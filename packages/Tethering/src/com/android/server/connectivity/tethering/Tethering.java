@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity;
+package com.android.server.connectivity.tethering;
 
 import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
@@ -47,8 +47,6 @@ import static android.net.wifi.WifiManager.WIFI_AP_STATE_DISABLED;
 import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
-import static com.android.server.ConnectivityService.SHORT_ARG;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -62,9 +60,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
+import android.net.INetd;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
-import android.net.ITetheringEventCallback;
+import android.net.ITetherInternalCallback;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -72,7 +71,10 @@ import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.NetworkState;
 import android.net.NetworkUtils;
+import android.net.TetherStatesParcel;
+import android.net.TetheringConfigurationParcel;
 import android.net.ip.IpServer;
+import android.net.util.BaseNetdUnsolicitedEventListener;
 import android.net.util.InterfaceSet;
 import android.net.util.PrefixUtils;
 import android.net.util.SharedLog;
@@ -87,13 +89,10 @@ import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
-import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -110,15 +109,6 @@ import com.android.internal.util.MessageUtils;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
-import com.android.server.LocalServices;
-import com.android.server.connectivity.tethering.EntitlementManager;
-import com.android.server.connectivity.tethering.IPv6TetheringCoordinator;
-import com.android.server.connectivity.tethering.OffloadController;
-import com.android.server.connectivity.tethering.TetheringConfiguration;
-import com.android.server.connectivity.tethering.TetheringDependencies;
-import com.android.server.connectivity.tethering.TetheringInterfaceUtils;
-import com.android.server.connectivity.tethering.UpstreamNetworkMonitor;
-import com.android.server.net.BaseNetworkObserver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -127,32 +117,32 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
- * @hide
  *
  * This class holds much of the business logic to allow Android devices
  * to act as IP gateways via USB, BT, and WiFi interfaces.
  */
-public class Tethering extends BaseNetworkObserver {
+public class Tethering {
 
-    private final static String TAG = Tethering.class.getSimpleName();
-    private final static boolean DBG = false;
-    private final static boolean VDBG = false;
+    private static final String TAG = Tethering.class.getSimpleName();
+    private static final boolean DBG = false;
+    private static final boolean VDBG = false;
 
-    private static final Class[] messageClasses = {
+    private static final Class[] sMessageClasses = {
             Tethering.class, TetherMasterSM.class, IpServer.class
     };
     private static final SparseArray<String> sMagicDecoderRing =
-            MessageUtils.findMessageNames(messageClasses);
+            MessageUtils.findMessageNames(sMessageClasses);
 
     private static class TetherState {
         public final IpServer ipServer;
         public int lastState;
         public int lastError;
 
-        public TetherState(IpServer ipServer) {
+        TetherState(IpServer ipServer) {
             this.ipServer = ipServer;
             // Assume all state machines start out available and with no errors.
             lastState = IpServer.STATE_AVAILABLE;
@@ -177,6 +167,7 @@ public class Tethering extends BaseNetworkObserver {
     private final Context mContext;
     private final ArrayMap<String, TetherState> mTetherStates;
     private final BroadcastReceiver mStateReceiver;
+    // Stopship: replace mNMService before production.
     private final INetworkManagementService mNMService;
     private final INetworkStatsService mStatsService;
     private final INetworkPolicyManager mPolicyManager;
@@ -191,10 +182,13 @@ public class Tethering extends BaseNetworkObserver {
     private final TetheringDependencies mDeps;
     private final EntitlementManager mEntitlementMgr;
     private final Handler mHandler;
-    private final RemoteCallbackList<ITetheringEventCallback> mTetheringEventCallbacks =
-            new RemoteCallbackList<>();
     private final PhoneStateListener mPhoneStateListener;
+    private final INetd mNetd;
+    private final NetdCallback mNetdCallback;
+    private final UserRestrictionActionListener mTetheringRestriction;
     private int mActiveDataSubId = INVALID_SUBSCRIPTION_ID;
+    // All the usage of mTetherInternalCallback should run in the same thread.
+    private ITetherInternalCallback mTetherInternalCallback = null;
 
     private volatile TetheringConfiguration mConfig;
     private InterfaceSet mCurrentUpstreamIfaceSet;
@@ -205,18 +199,17 @@ public class Tethering extends BaseNetworkObserver {
     // True iff. WiFi tethering should be started when soft AP is ready.
     private boolean mWifiTetherRequested;
     private Network mTetherUpstream;
+    private TetherStatesParcel mTetherStatesParcel;
 
-    public Tethering(Context context, INetworkManagementService nmService,
-            INetworkStatsService statsService, INetworkPolicyManager policyManager,
-            Looper looper, MockableSystemProperties systemProperties,
-            TetheringDependencies deps) {
-        mLog.mark("constructed");
-        mContext = context;
-        mNMService = nmService;
-        mStatsService = statsService;
-        mPolicyManager = policyManager;
-        mLooper = looper;
+    public Tethering(TetheringDependencies deps) {
+        mLog.mark("Tethering.constructed");
         mDeps = deps;
+        mContext = mDeps.getContext();
+        mNMService = mDeps.getINetworkManagementService();
+        mStatsService = mDeps.getINetworkStatsService();
+        mPolicyManager = mDeps.getINetworkPolicyManager();
+        mNetd = mDeps.getINetd(mContext);
+        mLooper = mDeps.getTetheringLooper();
 
         mPublicSync = new Object();
 
@@ -239,7 +232,7 @@ public class Tethering extends BaseNetworkObserver {
         // EntitlementManager will send EVENT_UPSTREAM_PERMISSION_CHANGED when cellular upstream
         // permission is changed according to entitlement check result.
         mEntitlementMgr = mDeps.getEntitlementManager(mContext, mTetherMasterSM, mLog,
-                TetherMasterSM.EVENT_UPSTREAM_PERMISSION_CHANGED, systemProperties);
+                TetherMasterSM.EVENT_UPSTREAM_PERMISSION_CHANGED);
         mEntitlementMgr.setOnUiEntitlementFailedListener((int downstream) -> {
             mLog.log("OBSERVED UiEnitlementFailed");
             stopTethering(downstream);
@@ -278,10 +271,22 @@ public class Tethering extends BaseNetworkObserver {
 
         mStateReceiver = new StateReceiver();
 
+        mNetdCallback = new NetdCallback();
+        try {
+            mNetd.registerUnsolicitedEventListener(mNetdCallback);
+        } catch (RemoteException e) {
+            mLog.e("Unable to register netd UnsolicitedEventListener");
+        }
+
+        final UserManager userManager = (UserManager) mContext.getSystemService(
+                    Context.USER_SERVICE);
+        mTetheringRestriction = new UserRestrictionActionListener(userManager, this);
+
         // Load tethering configuration.
         updateConfiguration();
 
         startStateMachineUpdaters(mHandler);
+        startTrackDefaultNetwork();
     }
 
     private void startStateMachineUpdaters(Handler handler) {
@@ -295,6 +300,7 @@ public class Tethering extends BaseNetworkObserver {
         filter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        filter.addAction(UserManager.ACTION_USER_RESTRICTIONS_CHANGED);
         mContext.registerReceiver(mStateReceiver, filter, null, handler);
 
         filter = new IntentFilter();
@@ -303,11 +309,6 @@ public class Tethering extends BaseNetworkObserver {
         filter.addDataScheme("file");
         mContext.registerReceiver(mStateReceiver, filter, null, handler);
 
-        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
-        // This check is useful only for some unit tests; example: ConnectivityServiceTest.
-        if (umi != null) {
-            umi.addUserRestrictionsListener(new TetheringUserRestrictionListener(this));
-        }
     }
 
     private WifiManager getWifiManager() {
@@ -318,6 +319,7 @@ public class Tethering extends BaseNetworkObserver {
     private void updateConfiguration() {
         mConfig = mDeps.generateTetheringConfiguration(mContext, mLog, mActiveDataSubId);
         mUpstreamNetworkMonitor.updateMobileRequiresDun(mConfig.isDunRequired);
+        reportConfigurationChanged(mConfig.toStableParcelable());
     }
 
     private void maybeDunSettingChanged() {
@@ -327,10 +329,31 @@ public class Tethering extends BaseNetworkObserver {
         updateConfiguration();
     }
 
-    @Override
-    public void interfaceStatusChanged(String iface, boolean up) {
+    private class NetdCallback extends BaseNetdUnsolicitedEventListener {
+        @Override
+        public void onInterfaceChanged(String ifName, boolean up) {
+            mHandler.post(() -> interfaceStatusChanged(ifName, up));
+        }
+
+        @Override
+        public void onInterfaceLinkStateChanged(String ifName, boolean up) {
+            mHandler.post(() -> interfaceLinkStateChanged(ifName, up));
+        }
+
+        @Override
+        public void onInterfaceAdded(String ifName) {
+            mHandler.post(() -> interfaceAdded(ifName));
+        }
+
+        @Override
+        public void onInterfaceRemoved(String ifName) {
+            mHandler.post(() -> interfaceRemoved(ifName));
+        }
+    }
+
+    void interfaceStatusChanged(String iface, boolean up) {
         // Never called directly: only called from interfaceLinkStateChanged.
-        // See NetlinkHandler.cpp:71.
+        // See NetlinkHandler.cpp: notifyInterfaceChanged.
         if (VDBG) Log.d(TAG, "interfaceStatusChanged " + iface + ", " + up);
         synchronized (mPublicSync) {
             if (up) {
@@ -349,8 +372,7 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
-    @Override
-    public void interfaceLinkStateChanged(String iface, boolean up) {
+    void interfaceLinkStateChanged(String iface, boolean up) {
         interfaceStatusChanged(iface, up);
     }
 
@@ -369,28 +391,27 @@ public class Tethering extends BaseNetworkObserver {
         return TETHERING_INVALID;
     }
 
-    @Override
-    public void interfaceAdded(String iface) {
+    void interfaceAdded(String iface) {
         if (VDBG) Log.d(TAG, "interfaceAdded " + iface);
         synchronized (mPublicSync) {
             maybeTrackNewInterfaceLocked(iface);
         }
     }
 
-    @Override
-    public void interfaceRemoved(String iface) {
+
+    void interfaceRemoved(String iface) {
         if (VDBG) Log.d(TAG, "interfaceRemoved " + iface);
         synchronized (mPublicSync) {
             stopTrackingInterfaceLocked(iface);
         }
     }
 
-    public void startTethering(int type, ResultReceiver receiver, boolean showProvisioningUi) {
+    void startTethering(int type, ResultReceiver receiver, boolean showProvisioningUi) {
         mEntitlementMgr.startProvisioningIfNeeded(type, showProvisioningUi);
         enableTetheringInternal(type, true /* enabled */, receiver);
     }
 
-    public void stopTethering(int type) {
+    void stopTethering(int type) {
         enableTetheringInternal(type, false /* disabled */, null);
         mEntitlementMgr.stopProvisioningIfNeeded(type);
     }
@@ -434,8 +455,8 @@ public class Tethering extends BaseNetworkObserver {
                     mLog.e("setWifiTethering: failed to get WifiManager!");
                     return TETHER_ERROR_SERVICE_UNAVAIL;
                 }
-                if ((enable && mgr.startSoftAp(null /* use existing wifi config */)) ||
-                    (!enable && mgr.stopSoftAp())) {
+                if ((enable && mgr.startSoftAp(null /* use existing wifi config */))
+                        || (!enable && mgr.stopSoftAp())) {
                     mWifiTetherRequested = enable;
                     return TETHER_ERROR_NO_ERROR;
                 }
@@ -450,8 +471,8 @@ public class Tethering extends BaseNetworkObserver {
     private void setBluetoothTethering(final boolean enable, final ResultReceiver receiver) {
         final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter == null || !adapter.isEnabled()) {
-            Log.w(TAG, "Tried to enable bluetooth tethering with null or disabled adapter. null: " +
-                    (adapter == null));
+            Log.w(TAG, "Tried to enable bluetooth tethering with null or disabled adapter. null: "
+                    + (adapter == null));
             sendTetherResult(receiver, TETHER_ERROR_SERVICE_UNAVAIL);
             return;
         }
@@ -487,7 +508,7 @@ public class Tethering extends BaseNetworkObserver {
         }, BluetoothProfile.PAN);
     }
 
-    public int tether(String iface) {
+    int tether(String iface) {
         return tether(iface, IpServer.STATE_TETHERED);
     }
 
@@ -515,7 +536,7 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
-    public int untether(String iface) {
+    int untether(String iface) {
         if (DBG) Log.d(TAG, "Untethering " + iface);
         synchronized (mPublicSync) {
             TetherState tetherState = mTetherStates.get(iface);
@@ -532,19 +553,19 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
-    public void untetherAll() {
+    void untetherAll() {
         stopTethering(TETHERING_WIFI);
         stopTethering(TETHERING_WIFI_P2P);
         stopTethering(TETHERING_USB);
         stopTethering(TETHERING_BLUETOOTH);
     }
 
-    public int getLastTetherError(String iface) {
+    int getLastTetherError(String iface) {
         synchronized (mPublicSync) {
             TetherState tetherState = mTetherStates.get(iface);
             if (tetherState == null) {
-                Log.e(TAG, "Tried to getLastTetherError on an unknown iface :" + iface +
-                        ", ignoring");
+                Log.e(TAG, "Tried to getLastTetherError on an unknown iface :" + iface
+                        + ", ignoring");
                 return TETHER_ERROR_UNKNOWN_IFACE;
             }
             return tetherState.lastError;
@@ -559,12 +580,14 @@ public class Tethering extends BaseNetworkObserver {
         final ArrayList<String> tetherList = new ArrayList<>();
         final ArrayList<String> localOnlyList = new ArrayList<>();
         final ArrayList<String> erroredList = new ArrayList<>();
+        final ArrayList<Integer> lastErrorList = new ArrayList<>();
 
         boolean wifiTethered = false;
         boolean usbTethered = false;
         boolean bluetoothTethered = false;
 
         final TetheringConfiguration cfg = mConfig;
+        final TetherStatesParcel mTetherStatesParcel = new TetherStatesParcel();
 
         synchronized (mPublicSync) {
             for (int i = 0; i < mTetherStates.size(); i++) {
@@ -572,6 +595,7 @@ public class Tethering extends BaseNetworkObserver {
                 String iface = mTetherStates.keyAt(i);
                 if (tetherState.lastError != TETHER_ERROR_NO_ERROR) {
                     erroredList.add(iface);
+                    lastErrorList.add(tetherState.lastError);
                 } else if (tetherState.lastState == IpServer.STATE_AVAILABLE) {
                     availableList.add(iface);
                 } else if (tetherState.lastState == IpServer.STATE_LOCAL_ONLY) {
@@ -588,9 +612,21 @@ public class Tethering extends BaseNetworkObserver {
                 }
             }
         }
+
+        mTetherStatesParcel.availableList = availableList.toArray(new String[0]);
+        mTetherStatesParcel.tetheredList = tetherList.toArray(new String[0]);
+        mTetherStatesParcel.localOnlyList = localOnlyList.toArray(new String[0]);
+        mTetherStatesParcel.erroredIfaceList = erroredList.toArray(new String[0]);
+        mTetherStatesParcel.lastErrorList = new int[lastErrorList.size()];
+        Iterator<Integer> iterator = lastErrorList.iterator();
+        for (int i = 0; i < lastErrorList.size(); i++) {
+            mTetherStatesParcel.lastErrorList[i] = iterator.next().intValue();
+        }
+        reportTetherStateChanged(mTetherStatesParcel);
+
         final Intent bcast = new Intent(ACTION_TETHER_STATE_CHANGED);
-        bcast.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
-                Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        bcast.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
+                | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         bcast.putStringArrayListExtra(EXTRA_AVAILABLE_TETHER, availableList);
         bcast.putStringArrayListExtra(EXTRA_ACTIVE_LOCAL_ONLY, localOnlyList);
         bcast.putStringArrayListExtra(EXTRA_ACTIVE_TETHER, tetherList);
@@ -638,16 +674,16 @@ public class Tethering extends BaseNetworkObserver {
         }
         int icon = 0;
         switch(id) {
-          case SystemMessage.NOTE_TETHER_USB:
-            icon = com.android.internal.R.drawable.stat_sys_tether_usb;
-            break;
-          case SystemMessage.NOTE_TETHER_BLUETOOTH:
-            icon = com.android.internal.R.drawable.stat_sys_tether_bluetooth;
-            break;
-          case SystemMessage.NOTE_TETHER_GENERAL:
-          default:
-            icon = com.android.internal.R.drawable.stat_sys_tether_general;
-            break;
+            case SystemMessage.NOTE_TETHER_USB:
+                icon = com.android.internal.R.drawable.stat_sys_tether_usb;
+                break;
+            case SystemMessage.NOTE_TETHER_BLUETOOTH:
+                icon = com.android.internal.R.drawable.stat_sys_tether_bluetooth;
+                break;
+            case SystemMessage.NOTE_TETHER_GENERAL:
+            default:
+                icon = com.android.internal.R.drawable.stat_sys_tether_general;
+                break;
         }
 
         if (mLastNotificationId != 0) {
@@ -679,8 +715,8 @@ public class Tethering extends BaseNetworkObserver {
         }
 
         if (mTetheredNotificationBuilder == null) {
-            mTetheredNotificationBuilder =
-                    new Notification.Builder(mContext, SystemNotificationChannels.NETWORK_STATUS);
+            mTetheredNotificationBuilder = new Notification.Builder(mContext,
+                    SystemNotificationChannels.NETWORK_STATUS);
             mTetheredNotificationBuilder.setWhen(0)
                     .setOngoing(true)
                     .setColor(mContext.getColor(
@@ -701,7 +737,7 @@ public class Tethering extends BaseNetworkObserver {
     @VisibleForTesting
     protected void clearTetheredNotification() {
         NotificationManager notificationManager =
-            (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null && mLastNotificationId != 0) {
             notificationManager.cancelAsUser(null, mLastNotificationId,
                     UserHandle.ALL);
@@ -726,14 +762,17 @@ public class Tethering extends BaseNetworkObserver {
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 mLog.log("OBSERVED configuration changed");
                 updateConfiguration();
+            } else if (action.equals(UserManager.ACTION_USER_RESTRICTIONS_CHANGED)) {
+                mLog.log("OBSERVED user restrictions changed");
+                handleUserRestrictionAction();
             }
         }
 
         private void handleConnectivityAction(Intent intent) {
             final NetworkInfo networkInfo =
                     (NetworkInfo) intent.getParcelableExtra(EXTRA_NETWORK_INFO);
-            if (networkInfo == null ||
-                    networkInfo.getDetailedState() == NetworkInfo.DetailedState.FAILED) {
+            if (networkInfo == null
+                    || networkInfo.getDetailedState() == NetworkInfo.DetailedState.FAILED) {
                 return;
             }
 
@@ -832,25 +871,35 @@ public class Tethering extends BaseNetworkObserver {
                 }
             }
         }
+
+        private void handleUserRestrictionAction() {
+            mTetheringRestriction.onUserRestrictionsChanged();
+        }
     }
 
     @VisibleForTesting
-    protected static class TetheringUserRestrictionListener implements UserRestrictionsListener {
+    protected static class UserRestrictionActionListener {
+        private final UserManager mUserManager;
         private final Tethering mWrapper;
+        public boolean mDisallowTethering;
 
-        public TetheringUserRestrictionListener(Tethering wrapper) {
+        public UserRestrictionActionListener(UserManager um, Tethering wrapper) {
+            mUserManager = um;
             mWrapper = wrapper;
+            mDisallowTethering = false;
         }
 
-        public void onUserRestrictionsChanged(int userId,
-                                              Bundle newRestrictions,
-                                              Bundle prevRestrictions) {
+        public void onUserRestrictionsChanged() {
+            // getUserRestrictions gets restriction for this process' user, which is the primary
+            // user. This is fine because DISALLOW_CONFIG_TETHERING can only be set on the primary
+            // user. See UserManager.DISALLOW_CONFIG_TETHERING.
+            final Bundle restrictions = mUserManager.getUserRestrictions();
             final boolean newlyDisallowed =
-                    newRestrictions.getBoolean(UserManager.DISALLOW_CONFIG_TETHERING);
-            final boolean previouslyDisallowed =
-                    prevRestrictions.getBoolean(UserManager.DISALLOW_CONFIG_TETHERING);
-            final boolean tetheringDisallowedChanged = (newlyDisallowed != previouslyDisallowed);
+                    restrictions.getBoolean(UserManager.DISALLOW_CONFIG_TETHERING);
+            final boolean prevDisallowed = mDisallowTethering;
+            mDisallowTethering = newlyDisallowed;
 
+            final boolean tetheringDisallowedChanged = (newlyDisallowed != prevDisallowed);
             if (!tetheringDisallowedChanged) {
                 return;
             }
@@ -888,8 +937,8 @@ public class Tethering extends BaseNetworkObserver {
             }
         }
 
-        mLog.log("Error disabling Wi-Fi IP serving; " +
-                (TextUtils.isEmpty(ifname) ? "no interface name specified"
+        mLog.log("Error disabling Wi-Fi IP serving; "
+                + (TextUtils.isEmpty(ifname) ? "no interface name specified"
                                            : "specified interface: " + ifname));
     }
 
@@ -928,8 +977,8 @@ public class Tethering extends BaseNetworkObserver {
             changeInterfaceState(ifname, ipServingMode);
         } else {
             mLog.e(String.format(
-                   "Cannot enable IP serving in mode %s on missing interface name",
-                   ipServingMode));
+                    "Cannot enable IP serving in mode %s on missing interface name",
+                    ipServingMode));
         }
     }
 
@@ -989,11 +1038,11 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
-    public TetheringConfiguration getTetheringConfiguration() {
+    TetheringConfiguration getTetheringConfiguration() {
         return mConfig;
     }
 
-    public boolean hasTetherableConfiguration() {
+    boolean hasTetherableConfiguration() {
         final TetheringConfiguration cfg = mConfig;
         final boolean hasDownstreamConfiguration =
                 (cfg.tetherableUsbRegexs.length != 0)
@@ -1007,19 +1056,19 @@ public class Tethering extends BaseNetworkObserver {
 
     // TODO - update callers to use getTetheringConfiguration(),
     // which has only final members.
-    public String[] getTetherableUsbRegexs() {
+    String[] getTetherableUsbRegexs() {
         return copy(mConfig.tetherableUsbRegexs);
     }
 
-    public String[] getTetherableWifiRegexs() {
+    String[] getTetherableWifiRegexs() {
         return copy(mConfig.tetherableWifiRegexs);
     }
 
-    public String[] getTetherableBluetoothRegexs() {
+    String[] getTetherableBluetoothRegexs() {
         return copy(mConfig.tetherableBluetoothRegexs);
     }
 
-    public int setUsbTethering(boolean enable) {
+    int setUsbTethering(boolean enable) {
         if (VDBG) Log.d(TAG, "setUsbTethering(" + enable + ")");
         UsbManager usbManager = (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
         if (usbManager == null) {
@@ -1035,7 +1084,7 @@ public class Tethering extends BaseNetworkObserver {
     }
 
     // TODO review API - figure out how to delete these entirely.
-    public String[] getTetheredIfaces() {
+    String[] getTetheredIfaces() {
         ArrayList<String> list = new ArrayList<String>();
         synchronized (mPublicSync) {
             for (int i = 0; i < mTetherStates.size(); i++) {
@@ -1048,7 +1097,7 @@ public class Tethering extends BaseNetworkObserver {
         return list.toArray(new String[list.size()]);
     }
 
-    public String[] getTetherableIfaces() {
+    String[] getTetherableIfaces() {
         ArrayList<String> list = new ArrayList<String>();
         synchronized (mPublicSync) {
             for (int i = 0; i < mTetherStates.size(); i++) {
@@ -1061,13 +1110,13 @@ public class Tethering extends BaseNetworkObserver {
         return list.toArray(new String[list.size()]);
     }
 
-    public String[] getTetheredDhcpRanges() {
+    String[] getTetheredDhcpRanges() {
         // TODO: this is only valid for the old DHCP server. Latest search suggests it is only used
         // by WifiP2pServiceImpl to start dnsmasq: remove/deprecate after migrating callers.
         return mConfig.legacyDhcpRanges;
     }
 
-    public String[] getErroredIfaces() {
+    String[] getErroredIfaces() {
         ArrayList<String> list = new ArrayList<String>();
         synchronized (mPublicSync) {
             for (int i = 0; i < mTetherStates.size(); i++) {
@@ -1518,8 +1567,8 @@ public class Tethering extends BaseNetworkObserver {
                         }
 
                         if (DBG) {
-                            Log.d(TAG, "TetherModeAlive still has " + mNotifyList.size() +
-                                    " live requests:");
+                            Log.d(TAG, "TetherModeAlive still has " + mNotifyList.size()
+                                    + " live requests:");
                             for (IpServer o : mNotifyList) {
                                 Log.d(TAG, "  " + o);
                             }
@@ -1588,7 +1637,7 @@ public class Tethering extends BaseNetworkObserver {
                         transitionTo(mInitialState);
                         break;
                     default:
-                       retValue = false;
+                        retValue = false;
                 }
                 return retValue;
             }
@@ -1625,7 +1674,7 @@ public class Tethering extends BaseNetworkObserver {
                 notify(IpServer.CMD_START_TETHERING_ERROR);
                 try {
                     mNMService.setIpForwardingEnabled(false);
-                } catch (Exception e) {}
+                } catch (Exception e) { }
             }
         }
 
@@ -1636,7 +1685,7 @@ public class Tethering extends BaseNetworkObserver {
                 notify(IpServer.CMD_STOP_TETHERING_ERROR);
                 try {
                     mNMService.setIpForwardingEnabled(false);
-                } catch (Exception e) {}
+                } catch (Exception e) { }
             }
         }
 
@@ -1647,10 +1696,10 @@ public class Tethering extends BaseNetworkObserver {
                 notify(IpServer.CMD_SET_DNS_FORWARDERS_ERROR);
                 try {
                     mNMService.stopTethering();
-                } catch (Exception e) {}
+                } catch (Exception e) { }
                 try {
                     mNMService.setIpForwardingEnabled(false);
-                } catch (Exception e) {}
+                } catch (Exception e) { }
             }
         }
 
@@ -1731,55 +1780,66 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
-    public void systemReady() {
+    private void startTrackDefaultNetwork() {
         mUpstreamNetworkMonitor.startTrackDefaultNetwork(mDeps.getDefaultNetworkRequest(),
                 mEntitlementMgr);
     }
 
     /** Get the latest value of the tethering entitlement check. */
-    public void getLatestTetheringEntitlementResult(int type, ResultReceiver receiver,
+    void requestLatestTetheringEntitlementResult(int type, ResultReceiver receiver,
             boolean showEntitlementUi) {
         if (receiver != null) {
-            mEntitlementMgr.getLatestTetheringEntitlementResult(type, receiver, showEntitlementUi);
+            mEntitlementMgr.requestLatestTetheringEntitlementResult(type, receiver,
+                    showEntitlementUi);
         }
     }
 
     /** Register tethering event callback */
-    public void registerTetheringEventCallback(ITetheringEventCallback callback) {
+    void registerTetherInternalCallback(ITetherInternalCallback callback) {
         mHandler.post(() -> {
+            mTetherInternalCallback = callback;
             try {
-                callback.onUpstreamChanged(mTetherUpstream);
+                mTetherInternalCallback.onCallbackCreated(mTetherUpstream,
+                        mConfig.toStableParcelable(), mTetherStatesParcel);
             } catch (RemoteException e) {
                 // Not really very much to do here.
             }
-            mTetheringEventCallbacks.register(callback);
-        });
-    }
-
-    /** Unregister tethering event callback */
-    public void unregisterTetheringEventCallback(ITetheringEventCallback callback) {
-        mHandler.post(() -> {
-            mTetheringEventCallbacks.unregister(callback);
         });
     }
 
     private void reportUpstreamChanged(Network network) {
-        final int length = mTetheringEventCallbacks.beginBroadcast();
+        // Don't need to synchronized mTetherInternalCallback because all the usage of this variable
+        // should run at the same thread.
+        if (mTetherInternalCallback == null) return;
+
         try {
-            for (int i = 0; i < length; i++) {
-                try {
-                    mTetheringEventCallbacks.getBroadcastItem(i).onUpstreamChanged(network);
-                } catch (RemoteException e) {
-                    // Not really very much to do here.
-                }
-            }
-        } finally {
-            mTetheringEventCallbacks.finishBroadcast();
+            mTetherInternalCallback.onUpstreamChanged(network);
+        } catch (RemoteException e) {
+            // Not really very much to do here.
         }
     }
 
-    @Override
-    public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+    private void reportConfigurationChanged(TetheringConfigurationParcel config) {
+        if (mTetherInternalCallback == null) return;
+
+        try {
+            mTetherInternalCallback.onConfigurationChanged(config);
+        } catch (RemoteException e) {
+            // Not really very much to do here.
+        }
+    }
+
+    private void reportTetherStateChanged(TetherStatesParcel states) {
+        if (mTetherInternalCallback == null) return;
+
+        try {
+            mTetherInternalCallback.onTetherStatesChanged(states);
+        } catch (RemoteException e) {
+            // Not really very much to do here.
+        }
+    }
+
+    void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         // Binder.java closes the resource for us.
         @SuppressWarnings("resource")
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
@@ -1838,7 +1898,7 @@ public class Tethering extends BaseNetworkObserver {
 
         pw.println("Log:");
         pw.increaseIndent();
-        if (argsContain(args, SHORT_ARG)) {
+        if (argsContain(args, "--short")) {
             pw.println("<log removed for brevity>");
         } else {
             mLog.dump(fd, pw, args);

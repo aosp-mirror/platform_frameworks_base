@@ -39,10 +39,6 @@ import java.util.function.Consumer;
 public class VersionedBroadcastListener {
     private static final boolean DBG = false;
 
-    public interface IntentCallback {
-        public void run(Intent intent);
-    }
-
     private final String mTag;
     private final Context mContext;
     private final Handler mHandler;
@@ -61,6 +57,7 @@ public class VersionedBroadcastListener {
         mGenerationNumber = new AtomicInteger(0);
     }
 
+    /** Start listening to intent broadcast. */
     public void startListening() {
         if (DBG) Log.d(mTag, "startListening");
         if (mReceiver != null) return;
@@ -69,6 +66,7 @@ public class VersionedBroadcastListener {
         mContext.registerReceiver(mReceiver, mFilter, null, mHandler);
     }
 
+    /** Stop listening to intent broadcast. */
     public void stopListening() {
         if (DBG) Log.d(mTag, "stopListening");
         if (mReceiver == null) return;
@@ -85,8 +83,7 @@ public class VersionedBroadcastListener {
         // Used to verify this receiver is still current.
         public final int generationNumber;
 
-        public Receiver(
-                String tag, AtomicInteger atomicGenerationNumber, Consumer<Intent> callback) {
+        Receiver(String tag, AtomicInteger atomicGenerationNumber, Consumer<Intent> callback) {
             this.tag = tag;
             this.atomicGenerationNumber = atomicGenerationNumber;
             this.callback = callback;
@@ -98,8 +95,8 @@ public class VersionedBroadcastListener {
             final int currentGenerationNumber = atomicGenerationNumber.get();
 
             if (DBG) {
-                Log.d(tag, "receiver generationNumber=" + generationNumber +
-                        ", current generationNumber=" + currentGenerationNumber);
+                Log.d(tag, "receiver generationNumber=" + generationNumber
+                        + ", current generationNumber=" + currentGenerationNumber);
             }
             if (generationNumber != currentGenerationNumber) return;
 
