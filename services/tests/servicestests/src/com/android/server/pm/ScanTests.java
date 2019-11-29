@@ -48,6 +48,8 @@ import android.os.UserManagerInternal;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 
+import com.android.server.compat.PlatformCompat;
+
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -71,12 +73,15 @@ public class ScanTests {
     @Mock
     UserManagerInternal mMockUserManager;
     @Mock
+    PlatformCompat mMockCompatibility;
+    @Mock
     PackageManagerService.Injector mMockInjector;
 
     @Before
     public void setupInjector() {
         when(mMockInjector.getAbiHelper()).thenReturn(mMockPackageAbiHelper);
         when(mMockInjector.getUserManagerInternal()).thenReturn(mMockUserManager);
+        when(mMockInjector.getCompatibility()).thenReturn(mMockCompatibility);
     }
 
     @Before

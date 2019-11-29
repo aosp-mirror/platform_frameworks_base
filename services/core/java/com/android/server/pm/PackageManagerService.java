@@ -2364,6 +2364,37 @@ public class PackageManagerService extends IPackageManager.Stub
         PackageManagerService m = new PackageManagerService(injector, factoryTest, onlyCore);
         t.traceEnd(); // "create package manager"
 
+        injector.getCompatibility().registerListener(SELinuxMMAC.SELINUX_LATEST_CHANGES,
+                packageName -> {
+                    synchronized (m.mInstallLock) {
+                        final PackageParser.Package pkg;
+                        final SharedUserSetting sharedUser;
+                        synchronized (m.mLock) {
+                            PackageSetting ps = m.mSettings.getPackageLPr(packageName);
+                            if (ps == null) {
+                                Slog.e(TAG, "Failed to find package setting " + packageName);
+                                return;
+                            }
+                            pkg = ps.pkg;
+                            sharedUser = ps.sharedUser;
+                        }
+
+                        if (pkg == null) {
+                            Slog.e(TAG, "Failed to find package " + packageName);
+                            return;
+                        }
+                        final String newSeInfo = SELinuxMMAC.getSeInfo(pkg, sharedUser,
+                                m.mInjector.getCompatibility());
+
+                        if (!newSeInfo.equals(pkg.applicationInfo.seInfo)) {
+                            Slog.i(TAG, "Updating seInfo for package " + packageName + " from: "
+                                    + pkg.applicationInfo.seInfo + " to: " + newSeInfo);
+                            pkg.applicationInfo.seInfo = newSeInfo;
+                            m.prepareAppDataAfterInstallLIF(pkg);
+                        }
+                    }
+                });
+
         m.installWhitelistedSystemPackages();
         ServiceManager.addService("package", m);
         final PackageManagerNative pmn = m.new PackageManagerNative();
@@ -10784,24 +10815,8 @@ public class PackageManagerService extends IPackageManager.Stub
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
         }
 
-        // Apps which share a sharedUserId must be placed in the same selinux domain. If this
-        // package is the first app installed as this shared user, set seInfoTargetSdkVersion to its
-        // targetSdkVersion. These are later adjusted in PackageManagerService's constructor to be
-        // the lowest targetSdkVersion of all apps within the shared user, which corresponds to the
-        // least restrictive selinux domain.
-        // NOTE: As new packages are installed / updated, the shared user's seinfoTargetSdkVersion
-        // will NOT be modified until next boot, even if a lower targetSdkVersion is used. This
-        // ensures that all packages continue to run in the same selinux domain.
-        final int targetSdkVersion =
-            ((sharedUserSetting != null) && (sharedUserSetting.packages.size() != 0)) ?
-            sharedUserSetting.seInfoTargetSdkVersion : pkg.applicationInfo.targetSdkVersion;
-        // TODO(b/71593002): isPrivileged for sharedUser and appInfo should never be out of sync.
-        // They currently can be if the sharedUser apps are signed with the platform key.
-        final boolean isPrivileged = (sharedUserSetting != null) ?
-            sharedUserSetting.isPrivileged() | pkg.isPrivileged() : pkg.isPrivileged();
-
-        pkg.applicationInfo.seInfo = SELinuxMMAC.getSeInfo(pkg, isPrivileged,
-                targetSdkVersion);
+        pkg.applicationInfo.seInfo = SELinuxMMAC.getSeInfo(pkg, sharedUserSetting,
+                injector.getCompatibility());
         pkg.applicationInfo.seInfoUser = SELinuxUtil.assignSeinfoUser(pkgSetting.readUserState(
                 userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId));
 

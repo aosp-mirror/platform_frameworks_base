@@ -16,12 +16,16 @@
 
 package com.android.server.pm;
 
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.Signature;
 import android.os.Environment;
 import android.util.Slog;
 import android.util.Xml;
+
+import com.android.server.compat.PlatformCompat;
 
 import libcore.io.IoUtils;
 
@@ -71,6 +75,19 @@ public final class SELinuxMMAC {
 
     // Append targetSdkVersion=n to existing seinfo label where n is the app's targetSdkVersion
     private static final String TARGETSDKVERSION_STR = ":targetSdkVersion=";
+
+    /**
+     * This change gates apps access to untrusted_app_R-targetSDk SELinux domain. Allows opt-in
+     * to R targetSdkVersion enforced changes without changing target SDK. Turning this change
+     * off for an app targeting R is a no-op.
+     *
+     * <p>Has no effect for apps using shared user id.
+     *
+     * TODO(b/143539591): Update description with relevant SELINUX changes this opts in to.
+     */
+    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.Q)
+    @ChangeId
+    static final long SELINUX_LATEST_CHANGES = 143539591L;
 
     // Only initialize sMacPermissions once.
     static {
@@ -317,6 +334,48 @@ public final class SELinuxMMAC {
                 break;
             }
         }
+    }
+
+    private static int getTargetSdkVersionForSeInfo(PackageParser.Package pkg,
+            SharedUserSetting sharedUserSetting, PlatformCompat compatibility) {
+        // Apps which share a sharedUserId must be placed in the same selinux domain. If this
+        // package is the first app installed as this shared user, set seInfoTargetSdkVersion to its
+        // targetSdkVersion. These are later adjusted in PackageManagerService's constructor to be
+        // the lowest targetSdkVersion of all apps within the shared user, which corresponds to the
+        // least restrictive selinux domain.
+        // NOTE: As new packages are installed / updated, the shared user's seinfoTargetSdkVersion
+        // will NOT be modified until next boot, even if a lower targetSdkVersion is used. This
+        // ensures that all packages continue to run in the same selinux domain.
+        if ((sharedUserSetting != null) && (sharedUserSetting.packages.size() != 0)) {
+            return sharedUserSetting.seInfoTargetSdkVersion;
+        }
+        if (compatibility.isChangeEnabled(SELINUX_LATEST_CHANGES, pkg.applicationInfo)) {
+            return android.os.Build.VERSION_CODES.R;
+        }
+
+        return pkg.applicationInfo.targetSdkVersion;
+    }
+
+    /**
+     * Selects a security label to a package based on input parameters and the seinfo tag taken
+     * from a matched policy. All signature based policy stanzas are consulted and, if no match
+     * is found, the default seinfo label of 'default' is used. The security label is attached to
+     * the ApplicationInfo instance of the package.
+     *
+     * @param pkg               object representing the package to be labeled.
+     * @param sharedUserSetting if the app shares a sharedUserId, then this has the shared setting.
+     * @param compatibility     the PlatformCompat service to ask about state of compat changes.
+     * @return String representing the resulting seinfo.
+     */
+    public static String getSeInfo(PackageParser.Package pkg, SharedUserSetting sharedUserSetting,
+            PlatformCompat compatibility) {
+        final int targetSdkVersion = getTargetSdkVersionForSeInfo(pkg, sharedUserSetting,
+                compatibility);
+        // TODO(b/71593002): isPrivileged for sharedUser and appInfo should never be out of sync.
+        // They currently can be if the sharedUser apps are signed with the platform key.
+        final boolean isPrivileged = (sharedUserSetting != null)
+                ? sharedUserSetting.isPrivileged() | pkg.isPrivileged() : pkg.isPrivileged();
+        return getSeInfo(pkg, isPrivileged, targetSdkVersion);
     }
 
     /**
