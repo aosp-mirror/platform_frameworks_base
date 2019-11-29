@@ -225,7 +225,6 @@ filegroup {
         ":framework-mca-filterfw-sources",
         ":framework-mca-filterpacks-sources",
         ":framework-media-sources",
-        ":framework-mime-sources",
         ":framework-mms-sources",
         ":framework-opengl-sources",
         ":framework-rs-sources",
@@ -269,6 +268,7 @@ filegroup {
 filegroup {
     name: "framework-all-sources",
     srcs: [
+        ":framework-mime-sources",
         ":framework-non-updatable-sources",
         ":updatable-media-srcs",
     ],
@@ -375,7 +375,6 @@ java_defaults {
 
     static_libs: [
         "framework-internal-utils",
-        "mimemap",
     ],
 
     dxflags: [
@@ -437,6 +436,9 @@ java_library {
         "services-platform-compat-config",
         "media-provider-platform-compat-config",
         "services-devicepolicy-platform-compat-config",
+    ],
+    static_libs: [
+        "mimemap",
     ],
     // For backwards compatibility.
     stem: "framework",
@@ -1016,6 +1018,7 @@ stubs_defaults {
     name: "framework-doc-stubs-default",
     srcs: [
         ":framework-non-updatable-sources",
+        ":framework-mime-sources",
         "core/java/**/*.logtags",
         "test-base/src/**/*.java",
         ":opt-telephony-srcs",
