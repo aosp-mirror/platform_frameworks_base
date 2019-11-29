@@ -768,9 +768,10 @@ public abstract class PackageManagerInternal {
      * @param userId user to uninstall apex package for. Must be
      *               {@link android.os.UserHandle#USER_ALL}, otherwise failure will be reported.
      * @param intentSender a {@link IntentSender} to send result of an uninstall to.
+     * @param flags flags about the uninstall.
      */
     public abstract void uninstallApex(String packageName, long versionCode, int userId,
-            IntentSender intentSender);
+            IntentSender intentSender, int flags);
 
     /**
      * Get fingerprint of build that updated the runtime permissions for a user.
