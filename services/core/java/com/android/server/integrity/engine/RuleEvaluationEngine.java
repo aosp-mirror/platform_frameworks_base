@@ -25,6 +25,7 @@ import com.android.server.integrity.model.IntegrityCheckResult;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The engine used to evaluate rules against app installs.
@@ -60,7 +61,8 @@ public class RuleEvaluationEngine {
      *     against.
      * @return result of the integrity check
      */
-    public IntegrityCheckResult evaluate(AppInstallMetadata appInstallMetadata) {
+    public IntegrityCheckResult evaluate(
+            AppInstallMetadata appInstallMetadata, Map<String, String> allowedInstallers) {
         List<Rule> rules = loadRules(appInstallMetadata);
         return RuleEvaluator.evaluateRules(rules, appInstallMetadata);
     }
