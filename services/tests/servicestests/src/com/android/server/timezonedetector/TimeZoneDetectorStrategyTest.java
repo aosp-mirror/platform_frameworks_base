@@ -24,18 +24,19 @@ import static android.app.timezonedetector.PhoneTimeZoneSuggestion.QUALITY_MULTI
 import static android.app.timezonedetector.PhoneTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET;
 import static android.app.timezonedetector.PhoneTimeZoneSuggestion.QUALITY_SINGLE_ZONE;
 
-import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.SCORE_HIGH;
-import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.SCORE_HIGHEST;
-import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.SCORE_LOW;
-import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.SCORE_MEDIUM;
-import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.SCORE_NONE;
-import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.SCORE_USAGE_THRESHOLD;
+import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.PHONE_SCORE_HIGH;
+import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.PHONE_SCORE_HIGHEST;
+import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.PHONE_SCORE_LOW;
+import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.PHONE_SCORE_MEDIUM;
+import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.PHONE_SCORE_NONE;
+import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.PHONE_SCORE_USAGE_THRESHOLD;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.PhoneTimeZoneSuggestion;
 import android.app.timezonedetector.PhoneTimeZoneSuggestion.MatchType;
 import android.app.timezonedetector.PhoneTimeZoneSuggestion.Quality;
@@ -49,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.Objects;
 
 /**
  * White-box unit tests for {@link TimeZoneDetectorStrategy}.
@@ -64,16 +66,17 @@ public class TimeZoneDetectorStrategyTest {
     // than the previous.
     private static final SuggestionTestCase[] TEST_CASES = new SuggestionTestCase[] {
             newTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY,
-                    QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS, SCORE_LOW),
+                    QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS, PHONE_SCORE_LOW),
             newTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY, QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET,
-                    SCORE_MEDIUM),
+                    PHONE_SCORE_MEDIUM),
             newTestCase(MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET,
-                    QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET, SCORE_MEDIUM),
-            newTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY, QUALITY_SINGLE_ZONE, SCORE_HIGH),
-            newTestCase(MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE, SCORE_HIGH),
+                    QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET, PHONE_SCORE_MEDIUM),
+            newTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY, QUALITY_SINGLE_ZONE, PHONE_SCORE_HIGH),
+            newTestCase(MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE,
+                    PHONE_SCORE_HIGH),
             newTestCase(MATCH_TYPE_TEST_NETWORK_OFFSET_ONLY,
-                    QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET, SCORE_HIGHEST),
-            newTestCase(MATCH_TYPE_EMULATOR_ZONE_ID, QUALITY_SINGLE_ZONE, SCORE_HIGHEST),
+                    QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET, PHONE_SCORE_HIGHEST),
+            newTestCase(MATCH_TYPE_EMULATOR_ZONE_ID, QUALITY_SINGLE_ZONE, PHONE_SCORE_HIGHEST),
     };
 
     private TimeZoneDetectorStrategy mTimeZoneDetectorStrategy;
@@ -87,11 +90,11 @@ public class TimeZoneDetectorStrategyTest {
     }
 
     @Test
-    public void testEmptySuggestions() {
+    public void testEmptyPhoneSuggestions() {
         PhoneTimeZoneSuggestion phone1TimeZoneSuggestion = createEmptyPhone1Suggestion();
         PhoneTimeZoneSuggestion phone2TimeZoneSuggestion = createEmptyPhone2Suggestion();
         Script script = new Script()
-                .initializeTimeZoneDetectionEnabled(true)
+                .initializeAutoTimeZoneDetection(true)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
         script.suggestPhoneTimeZone(phone1TimeZoneSuggestion)
@@ -99,38 +102,38 @@ public class TimeZoneDetectorStrategyTest {
 
         // Assert internal service state.
         QualifiedPhoneTimeZoneSuggestion expectedPhone1ScoredSuggestion =
-                new QualifiedPhoneTimeZoneSuggestion(phone1TimeZoneSuggestion, SCORE_NONE);
+                new QualifiedPhoneTimeZoneSuggestion(phone1TimeZoneSuggestion, PHONE_SCORE_NONE);
         assertEquals(expectedPhone1ScoredSuggestion,
                 mTimeZoneDetectorStrategy.getLatestPhoneSuggestion(PHONE1_ID));
         assertNull(mTimeZoneDetectorStrategy.getLatestPhoneSuggestion(PHONE2_ID));
         assertEquals(expectedPhone1ScoredSuggestion,
-                mTimeZoneDetectorStrategy.findBestSuggestionForTests());
+                mTimeZoneDetectorStrategy.findBestPhoneSuggestionForTests());
 
         script.suggestPhoneTimeZone(phone2TimeZoneSuggestion)
                 .verifyTimeZoneNotSet();
 
         // Assert internal service state.
         QualifiedPhoneTimeZoneSuggestion expectedPhone2ScoredSuggestion =
-                new QualifiedPhoneTimeZoneSuggestion(phone2TimeZoneSuggestion, SCORE_NONE);
+                new QualifiedPhoneTimeZoneSuggestion(phone2TimeZoneSuggestion, PHONE_SCORE_NONE);
         assertEquals(expectedPhone1ScoredSuggestion,
                 mTimeZoneDetectorStrategy.getLatestPhoneSuggestion(PHONE1_ID));
         assertEquals(expectedPhone2ScoredSuggestion,
                 mTimeZoneDetectorStrategy.getLatestPhoneSuggestion(PHONE2_ID));
         // Phone 1 should always beat phone 2, all other things being equal.
         assertEquals(expectedPhone1ScoredSuggestion,
-                mTimeZoneDetectorStrategy.findBestSuggestionForTests());
+                mTimeZoneDetectorStrategy.findBestPhoneSuggestionForTests());
     }
 
     @Test
-    public void testFirstPlausibleSuggestionAcceptedWhenTimeZoneUninitialized() {
+    public void testFirstPlausiblePhoneSuggestionAcceptedWhenTimeZoneUninitialized() {
         SuggestionTestCase testCase = newTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY,
-                QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS, SCORE_LOW);
+                QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS, PHONE_SCORE_LOW);
         PhoneTimeZoneSuggestion lowQualitySuggestion =
                 testCase.createSuggestion(PHONE1_ID, "America/New_York");
 
         // The device time zone setting is left uninitialized.
         Script script = new Script()
-                .initializeTimeZoneDetectionEnabled(true);
+                .initializeAutoTimeZoneDetection(true);
 
         // The very first suggestion will be taken.
         script.suggestPhoneTimeZone(lowQualitySuggestion)
@@ -142,7 +145,7 @@ public class TimeZoneDetectorStrategyTest {
         assertEquals(expectedScoredSuggestion,
                 mTimeZoneDetectorStrategy.getLatestPhoneSuggestion(PHONE1_ID));
         assertEquals(expectedScoredSuggestion,
-                mTimeZoneDetectorStrategy.findBestSuggestionForTests());
+                mTimeZoneDetectorStrategy.findBestPhoneSuggestionForTests());
 
         // Another low quality suggestion will be ignored now that the setting is initialized.
         PhoneTimeZoneSuggestion lowQualitySuggestion2 =
@@ -156,7 +159,7 @@ public class TimeZoneDetectorStrategyTest {
         assertEquals(expectedScoredSuggestion2,
                 mTimeZoneDetectorStrategy.getLatestPhoneSuggestion(PHONE1_ID));
         assertEquals(expectedScoredSuggestion2,
-                mTimeZoneDetectorStrategy.findBestSuggestionForTests());
+                mTimeZoneDetectorStrategy.findBestPhoneSuggestionForTests());
     }
 
     /**
@@ -164,12 +167,12 @@ public class TimeZoneDetectorStrategyTest {
      * the strategy is "opinionated".
      */
     @Test
-    public void testTogglingTimeZoneDetection() {
+    public void testTogglingAutoTimeZoneDetection() {
         Script script = new Script();
 
         for (SuggestionTestCase testCase : TEST_CASES) {
             // Start with the device in a known state.
-            script.initializeTimeZoneDetectionEnabled(false)
+            script.initializeAutoTimeZoneDetection(false)
                     .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
             PhoneTimeZoneSuggestion suggestion =
@@ -186,14 +189,14 @@ public class TimeZoneDetectorStrategyTest {
             assertEquals(expectedScoredSuggestion,
                     mTimeZoneDetectorStrategy.getLatestPhoneSuggestion(PHONE1_ID));
             assertEquals(expectedScoredSuggestion,
-                    mTimeZoneDetectorStrategy.findBestSuggestionForTests());
+                    mTimeZoneDetectorStrategy.findBestPhoneSuggestionForTests());
 
             // Toggling the time zone setting on should cause the device setting to be set.
-            script.timeZoneDetectionEnabled(true);
+            script.autoTimeZoneDetectionEnabled(true);
 
             // When time zone detection is already enabled the suggestion (if it scores highly
             // enough) should be set immediately.
-            if (testCase.expectedScore >= SCORE_USAGE_THRESHOLD) {
+            if (testCase.expectedScore >= PHONE_SCORE_USAGE_THRESHOLD) {
                 script.verifyTimeZoneSetAndReset(suggestion);
             } else {
                 script.verifyTimeZoneNotSet();
@@ -203,24 +206,24 @@ public class TimeZoneDetectorStrategyTest {
             assertEquals(expectedScoredSuggestion,
                     mTimeZoneDetectorStrategy.getLatestPhoneSuggestion(PHONE1_ID));
             assertEquals(expectedScoredSuggestion,
-                    mTimeZoneDetectorStrategy.findBestSuggestionForTests());
+                    mTimeZoneDetectorStrategy.findBestPhoneSuggestionForTests());
 
             // Toggling the time zone setting should off should do nothing.
-            script.timeZoneDetectionEnabled(false)
+            script.autoTimeZoneDetectionEnabled(false)
                     .verifyTimeZoneNotSet();
 
             // Assert internal service state.
             assertEquals(expectedScoredSuggestion,
                     mTimeZoneDetectorStrategy.getLatestPhoneSuggestion(PHONE1_ID));
             assertEquals(expectedScoredSuggestion,
-                    mTimeZoneDetectorStrategy.findBestSuggestionForTests());
+                    mTimeZoneDetectorStrategy.findBestPhoneSuggestionForTests());
         }
     }
 
     @Test
-    public void testSuggestionsSinglePhone() {
+    public void testPhoneSuggestionsSinglePhone() {
         Script script = new Script()
-                .initializeTimeZoneDetectionEnabled(true)
+                .initializeAutoTimeZoneDetection(true)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
         for (SuggestionTestCase testCase : TEST_CASES) {
@@ -254,7 +257,7 @@ public class TimeZoneDetectorStrategyTest {
                 new QualifiedPhoneTimeZoneSuggestion(zonePhone1Suggestion, testCase.expectedScore);
 
         script.suggestPhoneTimeZone(zonePhone1Suggestion);
-        if (testCase.expectedScore >= SCORE_USAGE_THRESHOLD) {
+        if (testCase.expectedScore >= PHONE_SCORE_USAGE_THRESHOLD) {
             script.verifyTimeZoneSetAndReset(zonePhone1Suggestion);
         } else {
             script.verifyTimeZoneNotSet();
@@ -264,7 +267,7 @@ public class TimeZoneDetectorStrategyTest {
         assertEquals(expectedZonePhone1ScoredSuggestion,
                 mTimeZoneDetectorStrategy.getLatestPhoneSuggestion(PHONE1_ID));
         assertEquals(expectedZonePhone1ScoredSuggestion,
-                mTimeZoneDetectorStrategy.findBestSuggestionForTests());
+                mTimeZoneDetectorStrategy.findBestPhoneSuggestionForTests());
     }
 
     /**
@@ -278,12 +281,12 @@ public class TimeZoneDetectorStrategyTest {
         PhoneTimeZoneSuggestion emptyPhone1Suggestion = createEmptyPhone1Suggestion();
         PhoneTimeZoneSuggestion emptyPhone2Suggestion = createEmptyPhone2Suggestion();
         QualifiedPhoneTimeZoneSuggestion expectedEmptyPhone1ScoredSuggestion =
-                new QualifiedPhoneTimeZoneSuggestion(emptyPhone1Suggestion, SCORE_NONE);
+                new QualifiedPhoneTimeZoneSuggestion(emptyPhone1Suggestion, PHONE_SCORE_NONE);
         QualifiedPhoneTimeZoneSuggestion expectedEmptyPhone2ScoredSuggestion =
-                new QualifiedPhoneTimeZoneSuggestion(emptyPhone2Suggestion, SCORE_NONE);
+                new QualifiedPhoneTimeZoneSuggestion(emptyPhone2Suggestion, PHONE_SCORE_NONE);
 
         Script script = new Script()
-                .initializeTimeZoneDetectionEnabled(true)
+                .initializeAutoTimeZoneDetection(true)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
                 // Initialize the latest suggestions as empty so we don't need to worry about nulls
                 // below for the first loop.
@@ -305,7 +308,7 @@ public class TimeZoneDetectorStrategyTest {
 
             // Start the test by making a suggestion for phone 1.
             script.suggestPhoneTimeZone(zonePhone1Suggestion);
-            if (testCase.expectedScore >= SCORE_USAGE_THRESHOLD) {
+            if (testCase.expectedScore >= PHONE_SCORE_USAGE_THRESHOLD) {
                 script.verifyTimeZoneSetAndReset(zonePhone1Suggestion);
             } else {
                 script.verifyTimeZoneNotSet();
@@ -317,7 +320,7 @@ public class TimeZoneDetectorStrategyTest {
             assertEquals(expectedEmptyPhone2ScoredSuggestion,
                     mTimeZoneDetectorStrategy.getLatestPhoneSuggestion(PHONE2_ID));
             assertEquals(expectedZonePhone1ScoredSuggestion,
-                    mTimeZoneDetectorStrategy.findBestSuggestionForTests());
+                    mTimeZoneDetectorStrategy.findBestPhoneSuggestionForTests());
 
             // Phone 2 then makes an alternative suggestion with an identical score. Phone 1's
             // suggestion should still "win" if it is above the required threshold.
@@ -331,13 +334,13 @@ public class TimeZoneDetectorStrategyTest {
                     mTimeZoneDetectorStrategy.getLatestPhoneSuggestion(PHONE2_ID));
             // Phone 1 should always beat phone 2, all other things being equal.
             assertEquals(expectedZonePhone1ScoredSuggestion,
-                    mTimeZoneDetectorStrategy.findBestSuggestionForTests());
+                    mTimeZoneDetectorStrategy.findBestPhoneSuggestionForTests());
 
             // Withdrawing phone 1's suggestion should leave phone 2 as the new winner. Since the
             // zoneId is different, the time zone setting should be updated if the score is high
             // enough.
             script.suggestPhoneTimeZone(emptyPhone1Suggestion);
-            if (testCase.expectedScore >= SCORE_USAGE_THRESHOLD) {
+            if (testCase.expectedScore >= PHONE_SCORE_USAGE_THRESHOLD) {
                 script.verifyTimeZoneSetAndReset(zonePhone2Suggestion);
             } else {
                 script.verifyTimeZoneNotSet();
@@ -349,7 +352,7 @@ public class TimeZoneDetectorStrategyTest {
             assertEquals(expectedZonePhone2ScoredSuggestion,
                     mTimeZoneDetectorStrategy.getLatestPhoneSuggestion(PHONE2_ID));
             assertEquals(expectedZonePhone2ScoredSuggestion,
-                    mTimeZoneDetectorStrategy.findBestSuggestionForTests());
+                    mTimeZoneDetectorStrategy.findBestPhoneSuggestionForTests());
 
             // Reset the state for the next loop.
             script.suggestPhoneTimeZone(emptyPhone2Suggestion)
@@ -369,10 +372,11 @@ public class TimeZoneDetectorStrategyTest {
     @Test
     public void testTimeZoneDetectorStrategyDoesNotAssumeCurrentSetting() {
         Script script = new Script()
-                .initializeTimeZoneDetectionEnabled(true);
+                .initializeAutoTimeZoneDetection(true);
 
         SuggestionTestCase testCase =
-                newTestCase(MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE, SCORE_HIGH);
+                newTestCase(MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE,
+                        PHONE_SCORE_HIGH);
         PhoneTimeZoneSuggestion losAngelesSuggestion =
                 testCase.createSuggestion(PHONE1_ID, "America/Los_Angeles");
         PhoneTimeZoneSuggestion newYorkSuggestion =
@@ -387,19 +391,47 @@ public class TimeZoneDetectorStrategyTest {
 
         // Toggling time zone detection should set the device time zone only if the current setting
         // value is different from the most recent phone suggestion.
-        script.timeZoneDetectionEnabled(false)
+        script.autoTimeZoneDetectionEnabled(false)
                 .verifyTimeZoneNotSet()
-                .timeZoneDetectionEnabled(true)
+                .autoTimeZoneDetectionEnabled(true)
                 .verifyTimeZoneNotSet();
 
         // Simulate a user turning auto detection off, a new suggestion being made while auto
         // detection is off, and the user turning it on again.
-        script.timeZoneDetectionEnabled(false)
+        script.autoTimeZoneDetectionEnabled(false)
                 .suggestPhoneTimeZone(newYorkSuggestion)
                 .verifyTimeZoneNotSet();
         // Latest suggestion should be used.
-        script.timeZoneDetectionEnabled(true)
+        script.autoTimeZoneDetectionEnabled(true)
                 .verifyTimeZoneSetAndReset(newYorkSuggestion);
+    }
+
+    @Test
+    public void testManualSuggestion_autoTimeZoneDetectionEnabled() {
+        Script script = new Script()
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+                .initializeAutoTimeZoneDetection(true);
+
+        // Auto time zone detection is enabled so the manual suggestion should be ignored.
+        script.suggestManualTimeZone(createManualSuggestion("Europe/Paris"))
+            .verifyTimeZoneNotSet();
+    }
+
+
+    @Test
+    public void testManualSuggestion_autoTimeZoneDetectionDisabled() {
+        Script script = new Script()
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+                .initializeAutoTimeZoneDetection(false);
+
+        // Auto time zone detection is disabled so the manual suggestion should be used.
+        ManualTimeZoneSuggestion manualSuggestion = createManualSuggestion("Europe/Paris");
+        script.suggestManualTimeZone(manualSuggestion)
+            .verifyTimeZoneSetAndReset(manualSuggestion);
+    }
+
+    private ManualTimeZoneSuggestion createManualSuggestion(String zoneId) {
+        return new ManualTimeZoneSuggestion(zoneId);
     }
 
     private static PhoneTimeZoneSuggestion createEmptyPhone1Suggestion() {
@@ -410,55 +442,86 @@ public class TimeZoneDetectorStrategyTest {
         return new PhoneTimeZoneSuggestion.Builder(PHONE2_ID).build();
     }
 
-    class FakeTimeZoneDetectorStrategyCallback implements TimeZoneDetectorStrategy.Callback {
+    static class FakeTimeZoneDetectorStrategyCallback implements TimeZoneDetectorStrategy.Callback {
 
-        private boolean mTimeZoneDetectionEnabled;
-        private TestState<String> mTimeZoneId = new TestState<>();
+        private boolean mAutoTimeZoneDetectionEnabled;
+        private TestState<TimeZoneChange> mTimeZoneChanges = new TestState<>();
+        private String mTimeZoneId;
 
         @Override
-        public boolean isTimeZoneDetectionEnabled() {
-            return mTimeZoneDetectionEnabled;
+        public boolean isAutoTimeZoneDetectionEnabled() {
+            return mAutoTimeZoneDetectionEnabled;
         }
 
         @Override
         public boolean isDeviceTimeZoneInitialized() {
-            return mTimeZoneId.getLatest() != null;
+            return mTimeZoneId != null;
         }
 
         @Override
         public String getDeviceTimeZone() {
-            return mTimeZoneId.getLatest();
+            return mTimeZoneId;
         }
 
         @Override
-        public void setDeviceTimeZone(String zoneId) {
-            mTimeZoneId.set(zoneId);
+        public void setDeviceTimeZone(String zoneId, boolean withNetworkBroadcast) {
+            mTimeZoneId = zoneId;
+            mTimeZoneChanges.set(new TimeZoneChange(zoneId, withNetworkBroadcast));
         }
 
-        void initializeTimeZoneDetectionEnabled(boolean enabled) {
-            mTimeZoneDetectionEnabled = enabled;
+        void initializeAutoTimeZoneDetection(boolean enabled) {
+            mAutoTimeZoneDetectionEnabled = enabled;
         }
 
         void initializeTimeZone(String zoneId) {
-            mTimeZoneId.init(zoneId);
+            mTimeZoneId = zoneId;
         }
 
-        void setTimeZoneDetectionEnabled(boolean enabled) {
-            mTimeZoneDetectionEnabled = enabled;
+        void setAutoTimeZoneDetectionEnabled(boolean enabled) {
+            mAutoTimeZoneDetectionEnabled = enabled;
         }
 
         void assertTimeZoneNotSet() {
-            mTimeZoneId.assertHasNotBeenSet();
+            mTimeZoneChanges.assertHasNotBeenSet();
         }
 
-        void assertTimeZoneSet(String timeZoneId) {
-            mTimeZoneId.assertHasBeenSet();
-            mTimeZoneId.assertChangeCount(1);
-            mTimeZoneId.assertLatestEquals(timeZoneId);
+        void assertTimeZoneSet(String timeZoneId, boolean withNetworkBroadcast) {
+            mTimeZoneChanges.assertHasBeenSet();
+            mTimeZoneChanges.assertChangeCount(1);
+            TimeZoneChange expectedChange = new TimeZoneChange(timeZoneId, withNetworkBroadcast);
+            mTimeZoneChanges.assertLatestEquals(expectedChange);
         }
 
         void commitAllChanges() {
-            mTimeZoneId.commitLatest();
+            mTimeZoneChanges.commitLatest();
+        }
+    }
+
+    private static class TimeZoneChange {
+        private final String mTimeZoneId;
+        private final boolean mWithNetworkBroadcast;
+
+        private TimeZoneChange(String timeZoneId, boolean withNetworkBroadcast) {
+            mTimeZoneId = timeZoneId;
+            mWithNetworkBroadcast = withNetworkBroadcast;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            TimeZoneChange that = (TimeZoneChange) o;
+            return mWithNetworkBroadcast == that.mWithNetworkBroadcast
+                    && mTimeZoneId.equals(that.mTimeZoneId);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mTimeZoneId, mWithNetworkBroadcast);
         }
     }
 
@@ -517,8 +580,8 @@ public class TimeZoneDetectorStrategyTest {
      */
     private class Script {
 
-        Script initializeTimeZoneDetectionEnabled(boolean enabled) {
-            mFakeTimeZoneDetectorStrategyCallback.initializeTimeZoneDetectionEnabled(enabled);
+        Script initializeAutoTimeZoneDetection(boolean enabled) {
+            mFakeTimeZoneDetectorStrategyCallback.initializeAutoTimeZoneDetection(enabled);
             return this;
         }
 
@@ -527,24 +590,21 @@ public class TimeZoneDetectorStrategyTest {
             return this;
         }
 
-        Script timeZoneDetectionEnabled(boolean enabled) {
-            mFakeTimeZoneDetectorStrategyCallback.setTimeZoneDetectionEnabled(enabled);
-            mTimeZoneDetectorStrategy.handleTimeZoneDetectionChange();
+        Script autoTimeZoneDetectionEnabled(boolean enabled) {
+            mFakeTimeZoneDetectorStrategyCallback.setAutoTimeZoneDetectionEnabled(enabled);
+            mTimeZoneDetectorStrategy.handleAutoTimeZoneDetectionChange();
             return this;
         }
 
-        /** Simulates the time zone detection service receiving a phone-originated suggestion. */
+        /** Simulates the time zone detection strategy receiving a phone-originated suggestion. */
         Script suggestPhoneTimeZone(PhoneTimeZoneSuggestion phoneTimeZoneSuggestion) {
             mTimeZoneDetectorStrategy.suggestPhoneTimeZone(phoneTimeZoneSuggestion);
             return this;
         }
 
-        /** Simulates the user manually setting the time zone. */
-        Script manuallySetTimeZone(String timeZoneId) {
-            // Assert the test code is correct to call this method.
-            assertFalse(mFakeTimeZoneDetectorStrategyCallback.isTimeZoneDetectionEnabled());
-
-            mFakeTimeZoneDetectorStrategyCallback.initializeTimeZone(timeZoneId);
+        /** Simulates the time zone detection strategy receiving a user-originated suggestion. */
+        Script suggestManualTimeZone(ManualTimeZoneSuggestion manualTimeZoneSuggestion) {
+            mTimeZoneDetectorStrategy.suggestManualTimeZone(manualTimeZoneSuggestion);
             return this;
         }
 
@@ -553,8 +613,22 @@ public class TimeZoneDetectorStrategyTest {
             return this;
         }
 
-        Script verifyTimeZoneSetAndReset(PhoneTimeZoneSuggestion timeZoneSuggestion) {
-            mFakeTimeZoneDetectorStrategyCallback.assertTimeZoneSet(timeZoneSuggestion.getZoneId());
+        Script verifyTimeZoneSetAndReset(PhoneTimeZoneSuggestion suggestion) {
+            // Phone suggestions should cause a TelephonyIntents.ACTION_NETWORK_SET_TIMEZONE
+            // broadcast.
+            boolean withNetworkBroadcast = true;
+            mFakeTimeZoneDetectorStrategyCallback.assertTimeZoneSet(
+                    suggestion.getZoneId(), withNetworkBroadcast);
+            mFakeTimeZoneDetectorStrategyCallback.commitAllChanges();
+            return this;
+        }
+
+        Script verifyTimeZoneSetAndReset(ManualTimeZoneSuggestion suggestion) {
+            // Manual suggestions should not cause a TelephonyIntents.ACTION_NETWORK_SET_TIMEZONE
+            // broadcast.
+            boolean withNetworkBroadcast = false;
+            mFakeTimeZoneDetectorStrategyCallback.assertTimeZoneSet(
+                    suggestion.getZoneId(), withNetworkBroadcast);
             mFakeTimeZoneDetectorStrategyCallback.commitAllChanges();
             return this;
         }
