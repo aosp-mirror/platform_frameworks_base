@@ -5580,6 +5580,7 @@ package android.net.wifi {
     method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public java.util.List<java.lang.Integer> getAvailableChannels(int);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean getScanResults();
     method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public java.util.List<android.net.wifi.ScanResult> getSingleScanResults();
+    method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void registerScanListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiScanner.ScanListener);
     method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void setScanningEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener, android.os.WorkSource);
@@ -5591,6 +5592,7 @@ package android.net.wifi {
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void stopScan(android.net.wifi.WifiScanner.ScanListener);
     method @Deprecated public void stopTrackingBssids(android.net.wifi.WifiScanner.BssidListener);
     method @Deprecated public void stopTrackingWifiChange(android.net.wifi.WifiScanner.WifiChangeListener);
+    method public void unregisterScanListener(@NonNull android.net.wifi.WifiScanner.ScanListener);
     field public static final int MAX_SCAN_PERIOD_MS = 1024000; // 0xfa000
     field public static final int MIN_SCAN_PERIOD_MS = 1000; // 0x3e8
     field public static final int REASON_DUPLICATE_REQEUST = -5; // 0xfffffffb
@@ -5603,6 +5605,9 @@ package android.net.wifi {
     field public static final int REPORT_EVENT_AFTER_EACH_SCAN = 1; // 0x1
     field public static final int REPORT_EVENT_FULL_SCAN_RESULT = 2; // 0x2
     field public static final int REPORT_EVENT_NO_BATCH = 4; // 0x4
+    field public static final int SCAN_TYPE_HIGH_ACCURACY = 2; // 0x2
+    field public static final int SCAN_TYPE_LOW_LATENCY = 0; // 0x0
+    field public static final int SCAN_TYPE_LOW_POWER = 1; // 0x1
     field public static final int WIFI_BAND_24_GHZ = 1; // 0x1
     field public static final int WIFI_BAND_5_GHZ = 2; // 0x2
     field public static final int WIFI_BAND_5_GHZ_DFS_ONLY = 4; // 0x4
@@ -5671,6 +5676,7 @@ package android.net.wifi {
     ctor public WifiScanner.ScanSettings();
     field public int band;
     field public android.net.wifi.WifiScanner.ChannelSpec[] channels;
+    field @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public final java.util.List<android.net.wifi.WifiScanner.ScanSettings.HiddenNetwork> hiddenNetworks;
     field public boolean hideFromAppOps;
     field public boolean ignoreLocationSettings;
     field public int maxPeriodInMs;
@@ -5679,6 +5685,12 @@ package android.net.wifi {
     field public int periodInMs;
     field public int reportEvents;
     field public int stepCount;
+    field @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public int type;
+  }
+
+  public static class WifiScanner.ScanSettings.HiddenNetwork {
+    ctor public WifiScanner.ScanSettings.HiddenNetwork(@NonNull String);
+    field @NonNull public final String ssid;
   }
 
   @Deprecated public static interface WifiScanner.WifiChangeListener extends android.net.wifi.WifiScanner.ActionListener {

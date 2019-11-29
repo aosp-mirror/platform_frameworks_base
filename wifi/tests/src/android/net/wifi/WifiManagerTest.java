@@ -1437,15 +1437,6 @@ public class WifiManagerTest {
     }
 
     /**
-     * Defined for testing purpose.
-     */
-    class SynchronousExecutor implements Executor {
-        public void execute(Runnable r) {
-            r.run();
-        }
-    }
-
-    /**
      * Test behavior of isEnhancedOpenSupported
      */
     @Test
