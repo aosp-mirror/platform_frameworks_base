@@ -181,6 +181,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String SEPARATE_PROFILE_CHALLENGE_KEY = "lockscreen.profilechallenge";
     private static final String PREV_SYNTHETIC_PASSWORD_HANDLE_KEY = "prev-sp-handle";
     private static final String SYNTHETIC_PASSWORD_UPDATE_TIME_KEY = "sp-handle-ts";
+    private static final String USER_SERIAL_NUMBER_KEY = "serial-number";
 
     // No challenge provided
     private static final int CHALLENGE_NONE = 0;
@@ -661,6 +662,34 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     /**
+     * Clean up states associated with the given user, in case the userId is reused but LSS didn't
+     * get a chance to do cleanup previously during ACTION_USER_REMOVED.
+     *
+     * Internally, LSS stores serial number for each user and check it against the current user's
+     * serial number to determine if the userId is reused and invoke cleanup code.
+     */
+    private void cleanupDataForReusedUserIdIfNecessary(int userId) {
+        if (userId == UserHandle.USER_SYSTEM) {
+            // Short circuit as we never clean up user 0.
+            return;
+        }
+        // Serial number is never reusued, so we can use it as a distinguisher for user Id reuse.
+        int serialNumber = mUserManager.getUserSerialNumber(userId);
+
+        int storedSerialNumber = getIntUnchecked(USER_SERIAL_NUMBER_KEY, -1, userId);
+        if (storedSerialNumber != serialNumber) {
+            // If LockSettingsStorage does not have a copy of the serial number, it could be either
+            // this is a user created before the serial number recording logic is introduced, or
+            // the user does not exist or was removed and cleaned up properly. In either case, don't
+            // invoke removeUser().
+            if (storedSerialNumber != -1) {
+                removeUser(userId, /* unknownUser */ true);
+            }
+            setIntUnchecked(USER_SERIAL_NUMBER_KEY, serialNumber, userId);
+        }
+    }
+
+    /**
      * Check if profile got unlocked but the keystore is still locked. This happens on full disk
      * encryption devices since the profile may not yet be running when we consider unlocking it
      * during the normal flow. In this case unlock the keystore for the profile.
@@ -684,6 +713,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
+                cleanupDataForReusedUserIdIfNecessary(userId);
                 ensureProfileKeystoreUnlocked(userId);
                 // Hide notification first, as tie managed profile lock takes time
                 hideEncryptionNotification(new UserHandle(userId));
@@ -729,9 +759,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (Intent.ACTION_USER_ADDED.equals(intent.getAction())) {
                 // Notify keystore that a new user was added.
                 final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
-                if (userHandle > UserHandle.USER_SYSTEM) {
-                    removeUser(userHandle, /* unknownUser= */ true);
-                }
                 final KeyStore ks = KeyStore.getInstance();
                 final UserInfo parentInfo = mUserManager.getProfileParent(userHandle);
                 final int parentHandle = parentInfo != null ? parentInfo.id : -1;
@@ -1066,6 +1093,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         setStringUnchecked(key, userId, Long.toString(value));
     }
 
+    private void setIntUnchecked(String key, int value, int userId) {
+        setStringUnchecked(key, userId, Integer.toString(value));
+    }
+
     @Override
     public void setString(String key, String value, int userId) {
         checkWritePermission(userId);
@@ -1102,6 +1133,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     private long getLongUnchecked(String key, long defaultValue, int userId) {
         String value = getStringUnchecked(key, null, userId);
         return TextUtils.isEmpty(value) ? defaultValue : Long.parseLong(value);
+    }
+
+    private int getIntUnchecked(String key, int defaultValue, int userId) {
+        String value = getStringUnchecked(key, null, userId);
+        return TextUtils.isEmpty(value) ? defaultValue : Integer.parseInt(value);
     }
 
     @Override
@@ -2171,8 +2207,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void removeUser(int userId, boolean unknownUser) {
+        Slog.i(TAG, "RemoveUser: " + userId);
         mSpManager.removeUser(userId);
-        mStorage.removeUser(userId);
         mStrongAuth.removeUser(userId);
         tryRemoveUserFromSpCacheLater(userId);
 
@@ -2183,6 +2219,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (unknownUser || mUserManager.getUserInfo(userId).isManagedProfile()) {
             removeKeystoreProfileKey(userId);
         }
+        // Clean up storage last, this is to ensure that cleanupDataForReusedUserIdIfNecessary()
+        // can make the assumption that no USER_SERIAL_NUMBER_KEY means user is fully removed.
+        mStorage.removeUser(userId);
     }
 
     private void removeKeystoreProfileKey(int targetUserId) {
