@@ -140,10 +140,10 @@ public class TimeDetectorServiceTest {
 
     private static PhoneTimeSuggestion createPhoneTimeSuggestion() {
         int phoneId = 1234;
-        PhoneTimeSuggestion suggestion = new PhoneTimeSuggestion(phoneId);
         TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
-        suggestion.setUtcTime(timeValue);
-        return suggestion;
+        return new PhoneTimeSuggestion.Builder(phoneId)
+                .setUtcTime(timeValue)
+                .build();
     }
 
     private static ManualTimeSuggestion createManualTimeSuggestion() {

@@ -150,7 +150,8 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
             if (!mCallback.isAutoTimeDetectionEnabled()) {
                 if (DBG) {
                     Slog.d(LOG_TAG, "Auto time detection is not enabled."
-                            + " time=" + time
+                            + " origin=" + origin
+                            + ", time=" + time
                             + ", cause=" + cause);
                 }
                 return;
@@ -159,7 +160,8 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
             if (mCallback.isAutoTimeDetectionEnabled()) {
                 if (DBG) {
                     Slog.d(LOG_TAG, "Auto time detection is enabled."
-                            + " time=" + time
+                            + " origin=" + origin
+                            + ", time=" + time
                             + ", cause=" + cause);
                 }
                 return;
@@ -232,16 +234,16 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
 
     @Override
     public synchronized void dump(@NonNull PrintWriter pw, @Nullable String[] args) {
-        pw.println("mLastPhoneSuggestion=" + mLastPhoneSuggestion);
-        pw.println("mLastAutoSystemClockTimeSet=" + mLastAutoSystemClockTimeSet);
-        pw.println("mLastAutoSystemClockTime=" + mLastAutoSystemClockTime);
-        pw.println("mLastAutoSystemClockTimeSendNetworkBroadcast="
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, " ");
+        ipw.println("TimeDetectorStrategy:");
+        ipw.increaseIndent(); // level 1
+
+        ipw.println("mLastPhoneSuggestion=" + mLastPhoneSuggestion);
+        ipw.println("mLastAutoSystemClockTimeSet=" + mLastAutoSystemClockTimeSet);
+        ipw.println("mLastAutoSystemClockTime=" + mLastAutoSystemClockTime);
+        ipw.println("mLastAutoSystemClockTimeSendNetworkBroadcast="
                 + mLastAutoSystemClockTimeSendNetworkBroadcast);
 
-        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, " ");
-
-        ipw.println("TimeDetectorStrategyImpl logs:");
-        ipw.increaseIndent(); // level 1
 
         ipw.println("Time change log:");
         ipw.increaseIndent(); // level 2
@@ -249,6 +251,7 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
         ipw.decreaseIndent(); // level 2
 
         ipw.decreaseIndent(); // level 1
+        ipw.flush();
     }
 
     @GuardedBy("this")
