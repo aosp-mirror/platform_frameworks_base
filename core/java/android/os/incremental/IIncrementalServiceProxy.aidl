@@ -18,7 +18,7 @@ package android.os.incremental;
 
 import android.os.incremental.IncrementalFileSystemControlParcel;
 import android.os.incremental.IncrementalDataLoaderParamsParcel;
-import android.service.incremental.IIncrementalDataLoaderStatusListener;
+import android.content.pm.IDataLoaderStatusListener;
 
 /**
  * Binder service to receive calls from native Incremental Service and handle Java tasks such as
@@ -29,7 +29,7 @@ interface IIncrementalServiceProxy {
     boolean prepareDataLoader(int mountId,
         in IncrementalFileSystemControlParcel control,
         in IncrementalDataLoaderParamsParcel params,
-        in IIncrementalDataLoaderStatusListener listener);
+        in IDataLoaderStatusListener listener);
     boolean startDataLoader(int mountId);
     void showHealthBlockedUI(int mountId);
     void destroyDataLoader(int mountId);

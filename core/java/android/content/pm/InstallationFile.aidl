@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
-package android.service.incremental;
+package android.content.pm;
 
 /**
- * Callbacks from DataLoaderService to IncrementalService to report data loader status.
- * @hide
+ * Describes a file which is part of a package installation.
  */
-oneway interface IIncrementalDataLoaderStatusListener {
-    /** Data loader status */
-    const int DATA_LOADER_READY = 0;
-    const int DATA_LOADER_NOT_READY = 1;
-    const int DATA_LOADER_RUNNING = 2;
-    const int DATA_LOADER_STOPPED = 3;
-    const int DATA_LOADER_SLOW_CONNECTION = 4;
-    const int DATA_LOADER_NO_CONNECTION = 5;
-    const int DATA_LOADER_CONNECTION_OK = 6;
-
-    /** Data loader status callback */
-    void onStatusChanged(in int storageId, in int status);
-}
+parcelable InstallationFile;
 
