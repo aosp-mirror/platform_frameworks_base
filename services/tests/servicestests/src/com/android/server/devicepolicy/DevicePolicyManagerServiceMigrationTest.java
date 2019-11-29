@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -39,6 +38,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
+
+    private static final String USER_TYPE_EMPTY = "";
+
     private DpmMockContext mContext;
 
     @Override
@@ -52,9 +54,10 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
     }
 
     public void testMigration() throws Exception {
-        final File user10dir = getServices().addUser(10, 0);
-        final File user11dir = getServices().addUser(11, UserInfo.FLAG_MANAGED_PROFILE);
-        getServices().addUser(12, 0);
+        final File user10dir = getServices().addUser(10, 0, USER_TYPE_EMPTY);
+        final File user11dir = getServices().addUser(11, 0,
+                UserManager.USER_TYPE_PROFILE_MANAGED);
+        getServices().addUser(12, 0, USER_TYPE_EMPTY);
 
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         setUpPackageManagerForAdmin(admin2, UserHandle.getUid(10, 123));
@@ -273,7 +276,8 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
     // Test setting default restrictions for managed profile.
     public void testMigration3_managedProfileOwner() throws Exception {
         // Create a managed profile user.
-        final File user10dir = getServices().addUser(10, UserInfo.FLAG_MANAGED_PROFILE);
+        final File user10dir = getServices().addUser(10, 0,
+                UserManager.USER_TYPE_PROFILE_MANAGED);
         // Profile owner package for managed profile user.
         setUpPackageManagerForAdmin(admin1, UserHandle.getUid(10, 123));
         // Set up fake UserManager to make it look like a managed profile.
