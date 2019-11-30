@@ -1673,13 +1673,13 @@
     <permission android:name="android.permission.NETWORK_BYPASS_PRIVATE_DNS"
         android:protectionLevel="signature" />
 
-    <!-- #SystemApi @hide Allows device mobility state to be set so that Wifi scan interval can be increased
-         when the device is stationary in order to save power.
+    <!-- @SystemApi @hide Allows device mobility state to be set so that Wifi scan interval can
+         be increased when the device is stationary in order to save power.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.WIFI_SET_DEVICE_MOBILITY_STATE"
         android:protectionLevel="signature|privileged" />
 
-    <!-- #SystemApi @hide Allows privileged system APK to update Wifi usability stats and score.
+    <!-- @SystemApi @hide Allows privileged system APK to update Wifi usability stats and score.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE"
         android:protectionLevel="signature|privileged" />
