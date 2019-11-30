@@ -168,11 +168,12 @@ public class TetheringManager {
      * #getTetherableIfaces() to ensure corresponding interface is available for
      * tethering before calling #tether().
      *
-     * TODO: Deprecate this API. The only usages should be in PanService and Wifi P2P which
+     * @deprecated The only usages should be in PanService and Wifi P2P which
      * need direct access.
      *
      * {@hide}
      */
+    @Deprecated
     public int tether(@NonNull String iface) {
         try {
             mConnector.tether(iface);
@@ -185,8 +186,10 @@ public class TetheringManager {
     /**
      * Stop tethering the named interface.
      *
+     * @deprecated
      * {@hide}
      */
+    @Deprecated
     public int untether(@NonNull String iface) {
         try {
             mConnector.untether(iface);
@@ -202,9 +205,10 @@ public class TetheringManager {
      * encapsulate proper entitlement logic. If the API is used and an entitlement check is needed,
      * downstream USB tethering will be enabled but will not have any upstream.
      *
-     * @Deprecated
+     * @deprecated
      * {@hide}
      */
+    @Deprecated
     public int setUsbTethering(boolean enable) {
         try {
             mConnector.setUsbTethering(enable);
@@ -386,8 +390,10 @@ public class TetheringManager {
     /**
      * Get the set of tethered dhcp ranges.
      *
+     * @deprecated This API just return the default value which is not used in DhcpServer.
      * {@hide}
      */
+    @Deprecated
     public @NonNull String[] getTetheredDhcpRanges() {
         if (!mCallback.awaitCallbackCreation()) {
             throw new NullPointerException("callback was not ready yet");
