@@ -39,7 +39,6 @@ import android.text.TextUtils;
 import android.util.BackupUtils;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.TimeUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -49,6 +48,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Calendar;
 import java.util.HashMap;
 
 /**
@@ -2006,6 +2006,16 @@ public class WifiConfiguration implements Parcelable {
                 && enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE;
     }
 
+    private static String logTimeOfDay(long millis) {
+        Calendar c = Calendar.getInstance();
+        if (millis >= 0) {
+            c.setTimeInMillis(millis);
+            return String.format("%tm-%td %tH:%tM:%tS.%tL", c, c, c, c, c, c);
+        } else {
+            return Long.toString(millis);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
@@ -2042,7 +2052,7 @@ public class WifiConfiguration implements Parcelable {
         if (mNetworkSelectionStatus.getConnectChoice() != null) {
             sbuf.append(" connect choice: ").append(mNetworkSelectionStatus.getConnectChoice());
             sbuf.append(" connect choice set time: ")
-                    .append(TimeUtils.logTimeOfDay(
+                    .append(logTimeOfDay(
                             mNetworkSelectionStatus.getConnectChoiceTimestamp()));
         }
         sbuf.append(" hasEverConnected: ")
@@ -2081,7 +2091,7 @@ public class WifiConfiguration implements Parcelable {
         sbuf.append(" mRandomizedMacAddress: ").append(mRandomizedMacAddress).append("\n");
         sbuf.append(" randomizedMacExpirationTimeMs: ")
                 .append(randomizedMacExpirationTimeMs == 0 ? "<none>"
-                        : TimeUtils.logTimeOfDay(randomizedMacExpirationTimeMs)).append("\n");
+                        : logTimeOfDay(randomizedMacExpirationTimeMs)).append("\n");
         sbuf.append(" KeyMgmt:");
         for (int k = 0; k < this.allowedKeyManagement.size(); k++) {
             if (this.allowedKeyManagement.get(k)) {
@@ -2205,7 +2215,7 @@ public class WifiConfiguration implements Parcelable {
 
         if (this.lastConnected != 0) {
             sbuf.append('\n');
-            sbuf.append("lastConnected: ").append(TimeUtils.logTimeOfDay(this.lastConnected));
+            sbuf.append("lastConnected: ").append(logTimeOfDay(this.lastConnected));
             sbuf.append(" ");
         }
         sbuf.append('\n');
@@ -2355,7 +2365,7 @@ public class WifiConfiguration implements Parcelable {
                 ? getSsidAndSecurityTypeString()
                 : FQDN + KeyMgmt.strings[KeyMgmt.WPA_EAP];
         if (!shared) {
-            key += "-" + UserHandle.getUserId(creatorUid);
+            key += "-" + UserHandle.getUserHandleForUid(creatorUid).getIdentifier();
         }
         return key;
     }
