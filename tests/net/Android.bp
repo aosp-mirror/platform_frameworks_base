@@ -45,7 +45,6 @@ android_test {
     name: "FrameworksNetTests",
     defaults: ["FrameworksNetTests-jni-defaults"],
     srcs: [
-        ":tethering-tests-src",
         "java/**/*.java",
         "java/**/*.kt",
     ],

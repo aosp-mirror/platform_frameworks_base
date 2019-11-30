@@ -20,7 +20,6 @@ java_library_static {
         ":vold_aidl",
         ":gsiservice_aidl",
         ":platform-compat-config",
-        ":tethering-servicescore-srcs",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
         "java/com/android/server/policy/EventLogTags.logtags",
@@ -50,7 +49,6 @@ java_library_static {
         "android.hardware.biometrics.face-V1.0-java",
         "android.hardware.biometrics.fingerprint-V2.1-java",
         "android.hardware.oemlock-V1.0-java",
-        "android.hardware.tetheroffload.control-V1.0-java",
         "android.hardware.configstore-V1.0-java",
         "android.hardware.contexthub-V1.0-java",
         "android.hidl.manager-V1.2-java",
@@ -81,12 +79,4 @@ java_library {
 prebuilt_etc {
     name: "gps_debug.conf",
     src: "java/com/android/server/location/gps_debug.conf",
-}
-
-// TODO: this should be removed after tethering migration done.
-filegroup {
-    name: "servicescore-tethering-src",
-    srcs: [
-        "java/com/android/server/connectivity/MockableSystemProperties.java",
-    ],
 }
