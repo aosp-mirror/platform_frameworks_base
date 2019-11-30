@@ -17,7 +17,7 @@
 package android.net;
 
 /**
- * Configuration details for a tethering.
+ * Configuration details for tethering.
  * @hide
  */
 parcelable TetheringConfigurationParcel {
