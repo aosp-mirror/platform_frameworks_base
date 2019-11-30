@@ -17,4 +17,4 @@
 
 package android.os;
 
-parcelable ResultReceiver;
+@JavaOnlyStableParcelable parcelable ResultReceiver;

@@ -51,7 +51,9 @@ public class VersionedBroadcastListenerTest {
     private VersionedBroadcastListener mListener;
     private int mCallbackCount;
 
-    private void doCallback() { mCallbackCount++; }
+    private void doCallback() {
+        mCallbackCount++;
+    }
 
     private class MockContext extends BroadcastInterceptingContext {
         MockContext(Context base) {
@@ -96,7 +98,7 @@ public class VersionedBroadcastListenerTest {
         mListener.startListening();
         for (int i = 0; i < 5; i++) {
             sendBroadcast();
-            assertEquals(i+1, mCallbackCount);
+            assertEquals(i + 1, mCallbackCount);
         }
         mListener.stopListening();
     }
