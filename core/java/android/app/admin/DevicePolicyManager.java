@@ -5001,14 +5001,15 @@ public class DevicePolicyManager {
      * <p>Device owner, profile owner and their delegated certificate installer can use
      * {@link #ID_TYPE_BASE_INFO} to request inclusion of the general device information
      * including manufacturer, model, brand, device and product in the attestation record.
-     * Only device owner and their delegated certificate installer can use
-     * {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and {@link #ID_TYPE_MEID} to request
-     * unique device identifiers to be attested (the serial number, IMEI and MEID correspondingly),
-     * if supported by the device (see {@link #isDeviceIdAttestationSupported()}).
-     * Additionally, device owner and their delegated certificate installer can also request the
-     * attestation record to be signed using an individual attestation certificate by specifying
-     * the {@link #ID_TYPE_INDIVIDUAL_ATTESTATION} flag (if supported by the device, see
-     * {@link #isUniqueDeviceAttestationSupported()}).
+     * Only device owner, profile owner on an organization-owned device and their delegated
+     * certificate installers can use {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and
+     * {@link #ID_TYPE_MEID} to request unique device identifiers to be attested (the serial number,
+     * IMEI and MEID correspondingly), if supported by the device
+     * (see {@link #isDeviceIdAttestationSupported()}).
+     * Additionally, device owner, profile owner on an organization-owned device and their delegated
+     * certificate installers can also request the attestation record to be signed using an
+     * individual attestation certificate by specifying the {@link #ID_TYPE_INDIVIDUAL_ATTESTATION}
+     * flag (if supported by the device, see {@link #isUniqueDeviceAttestationSupported()}).
      * <p>
      * If any of {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and {@link #ID_TYPE_MEID}
      * is set, it is implicitly assumed that {@link #ID_TYPE_BASE_INFO} is also set.
