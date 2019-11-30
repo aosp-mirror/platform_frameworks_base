@@ -146,12 +146,11 @@ public class WifiManager {
     @Deprecated
     public static final int ERROR_AUTH_FAILURE_EAP_FAILURE = 3;
 
-    /**
-     * Maximum number of active network suggestions allowed per app.
-     * @hide
-     */
-    public static final int NETWORK_SUGGESTIONS_MAX_PER_APP =
-            ActivityManager.isLowRamDeviceStatic() ? 256 : 1024;
+    /** @hide */
+    public static final int NETWORK_SUGGESTIONS_MAX_PER_APP_LOW_RAM = 256;
+
+    /** @hide */
+    public static final int NETWORK_SUGGESTIONS_MAX_PER_APP_HIGH_RAM = 1024;
 
     /**
      * Reason code if all of the network suggestions were successfully added or removed.
@@ -1830,7 +1829,15 @@ public class WifiManager {
      * @see #removeNetworkSuggestions(List)
      */
     public int getMaxNumberOfNetworkSuggestionsPerApp() {
-        return NETWORK_SUGGESTIONS_MAX_PER_APP;
+        return getMaxNumberOfNetworkSuggestionsPerApp(
+                mContext.getSystemService(ActivityManager.class).isLowRamDevice());
+    }
+
+    /** @hide */
+    public static int getMaxNumberOfNetworkSuggestionsPerApp(boolean isLowRamDevice) {
+        return isLowRamDevice
+                ? NETWORK_SUGGESTIONS_MAX_PER_APP_LOW_RAM
+                : NETWORK_SUGGESTIONS_MAX_PER_APP_HIGH_RAM;
     }
 
     /**

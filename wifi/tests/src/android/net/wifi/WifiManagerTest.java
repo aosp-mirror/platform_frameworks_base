@@ -50,6 +50,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.net.DhcpInfo;
@@ -116,6 +117,7 @@ public class WifiManagerTest {
     @Mock Runnable mRunnable;
     @Mock Executor mExecutor;
     @Mock Executor mAnotherExecutor;
+    @Mock ActivityManager mActivityManager;
 
     private Handler mHandler;
     private TestLooper mLooper;
@@ -1395,8 +1397,15 @@ public class WifiManagerTest {
      */
     @Test
     public void getMaxNumberOfNetworkSuggestionsPerApp() {
-        assertEquals(WifiManager.NETWORK_SUGGESTIONS_MAX_PER_APP,
-                mWifiManager.getMaxNumberOfNetworkSuggestionsPerApp());
+        when(mContext.getSystemServiceName(ActivityManager.class))
+                .thenReturn(Context.ACTIVITY_SERVICE);
+        when(mContext.getSystemService(Context.ACTIVITY_SERVICE))
+                .thenReturn(mActivityManager);
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        assertEquals(256, mWifiManager.getMaxNumberOfNetworkSuggestionsPerApp());
+
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        assertEquals(1024, mWifiManager.getMaxNumberOfNetworkSuggestionsPerApp());
     }
 
     /**
