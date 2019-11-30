@@ -336,7 +336,7 @@ public class WifiTrackerTest {
     private static OsuProvider buildOsuProvider(String friendlyName) {
         Map<String, String> friendlyNames = new HashMap<>();
         friendlyNames.put("en", friendlyName);
-        return new OsuProvider((WifiSsid) null, friendlyNames, null, null, null, null, null);
+        return new OsuProvider((WifiSsid) null, friendlyNames, null, null, null, null);
     }
 
     private WifiTracker createTrackerWithImmediateBroadcastsAndInjectInitialScanResults(
