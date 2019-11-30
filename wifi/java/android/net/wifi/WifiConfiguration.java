@@ -2426,13 +2426,13 @@ public class WifiConfiguration implements Parcelable {
     @NonNull
     @SystemApi
     public IpConfiguration.IpAssignment getIpAssignment() {
-        return mIpConfiguration.ipAssignment;
+        return mIpConfiguration.getIpAssignment();
     }
 
     /** @hide */
     @UnsupportedAppUsage
     public void setIpAssignment(IpConfiguration.IpAssignment ipAssignment) {
-        mIpConfiguration.ipAssignment = ipAssignment;
+        mIpConfiguration.setIpAssignment(ipAssignment);
     }
 
     /**
@@ -2442,13 +2442,13 @@ public class WifiConfiguration implements Parcelable {
     @NonNull
     @SystemApi
     public IpConfiguration.ProxySettings getProxySettings() {
-        return mIpConfiguration.proxySettings;
+        return mIpConfiguration.getProxySettings();
     }
 
     /** @hide */
     @UnsupportedAppUsage
     public void setProxySettings(IpConfiguration.ProxySettings proxySettings) {
-        mIpConfiguration.proxySettings = proxySettings;
+        mIpConfiguration.setProxySettings(proxySettings);
     }
 
     /**
@@ -2457,10 +2457,10 @@ public class WifiConfiguration implements Parcelable {
      *                  WifiConfiguration, or {@code null} if no proxy is specified.
      */
     public ProxyInfo getHttpProxy() {
-        if (mIpConfiguration.proxySettings == IpConfiguration.ProxySettings.NONE) {
+        if (mIpConfiguration.getProxySettings() == IpConfiguration.ProxySettings.NONE) {
             return null;
         }
-        return new ProxyInfo(mIpConfiguration.httpProxy);
+        return new ProxyInfo(mIpConfiguration.getHttpProxy());
     }
 
     /**
@@ -2485,12 +2485,12 @@ public class WifiConfiguration implements Parcelable {
         if (!Uri.EMPTY.equals(httpProxy.getPacFileUrl())) {
             proxySettingCopy = IpConfiguration.ProxySettings.PAC;
             // Construct a new PAC URL Proxy
-            httpProxyCopy = new ProxyInfo(httpProxy.getPacFileUrl(), httpProxy.getPort());
+            httpProxyCopy = ProxyInfo.buildPacProxy(httpProxy.getPacFileUrl(), httpProxy.getPort());
         } else {
             proxySettingCopy = IpConfiguration.ProxySettings.STATIC;
             // Construct a new HTTP Proxy
-            httpProxyCopy = new ProxyInfo(httpProxy.getHost(), httpProxy.getPort(),
-                    httpProxy.getExclusionListAsString());
+            httpProxyCopy = ProxyInfo.buildDirectProxy(httpProxy.getHost(), httpProxy.getPort(),
+                    Arrays.asList(httpProxy.getExclusionList()));
         }
         if (!httpProxyCopy.isValid()) {
             throw new IllegalArgumentException("Invalid ProxyInfo: " + httpProxyCopy.toString());
@@ -2505,8 +2505,8 @@ public class WifiConfiguration implements Parcelable {
      */
     @SystemApi
     public void setProxy(@NonNull ProxySettings settings, @NonNull ProxyInfo proxy) {
-        mIpConfiguration.proxySettings = settings;
-        mIpConfiguration.httpProxy = proxy;
+        mIpConfiguration.setProxySettings(settings);
+        mIpConfiguration.setHttpProxy(proxy);
     }
 
     /** Implement the Parcelable interface {@hide} */
