@@ -107,6 +107,8 @@ public class OffloadHardwareInterface {
     public OffloadHardwareInterface(Handler h, SharedLog log) {
         mHandler = h;
         mLog = log.forSubComponent(TAG);
+
+        System.loadLibrary("tetheroffloadjni");
     }
 
     /** Get default value indicating whether offload is supported. */
