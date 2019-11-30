@@ -34,6 +34,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DemoMode;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -66,6 +67,7 @@ public class TunerServiceImpl extends TunerService {
     // Things that use the tunable infrastructure but are now real user settings and
     // shouldn't be reset with tuner settings.
     private static final String[] RESET_BLACKLIST = new String[] {
+            BatteryMeterView.STATUS_BAR_BATTERY_STYLE,
             Clock.CLOCK_STYLE,
             ClockController.CLOCK_POSITION,
             NavigationBarView.NAVIGATION_BAR_MENU_ARROW_KEYS,

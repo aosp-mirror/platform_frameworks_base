@@ -5031,6 +5031,32 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Display style of the status bar battery information
+         * 0: Display the battery an icon in portrait mode
+         * 1: Display the battery as a circle
+         * 2: Display the battery as plain text
+         * default: 0
+         */
+        public static final String STATUS_BAR_BATTERY_STYLE = "status_bar_battery_style";
+
+        /** @hide */
+        public static final Validator STATUS_BAR_BATTERY_STYLE_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
+
+        /**
+         * Status bar battery %
+         * 0: Hide the battery percentage
+         * 1: Display the battery percentage inside the icon
+         * 2: Display the battery percentage next to the icon
+         */
+        public static final String STATUS_BAR_SHOW_BATTERY_PERCENT =
+                "status_bar_show_battery_percent";
+
+        /** @hide */
+        public static final Validator STATUS_BAR_SHOW_BATTERY_PERCENT_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5270,6 +5296,8 @@ public final class Settings {
             PRIVATE_SETTINGS.add(VOLUME_LINK_NOTIFICATION);
             PRIVATE_SETTINGS.add(ACCELEROMETER_ROTATION_ANGLES);
             PRIVATE_SETTINGS.add(NAVIGATION_BAR_MENU_ARROW_KEYS);
+            PRIVATE_SETTINGS.add(STATUS_BAR_BATTERY_STYLE);
+            PRIVATE_SETTINGS.add(STATUS_BAR_SHOW_BATTERY_PERCENT);
         }
 
         /**
@@ -5412,6 +5440,8 @@ public final class Settings {
             VALIDATORS.put(VOLUME_LINK_NOTIFICATION, VOLUME_LINK_NOTIFICATION_VALIDATOR);
             VALIDATORS.put(ACCELEROMETER_ROTATION_ANGLES, ACCELEROMETER_ROTATION_ANGLES_VALIDATOR);
             VALIDATORS.put(NAVIGATION_BAR_MENU_ARROW_KEYS, NAVIGATION_BAR_MENU_ARROW_KEYS_VALIDATOR);
+            VALIDATORS.put(STATUS_BAR_BATTERY_STYLE, STATUS_BAR_BATTERY_STYLE_VALIDATOR);
+            VALIDATORS.put(STATUS_BAR_SHOW_BATTERY_PERCENT, STATUS_BAR_SHOW_BATTERY_PERCENT_VALIDATOR);
         }
 
         /**

@@ -78,10 +78,9 @@
 
     <!-- other weird signal stuff -->
 
-    <com.android.systemui.tuner.BatteryPreference
-        android:title="@string/battery"
-        android:summary="%s"
-        android:entries="@array/battery_options" />
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="battery"
+        android:title="@string/battery" />
 
     <com.android.systemui.tuner.StatusBarSwitch
         android:key="alarm_clock"
