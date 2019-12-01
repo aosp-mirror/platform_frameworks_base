@@ -438,6 +438,8 @@ java_library {
         "services-devicepolicy-platform-compat-config",
     ],
     static_libs: [
+        // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
+        // in favor of an API stubs dependency in java_library "framework" below.
         "mimemap",
     ],
     // For backwards compatibility.
