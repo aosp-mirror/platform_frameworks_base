@@ -6363,6 +6363,9 @@ public class DevicePolicyManager {
     /**
      * Sets the device owner information to be shown on the lock screen.
      * <p>
+     * Device owner information set using this method overrides any owner information manually set
+     * by the user and prevents the user from further changing it.
+     * <p>
      * If the device owner information is {@code null} or empty then the device owner info is
      * cleared and the user owner info is shown on the lock screen if it is set.
      * <p>
@@ -6372,6 +6375,8 @@ public class DevicePolicyManager {
      * If the device owner information needs to be localized, it is the responsibility of the
      * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
      * and set a new version of this string accordingly.
+     * <p>
+     * May be called by the device owner or the profile owner of an organization-owned device.
      *
      * @param admin The name of the admin component to check.
      * @param info Device owner information which will be displayed instead of the user owner info.
