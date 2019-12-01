@@ -20,17 +20,19 @@ import android.content.integrity.Rule;
 
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Optional;
 
 /** A helper class to serialize rules from the {@link Rule} model to Xml representation. */
 public class RuleBinarySerializer implements RuleSerializer {
 
     @Override
-    public void serialize(List<Rule> rules, OutputStream outputStream) {
+    public void serialize(
+            List<Rule> rules, Optional<Integer> formatVersion, OutputStream outputStream) {
         // TODO: Implement stream serializer.
     }
 
     @Override
-    public String serialize(List<Rule> rules) {
+    public String serialize(List<Rule> rules, Optional<Integer> formatVersion) {
         // TODO: Implement text serializer.
         return null;
     }

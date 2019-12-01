@@ -18,8 +18,12 @@
 aidl_interface {
     name: "tethering-aidl-interfaces",
     local_include_dir: "src",
+    include_dirs: ["frameworks/base/core/java"], // For framework parcelables.
     srcs: [
+        "src/android/net/ITetherInternalCallback.aidl",
         "src/android/net/ITetheringConnector.aidl",
+        "src/android/net/TetheringConfigurationParcel.aidl",
+        "src/android/net/TetherStatesParcel.aidl",
     ],
     backend: {
         ndk: {
@@ -33,8 +37,15 @@ aidl_interface {
 
 java_library {
     name: "tethering-client",
-    platform_apis: true,
+    sdk_version: "system_current",
     static_libs: [
         "tethering-aidl-interfaces-java",
     ],
+}
+
+// This is temporary file group which would be removed after TetheringManager is built
+// into tethering-client. Will be done by aosp/1156906.
+filegroup {
+    name: "tethering-manager",
+    srcs: ["src/android/net/TetheringManager.java"],
 }

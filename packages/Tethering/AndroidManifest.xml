@@ -25,5 +25,11 @@
         android:process="com.android.networkstack.process"
         android:extractNativeLibs="false"
         android:persistent="true">
+        <service android:name="com.android.server.connectivity.tethering.TetheringService"
+                 android:permission="android.permission.MAINLINE_NETWORK_STACK">
+            <intent-filter>
+                <action android:name="android.net.ITetheringConnector"/>
+            </intent-filter>
+        </service>
     </application>
 </manifest>

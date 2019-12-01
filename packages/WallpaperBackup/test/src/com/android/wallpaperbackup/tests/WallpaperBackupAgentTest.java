@@ -19,8 +19,13 @@ package com.android.wallpaperbackup.tests;
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +45,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -53,78 +59,109 @@ public class WallpaperBackupAgentTest {
     private static final String SYSTEM_GENERATION = "system_gen";
     private static final String LOCK_GENERATION = "lock_gen";
 
+    private static final int TEST_SYSTEM_WALLPAPER_ID = 1;
+    private static final int TEST_LOCK_WALLPAPER_ID = 2;
+
     @Mock private FullBackupDataOutput mOutput;
     @Mock private WallpaperManager mWallpaperManager;
     @Mock private SharedPreferences mSharedPreferences;
+    @Mock private SharedPreferences.Editor mSharedPreferenceEditor;
 
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
 
     private ContextWithServiceOverrides mContext;
+    private IsolatedWallpaperBackupAgent mWallpaperBackupAgent;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        when(mSharedPreferences.edit()).thenReturn(mSharedPreferenceEditor);
+        when(mSharedPreferenceEditor.putInt(anyString(), anyInt()))
+                .thenReturn(mSharedPreferenceEditor);
+        doNothing().when(mSharedPreferenceEditor).apply();
+
         mContext = new ContextWithServiceOverrides(ApplicationProvider.getApplicationContext());
         mContext.injectSystemService(WallpaperManager.class, mWallpaperManager);
         mContext.setSharedPreferencesOverride(mSharedPreferences);
+
+        mWallpaperBackupAgent = new IsolatedWallpaperBackupAgent(mTemporaryFolder.getRoot());
+        mWallpaperBackupAgent.attach(mContext);
+        mWallpaperBackupAgent.onCreate();
     }
 
     @Test
     public void testOnFullBackup_withNoChanges_onlyBacksUpEmptyFile() throws IOException {
-        WallpaperBackupAgent wallpaperBackupAgent = new WallpaperBackupAgent();
-        initialiseAgent(wallpaperBackupAgent);
+        mockBackedUpState();
+        mockCurrentWallpapers(TEST_SYSTEM_WALLPAPER_ID, TEST_LOCK_WALLPAPER_ID);
 
-        when(mWallpaperManager.getWallpaperIdForUser(eq(FLAG_SYSTEM), eq(UserHandle.USER_SYSTEM)))
-                .thenReturn(1);
-        when(mWallpaperManager.getWallpaperIdForUser(eq(FLAG_LOCK), eq(UserHandle.USER_SYSTEM)))
-                .thenReturn(1);
-        when(mSharedPreferences.getInt(eq(SYSTEM_GENERATION), eq(-1))).thenReturn(1);
-        when(mSharedPreferences.getInt(eq(LOCK_GENERATION), eq(-1))).thenReturn(1);
+        mWallpaperBackupAgent.onFullBackup(mOutput);
 
-        wallpaperBackupAgent.onFullBackup(mOutput);
-
-        verify(mOutput); // Backup of empty file only
+        assertThat(mWallpaperBackupAgent.mBackedUpFiles.size()).isEqualTo(1);
+        assertThat(mWallpaperBackupAgent.mBackedUpFiles.get(0).getName()).isEqualTo("empty");
     }
 
     @Test
     public void testOnFullBackup_withOnlyChangedSystem_updatesTheSharedPreferences()
             throws IOException {
-        // Create a system wallpaper file
-        mTemporaryFolder.newFile("wallpaper_orig");
-        // Create stageing file to simulate he wallpaper being ready to back up
-        new File(mContext.getFilesDir(), "wallpaper-stage").createNewFile();
+        mockSystemWallpaperReadyToBackUp();
+        mockUnbackedUpState();
+        mockCurrentWallpapers(TEST_SYSTEM_WALLPAPER_ID, TEST_LOCK_WALLPAPER_ID);
 
-        WallpaperBackupAgent wallpaperBackupAgent =
-                new IsolatedWallpaperBackupAgent(mTemporaryFolder.getRoot());
-        initialiseAgent(wallpaperBackupAgent);
+        mWallpaperBackupAgent.onFullBackup(mOutput);
 
-        SharedPreferences.Editor preferenceEditor = mock(SharedPreferences.Editor.class);
+        verify(mSharedPreferenceEditor).putInt(eq(SYSTEM_GENERATION), eq(TEST_SYSTEM_WALLPAPER_ID));
+    }
 
+    @Test
+    public void testOnFullBackup_withLockChangedToMatchSystem_updatesTheSharedPreferences()
+            throws IOException {
+        mockBackedUpState();
+        mockSystemWallpaperReadyToBackUp();
+        mockCurrentWallpapers(TEST_SYSTEM_WALLPAPER_ID, -1);
+
+        mWallpaperBackupAgent.onFullBackup(mOutput);
+
+        InOrder inOrder = inOrder(mSharedPreferenceEditor);
+        inOrder.verify(mSharedPreferenceEditor)
+                .putInt(eq(SYSTEM_GENERATION), eq(TEST_SYSTEM_WALLPAPER_ID));
+        inOrder.verify(mSharedPreferenceEditor).apply();
+        inOrder.verify(mSharedPreferenceEditor).putInt(eq(LOCK_GENERATION), eq(-1));
+        inOrder.verify(mSharedPreferenceEditor).apply();
+    }
+
+    private void mockUnbackedUpState() {
+        mockCurrentWallpapers(TEST_SYSTEM_WALLPAPER_ID, TEST_LOCK_WALLPAPER_ID);
+        when(mSharedPreferences.getInt(eq(SYSTEM_GENERATION), eq(-1))).thenReturn(-1);
+        when(mSharedPreferences.getInt(eq(LOCK_GENERATION), eq(-1))).thenReturn(-1);
+    }
+
+    private void mockBackedUpState() {
+        when(mSharedPreferences.getInt(eq(SYSTEM_GENERATION), eq(-1)))
+                .thenReturn(TEST_SYSTEM_WALLPAPER_ID);
+        when(mSharedPreferences.getInt(eq(LOCK_GENERATION), eq(-1)))
+                .thenReturn(TEST_LOCK_WALLPAPER_ID);
+    }
+
+    private void mockCurrentWallpapers(int systemWallpaperId, int lockWallpaperId) {
         when(mWallpaperManager.getWallpaperIdForUser(eq(FLAG_SYSTEM), eq(UserHandle.USER_SYSTEM)))
-                .thenReturn(2);
+                .thenReturn(systemWallpaperId);
         when(mWallpaperManager.getWallpaperIdForUser(eq(FLAG_LOCK), eq(UserHandle.USER_SYSTEM)))
-                .thenReturn(1);
+                .thenReturn(lockWallpaperId);
         when(mWallpaperManager.isWallpaperBackupEligible(eq(FLAG_SYSTEM))).thenReturn(true);
         when(mWallpaperManager.isWallpaperBackupEligible(eq(FLAG_LOCK))).thenReturn(true);
-        when(mSharedPreferences.getInt(eq(SYSTEM_GENERATION), eq(-1))).thenReturn(1);
-        when(mSharedPreferences.getInt(eq(LOCK_GENERATION), eq(-1))).thenReturn(1);
-        when(mSharedPreferences.edit()).thenReturn(preferenceEditor);
-        when(preferenceEditor.putInt(eq(SYSTEM_GENERATION), eq(2))).thenReturn(preferenceEditor);
-
-        wallpaperBackupAgent.onFullBackup(mOutput);
-
-        verify(preferenceEditor).putInt(eq(SYSTEM_GENERATION), eq(2));
     }
 
-    private void initialiseAgent(WallpaperBackupAgent agent) {
-        agent.attach(mContext);
-        agent.onCreate();
+    private void mockSystemWallpaperReadyToBackUp() throws IOException {
+        // Create a system wallpaper file
+        mTemporaryFolder.newFile("wallpaper_orig");
+        // Create staging file to simulate he wallpaper being ready to back up
+        new File(mContext.getFilesDir(), "wallpaper-stage").createNewFile();
     }
 
-    private static class IsolatedWallpaperBackupAgent extends WallpaperBackupAgent {
+    private class IsolatedWallpaperBackupAgent extends WallpaperBackupAgent {
         File mWallpaperBaseDirectory;
-        List<File> mBackedUpFiles = new ArrayList();
+        List<File> mBackedUpFiles = new ArrayList<>();
 
         IsolatedWallpaperBackupAgent(File wallpaperBaseDirectory) {
             mWallpaperBaseDirectory = wallpaperBaseDirectory;
@@ -138,6 +175,11 @@ public class WallpaperBackupAgentTest {
         @Override
         protected void backupFile(File file, FullBackupDataOutput data) {
             mBackedUpFiles.add(file);
+        }
+
+        @Override
+        public SharedPreferences getSharedPreferences(File file, int mode) {
+            return mSharedPreferences;
         }
     }
 }

@@ -171,7 +171,6 @@ public class InputManagerService extends IInputManager.Stub
     private final ArrayList<InputDevice>
             mTempFullKeyboards = new ArrayList<InputDevice>(); // handler thread only
     private boolean mKeyboardLayoutNotificationShown;
-    private PendingIntent mKeyboardLayoutIntent;
     private Toast mSwitchedKeyboardLayoutToast;
 
     // State for vibrator tokens.
@@ -205,6 +204,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeUnregisterInputChannel(long ptr, InputChannel inputChannel);
     private static native void nativePilferPointers(long ptr, IBinder token);
     private static native void nativeSetInputFilterEnabled(long ptr, boolean enable);
+    private static native void nativeSetInTouchMode(long ptr, boolean inTouchMode);
     private static native int nativeInjectInputEvent(long ptr, InputEvent event,
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis,
             int policyFlags);
@@ -601,6 +601,25 @@ public class InputManagerService extends IInputManager.Stub
 
             nativeSetInputFilterEnabled(mPtr, filter != null);
         }
+    }
+
+    /**
+     * Set the state of the touch mode.
+     *
+     * WindowManager remains the source of truth of the touch mode state.
+     * However, we need to keep a copy of this state in input.
+     *
+     * The apps determine the touch mode state. Therefore, a single app will
+     * affect the global state. That state change needs to be propagated to
+     * other apps, when they become focused.
+     *
+     * When input dispatches focus to the apps, the touch mode state
+     * will be sent together with the focus change.
+     *
+     * @param inTouchMode true if the device is in touch mode.
+     */
+    public void setInTouchMode(boolean inTouchMode) {
+        nativeSetInTouchMode(mPtr, inTouchMode);
     }
 
     @Override // Binder call

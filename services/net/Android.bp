@@ -9,8 +9,8 @@ java_library_static {
     name: "services.net",
     srcs: [
         ":net-module-utils-srcs",
-        ":tethering-servicesnet-srcs",
         ":services.net-sources",
+        ":tethering-manager",
     ],
     static_libs: [
         "dnsresolver_aidl_interface-V2-java",

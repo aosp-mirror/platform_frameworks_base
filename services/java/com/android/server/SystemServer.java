@@ -43,6 +43,7 @@ import android.database.sqlite.SQLiteGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityModuleConnector;
 import android.net.NetworkStackClient;
+import android.net.TetheringManager;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
@@ -268,6 +269,8 @@ public final class SystemServer {
             "com.android.internal.car.CarServiceHelperService";
     private static final String TIME_DETECTOR_SERVICE_CLASS =
             "com.android.server.timedetector.TimeDetectorService$Lifecycle";
+    private static final String TIME_ZONE_DETECTOR_SERVICE_CLASS =
+            "com.android.server.timezonedetector.TimeZoneDetectorService$Lifecycle";
     private static final String ACCESSIBILITY_MANAGER_SERVICE_CLASS =
             "com.android.server.accessibility.AccessibilityManagerService$Lifecycle";
     private static final String ADB_SERVICE_CLASS =
@@ -1480,6 +1483,14 @@ public final class SystemServer {
             }
             t.traceEnd();
 
+            t.traceBegin("StartTimeZoneDetectorService");
+            try {
+                mSystemServiceManager.startService(TIME_ZONE_DETECTOR_SERVICE_CLASS);
+            } catch (Throwable e) {
+                reportWtf("starting StartTimeZoneDetectorService service", e);
+            }
+            t.traceEnd();
+
             if (!isWatch) {
                 t.traceBegin("StartSearchManagerService");
                 try {
@@ -2201,6 +2212,15 @@ public final class SystemServer {
                 NetworkStackClient.getInstance().start();
             } catch (Throwable e) {
                 reportWtf("starting Network Stack", e);
+            }
+            t.traceEnd();
+
+            t.traceBegin("StartTethering");
+            try {
+                // Tethering must start after ConnectivityService and NetworkStack.
+                TetheringManager.getInstance().start();
+            } catch (Throwable e) {
+                reportWtf("starting Tethering", e);
             }
             t.traceEnd();
 

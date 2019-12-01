@@ -34,6 +34,8 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
 
+import java.util.List;
+
 /**
  * The interface through which an application interacts with the Android backup service to
  * request backup and restore operations.
@@ -946,6 +948,29 @@ public class BackupManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Excludes keys from KV restore for a given package. The corresponding data will be excluded
+     * from the data set available the backup agent during restore. However,  final list  of keys
+     * that have been excluded will be passed to the agent to make it aware of the exclusions.
+     *
+     * @param packageName The name of the package for which to exclude keys.
+     * @param keys The list of keys to exclude.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public void excludeKeysFromRestore(@NonNull String packageName, @NonNull List<String> keys) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                sService.excludeKeysFromRestore(packageName, keys);
+            } catch (RemoteException e) {
+                Log.e(TAG, "excludeKeysFromRestore() couldn't connect");
+            }
+        }
     }
 
     /*

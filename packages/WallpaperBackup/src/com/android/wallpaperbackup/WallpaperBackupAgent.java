@@ -153,6 +153,7 @@ public class WallpaperBackupAgent extends BackupAgent {
                 Slog.v(TAG, "lockGen=" + lockGeneration + " : lockChanged=" + lockChanged);
                 Slog.v(TAG, "sysEligble=" + sysEligible);
                 Slog.v(TAG, "lockEligible=" + lockEligible);
+                Slog.v(TAG, "hasLockWallpaper=" + hasLockWallpaper);
             }
 
             // only back up the wallpapers if we've been told they're eligible
@@ -172,6 +173,17 @@ public class WallpaperBackupAgent extends BackupAgent {
                 if (DEBUG) Slog.v(TAG, "Storing system wallpaper image");
                 backupFile(imageStage, data);
                 prefs.edit().putInt(SYSTEM_GENERATION, sysGeneration).apply();
+            }
+
+            // If there's no lock wallpaper, then we have nothing to add to the backup.
+            if (lockGeneration == -1) {
+                if (lockChanged && lockImageStage.exists()) {
+                    if (DEBUG) Slog.v(TAG, "Removed lock wallpaper; deleting");
+                    lockImageStage.delete();
+                }
+                if (DEBUG) Slog.v(TAG, "No lock paper set, add nothing to backup");
+                prefs.edit().putInt(LOCK_GENERATION, lockGeneration).apply();
+                return;
             }
 
             // Don't try to store the lock image if we overran our quota last time

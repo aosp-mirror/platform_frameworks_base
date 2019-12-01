@@ -33,7 +33,6 @@ import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.os.Build;
 import android.os.SELinux;
-import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Slog;
@@ -442,6 +441,24 @@ public class NativeLibraryHelper {
             sum += sumNativeBinariesForSupportedAbi(handle, abiList);
         }
         return sum;
+    }
+
+     /**
+     * Configure the native library files managed by Incremental Service. Makes sure Incremental
+     * Service will create native library directories and set up native library binary files in the
+     * same structure as they are in non-incremental installations.
+     *
+     * @param pkg The package to be installed, including all the APK files.
+     * @param handle The pointer to an zip archive.
+     * @param libraryRoot The root directory of the native library files, e.g., lib/
+     * @param abiList The list of ABIs that are supported by the current device.
+     * @param useIsaSubdir Whether or not to set up a sub dir for the ISA.
+     * @return ABI code if installation succeeds or error code if installation fails.
+     */
+    public static int configureNativeBinariesForSupportedAbi(Package pkg, Handle handle,
+            File libraryRoot, String[] abiList, boolean useIsaSubdir) {
+        // TODO(b/136132412): Implement this.
+        return -1;
     }
 
     // We don't care about the other return values for now.

@@ -286,14 +286,12 @@ public class WifiP2pDevice implements Parcelable {
     }
 
     /**
-     * Update device details. This will throw an exception if the device address does not match.
+     * Update this device's details using another {@link WifiP2pDevice} instance.
+     * This will throw an exception if the device address does not match.
      *
-     * @param device to be updated
+     * @param device another instance of {@link WifiP2pDevice} used to update this instance.
      * @throws IllegalArgumentException if the device is null or the device address does not match
-     *
-     * @hide
      */
-    @UnsupportedAppUsage
     public void update(@NonNull WifiP2pDevice device) {
         updateSupplicantDetails(device);
         status = device.status;

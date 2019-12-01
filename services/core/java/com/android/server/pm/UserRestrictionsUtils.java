@@ -194,7 +194,18 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
             UserManager.DISALLOW_UNMUTE_MICROPHONE,
-            UserManager.DISALLOW_UNMUTE_DEVICE
+            UserManager.DISALLOW_UNMUTE_DEVICE,
+            UserManager.DISALLOW_CAMERA
+    );
+
+    /**
+     * Special user restrictions that are applied globally when set by the profile owner of a
+     * managed profile that was created during the device provisioning flow.
+     */
+    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS =
+            Sets.newArraySet(
+                    UserManager.DISALLOW_CONFIG_DATE_TIME,
+                    UserManager.DISALLOW_CAMERA
     );
 
     /**
@@ -419,15 +430,9 @@ public class UserRestrictionsUtils {
      * Takes restrictions that can be set by device owner, and sort them into what should be applied
      * globally and what should be applied only on the current user.
      */
-    public static void sortToGlobalAndLocal(@Nullable Bundle in, boolean isDeviceOwner,
-            int cameraRestrictionScope,
-            @NonNull Bundle global, @NonNull Bundle local) {
-        // Camera restriction (as well as all others) goes to at most one bundle.
-        if (cameraRestrictionScope == UserManagerInternal.CAMERA_DISABLED_GLOBALLY) {
-            global.putBoolean(UserManager.DISALLOW_CAMERA, true);
-        } else if (cameraRestrictionScope == UserManagerInternal.CAMERA_DISABLED_LOCALLY) {
-            local.putBoolean(UserManager.DISALLOW_CAMERA, true);
-        }
+    public static void sortToGlobalAndLocal(@Nullable Bundle in,
+            @UserManagerInternal.OwnerType int restrictionOwnerType, @NonNull Bundle global,
+            @NonNull Bundle local) {
         if (in == null || in.size() == 0) {
             return;
         }
@@ -435,7 +440,7 @@ public class UserRestrictionsUtils {
             if (!in.getBoolean(key)) {
                 continue;
             }
-            if (isGlobal(isDeviceOwner, key)) {
+            if (isGlobal(restrictionOwnerType, key)) {
                 global.putBoolean(key, true);
             } else {
                 local.putBoolean(key, true);
@@ -446,9 +451,13 @@ public class UserRestrictionsUtils {
     /**
      * Whether given user restriction should be enforced globally.
      */
-    private static boolean isGlobal(boolean isDeviceOwner, String key) {
-        return (isDeviceOwner &&
-                (PRIMARY_USER_ONLY_RESTRICTIONS.contains(key) || GLOBAL_RESTRICTIONS.contains(key)))
+    private static boolean isGlobal(@UserManagerInternal.OwnerType int restrictionOwnerType,
+            String key) {
+        return ((restrictionOwnerType == UserManagerInternal.OWNER_TYPE_DEVICE_OWNER) && (
+                PRIMARY_USER_ONLY_RESTRICTIONS.contains(key) || GLOBAL_RESTRICTIONS.contains(key)))
+                || ((restrictionOwnerType
+                == UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE)
+                && PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS.contains(key))
                 || PROFILE_GLOBAL_RESTRICTIONS.contains(key)
                 || DEVICE_OWNER_ONLY_RESTRICTIONS.contains(key);
     }

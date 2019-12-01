@@ -52,6 +52,7 @@ import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
@@ -77,6 +78,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
@@ -151,6 +154,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     // When finished call listener
     private final OnTaskFinishedListener mListener;
 
+    private final Map<String, Set<String>> mExcludedKeys;
+
     // Key/value: bookkeeping about staged data and files for agent access
     private File mBackupDataName;
     private File mStageName;
@@ -160,6 +165,17 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     private final int mEphemeralOpToken;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
+
+    @VisibleForTesting
+    PerformUnifiedRestoreTask(Map<String, Set<String>> excludedKeys) {
+        mExcludedKeys = excludedKeys;
+        mListener = null;
+        mAgentTimeoutParameters = null;
+        mTransportClient = null;
+        mTransportManager = null;
+        mEphemeralOpToken = 0;
+        mUserId = 0;
+    }
 
     // This task can assume that the wakelock is properly held for it and doesn't have to worry
     // about releasing it.
@@ -173,7 +189,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             int pmToken,
             boolean isFullSystemRestore,
             @Nullable String[] filterSet,
-            OnTaskFinishedListener listener) {
+            OnTaskFinishedListener listener,
+            Map<String, Set<String>> excludedKeys) {
         this.backupManagerService = backupManagerService;
         mUserId = backupManagerService.getUserId();
         mTransportManager = backupManagerService.getTransportManager();
@@ -194,6 +211,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mAgentTimeoutParameters = Preconditions.checkNotNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
+
+        mExcludedKeys = excludedKeys;
 
         if (targetPackage != null) {
             // Single package restore
@@ -724,27 +743,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
                 BackupDataInput in = new BackupDataInput(stage.getFileDescriptor());
                 BackupDataOutput out = new BackupDataOutput(mBackupData.getFileDescriptor());
-                byte[] buffer = new byte[8192]; // will grow when needed
-                while (in.readNextHeader()) {
-                    final String key = in.getKey();
-                    final int size = in.getDataSize();
-
-                    // is this a special key?
-                    if (key.equals(KEY_WIDGET_STATE)) {
-                        if (DEBUG) {
-                            Slog.i(TAG, "Restoring widget state for " + packageName);
-                        }
-                        mWidgetData = new byte[size];
-                        in.readEntityData(mWidgetData, 0, size);
-                    } else {
-                        if (size > buffer.length) {
-                            buffer = new byte[size];
-                        }
-                        in.readEntityData(buffer, 0, size);
-                        out.writeEntityHeader(key, size);
-                        out.writeEntityData(buffer, size);
-                    }
-                }
+                filterExcludedKeys(packageName, in, out);
 
                 mBackupData.close();
             }
@@ -780,6 +779,39 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             // are no more packages to be restored that will be handled by the
             // next step.
             executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
+        }
+    }
+
+    @VisibleForTesting
+    void filterExcludedKeys(String packageName, BackupDataInput in, BackupDataOutput out)
+            throws Exception {
+        Set<String> excludedKeysForPackage = mExcludedKeys.get(packageName);
+
+        byte[] buffer = new byte[8192]; // will grow when needed
+        while (in.readNextHeader()) {
+            final String key = in.getKey();
+            final int size = in.getDataSize();
+
+            if (excludedKeysForPackage != null && excludedKeysForPackage.contains(key)) {
+                in.skipEntityData();
+                continue;
+            }
+
+            // is this a special key?
+            if (key.equals(KEY_WIDGET_STATE)) {
+                if (DEBUG) {
+                    Slog.i(TAG, "Restoring widget state for " + packageName);
+                }
+                mWidgetData = new byte[size];
+                in.readEntityData(mWidgetData, 0, size);
+            } else {
+                if (size > buffer.length) {
+                    buffer = new byte[size];
+                }
+                in.readEntityData(buffer, 0, size);
+                out.writeEntityHeader(key, size);
+                out.writeEntityData(buffer, size);
+            }
         }
     }
 

@@ -122,13 +122,15 @@ public class UserRestrictionsUtilsTest extends AndroidTestCase {
         final Bundle local = new Bundle();
         final Bundle global = new Bundle();
 
-        UserRestrictionsUtils.sortToGlobalAndLocal(null, false /* isDeviceOwner */,
-                UserManagerInternal.CAMERA_NOT_DISABLED, global, local);
+        UserRestrictionsUtils.sortToGlobalAndLocal(null,
+                UserManagerInternal.OWNER_TYPE_PROFILE_OWNER,
+                global, local);
         assertEquals(0, global.size());
         assertEquals(0, local.size());
 
-        UserRestrictionsUtils.sortToGlobalAndLocal(Bundle.EMPTY, false /* isDeviceOwner */,
-                UserManagerInternal.CAMERA_NOT_DISABLED, global, local);
+        UserRestrictionsUtils.sortToGlobalAndLocal(Bundle.EMPTY,
+                UserManagerInternal.OWNER_TYPE_PROFILE_OWNER,
+                global, local);
         assertEquals(0, global.size());
         assertEquals(0, local.size());
 
@@ -140,8 +142,10 @@ public class UserRestrictionsUtilsTest extends AndroidTestCase {
                 UserManager.DISALLOW_CONFIG_TETHERING,
                 UserManager.DISALLOW_OUTGOING_BEAM,
                 UserManager.DISALLOW_APPS_CONTROL,
-                UserManager.ENSURE_VERIFY_APPS
-        ), true /* isDeviceOwner */, UserManagerInternal.CAMERA_NOT_DISABLED, global, local);
+                UserManager.ENSURE_VERIFY_APPS,
+                UserManager.DISALLOW_CAMERA
+                ), UserManagerInternal.OWNER_TYPE_DEVICE_OWNER,
+                global, local);
 
 
         assertRestrictions(newRestrictions(
@@ -154,7 +158,10 @@ public class UserRestrictionsUtilsTest extends AndroidTestCase {
 
                 // These can only be set by DO.
                 UserManager.DISALLOW_USB_FILE_TRANSFER,
-                UserManager.DISALLOW_CONFIG_TETHERING
+                UserManager.DISALLOW_CONFIG_TETHERING,
+
+                // This can be set by DO or PO of organisation owned device
+                UserManager.DISALLOW_CAMERA
         ), global);
 
         assertRestrictions(newRestrictions(
@@ -174,8 +181,10 @@ public class UserRestrictionsUtilsTest extends AndroidTestCase {
                 UserManager.DISALLOW_CONFIG_TETHERING,
                 UserManager.DISALLOW_OUTGOING_BEAM,
                 UserManager.DISALLOW_APPS_CONTROL,
-                UserManager.ENSURE_VERIFY_APPS
-        ), false /* isDeviceOwner */, UserManagerInternal.CAMERA_NOT_DISABLED, global, local);
+                UserManager.ENSURE_VERIFY_APPS,
+                UserManager.DISALLOW_CAMERA
+                ), UserManagerInternal.OWNER_TYPE_PROFILE_OWNER,
+                global, local);
 
         assertRestrictions(newRestrictions(
                 // This one is global no matter who sets it.
@@ -193,23 +202,47 @@ public class UserRestrictionsUtilsTest extends AndroidTestCase {
 
                 // These can only be set by DO.
                 UserManager.DISALLOW_USB_FILE_TRANSFER,
-                UserManager.DISALLOW_CONFIG_TETHERING
+                UserManager.DISALLOW_CONFIG_TETHERING,
+
+                // This can be set by DO or PO of organisation owned device
+                UserManager.DISALLOW_CAMERA
         ), local);
 
+        local.clear();
+        global.clear();
+
+        // Restrictions set by PO of organisation owned device
+        UserRestrictionsUtils.sortToGlobalAndLocal(newRestrictions(
+                UserManager.DISALLOW_CONFIG_DATE_TIME
+                ), UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE,
+                global, local);
+
+        assertRestrictions(newRestrictions(
+                // This user restriction is global when set by PO of org owned device
+                UserManager.DISALLOW_CONFIG_DATE_TIME
+        ), global);
+        assertEquals(0, local.size());
     }
 
     public void testSortToLocalAndGlobalWithCameraDisabled() {
         final Bundle local = new Bundle();
         final Bundle global = new Bundle();
 
-        UserRestrictionsUtils.sortToGlobalAndLocal(Bundle.EMPTY, false,
-                UserManagerInternal.CAMERA_DISABLED_GLOBALLY, global, local);
+        UserRestrictionsUtils.sortToGlobalAndLocal(newRestrictions(UserManager.DISALLOW_CAMERA),
+                UserManagerInternal.OWNER_TYPE_DEVICE_OWNER, global, local);
         assertRestrictions(newRestrictions(UserManager.DISALLOW_CAMERA), global);
         assertEquals(0, local.size());
         global.clear();
 
-        UserRestrictionsUtils.sortToGlobalAndLocal(Bundle.EMPTY, false,
-                UserManagerInternal.CAMERA_DISABLED_LOCALLY, global, local);
+        UserRestrictionsUtils.sortToGlobalAndLocal(newRestrictions(UserManager.DISALLOW_CAMERA),
+                UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE, global,
+                local);
+        assertRestrictions(newRestrictions(UserManager.DISALLOW_CAMERA), global);
+        assertEquals(0, local.size());
+        global.clear();
+
+        UserRestrictionsUtils.sortToGlobalAndLocal(newRestrictions(UserManager.DISALLOW_CAMERA),
+                UserManagerInternal.OWNER_TYPE_PROFILE_OWNER, global, local);
         assertEquals(0, global.size());
         assertRestrictions(newRestrictions(UserManager.DISALLOW_CAMERA), local);
     }

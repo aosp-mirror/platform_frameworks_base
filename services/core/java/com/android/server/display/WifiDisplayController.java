@@ -508,8 +508,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 Slog.d(TAG, "updateDesiredDevice: new information "
                         + describeWifiP2pDevice(device));
             }
-            mDesiredDevice.updateSupplicantDetails(device);
-            mDesiredDevice.status = device.status;
+            mDesiredDevice.update(device);
             if (mAdvertisedDisplay != null
                     && mAdvertisedDisplay.getDeviceAddress().equals(address)) {
                 readvertiseDisplay(createWifiDisplay(mDesiredDevice));

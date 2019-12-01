@@ -264,8 +264,8 @@ class LinkCommand : public Command {
         &options_.keep_raw_values);
     AddOptionalFlag("--no-compress-regex",
         "Do not compress extensions matching the regular expression. Remember to\n"
-            " use the '$' symbol for end of line. Uses a non case-sensitive\n"
-            " ECMAScript regular expression grammar.",
+            "use the '$' symbol for end of line. Uses a case-sensitive ECMAScript"
+            "regular expression grammar.",
         &no_compress_regex);
     AddOptionalSwitch("--warn-manifest-validation",
         "Treat manifest validation errors as warnings.",
