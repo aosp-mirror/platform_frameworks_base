@@ -1942,16 +1942,6 @@ public class DevicePolicyManager {
     public static final int CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
-     *
-     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_PROFILE} when adding a managed profile is
-     * disallowed by {@link UserManager#DISALLOW_ADD_MANAGED_PROFILE}.
-     *
-     * @hide
-     */
-    public static final int CODE_ADD_MANAGED_PROFILE_DISALLOWED = 15;
-
-    /**
      * Result codes for {@link #checkProvisioningPreCondition} indicating all the provisioning pre
      * conditions.
      *
@@ -1963,7 +1953,7 @@ public class DevicePolicyManager {
             CODE_USER_SETUP_COMPLETED, CODE_NOT_SYSTEM_USER, CODE_HAS_PAIRED,
             CODE_MANAGED_USERS_NOT_SUPPORTED, CODE_SYSTEM_USER, CODE_CANNOT_ADD_MANAGED_PROFILE,
             CODE_NOT_SYSTEM_USER_SPLIT, CODE_DEVICE_ADMIN_NOT_SUPPORTED,
-            CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER, CODE_ADD_MANAGED_PROFILE_DISALLOWED
+            CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER
     })
     public @interface ProvisioningPreCondition {}
 

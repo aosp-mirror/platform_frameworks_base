@@ -23,7 +23,6 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
 import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
-import static android.app.admin.DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED;
 import static android.app.admin.DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE;
 import static android.app.admin.DevicePolicyManager.CODE_DEVICE_ADMIN_NOT_SUPPORTED;
 import static android.app.admin.DevicePolicyManager.CODE_HAS_DEVICE_OWNER;
@@ -4099,6 +4098,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER, userHandle)) {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, false, userHandle);
         }
+        // When a device owner is set, the system automatically restricts adding a managed profile.
+        // Remove this restriction when the device owner is cleared.
+        if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, userHandle)) {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, false,
+                    userHandle);
+        }
     }
 
     /**
@@ -7976,10 +7981,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             updateDeviceOwnerLocked();
             setDeviceOwnerSystemPropertyLocked();
 
-            // TODO Send to system too?
-            mInjector.binderWithCleanCallingIdentity(
-                    () -> sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED,
-                            userId));
+            mInjector.binderWithCleanCallingIdentity(() -> {
+                // Restrict adding a managed profile when a device owner is set on the device.
+                // That is to prevent the co-existence of a managed profile and a device owner
+                // on the same device.
+                // Instead, the device may be provisioned with an organization-owned managed
+                // profile, such that the admin on that managed profile has extended management
+                // capabilities that can affect the entire device (but not access private data
+                // on the primary profile).
+                mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
+                        UserHandle.of(userId));
+                // TODO Send to system too?
+                sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED, userId);
+            });
             mDeviceAdminServiceController.startServiceForOwner(
                     admin.getPackageName(), userId, "set-device-owner");
 
@@ -8232,6 +8246,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
             if (admin == null || getUserData(userHandle).mRemovingAdmins.contains(who)) {
                 throw new IllegalArgumentException("Not active admin: " + who);
+            }
+
+            UserInfo parentUser = mUserManager.getProfileParent(userHandle);
+            // When trying to set a profile owner on a new user, it may be that this user is
+            // a profile - but it may not be a managed profile if there's a restriction on the
+            // parent to add managed profiles (e.g. if the device has a device owner).
+            if (parentUser != null && mUserManager.hasUserRestriction(
+                    UserManager.DISALLOW_ADD_MANAGED_PROFILE,
+                    UserHandle.of(parentUser.id))) {
+                Slog.i(LOG_TAG, "Cannot set profile owner because of restriction.");
+                return false;
             }
 
             if (isAdb()) {
@@ -12293,25 +12318,41 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final long ident = mInjector.binderClearCallingIdentity();
         try {
             final UserHandle callingUserHandle = UserHandle.of(callingUserId);
-            final ComponentName ownerAdmin = getOwnerComponent(packageName, callingUserId);
-            if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE,
-                    callingUserHandle)) {
-                // An admin can initiate provisioning if it has set the restriction.
-                if (ownerAdmin == null || isAdminAffectedByRestriction(ownerAdmin,
-                        UserManager.DISALLOW_ADD_MANAGED_PROFILE, callingUserId)) {
-                    return CODE_ADD_MANAGED_PROFILE_DISALLOWED;
-                }
+            final boolean hasDeviceOwner;
+            synchronized (getLockObject()) {
+                hasDeviceOwner = getDeviceOwnerAdminLocked() != null;
             }
-            boolean canRemoveProfile = true;
-            if (mUserManager.hasUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
-                    callingUserHandle)) {
-                // We can remove a profile if the admin itself has set the restriction.
-                if (ownerAdmin == null || isAdminAffectedByRestriction(ownerAdmin,
-                        UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
-                        callingUserId)) {
-                    canRemoveProfile = false;
-                }
+
+            final boolean addingProfileRestricted = mUserManager.hasUserRestriction(
+                    UserManager.DISALLOW_ADD_MANAGED_PROFILE, callingUserHandle);
+
+            UserInfo parentUser = mUserManager.getProfileParent(callingUserId);
+            final boolean addingProfileRestrictedOnParent = (parentUser != null)
+                    && mUserManager.hasUserRestriction(
+                            UserManager.DISALLOW_ADD_MANAGED_PROFILE,
+                            UserHandle.of(parentUser.id));
+
+            Slog.i(LOG_TAG, String.format(
+                    "When checking for managed profile provisioning: Has device owner? %b, adding"
+                            + " profile restricted? %b, adding profile restricted on parent? %b",
+                    hasDeviceOwner, addingProfileRestricted, addingProfileRestrictedOnParent));
+
+            // If there's a device owner, the restriction on adding a managed profile must be set
+            // somewhere.
+            if (hasDeviceOwner && !addingProfileRestricted && !addingProfileRestrictedOnParent) {
+                Slog.wtf(LOG_TAG, "Has a device owner but no restriction on adding a profile.");
             }
+
+            // Do not allow adding a managed profile if there's a restriction, either on the current
+            // user or its parent user.
+            if (addingProfileRestricted || addingProfileRestrictedOnParent) {
+                return CODE_CANNOT_ADD_MANAGED_PROFILE;
+            }
+            // If there's a restriction on removing the managed profile then we have to take it
+            // into account when checking whether more profiles can be added.
+            boolean canRemoveProfile =
+                    !mUserManager.hasUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
+                    callingUserHandle);
             if (!mUserManager.canAddMoreManagedProfiles(callingUserId, canRemoveProfile)) {
                 return CODE_CANNOT_ADD_MANAGED_PROFILE;
             }
