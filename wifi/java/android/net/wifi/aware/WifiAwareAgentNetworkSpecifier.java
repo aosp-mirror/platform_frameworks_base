@@ -207,14 +207,14 @@ public class WifiAwareAgentNetworkSpecifier extends NetworkSpecifier implements 
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeBlob(mData);
+            dest.writeByteArray(mData);
         }
 
         public static final @android.annotation.NonNull Creator<ByteArrayWrapper> CREATOR =
                 new Creator<ByteArrayWrapper>() {
                     @Override
                     public ByteArrayWrapper createFromParcel(Parcel in) {
-                        return new ByteArrayWrapper(in.readBlob());
+                        return new ByteArrayWrapper(in.createByteArray());
                     }
 
                     @Override

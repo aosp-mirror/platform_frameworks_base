@@ -5084,9 +5084,9 @@ public class WifiManager {
                                 Log.v(TAG, "OnWifiUsabilityStatsListener: "
                                         + "onWifiUsabilityStats: seqNum=" + seqNum);
                             }
-                            Binder.withCleanCallingIdentity(() ->
-                                    executor.execute(() -> listener.onWifiUsabilityStats(seqNum,
-                                            isSameBssidAndFreq, stats)));
+                            Binder.clearCallingIdentity();
+                            executor.execute(() -> listener.onWifiUsabilityStats(
+                                    seqNum, isSameBssidAndFreq, stats));
                         }
                     },
                     listener.hashCode()
