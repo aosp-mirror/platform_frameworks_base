@@ -4150,7 +4150,6 @@ package android.net {
     ctor public LinkProperties(@Nullable android.net.LinkProperties);
     method public boolean addDnsServer(@NonNull java.net.InetAddress);
     method public boolean addLinkAddress(@NonNull android.net.LinkAddress);
-    method @Nullable public android.net.IpPrefix getNat64Prefix();
     method @NonNull public java.util.List<java.net.InetAddress> getPcscfServers();
     method @Nullable public String getTcpBufferSizes();
     method @NonNull public java.util.List<java.net.InetAddress> getValidatedPrivateDnsServers();
@@ -4164,7 +4163,6 @@ package android.net {
     method public boolean removeDnsServer(@NonNull java.net.InetAddress);
     method public boolean removeLinkAddress(@NonNull android.net.LinkAddress);
     method public boolean removeRoute(@NonNull android.net.RouteInfo);
-    method public void setNat64Prefix(@Nullable android.net.IpPrefix);
     method public void setPcscfServers(@NonNull java.util.Collection<java.net.InetAddress>);
     method public void setPrivateDnsServerName(@Nullable String);
     method public void setTcpBufferSizes(@Nullable String);
