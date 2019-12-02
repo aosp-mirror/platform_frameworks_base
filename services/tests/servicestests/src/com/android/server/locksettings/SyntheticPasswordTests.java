@@ -24,6 +24,12 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSW
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_ENABLED_KEY;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
@@ -36,6 +42,7 @@ import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
@@ -43,31 +50,25 @@ import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationRe
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationToken;
 import com.android.server.locksettings.SyntheticPasswordManager.PasswordData;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 
 
 /**
- * runtest frameworks-services -c com.android.server.locksettings.SyntheticPasswordTests
+ * atest FrameworksServicesTests:SyntheticPasswordTests
  */
 @SmallTest
 @Presubmit
+@RunWith(AndroidJUnit4.class)
 public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
     public static final byte[] PAYLOAD = new byte[] {1, 2, -1, -2, 55};
     public static final byte[] PAYLOAD2 = new byte[] {2, 3, -2, -3, 44, 1};
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testPasswordBasedSyntheticPassword() throws RemoteException {
         final int USER_ID = 10;
         final byte[] password = "user-password".getBytes();
@@ -102,6 +103,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         return mService.getLong(SYNTHETIC_PASSWORD_HANDLE_KEY, 0, userId) != 0;
     }
 
+    @Test
     public void testPasswordMigration() throws RemoteException {
         final byte[] password = "testPasswordMigration-password".getBytes();
 
@@ -135,6 +137,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         mService.setLockCredential(password, type, null, quality, userId, false);
     }
 
+    @Test
     public void testSyntheticPasswordChangeCredential() throws RemoteException {
         final byte[] password = "testSyntheticPasswordChangeCredential-password".getBytes();
         final byte[] newPassword = "testSyntheticPasswordChangeCredential-newpassword".getBytes();
@@ -149,6 +152,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertEquals(sid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
     }
 
+    @Test
     public void testSyntheticPasswordVerifyCredential() throws RemoteException {
         final byte[] password = "testSyntheticPasswordVerifyCredential-password".getBytes();
         final byte[] badPassword = "testSyntheticPasswordVerifyCredential-badpassword".getBytes();
@@ -163,6 +167,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                         .getResponseCode());
     }
 
+    @Test
     public void testSyntheticPasswordClearCredential() throws RemoteException {
         final byte[] password = "testSyntheticPasswordClearCredential-password".getBytes();
         final byte[] badPassword = "testSyntheticPasswordClearCredential-newpassword".getBytes();
@@ -183,6 +188,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertNotEquals(sid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
     }
 
+    @Test
     public void testSyntheticPasswordChangeCredentialKeepsAuthSecret() throws RemoteException {
         final byte[] password =
                 "testSyntheticPasswordChangeCredentialKeepsAuthSecret-password".getBytes();
@@ -202,6 +208,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertEquals(1, secret.getAllValues().stream().distinct().count());
     }
 
+    @Test
     public void testSyntheticPasswordVerifyPassesPrimaryUserAuthSecret() throws RemoteException {
         final byte[] password =
                 "testSyntheticPasswordVerifyPassesPrimaryUserAuthSecret-password".getBytes();
@@ -216,6 +223,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         verify(mAuthSecretService).primaryUserCredential(any(ArrayList.class));
     }
 
+    @Test
     public void testSecondaryUserDoesNotPassAuthSecret() throws RemoteException {
         final byte[] password = "testSecondaryUserDoesNotPassAuthSecret-password".getBytes();
 
@@ -226,6 +234,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
     }
 
+    @Test
     public void testNoSyntheticPasswordOrCredentialDoesNotPassAuthSecret() throws RemoteException {
         // Setting null doesn't create a synthetic password
         initializeCredentialUnderSP(null, PRIMARY_USER_ID);
@@ -236,6 +245,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
     }
 
+    @Test
     public void testSyntheticPasswordAndCredentialDoesNotPassAuthSecret() throws RemoteException {
         final byte[] password = "passwordForASyntheticPassword".getBytes();
         initializeCredentialUnderSP(password, PRIMARY_USER_ID);
@@ -246,6 +256,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
     }
 
+    @Test
     public void testSyntheticPasswordButNoCredentialPassesAuthSecret() throws RemoteException {
         final byte[] password = "getASyntheticPassword".getBytes();
         initializeCredentialUnderSP(password, PRIMARY_USER_ID);
@@ -258,6 +269,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         verify(mAuthSecretService).primaryUserCredential(any(ArrayList.class));
     }
 
+    @Test
     public void testManagedProfileUnifiedChallengeMigration() throws RemoteException {
         final byte[] UnifiedPassword = "testManagedProfileUnifiedChallengeMigration-pwd".getBytes();
         disableSyntheticPassword();
@@ -292,6 +304,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertTrue(hasSyntheticPassword(MANAGED_PROFILE_USER_ID));
     }
 
+    @Test
     public void testManagedProfileSeparateChallengeMigration() throws RemoteException {
         final byte[] primaryPassword =
                 "testManagedProfileSeparateChallengeMigration-primary".getBytes();
@@ -336,6 +349,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertTrue(hasSyntheticPassword(MANAGED_PROFILE_USER_ID));
     }
 
+    @Test
     public void testTokenBasedResetPassword() throws RemoteException {
         final byte[] password = "password".getBytes();
         final byte[] pattern = "123654".getBytes();
@@ -368,6 +382,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertArrayEquals(storageKey, mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
     }
 
+    @Test
     public void testTokenBasedClearPassword() throws RemoteException {
         final byte[] password = "password".getBytes();
         final byte[] pattern = "123654".getBytes();
@@ -394,6 +409,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertArrayEquals(storageKey, mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
     }
 
+    @Test
     public void testTokenBasedResetPasswordAfterCredentialChanges() throws RemoteException {
         final byte[] password = "password".getBytes();
         final byte[] pattern = "123654".getBytes();
@@ -422,6 +438,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertArrayEquals(storageKey, mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
     }
 
+    @Test
     public void testEscrowTokenActivatedImmediatelyIfNoUserPasswordNeedsMigration()
             throws RemoteException {
         final String token = "some-high-entropy-secure-token";
@@ -432,6 +449,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
     }
 
+    @Test
     public void testEscrowTokenActivatedImmediatelyIfNoUserPasswordNoMigration()
             throws RemoteException {
         final String token = "some-high-entropy-secure-token";
@@ -442,6 +460,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
     }
 
+    @Test
     public void testEscrowTokenActivatedLaterWithUserPasswordNeedsMigration()
             throws RemoteException {
         final byte[] token = "some-high-entropy-secure-token".getBytes();
@@ -463,6 +482,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
     }
 
+    @Test
     public void testSetLockCredentialWithTokenFailsWithoutLockScreen() throws Exception {
         final byte[] password = "password".getBytes();
         final byte[] pattern = "123654".getBytes();
@@ -494,6 +514,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertFalse(mService.havePattern(PRIMARY_USER_ID));
     }
 
+    @Test
     public void testgetHashFactorPrimaryUser() throws RemoteException {
         final byte[] password = "password".getBytes();
         mService.setLockCredential(password, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
@@ -509,6 +530,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertArrayEquals(hashFactor, newHashFactor);
     }
 
+    @Test
     public void testgetHashFactorManagedProfileUnifiedChallenge() throws RemoteException {
         final byte[] pattern = "1236".getBytes();
         mService.setLockCredential(pattern, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
@@ -517,6 +539,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertNotNull(mService.getHashFactor(null, MANAGED_PROFILE_USER_ID));
     }
 
+    @Test
     public void testgetHashFactorManagedProfileSeparateChallenge() throws RemoteException {
         final byte[] primaryPassword = "primary".getBytes();
         final byte[] profilePassword = "profile".getBytes();
@@ -527,6 +550,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertNotNull(mService.getHashFactor(profilePassword, MANAGED_PROFILE_USER_ID));
     }
 
+    @Test
     public void testPasswordData_serializeDeserialize() {
         PasswordData data = new PasswordData();
         data.scryptN = 11;
@@ -546,6 +570,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
     }
 
+    @Test
     public void testPasswordData_deserialize() {
         // Test that we can deserialize existing PasswordData and don't inadvertently change the
         // wire format.
@@ -569,6 +594,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
     }
 
+    @Test
     public void testGsiDisablesAuthSecret() throws RemoteException {
         mGsiService.setIsGsiRunning(true);
 
