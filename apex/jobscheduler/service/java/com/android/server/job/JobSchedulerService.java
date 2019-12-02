@@ -2689,7 +2689,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        protected int handleShellCommand(@NonNull ParcelFileDescriptor in,
+        public int handleShellCommand(@NonNull ParcelFileDescriptor in,
                 @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
                 @NonNull String[] args) {
             return (new JobSchedulerShellCommand(JobSchedulerService.this)).exec(
