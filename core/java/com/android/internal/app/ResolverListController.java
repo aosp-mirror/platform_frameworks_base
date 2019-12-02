@@ -28,6 +28,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -55,6 +56,7 @@ public class ResolverListController {
 
     private static final String TAG = "ResolverListController";
     private static final boolean DEBUG = false;
+    private final UserHandle mUserHandle;
 
     private AbstractResolverComparator mResolverComparator;
     private boolean isComputed = false;
@@ -64,8 +66,9 @@ public class ResolverListController {
             PackageManager pm,
             Intent targetIntent,
             String referrerPackage,
-            int launchedFromUid) {
-        this(context, pm, targetIntent, referrerPackage, launchedFromUid,
+            int launchedFromUid,
+            UserHandle userHandle) {
+        this(context, pm, targetIntent, referrerPackage, launchedFromUid, userHandle,
                     new ResolverRankerServiceResolverComparator(
                         context, targetIntent, referrerPackage, null));
     }
@@ -76,12 +79,14 @@ public class ResolverListController {
             Intent targetIntent,
             String referrerPackage,
             int launchedFromUid,
+            UserHandle userHandle,
             AbstractResolverComparator resolverComparator) {
         mContext = context;
         mpm = pm;
         mLaunchedFromUid = launchedFromUid;
         mTargetIntent = targetIntent;
         mReferrerPackage = referrerPackage;
+        mUserHandle = userHandle;
         mResolverComparator = resolverComparator;
     }
 
@@ -116,7 +121,8 @@ public class ResolverListController {
                         || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
                 flags |= PackageManager.MATCH_INSTANT;
             }
-            final List<ResolveInfo> infos = mpm.queryIntentActivities(intent, flags);
+            final List<ResolveInfo> infos = mpm.queryIntentActivitiesAsUser(intent, flags,
+                    mUserHandle);
             if (infos != null) {
                 if (resolvedComponents == null) {
                     resolvedComponents = new ArrayList<>();
@@ -125,6 +131,10 @@ public class ResolverListController {
             }
         }
         return resolvedComponents;
+    }
+
+    UserHandle getUserHandle() {
+        return mUserHandle;
     }
 
     @VisibleForTesting
