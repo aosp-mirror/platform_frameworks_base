@@ -161,7 +161,7 @@ public class WifiManagerTest {
                 mRunnable.run();
             }
         };
-        mWifiActivityEnergyInfo = new WifiActivityEnergyInfo(0, 0, 0, 0, 0, 0, 0);
+        mWifiActivityEnergyInfo = new WifiActivityEnergyInfo(0, 0, 0, 0, 0, 0);
     }
 
     /**
@@ -1713,7 +1713,7 @@ public class WifiManagerTest {
     @Test
     public void testGetControllerActivityEnergyInfo() throws Exception {
         WifiActivityEnergyInfo activityEnergyInfo =
-                new WifiActivityEnergyInfo(5, 3, 3, 5, 5, 5, 5);
+                new WifiActivityEnergyInfo(5, 3, 3, 5, 5, 5);
         when(mWifiService.reportActivityInfo()).thenReturn(activityEnergyInfo);
 
         assertEquals(activityEnergyInfo, mWifiManager.getControllerActivityEnergyInfo());

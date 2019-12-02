@@ -125,7 +125,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     // Keep the last WiFi stats so we can compute a delta.
     @GuardedBy("mWorkerLock")
     private WifiActivityEnergyInfo mLastInfo =
-            new WifiActivityEnergyInfo(0, 0, 0, 0, 0, 0, 0);
+            new WifiActivityEnergyInfo(0, 0, 0, 0, 0, 0);
 
     /**
      * Timestamp at which all external stats were last collected in
