@@ -8022,6 +8022,10 @@ package android.telecom {
     field public static final int PROPERTY_REMOTELY_HOSTED = 2048; // 0x800
   }
 
+  public final class ConnectionRequest implements android.os.Parcelable {
+    method @Nullable public String getTelecomCallId();
+  }
+
   public abstract class ConnectionService extends android.app.Service {
     method public final void addExistingConnection(@NonNull android.telecom.PhoneAccountHandle, @NonNull android.telecom.Connection, @NonNull android.telecom.Conference);
   }
@@ -8229,6 +8233,7 @@ package android.telecom {
     method public java.util.List<android.telecom.PhoneAccountHandle> getAllPhoneAccountHandles();
     method public java.util.List<android.telecom.PhoneAccount> getAllPhoneAccounts();
     method public int getAllPhoneAccountsCount();
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts(boolean);
     method public int getCallState();
     method public android.telecom.PhoneAccountHandle getConnectionManager();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCurrentTtyMode();
