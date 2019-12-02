@@ -6467,29 +6467,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // do this after the default net is switched, but
         // before LegacyTypeTracker sends legacy broadcasts
         for (NetworkRequestInfo nri : addedRequests) notifyNetworkAvailable(newNetwork, nri);
-
-        // Linger any networks that are no longer needed. This should be done after sending the
-        // available callback for newNetwork.
-        for (NetworkAgentInfo nai : removedRequests) {
-            updateLingerState(nai, now);
-        }
-        // Possibly unlinger newNetwork. Unlingering a network does not send any callbacks so it
-        // does not need to be done in any particular order.
-        updateLingerState(newNetwork, now);
-
-        if (isNewDefault) {
-            // Maintain the illusion: since the legacy API only
-            // understands one network at a time, we must pretend
-            // that the current default network disconnected before
-            // the new one connected.
-            if (oldDefaultNetwork != null) {
-                mLegacyTypeTracker.remove(oldDefaultNetwork.networkInfo.getType(),
-                                          oldDefaultNetwork, true);
-            }
-            mDefaultInetConditionPublished = newNetwork.lastValidated ? 100 : 0;
-            mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
-            notifyLockdownVpn(newNetwork);
-        }
     }
 
     /**
@@ -6503,33 +6480,30 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // requests. Once the code has switched to a request-major iteration style, this can
         // be optimized to only do the processing needed.
         final long now = SystemClock.elapsedRealtime();
+        final NetworkAgentInfo oldDefaultNetwork = getDefaultNetwork();
+
         final NetworkAgentInfo[] nais = mNetworkAgentInfos.values().toArray(
                 new NetworkAgentInfo[mNetworkAgentInfos.size()]);
         // Rematch higher scoring networks first to prevent requests first matching a lower
         // scoring network and then a higher scoring network, which could produce multiple
-        // callbacks and inadvertently unlinger networks.
+        // callbacks.
         Arrays.sort(nais);
-        for (NetworkAgentInfo nai : nais) {
+        for (final NetworkAgentInfo nai : nais) {
             rematchNetworkAndRequests(nai, now);
         }
 
-        // Now that all the callbacks have been sent, send the legacy network broadcasts
-        // as needed. This is necessary so that legacy requests correctly bind dns
-        // requests to this network. The legacy users are listening for this broadcast
-        // and will generally do a dns request so they can ensureRouteToHost and if
-        // they do that before the callbacks happen they'll use the default network.
-        //
-        // TODO: Is there still a race here? The legacy broadcast will be sent after sending
-        // callbacks, but if apps can receive the broadcast before the callback, they still might
-        // have an inconsistent view of networking.
-        //
-        // This *does* introduce a race where if the user uses the new api
-        // (notification callbacks) and then uses the old api (getNetworkInfo(type))
-        // they may get old info. Reverse this after the old startUsing api is removed.
-        // This is on top of the multiple intent sequencing referenced in the todo above.
-        for (NetworkAgentInfo nai : nais) {
-            addNetworkToLegacyTypeTracker(nai);
+        final NetworkAgentInfo newDefaultNetwork = getDefaultNetwork();
+
+        for (final NetworkAgentInfo nai : nais) {
+            // Rematching may have altered the linger state of some networks, so update all linger
+            // timers. updateLingerState reads the state from the network agent and does nothing
+            // if the state has not changed : the source of truth is controlled with
+            // NetworkAgentInfo#lingerRequest and NetworkAgentInfo#unlingerRequest, which have been
+            // called while rematching the individual networks above.
+            updateLingerState(nai, now);
         }
+
+        updateLegacyTypeTrackerAndVpnLockdownForRematch(oldDefaultNetwork, newDefaultNetwork, nais);
 
         // Tear down all unneeded networks.
         for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
@@ -6548,6 +6522,52 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     teardownUnneededNetwork(nai);
                 }
             }
+        }
+    }
+
+    private void updateLegacyTypeTrackerAndVpnLockdownForRematch(
+            @Nullable final NetworkAgentInfo oldDefaultNetwork,
+            @Nullable final NetworkAgentInfo newDefaultNetwork,
+            @NonNull final NetworkAgentInfo[] nais) {
+        if (oldDefaultNetwork != newDefaultNetwork) {
+            // Maintain the illusion : since the legacy API only understands one network at a time,
+            // if the default network changed, apps should see a disconnected broadcast for the
+            // old default network before they see a connected broadcast for the new one.
+            if (oldDefaultNetwork != null) {
+                mLegacyTypeTracker.remove(oldDefaultNetwork.networkInfo.getType(),
+                        oldDefaultNetwork, true);
+            }
+            if (newDefaultNetwork != null) {
+                // The new default network can be newly null if and only if the old default
+                // network doesn't satisfy the default request any more because it lost a
+                // capability.
+                mDefaultInetConditionPublished = newDefaultNetwork.lastValidated ? 100 : 0;
+                mLegacyTypeTracker.add(newDefaultNetwork.networkInfo.getType(), newDefaultNetwork);
+                // If the legacy VPN is connected, notifyLockdownVpn may end up sending a broadcast
+                // to reflect the NetworkInfo of this new network. This broadcast has to be sent
+                // after the disconnect broadcasts above, but before the broadcasts sent by the
+                // legacy type tracker below.
+                // TODO : refactor this, it's too complex
+                notifyLockdownVpn(newDefaultNetwork);
+            }
+        }
+
+        // Now that all the callbacks have been sent, send the legacy network broadcasts
+        // as needed. This is necessary so that legacy requests correctly bind dns
+        // requests to this network. The legacy users are listening for this broadcast
+        // and will generally do a dns request so they can ensureRouteToHost and if
+        // they do that before the callbacks happen they'll use the default network.
+        //
+        // TODO: Is there still a race here? The legacy broadcast will be sent after sending
+        // callbacks, but if apps can receive the broadcast before the callback, they still might
+        // have an inconsistent view of networking.
+        //
+        // This *does* introduce a race where if the user uses the new api
+        // (notification callbacks) and then uses the old api (getNetworkInfo(type))
+        // they may get old info. Reverse this after the old startUsing api is removed.
+        // This is on top of the multiple intent sequencing referenced in the todo above.
+        for (NetworkAgentInfo nai : nais) {
+            addNetworkToLegacyTypeTracker(nai);
         }
     }
 
