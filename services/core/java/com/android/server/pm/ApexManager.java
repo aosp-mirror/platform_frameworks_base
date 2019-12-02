@@ -17,11 +17,11 @@
 package com.android.server.pm;
 
 import android.annotation.IntDef;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
+import android.apex.ApexSessionParams;
 import android.apex.IApexService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -176,13 +176,9 @@ abstract class ApexManager {
      * enough for it to be activated at the next boot, the caller needs to call
      * {@link #markStagedSessionReady(int)}.
      *
-     * @param sessionId the identifier of the {@link PackageInstallerSession} being submitted.
-     * @param childSessionIds if {@code sessionId} is a multi-package session, this should contain
-     *                        an array of identifiers of all the child sessions. Otherwise it should
-     *                        be an empty array.
      * @throws PackageManagerException if call to apexd fails
      */
-    abstract ApexInfoList submitStagedSession(int sessionId, @NonNull int[] childSessionIds)
+    abstract ApexInfoList submitStagedSession(ApexSessionParams params)
             throws PackageManagerException;
 
     /**
@@ -450,11 +446,10 @@ abstract class ApexManager {
         }
 
         @Override
-        ApexInfoList submitStagedSession(int sessionId, @NonNull int[] childSessionIds)
-                throws PackageManagerException {
+        ApexInfoList submitStagedSession(ApexSessionParams params) throws PackageManagerException {
             try {
                 final ApexInfoList apexInfoList = new ApexInfoList();
-                mApexService.submitStagedSession(sessionId, childSessionIds, apexInfoList);
+                mApexService.submitStagedSession(params, apexInfoList);
                 return apexInfoList;
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
@@ -686,7 +681,7 @@ abstract class ApexManager {
         }
 
         @Override
-        ApexInfoList submitStagedSession(int sessionId, int[] childSessionIds)
+        ApexInfoList submitStagedSession(ApexSessionParams params)
                 throws PackageManagerException {
             throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
                     "Device doesn't support updating APEX");

@@ -897,11 +897,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     @Override
-    public boolean notifyStagedSession(int sessionId) {
+    public int notifyStagedSession(int sessionId) {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("notifyStagedSession may only be called by the system.");
         }
-        final LinkedBlockingQueue<Boolean> result = new LinkedBlockingQueue<>();
+        final LinkedBlockingQueue<Integer> result = new LinkedBlockingQueue<>();
 
         // NOTE: We post this runnable on the RollbackManager's binder thread because we'd prefer
         // to preserve the invariant that all operations that modify state happen there.
@@ -911,7 +911,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             final PackageInstaller.SessionInfo session = installer.getSessionInfo(sessionId);
             if (session == null) {
                 Slog.e(TAG, "No matching install session for: " + sessionId);
-                result.offer(false);
+                result.offer(-1);
                 return;
             }
 
@@ -923,7 +923,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             if (!session.isMultiPackage()) {
                 if (!enableRollbackForPackageSession(newRollback.rollback, session)) {
                     Slog.e(TAG, "Unable to enable rollback for session: " + sessionId);
-                    result.offer(false);
+                    result.offer(-1);
                     return;
                 }
             } else {
@@ -932,25 +932,30 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             installer.getSessionInfo(childSessionId);
                     if (childSession == null) {
                         Slog.e(TAG, "No matching child install session for: " + childSessionId);
-                        result.offer(false);
+                        result.offer(-1);
                         return;
                     }
                     if (!enableRollbackForPackageSession(newRollback.rollback, childSession)) {
                         Slog.e(TAG, "Unable to enable rollback for session: " + sessionId);
-                        result.offer(false);
+                        result.offer(-1);
                         return;
                     }
                 }
             }
 
-            result.offer(completeEnableRollback(newRollback, true) != null);
+            Rollback rollback = completeEnableRollback(newRollback, true);
+            if (rollback == null) {
+                result.offer(-1);
+            } else {
+                result.offer(rollback.info.getRollbackId());
+            }
         });
 
         try {
             return result.take();
         } catch (InterruptedException ie) {
             Slog.e(TAG, "Interrupted while waiting for notifyStagedSession response");
-            return false;
+            return -1;
         }
     }
 

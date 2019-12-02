@@ -30,6 +30,7 @@ import static org.testng.Assert.assertThrows;
 
 import android.apex.ApexInfo;
 import android.apex.ApexSessionInfo;
+import android.apex.ApexSessionParams;
 import android.apex.IApexService;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -183,19 +184,18 @@ public class ApexManagerTest {
     public void testSubmitStagedSession_throwPackageManagerException() throws RemoteException {
         doAnswer(invocation -> {
             throw new Exception();
-        }).when(mApexService).submitStagedSession(anyInt(), any(), any());
+        }).when(mApexService).submitStagedSession(any(), any());
 
         assertThrows(PackageManagerException.class,
-                () -> mApexManager.submitStagedSession(TEST_SESSION_ID, TEST_CHILD_SESSION_ID));
+                () -> mApexManager.submitStagedSession(testParamsWithChildren()));
     }
 
     @Test
     public void testSubmitStagedSession_throwRunTimeException() throws RemoteException {
-        doThrow(RemoteException.class).when(mApexService).submitStagedSession(anyInt(), any(),
-                any());
+        doThrow(RemoteException.class).when(mApexService).submitStagedSession(any(), any());
 
         assertThrows(RuntimeException.class,
-                () -> mApexManager.submitStagedSession(TEST_SESSION_ID, TEST_CHILD_SESSION_ID));
+                () -> mApexManager.submitStagedSession(testParamsWithChildren()));
     }
 
     @Test
@@ -270,6 +270,13 @@ public class ApexManagerTest {
         stagedSessionInfo.isUnknown = true;
 
         return stagedSessionInfo;
+    }
+
+    private static ApexSessionParams testParamsWithChildren() {
+        ApexSessionParams params = new ApexSessionParams();
+        params.sessionId = TEST_SESSION_ID;
+        params.childSessionIds = TEST_CHILD_SESSION_ID;
+        return params;
     }
 
     /**
