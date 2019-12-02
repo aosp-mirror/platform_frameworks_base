@@ -1351,6 +1351,18 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public void sendOrderedBroadcast(Intent intent, String receiverPermission, String receiverAppOp,
+            Bundle options, BroadcastReceiver resultReceiver, Handler scheduler, int initialCode,
+            String initialData, @Nullable Bundle initialExtras) {
+        int intAppOp = AppOpsManager.OP_NONE;
+        if (!TextUtils.isEmpty(receiverAppOp)) {
+            intAppOp = AppOpsManager.strOpToOp(receiverAppOp);
+        }
+        sendOrderedBroadcastAsUser(intent, getUser(), receiverPermission, intAppOp, options,
+                resultReceiver, scheduler, initialCode, initialData, initialExtras);
+    }
+
+    @Override
     @Deprecated
     public void sendStickyBroadcast(Intent intent) {
         warnIfCallingFromSystemProcess();
