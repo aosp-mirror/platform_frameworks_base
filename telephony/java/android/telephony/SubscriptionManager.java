@@ -48,7 +48,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.ParcelUuid;
 import android.os.Process;
@@ -64,6 +63,7 @@ import android.util.Pair;
 import com.android.internal.telephony.ISetOpportunisticDataCallback;
 import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.telephony.util.HandlerExecutor;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
