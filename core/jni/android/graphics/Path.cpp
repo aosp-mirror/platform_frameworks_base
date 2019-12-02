@@ -132,14 +132,14 @@ public:
     static void addRect(JNIEnv* env, jclass clazz, jlong objHandle,
             jfloat left, jfloat top, jfloat right, jfloat bottom, jint dirHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkPathDirection dir = static_cast<SkPathDirection>(dirHandle);
+        SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
         obj->addRect(left, top, right, bottom, dir);
     }
 
     static void addOval(JNIEnv* env, jclass clazz, jlong objHandle,
             jfloat left, jfloat top, jfloat right, jfloat bottom, jint dirHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkPathDirection dir = static_cast<SkPathDirection>(dirHandle);
+        SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
         SkRect oval = SkRect::MakeLTRB(left, top, right, bottom);
         obj->addOval(oval, dir);
     }
@@ -147,7 +147,7 @@ public:
     static void addCircle(JNIEnv* env, jclass clazz, jlong objHandle, jfloat x, jfloat y,
             jfloat radius, jint dirHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkPathDirection dir = static_cast<SkPathDirection>(dirHandle);
+        SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
         obj->addCircle(x, y, radius, dir);
     }
 
@@ -162,7 +162,7 @@ public:
             jfloat right, jfloat bottom, jfloat rx, jfloat ry, jint dirHandle) {
         SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkPathDirection dir = static_cast<SkPathDirection>(dirHandle);
+        SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
         obj->addRoundRect(rect, rx, ry, dir);
     }
 
@@ -170,7 +170,7 @@ public:
                 jfloat right, jfloat bottom, jfloatArray array, jint dirHandle) {
         SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkPathDirection dir = static_cast<SkPathDirection>(dirHandle);
+        SkPath::Direction dir = static_cast<SkPath::Direction>(dirHandle);
         AutoJavaFloatArray  afa(env, array, 8);
 #ifdef SK_SCALAR_IS_FLOAT
         const float* src = afa.ptr();
@@ -555,8 +555,8 @@ static const JNINativeMethod methods[] = {
 int register_android_graphics_Path(JNIEnv* env) {
     return RegisterMethodsOrDie(env, "android/graphics/Path", methods, NELEM(methods));
 
-    static_assert(0 == (int)SkPathDirection::kCW,  "direction_mismatch");
-    static_assert(1 == (int)SkPathDirection::kCCW, "direction_mismatch");
+    static_assert(0  == SkPath::kCW_Direction,  "direction_mismatch");
+    static_assert(1  == SkPath::kCCW_Direction, "direction_mismatch");
 }
 
 }
