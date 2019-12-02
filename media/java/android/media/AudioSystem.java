@@ -902,6 +902,18 @@ public class AudioSystem
         }
     }
 
+    /**
+     * Returns a human readable name for a given device type
+     * @param device a native device type, NOT an AudioDeviceInfo type
+     * @return a string describing the device type
+     */
+    public static @NonNull String getDeviceName(int device) {
+        if ((device & DEVICE_BIT_IN) != 0) {
+            return getInputDeviceName(device);
+        }
+        return getOutputDeviceName(device);
+    }
+
     // phone state, match audio_mode???
     public static final int PHONE_STATE_OFFCALL = 0;
     public static final int PHONE_STATE_RINGING = 1;
