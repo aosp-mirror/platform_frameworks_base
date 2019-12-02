@@ -101,7 +101,6 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -12502,105 +12501,6 @@ public final class Settings {
          */
         public static final String ADB_ALLOWED_CONNECTION_TIME =
                 "adb_allowed_connection_time";
-
-        /**
-         * Get the key that retrieves a bluetooth headset's priority.
-         * @hide
-         */
-        public static final String getBluetoothHeadsetPriorityKey(String address) {
-            return BLUETOOTH_HEADSET_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
-        }
-
-        /**
-         * Get the key that retrieves a bluetooth a2dp sink's priority.
-         * @hide
-         */
-        public static final String getBluetoothA2dpSinkPriorityKey(String address) {
-            return BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
-        }
-
-        /**
-         * Get the key that retrieves a bluetooth a2dp src's priority.
-         * @hide
-         */
-        public static final String getBluetoothA2dpSrcPriorityKey(String address) {
-            return BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
-        }
-
-        /**
-         * Get the key that retrieves a bluetooth a2dp device's ability to support optional codecs.
-         * @hide
-         */
-        public static final String getBluetoothA2dpSupportsOptionalCodecsKey(String address) {
-            return BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX +
-                    address.toUpperCase(Locale.ROOT);
-        }
-
-        /**
-         * Get the key that retrieves whether a bluetooth a2dp device should have optional codecs
-         * enabled.
-         * @hide
-         */
-        public static final String getBluetoothA2dpOptionalCodecsEnabledKey(String address) {
-            return BLUETOOTH_A2DP_OPTIONAL_CODECS_ENABLED_PREFIX +
-                    address.toUpperCase(Locale.ROOT);
-        }
-
-        /**
-         * Get the key that retrieves a bluetooth Input Device's priority.
-         * @hide
-         */
-        public static final String getBluetoothHidHostPriorityKey(String address) {
-            return BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
-        }
-
-        /**
-         * Get the key that retrieves a bluetooth pan client priority.
-         * @hide
-         */
-        public static final String getBluetoothPanPriorityKey(String address) {
-            return BLUETOOTH_PAN_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
-        }
-
-        /**
-         * Get the key that retrieves a bluetooth hearing aid priority.
-         * @hide
-         */
-        public static final String getBluetoothHearingAidPriorityKey(String address) {
-            return BLUETOOTH_HEARING_AID_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
-        }
-
-        /**
-         * Get the key that retrieves a bluetooth map priority.
-         * @hide
-         */
-        public static final String getBluetoothMapPriorityKey(String address) {
-            return BLUETOOTH_MAP_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
-        }
-
-        /**
-         * Get the key that retrieves a bluetooth map client priority.
-         * @hide
-         */
-        public static final String getBluetoothMapClientPriorityKey(String address) {
-            return BLUETOOTH_MAP_CLIENT_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
-        }
-
-        /**
-         * Get the key that retrieves a bluetooth pbap client priority.
-         * @hide
-         */
-        public static final String getBluetoothPbapClientPriorityKey(String address) {
-            return BLUETOOTH_PBAP_CLIENT_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
-        }
-
-        /**
-         * Get the key that retrieves a bluetooth sap priority.
-         * @hide
-         */
-        public static final String getBluetoothSapPriorityKey(String address) {
-            return BLUETOOTH_SAP_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
-        }
 
         /**
          * Scaling factor for normal window animations. Setting to 0 will
