@@ -33,6 +33,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -227,7 +228,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             new CarAudioManager.CarVolumeCallback() {
                 @Override
                 public void onGroupVolumeChanged(int zoneId, int groupId, int flags) {
-                    if (mVolumeUI == null) {
+                    if (mVolumeUI == null && (flags & AudioManager.FLAG_SHOW_UI) != 0) {
                         new Handler(Looper.getMainLooper()).post(() -> {
                             // Initialize Volume UI
                             mVolumeUI = new VolumeUI();
