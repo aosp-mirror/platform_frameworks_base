@@ -1469,10 +1469,6 @@
     <string name="submit" msgid="862795280643405865">"Перадаць"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Праграма для ваджэння ўключана"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Націсніце, каб выйсці з праграмы для ваджэння."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"USB-мадэм або хот-спот Wi-Fi актыўныя"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"Дакраніцеся, каб наладзіць."</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"Рэжым мадэма адключаны"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"Звярніцеся да адміністратара па падрабязную інфармацыю"</string>
     <string name="back_button_label" msgid="4078224038025043387">"Назад"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Далей"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"Прапусціць"</string>

@@ -1429,10 +1429,6 @@
     <string name="submit" msgid="862795280643405865">"சமர்ப்பி"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"\'வாகனம் ஓட்டும் பயன்முறை’ ஆனில் உள்ளது"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"வாகனம் ஓட்டும் பயன்முறையிலிருந்து வெளியேற, தட்டவும்."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"டெதெரிங்/ஹாட்ஸ்பாட் இயங்குகிறது"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"அமைக்க, தட்டவும்."</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"இணைப்பு முறை முடக்கப்பட்டுள்ளது"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"விவரங்களுக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்"</string>
     <string name="back_button_label" msgid="4078224038025043387">"முந்தையது"</string>
     <string name="next_button_label" msgid="6040209156399907780">"அடுத்து"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"தவிர்"</string>

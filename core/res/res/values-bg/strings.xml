@@ -1429,10 +1429,6 @@
     <string name="submit" msgid="862795280643405865">"Изпращане"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Приложението за шофиране е включено"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Докоснете, за да излезете от приложението за шофиране."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"Има активна споделена връзка или безжична точка за достъп"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"Докоснете, за да настроите."</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"Функцията за тетъринг е деактивирана"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"Свържете се с администратора си за подробности"</string>
     <string name="back_button_label" msgid="4078224038025043387">"Назад"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Напред"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"Пропускане"</string>

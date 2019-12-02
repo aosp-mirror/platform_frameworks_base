@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="tethered_notification_title" msgid="3146694234398202601">"ភ្ជាប់ ឬ​ហតស្ពត​សកម្ម"</string>
+    <string name="tethered_notification_message" msgid="2113628520792055377">"ប៉ះដើម្បីកំណត់"</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"ការភ្ជាប់​ត្រូវបានបិទ"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"ទាក់ទងអ្នកគ្រប់គ្រង​របស់អ្នកសម្រាប់​ព័ត៌មានលម្អិត"</string>
+</resources>

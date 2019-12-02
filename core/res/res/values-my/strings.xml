@@ -1429,10 +1429,6 @@
     <string name="submit" msgid="862795280643405865">"ပေးပို့ရန်"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"ကားမောင်းသည့်အက်ပ် ပွင့်နေပါသည်"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"ကားမောင်းသည့်အက်ပ်မှ ထွက်ရန် တို့ပါ။"</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"တဆင့်ပြန်လည်လွှင့်ခြင်း သို့မဟုတ် ဟော့စပေါ့ ဖွင့်ထားသည်"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"စနစ်ထည့်သွင်းရန် တို့ပါ။"</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"မိုဘိုင်းဖုန်းကို မိုဒမ်အဖြစ်သုံးခြင်းအား ပိတ်ထားသည်"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"အသေးစိတ်အချက်အလက်များအတွက် သင့်စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ"</string>
     <string name="back_button_label" msgid="4078224038025043387">"နောက်သို့"</string>
     <string name="next_button_label" msgid="6040209156399907780">"ရှေ့သို့"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"ကျော်ရန်"</string>

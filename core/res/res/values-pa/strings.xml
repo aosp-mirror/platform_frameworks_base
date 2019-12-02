@@ -1429,10 +1429,6 @@
     <string name="submit" msgid="862795280643405865">"ਪ੍ਰਸਤੁਤ ਕਰੋ"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"ਗੱਡੀ ਚਲਾਉਣ ਸੰਬੰਧੀ ਐਪ ਚੱਲ ਰਹੀ ਹੈ"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"ਗੱਡੀ ਚਲਾਉਣ ਸੰਬੰਧੀ ਐਪ ਤੋਂ ਬਾਹਰ ਜਾਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"ਟੈਦਰਿੰਗ ਜਾਂ ਹੌਟਸਪੌਟ ਕਿਰਿਆਸ਼ੀਲ"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"ਸਥਾਪਤ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"ਟੈਦਰਿੰਗ ਨੂੰ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"ਵੇਰਵਿਆਂ ਲਈ ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ"</string>
     <string name="back_button_label" msgid="4078224038025043387">"ਪਿੱਛੇ"</string>
     <string name="next_button_label" msgid="6040209156399907780">"ਅੱਗੇ"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"ਛੱਡੋ"</string>

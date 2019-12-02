@@ -1429,10 +1429,6 @@
     <string name="submit" msgid="862795280643405865">"ଦାଖଲ କରନ୍ତୁ"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"ଡ୍ରାଇଭିଙ୍ଗ ଆପ୍ ଚାଲୁଛି"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"ଡ୍ରାଇଭିଙ୍ଗ ଆପ୍‌ରୁ ବାହାରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"ଟିଥରିଙ୍ଗ କିମ୍ୱା ହଟସ୍ପଟ୍‌ ସକ୍ରିୟ ଅଛି"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"ସେଟଅପ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"ଟିଥରିଙ୍ଗ ଅକ୍ଷମ କରାଯାଇଛି"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"ବିବରଣୀ ପାଇଁ ନିଜ ଆଡମିନ୍‌ଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ"</string>
     <string name="back_button_label" msgid="4078224038025043387">"ଫେରନ୍ତୁ"</string>
     <string name="next_button_label" msgid="6040209156399907780">"ପରବର୍ତ୍ତୀ"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"ଛାଡ଼ିଦିଅନ୍ତୁ"</string>
