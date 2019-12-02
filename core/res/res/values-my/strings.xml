@@ -1523,10 +1523,6 @@
     <string name="submit" msgid="1602335572089911941">"ပေးပို့ရန်"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"ကားမောင်းသည့်အက်ပ် ပွင့်နေပါသည်"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"ကားမောင်းသည့်အက်ပ်မှ ထွက်ရန် တို့ပါ။"</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"တဆင့်ပြန်လည်လွှင့်ခြင်း သို့မဟုတ် ဟော့စပေါ့ ဖွင့်ထားသည်"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"စနစ်ထည့်သွင်းရန် တို့ပါ။"</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"မိုဘိုင်းဖုန်းကို မိုဒမ်အဖြစ်သုံးခြင်းအား ပိတ်ထားသည်"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"အသေးစိတ်အချက်အလက်များအတွက် သင့်စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ"</string>
     <string name="back_button_label" msgid="2300470004503343439">"နောက်သို့"</string>
     <string name="next_button_label" msgid="1080555104677992408">"ရှေ့သို့"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"ကျော်ရန်"</string>

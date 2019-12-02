@@ -1522,10 +1522,6 @@
     <string name="submit" msgid="1602335572089911941">"ສົ່ງຂໍ້ມູນ"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"ແອັບຂັບລົດກຳລັງເຮັດວຽກຢູ່"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"ແຕະເພື່ອອອກຈາກແອັບຂັບລົດ."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"ເປີດ​ການ​ປ່ອຍ​ສັນຍານ ຫຼື​ຮັອດສະປອດ​ແລ້ວ"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"ແຕະເພື່ອຕັ້ງຄ່າ."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"ການປ່ອຍສັນຍານຖືກປິດໄວ້"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"ຕິດຕໍ່ຜູ້ເບິ່ງແຍງລະບົບສຳລັບລາຍລະອຽດ"</string>
     <string name="back_button_label" msgid="2300470004503343439">"ກັບຄືນ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"ຕໍ່ໄປ"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"ຂ້າມ"</string>

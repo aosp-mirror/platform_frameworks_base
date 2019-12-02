@@ -109,6 +109,7 @@ import com.android.internal.util.MessageUtils;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.tethering.R;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -675,14 +676,14 @@ public class Tethering {
         int icon = 0;
         switch(id) {
             case SystemMessage.NOTE_TETHER_USB:
-                icon = com.android.internal.R.drawable.stat_sys_tether_usb;
+                icon = R.drawable.stat_sys_tether_usb;
                 break;
             case SystemMessage.NOTE_TETHER_BLUETOOTH:
-                icon = com.android.internal.R.drawable.stat_sys_tether_bluetooth;
+                icon = R.drawable.stat_sys_tether_bluetooth;
                 break;
             case SystemMessage.NOTE_TETHER_GENERAL:
             default:
-                icon = com.android.internal.R.drawable.stat_sys_tether_general;
+                icon = R.drawable.stat_sys_tether_general;
                 break;
         }
 
@@ -702,16 +703,16 @@ public class Tethering {
         PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0, intent, 0,
                 null, UserHandle.CURRENT);
 
-        Resources r = Resources.getSystem();
+        Resources r = mContext.getResources();
         final CharSequence title;
         final CharSequence message;
 
         if (tetheringOn) {
-            title = r.getText(com.android.internal.R.string.tethered_notification_title);
-            message = r.getText(com.android.internal.R.string.tethered_notification_message);
+            title = r.getText(R.string.tethered_notification_title);
+            message = r.getText(R.string.tethered_notification_message);
         } else {
-            title = r.getText(com.android.internal.R.string.disable_tether_notification_title);
-            message = r.getText(com.android.internal.R.string.disable_tether_notification_message);
+            title = r.getText(R.string.disable_tether_notification_title);
+            message = r.getText(R.string.disable_tether_notification_message);
         }
 
         if (mTetheredNotificationBuilder == null) {
@@ -909,7 +910,7 @@ public class Tethering {
 
             if (newlyDisallowed && isTetheringActiveOnDevice) {
                 mWrapper.showTetheredNotification(
-                        com.android.internal.R.drawable.stat_sys_tether_general, false);
+                        R.drawable.stat_sys_tether_general, false);
                 mWrapper.untetherAll();
             }
         }

@@ -1522,10 +1522,6 @@
     <string name="submit" msgid="1602335572089911941">"提交"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"駕駛應用程式執行中"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"輕按即可退出駕駛應用程式。"</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"已啟用網絡共享或熱點"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"輕按即可設定。"</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"網絡共享已停用"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"請聯絡您的管理員以瞭解詳情"</string>
     <string name="back_button_label" msgid="2300470004503343439">"返回"</string>
     <string name="next_button_label" msgid="1080555104677992408">"繼續"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"略過"</string>

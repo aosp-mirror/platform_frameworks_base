@@ -1566,10 +1566,6 @@
     <string name="submit" msgid="1602335572089911941">"Pošlji"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Aplikacija za vožnjo se izvaja"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Dotaknite se, če želite zapreti aplikacijo za vožnjo."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Aktivna povezava z internetom ali dostopna točka sta aktivni"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"Dotaknite se, če želite nastaviti."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Povezava z internetom prek mobilnega telefona je onemogočena"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Za podrobnosti se obrnite na skrbnika"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Nazaj"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Naprej"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Preskoči"</string>

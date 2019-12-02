@@ -1522,10 +1522,6 @@
     <string name="submit" msgid="1602335572089911941">"Verzenden"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Auto-app wordt uitgevoerd"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Tik om de auto-app te sluiten."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering of hotspot actief"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"Tik om in te stellen."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Tethering is uitgeschakeld"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Neem contact op met je beheerder voor meer informatie"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Vorige"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Volgende"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Overslaan"</string>

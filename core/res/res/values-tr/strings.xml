@@ -1522,10 +1522,6 @@
     <string name="submit" msgid="1602335572089911941">"Gönder"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Sürüş uygulaması çalışıyor"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Sürüş uygulamasından çıkmak için dokunun."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering veya hotspot etkin"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"Ayarlamak için dokunun."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Tethering devre dışı bırakıldı"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Ayrıntılı bilgi için yöneticinize başvurun"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Geri"</string>
     <string name="next_button_label" msgid="1080555104677992408">"İleri"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Atla"</string>
