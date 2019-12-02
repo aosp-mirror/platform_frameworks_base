@@ -16,6 +16,18 @@
 
 package com.android.server.integrity.serializer;
 
+import static com.android.server.integrity.model.ComponentBitSize.ATOMIC_FORMULA_START;
+import static com.android.server.integrity.model.ComponentBitSize.COMPOUND_FORMULA_END;
+import static com.android.server.integrity.model.ComponentBitSize.COMPOUND_FORMULA_START;
+import static com.android.server.integrity.model.ComponentBitSize.CONNECTOR_BITS;
+import static com.android.server.integrity.model.ComponentBitSize.DEFAULT_FORMAT_VERSION;
+import static com.android.server.integrity.model.ComponentBitSize.EFFECT_BITS;
+import static com.android.server.integrity.model.ComponentBitSize.FORMAT_VERSION_BITS;
+import static com.android.server.integrity.model.ComponentBitSize.KEY_BITS;
+import static com.android.server.integrity.model.ComponentBitSize.OPERATOR_BITS;
+import static com.android.server.integrity.model.ComponentBitSize.SEPARATOR_BITS;
+import static com.android.server.integrity.model.ComponentBitSize.VALUE_SIZE_BITS;
+
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
 import android.content.integrity.Formula;
@@ -31,20 +43,6 @@ import java.util.Optional;
 
 /** A helper class to serialize rules from the {@link Rule} model to Binary representation. */
 public class RuleBinarySerializer implements RuleSerializer {
-
-    public static final int FORMAT_VERSION_BITS = 5;
-    public static final int EFFECT_BITS = 3;
-    public static final int KEY_BITS = 4;
-    public static final int OPERATOR_BITS = 3;
-    public static final int CONNECTOR_BITS = 2;
-    public static final int SEPARATOR_BITS = 2;
-    public static final int VALUE_SIZE_BITS = 5;
-
-    public static final int ATOMIC_FORMULA_START = 0;
-    public static final int COMPOUND_FORMULA_START = 1;
-    public static final int COMPOUND_FORMULA_END = 2;
-
-    public static final int DEFAULT_FORMAT_VERSION = 1;
 
     // Get the byte representation for a list of rules, and write them to an output stream.
     @Override
