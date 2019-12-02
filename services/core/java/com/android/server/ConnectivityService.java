@@ -6296,6 +6296,26 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    // An accumulator class to gather the list of changes that result from a rematch.
+    // TODO : enrich to represent an entire set of changes to apply.
+    private static class NetworkReassignment {
+        static class NetworkBgStatePair {
+            @NonNull final NetworkAgentInfo mNetwork;
+            final boolean mOldBackground;
+            NetworkBgStatePair(@NonNull final NetworkAgentInfo network,
+                    final boolean oldBackground) {
+                mNetwork = network;
+                mOldBackground = oldBackground;
+            }
+        }
+
+        @NonNull private final Set<NetworkBgStatePair> mRematchedNetworks = new ArraySet<>();
+
+        void addRematchedNetwork(@NonNull final NetworkBgStatePair network) {
+            mRematchedNetworks.add(network);
+        }
+    }
+
     private ArrayMap<NetworkRequestInfo, NetworkAgentInfo> computeRequestReassignmentForNetwork(
             @NonNull final NetworkAgentInfo newNetwork) {
         final int score = newNetwork.getCurrentScore();
@@ -6341,8 +6361,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     //   needed. A network is needed if it is the best network for
     //   one or more NetworkRequests, or if it is a VPN.
     //
-    // - Tears down newNetwork if it just became validated
-    //   but turns out to be unneeded.
+    // - Writes into the passed reassignment object all changes that should be done for
+    //   rematching this network with all requests, to be applied later.
     //
     // NOTE: This function only adds NetworkRequests that "newNetwork" could satisfy,
     // it does not remove NetworkRequests that other Networks could better satisfy.
@@ -6350,15 +6370,23 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // This function should be used when possible instead of {@code rematchAllNetworksAndRequests}
     // as it performs better by a factor of the number of Networks.
     //
+    // TODO : stop writing to the passed reassignment. This is temporarily more useful, but
+    // it's unidiomatic Java and it's hard to read.
+    //
+    // @param changes a currently-building list of changes to write to
     // @param newNetwork is the network to be matched against NetworkRequests.
     // @param now the time the rematch starts, as returned by SystemClock.elapsedRealtime();
-    private void rematchNetworkAndRequests(NetworkAgentInfo newNetwork, long now) {
+    private void rematchNetworkAndRequests(@NonNull final NetworkReassignment changes,
+            @NonNull final NetworkAgentInfo newNetwork, final long now) {
         ensureRunningOnConnectivityServiceThread();
         if (!newNetwork.everConnected) return;
         boolean isNewDefault = false;
         NetworkAgentInfo oldDefaultNetwork = null;
 
         final boolean wasBackgroundNetwork = newNetwork.isBackgroundNetwork();
+        changes.addRematchedNetwork(new NetworkReassignment.NetworkBgStatePair(newNetwork,
+                wasBackgroundNetwork));
+
         final int score = newNetwork.getCurrentScore();
 
         if (VDBG || DDBG) log("rematching " + newNetwork.name());
@@ -6515,8 +6543,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // scoring network and then a higher scoring network, which could produce multiple
         // callbacks.
         Arrays.sort(nais);
+        final NetworkReassignment changes = new NetworkReassignment();
         for (final NetworkAgentInfo nai : nais) {
-            rematchNetworkAndRequests(nai, now);
+            rematchNetworkAndRequests(changes, nai, now);
         }
 
         final NetworkAgentInfo newDefaultNetwork = getDefaultNetwork();
