@@ -922,6 +922,7 @@ public class VolumeDialogImpl implements VolumeDialog,
             if (!mDynamic.get(row.stream)) {
                 mRows.remove(i);
                 mDialogRowsView.removeView(row.view);
+                mConfigurableTexts.remove(row.header);
             }
         }
     }
