@@ -561,6 +561,12 @@ filegroup {
     ],
 }
 
+java_library {
+    name: "framework-annotations-lib",
+    srcs: [ ":framework-annotations" ],
+    sdk_version: "current",
+}
+
 filegroup {
     name: "framework-networkstack-shared-srcs",
     srcs: [
