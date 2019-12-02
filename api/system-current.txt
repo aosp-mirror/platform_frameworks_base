@@ -8741,6 +8741,7 @@ package android.telephony {
   }
 
   public class ServiceState implements android.os.Parcelable {
+    method public int getDataRegistrationState();
     method @Nullable public android.telephony.NetworkRegistrationInfo getNetworkRegistrationInfo(int, int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoList();
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForDomain(int);
