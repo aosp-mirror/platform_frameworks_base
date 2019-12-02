@@ -25,18 +25,13 @@
 #include "SkBitmapRegionDecoder.h"
 #include "SkCodec.h"
 #include "SkData.h"
-#include "SkUtils.h"
-#include "SkPixelRef.h"
 #include "SkStream.h"
 
-#include "android_nio_utils.h"
-#include "android_util_Binder.h"
 #include "core_jni_helpers.h"
 
 #include <HardwareBitmapUploader.h>
 #include <nativehelper/JNIHelp.h>
 #include <androidfw/Asset.h>
-#include <binder/Parcel.h>
 #include <jni.h>
 #include <sys/stat.h>
 

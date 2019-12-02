@@ -19,8 +19,6 @@
 
 #include "SkStream.h"
 
-#include "android_util_Binder.h"
-
 #include <jni.h>
 #include <androidfw/Asset.h>
 
