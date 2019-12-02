@@ -19,3 +19,12 @@ filegroup {
     ],
     path: "java",
 }
+
+java_library {
+    name: "framework-sdkext",
+    srcs: [ ":framework-sdkext-sources" ],
+    sdk_version: "system_current",
+    libs: [ "framework-annotations-lib" ],
+    permitted_packages: [ "android.os.ext" ],
+    installable: true,
+}

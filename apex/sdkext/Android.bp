@@ -15,6 +15,7 @@
 apex {
     name: "com.android.sdkext",
     manifest: "manifest.json",
+    java_libs: [ "framework-sdkext" ],
     key: "com.android.sdkext.key",
     certificate: ":com.android.sdkext.certificate",
 }
