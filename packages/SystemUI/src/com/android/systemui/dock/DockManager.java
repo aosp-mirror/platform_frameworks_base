@@ -35,6 +35,12 @@ public interface DockManager {
     int STATE_DOCKED_HIDE = 2;
 
     /**
+     * Indicates there's no alignment info. This could happen when the device is unable to decide
+     * its alignment condition.
+     */
+    int ALIGN_STATE_UNKNOWN = -1;
+
+    /**
      * Indicates there's no alignment issue.
      */
     int ALIGN_STATE_GOOD = 0;
