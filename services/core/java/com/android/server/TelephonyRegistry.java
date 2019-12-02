@@ -50,7 +50,6 @@ import android.telephony.DisconnectCause;
 import android.telephony.LocationAccessPolicy;
 import android.telephony.PhoneCapability;
 import android.telephony.PhoneStateListener;
-import android.telephony.PhysicalChannelConfig;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.PreciseDisconnectCause;
@@ -212,8 +211,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private int[] mOtaspMode;
 
     private ArrayList<List<CellInfo>> mCellInfo = null;
-
-    private ArrayList<List<PhysicalChannelConfig>> mPhysicalChannelConfigs;
 
     private Map<Integer, List<EmergencyNumber>> mEmergencyNumberList;
 
@@ -424,7 +421,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (mNumPhones < oldNumPhones) {
             cutListToSize(mCellInfo, mNumPhones);
             cutListToSize(mImsReasonInfo, mNumPhones);
-            cutListToSize(mPhysicalChannelConfigs, mNumPhones);
             return;
         }
 
@@ -445,7 +441,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCellInfo.add(i, null);
             mImsReasonInfo.add(i, null);
             mSrvccState[i] = TelephonyManager.SRVCC_STATE_HANDOVER_NONE;
-            mPhysicalChannelConfigs.add(i, new ArrayList<>());
             mOtaspMode[i] = TelephonyManager.OTASP_UNKNOWN;
             mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
             mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
@@ -522,7 +517,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mPreciseDataConnectionState = new PreciseDataConnectionState[numPhones];
         mCellInfo = new ArrayList<>();
         mImsReasonInfo = new ArrayList<>();
-        mPhysicalChannelConfigs = new ArrayList<>();
         mEmergencyNumberList = new HashMap<>();
         mOutgoingCallEmergencyNumber = new EmergencyNumber[numPhones];
         mOutgoingSmsEmergencyNumber = new EmergencyNumber[numPhones];
@@ -542,7 +536,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCellInfo.add(i, null);
             mImsReasonInfo.add(i, null);
             mSrvccState[i] = TelephonyManager.SRVCC_STATE_HANDOVER_NONE;
-            mPhysicalChannelConfigs.add(i, new ArrayList<>());
             mOtaspMode[i] = TelephonyManager.OTASP_UNKNOWN;
             mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
             mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
@@ -961,14 +954,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             remove(r.binder);
                         }
                     }
-                    if ((events & PhoneStateListener.LISTEN_PHYSICAL_CHANNEL_CONFIGURATION) != 0) {
-                        try {
-                            r.callback.onPhysicalChannelConfigurationChanged(
-                                    mPhysicalChannelConfigs.get(phoneId));
-                        } catch (RemoteException ex) {
-                            remove(r.binder);
-                        }
-                    }
                     if ((events & PhoneStateListener.LISTEN_EMERGENCY_NUMBER_LIST) != 0) {
                         try {
                             r.callback.onEmergencyNumberListChanged(mEmergencyNumberList);
@@ -1383,43 +1368,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                     + " r=" + r);
                             }
                             r.callback.onCellInfoChanged(cellInfo);
-                        } catch (RemoteException ex) {
-                            mRemoveList.add(r.binder);
-                        }
-                    }
-                }
-            }
-            handleRemoveListLocked();
-        }
-    }
-
-    /**
-     * Notify physical channel configuration according to subscripton ID and phone ID
-     */
-    public void notifyPhysicalChannelConfigurationForSubscriber(int phoneId, int subId,
-            List<PhysicalChannelConfig> configs) {
-        if (!checkNotifyPermission("notifyPhysicalChannelConfiguration()")) {
-            return;
-        }
-
-        if (VDBG) {
-            log("notifyPhysicalChannelConfiguration: subId=" + subId + " phoneId=" + phoneId
-                    + " configs=" + configs);
-        }
-
-        synchronized (mRecords) {
-            if (validatePhoneId(phoneId)) {
-                mPhysicalChannelConfigs.set(phoneId, configs);
-                for (Record r : mRecords) {
-                    if (r.matchPhoneStateListenerEvent(
-                            PhoneStateListener.LISTEN_PHYSICAL_CHANNEL_CONFIGURATION)
-                            && idMatch(r.subId, subId, phoneId)) {
-                        try {
-                            if (DBG_LOC) {
-                                log("notifyPhysicalChannelConfiguration: mPhysicalChannelConfigs="
-                                        + configs + " r=" + r);
-                            }
-                            r.callback.onPhysicalChannelConfigurationChanged(configs);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
