@@ -37,7 +37,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.view.textclassifier.ConversationActions;
@@ -437,28 +436,16 @@ public abstract class TextClassifierService extends Service {
     /**
      * Returns the component name of the system default textclassifier service if it can be found
      * on the system. Otherwise, returns null.
-     * @hide
-     */
-    public static ComponentName getServiceComponentName(@NonNull Context context) {
-        return getServiceComponentName(context, new TextClassificationConstants(
-                () -> Settings.Global.getString(
-                        context.getContentResolver(),
-                        Settings.Global.TEXT_CLASSIFIER_CONSTANTS)));
-    }
-
-    /**
-     * Returns the component name of the system default textclassifier service if it can be found
-     * on the system. Otherwise, returns null.
-     * @param context the text classification context
-     * @param settings TextClassifier specific settings.
      *
+     * @param context the text classification context
      * @hide
      */
     @Nullable
-    public static ComponentName getServiceComponentName(@NonNull Context context,
-            @NonNull TextClassificationConstants settings) {
+    public static ComponentName getServiceComponentName(@NonNull Context context) {
+        final TextClassificationConstants settings = TextClassificationManager.getSettings(context);
         // get override TextClassifierService package name
-        String packageName = settings.getTextClassifierServiceName();
+        String packageName = settings.getTextClassifierServicePackageOverride();
+
         ComponentName serviceComponent = null;
         final boolean isOverrideService = !TextUtils.isEmpty(packageName);
         if (isOverrideService) {
@@ -468,7 +455,7 @@ public abstract class TextClassifierService extends Service {
         if (serviceComponent != null) {
             return serviceComponent;
         }
-        // If no TextClassifierService overrode or invalid override package name, read the first
+        // If no TextClassifierService override or invalid override package name, read the first
         // package defined in the config
         final String[] packages = context.getPackageManager().getSystemTextClassifierPackages();
         if (packages.length == 0 || TextUtils.isEmpty(packages[0])) {
