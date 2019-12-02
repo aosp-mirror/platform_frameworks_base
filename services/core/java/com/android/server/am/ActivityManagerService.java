@@ -568,11 +568,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final int NATIVE_DUMP_TIMEOUT_MS = 2000; // 2 seconds;
     private static final int JAVA_DUMP_MINIMUM_SIZE = 100; // 100 bytes.
 
-    /**
-     * How long between a process kill and we actually receive its death recipient
-     */
-    private static final long PROC_KILL_TIMEOUT = 5000; // 5 seconds;
-
     OomAdjuster mOomAdjuster;
     final LowMemDetector mLowMemDetector;
 
@@ -3743,9 +3738,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "Dying app: " + app + ", pid: " + pid + ", thread: " + thread.asBinder());
             handleAppDiedLocked(app, false, true);
 
-            // Execute the callback if there is any.
-            doAppDiedCallbackLocked(app);
-
             if (doOomAdj) {
                 updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_PROCESS_END);
             }
@@ -3758,9 +3750,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     "Process " + app.processName + " (pid " + pid
                             + ") has died and restarted (pid " + app.pid + ").", app.info.uid);
 
-            // Execute the callback if there is any.
-            doAppDiedCallbackLocked(app);
-
             EventLogTags.writeAmProcDied(app.userId, app.pid, app.processName, app.setAdj,
                     app.setProcState);
         } else if (DEBUG_PROCESSES) {
@@ -3772,39 +3761,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         // for pulling memory stats of other running processes when this process died.
         if (!hasMemcg()) {
             StatsLog.write(StatsLog.APP_DIED, SystemClock.elapsedRealtime());
-        }
-    }
-
-    @GuardedBy("this")
-    private void doAppDiedCallbackLocked(final ProcessRecord app) {
-        if (app.mAppDiedCallback != null) {
-            app.mAppDiedCallback.run();
-            app.mAppDiedCallback = null;
-        }
-    }
-
-    @GuardedBy("this")
-    private void waitForProcKillLocked(final ProcessRecord app, final String formatString,
-            final long startTime) {
-        app.mAppDiedCallback = () -> {
-            synchronized (ActivityManagerService.this) {
-                // called when this app receives appDiedLocked()
-                ActivityManagerService.this.notifyAll();
-            }
-        };
-        checkTime(startTime, String.format(formatString, "before appDied"));
-        long now = SystemClock.uptimeMillis();
-        long timeout = PROC_KILL_TIMEOUT + now;
-        while (app.mAppDiedCallback != null && timeout > now) {
-            try {
-                wait(timeout - now);
-            } catch (InterruptedException e) {
-            }
-            now = SystemClock.uptimeMillis();
-        }
-        checkTime(startTime, String.format(formatString, "after appDied"));
-        if (app.mAppDiedCallback != null) {
-            Slog.w(TAG, String.format(formatString, "waiting for app killing timed out"));
         }
     }
 
@@ -6824,12 +6780,18 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Note if killedByAm is also set, this means the provider process has just been
                 // killed by AM (in ProcessRecord.kill()), but appDiedLocked() hasn't been called
-                // yet. So we need to wait for appDiedLocked() here and let it clean up.
+                // yet. So we need to call appDiedLocked() here and let it clean up.
                 // (See the commit message on I2c4ba1e87c2d47f2013befff10c49b3dc337a9a7 to see
                 // how to test this case.)
                 if (cpr.proc.killed && cpr.proc.killedByAm) {
-                    waitForProcKillLocked(cpr.proc, "getContentProviderImpl: %s (killedByAm)",
-                            startTime);
+                    checkTime(startTime, "getContentProviderImpl: before appDied (killedByAm)");
+                    final long iden = Binder.clearCallingIdentity();
+                    try {
+                        appDiedLocked(cpr.proc);
+                    } finally {
+                        Binder.restoreCallingIdentity(iden);
+                    }
+                    checkTime(startTime, "getContentProviderImpl: after appDied (killedByAm)");
                 }
             }
 
@@ -6933,7 +6895,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Slog.i(TAG, "Existing provider " + cpr.name.flattenToShortString()
                             + " is crashing; detaching " + r);
                     boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
-                    waitForProcKillLocked(cpr.proc, "getContentProviderImpl: %s", startTime);
+                    checkTime(startTime, "getContentProviderImpl: before appDied");
+                    appDiedLocked(cpr.proc);
+                    checkTime(startTime, "getContentProviderImpl: after appDied");
                     if (!lastRef) {
                         // This wasn't the last ref our process had on
                         // the provider...  we have now been killed, bail.
