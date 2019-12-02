@@ -77,7 +77,7 @@ class MediaRouter2ServiceImpl {
     @GuardedBy("mLock")
     private int mCurrentUserId = -1;
     @GuardedBy("mLock")
-    private int mSelectRouteRequestSequenceNumber = 0;
+    private int mSelectRouteRequestSequenceNumber = 1;
 
     MediaRouter2ServiceImpl(Context context) {
         mContext = context;
@@ -218,7 +218,7 @@ class MediaRouter2ServiceImpl {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                requestSelectRoute2Locked(mAllClientRecords.get(client.asBinder()), route);
+                requestSelectRoute2Locked(mAllClientRecords.get(client.asBinder()), false, route);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -399,10 +399,12 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    private void requestSelectRoute2Locked(ClientRecord clientRecord, MediaRoute2Info route) {
+    private void requestSelectRoute2Locked(ClientRecord clientRecord, boolean selectedByManager,
+            MediaRoute2Info route) {
         if (clientRecord != null) {
             MediaRoute2Info oldRoute = clientRecord.mSelectedRoute;
             clientRecord.mSelectingRoute = route;
+            clientRecord.mIsManagerSelecting = selectedByManager;
 
             UserHandler handler = clientRecord.mUserRecord.mHandler;
             //TODO: Handle transfer instead of unselect and select
@@ -417,7 +419,6 @@ class MediaRouter2ServiceImpl {
                 handler.sendMessage(obtainMessage(
                         UserHandler::requestSelectRoute, handler, clientRecord.mPackageName,
                         route, seq));
-
                 // Remove all previous timeout messages
                 for (int previousSeq : clientRecord.mSelectRouteSequenceNumbers) {
                     clientRecord.mUserRecord.mHandler.removeMessages(previousSeq);
@@ -543,7 +544,7 @@ class MediaRouter2ServiceImpl {
                 Slog.w(TAG, "Ignoring route selection for unknown client.");
             }
             if (clientRecord != null && managerRecord.mTrusted) {
-                requestSelectRoute2Locked(clientRecord, route);
+                requestSelectRoute2Locked(clientRecord, true, route);
             }
         }
     }
@@ -656,7 +657,9 @@ class MediaRouter2ServiceImpl {
         public final UserRecord mUserRecord;
         public final String mPackageName;
         public final List<Integer> mSelectRouteSequenceNumbers;
+
         public List<String> mControlCategories;
+        public boolean mIsManagerSelecting;
         public MediaRoute2Info mSelectingRoute;
         public MediaRoute2Info mSelectedRoute;
 
@@ -802,9 +805,8 @@ class MediaRouter2ServiceImpl {
             sendMessage(PooledLambda.obtainMessage(UserHandler::updateProvider, this, provider));
         }
 
-        // TODO: When introducing MediaRoute2ProviderService#sendControlHints(),
-        // Make this method to be called.
-        public void onRouteSelectionRequestHandled(@NonNull MediaRoute2ProviderProxy provider,
+        @Override
+        public void onRouteSelected(@NonNull MediaRoute2ProviderProxy provider,
                 String clientPackageName, MediaRoute2Info route, Bundle controlHints, int seq) {
             sendMessage(PooledLambda.obtainMessage(
                     UserHandler::updateSelectedRoute, this, provider, clientPackageName, route,
@@ -917,6 +919,8 @@ class MediaRouter2ServiceImpl {
                 return;
             }
 
+            //TODO: handle a case such that controlHints is null. (How should we notify MR2?)
+
             if (clientRecord.mSelectingRoute == null || !TextUtils.equals(
                     clientRecord.mSelectingRoute.getUniqueId(), selectedRoute.getUniqueId())) {
                 Log.w(TAG, "Ignoring invalid updateSelectedRoute call. selectingRoute="
@@ -929,7 +933,9 @@ class MediaRouter2ServiceImpl {
 
             notifyRouteSelectedToClient(((Client2Record) clientRecord).mClient,
                     selectedRoute,
-                    MediaRouter2.SELECT_REASON_USER_SELECTED,
+                    clientRecord.mIsManagerSelecting
+                            ? MediaRouter2.SELECT_REASON_SYSTEM_SELECTED :
+                            MediaRouter2.SELECT_REASON_USER_SELECTED,
                     controlHints);
             updateClientUsage(clientRecord);
 
