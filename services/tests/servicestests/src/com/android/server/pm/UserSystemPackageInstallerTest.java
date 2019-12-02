@@ -24,6 +24,7 @@ import static com.android.server.pm.UserSystemPackageInstaller.PACKAGE_WHITELIST
 import static com.android.server.pm.UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_DEVICE_DEFAULT;
 import static com.android.server.pm.UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_DISABLE;
 import static com.android.server.pm.UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE;
+import static com.android.server.pm.UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_IGNORE_OTA;
 import static com.android.server.pm.UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST;
 import static com.android.server.pm.UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_LOG;
 
@@ -394,33 +395,45 @@ public class UserSystemPackageInstallerTest {
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertFalse(mUserSystemPackageInstaller.isEnforceMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
         setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_LOG);
         assertTrue(mUserSystemPackageInstaller.isLogMode());
         assertFalse(mUserSystemPackageInstaller.isEnforceMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
         setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE);
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertTrue(mUserSystemPackageInstaller.isEnforceMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
         setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST);
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertFalse(mUserSystemPackageInstaller.isEnforceMode());
         assertTrue(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
+
+        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IGNORE_OTA);
+        assertFalse(mUserSystemPackageInstaller.isLogMode());
+        assertFalse(mUserSystemPackageInstaller.isEnforceMode());
+        assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertTrue(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
         setUserTypePackageWhitelistMode(
                 USER_TYPE_PACKAGE_WHITELIST_MODE_LOG | USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE);
         assertTrue(mUserSystemPackageInstaller.isLogMode());
         assertTrue(mUserSystemPackageInstaller.isEnforceMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
         setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST
                 | USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE);
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertTrue(mUserSystemPackageInstaller.isEnforceMode());
         assertTrue(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
     }
 
     /** Sets the whitelist mode to the desired value via adb's setprop. */
