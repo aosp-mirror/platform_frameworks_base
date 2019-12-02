@@ -59,6 +59,7 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.PackageWatchdog;
 import com.android.server.SystemConfig;
@@ -68,6 +69,10 @@ import com.android.server.pm.Installer;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -88,10 +93,32 @@ import java.util.concurrent.TimeUnit;
  *
  * Threading model:
  *
+ * Each method falls into one of the 3 categories:
  * - @AnyThread annotates thread-safe methods.
  * - @WorkerThread annotates methods that should be called from the handler thread only.
+ * - @ExtThread annotates methods that should never be called from the handler thread.
+ *
+ * Runtime checks that enforce thread annotations:
+ * - #assertInWorkerThread checks a method is called from the handler thread only. The handler
+ *   thread is where we handle state changes. By having all state changes in the same thread, each
+ *   method can run to complete without worrying about state changes in-between locks. It also
+ *   allows us to remove the use of lock and reduce the chance of deadlock.
+ * - #assertNotInWorkerThread checks a method is never called from the handler thread. These methods
+ *   are intended for external entities and should never change internal states directly. Instead
+ *   they should dispatch tasks to the handler to make state changes. Violation will fail
+ *   #assertInWorkerThread. #assertNotInWorkerThread and #assertInWorkerThread are
+ *   mutually-exclusive to ensure @WorkerThread methods and @ExtThread ones never call into each
+ *   other.
  */
 class RollbackManagerServiceImpl extends IRollbackManager.Stub {
+    /**
+     * Denotes that the annotated methods is intended for external entities and should be called on
+     * an external thread. By 'external' we mean any thread that is not the handler thread.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ElementType.METHOD})
+    private @interface ExtThread {
+    }
 
     private static final String TAG = "RollbackManager";
     private static final boolean LOCAL_LOGV = Log.isLoggable(TAG, Log.VERBOSE);
@@ -197,6 +224,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                assertInWorkerThread();
+
                 if (Intent.ACTION_PACKAGE_ENABLE_ROLLBACK.equals(intent.getAction())) {
                     int token = intent.getIntExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN, -1);
@@ -206,6 +235,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     queueSleepIfNeeded();
 
                     getHandler().post(() -> {
+                        assertInWorkerThread();
                         boolean success = enableRollback(sessionId);
                         int ret = PackageManagerInternal.ENABLE_ROLLBACK_SUCCEEDED;
                         if (!success) {
@@ -231,6 +261,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                assertInWorkerThread();
+
                 if (Intent.ACTION_CANCEL_ENABLE_ROLLBACK.equals(intent.getAction())) {
                     int sessionId = intent.getIntExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID, -1);
@@ -252,6 +284,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                assertInWorkerThread();
+
                 if (Intent.ACTION_USER_ADDED.equals(intent.getAction())) {
                     final int newUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                     if (newUserId == -1) {
@@ -263,6 +297,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }, userAddedIntentFilter, null, getHandler());
 
         registerTimeChangeReceiver();
+    }
+
+    private void assertInWorkerThread() {
+        Preconditions.checkState(mHandlerThread.getLooper().isCurrentThread());
+    }
+
+    private void assertNotInWorkerThread() {
+        Preconditions.checkState(!mHandlerThread.getLooper().isCurrentThread());
     }
 
     @AnyThread
@@ -283,6 +325,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         context.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                assertInWorkerThread();
+
                 String action = intent.getAction();
                 if (Intent.ACTION_PACKAGE_REPLACED.equals(action)) {
                     String packageName = intent.getData().getSchemeSpecificPart();
@@ -303,8 +347,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }, filter, null, getHandler());
     }
 
+    @ExtThread
     @Override
     public ParceledListSlice getAvailableRollbacks() {
+        assertNotInWorkerThread();
         enforceManageRollbacks("getAvailableRollbacks");
         synchronized (mLock) {
             List<RollbackInfo> rollbacks = new ArrayList<>();
@@ -318,8 +364,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
     }
 
+    @ExtThread
     @Override
     public ParceledListSlice<RollbackInfo> getRecentlyCommittedRollbacks() {
+        assertNotInWorkerThread();
         enforceManageRollbacks("getRecentlyCommittedRollbacks");
 
         synchronized (mLock) {
@@ -334,9 +382,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
     }
 
+    @ExtThread
     @Override
     public void commitRollback(int rollbackId, ParceledListSlice causePackages,
             String callerPackageName, IntentSender statusReceiver) {
+        assertNotInWorkerThread();
         enforceManageRollbacks("commitRollback");
 
         final int callingUid = Binder.getCallingUid();
@@ -353,6 +403,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         final BroadcastReceiver timeChangeIntentReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                assertInWorkerThread();
                 final long oldRelativeBootTime = mRelativeBootTime;
                 mRelativeBootTime = calculateRelativeBootTime();
                 final long timeDifference = mRelativeBootTime - oldRelativeBootTime;
@@ -386,6 +437,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @WorkerThread
     private void commitRollbackInternal(int rollbackId, List<VersionedPackage> causePackages,
             String callerPackageName, IntentSender statusReceiver) {
+        assertInWorkerThread();
         Slog.i(TAG, "commitRollback id=" + rollbackId + " caller=" + callerPackageName);
 
         Rollback rollback = getRollbackForId(rollbackId);
@@ -398,14 +450,17 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         rollback.commit(mContext, causePackages, callerPackageName, statusReceiver);
     }
 
+    @ExtThread
     @Override
     public void reloadPersistedData() {
+        assertNotInWorkerThread();
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.TEST_MANAGE_ROLLBACKS,
                 "reloadPersistedData");
 
         CountDownLatch latch = new CountDownLatch(1);
         getHandler().post(() -> {
+            assertInWorkerThread();
             synchronized (mLock) {
                 mRollbacks.clear();
                 mRollbacks.addAll(mRollbackStore.loadRollbacks());
@@ -437,18 +492,22 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
     }
 
+    @ExtThread
     @Override
     public void blockRollbackManager(long millis) {
+        assertNotInWorkerThread();
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.TEST_MANAGE_ROLLBACKS,
                 "blockRollbackManager");
         getHandler().post(() -> {
+            assertInWorkerThread();
             mSleepDuration.addLast(millis);
         });
     }
 
     @WorkerThread
     private void queueSleepIfNeeded() {
+        assertInWorkerThread();
         if (mSleepDuration.size() == 0) {
             return;
         }
@@ -457,6 +516,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             return;
         }
         getHandler().post(() -> {
+            assertInWorkerThread();
             try {
                 Thread.sleep(millis);
             } catch (InterruptedException e) {
@@ -465,7 +525,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         });
     }
 
+    @ExtThread
     void onUnlockUser(int userId) {
+        assertNotInWorkerThread();
         if (LOCAL_LOGV) {
             Slog.v(TAG, "onUnlockUser id=" + userId);
         }
@@ -474,6 +536,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // completed.
         CountDownLatch latch = new CountDownLatch(1);
         getHandler().post(() -> {
+            assertInWorkerThread();
             final List<Rollback> rollbacks;
             synchronized (mLock) {
                 rollbacks = new ArrayList<>(mRollbacks);
@@ -496,6 +559,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     @WorkerThread
     private void updateRollbackLifetimeDurationInMillis() {
+        assertInWorkerThread();
         mRollbackLifetimeDurationInMillis = DeviceConfig.getLong(
                 DeviceConfig.NAMESPACE_ROLLBACK_BOOT,
                 RollbackManager.PROPERTY_ROLLBACK_LIFETIME_MILLIS,
@@ -511,6 +575,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 mExecutor, properties -> updateRollbackLifetimeDurationInMillis());
 
         getHandler().post(() -> {
+            assertInWorkerThread();
             updateRollbackLifetimeDurationInMillis();
             runExpiration();
 
@@ -578,6 +643,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     @WorkerThread
     private void onPackageReplaced(String packageName) {
+        assertInWorkerThread();
         // TODO: Could this end up incorrectly deleting a rollback for a
         // package that is about to be installed?
         long installedVersion = getInstalledPackageVersion(packageName);
@@ -603,6 +669,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     @WorkerThread
     private void onPackageFullyRemoved(String packageName) {
+        assertInWorkerThread();
         expireRollbackForPackage(packageName);
     }
 
@@ -631,6 +698,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     // Schedules future expiration as appropriate.
     @WorkerThread
     private void runExpiration() {
+        assertInWorkerThread();
         Instant now = Instant.now();
         Instant oldest = null;
         synchronized (mLock) {
@@ -694,6 +762,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     @WorkerThread
     private boolean enableRollback(int sessionId) {
+        assertInWorkerThread();
         if (LOCAL_LOGV) {
             Slog.v(TAG, "enableRollback sessionId=" + sessionId);
         }
@@ -759,6 +828,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @WorkerThread
     private boolean enableRollbackForPackageSession(Rollback rollback,
             PackageInstaller.SessionInfo session) {
+        assertInWorkerThread();
         // TODO: Don't attempt to enable rollback for split installs.
         final int installFlags = session.installFlags;
         if ((installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) == 0) {
@@ -845,15 +915,18 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 appInfo.splitSourceDirs, session.rollbackDataPolicy);
     }
 
+    @ExtThread
     @Override
     public void snapshotAndRestoreUserData(String packageName, int[] userIds, int appId,
             long ceDataInode, String seInfo, int token) {
+        assertNotInWorkerThread();
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException(
                     "snapshotAndRestoreUserData may only be called by the system.");
         }
 
         getHandler().post(() -> {
+            assertInWorkerThread();
             snapshotUserDataInternal(packageName, userIds);
             restoreUserDataInternal(packageName, userIds, appId, seInfo);
             // When this method is called as part of the install flow, a positive token number is
@@ -868,6 +941,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     @WorkerThread
     private void snapshotUserDataInternal(String packageName, int[] userIds) {
+        assertInWorkerThread();
         if (LOCAL_LOGV) {
             Slog.v(TAG, "snapshotUserData pkg=" + packageName
                     + " users=" + Arrays.toString(userIds));
@@ -883,6 +957,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @WorkerThread
     private void restoreUserDataInternal(
             String packageName, int[] userIds, int appId, String seInfo) {
+        assertInWorkerThread();
         if (LOCAL_LOGV) {
             Slog.v(TAG, "restoreUserData pkg=" + packageName
                     + " users=" + Arrays.toString(userIds));
@@ -898,8 +973,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
     }
 
+    @ExtThread
     @Override
     public int notifyStagedSession(int sessionId) {
+        assertNotInWorkerThread();
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("notifyStagedSession may only be called by the system.");
         }
@@ -908,6 +985,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // NOTE: We post this runnable on the RollbackManager's binder thread because we'd prefer
         // to preserve the invariant that all operations that modify state happen there.
         getHandler().post(() -> {
+            assertInWorkerThread();
             PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
 
             final PackageInstaller.SessionInfo session = installer.getSessionInfo(sessionId);
@@ -956,12 +1034,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
     }
 
+    @ExtThread
     @Override
     public void notifyStagedApkSession(int originalSessionId, int apkSessionId) {
+        assertNotInWorkerThread();
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("notifyStagedApkSession may only be called by the system.");
         }
         getHandler().post(() -> {
+            assertInWorkerThread();
             Rollback rollback = null;
             synchronized (mLock) {
                 for (int i = 0; i < mRollbacks.size(); ++i) {
@@ -1088,6 +1169,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         @Override
         public void onFinished(int sessionId, boolean success) {
+            assertInWorkerThread();
             if (LOCAL_LOGV) {
                 Slog.v(TAG, "SessionCallback.onFinished id=" + sessionId + " success=" + success);
             }
@@ -1125,6 +1207,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     @WorkerThread
     private boolean completeEnableRollback(Rollback rollback) {
+        assertInWorkerThread();
         if (LOCAL_LOGV) {
             Slog.v(TAG, "completeEnableRollback id=" + rollback.info.getRollbackId());
         }
@@ -1158,6 +1241,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @WorkerThread
     @GuardedBy("rollback.getLock")
     private void makeRollbackAvailable(Rollback rollback) {
+        assertInWorkerThread();
         if (LOCAL_LOGV) {
             Slog.v(TAG, "makeRollbackAvailable id=" + rollback.info.getRollbackId());
         }
@@ -1178,6 +1262,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     @WorkerThread
     private Rollback getRollbackForId(int rollbackId) {
+        assertInWorkerThread();
         synchronized (mLock) {
             for (int i = 0; i < mRollbacks.size(); ++i) {
                 Rollback rollback = mRollbacks.get(i);
@@ -1193,6 +1278,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @WorkerThread
     @GuardedBy("mLock")
     private int allocateRollbackIdLocked() {
+        assertInWorkerThread();
         int n = 0;
         int rollbackId;
         do {
@@ -1206,8 +1292,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         throw new IllegalStateException("Failed to allocate rollback ID");
     }
 
+    @ExtThread
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        assertNotInWorkerThread();
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
@@ -1239,6 +1327,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @WorkerThread
     @GuardedBy("mLock")
     private Rollback createNewRollbackLocked(PackageInstaller.SessionInfo parentSession) {
+        assertInWorkerThread();
         int rollbackId = allocateRollbackIdLocked();
         final int userId;
         if (parentSession.getUser() == UserHandle.ALL) {
@@ -1282,6 +1371,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @GuardedBy("mLock")
     @Nullable
     private Rollback getRollbackForSessionLocked(int sessionId) {
+        assertInWorkerThread();
         // We expect mRollbacks to be a very small list; linear search should be plenty fast.
         for (int i = 0; i < mRollbacks.size(); ++i) {
             Rollback rollback = mRollbacks.get(i);
