@@ -2036,7 +2036,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     boolean okToAnimate() {
-        return mDisplayContent != null && mDisplayContent.okToAnimate();
+        return okToAnimate(false /* ignoreFrozen */);
+    }
+
+    boolean okToAnimate(boolean ignoreFrozen) {
+        return mDisplayContent != null && mDisplayContent.okToAnimate(ignoreFrozen);
     }
 
     @Override

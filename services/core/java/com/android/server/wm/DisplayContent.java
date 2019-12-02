@@ -3988,15 +3988,23 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     boolean okToDisplay() {
+        return okToDisplay(false);
+    }
+
+    boolean okToDisplay(boolean ignoreFrozen) {
         if (mDisplayId == DEFAULT_DISPLAY) {
-            return !mWmService.mDisplayFrozen
+            return (!mWmService.mDisplayFrozen || ignoreFrozen)
                     && mWmService.mDisplayEnabled && mWmService.mPolicy.isScreenOn();
         }
         return mDisplayInfo.state == Display.STATE_ON;
     }
 
     boolean okToAnimate() {
-        return okToDisplay() &&
+        return okToAnimate(false);
+    }
+
+    boolean okToAnimate(boolean ignoreFrozen) {
+        return okToDisplay(ignoreFrozen) &&
                 (mDisplayId != DEFAULT_DISPLAY || mWmService.mPolicy.okToAnimate());
     }
 

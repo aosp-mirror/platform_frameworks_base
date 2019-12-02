@@ -3990,7 +3990,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // If we are preparing an app transition, then delay changing
         // the visibility of this token until we execute that transition.
-        if (okToAnimate() && appTransition.isTransitionSet()) {
+        // Note that we ignore display frozen since we want the opening / closing transition type
+        // can be updated correctly even display frozen, and it's safe since in applyAnimation will
+        // still check DC#okToAnimate again if the transition animation is fine to apply.
+        if (okToAnimate(true /* ignoreFrozen */) && appTransition.isTransitionSet()) {
             if (visible) {
                 displayContent.mOpeningApps.add(this);
                 mEnteringAnimation = true;
