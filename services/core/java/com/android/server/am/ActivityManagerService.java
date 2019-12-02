@@ -3783,7 +3783,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    void waitForProcKillLocked(final ProcessRecord app, final String formatString,
+    private void waitForProcKillLocked(final ProcessRecord app, final String formatString,
             final long startTime) {
         app.mAppDiedCallback = () -> {
             synchronized (ActivityManagerService.this) {
