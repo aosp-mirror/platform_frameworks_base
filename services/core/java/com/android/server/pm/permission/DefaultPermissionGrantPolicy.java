@@ -63,6 +63,7 @@ import android.util.SparseArray;
 import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
+import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
@@ -766,9 +767,14 @@ public final class DefaultPermissionGrantPolicy {
             grantSystemFixedPermissionsToSystemPackage(pm, wearPackage, userId, PHONE_PERMISSIONS);
 
             // Fitness tracking on watches
-            grantPermissionsToSystemPackage(pm,
+            if (mContext.getResources().getBoolean(R.bool.config_trackerAppNeedsPermissions)) {
+                Log.d(TAG, "Wear: Skipping permission grant for Default fitness tracker app : "
+                        + wearPackage);
+            } else {
+                grantPermissionsToSystemPackage(pm,
                     getDefaultSystemHandlerActivityPackage(pm, ACTION_TRACK, userId), userId,
                     SENSORS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS);
+            }
         }
 
         // Print Spooler
