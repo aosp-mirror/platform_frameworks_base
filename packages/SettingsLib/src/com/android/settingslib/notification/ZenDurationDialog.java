@@ -234,6 +234,7 @@ public class ZenDurationDialog {
             @Override
             public void onClick(View v) {
                 onClickTimeButton(row, tag, false /*down*/, rowIndex);
+                tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
             }
         });
 
@@ -243,6 +244,7 @@ public class ZenDurationDialog {
             @Override
             public void onClick(View v) {
                 onClickTimeButton(row, tag, true /*up*/, rowIndex);
+                tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
             }
         });
 
