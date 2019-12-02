@@ -26,16 +26,20 @@
         android:gravity="right"
         android:layout_gravity="right"
         android:id="@+id/notification_animation_right"
-        android:layout_width="150px"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
         android:src="@drawable/aod_notification_light_right"/>
      <ImageView
         android:layout_alignParentLeft="true"
         android:gravity="left"
         android:layout_gravity="left"
         android:id="@+id/notification_animation_left"
-        android:layout_width="150px"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
         android:src="@drawable/aod_notification_light_left"/>
 
 </com.android.systemui.statusbar.notification.NotificationLightsView>
