@@ -6312,10 +6312,32 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
+        static class RequestReassignment {
+            @NonNull public final NetworkRequestInfo mRequest;
+            @Nullable public final NetworkAgentInfo mOldNetwork;
+            @Nullable public final NetworkAgentInfo mNewNetwork;
+            RequestReassignment(@NonNull final NetworkRequestInfo request,
+                    @Nullable final NetworkAgentInfo oldNetwork,
+                    @Nullable final NetworkAgentInfo newNetwork) {
+                mRequest = request;
+                mOldNetwork = oldNetwork;
+                mNewNetwork = newNetwork;
+            }
+        }
+
         @NonNull private final Set<NetworkBgStatePair> mRematchedNetworks = new ArraySet<>();
+        @NonNull private final List<RequestReassignment> mReassignments = new ArrayList<>();
 
         @NonNull Iterable<NetworkBgStatePair> getRematchedNetworks() {
             return mRematchedNetworks;
+        }
+
+        @NonNull Iterable<RequestReassignment> getRequestReassignments() {
+            return mReassignments;
+        }
+
+        void addRequestReassignment(@NonNull final RequestReassignment reassignment) {
+            mReassignments.add(reassignment);
         }
 
         void addRematchedNetwork(@NonNull final NetworkBgStatePair network) {
@@ -6406,7 +6428,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Find and migrate to this Network any NetworkRequests for
         // which this network is now the best.
         final ArrayList<NetworkAgentInfo> removedRequests = new ArrayList<>();
-        final ArrayList<NetworkRequestInfo> addedRequests = new ArrayList<>();
         for (final Map.Entry<NetworkRequestInfo, NetworkAgentInfo> entry :
                 reassignedRequests.entrySet()) {
             final NetworkRequestInfo nri = entry.getKey();
@@ -6429,7 +6450,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (!newSatisfier.addRequest(nri.request)) {
                     Slog.wtf(TAG, "BUG: " + newSatisfier.name() + " already has " + nri.request);
                 }
-                addedRequests.add(nri);
+                changes.addRequestReassignment(new NetworkReassignment.RequestReassignment(
+                        nri, previousSatisfier, newSatisfier));
                 // Tell NetworkFactories about the new score, so they can stop
                 // trying to connect if they know they cannot match it.
                 // TODO - this could get expensive if we have a lot of requests for this
@@ -6497,10 +6519,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     "BUG: %s changed score during rematch: %d -> %d",
                     newNetwork.name(), score, newNetwork.getCurrentScore()));
         }
-
-        // Notify requested networks are available after the default net is switched, but
-        // before LegacyTypeTracker sends legacy broadcasts
-        for (NetworkRequestInfo nri : addedRequests) notifyNetworkAvailable(newNetwork, nri);
     }
 
     /**
@@ -6528,6 +6546,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         final NetworkAgentInfo newDefaultNetwork = getDefaultNetwork();
+
+        // Notify requested networks are available after the default net is switched, but
+        // before LegacyTypeTracker sends legacy broadcasts
+        for (final NetworkReassignment.RequestReassignment event :
+                changes.getRequestReassignments()) {
+            if (null != event.mNewNetwork) {
+                notifyNetworkAvailable(event.mNewNetwork, event.mRequest);
+            }
+        }
 
         for (final NetworkReassignment.NetworkBgStatePair event : changes.getRematchedNetworks()) {
             // Process listen requests and update capabilities if the background state has
