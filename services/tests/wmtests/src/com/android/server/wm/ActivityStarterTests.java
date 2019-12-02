@@ -962,4 +962,19 @@ public class ActivityStarterTests extends ActivityTestsBase {
         }
         assertThat(exceptionCaught).isTrue();
     }
+
+    @Test
+    public void testRecycleTaskFromAnotherUser() {
+        final ActivityStarter starter = prepareStarter(0 /* flags */);
+        starter.mStartActivity = new ActivityBuilder(mService).build();
+        final Task task = new TaskBuilder(mService.mStackSupervisor)
+                .setStack(mService.mRootActivityContainer.getDefaultDisplay().createStack(
+                        WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */))
+                .setUserId(10)
+                .build();
+
+        final int result = starter.recycleTask(task, null, null);
+        assertThat(result == START_SUCCESS).isTrue();
+        assertThat(starter.mAddingToTask).isTrue();
+    }
 }

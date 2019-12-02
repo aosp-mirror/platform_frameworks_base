@@ -149,7 +149,8 @@ class ActivityStarter {
     private final ActivityStartController mController;
 
     // Share state variable among methods when starting an activity.
-    private ActivityRecord mStartActivity;
+    @VisibleForTesting
+    ActivityRecord mStartActivity;
     private Intent mIntent;
     private int mCallingUid;
     private ActivityOptions mOptions;
@@ -173,7 +174,8 @@ class ActivityStarter {
     private int mPreferredDisplayId;
 
     private Task mInTask;
-    private boolean mAddingToTask;
+    @VisibleForTesting
+    boolean mAddingToTask;
     private Task mReuseTask;
 
     private ActivityInfo mNewTaskInfo;
@@ -1665,7 +1667,16 @@ class ActivityStarter {
      * - Comply to the specified activity launch flags
      * - Determine whether need to add a new activity on top or just brought the task to front.
      */
-    private int recycleTask(Task targetTask, ActivityRecord targetTaskTop, Task reusedTask) {
+    @VisibleForTesting
+    int recycleTask(Task targetTask, ActivityRecord targetTaskTop, Task reusedTask) {
+        // Should not recycle task which is from a different user, just adding the starting
+        // activity to the task.
+        if (targetTask.mUserId != mStartActivity.mUserId) {
+            mTargetStack = targetTask.getStack();
+            mAddingToTask = true;
+            return START_SUCCESS;
+        }
+
         // True if we are clearing top and resetting of a standard (default) launch mode
         // ({@code LAUNCH_MULTIPLE}) activity. The existing activity will be finished.
         final boolean clearTopAndResetStandardLaunchMode =
