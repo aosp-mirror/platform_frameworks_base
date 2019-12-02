@@ -925,6 +925,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return IIpConnectivityMetrics.Stub.asInterface(
                     ServiceManager.getService(IpConnectivityLog.SERVICE_NAME));
         }
+
+        public IBatteryStats getBatteryStatsService() {
+            return BatteryStatsService.getService();
+        }
     }
 
     public ConnectivityService(Context context, INetworkManagementService netManager,
@@ -2144,7 +2148,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     opts.setMaxManifestReceiverApiLevel(Build.VERSION_CODES.M);
                     options = opts.toBundle();
                 }
-                final IBatteryStats bs = BatteryStatsService.getService();
+                final IBatteryStats bs = mDeps.getBatteryStatsService();
                 try {
                     bs.noteConnectivityChanged(intent.getIntExtra(
                             ConnectivityManager.EXTRA_NETWORK_TYPE, ConnectivityManager.TYPE_NONE),
@@ -5628,7 +5632,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // are accurate.
         networkAgent.clatd.fixupLinkProperties(oldLp, newLp);
 
-        updateInterfaces(newLp, oldLp, netId, networkAgent.networkCapabilities);
+        updateInterfaces(newLp, oldLp, netId, networkAgent.networkCapabilities,
+                networkAgent.networkInfo.getType());
 
         // update filtering rules, need to happen after the interface update so netd knows about the
         // new interface (the interface name -> index map becomes initialized)
@@ -5707,21 +5712,26 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     }
 
-    private void updateInterfaces(LinkProperties newLp, LinkProperties oldLp, int netId,
-                                  NetworkCapabilities caps) {
-        CompareResult<String> interfaceDiff = new CompareResult<>(
+    private void updateInterfaces(final @Nullable LinkProperties newLp,
+            final @Nullable LinkProperties oldLp, final int netId,
+            final @Nullable NetworkCapabilities caps, final int legacyType) {
+        final CompareResult<String> interfaceDiff = new CompareResult<>(
                 oldLp != null ? oldLp.getAllInterfaceNames() : null,
                 newLp != null ? newLp.getAllInterfaceNames() : null);
-        for (String iface : interfaceDiff.added) {
-            try {
-                if (DBG) log("Adding iface " + iface + " to network " + netId);
-                mNMS.addInterfaceToNetwork(iface, netId);
-                wakeupModifyInterface(iface, caps, true);
-            } catch (Exception e) {
-                loge("Exception adding interface: " + e);
+        if (!interfaceDiff.added.isEmpty()) {
+            final IBatteryStats bs = mDeps.getBatteryStatsService();
+            for (final String iface : interfaceDiff.added) {
+                try {
+                    if (DBG) log("Adding iface " + iface + " to network " + netId);
+                    mNMS.addInterfaceToNetwork(iface, netId);
+                    wakeupModifyInterface(iface, caps, true);
+                    bs.noteNetworkInterfaceType(iface, legacyType);
+                } catch (Exception e) {
+                    loge("Exception adding interface: " + e);
+                }
             }
         }
-        for (String iface : interfaceDiff.removed) {
+        for (final String iface : interfaceDiff.removed) {
             try {
                 if (DBG) log("Removing iface " + iface + " from network " + netId);
                 wakeupModifyInterface(iface, caps, false);
@@ -6480,54 +6490,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
             notifyLockdownVpn(newNetwork);
         }
-
-        if (reassignedRequests.containsValue(newNetwork) || newNetwork.isVPN()) {
-            // Notify battery stats service about this network, both the normal
-            // interface and any stacked links.
-            // TODO: Avoid redoing this; this must only be done once when a network comes online.
-            try {
-                final IBatteryStats bs = BatteryStatsService.getService();
-                final int type = newNetwork.networkInfo.getType();
-
-                final String baseIface = newNetwork.linkProperties.getInterfaceName();
-                bs.noteNetworkInterfaceType(baseIface, type);
-                for (LinkProperties stacked : newNetwork.linkProperties.getStackedLinks()) {
-                    final String stackedIface = stacked.getInterfaceName();
-                    bs.noteNetworkInterfaceType(stackedIface, type);
-                }
-            } catch (RemoteException ignored) {
-            }
-
-            // This has to happen after the notifyNetworkCallbacks as that tickles each
-            // ConnectivityManager instance so that legacy requests correctly bind dns
-            // requests to this network.  The legacy users are listening for this broadcast
-            // and will generally do a dns request so they can ensureRouteToHost and if
-            // they do that before the callbacks happen they'll use the default network.
-            //
-            // TODO: Is there still a race here? We send the broadcast
-            // after sending the callback, but if the app can receive the
-            // broadcast before the callback, it might still break.
-            //
-            // This *does* introduce a race where if the user uses the new api
-            // (notification callbacks) and then uses the old api (getNetworkInfo(type))
-            // they may get old info.  Reverse this after the old startUsing api is removed.
-            // This is on top of the multiple intent sequencing referenced in the todo above.
-            for (int i = 0; i < newNetwork.numNetworkRequests(); i++) {
-                NetworkRequest nr = newNetwork.requestAt(i);
-                if (nr.legacyType != TYPE_NONE && nr.isRequest()) {
-                    // legacy type tracker filters out repeat adds
-                    mLegacyTypeTracker.add(nr.legacyType, newNetwork);
-                }
-            }
-
-            // A VPN generally won't get added to the legacy tracker in the "for (nri)" loop above,
-            // because usually there are no NetworkRequests it satisfies (e.g., mDefaultRequest
-            // wants the NOT_VPN capability, so it will never be satisfied by a VPN). So, add the
-            // newNetwork to the tracker explicitly (it's a no-op if it has already been added).
-            if (newNetwork.isVPN()) {
-                mLegacyTypeTracker.add(TYPE_VPN, newNetwork);
-            }
-        }
     }
 
     /**
@@ -6550,6 +6512,26 @@ public class ConnectivityService extends IConnectivityManager.Stub
         for (NetworkAgentInfo nai : nais) {
             rematchNetworkAndRequests(nai, now);
         }
+
+        // Now that all the callbacks have been sent, send the legacy network broadcasts
+        // as needed. This is necessary so that legacy requests correctly bind dns
+        // requests to this network. The legacy users are listening for this broadcast
+        // and will generally do a dns request so they can ensureRouteToHost and if
+        // they do that before the callbacks happen they'll use the default network.
+        //
+        // TODO: Is there still a race here? The legacy broadcast will be sent after sending
+        // callbacks, but if apps can receive the broadcast before the callback, they still might
+        // have an inconsistent view of networking.
+        //
+        // This *does* introduce a race where if the user uses the new api
+        // (notification callbacks) and then uses the old api (getNetworkInfo(type))
+        // they may get old info. Reverse this after the old startUsing api is removed.
+        // This is on top of the multiple intent sequencing referenced in the todo above.
+        for (NetworkAgentInfo nai : nais) {
+            addNetworkToLegacyTypeTracker(nai);
+        }
+
+        // Tear down all unneeded networks.
         for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
             if (unneeded(nai, UnneededFor.TEARDOWN)) {
                 if (nai.getLingerExpiry() > 0) {
@@ -6566,6 +6548,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     teardownUnneededNetwork(nai);
                 }
             }
+        }
+    }
+
+    private void addNetworkToLegacyTypeTracker(@NonNull final NetworkAgentInfo nai) {
+        for (int i = 0; i < nai.numNetworkRequests(); i++) {
+            NetworkRequest nr = nai.requestAt(i);
+            if (nr.legacyType != TYPE_NONE && nr.isRequest()) {
+                // legacy type tracker filters out repeat adds
+                mLegacyTypeTracker.add(nr.legacyType, nai);
+            }
+        }
+
+        // A VPN generally won't get added to the legacy tracker in the "for (nri)" loop above,
+        // because usually there are no NetworkRequests it satisfies (e.g., mDefaultRequest
+        // wants the NOT_VPN capability, so it will never be satisfied by a VPN). So, add the
+        // newNetwork to the tracker explicitly (it's a no-op if it has already been added).
+        if (nai.isVPN()) {
+            mLegacyTypeTracker.add(TYPE_VPN, nai);
         }
     }
 
