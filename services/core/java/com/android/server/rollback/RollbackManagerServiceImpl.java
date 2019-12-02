@@ -84,11 +84,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * Implementation of service that manages APK level rollbacks.
@@ -301,6 +300,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         registerTimeChangeReceiver();
     }
 
+    private <U> U awaitResult(Supplier<U> supplier) {
+        assertNotInWorkerThread();
+        try {
+            return CompletableFuture.supplyAsync(supplier, mExecutor).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void awaitResult(Runnable runnable) {
         assertNotInWorkerThread();
         try {
@@ -363,16 +371,19 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     public ParceledListSlice getAvailableRollbacks() {
         assertNotInWorkerThread();
         enforceManageRollbacks("getAvailableRollbacks");
-        synchronized (mLock) {
-            List<RollbackInfo> rollbacks = new ArrayList<>();
-            for (int i = 0; i < mRollbacks.size(); ++i) {
-                Rollback rollback = mRollbacks.get(i);
-                if (rollback.isAvailable()) {
-                    rollbacks.add(rollback.info);
+        return awaitResult(() -> {
+            assertInWorkerThread();
+            synchronized (mLock) {
+                List<RollbackInfo> rollbacks = new ArrayList<>();
+                for (int i = 0; i < mRollbacks.size(); ++i) {
+                    Rollback rollback = mRollbacks.get(i);
+                    if (rollback.isAvailable()) {
+                        rollbacks.add(rollback.info);
+                    }
                 }
+                return new ParceledListSlice<>(rollbacks);
             }
-            return new ParceledListSlice<>(rollbacks);
-        }
+        });
     }
 
     @ExtThread
@@ -381,16 +392,19 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         assertNotInWorkerThread();
         enforceManageRollbacks("getRecentlyCommittedRollbacks");
 
-        synchronized (mLock) {
-            List<RollbackInfo> rollbacks = new ArrayList<>();
-            for (int i = 0; i < mRollbacks.size(); ++i) {
-                Rollback rollback = mRollbacks.get(i);
-                if (rollback.isCommitted()) {
-                    rollbacks.add(rollback.info);
+        return awaitResult(() -> {
+            assertInWorkerThread();
+            synchronized (mLock) {
+                List<RollbackInfo> rollbacks = new ArrayList<>();
+                for (int i = 0; i < mRollbacks.size(); ++i) {
+                    Rollback rollback = mRollbacks.get(i);
+                    if (rollback.isCommitted()) {
+                        rollbacks.add(rollback.info);
+                    }
                 }
+                return new ParceledListSlice<>(rollbacks);
             }
-            return new ParceledListSlice<>(rollbacks);
-        }
+        });
     }
 
     @ExtThread
@@ -469,21 +483,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 Manifest.permission.TEST_MANAGE_ROLLBACKS,
                 "reloadPersistedData");
 
-        CountDownLatch latch = new CountDownLatch(1);
-        getHandler().post(() -> {
+        awaitResult(() -> {
             assertInWorkerThread();
             synchronized (mLock) {
                 mRollbacks.clear();
                 mRollbacks.addAll(mRollbackStore.loadRollbacks());
             }
-            latch.countDown();
         });
-
-        try {
-            latch.await();
-        } catch (InterruptedException ie) {
-            throw new IllegalStateException("RollbackManagerHandlerThread interrupted");
-        }
     }
 
     @WorkerThread
@@ -553,8 +559,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // In order to ensure that no package begins running while a backup or restore is taking
         // place, onUnlockUser must remain blocked until all pending backups and restores have
         // completed.
-        CountDownLatch latch = new CountDownLatch(1);
-        getHandler().post(() -> {
+        awaitResult(() -> {
             assertInWorkerThread();
             final List<Rollback> rollbacks;
             synchronized (mLock) {
@@ -565,15 +570,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 Rollback rollback = rollbacks.get(i);
                 rollback.commitPendingBackupAndRestoreForUser(userId, mAppDataRollbackHelper);
             }
-
-            latch.countDown();
         });
-
-        try {
-            latch.await();
-        } catch (InterruptedException ie) {
-            throw new IllegalStateException("RollbackManagerHandlerThread interrupted");
-        }
     }
 
     @WorkerThread
@@ -999,19 +996,17 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("notifyStagedSession may only be called by the system.");
         }
-        final LinkedBlockingQueue<Integer> result = new LinkedBlockingQueue<>();
 
         // NOTE: We post this runnable on the RollbackManager's binder thread because we'd prefer
         // to preserve the invariant that all operations that modify state happen there.
-        getHandler().post(() -> {
+        return awaitResult(() -> {
             assertInWorkerThread();
             PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
 
             final PackageInstaller.SessionInfo session = installer.getSessionInfo(sessionId);
             if (session == null) {
                 Slog.e(TAG, "No matching install session for: " + sessionId);
-                result.offer(-1);
-                return;
+                return -1;
             }
 
             Rollback newRollback;
@@ -1039,18 +1034,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             }
 
             if (!completeEnableRollback(newRollback)) {
-                result.offer(-1);
+                return -1;
             } else {
-                result.offer(newRollback.info.getRollbackId());
+                return newRollback.info.getRollbackId();
             }
         });
-
-        try {
-            return result.take();
-        } catch (InterruptedException ie) {
-            Slog.e(TAG, "Interrupted while waiting for notifyStagedSession response");
-            return -1;
-        }
     }
 
     @ExtThread
@@ -1318,13 +1306,16 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-        synchronized (mLock) {
-            for (Rollback rollback : mRollbacks) {
-                rollback.dump(ipw);
+        awaitResult(() -> {
+            assertInWorkerThread();
+            synchronized (mLock) {
+                for (Rollback rollback : mRollbacks) {
+                    rollback.dump(ipw);
+                }
+                ipw.println();
+                PackageWatchdog.getInstance(mContext).dump(ipw);
             }
-            ipw.println();
-            PackageWatchdog.getInstance(mContext).dump(ipw);
-        }
+        });
     }
 
     @AnyThread
