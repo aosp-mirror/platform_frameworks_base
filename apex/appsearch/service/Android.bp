@@ -21,4 +21,7 @@ java_library {
     "framework",
     "services.core",
   ],
+  static_libs: [
+    "icing-java-proto-lite",
+  ]
 }
