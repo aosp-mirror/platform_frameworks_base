@@ -497,8 +497,17 @@ public abstract class Connection extends Conferenceable {
     @TestApi
     public static final int PROPERTY_REMOTELY_HOSTED = 1 << 11;
 
+    /**
+     * Set by the framework to indicate that it is an adhoc conference call.
+     * <p>
+     * This is used for Outgoing and incoming conference calls.
+     *
+     */
+    public static final int PROPERTY_IS_ADHOC_CONFERENCE = 1 << 12;
+
+
     //**********************************************************************************************
-    // Next PROPERTY value: 1<<12
+    // Next PROPERTY value: 1<<13
     //**********************************************************************************************
 
     /**
@@ -951,6 +960,10 @@ public abstract class Connection extends Conferenceable {
 
         if ((properties & PROPERTY_REMOTELY_HOSTED) == PROPERTY_REMOTELY_HOSTED) {
             builder.append(isLong ? " PROPERTY_REMOTELY_HOSTED" : " remote_hst");
+        }
+
+        if ((properties & PROPERTY_IS_ADHOC_CONFERENCE) == PROPERTY_IS_ADHOC_CONFERENCE) {
+            builder.append(isLong ? " PROPERTY_IS_ADHOC_CONFERENCE" : " adhoc_conf");
         }
 
         builder.append("]");

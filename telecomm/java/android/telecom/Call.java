@@ -548,8 +548,14 @@ public final class Call {
          */
         public static final int PROPERTY_VOIP_AUDIO_MODE = 0x00001000;
 
+        /**
+         * Indicates that the call is an adhoc conference call. This property can be set for both
+         * incoming and outgoing calls.
+         */
+        public static final int PROPERTY_IS_ADHOC_CONFERENCE = 0x00002000;
+
         //******************************************************************************************
-        // Next PROPERTY value: 0x00002000
+        // Next PROPERTY value: 0x00004000
         //******************************************************************************************
 
         private final String mTelecomCallId;
@@ -725,6 +731,9 @@ public final class Call {
             }
             if (hasProperty(properties, PROPERTY_VOIP_AUDIO_MODE)) {
                 builder.append(" PROPERTY_VOIP_AUDIO_MODE");
+            }
+            if (hasProperty(properties, PROPERTY_IS_ADHOC_CONFERENCE)) {
+                builder.append(" PROPERTY_IS_ADHOC_CONFERENCE");
             }
             builder.append("]");
             return builder.toString();
