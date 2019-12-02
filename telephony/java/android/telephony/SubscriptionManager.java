@@ -55,6 +55,7 @@ import android.os.ParcelUuid;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.provider.Telephony.SimInfo;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.util.DisplayMetrics;
@@ -130,7 +131,7 @@ public class SubscriptionManager {
 
     /** @hide */
     @UnsupportedAppUsage
-    public static final Uri CONTENT_URI = Uri.parse("content://telephony/siminfo");
+    public static final Uri CONTENT_URI = SimInfo.CONTENT_URI;
 
     /**
      * Generates a content {@link Uri} used to receive updates on simInfo change
