@@ -263,12 +263,19 @@ filegroup {
 }
 
 filegroup {
+    name: "framework-updatable-sources",
+    srcs: [
+        ":framework-sdkext-sources",
+        ":updatable-media-srcs",
+    ]
+}
+
+filegroup {
     name: "framework-all-sources",
     srcs: [
         ":framework-mime-sources",
         ":framework-non-updatable-sources",
-        ":framework-sdkext-sources",
-        ":updatable-media-srcs",
+        ":framework-updatable-sources",
     ],
 }
 
@@ -979,16 +986,15 @@ packages_to_document = [
 stubs_defaults {
     name: "framework-doc-stubs-default",
     srcs: [
-        ":framework-non-updatable-sources",
         ":framework-mime-sources",
-        ":framework-sdkext-sources",
+        ":framework-non-updatable-sources",
+        ":framework-updatable-sources",
         "core/java/**/*.logtags",
         "test-base/src/**/*.java",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
         ":core-current-stubs-source",
         ":core_public_api_files",
-        ":updatable-media-srcs",
         "test-mock/src/**/*.java",
         "test-runner/src/**/*.java",
     ],
@@ -1046,13 +1052,12 @@ stubs_defaults {
     name: "metalava-api-stubs-default",
     srcs: [
         ":framework-non-updatable-sources",
-        ":framework-sdkext-sources",
+        ":framework-updatable-sources",
         "core/java/**/*.logtags",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
         ":core-current-stubs-source",
         ":core_public_api_files",
-        ":updatable-media-srcs",
         ":ike-api-srcs",
     ],
     libs: ["framework-internal-utils"],
