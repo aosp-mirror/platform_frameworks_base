@@ -1975,4 +1975,27 @@ public class ServiceState implements Parcelable {
     public boolean isIwlanPreferred() {
         return mIsIwlanPreferred;
     }
+     /**
+     * @return {@code true}Returns True whenever the modem is searching for service.
+     * To check both CS and PS domain
+     */
+
+    public boolean isSearching() {
+        NetworkRegistrationInfo psRegState = getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+        if (psRegState != null && psRegState.getRegistrationState()
+                == NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_SEARCHING) {
+            return true;
+        }
+
+        NetworkRegistrationInfo csRegState = getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_CS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+        if (csRegState != null && csRegState.getRegistrationState()
+                == NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_SEARCHING) {
+            return true;
+        }
+        return false;
+    }
 }
