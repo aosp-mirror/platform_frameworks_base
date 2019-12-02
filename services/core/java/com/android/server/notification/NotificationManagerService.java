@@ -8162,7 +8162,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 assistant.onAllowedAdjustmentsChanged();
             } catch (RemoteException ex) {
-                Slog.e(TAG, "unable to notify assistant (capabilities): " + assistant, ex);
+                Slog.e(TAG, "unable to notify assistant (capabilities): " + info, ex);
             }
         }
 
@@ -8172,7 +8172,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 assistant.onNotificationsSeen(keys);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "unable to notify assistant (seen): " + assistant, ex);
+                Slog.e(TAG, "unable to notify assistant (seen): " + info, ex);
             }
         }
 
@@ -8478,7 +8478,7 @@ public class NotificationManagerService extends SystemService {
                         listener.onStatusBarIconsBehaviorChanged(hideSilentStatusIcons);
                     } catch (RemoteException ex) {
                         Slog.e(TAG, "unable to notify listener "
-                                + "(hideSilentStatusIcons): " + listener, ex);
+                                + "(hideSilentStatusIcons): " + info, ex);
                     }
                 });
             }
@@ -8771,7 +8771,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 listener.onNotificationPosted(sbnHolder, rankingUpdate);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "unable to notify listener (posted): " + listener, ex);
+                Slog.e(TAG, "unable to notify listener (posted): " + info, ex);
             }
         }
 
@@ -8785,7 +8785,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 listener.onNotificationRemoved(sbnHolder, rankingUpdate, stats, reason);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "unable to notify listener (removed): " + listener, ex);
+                Slog.e(TAG, "unable to notify listener (removed): " + info, ex);
             }
         }
 
@@ -8795,7 +8795,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 listener.onNotificationRankingUpdate(rankingUpdate);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "unable to notify listener (ranking update): " + listener, ex);
+                Slog.e(TAG, "unable to notify listener (ranking update): " + info, ex);
             }
         }
 
@@ -8804,7 +8804,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 listener.onListenerHintsChanged(hints);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "unable to notify listener (listener hints): " + listener, ex);
+                Slog.e(TAG, "unable to notify listener (listener hints): " + info, ex);
             }
         }
 
@@ -8814,7 +8814,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 listener.onInterruptionFilterChanged(interruptionFilter);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "unable to notify listener (interruption filter): " + listener, ex);
+                Slog.e(TAG, "unable to notify listener (interruption filter): " + info, ex);
             }
         }
 
@@ -8825,7 +8825,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 listener.onNotificationChannelModification(pkg, user, channel, modificationType);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "unable to notify listener (channel changed): " + listener, ex);
+                Slog.e(TAG, "unable to notify listener (channel changed): " + info, ex);
             }
         }
 
@@ -8836,7 +8836,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 listener.onNotificationChannelGroupModification(pkg, user, group, modificationType);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "unable to notify listener (channel group changed): " + listener, ex);
+                Slog.e(TAG, "unable to notify listener (channel group changed): " + info, ex);
             }
         }
 
