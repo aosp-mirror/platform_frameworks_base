@@ -83,7 +83,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -299,6 +301,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         registerTimeChangeReceiver();
     }
 
+    private void awaitResult(Runnable runnable) {
+        assertNotInWorkerThread();
+        try {
+            CompletableFuture.runAsync(runnable, mExecutor).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void assertInWorkerThread() {
         Preconditions.checkState(mHandlerThread.getLooper().isCurrentThread());
     }
@@ -475,11 +486,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
     }
 
-    @Override
-    public void expireRollbackForPackage(String packageName) {
-        mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.TEST_MANAGE_ROLLBACKS,
-                "expireRollbackForPackage");
+    @WorkerThread
+    private void expireRollbackForPackageInternal(String packageName) {
+        assertInWorkerThread();
         synchronized (mLock) {
             Iterator<Rollback> iter = mRollbacks.iterator();
             while (iter.hasNext()) {
@@ -490,6 +499,16 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
             }
         }
+    }
+
+    @ExtThread
+    @Override
+    public void expireRollbackForPackage(String packageName) {
+        assertNotInWorkerThread();
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.TEST_MANAGE_ROLLBACKS,
+                "expireRollbackForPackage");
+        awaitResult(() -> expireRollbackForPackageInternal(packageName));
     }
 
     @ExtThread
@@ -670,7 +689,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @WorkerThread
     private void onPackageFullyRemoved(String packageName) {
         assertInWorkerThread();
-        expireRollbackForPackage(packageName);
+        expireRollbackForPackageInternal(packageName);
     }
 
     /**
