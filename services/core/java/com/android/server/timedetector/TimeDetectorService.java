@@ -149,6 +149,6 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     }
 
     private void enforceSuggestManualTimePermission() {
-        mContext.enforceCallingPermission(android.Manifest.permission.SET_TIME, "set time");
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SET_TIME, "set time");
     }
 }
