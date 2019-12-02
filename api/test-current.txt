@@ -2832,6 +2832,23 @@ package android.telecom {
     field public static final int PROPERTY_REMOTELY_HOSTED = 2048; // 0x800
   }
 
+  public final class ConnectionRequest implements android.os.Parcelable {
+    method @Nullable public String getTelecomCallId();
+  }
+
+  public static final class ConnectionRequest.Builder {
+    ctor public ConnectionRequest.Builder();
+    method @NonNull public android.telecom.ConnectionRequest build();
+    method @NonNull public android.telecom.ConnectionRequest.Builder setAccountHandle(@NonNull android.telecom.PhoneAccountHandle);
+    method @NonNull public android.telecom.ConnectionRequest.Builder setAddress(@NonNull android.net.Uri);
+    method @NonNull public android.telecom.ConnectionRequest.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public android.telecom.ConnectionRequest.Builder setRttPipeFromInCall(@NonNull android.os.ParcelFileDescriptor);
+    method @NonNull public android.telecom.ConnectionRequest.Builder setRttPipeToInCall(@NonNull android.os.ParcelFileDescriptor);
+    method @NonNull public android.telecom.ConnectionRequest.Builder setShouldShowIncomingCallUi(boolean);
+    method @NonNull public android.telecom.ConnectionRequest.Builder setTelecomCallId(@NonNull String);
+    method @NonNull public android.telecom.ConnectionRequest.Builder setVideoState(int);
+  }
+
   public static class PhoneAccount.Builder {
     method @NonNull public android.telecom.PhoneAccount.Builder setGroupId(@NonNull String);
   }
@@ -2845,6 +2862,7 @@ package android.telecom {
   }
 
   public class TelecomManager {
+    method @NonNull @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts(boolean);
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getCurrentTtyMode();
     method @Nullable @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getDefaultDialerPackage(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isInEmergencyCall();
