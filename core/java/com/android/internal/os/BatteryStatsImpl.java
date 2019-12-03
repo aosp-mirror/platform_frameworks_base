@@ -10801,10 +10801,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 mHasWifiReporting = true;
 
                 // Measured in mAms
-                final long txTimeMs = info.getControllerTxTimeMillis();
-                final long rxTimeMs = info.getControllerRxTimeMillis();
-                final long scanTimeMs = info.getControllerScanTimeMillis();
-                final long idleTimeMs = info.getControllerIdleTimeMillis();
+                final long txTimeMs = info.getControllerTxDurationMillis();
+                final long rxTimeMs = info.getControllerRxDurationMillis();
+                final long scanTimeMs = info.getControllerScanDurationMillis();
+                final long idleTimeMs = info.getControllerIdleDurationMillis();
                 final long totalTimeMs = txTimeMs + rxTimeMs + idleTimeMs;
 
                 long leftOverRxTimeMs = rxTimeMs;
@@ -10947,13 +10947,14 @@ public class BatteryStatsImpl extends BatteryStats {
 
 
                 // Update WiFi controller stats.
-                mWifiActivity.getRxTimeCounter().addCountLocked(info.getControllerRxTimeMillis());
+                mWifiActivity.getRxTimeCounter().addCountLocked(
+                        info.getControllerRxDurationMillis());
                 mWifiActivity.getTxTimeCounters()[0].addCountLocked(
-                        info.getControllerTxTimeMillis());
+                        info.getControllerTxDurationMillis());
                 mWifiActivity.getScanTimeCounter().addCountLocked(
-                    info.getControllerScanTimeMillis());
+                        info.getControllerScanDurationMillis());
                 mWifiActivity.getIdleTimeCounter().addCountLocked(
-                        info.getControllerIdleTimeMillis());
+                        info.getControllerIdleDurationMillis());
 
                 // POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE is measured in mV, so convert to V.
                 final double opVolt = mPowerProfile.getAveragePower(
@@ -10961,7 +10962,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 if (opVolt != 0) {
                     // We store the power drain as mAms.
                     mWifiActivity.getPowerCounter().addCountLocked(
-                            (long) (info.getControllerEnergyUsed() / opVolt));
+                            (long) (info.getControllerEnergyUsedMicroJoules() / opVolt));
                 }
                 // Converting uWs to mAms.
                 // Conversion: (uWs * (1000ms / 1s) * (1mW / 1000uW)) / mV = mAms
