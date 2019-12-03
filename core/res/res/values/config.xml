@@ -2148,8 +2148,6 @@
     <integer name="config_dreamsBatteryLevelDrainCutoff">5</integer>
     <!-- Limit of how long the device can remain unlocked due to attention checking.  -->
     <integer name="config_attentionMaximumExtension">330000</integer> <!-- 5 minutes and 30 sec.-->
-    <!-- How long we should wait until we give up on receiving an attention API callback.  -->
-    <integer name="config_attentionApiTimeout">2000</integer> <!-- 2 seconds -->
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead

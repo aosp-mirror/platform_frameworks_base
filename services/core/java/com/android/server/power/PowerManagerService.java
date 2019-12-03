@@ -2140,9 +2140,11 @@ public final class PowerManagerService extends SystemService
                     nextTimeout = -1;
                 }
 
-                if ((mUserActivitySummary & USER_ACTIVITY_SCREEN_BRIGHT) != 0
+                if (((mUserActivitySummary & USER_ACTIVITY_SCREEN_BRIGHT) != 0
+                        || (mUserActivitySummary & USER_ACTIVITY_SCREEN_DIM) != 0)
                         && (mWakeLockSummary & WAKE_LOCK_STAY_AWAKE) == 0) {
-                    nextTimeout = mAttentionDetector.updateUserActivity(nextTimeout);
+                    nextTimeout = mAttentionDetector.updateUserActivity(nextTimeout,
+                            screenDimDuration);
                 }
 
                 if (nextProfileTimeout > 0) {
