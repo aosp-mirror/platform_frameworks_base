@@ -6198,7 +6198,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void sendUpdatedScoreToFactories(NetworkRequest networkRequest, NetworkAgentInfo nai) {
+    private void sendUpdatedScoreToFactories(@NonNull NetworkRequest networkRequest,
+            @Nullable NetworkAgentInfo nai) {
         int score = 0;
         int serial = 0;
         if (nai != null) {
@@ -6567,12 +6568,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (!newSatisfier.addRequest(nri.request)) {
                     Slog.wtf(TAG, "BUG: " + newSatisfier.name() + " already has " + nri.request);
                 }
-                // Tell NetworkProviders about the new score, so they can stop
-                // trying to connect if they know they cannot match it.
-                // TODO - this could get expensive if we have a lot of requests for this
-                // network.  Think about if there is a way to reduce this.  Push
-                // netid->request mapping to each provider?
-                sendUpdatedScoreToFactories(nri.request, newSatisfier);
             } else {
                 // If "newNetwork" is listed as satisfying "nri" but no longer satisfies "nri",
                 // mark it as no longer satisfying "nri".  Because networks are processed by
@@ -6588,8 +6583,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 newNetwork.removeRequest(nri.request.requestId);
                 nri.mSatisfier = null;
                 if (isDefaultRequest(nri)) mDefaultNetworkNai = null;
-                sendUpdatedScoreToFactories(nri.request, null);
             }
+            // Tell NetworkProviders about the new score, so they can stop
+            // trying to connect if they know they cannot match it.
+            // TODO - this could get expensive if there are a lot of outstanding requests for this
+            // network. Think of a way to reduce this. Push netid->request mapping to each factory?
+            sendUpdatedScoreToFactories(nri.request, newSatisfier);
         }
     }
 
