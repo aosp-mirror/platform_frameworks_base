@@ -179,6 +179,7 @@ public class ZenLog {
             case TYPE_SUPPRESSOR_CHANGED: return "suppressor_changed";
             case TYPE_LISTENER_HINTS_CHANGED: return "listener_hints_changed";
             case TYPE_SET_NOTIFICATION_POLICY: return "set_notification_policy";
+            case TYPE_SET_CONSOLIDATED_ZEN_POLICY: return "set_consolidated_policy";
             default: return "unknown";
         }
     }

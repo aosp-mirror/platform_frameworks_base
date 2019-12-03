@@ -26,6 +26,8 @@ import android.util.ArrayMap;
 import android.util.Base64;
 import android.util.Xml;
 
+import libcore.util.HexEncoding;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -396,16 +398,7 @@ public class XmlUtils {
         final int N = val.length;
         out.attribute(null, "num", Integer.toString(N));
 
-        StringBuilder sb = new StringBuilder(val.length*2);
-        for (int i=0; i<N; i++) {
-            int b = val[i];
-            int h = (b >> 4) & 0x0f;
-            sb.append((char)(h >= 10 ? ('a'+h-10) : ('0'+h)));
-            h = b & 0x0f;
-            sb.append((char)(h >= 10 ? ('a'+h-10) : ('0'+h)));
-        }
-
-        out.text(sb.toString());
+        out.text(HexEncoding.encodeToString(val).toLowerCase());
 
         out.endTag(null, "byte-array");
     }
@@ -1032,7 +1025,9 @@ public class XmlUtils {
                     "Not a number in num attribute in byte-array");
         }
 
-        byte[] array = new byte[num];
+        // 0 len byte array does not have a text in the XML tag. So, initialize to 0 len array.
+        // For all other array lens, HexEncoding.decode() below overrides the array.
+        byte[] array = new byte[0];
 
         int eventType = parser.getEventType();
         do {
@@ -1043,16 +1038,7 @@ public class XmlUtils {
                         throw new XmlPullParserException(
                                 "Invalid value found in byte-array: " + values);
                     }
-                    // This is ugly, but keeping it to mirror the logic in #writeByteArrayXml.
-                    for (int i = 0; i < num; i ++) {
-                        char nibbleHighChar = values.charAt(2 * i);
-                        char nibbleLowChar = values.charAt(2 * i + 1);
-                        int nibbleHigh = nibbleHighChar > 'a' ? (nibbleHighChar - 'a' + 10)
-                                : (nibbleHighChar - '0');
-                        int nibbleLow = nibbleLowChar > 'a' ? (nibbleLowChar - 'a' + 10)
-                                : (nibbleLowChar - '0');
-                        array[i] = (byte) ((nibbleHigh & 0x0F) << 4 | (nibbleLow & 0x0F));
-                    }
+                    array = HexEncoding.decode(values);
                 }
             } else if (eventType == parser.END_TAG) {
                 if (parser.getName().equals(endTag)) {

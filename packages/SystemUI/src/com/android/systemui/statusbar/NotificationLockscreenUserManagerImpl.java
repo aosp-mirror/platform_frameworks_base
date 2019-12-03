@@ -58,10 +58,14 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Handles keeping track of the current user, profiles, and various things related to hiding
  * contents, redacting notifications, and the lockscreen.
  */
+@Singleton
 public class NotificationLockscreenUserManagerImpl implements
         Dumpable, NotificationLockscreenUserManager, StateListener {
     private static final String TAG = "LockscreenUserManager";
@@ -171,6 +175,7 @@ public class NotificationLockscreenUserManagerImpl implements
         return mEntryManager;
     }
 
+    @Inject
     public NotificationLockscreenUserManagerImpl(Context context) {
         mContext = context;
         mDevicePolicyManager = (DevicePolicyManager) mContext.getSystemService(

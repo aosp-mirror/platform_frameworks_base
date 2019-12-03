@@ -28,7 +28,7 @@
     <string name="recents_empty_message" msgid="7967713254531861311">"Keine kürzlich verwendeten Elemente"</string>
     <string name="recents_empty_message_dismissed_all" msgid="1850214584987361375">"Du hast alles gelöscht"</string>
     <string name="recents_app_info_button_label" msgid="8732926607391786762">"App-Info"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6087750201863853365">"Bildschirm anpinnen"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6087750201863853365">"Bildschirmfixierung"</string>
     <string name="recents_search_bar_label" msgid="638132045925945941">"Suchen"</string>
     <string name="recents_launch_error_message" msgid="9107963563503438012">"<xliff:g id="APP">%s</xliff:g> konnte nicht gestartet werden."</string>
     <string name="recents_launch_disabled_message" msgid="826461671965217243">"<xliff:g id="APP">%s</xliff:g> ist im abgesicherten Modus deaktiviert."</string>

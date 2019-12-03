@@ -110,7 +110,9 @@ class HighRefreshRateBlacklist {
     private class OnPropertyChangedListener implements DeviceConfig.OnPropertyChangedListener {
         public void onPropertyChanged(@NonNull String namespace, @NonNull String name,
                 @Nullable String value) {
-            updateBlacklist(value);
+            if (KEY_HIGH_REFRESH_RATE_BLACKLIST.equals(name)) {
+                updateBlacklist(value);
+            }
         }
     }
 }

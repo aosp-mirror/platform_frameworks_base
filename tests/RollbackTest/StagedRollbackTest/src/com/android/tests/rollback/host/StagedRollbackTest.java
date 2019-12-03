@@ -26,6 +26,7 @@ import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -68,6 +69,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      * Tests watchdog triggered staged rollbacks involving only apks.
      */
     @Test
+    @Ignore("b/139175593 flaky test")
     public void testBadApkOnly() throws Exception {
         runPhase("testBadApkOnlyEnableRollback");
         getDevice().reboot();

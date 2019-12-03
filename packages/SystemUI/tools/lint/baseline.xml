@@ -2685,39 +2685,6 @@
 
     <issue
         id="UnusedResources"
-        message="The resource `R.dimen.volume_dialog_base_margin` appears to be unused"
-        errorLine1="    &lt;dimen name=&quot;volume_dialog_base_margin&quot;>8dp&lt;/dimen>"
-        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="res/values/dimens.xml"
-            line="308"
-            column="12"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.dimen.volume_dialog_row_height` appears to be unused"
-        errorLine1="    &lt;dimen name=&quot;volume_dialog_row_height&quot;>252dp&lt;/dimen>"
-        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="res/values/dimens.xml"
-            line="314"
-            column="12"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.dimen.volume_dialog_settings_icon_size` appears to be unused"
-        errorLine1="    &lt;dimen name=&quot;volume_dialog_settings_icon_size&quot;>16dp&lt;/dimen>"
-        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="res/values/dimens.xml"
-            line="328"
-            column="12"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
         message="The resource `R.dimen.carrier_label_height` appears to be unused"
         errorLine1="    &lt;dimen name=&quot;carrier_label_height&quot;>24dp&lt;/dimen>"
         errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~">

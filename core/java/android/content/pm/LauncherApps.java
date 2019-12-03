@@ -503,9 +503,38 @@ public class LauncherApps {
     }
 
     /**
-     * Retrieves a list of launchable activities that match {@link Intent#ACTION_MAIN} and
-     * {@link Intent#CATEGORY_LAUNCHER}, for a specified user. Result may include
-     * synthesized activities like app details Activity injected by system.
+     * Retrieves a list of activities that specify {@link Intent#ACTION_MAIN} and
+     * {@link Intent#CATEGORY_LAUNCHER}, across all apps, for a specified user. If an app doesn't
+     * have any activities that specify <code>ACTION_MAIN</code> or <code>CATEGORY_LAUNCHER</code>,
+     * the system adds a synthesized activity to the list. This synthesized activity represents the
+     * app's details page within system settings.
+     *
+     * <p class="note"><b>Note: </b>It's possible for system apps, such as app stores, to prevent
+     * the system from adding synthesized activities to the returned list.</p>
+     *
+     * <p>As of <a href="/reference/android/os/Build.VERSION_CODES.html#Q">Android Q</a>, at least
+     * one of the app's activities or synthesized activities appears in the returned list unless the
+     * app satisfies at least one of the following conditions:</p>
+     * <ul>
+     * <li>The app is a system app.</li>
+     * <li>The app doesn't request any <a href="/guide/topics/permissions/overview">permissions</a>.
+     * </li>
+     * <li>The app doesn't have a <em>launcher activity</em> that is enabled by default. A launcher
+     * activity has an intent containing the <code>ACTION_MAIN</code> action and the
+     * <code>CATEGORY_LAUNCHER</code> category.</li>
+     * </ul>
+     *
+     * <p>Additionally, the system hides synthesized activities for some or all apps in the
+     * following enterprise-related cases:</p>
+     * <ul>
+     * <li>If the device is a
+     * <a href="https://developers.google.com/android/work/overview#company-owned-devices-for-knowledge-workers">fully
+     * managed device</a>, no synthesized activities for any app appear in the returned list.</li>
+     * <li>If the current user has a
+     * <a href="https://developers.google.com/android/work/overview#employee-owned-devices-byod">work
+     * profile</a>, no synthesized activities for the user's work apps appear in the returned
+     * list.</li>
+     * </ul>
      *
      * @param packageName The specific package to query. If null, it checks all installed packages
      *            in the profile.

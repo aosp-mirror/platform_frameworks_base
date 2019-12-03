@@ -40,6 +40,7 @@ import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.systemui.R;
 
 
 /**

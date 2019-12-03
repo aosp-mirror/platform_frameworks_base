@@ -39,6 +39,7 @@ import android.widget.FrameLayout;
 import android.widget.TextClock;
 
 import com.android.keyguard.clock.ClockManager;
+import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ClockPlugin;

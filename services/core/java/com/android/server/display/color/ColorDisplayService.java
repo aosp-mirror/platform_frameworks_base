@@ -609,6 +609,9 @@ public final class ColorDisplayService extends SystemService {
 
                 @Override
                 public void onAnimationEnd(Animator animator) {
+                    Slog.d(TAG, tintController.getClass().getSimpleName()
+                            + " Animation cancelled: " + mIsCancelled
+                            + " to matrix: " + TintController.matrixToString(to, 16));
                     if (!mIsCancelled) {
                         // Ensure final color matrix is set at the end of the animation. If the
                         // animation is cancelled then don't set the final color matrix so the new
@@ -1314,8 +1317,10 @@ public final class ColorDisplayService extends SystemService {
          * Reset the CCT value for the display white balance transform to its default value.
          */
         public boolean resetDisplayWhiteBalanceColorTemperature() {
-            return setDisplayWhiteBalanceColorTemperature(getContext().getResources()
-                    .getInteger(R.integer.config_displayWhiteBalanceColorTemperatureDefault));
+            int temperatureDefault = getContext().getResources()
+                    .getInteger(R.integer.config_displayWhiteBalanceColorTemperatureDefault);
+            Slog.d(TAG, "resetDisplayWhiteBalanceColorTemperature: " + temperatureDefault);
+            return setDisplayWhiteBalanceColorTemperature(temperatureDefault);
         }
 
         /**

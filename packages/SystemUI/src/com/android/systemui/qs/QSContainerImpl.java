@@ -111,11 +111,23 @@ public class QSContainerImpl extends FrameLayout {
                 + mQSPanel.getMeasuredHeight() + getPaddingBottom();
         super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-
         // QSCustomizer will always be the height of the screen, but do this after
         // other measuring to avoid changing the height of the QS.
         mQSCustomizer.measure(widthMeasureSpec,
                 MeasureSpec.makeMeasureSpec(getDisplayHeight(), MeasureSpec.EXACTLY));
+    }
+
+
+    @Override
+    protected void measureChildWithMargins(View child, int parentWidthMeasureSpec, int widthUsed,
+            int parentHeightMeasureSpec, int heightUsed) {
+        // Do not measure QSPanel again when doing super.onMeasure.
+        // This prevents the pages in PagedTileLayout to be remeasured with a different (incorrect)
+        // size to the one used for determining the number of rows and then the number of pages.
+        if (child != mQSPanel) {
+            super.measureChildWithMargins(child, parentWidthMeasureSpec, widthUsed,
+                    parentHeightMeasureSpec, heightUsed);
+        }
     }
 
     @Override

@@ -107,7 +107,7 @@ public class DynamicPrivacyController implements UnlockMethodCache.OnUnlockMetho
      */
     public boolean isInLockedDownShade() {
         if (!mStatusBarKeyguardViewManager.isShowing()
-                || !mStatusBarKeyguardViewManager.isSecure()) {
+                || !mUnlockMethodCache.isMethodSecure()) {
             return false;
         }
         int state = mStateController.getState();

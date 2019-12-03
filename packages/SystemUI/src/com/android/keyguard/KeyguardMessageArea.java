@@ -31,6 +31,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.lang.ref.WeakReference;

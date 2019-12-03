@@ -829,23 +829,36 @@ public final class DisplayManager {
     public interface DeviceConfig {
 
         /**
-         * Key for accessing the 60 hz only regions.
+         * Key for refresh rate in the zone defined by thresholds.
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER
+         * @see android.R.integer#config_defaultZoneBehavior
+         */
+        String KEY_REFRESH_RATE_IN_ZONE = "refresh_rate_in_zone";
+
+        /**
+         * Key for accessing the display brightness thresholds for the configured refresh rate zone.
+         * The value will be a pair of comma separated integers representing the minimum and maximum
+         * thresholds of the zone, respectively, in display backlight units (i.e. [0, 255]).
          *
          * @see android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER
          * @see android.R.array#config_brightnessThresholdsOfPeakRefreshRate
          * @hide
          */
-        String KEY_PEAK_REFRESH_RATE_BRIGHTNESS_THRESHOLDS =
+        String KEY_PEAK_REFRESH_RATE_DISPLAY_BRIGHTNESS_THRESHOLDS =
                 "peak_refresh_rate_brightness_thresholds";
 
         /**
-         * Key for accessing the 60 hz only regions.
+         * Key for accessing the ambient brightness thresholds for the configured refresh rate zone.
+         * The value will be a pair of comma separated integers representing the minimum and maximum
+         * thresholds of the zone, respectively, in lux.
          *
          * @see android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER
-         * @see android.R.array#config_brightnessThresholdsOfPeakRefreshRate
+         * @see android.R.array#config_ambientThresholdsOfPeakRefreshRate
          * @hide
          */
-        String KEY_PEAK_REFRESH_RATE_AMBIENT_THRESHOLDS = "peak_refresh_rate_ambient_thresholds";
+        String KEY_PEAK_REFRESH_RATE_AMBIENT_BRIGHTNESS_THRESHOLDS =
+                "peak_refresh_rate_ambient_thresholds";
 
         /**
          * Key for default peak refresh rate

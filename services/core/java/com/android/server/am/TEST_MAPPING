@@ -14,9 +14,6 @@
         },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-filter": "android.app.cts.SystemFeaturesTest#testLocationFeatures"
         }
       ]
     },

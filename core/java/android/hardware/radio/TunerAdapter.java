@@ -271,6 +271,8 @@ class TunerAdapter extends RadioTuner {
             mCallback.setProgramListObserver(list, () -> {
                 try {
                     mTuner.stopProgramListUpdates();
+                } catch (IllegalStateException ex) {
+                    // it's fine to not stop updates if tuner is already closed
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Couldn't stop program list updates", ex);
                 }

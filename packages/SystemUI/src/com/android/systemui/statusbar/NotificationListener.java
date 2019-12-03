@@ -37,11 +37,15 @@ import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * This class handles listening to notification updates and passing them along to
  * NotificationPresenter to be displayed to the user.
  */
 @SuppressLint("OverrideAbstract")
+@Singleton
 public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
 
@@ -56,6 +60,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     private final ArrayList<NotificationSettingsListener> mSettingsListeners = new ArrayList<>();
     private final Context mContext;
 
+    @Inject
     public NotificationListener(Context context) {
         mContext = context;
     }

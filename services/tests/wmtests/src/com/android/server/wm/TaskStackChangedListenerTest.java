@@ -271,6 +271,54 @@ public class TaskStackChangedListenerTest {
         waitForCallback(singleTaskDisplayDrawnLatch);
     }
 
+    @Test
+    public void testSingleTaskDisplayEmpty() throws Exception {
+        final Instrumentation instrumentation = getInstrumentation();
+
+        final CountDownLatch activityViewReadyLatch = new CountDownLatch(1);
+        final CountDownLatch activityViewDestroyedLatch = new CountDownLatch(1);
+        final CountDownLatch singleTaskDisplayDrawnLatch = new CountDownLatch(1);
+        final CountDownLatch singleTaskDisplayEmptyLatch = new CountDownLatch(1);
+
+        registerTaskStackChangedListener(new TaskStackListener() {
+            @Override
+            public void onSingleTaskDisplayDrawn(int displayId) throws RemoteException {
+                singleTaskDisplayDrawnLatch.countDown();
+            }
+            @Override
+            public void onSingleTaskDisplayEmpty(int displayId)
+                    throws RemoteException {
+                singleTaskDisplayEmptyLatch.countDown();
+            }
+        });
+        final ActivityViewTestActivity activity =
+                (ActivityViewTestActivity) startTestActivity(ActivityViewTestActivity.class);
+        final ActivityView activityView = activity.getActivityView();
+        activityView.setCallback(new ActivityView.StateCallback() {
+            @Override
+            public void onActivityViewReady(ActivityView view) {
+                activityViewReadyLatch.countDown();
+            }
+
+            @Override
+            public void onActivityViewDestroyed(ActivityView view) {
+                activityViewDestroyedLatch.countDown();
+            }
+        });
+        waitForCallback(activityViewReadyLatch);
+
+        final Context context = instrumentation.getContext();
+        Intent intent = new Intent(context, ActivityInActivityView.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        activityView.startActivity(intent);
+        waitForCallback(singleTaskDisplayDrawnLatch);
+        assertEquals(1, singleTaskDisplayEmptyLatch.getCount());
+
+        activityView.release();
+        waitForCallback(activityViewDestroyedLatch);
+        waitForCallback(singleTaskDisplayEmptyLatch);
+    }
+
     /**
      * Starts the provided activity and returns the started instance.
      */

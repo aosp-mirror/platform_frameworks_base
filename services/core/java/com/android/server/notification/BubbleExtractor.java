@@ -41,10 +41,9 @@ public class BubbleExtractor implements NotificationSignalExtractor {
             if (DBG) Slog.d(TAG, "missing config");
             return null;
         }
-        boolean userWantsBubbles = mConfig.bubblesEnabled(record.sbn.getUser());
         boolean appCanShowBubble =
                 mConfig.areBubblesAllowed(record.sbn.getPackageName(), record.sbn.getUid());
-        if (!userWantsBubbles || !appCanShowBubble) {
+        if (!mConfig.bubblesEnabled() || !appCanShowBubble) {
             record.setAllowBubble(false);
         } else {
             if (record.getChannel() != null) {

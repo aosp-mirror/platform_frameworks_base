@@ -20,6 +20,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.text.format.DateFormat;
 import android.util.FloatProperty;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Interpolator;
 
@@ -135,6 +136,11 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
 
         // Record the to-be mState and mLastState
         recordHistoricalState(state, mState);
+
+        // b/139259891
+        if (mState == StatusBarState.SHADE && state == StatusBarState.SHADE_LOCKED) {
+            Log.e(TAG, "Invalid state transition: SHADE -> SHADE_LOCKED", new Throwable());
+        }
 
         synchronized (mListeners) {
             for (RankedListener rl : new ArrayList<>(mListeners)) {

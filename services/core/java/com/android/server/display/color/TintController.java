@@ -18,6 +18,7 @@ package com.android.server.display.color;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.util.Slog;
 
 import java.io.PrintWriter;
 
@@ -95,4 +96,29 @@ abstract class TintController {
      * Returns whether or not this transform type is available on this device.
      */
     public abstract boolean isAvailable(Context context);
+
+    /**
+     * Format a given matrix into a string.
+     *
+     * @param matrix the matrix to format
+     * @param columns number of columns in the matrix
+     */
+    static String matrixToString(float[] matrix, int columns) {
+        if (matrix == null || columns <= 0) {
+            Slog.e(ColorDisplayService.TAG, "Invalid arguments when formatting matrix to string,"
+                    + " matrix is null: " + (matrix == null)
+                    + " columns: " + columns);
+            return "";
+        }
+
+        final StringBuilder sb = new StringBuilder("");
+        for (int i = 0; i < matrix.length; i++) {
+            if (i % columns == 0) {
+                sb.append("\n      ");
+            }
+            sb.append(String.format("%9.6f", matrix[i]));
+        }
+        return sb.toString();
+    }
+
 }

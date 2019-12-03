@@ -106,6 +106,7 @@ public class PipTouchState {
                 mIsDoubleTap = !mPreviouslyDragging &&
                         (mDownTouchTime - mLastDownTouchTime) < DOUBLE_TAP_TIMEOUT;
                 mIsWaitingForDoubleTap = false;
+                mIsDragging = false;
                 mLastDownTouchTime = mDownTouchTime;
                 if (mDoubleTapTimeoutCallback != null) {
                     mHandler.removeCallbacks(mDoubleTapTimeoutCallback);

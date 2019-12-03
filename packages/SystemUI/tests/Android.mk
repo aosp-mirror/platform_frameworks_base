@@ -39,7 +39,7 @@ LOCAL_JAVA_LIBRARIES := \
     telephony-common \
     android.test.base \
 
-LOCAL_AAPT_FLAGS := --extra-packages com.android.systemui:com.android.keyguard
+LOCAL_AAPT_FLAGS := --extra-packages com.android.systemui
 
 # sign this with platform cert, so this test is allowed to inject key events into
 # UI it doesn't own. This is necessary to allow screenshots to be taken

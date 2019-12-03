@@ -133,11 +133,6 @@ public class NotificationFilter {
                 }
             }
         }
-
-        if (entry.isBubble() && !entry.showInShadeWhenBubble()) {
-            return true;
-        }
-
         return false;
     }
 

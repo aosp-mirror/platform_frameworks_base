@@ -1294,10 +1294,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tap to see all networks"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Connect"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"All networks"</string>
-    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Connect to Wi‑Fi networks?"</string>
+    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Suggested by <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Yes"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi will turn on automatically"</string>

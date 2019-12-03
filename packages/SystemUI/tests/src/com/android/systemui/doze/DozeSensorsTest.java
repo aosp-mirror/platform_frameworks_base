@@ -19,7 +19,6 @@ package com.android.systemui.doze;
 import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_LOCK_SCREEN;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -79,8 +78,6 @@ public class DozeSensorsTest extends SysuiTestCase {
     private AlwaysOnDisplayPolicy mAlwaysOnDisplayPolicy;
     @Mock
     private TriggerSensor mTriggerSensor;
-    @Mock
-    private TriggerSensor mProxGatedTriggerSensor;
     private SensorManagerPlugin.SensorEventListener mWakeLockScreenListener;
     private TestableLooper mTestableLooper;
     private DozeSensors mDozeSensors;
@@ -88,7 +85,6 @@ public class DozeSensorsTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mProxGatedTriggerSensor.performsProxCheck()).thenReturn(true);
         mTestableLooper = TestableLooper.get(this);
         when(mAmbientDisplayConfiguration.getWakeLockScreenDebounce()).thenReturn(5000L);
         when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
@@ -106,14 +102,14 @@ public class DozeSensorsTest extends SysuiTestCase {
         mWakeLockScreenListener.onSensorChanged(mock(SensorManagerPlugin.SensorEvent.class));
         mTestableLooper.processAllMessages();
         verify(mCallback).onSensorPulse(eq(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN),
-                anyBoolean(), anyFloat(), anyFloat(), eq(null));
+                anyFloat(), anyFloat(), eq(null));
 
         mDozeSensors.requestTemporaryDisable();
         reset(mCallback);
         mWakeLockScreenListener.onSensorChanged(mock(SensorManagerPlugin.SensorEvent.class));
         mTestableLooper.processAllMessages();
         verify(mCallback, never()).onSensorPulse(eq(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN),
-                anyBoolean(), anyFloat(), anyFloat(), eq(null));
+                anyFloat(), anyFloat(), eq(null));
     }
 
     @Test
@@ -132,20 +128,17 @@ public class DozeSensorsTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetPaused_onlyPausesNonGatedSensors() {
+    public void testSetPaused_doesntPause_sensors() {
         mDozeSensors.setListening(true);
         verify(mTriggerSensor).setListening(eq(true));
-        verify(mProxGatedTriggerSensor).setListening(eq(true));
 
-        clearInvocations(mTriggerSensor, mProxGatedTriggerSensor);
+        clearInvocations(mTriggerSensor);
         mDozeSensors.setPaused(true);
-        verify(mTriggerSensor).setListening(eq(false));
-        verify(mProxGatedTriggerSensor).setListening(eq(true));
-
-        clearInvocations(mTriggerSensor, mProxGatedTriggerSensor);
-        mDozeSensors.setPaused(false);
         verify(mTriggerSensor).setListening(eq(true));
-        verify(mProxGatedTriggerSensor).setListening(eq(true));
+
+        clearInvocations(mTriggerSensor);
+        mDozeSensors.setListening(false);
+        verify(mTriggerSensor).setListening(eq(false));
     }
 
     private class TestableDozeSensors extends DozeSensors {
@@ -161,7 +154,7 @@ public class DozeSensorsTest extends SysuiTestCase {
                     mWakeLockScreenListener = (PluginSensor) sensor;
                 }
             }
-            mSensors = new TriggerSensor[] {mTriggerSensor, mProxGatedTriggerSensor};
+            mSensors = new TriggerSensor[] {mTriggerSensor};
         }
     }
 }

@@ -217,12 +217,6 @@ static void nativeRelease(JNIEnv* env, jclass clazz, jlong nativeObject) {
     ctrl->decStrong((void *)nativeCreate);
 }
 
-static void nativeDestroy(JNIEnv* env, jclass clazz, jlong nativeObject) {
-    sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(nativeObject));
-    ctrl->destroy();
-    ctrl->decStrong((void *)nativeCreate);
-}
-
 static void nativeDisconnect(JNIEnv* env, jclass clazz, jlong nativeObject) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     if (ctrl != NULL) {
@@ -1268,8 +1262,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeWriteToParcel },
     {"nativeRelease", "(J)V",
             (void*)nativeRelease },
-    {"nativeDestroy", "(J)V",
-            (void*)nativeDestroy },
     {"nativeDisconnect", "(J)V",
             (void*)nativeDisconnect },
     {"nativeCreateTransaction", "()J",

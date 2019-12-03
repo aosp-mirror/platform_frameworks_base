@@ -491,6 +491,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
             params.installFlags &= ~PackageManager.INSTALL_FROM_ADB;
             params.installFlags &= ~PackageManager.INSTALL_ALL_USERS;
+            params.installFlags &= ~PackageManager.INSTALL_ALLOW_TEST;
             params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
             if ((params.installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0
                     && !mPm.isCallerVerifier(callingUid)) {
@@ -503,6 +504,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         } else {
             params.installFlags &= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
             params.installFlags &= ~PackageManager.INSTALL_REQUEST_DOWNGRADE;
+        }
+
+        if (callingUid != Process.SYSTEM_UID) {
+            // Only system_server can use INSTALL_DISABLE_VERIFICATION.
+            params.installFlags &= ~PackageManager.INSTALL_DISABLE_VERIFICATION;
         }
 
         boolean isApex = (params.installFlags & PackageManager.INSTALL_APEX) != 0;

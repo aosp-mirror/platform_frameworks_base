@@ -8,9 +8,6 @@
                 },
                 {
                     "include-filter": "android.media.cts.AudioFocusTest"
-                },
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
                 }
             ]
         }
