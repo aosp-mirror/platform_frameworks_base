@@ -43,7 +43,7 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
     }
 
     @Override
-    public boolean isTimeZoneDetectionEnabled() {
+    public boolean isAutoTimeZoneDetectionEnabled() {
         return Settings.Global.getInt(mCr, Settings.Global.AUTO_TIME_ZONE, 1 /* default */) > 0;
     }
 
@@ -66,14 +66,16 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
     }
 
     @Override
-    public void setDeviceTimeZone(String zoneId) {
+    public void setDeviceTimeZone(String zoneId, boolean sendNetworkBroadcast) {
         AlarmManager alarmManager = mContext.getSystemService(AlarmManager.class);
         alarmManager.setTimeZone(zoneId);
 
-        // TODO Nothing in the platform appears to listen for this. Remove it.
-        Intent intent = new Intent(TelephonyIntents.ACTION_NETWORK_SET_TIMEZONE);
-        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-        intent.putExtra("time-zone", zoneId);
-        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+        if (sendNetworkBroadcast) {
+            // TODO Nothing in the platform appears to listen for this. Remove it.
+            Intent intent = new Intent(TelephonyIntents.ACTION_NETWORK_SET_TIMEZONE);
+            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+            intent.putExtra("time-zone", zoneId);
+            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+        }
     }
 }
