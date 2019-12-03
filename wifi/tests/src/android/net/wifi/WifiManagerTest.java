@@ -87,6 +87,7 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.connectivity.WifiActivityEnergyInfo;
 import android.os.test.TestLooper;
 
 import androidx.test.filters.SmallTest;

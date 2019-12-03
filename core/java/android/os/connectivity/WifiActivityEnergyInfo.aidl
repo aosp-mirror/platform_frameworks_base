@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.net.wifi;
+package android.os.connectivity;
 
 parcelable WifiActivityEnergyInfo;

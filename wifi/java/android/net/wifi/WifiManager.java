@@ -48,6 +48,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.WorkSource;
+import android.os.connectivity.WifiActivityEnergyInfo;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;

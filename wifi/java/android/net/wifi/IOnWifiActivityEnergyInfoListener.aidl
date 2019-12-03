@@ -16,7 +16,7 @@
 
 package android.net.wifi;
 
-import android.net.wifi.WifiActivityEnergyInfo;
+import android.os.connectivity.WifiActivityEnergyInfo;
 
 /**
  * Interface for Wi-Fi activity energy info listener.
