@@ -5644,6 +5644,7 @@ public class ConnectivityServiceTest {
         mCm.unregisterNetworkCallback(defaultCallback);
     }
 
+    @Ignore // 40%+ flakiness : figure out why and re-enable.
     @Test
     public final void testBatteryStatsNetworkType() throws Exception {
         final LinkProperties cellLp = new LinkProperties();
