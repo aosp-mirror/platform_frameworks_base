@@ -294,9 +294,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                     AppOpsManager.WATCH_FOREGROUND_CHANGES,
                     new AppOpsManager.OnOpChangedInternalListener() {
                         public void onOpChanged(int op, String packageName) {
-                            // onOpChanged invoked on ui thread, move to our thread to reduce
-                            // risk of
-                            // blocking ui thread
+                            // onOpChanged invoked on ui thread, move to our thread to reduce risk
+                            // of blocking ui thread
                             mHandler.post(() -> {
                                 synchronized (mLock) {
                                     onAppOpChangedLocked();
@@ -307,8 +306,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             mPackageManager.addOnPermissionsChangeListener(
                     uid -> {
                         // listener invoked on ui thread, move to our thread to reduce risk of
-                        // blocking
-                        // ui thread
+                        // blocking ui thread
                         mHandler.post(() -> {
                             synchronized (mLock) {
                                 onPermissionsChangedLocked();
@@ -318,8 +316,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             mActivityManager.addOnUidImportanceListener(
                     (uid, importance) -> {
                         // listener invoked on ui thread, move to our thread to reduce risk of
-                        // blocking
-                        // ui thread
+                        // blocking ui thread
                         mHandler.post(() -> {
                             synchronized (mLock) {
                                 onUidImportanceChangedLocked(uid, importance);
@@ -331,8 +328,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             localPowerManager.registerLowPowerModeObserver(ServiceType.LOCATION,
                     state -> {
                         // listener invoked on ui thread, move to our thread to reduce risk of
-                        // blocking
-                        // ui thread
+                        // blocking ui thread
                         mHandler.post(() -> {
                             synchronized (mLock) {
                                 onBatterySaverModeChangedLocked(state.locationMode);
@@ -341,14 +337,14 @@ public class LocationManagerService extends ILocationManager.Stub {
                     });
             mBatterySaverMode = mPowerManager.getLocationPowerSaveMode();
 
-            mSettingsStore.addOnLocationEnabledChangedListener(() -> {
+            mSettingsStore.addOnLocationEnabledChangedListener((userId) -> {
                 synchronized (mLock) {
-                    onLocationModeChangedLocked(true);
+                    onLocationModeChangedLocked(userId, true);
                 }
             });
-            mSettingsStore.addOnLocationProvidersAllowedChangedListener(() -> {
+            mSettingsStore.addOnLocationProvidersAllowedChangedListener((userId) -> {
                 synchronized (mLock) {
-                    onProviderAllowedChangedLocked();
+                    onProviderAllowedChangedLocked(userId);
                 }
             });
             mSettingsStore.addOnBackgroundThrottleIntervalChangedListener(() -> {
@@ -471,7 +467,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @GuardedBy("mLock")
-    private void onLocationModeChangedLocked(boolean broadcast) {
+    private void onLocationModeChangedLocked(int userId, boolean broadcast) {
+        if (!isCurrentProfileLocked(userId)) {
+            return;
+        }
+
         if (D) {
             Log.d(TAG, "location enabled is now " + isLocationEnabled());
         }
@@ -490,7 +490,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @GuardedBy("mLock")
-    private void onProviderAllowedChangedLocked() {
+    private void onProviderAllowedChangedLocked(int userId) {
+        if (!isCurrentProfileLocked(userId)) {
+            return;
+        }
+
         for (LocationProvider p : mProviders) {
             p.onAllowedChangedLocked();
         }
@@ -803,8 +807,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         onUserProfilesChangedLocked();
 
         // if the user changes, per-user settings may also have changed
-        onLocationModeChangedLocked(false);
-        onProviderAllowedChangedLocked();
+        onLocationModeChangedLocked(userId, false);
+        onProviderAllowedChangedLocked(userId);
 
         // always force useability to be rechecked, even if no per-user settings have changed
         for (LocationProvider p : mProviders) {
