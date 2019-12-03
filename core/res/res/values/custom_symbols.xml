@@ -46,4 +46,7 @@
     <!-- Leds -->
     <java-symbol type="bool" name="config_intrusiveBatteryLed" />
 
+    <!-- Whether to send camera status intent -->
+    <java-symbol type="bool" name="config_sendCameraStatusIntent" />
+
 </resources>
