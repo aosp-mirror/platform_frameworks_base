@@ -533,7 +533,8 @@ public final class SmsCbMessage implements Parcelable {
                 + ", priority=" + mPriority
                 + (mEtwsWarningInfo != null ? (", " + mEtwsWarningInfo.toString()) : "")
                 + (mCmasWarningInfo != null ? (", " + mCmasWarningInfo.toString()) : "")
-                + ", maximumWaitingTime = " + mMaximumWaitTimeSec
+                + ", maximumWaitingTime=" + mMaximumWaitTimeSec
+                + ", received time=" + mReceivedTimeMillis
                 + ", slotIndex = " + mSlotIndex
                 + ", geo=" + (mGeometries != null
                 ? CbGeoUtils.encodeGeometriesToString(mGeometries) : "null")
