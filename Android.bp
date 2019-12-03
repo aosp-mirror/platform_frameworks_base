@@ -444,6 +444,7 @@ java_library {
         "services-platform-compat-config",
         "media-provider-platform-compat-config",
         "services-devicepolicy-platform-compat-config",
+        "services-core-platform-compat-config",
     ],
     static_libs: [
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
