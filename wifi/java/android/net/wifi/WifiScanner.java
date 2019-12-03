@@ -68,7 +68,9 @@ public class WifiScanner {
     /** @hide */
     public static final int WIFI_BAND_INDEX_6_GHZ = 3;
     /** @hide */
-    public static final int WIFI_BAND_COUNT = 4;
+    public static final int WIFI_BAND_INDEX_60_GHZ = 4;
+    /** @hide */
+    public static final int WIFI_BAND_COUNT = 5;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -76,7 +78,8 @@ public class WifiScanner {
             WIFI_BAND_INDEX_24_GHZ,
             WIFI_BAND_INDEX_5_GHZ,
             WIFI_BAND_INDEX_5_GHZ_DFS_ONLY,
-            WIFI_BAND_INDEX_6_GHZ})
+            WIFI_BAND_INDEX_6_GHZ,
+            WIFI_BAND_INDEX_60_GHZ})
     public @interface WifiBandIndex {}
 
     /** no band specified; use channel list instead */
@@ -89,6 +92,8 @@ public class WifiScanner {
     public static final int WIFI_BAND_5_GHZ_DFS_ONLY  = 1 << WIFI_BAND_INDEX_5_GHZ_DFS_ONLY;
     /** 6 GHz band */
     public static final int WIFI_BAND_6_GHZ = 1 << WIFI_BAND_INDEX_6_GHZ;
+    /** 60 GHz band */
+    public static final int WIFI_BAND_60_GHZ = 1 << WIFI_BAND_INDEX_60_GHZ;
 
     /**
      * Combination of bands
@@ -113,6 +118,12 @@ public class WifiScanner {
     /** 2.4 GHz band and 5 GHz band; with DFS channels and 6 GHz */
     public static final int WIFI_BAND_24_5_WITH_DFS_6_GHZ =
             WIFI_BAND_BOTH_WITH_DFS | WIFI_BAND_6_GHZ;
+    /** @hide */
+    public static final int WIFI_BAND_24_5_6_60_GHZ =
+            WIFI_BAND_24_5_6_GHZ | WIFI_BAND_60_GHZ;
+    /** @hide */
+    public static final int WIFI_BAND_24_5_WITH_DFS_6_60_GHZ =
+            WIFI_BAND_24_5_6_60_GHZ | WIFI_BAND_5_GHZ_DFS_ONLY;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -127,7 +138,10 @@ public class WifiScanner {
             WIFI_BAND_BOTH_WITH_DFS,
             WIFI_BAND_6_GHZ,
             WIFI_BAND_24_5_6_GHZ,
-            WIFI_BAND_24_5_WITH_DFS_6_GHZ})
+            WIFI_BAND_24_5_WITH_DFS_6_GHZ,
+            WIFI_BAND_60_GHZ,
+            WIFI_BAND_24_5_6_60_GHZ,
+            WIFI_BAND_24_5_WITH_DFS_6_60_GHZ})
     public @interface WifiBand {}
 
     /**
@@ -179,7 +193,10 @@ public class WifiScanner {
      * @hide
      */
     public static boolean isFullBandScan(@WifiBand int bandScanned, boolean excludeDfs) {
-        return (bandScanned | WIFI_BAND_6_GHZ | (excludeDfs ? WIFI_BAND_5_GHZ_DFS_ONLY : 0))
+        // 5GHz DFS channel is part of 5GHz, mark 5GHz scanned as well.
+        if ((bandScanned & WIFI_BAND_5_GHZ_DFS_ONLY) != 0) bandScanned |= WIFI_BAND_5_GHZ;
+        return (bandScanned | WIFI_BAND_6_GHZ | WIFI_BAND_60_GHZ
+                | (excludeDfs ? WIFI_BAND_5_GHZ_DFS_ONLY : 0))
                 == WIFI_BAND_ALL;
     }
 
@@ -569,6 +586,19 @@ public class WifiScanner {
             for (ScanResult result : newResults) {
                 mResults.add(new ScanResult(result));
             }
+        }
+
+        /** {@hide} */
+        public void addResults(@NonNull ScanData s) {
+            mBandScanned |= s.mBandScanned;
+            mFlags |= s.mFlags;
+            addResults(s.getResults());
+        }
+
+        /** {@hide} */
+        public boolean isFullBandScanResults() {
+            return (mBandScanned & WifiScanner.WIFI_BAND_24_GHZ) != 0
+                && (mBandScanned & WifiScanner.WIFI_BAND_5_GHZ) != 0;
         }
 
         /** Implement the Parcelable interface {@hide} */
