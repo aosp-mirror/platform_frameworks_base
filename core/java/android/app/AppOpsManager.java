@@ -850,10 +850,12 @@ public class AppOpsManager {
     public static final int OP_QUERY_ALL_PACKAGES = 91;
     /** @hide Access all external storage */
     public static final int OP_MANAGE_EXTERNAL_STORAGE = 92;
+    /** @hide Communicate cross-profile within the same profile group. */
+    public static final int OP_INTERACT_ACROSS_PROFILES = 93;
 
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 93;
+    public static final int _NUM_OP = 94;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1144,6 +1146,10 @@ public class AppOpsManager {
     public static final String OPSTR_MANAGE_EXTERNAL_STORAGE =
             "android:manage_external_storage";
 
+    /** @hide Communicate cross-profile within the same profile group. */
+    @SystemApi
+    public static final String OPSTR_INTERACT_ACROSS_PROFILES = "android:interact_across_profiles";
+
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
@@ -1221,6 +1227,7 @@ public class AppOpsManager {
             OP_MANAGE_IPSEC_TUNNELS,
             OP_INSTANT_APP_START_FOREGROUND,
             OP_MANAGE_EXTERNAL_STORAGE,
+            OP_INTERACT_ACROSS_PROFILES
     };
 
     /**
@@ -1325,6 +1332,7 @@ public class AppOpsManager {
             OP_ACCESS_MEDIA_LOCATION,           // ACCESS_MEDIA_LOCATION
             OP_QUERY_ALL_PACKAGES,              // QUERY_ALL_PACKAGES
             OP_MANAGE_EXTERNAL_STORAGE,         // MANAGE_EXTERNAL_STORAGE
+            OP_INTERACT_ACROSS_PROFILES,        //INTERACT_ACROSS_PROFILES
     };
 
     /**
@@ -1424,6 +1432,7 @@ public class AppOpsManager {
             OPSTR_ACCESS_MEDIA_LOCATION,
             OPSTR_QUERY_ALL_PACKAGES,
             OPSTR_MANAGE_EXTERNAL_STORAGE,
+            OPSTR_INTERACT_ACROSS_PROFILES,
     };
 
     /**
@@ -1523,7 +1532,8 @@ public class AppOpsManager {
             "READ_DEVICE_IDENTIFIERS",
             "ACCESS_MEDIA_LOCATION",
             "QUERY_ALL_PACKAGES",
-            "MANAGE_EXTERNAL_STORAGE"
+            "MANAGE_EXTERNAL_STORAGE",
+            "INTERACT_ACROSS_PROFILES"
     };
 
     /**
@@ -1625,6 +1635,7 @@ public class AppOpsManager {
             Manifest.permission.ACCESS_MEDIA_LOCATION,
             null, // no permission for OP_QUERY_ALL_PACKAGES
             Manifest.permission.MANAGE_EXTERNAL_STORAGE,
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES,
     };
 
     /**
@@ -1726,6 +1737,7 @@ public class AppOpsManager {
             null, // ACCESS_MEDIA_LOCATION
             null, // QUERY_ALL_PACKAGES
             null, // MANAGE_EXTERNAL_STORAGE
+            null, // INTERACT_ACROSS_PROFILES
     };
 
     /**
@@ -1826,6 +1838,7 @@ public class AppOpsManager {
             false, // ACCESS_MEDIA_LOCATION
             false, // QUERY_ALL_PACKAGES
             false, // MANAGE_EXTERNAL_STORAGE
+            false, // INTERACT_ACROSS_PROFILES
     };
 
     /**
@@ -1925,6 +1938,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // ALLOW_MEDIA_LOCATION
             AppOpsManager.MODE_DEFAULT, // QUERY_ALL_PACKAGES
             AppOpsManager.MODE_DEFAULT, // MANAGE_EXTERNAL_STORAGE
+            AppOpsManager.MODE_DEFAULT, // INTERACT_ACROSS_PROFILES
     };
 
     /**
@@ -2028,6 +2042,7 @@ public class AppOpsManager {
             false, // ACCESS_MEDIA_LOCATION
             false, // QUERY_ALL_PACKAGES
             false, // MANAGE_EXTERNAL_STORAGE
+            false, // INTERACT_ACROSS_PROFILES
     };
 
     /**
