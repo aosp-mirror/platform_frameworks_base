@@ -172,7 +172,6 @@ import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
-import com.android.internal.util.ObjectUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.AutodestructReference;
@@ -6367,20 +6366,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void makeDefault(@NonNull final NetworkAgentInfo newNetwork) {
+    private void makeDefault(@Nullable final NetworkAgentInfo newNetwork) {
         if (DBG) log("Switching to new default network: " + newNetwork);
 
+        mDefaultNetworkNai = newNetwork;
+
         try {
-            mNMS.setDefaultNetId(newNetwork.network.netId);
+            if (null != newNetwork) {
+                mNMS.setDefaultNetId(newNetwork.network.netId);
+            } else {
+                mNMS.clearDefaultNetId();
+            }
         } catch (Exception e) {
             loge("Exception setting default network :" + e);
         }
 
-        mDefaultNetworkNai = newNetwork;
         notifyLockdownVpn(newNetwork);
-        handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
-        updateTcpBufferSizes(newNetwork.linkProperties.getTcpBufferSizes());
-        mDnsManager.setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
+        handleApplyDefaultProxy(null != newNetwork
+                ? newNetwork.linkProperties.getHttpProxy() : null);
+        updateTcpBufferSizes(null != newNetwork
+                ? newNetwork.linkProperties.getTcpBufferSizes() : null);
+        mDnsManager.setDefaultDnsSystemProperties(null != newNetwork
+                ? newNetwork.linkProperties.getDnsServers() : Collections.EMPTY_LIST);
         notifyIfacesChangedForNetworkStats();
         // Fix up the NetworkCapabilities of any VPNs that don't specify underlying networks.
         updateAllVpnsCapabilities();
@@ -6461,10 +6468,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         // Will return null if this reassignment does not change the network assigned to
-        // the passed request, or if it changes this request to not have a satisfier any more.
-        @Nullable private NetworkAgentInfo getNewSatisfier(@NonNull final NetworkRequestInfo nri) {
+        // the passed request.
+        @Nullable
+        private RequestReassignment getReassignment(@NonNull final NetworkRequestInfo nri) {
             for (final RequestReassignment event : getRequestReassignments()) {
-                if (nri == event.mRequest) return event.mNewNetwork;
+                if (nri == event.mRequest) return event;
             }
             return null;
         }
@@ -6582,7 +6590,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 newNetwork.removeRequest(nri.request.requestId);
                 nri.mSatisfier = null;
-                if (isDefaultRequest(nri)) mDefaultNetworkNai = null;
             }
             // Tell NetworkProviders about the new score, so they can stop
             // trying to connect if they know they cannot match it.
@@ -6617,15 +6624,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         final NetworkRequestInfo defaultRequestInfo = mNetworkRequests.get(mDefaultRequest);
-        final NetworkAgentInfo newDefaultNetwork = ObjectUtils.getOrElse(
-                changes.getNewSatisfier(defaultRequestInfo), oldDefaultNetwork);
+        final NetworkReassignment.RequestReassignment reassignment =
+                changes.getReassignment(defaultRequestInfo);
+        final NetworkAgentInfo newDefaultNetwork =
+                null != reassignment ? reassignment.mNewNetwork : oldDefaultNetwork;
 
         if (oldDefaultNetwork != newDefaultNetwork) {
             if (oldDefaultNetwork != null) {
                 mLingerMonitor.noteLingerDefaultNetwork(oldDefaultNetwork, newDefaultNetwork);
             }
             updateDataActivityTracking(newDefaultNetwork, oldDefaultNetwork);
-            // Notify system services that this network is up.
+            // Notify system services of the new default.
             makeDefault(newDefaultNetwork);
             // Log 0 -> X and Y -> X default network transitions, where X is the new default.
             mDeps.getMetricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(
