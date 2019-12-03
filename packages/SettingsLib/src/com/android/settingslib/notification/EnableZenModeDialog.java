@@ -328,7 +328,6 @@ public class EnableZenModeDialog {
             boolean enabled, int rowId, Uri conditionId) {
         if (tag.lines == null) {
             tag.lines = row.findViewById(android.R.id.content);
-            tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         }
         if (tag.line1 == null) {
             tag.line1 = (TextView) row.findViewById(android.R.id.text1);
@@ -364,6 +363,7 @@ public class EnableZenModeDialog {
             @Override
             public void onClick(View v) {
                 onClickTimeButton(row, tag, false /*down*/, rowId);
+                tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
             }
         });
 
@@ -373,6 +373,7 @@ public class EnableZenModeDialog {
             @Override
             public void onClick(View v) {
                 onClickTimeButton(row, tag, true /*up*/, rowId);
+                tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
             }
         });
 
