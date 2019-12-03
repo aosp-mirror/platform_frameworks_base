@@ -329,9 +329,6 @@ class ProcessRecord implements WindowProcessListener {
 
     boolean mReachable; // Whether or not this process is reachable from given process
 
-    // A callback that should be executed on app died; after that it'll be set to null
-    Runnable mAppDiedCallback;
-
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startTime) {
         this.startUid = startUid;
