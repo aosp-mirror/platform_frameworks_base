@@ -2739,7 +2739,6 @@ public class WifiManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.NETWORK_STACK,
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
@@ -2751,6 +2750,31 @@ public class WifiManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Start Soft AP (hotspot) mode for tethering purposes with the specified configuration.
+     * Note that starting Soft AP mode may disable station mode operation if the device does not
+     * support concurrency.
+     * @param softApConfig A valid SoftApConfiguration specifying the configuration of the SAP,
+     *                     or null to use the persisted Soft AP configuration that was previously
+     *                     set using {@link #setSoftApConfiguration(softApConfiguration)}.
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_STACK,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
+    })
+    public boolean startTetheredHotspot(@Nullable SoftApConfiguration softApConfig) {
+        try {
+            return mService.startTetheredHotspot(softApConfig);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
 
     /**
      * Stop SoftAp mode.
@@ -3036,10 +3060,12 @@ public class WifiManager {
      * Gets the Wi-Fi AP Configuration.
      * @return AP details in WifiConfiguration
      *
+     * @deprecated This API is deprecated. Use {@link #getSoftApConfiguration()} instead.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE)
+    @Deprecated
     public WifiConfiguration getWifiApConfiguration() {
         try {
             return mService.getWifiApConfiguration();
@@ -3049,17 +3075,56 @@ public class WifiManager {
     }
 
     /**
-     * Sets the Wi-Fi AP Configuration.  The AP configuration must either be open or
-     * WPA2 PSK networks.
+     * Gets the Wi-Fi AP Configuration.
+     * @return AP details in {@link SoftApConfiguration}
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE)
+    public SoftApConfiguration getSoftApConfiguration() {
+        try {
+            return mService.getSoftApConfiguration();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the Wi-Fi AP Configuration.
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     *
+     * @deprecated This API is deprecated. Use {@link #setSoftApConfiguration(SoftApConfiguration)}
+     * instead.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE)
+    @Deprecated
+    public boolean setWifiApConfiguration(WifiConfiguration wifiConfig) {
+        try {
+            return mService.setWifiApConfiguration(wifiConfig, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the Wi-Fi AP Configuration.
+     *
+     * @param softApConfig  A valid SoftApConfiguration specifying the configuration of the SAP.
+
      * @return {@code true} if the operation succeeded, {@code false} otherwise
      *
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE)
-    public boolean setWifiApConfiguration(WifiConfiguration wifiConfig) {
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public boolean setSoftApConfiguration(@NonNull SoftApConfiguration softApConfig) {
         try {
-            return mService.setWifiApConfiguration(wifiConfig, mContext.getOpPackageName());
+            return mService.setSoftApConfiguration(
+                    softApConfig, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4542,6 +4607,36 @@ public class WifiManager {
     public void restoreBackupData(@NonNull byte[] data) {
         try {
             mService.restoreBackupData(data);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieve the soft ap config data to be backed to save current config data.
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public byte[] retrieveSoftApBackupData() {
+        try {
+            return mService.retrieveSoftApBackupData();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Restore soft ap config from the backed up data.
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void restoreSoftApBackupData(@NonNull byte[] data) {
+        try {
+            mService.restoreSoftApBackupData(data);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
