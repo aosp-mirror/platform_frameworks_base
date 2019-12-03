@@ -172,6 +172,7 @@ import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
+import com.android.internal.util.ObjectUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.AutodestructReference;
@@ -6457,6 +6458,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         void addRematchedNetwork(@NonNull final NetworkBgStatePair network) {
             mRematchedNetworks.add(network);
         }
+
+        // Will return null if this reassignment does not change the network assigned to
+        // the passed request, or if it changes this request to not have a satisfier any more.
+        @Nullable private NetworkAgentInfo getNewSatisfier(@NonNull final NetworkRequestInfo nri) {
+            for (final RequestReassignment event : getRequestReassignments()) {
+                if (nri == event.mRequest) return event.mNewNetwork;
+            }
+            return null;
+        }
     }
 
     private ArrayMap<NetworkRequestInfo, NetworkAgentInfo> computeRequestReassignmentForNetwork(
@@ -6523,8 +6533,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             @NonNull final NetworkAgentInfo newNetwork, final long now) {
         ensureRunningOnConnectivityServiceThread();
         if (!newNetwork.everConnected) return;
-        boolean isNewDefault = false;
-        NetworkAgentInfo oldDefaultNetwork = null;
 
         changes.addRematchedNetwork(new NetworkReassignment.NetworkBgStatePair(newNetwork,
                 newNetwork.isBackgroundNetwork()));
@@ -6566,8 +6574,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // netid->request mapping to each provider?
                 sendUpdatedScoreToFactories(nri.request, newSatisfier);
                 if (isDefaultRequest(nri)) {
-                    isNewDefault = true;
-                    oldDefaultNetwork = previousSatisfier;
                     if (previousSatisfier != null) {
                         mLingerMonitor.noteLingerDefaultNetwork(previousSatisfier, newSatisfier);
                     }
@@ -6604,17 +6610,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 callCallbackForRequest(nri, newNetwork, ConnectivityManager.CALLBACK_LOST, 0);
             }
         }
-
-        if (isNewDefault) {
-            updateDataActivityTracking(newNetwork, oldDefaultNetwork);
-            // Notify system services that this network is up.
-            makeDefault(newNetwork);
-            // Log 0 -> X and Y -> X default network transitions, where X is the new default.
-            mDeps.getMetricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(
-                    now, newNetwork, oldDefaultNetwork);
-            // Have a new default network, release the transition wakelock in
-            scheduleReleaseNetworkTransitionWakelock();
-        }
     }
 
     /**
@@ -6641,7 +6636,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
             rematchNetworkAndRequests(changes, nai, now);
         }
 
-        final NetworkAgentInfo newDefaultNetwork = getDefaultNetwork();
+        final NetworkRequestInfo defaultRequestInfo = mNetworkRequests.get(mDefaultRequest);
+        final NetworkAgentInfo newDefaultNetwork = ObjectUtils.getOrElse(
+                changes.getNewSatisfier(defaultRequestInfo), oldDefaultNetwork);
+
+        if (oldDefaultNetwork != newDefaultNetwork) {
+            updateDataActivityTracking(newDefaultNetwork, oldDefaultNetwork);
+            // Notify system services that this network is up.
+            makeDefault(newDefaultNetwork);
+            // Log 0 -> X and Y -> X default network transitions, where X is the new default.
+            mDeps.getMetricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(
+                    now, newDefaultNetwork, oldDefaultNetwork);
+            // Have a new default network, release the transition wakelock in
+            scheduleReleaseNetworkTransitionWakelock();
+        }
 
         // Notify requested networks are available after the default net is switched, but
         // before LegacyTypeTracker sends legacy broadcasts
