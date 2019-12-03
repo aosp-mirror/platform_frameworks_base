@@ -315,16 +315,9 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void setAllowedDisplayModesLocked(int[] modes) {
-            final int id;
-            if (modes.length > 0) {
-                // The allowed modes should be ordered by preference, so just use the first mode
-                // here.
-                id = modes[0];
-            } else {
-                // If we don't have any allowed modes, just use the default mode.
-                id = 0;
-            }
+        public void setDesiredDisplayConfigSpecs(int defaultModeId, float minRefreshRate,
+                float maxRefreshRate, int[] modes) {
+            final int id = defaultModeId;
             int index = -1;
             if (id == 0) {
                 // Use the default.

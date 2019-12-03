@@ -161,6 +161,8 @@ public final class SurfaceControl implements Parcelable {
     private static native boolean nativeSetAllowedDisplayConfigs(IBinder displayToken,
                                                                  int[] allowedConfigs);
     private static native int[] nativeGetAllowedDisplayConfigs(IBinder displayToken);
+    private static native boolean nativeSetDesiredDisplayConfigSpecs(IBinder displayToken,
+            int defaultModeId, float minRefreshRate, float maxRefreshRate);
     private static native int[] nativeGetDisplayColorModes(IBinder displayToken);
     private static native SurfaceControl.DisplayPrimaries nativeGetDisplayNativePrimaries(
             IBinder displayToken);
@@ -1487,6 +1489,19 @@ public final class SurfaceControl implements Parcelable {
             throw new IllegalArgumentException("displayToken must not be null");
         }
         return nativeGetAllowedDisplayConfigs(displayToken);
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean setDesiredDisplayConfigSpecs(IBinder displayToken,
+            int defaultModeId, float minRefreshRate, float maxRefreshRate) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+
+        return nativeSetDesiredDisplayConfigSpecs(displayToken, defaultModeId, minRefreshRate,
+            maxRefreshRate);
     }
 
     /**

@@ -173,6 +173,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mActiveModeId;
         private boolean mActiveModeInvalid;
         private int[] mAllowedModeIds;
+        private float mMinRefreshRate;
+        private float mMaxRefreshRate;
         private boolean mAllowedModeIdsInvalid;
         private int mActivePhysIndex;
         private int[] mAllowedPhysIndexes;
@@ -623,7 +625,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void setAllowedDisplayModesLocked(int[] modes) {
+        public void setDesiredDisplayConfigSpecs(int defaultModeId, float minRefreshRate,
+                float maxRefreshRate, int[] modes) {
+            updateDesiredDisplayConfigSpecs(defaultModeId, minRefreshRate, maxRefreshRate);
             updateAllowedModesLocked(modes);
         }
 
@@ -653,6 +657,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return true;
         }
 
+        // TODO(b/142507213): Remove once refresh rates are plummed through to kernel.
         public void updateAllowedModesLocked(int[] allowedModes) {
             if (Arrays.equals(allowedModes, mAllowedModeIds) && !mAllowedModeIdsInvalid) {
                 return;
@@ -660,6 +665,38 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             if (updateAllowedModesInternalLocked(allowedModes)) {
                 updateDeviceInfoLocked();
             }
+        }
+
+        public void updateDesiredDisplayConfigSpecs(int defaultModeId, float minRefreshRate,
+                float maxRefreshRate) {
+            if (minRefreshRate == mMinRefreshRate
+                        && maxRefreshRate == mMaxRefreshRate
+                        && defaultModeId == mDefaultModeId) {
+                return;
+            }
+            if (updateDesiredDisplayConfigSpecsInternalLocked(defaultModeId, minRefreshRate,
+                    maxRefreshRate)) {
+                updateDeviceInfoLocked();
+            }
+        }
+
+        public boolean updateDesiredDisplayConfigSpecsInternalLocked(int defaultModeId,
+                float minRefreshRate, float maxRefreshRate) {
+            if (DEBUG) {
+                Slog.w(TAG, "updateDesiredDisplayConfigSpecsInternalLocked("
+                        + "defaultModeId="
+                        + Integer.toString(defaultModeId)
+                        + ", minRefreshRate="
+                        + Float.toString(minRefreshRate)
+                        + ", maxRefreshRate="
+                        + Float.toString(minRefreshRate));
+            }
+
+            final IBinder token = getDisplayTokenLocked();
+            SurfaceControl.setDesiredDisplayConfigSpecs(token, defaultModeId, minRefreshRate,
+                    maxRefreshRate);
+            int activePhysIndex = SurfaceControl.getActiveConfig(token);
+            return updateActiveModeLocked(activePhysIndex);
         }
 
         public boolean updateAllowedModesInternalLocked(int[] allowedModes) {
@@ -735,6 +772,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             pw.println("mPhysicalDisplayId=" + mPhysicalDisplayId);
             pw.println("mAllowedPhysIndexes=" + Arrays.toString(mAllowedPhysIndexes));
             pw.println("mAllowedModeIds=" + Arrays.toString(mAllowedModeIds));
+            pw.println("mMinRefreshRate=" + mMinRefreshRate);
+            pw.println("mMaxRefreshRate=" + mMaxRefreshRate);
             pw.println("mAllowedModeIdsInvalid=" + mAllowedModeIdsInvalid);
             pw.println("mActivePhysIndex=" + mActivePhysIndex);
             pw.println("mActiveModeId=" + mActiveModeId);
