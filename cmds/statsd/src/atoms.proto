@@ -6717,6 +6717,9 @@ message AppOps {
     // For long-running operations, total duration of the operation
     // while the app was in the background (only for trusted requests)
     optional int64 trusted_background_duration_millis = 9;
+
+    // Whether AppOps is guarded by Runtime permission
+    optional bool is_runtime_permission = 10;
 }
 
 /**
