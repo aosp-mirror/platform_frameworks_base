@@ -1429,10 +1429,6 @@
     <string name="submit" msgid="862795280643405865">"Lähetä"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Ajosovellus on käynnissä"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Poistu ajosovelluksesta napauttamalla."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"Internetin jakaminen tai yhteyspiste käytössä"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"Määritä napauttamalla."</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"Yhteyden jakaminen poistettu käytöstä"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"Kysy lisätietoja järjestelmänvalvojalta."</string>
     <string name="back_button_label" msgid="4078224038025043387">"Takaisin"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Seuraava"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"Ohita"</string>

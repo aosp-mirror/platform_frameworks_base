@@ -1429,10 +1429,6 @@
     <string name="submit" msgid="862795280643405865">"দাখিল কৰক"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"ড্ৰাইভিং এপ্ চলি আছে"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"ড্ৰাইভিং এপৰ পৰা বাহিৰ হ\'বলৈ টিপক।"</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"টেডাৰিং বা হটস্প\'ট সক্ৰিয় অৱস্থাত আছে"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"ছেট আপ কৰিবলৈ টিপক।"</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"টেডাৰিং অক্ষম কৰি থোৱা হৈছে"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"সবিশেষ জানিবলৈ আপোনাৰ প্ৰশাসকৰ সৈতে যোগাযোগ কৰক"</string>
     <string name="back_button_label" msgid="4078224038025043387">"উভতি যাওক"</string>
     <string name="next_button_label" msgid="6040209156399907780">"পৰৱৰ্তী"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"এৰি যাওক"</string>

@@ -1429,10 +1429,6 @@
     <string name="submit" msgid="862795280643405865">"Senden"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Fahr-App wird ausgeführt"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Tippen, um die Fahr-App zu beenden."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"Tethering oder Hotspot aktiv"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"Zum Einrichten tippen."</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"Tethering ist deaktiviert"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"Bitte wende dich für weitere Informationen an den Administrator"</string>
     <string name="back_button_label" msgid="4078224038025043387">"Zurück"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Weiter"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"Überspringen"</string>

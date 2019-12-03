@@ -1429,10 +1429,6 @@
     <string name="submit" msgid="862795280643405865">"ارسال"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"برنامه رانندگی درحال اجرا است"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"برای خروج از برنامه رانندگی ضربه بزنید."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"اشتراک‌گذاری اینترنت یا نقطه اتصال فعال"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"برای راه‌اندازی ضربه بزنید."</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"اشتراک‌گذاری اینترنت غیرفعال است"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"برای جزئیات، با سرپرستتان تماس بگیرید"</string>
     <string name="back_button_label" msgid="4078224038025043387">"برگشت"</string>
     <string name="next_button_label" msgid="6040209156399907780">"بعدی"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"رد شدن"</string>

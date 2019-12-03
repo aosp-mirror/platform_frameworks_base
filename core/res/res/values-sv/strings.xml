@@ -1429,10 +1429,6 @@
     <string name="submit" msgid="862795280643405865">"Skicka"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Bilkörningsappen körs"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Tryck här om du vill avsluta bilkörningsappen."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"Internetdelning eller surfzon aktiverad"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"Tryck om du vill konfigurera."</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"Internetdelning har inaktiverats"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"Kontakta administratören om du vill veta mer"</string>
     <string name="back_button_label" msgid="4078224038025043387">"Tillbaka"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Nästa"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"Hoppa över"</string>

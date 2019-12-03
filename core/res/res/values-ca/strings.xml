@@ -1429,10 +1429,6 @@
     <string name="submit" msgid="862795280643405865">"Envia"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"S\'està executant l\'aplicació de conducció"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Toca per sortir de l\'aplicació de conducció."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"Compartició de xarxa o punt d\'accés Wi-Fi activat"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"Toca per configurar."</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"La compartició de xarxa està desactivada"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"Contacta amb el teu administrador per obtenir més informació"</string>
     <string name="back_button_label" msgid="4078224038025043387">"Enrere"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Següent"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"Omet"</string>
