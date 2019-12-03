@@ -23,11 +23,10 @@
 #include <inttypes.h>
 
 #include <android_runtime/AndroidRuntime.h>
-#include <androidfw/DisplayEventDispatcher.h>
+#include <gui/DisplayEventDispatcher.h>
 #include <utils/Log.h>
 #include <utils/Looper.h>
 #include <utils/threads.h>
-#include <gui/DisplayEventReceiver.h>
 #include "android_os_MessageQueue.h"
 
 #include <nativehelper/ScopedLocalRef.h>
@@ -59,7 +58,6 @@ protected:
 private:
     jobject mReceiverWeakGlobal;
     sp<MessageQueue> mMessageQueue;
-    DisplayEventReceiver mReceiver;
 
     void dispatchVsync(nsecs_t timestamp, PhysicalDisplayId displayId, uint32_t count) override;
     void dispatchHotplug(nsecs_t timestamp, PhysicalDisplayId displayId, bool connected) override;
