@@ -6500,6 +6500,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    // TODO : remove this when it's useless
+    @NonNull private NetworkReassignment computeInitialReassignment() {
+        final NetworkReassignment change = new NetworkReassignment();
+        for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+            change.addRequestReassignment(new NetworkReassignment.RequestReassignment(nri,
+                    nri.mSatisfier, nri.mSatisfier));
+        }
+        return change;
+    }
+
     private ArrayMap<NetworkRequestInfo, NetworkAgentInfo> computeRequestReassignmentForNetwork(
             @NonNull final NetworkAgentInfo newNetwork) {
         final int score = newNetwork.getCurrentScore();
@@ -6541,18 +6551,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     //   satisfied by newNetwork, and reassigns to newNetwork
     //   any such requests for which newNetwork is the best.
     //
-    // - Lingers any validated Networks that as a result are no longer
-    //   needed. A network is needed if it is the best network for
-    //   one or more NetworkRequests, or if it is a VPN.
-    //
     // - Writes into the passed reassignment object all changes that should be done for
     //   rematching this network with all requests, to be applied later.
-    //
-    // NOTE: This function only adds NetworkRequests that "newNetwork" could satisfy,
-    // it does not remove NetworkRequests that other Networks could better satisfy.
-    // If you need to handle decreases in score, use {@link rematchAllNetworksAndRequests}.
-    // This function should be used when possible instead of {@code rematchAllNetworksAndRequests}
-    // as it performs better by a factor of the number of Networks.
     //
     // TODO : stop writing to the passed reassignment. This is temporarily more useful, but
     // it's unidiomatic Java and it's hard to read.
@@ -6634,7 +6634,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // scoring network and then a higher scoring network, which could produce multiple
         // callbacks.
         Arrays.sort(nais);
-        final NetworkReassignment changes = new NetworkReassignment();
+        final NetworkReassignment changes = computeInitialReassignment();
         for (final NetworkAgentInfo nai : nais) {
             rematchNetworkAndRequests(changes, nai, now);
         }
@@ -6663,6 +6663,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // before LegacyTypeTracker sends legacy broadcasts
         for (final NetworkReassignment.RequestReassignment event :
                 changes.getRequestReassignments()) {
+            if (event.mOldNetwork == event.mNewNetwork) continue;
+
             // Tell NetworkProviders about the new score, so they can stop
             // trying to connect if they know they cannot match it.
             // TODO - this could get expensive if there are a lot of outstanding requests for this
