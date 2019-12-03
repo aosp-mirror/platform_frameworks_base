@@ -160,48 +160,114 @@ public final class UsageStatsManager {
     public static final int REASON_MAIN_MASK = 0xFF00;
     /** @hide */
     public static final int REASON_MAIN_DEFAULT =   0x0100;
-    /** @hide */
+    /**
+     * The app spent sufficient time in the old bucket without any substantial event so it reached
+     * the timeout threshold to have its bucket lowered.
+     *
+     * @hide
+     */
     public static final int REASON_MAIN_TIMEOUT =   0x0200;
-    /** @hide */
+    /**
+     * The app was used in some way. Look at the REASON_SUB_USAGE_ reason for more details.
+     * @hide
+     */
     public static final int REASON_MAIN_USAGE =     0x0300;
-    /** @hide */
+    /**
+     * Forced by a core UID.
+     * @hide
+     */
     public static final int REASON_MAIN_FORCED =    0x0400;
-    /** @hide */
+    /**
+     * Set by a privileged system app.
+     * @hide
+     */
     public static final int REASON_MAIN_PREDICTED = 0x0500;
 
     /** @hide */
     public static final int REASON_SUB_MASK = 0x00FF;
-    /** @hide */
+    /**
+     * The app was interacted with in some way by the system.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_SYSTEM_INTERACTION = 0x0001;
-    /** @hide */
+    /**
+     * A notification was viewed by the user. This does not mean the user interacted with the
+     * notification.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_NOTIFICATION_SEEN  = 0x0002;
-    /** @hide */
+    /**
+     * The app was interacted with in some way by the user. This includes interacting with
+     * notification.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_USER_INTERACTION   = 0x0003;
-    /** @hide */
+    /**
+     * An {@link android.app.Activity} moved to the foreground.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_MOVE_TO_FOREGROUND = 0x0004;
-    /** @hide */
+    /**
+     * An {@link android.app.Activity} moved to the background.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_MOVE_TO_BACKGROUND = 0x0005;
-    /** @hide */
+    /**
+     * There was a system update.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_SYSTEM_UPDATE      = 0x0006;
-    /** @hide */
+    /**
+     * An app is in an elevated bucket because of an active timeout preventing it from being placed
+     * in a lower bucket.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_ACTIVE_TIMEOUT     = 0x0007;
-    /** @hide */
+    /**
+     * This system package's sync adapter has been used for another package's content provider.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_SYNC_ADAPTER       = 0x0008;
-    /** @hide */
+    /**
+     * A slice was pinned by an app.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_SLICE_PINNED       = 0x0009;
-    /** @hide */
+    /** /**
+     * A slice was pinned by the default launcher or the default assistant.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_SLICE_PINNED_PRIV  = 0x000A;
-    /** @hide */
+    /**
+     * A sync operation that is exempt from app standby was scheduled when the device wasn't Dozing.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_EXEMPTED_SYNC_SCHEDULED_NON_DOZE = 0x000B;
-    /** @hide */
+    /**
+     * A sync operation that is exempt from app standby was scheduled while the device was Dozing.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_EXEMPTED_SYNC_SCHEDULED_DOZE = 0x000C;
-    /** @hide */
+    /**
+     * A sync operation that is exempt from app standby started.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_EXEMPTED_SYNC_START = 0x000D;
-    /** @hide */
+    /**
+     * A sync operation that is not exempt from app standby was scheduled.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_UNEXEMPTED_SYNC_SCHEDULED = 0x000E;
-    /** @hide */
+    /**
+     * A foreground service started.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_FOREGROUND_SERVICE_START = 0x000F;
-    /** @hide */
+    /**
+     * The predicted bucket was restored after the app's temporary elevation to the ACTIVE bucket
+     * ended.
+     * @hide
+     */
     public static final int REASON_SUB_PREDICTED_RESTORED       = 0x0001;
 
 
