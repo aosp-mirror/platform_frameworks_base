@@ -3371,6 +3371,7 @@ public abstract class Context {
             CROSS_PROFILE_APPS_SERVICE,
             //@hide: SYSTEM_UPDATE_SERVICE,
             //@hide: TIME_DETECTOR_SERVICE,
+            //@hide: TIME_ZONE_DETECTOR_SERVICE,
             PERMISSION_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -4785,12 +4786,21 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.app.timedetector.ITimeDetectorService}.
+     * {@link android.app.timedetector.TimeDetector}.
      * @hide
      *
      * @see #getSystemService(String)
      */
     public static final String TIME_DETECTOR_SERVICE = "time_detector";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.app.timezonedetector.TimeZoneDetector}.
+     * @hide
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String TIME_ZONE_DETECTOR_SERVICE = "time_zone_detector";
 
     /**
      * Binder service name for {@link AppBindingService}.
