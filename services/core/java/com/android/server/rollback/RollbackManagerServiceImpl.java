@@ -67,6 +67,7 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -82,6 +83,7 @@ import java.util.concurrent.TimeUnit;
 class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     private static final String TAG = "RollbackManager";
+    private static final boolean LOCAL_LOGV = false;
 
     // Rollbacks expire after 14 days.
     private static final long DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS =
@@ -220,6 +222,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 if (Intent.ACTION_CANCEL_ENABLE_ROLLBACK.equals(intent.getAction())) {
                     int token = intent.getIntExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN, -1);
+                    if (LOCAL_LOGV) {
+                        Slog.v(TAG, "broadcast=ACTION_CANCEL_ENABLE_ROLLBACK token=" + token);
+                    }
                     synchronized (mLock) {
                         for (NewRollback rollback : mNewRollbacks) {
                             if (rollback.hasToken(token)) {
@@ -269,10 +274,17 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 String action = intent.getAction();
                 if (Intent.ACTION_PACKAGE_REPLACED.equals(action)) {
                     String packageName = intent.getData().getSchemeSpecificPart();
+                    if (LOCAL_LOGV) {
+                        Slog.v(TAG, "broadcast=ACTION_PACKAGE_REPLACED" + " pkg=" + packageName);
+                    }
                     onPackageReplaced(packageName);
                 }
                 if (Intent.ACTION_PACKAGE_FULLY_REMOVED.equals(action)) {
                     String packageName = intent.getData().getSchemeSpecificPart();
+                    if (LOCAL_LOGV) {
+                        Slog.v(TAG, "broadcast=ACTION_PACKAGE_FULLY_REMOVED"
+                                + " pkg=" + packageName);
+                    }
                     onPackageFullyRemoved(packageName);
                 }
             }
@@ -359,7 +371,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     private void commitRollbackInternal(int rollbackId, List<VersionedPackage> causePackages,
             String callerPackageName, IntentSender statusReceiver) {
-        Slog.i(TAG, "Initiating rollback");
+        Slog.i(TAG, "commitRollback id=" + rollbackId + " caller=" + callerPackageName);
 
         Rollback rollback = getRollbackForId(rollbackId);
         if (rollback == null) {
@@ -444,6 +456,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     void onUnlockUser(int userId) {
+        if (LOCAL_LOGV) {
+            Slog.v(TAG, "onUnlockUser id=" + userId);
+        }
         // In order to ensure that no package begins running while a backup or restore is taking
         // place, onUnlockUser must remain blocked until all pending backups and restores have
         // completed.
@@ -611,6 +626,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 if (!now.isBefore(
                         rollbackTimestamp
                                 .plusMillis(mRollbackLifetimeDurationInMillis))) {
+                    if (LOCAL_LOGV) {
+                        Slog.v(TAG, "runExpiration id=" + rollback.info.getRollbackId());
+                    }
                     iter.remove();
                     rollback.delete(mAppDataRollbackHelper);
                 } else if (oldest == null || oldest.isAfter(rollbackTimestamp)) {
@@ -675,6 +693,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     private boolean enableRollback(
             int installFlags, File newPackageCodePath, @UserIdInt int user, int token) {
+        if (LOCAL_LOGV) {
+            Slog.v(TAG, "enableRollback user=" + user + " token=" + token
+                    + " path=" + newPackageCodePath.getAbsolutePath());
+        }
 
         // Find the session id associated with this install.
         // TODO: It would be nice if package manager or package installer told
@@ -838,6 +860,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     private void snapshotUserDataInternal(String packageName, int[] userIds) {
+        if (LOCAL_LOGV) {
+            Slog.v(TAG, "snapshotUserData pkg=" + packageName
+                    + " users=" + Arrays.toString(userIds));
+        }
         synchronized (mLock) {
             // staged installs
             for (int i = 0; i < mRollbacks.size(); i++) {
@@ -854,6 +880,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     private void restoreUserDataInternal(
             String packageName, int[] userIds, int appId, String seInfo) {
+        if (LOCAL_LOGV) {
+            Slog.v(TAG, "restoreUserData pkg=" + packageName
+                    + " users=" + Arrays.toString(userIds));
+        }
         synchronized (mLock) {
             for (int i = 0; i < mRollbacks.size(); ++i) {
                 Rollback rollback = mRollbacks.get(i);
@@ -1041,6 +1071,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         @Override
         public void onFinished(int sessionId, boolean success) {
+            if (LOCAL_LOGV) {
+                Slog.v(TAG, "SessionCallback.onFinished id=" + sessionId + " success=" + success);
+            }
             NewRollback newRollback;
             synchronized (mLock) {
                 newRollback = getNewRollbackForPackageSessionLocked(sessionId);
@@ -1070,6 +1103,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     private Rollback completeEnableRollback(NewRollback newRollback, boolean success) {
         Rollback rollback = newRollback.rollback;
+        if (LOCAL_LOGV) {
+            Slog.v(TAG, "completeEnableRollback id="
+                    + rollback.info.getRollbackId() + " success=" + success);
+        }
         if (!success) {
             // The install session was aborted, clean up the pending install.
             rollback.delete(mAppDataRollbackHelper);
@@ -1108,6 +1145,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     @GuardedBy("rollback.getLock")
     private void makeRollbackAvailable(Rollback rollback) {
+        if (LOCAL_LOGV) {
+            Slog.v(TAG, "makeRollbackAvailable id=" + rollback.info.getRollbackId());
+        }
         rollback.makeAvailable();
 
         // TODO(zezeozue): Provide API to explicitly start observing instead
@@ -1279,6 +1319,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         String installerPackageName = parentSession.getInstallerPackageName();
         final Rollback rollback;
         int parentSessionId = parentSession.getSessionId();
+
+        if (LOCAL_LOGV) {
+            Slog.v(TAG, "createNewRollback id=" + rollbackId
+                    + " user=" + userId + " installer=" + installerPackageName);
+        }
 
         if (parentSession.isStaged()) {
             rollback = mRollbackStore.createStagedRollback(rollbackId, parentSessionId, userId,
