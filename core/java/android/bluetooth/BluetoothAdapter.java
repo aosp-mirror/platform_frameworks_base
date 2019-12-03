@@ -456,6 +456,37 @@ public final class BluetoothAdapter {
     @Retention(RetentionPolicy.SOURCE)
     public @interface IoCapability {}
 
+    /** @hide */
+    @IntDef(prefix = "ACTIVE_DEVICE_", value = {ACTIVE_DEVICE_AUDIO,
+            ACTIVE_DEVICE_PHONE_CALL, ACTIVE_DEVICE_ALL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ActiveDeviceUse {}
+
+    /**
+     * Use the specified device for audio (a2dp and hearing aid profile)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ACTIVE_DEVICE_AUDIO = 0;
+
+    /**
+     * Use the specified device for phone calls (headset profile and hearing
+     * aid profile)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ACTIVE_DEVICE_PHONE_CALL = 1;
+
+    /**
+     * Use the specified device for a2dp, hearing aid profile, and headset profile
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ACTIVE_DEVICE_ALL = 2;
+
     /**
      * Broadcast Action: The local Bluetooth adapter has started the remote
      * device discovery process.
@@ -1730,6 +1761,41 @@ public final class BluetoothAdapter {
         } finally {
             mServiceLock.readLock().unlock();
         }
+        return false;
+    }
+
+    /**
+     *
+     * @param device is the remote bluetooth device
+     * @param profiles represents the purpose for which we are setting this as the active device.
+     *                 Possible values are:
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_AUDIO},
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_PHONE_CALL},
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_ALL}
+     * @return false on immediate error, true otherwise
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public boolean setActiveDevice(@Nullable BluetoothDevice device,
+            @ActiveDeviceUse int profiles) {
+        if (profiles != ACTIVE_DEVICE_AUDIO && profiles != ACTIVE_DEVICE_PHONE_CALL
+                && profiles != ACTIVE_DEVICE_ALL) {
+            Log.e(TAG, "Invalid profiles param value in setActiveDevice");
+            return false;
+        }
+
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.setActiveDevice(device, profiles);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+
         return false;
     }
 
