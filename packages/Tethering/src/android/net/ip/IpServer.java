@@ -26,7 +26,6 @@ import static android.net.util.TetheringMessageBase.BASE_IPSERVER;
 
 import android.net.INetd;
 import android.net.INetworkStackStatusCallback;
-import android.net.INetworkStatsService;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -176,7 +175,6 @@ public class IpServer extends StateMachine {
 
     private final SharedLog mLog;
     private final INetd mNetd;
-    private final INetworkStatsService mStatsService;
     private final Callback mCallback;
     private final InterfaceController mInterfaceCtrl;
 
@@ -208,12 +206,10 @@ public class IpServer extends StateMachine {
 
     public IpServer(
             String ifaceName, Looper looper, int interfaceType, SharedLog log,
-            INetd netd, INetworkStatsService statsService, Callback callback,
-            boolean usingLegacyDhcp, Dependencies deps) {
+            INetd netd, Callback callback, boolean usingLegacyDhcp, Dependencies deps) {
         super(ifaceName, looper);
         mLog = log.forSubComponent(ifaceName);
         mNetd = netd;
-        mStatsService = statsService;
         mCallback = callback;
         mInterfaceCtrl = new InterfaceController(ifaceName, mNetd, mLog);
         mIfaceName = ifaceName;
@@ -881,12 +877,6 @@ public class IpServer extends StateMachine {
             // Sometimes interfaces are gone before we get
             // to remove their rules, which generates errors.
             // Just do the best we can.
-            try {
-                // About to tear down NAT; gather remaining statistics.
-                mStatsService.forceUpdate();
-            } catch (Exception e) {
-                mLog.e("Exception in forceUpdate: " + e.toString());
-            }
             try {
                 mNetd.ipfwdRemoveInterfaceForward(mIfaceName, upstreamIface);
             } catch (RemoteException | ServiceSpecificException e) {
