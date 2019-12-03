@@ -1157,9 +1157,9 @@ BootAnimation::Animation* BootAnimation::loadAnimation(const String8& fn)
 
     parseAnimationDesc(*animation);
     if (!preloadZip(*animation)) {
+        releaseAnimation(animation);
         return nullptr;
     }
-
 
     mLoadedFiles.remove(fn);
     return animation;
