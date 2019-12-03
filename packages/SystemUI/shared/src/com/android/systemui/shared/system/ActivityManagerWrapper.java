@@ -236,7 +236,8 @@ public class ActivityManagerWrapper {
 
                     @Override
                     public void onAnimationCanceled(boolean deferredWithScreenshot) {
-                        animationHandler.onAnimationCanceled(deferredWithScreenshot);
+                        animationHandler.onAnimationCanceled(
+                                deferredWithScreenshot ? new ThumbnailData() : null);
                     }
                 };
             }

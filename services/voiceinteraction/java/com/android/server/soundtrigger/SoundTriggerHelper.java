@@ -325,9 +325,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                     false /* Don't notify for synchronous calls */);
 
                                 // Initialize power save, call active state monitoring logic.
-            if (status == STATUS_OK && !mRecognitionRequested) {
+            if (status == STATUS_OK) {
                 initializeTelephonyAndPowerStateListeners();
-                mRecognitionRequested = true;
             }
 
             return status;
@@ -481,6 +480,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         if (unloadModel && modelData.isModelLoaded()) {
             Slog.d(TAG, "Unloading previously loaded stale model.");
+            if (mModule == null) {
+                return STATUS_ERROR;
+            }
             status = mModule.unloadSoundModel(modelData.getHandle());
             MetricsLogger.count(mContext, "sth_unloading_stale_model", 1);
             if (status != SoundTrigger.STATUS_OK) {
@@ -550,6 +552,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 }
             }
 
+            if (mModule == null) {
+                return STATUS_ERROR;
+            }
             int status = mModule.unloadSoundModel(modelData.getHandle());
             if (status != SoundTrigger.STATUS_OK) {
                 Slog.w(TAG, "unloadGenericSoundModel() call failed with " + status);
@@ -878,6 +883,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             mContext.unregisterReceiver(mPowerSaveModeListener);
             mPowerSaveModeListener = null;
         }
+        mRecognitionRequested = false;
     }
 
     // Clears state for all models (generic and keyphrase).
@@ -924,6 +930,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     }
 
     private void initializeTelephonyAndPowerStateListeners() {
+        if (mRecognitionRequested) {
+            return;
+        }
         long token = Binder.clearCallingIdentity();
         try {
             // Get the current call state synchronously for the first recognition.
@@ -941,6 +950,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
             mIsPowerSaveMode = mPowerManager.getPowerSaveState(ServiceType.SOUND)
                     .batterySaverEnabled;
+
+            mRecognitionRequested = true;
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -986,6 +997,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             Iterator modelDataIterator) {
         if (exception != null) {
           Slog.e(TAG, "forceStopAndUnloadModel", exception);
+        }
+        if (mModule == null) {
+            return;
         }
         if (modelData.isModelStarted()) {
             Slog.d(TAG, "Stopping previously started dangling model " + modelData.getHandle());
@@ -1093,6 +1107,13 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     // a recognition include: no active phone call or not being in a power save mode. Also,
     // the native service should be enabled.
     private boolean isRecognitionAllowed() {
+        // if mRecognitionRequested is false, call and power state listeners are not registered so
+        // we read current state directly from services
+        if (!mRecognitionRequested) {
+            mCallActive = mTelephonyManager.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK;
+            mIsPowerSaveMode =
+                mPowerManager.getPowerSaveState(ServiceType.SOUND).batterySaverEnabled;
+        }
         return !mCallActive && !mServiceDisabled && !mIsPowerSaveMode;
     }
 
@@ -1116,6 +1137,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return STATUS_OK;
         }
 
+        if (mModule == null) {
+            return STATUS_ERROR;
+        }
         int status = mModule.startRecognition(handle, config);
         if (status != SoundTrigger.STATUS_OK) {
             Slog.w(TAG, "startRecognition failed with " + status);
@@ -1152,8 +1176,11 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     }
 
     private int stopRecognitionLocked(ModelData modelData, boolean notify) {
-        IRecognitionStatusCallback callback = modelData.getCallback();
+        if (mModule == null) {
+            return STATUS_ERROR;
+        }
 
+        IRecognitionStatusCallback callback = modelData.getCallback();
         // Stop recognition.
         int status = STATUS_OK;
 

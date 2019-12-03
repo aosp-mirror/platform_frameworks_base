@@ -23,6 +23,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionSessionId;
 import android.app.prediction.AppTargetEvent;
@@ -61,7 +62,8 @@ public class AppPredictionManagerService extends
 
     public AppPredictionManagerService(Context context) {
         super(context, new FrameworkResourcesServiceNameResolver(context,
-                com.android.internal.R.string.config_defaultAppPredictionService), null);
+                com.android.internal.R.string.config_defaultAppPredictionService), null,
+                PACKAGE_UPDATE_POLICY_NO_REFRESH | PACKAGE_RESTART_POLICY_NO_REFRESH);
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
     }
 
@@ -78,6 +80,22 @@ public class AppPredictionManagerService extends
     @Override
     protected void enforceCallingPermissionForManagement() {
         getContext().enforceCallingPermission(MANAGE_APP_PREDICTIONS, TAG);
+    }
+
+    @Override // from AbstractMasterSystemService
+    protected void onServicePackageUpdatedLocked(@UserIdInt int userId) {
+        final AppPredictionPerUserService service = peekServiceForUserLocked(userId);
+        if (service != null) {
+            service.onPackageUpdatedLocked();
+        }
+    }
+
+    @Override // from AbstractMasterSystemService
+    protected void onServicePackageRestartedLocked(@UserIdInt int userId) {
+        final AppPredictionPerUserService service = peekServiceForUserLocked(userId);
+        if (service != null) {
+            service.onPackageRestartedLocked();
+        }
     }
 
     @Override

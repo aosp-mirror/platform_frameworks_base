@@ -16,12 +16,15 @@
 
 package com.android.systemui.keyguard;
 
+import android.annotation.IntDef;
 import android.os.Trace;
 
 import com.android.systemui.Dumpable;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -32,6 +35,15 @@ import javax.inject.Singleton;
 @Singleton
 public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observer> implements
         Dumpable {
+
+    @IntDef(prefix = { "WAKEFULNESS_" }, value = {
+            WAKEFULNESS_ASLEEP,
+            WAKEFULNESS_WAKING,
+            WAKEFULNESS_AWAKE,
+            WAKEFULNESS_GOING_TO_SLEEP,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Wakefulness {}
 
     public static final int WAKEFULNESS_ASLEEP = 0;
     public static final int WAKEFULNESS_WAKING = 1;
@@ -44,7 +56,7 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     public WakefulnessLifecycle() {
     }
 
-    public int getWakefulness() {
+    public @Wakefulness int getWakefulness() {
         return mWakefulness;
     }
 
@@ -86,7 +98,7 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
         pw.println("  mWakefulness=" + mWakefulness);
     }
 
-    private void setWakefulness(int wakefulness) {
+    private void setWakefulness(@Wakefulness int wakefulness) {
         mWakefulness = wakefulness;
         Trace.traceCounter(Trace.TRACE_TAG_APP, "wakefulness", wakefulness);
     }

@@ -58,6 +58,7 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"ต้องการถอนการติดตั้งแอปนี้สำหรับผู้ใช้ <xliff:g id="USERNAME">%1$s</xliff:g> ไหม"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"แทนที่แอปนี้ด้วยเวอร์ชันเริ่มต้นไหม ระบบจะนำข้อมูลทั้งหมดออก"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"แทนที่แอปนี้ด้วยเวอร์ชันเริ่มต้นไหม ระบบจะนำข้อมูลทั้งหมดออก วิธีนี้จะส่งผลต่อผู้ใช้ทุกคนที่ใช้อุปกรณ์เครื่องนี้ รวมทั้งผู้ที่มีโปรไฟล์งาน"</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"และนำไฟล์สื่อต่างๆ ที่เกี่ยวข้องซึ่งรวมแล้วมีขนาด <xliff:g id="SIZE">%1$s</xliff:g> ออกด้วย"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"เก็บข้อมูลแอปไว้ <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"กำลังเรียกใช้การถอนการติดตั้ง"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ถอนการติดตั้งไม่สำเร็จ"</string>
@@ -72,7 +73,7 @@
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"แอปนี้จำเป็นสำหรับผู้ใช้หรือโปรไฟล์บางส่วน และถอนการติดตั้งไปแล้วสำหรับส่วนอื่น"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"แอปนี้จำเป็นสำหรับโปรไฟล์ของคุณและถอนการติดตั้งไม่ได้"</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"ผู้ดูแลระบบอุปกรณ์กำหนดให้ใช้แอปนี้และถอนการติดตั้งไม่ได้"</string>
-    <string name="manage_device_administrators" msgid="3092696419363842816">"จัดการแอปดูแลอุปกรณ์"</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"จัดการแอปผู้ดูแลระบบอุปกรณ์"</string>
     <string name="manage_users" msgid="1243995386982560813">"จัดการผู้ใช้"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"ถอนการติดตั้ง <xliff:g id="APP_NAME">%1$s</xliff:g> ไม่ได้"</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"พบปัญหาในการแยกวิเคราะห์แพ็กเกจ"</string>

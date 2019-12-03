@@ -385,21 +385,15 @@
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
-    <dimen name="volume_dialog_panel_transparent_padding_right">8dp</dimen>
+    <dimen name="volume_dialog_panel_transparent_padding_right">4dp</dimen>
 
     <dimen name="volume_dialog_panel_transparent_padding">20dp</dimen>
 
     <dimen name="volume_dialog_stream_padding">8dp</dimen>
 
-    <!-- the amount the volume panel should be offset at the end from the view next to it (or
-    the screen edge, in portrait-->
-    <dimen name="volume_dialog_base_margin">8dp</dimen>
-
     <dimen name="volume_dialog_panel_width">64dp</dimen>
 
     <dimen name="volume_dialog_slider_height">116dp</dimen>
-
-    <dimen name="volume_dialog_row_height">252dp</dimen>
 
     <dimen name="volume_dialog_ringer_size">64dp</dimen>
 
@@ -416,8 +410,6 @@
     <dimen name="volume_dialog_slider_margin_bottom">-2dp</dimen>
 
     <dimen name="volume_dialog_row_margin_bottom">8dp</dimen>
-
-    <dimen name="volume_dialog_settings_icon_size">16dp</dimen>
 
     <dimen name="volume_dialog_elevation">9dp</dimen>
 
@@ -1110,18 +1102,23 @@
     <dimen name="bubble_flyout_pointer_size">6dp</dimen>
     <!-- How much space to leave between the flyout (tip of the arrow) and the bubble stack. -->
     <dimen name="bubble_flyout_space_from_bubble">8dp</dimen>
-    <!-- Padding around a collapsed bubble -->
-    <dimen name="bubble_view_padding">0dp</dimen>
-    <!-- Padding between bubbles when displayed in expanded state -->
-    <dimen name="bubble_padding">8dp</dimen>
+    <!-- Padding between status bar and bubbles when displayed in expanded state -->
+    <dimen name="bubble_padding_top">16dp</dimen>
     <!-- Size of individual bubbles. -->
-    <dimen name="individual_bubble_size">52dp</dimen>
+    <dimen name="individual_bubble_size">60dp</dimen>
+    <!-- Size of bubble icon bitmap. -->
+    <dimen name="bubble_icon_bitmap_size">52dp</dimen>
+    <!-- Extra padding added to the touchable rect for bubbles so they are easier to grab. -->
+    <dimen name="bubble_touch_padding">12dp</dimen>
     <!-- Size of the circle around the bubbles when they're in the dismiss target. -->
-    <dimen name="bubble_dismiss_encircle_size">56dp</dimen>
+    <dimen name="bubble_dismiss_encircle_size">52dp</dimen>
     <!-- How much to inset the icon in the circle -->
     <dimen name="bubble_icon_inset">16dp</dimen>
     <!-- Padding around the view displayed when the bubble is expanded -->
     <dimen name="bubble_expanded_view_padding">4dp</dimen>
+    <!-- This should be at least the size of bubble_expanded_view_padding; it is used to include
+         a slight touch slop around the expanded view. -->
+    <dimen name="bubble_expanded_view_slop">8dp</dimen>
     <!-- Default (and minimum) height of the expanded view shown when the bubble is expanded -->
     <dimen name="bubble_expanded_default_height">180dp</dimen>
     <!-- Height of the triangle that points to the expanded bubble -->
@@ -1130,10 +1127,8 @@
     <dimen name="bubble_pointer_width">6dp</dimen>
     <!-- Extra padding around the dismiss target for bubbles -->
     <dimen name="bubble_dismiss_slop">16dp</dimen>
-    <!-- Height of the header within the expanded view. -->
-    <dimen name="bubble_expanded_header_height">48dp</dimen>
-    <!-- Left and right padding applied to the header. -->
-    <dimen name="bubble_expanded_header_horizontal_padding">24dp</dimen>
+    <!-- Height of button allowing users to adjust settings for bubbles. -->
+    <dimen name="bubble_settings_size">48dp</dimen>
     <!-- How far, horizontally, to animate the expanded view over when animating in/out. -->
     <dimen name="bubble_expanded_animate_x_distance">100dp</dimen>
     <!-- How far, vertically, to animate the expanded view over when animating in/out. -->
@@ -1146,12 +1141,10 @@
     <dimen name="bubble_message_padding">4dp</dimen>
     <!-- Offset between bubbles in their stacked position. -->
     <dimen name="bubble_stack_offset">5dp</dimen>
-    <!-- How far offscreen the bubble stack rests. -->
-    <dimen name="bubble_stack_offscreen">5dp</dimen>
+    <!-- How far offscreen the bubble stack rests. Cuts off padding and part of icon bitmap. -->
+    <dimen name="bubble_stack_offscreen">9dp</dimen>
     <!-- How far down the screen the stack starts. -->
-    <dimen name="bubble_stack_starting_offset_y">100dp</dimen>
-    <!-- Size of image buttons in the bubble header -->
-    <dimen name="bubble_header_icon_size">48dp</dimen>
+    <dimen name="bubble_stack_starting_offset_y">96dp</dimen>
     <!-- Space between the pointer triangle and the bubble expanded view -->
     <dimen name="bubble_pointer_margin">8dp</dimen>
     <!-- Height of the permission prompt shown with bubbles -->
@@ -1160,6 +1153,7 @@
          snap to the dismiss target. -->
     <dimen name="bubble_dismiss_target_padding_x">40dp</dimen>
     <dimen name="bubble_dismiss_target_padding_y">20dp</dimen>
+
     <!-- Size of the RAT type for CellularTile -->
     <dimen name="celltile_rat_type_size">10sp</dimen>
 </resources>

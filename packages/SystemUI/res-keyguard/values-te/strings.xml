@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"పిన్ కోడ్ తప్పు."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"చెల్లని కార్డ్."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"పూర్తిగా ఛార్జ్ చేయబడింది"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • వైర్‌ లేకుండా ఛార్జ్ అవుతోంది"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • వైర్‌లెస్‌గా ఛార్జ్ అవుతోంది"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ఛార్జ్ అవుతోంది"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • వేగంగా ఛార్జ్ అవుతోంది"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • నెమ్మదిగా ఛార్జ్ అవుతోంది"</string>
@@ -151,7 +151,84 @@
       <item quantity="other">SIM ఇప్పుడు నిలిపివేయబడింది. PUK కోడ్‌ను నమోదు చేయండి. SIM శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="_NUMBER_1">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి. వివరాల కోసం కారియర్‌ను సంప్రదించండి.</item>
       <item quantity="one">SIM ఇప్పుడు నిలిపివేయబడింది. PUK కోడ్‌ను నమోదు చేయండి. SIM శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="_NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది వివరాల కోసం కారియర్‌ను సంప్రదించండి.</item>
     </plurals>
-    <string name="clock_title_default" msgid="6645600990069154049">"డిఫాల్ట్"</string>
-    <string name="clock_title_bubble" msgid="1286365278681892114">"బబుల్"</string>
-    <string name="clock_title_analog" msgid="4047401488577315053">"ఎనలాగ్"</string>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"సమయం"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"సమయం"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"పన్నెండు"</item>
+    <item msgid="7389464214252023751">"ఒకటి"</item>
+    <item msgid="8803180377002008046">"రెండు"</item>
+    <item msgid="8614897059944644719">"మూడు"</item>
+    <item msgid="2293058674782619556">"నాలుగు"</item>
+    <item msgid="4815402358455041664">"ఐదు"</item>
+    <item msgid="3325754778509665687">"ఆరు"</item>
+    <item msgid="5805551341866280575">"ఏడు"</item>
+    <item msgid="203334816668238610">"ఎనిమిది"</item>
+    <item msgid="4828052671464488923">"తొమ్మిది"</item>
+    <item msgid="2233497913571137419">"పది"</item>
+    <item msgid="5621554266768657830">"పదకొండు"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"అవుతుంది"</item>
+    <item msgid="8837126587669001578">"ఒకటి అవుతుంది"</item>
+    <item msgid="4294343372940455660">"రెండు అవుతుంది"</item>
+    <item msgid="7129166637707421536">"మూడు అవుతుంది"</item>
+    <item msgid="7579404865008788673">"నాలుగు అవుతుంది"</item>
+    <item msgid="3873924689207380586">"ఐదు అవుతుంది"</item>
+    <item msgid="4849565597850069377">"ఆరు అవుతుంది"</item>
+    <item msgid="4404219424523572364">"ఏడు అవుతుంది"</item>
+    <item msgid="8740481214764087329">"ఎనిమిది అవుతుంది"</item>
+    <item msgid="1713216865806811237">"తొమ్మిది అవుతుంది"</item>
+    <item msgid="3508406095411245038">"పది"</item>
+    <item msgid="7161996337755311711">"పదకొండు"</item>
+    <item msgid="4044549963329624197">"పన్నెండు"</item>
+    <item msgid="333373157917379088">"పదమూడు"</item>
+    <item msgid="2631202907124819385">"పద్నాలుగు"</item>
+    <item msgid="6472396076858033453">"పదిహేను"</item>
+    <item msgid="8656981856181581643">"పదహారు"</item>
+    <item msgid="7289026608562030619">"పదిహేడు"</item>
+    <item msgid="3881477602692646573">"పద్దెనిమిది"</item>
+    <item msgid="3358129827772984226">"పంతొమ్మిది"</item>
+    <item msgid="3308575407402865807">"ఇరవై"</item>
+    <item msgid="5346560955382229629">"ఇరవై\nఒకటి"</item>
+    <item msgid="226750304761473436">"ఇరవై\nరెండు"</item>
+    <item msgid="616811325336838734">"ఇరవై\nమూడు"</item>
+    <item msgid="616346116869053440">"ఇరవై\nనాలుగు"</item>
+    <item msgid="4642996410384042830">"ఇరవై\nఐదు"</item>
+    <item msgid="7506092849993571465">"ఇరవై\nఆరు"</item>
+    <item msgid="1915078191101042031">"ఇరవై\nఏడు"</item>
+    <item msgid="4292378641900520252">"ఇరవై\nఎనిమిది"</item>
+    <item msgid="5339513901773103696">"ఇరవై\nతొమ్మిది"</item>
+    <item msgid="3574673250891657607">"ముప్పై"</item>
+    <item msgid="5796923836589110940">"ముప్పై\nఒకటి"</item>
+    <item msgid="5859323597571702052">"ముప్పై\nరెండు"</item>
+    <item msgid="5133326723148876507">"ముప్పై\nమూడు"</item>
+    <item msgid="2693999494655663096">"ముప్పై\nనాలుగు"</item>
+    <item msgid="3316754944962836197">"ముప్పై\nఐదు"</item>
+    <item msgid="816891008836796723">"ముప్పై\nఆరు"</item>
+    <item msgid="9158890488666520078">"ముప్పై\nఏడు"</item>
+    <item msgid="1894769703213894011">"ముప్ఫై\nఎనిమిది"</item>
+    <item msgid="5638820345598572399">"ముప్పై\nతొమ్మిది"</item>
+    <item msgid="8838304023017895439">"నలభై"</item>
+    <item msgid="1834742948932559597">"నలభై\nఒకటి"</item>
+    <item msgid="6573707308847773944">"నలభై\nరెండు"</item>
+    <item msgid="2450149950652678001">"నలభై\nమూడు"</item>
+    <item msgid="2874667401318178036">"నలభై\nనాలుగు"</item>
+    <item msgid="3391101532763048862">"నలభై\nఐదు"</item>
+    <item msgid="1671489330863254362">"నలభై\nఆరు"</item>
+    <item msgid="5916017359554531038">"నలభై\nఏడు"</item>
+    <item msgid="8205413177993059967">"నలభై\nఎనిమిది"</item>
+    <item msgid="6607867415142171302">"నలభై\nతొమ్మిది"</item>
+    <item msgid="8358850748472089162">"యాభై"</item>
+    <item msgid="3551313125255080234">"యాభై\nఒకటి"</item>
+    <item msgid="1559678130725716542">"యాభై\nరెండు"</item>
+    <item msgid="431441994725492377">"యాభై\nమూడు"</item>
+    <item msgid="6345774640539623024">"యాభై\nనాలుగు"</item>
+    <item msgid="8018192990793931120">"యాభై\nఐదు"</item>
+    <item msgid="6187650843754604534">"యాభై\nఆరు"</item>
+    <item msgid="8727240174015993259">"యాభై\nఏడు"</item>
+    <item msgid="848339003778952950">"యాభై\nఎనిమిది"</item>
+    <item msgid="5798985802835423618">"యాభై\nతొమ్మిది"</item>
+  </string-array>
 </resources>

@@ -185,6 +185,10 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
+    public void onSingleTaskDisplayEmpty(int displayId) throws RemoteException {
+    }
+
+    @Override
     public void onTaskDisplayChanged(int taskId, int newDisplayId) throws RemoteException {
     }
 }

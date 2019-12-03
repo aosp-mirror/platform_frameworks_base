@@ -649,13 +649,8 @@ final class ColorFade {
         if (mSurfaceControl != null) {
             mSurfaceLayout.dispose();
             mSurfaceLayout = null;
-            SurfaceControl.openTransaction();
-            try {
-                mSurfaceControl.remove();
-                mSurface.release();
-            } finally {
-                SurfaceControl.closeTransaction();
-            }
+            new Transaction().remove(mSurfaceControl).apply();
+            mSurface.release();
             mSurfaceControl = null;
             mSurfaceVisible = false;
             mSurfaceAlpha = 0f;

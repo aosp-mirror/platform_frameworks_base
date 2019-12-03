@@ -235,17 +235,17 @@ public class SmartReplyView extends ViewGroup {
      * Add smart actions to be shown next to smart replies. Only the actions that fit into the
      * notification are shown.
      */
-    public List<Button> inflateSmartActions(@NonNull SmartActions smartActions,
-            SmartReplyController smartReplyController, NotificationEntry entry,
-            HeadsUpManager headsUpManager, boolean delayOnClickListener) {
+    public List<Button> inflateSmartActions(Context packageContext,
+            @NonNull SmartActions smartActions, SmartReplyController smartReplyController,
+            NotificationEntry entry, HeadsUpManager headsUpManager, boolean delayOnClickListener) {
         List<Button> buttons = new ArrayList<>();
         int numSmartActions = smartActions.actions.size();
         for (int n = 0; n < numSmartActions; n++) {
             Notification.Action action = smartActions.actions.get(n);
             if (action.actionIntent != null) {
                 buttons.add(inflateActionButton(
-                        this, getContext(), n, smartActions, smartReplyController, entry,
-                        headsUpManager, delayOnClickListener));
+                        this, getContext(), packageContext, n, smartActions, smartReplyController,
+                        entry, headsUpManager, delayOnClickListener));
             }
         }
         return buttons;
@@ -327,7 +327,7 @@ public class SmartReplyView extends ViewGroup {
 
     @VisibleForTesting
     static Button inflateActionButton(SmartReplyView smartReplyView, Context context,
-            int actionIndex, SmartActions smartActions,
+            Context packageContext, int actionIndex, SmartActions smartActions,
             SmartReplyController smartReplyController, NotificationEntry entry,
             HeadsUpManager headsUpManager, boolean useDelayedOnClickListener) {
         Notification.Action action = smartActions.actions.get(actionIndex);
@@ -335,7 +335,9 @@ public class SmartReplyView extends ViewGroup {
                 R.layout.smart_action_button, smartReplyView, false);
         button.setText(action.title);
 
-        Drawable iconDrawable = action.getIcon().loadDrawable(context);
+        // We received the Icon from the application - so use the Context of the application to
+        // reference icon resources.
+        Drawable iconDrawable = action.getIcon().loadDrawable(packageContext);
         // Add the action icon to the Smart Action button.
         int newIconSize = context.getResources().getDimensionPixelSize(
                 R.dimen.smart_action_button_icon_size);

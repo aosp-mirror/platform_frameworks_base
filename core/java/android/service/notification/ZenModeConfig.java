@@ -1639,7 +1639,7 @@ public class ZenModeConfig implements Parcelable {
         @UnsupportedAppUsage
         public String name;              // required for automatic
         @UnsupportedAppUsage
-        public int zenMode;
+        public int zenMode;             // ie: Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
         @UnsupportedAppUsage
         public Uri conditionId;          // required for automatic
         public Condition condition;      // optional

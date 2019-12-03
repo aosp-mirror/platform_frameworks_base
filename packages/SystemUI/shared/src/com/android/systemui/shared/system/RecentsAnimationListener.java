@@ -18,6 +18,8 @@ package com.android.systemui.shared.system;
 
 import android.graphics.Rect;
 
+import com.android.systemui.shared.recents.model.ThumbnailData;
+
 public interface RecentsAnimationListener {
 
     /**
@@ -29,5 +31,5 @@ public interface RecentsAnimationListener {
     /**
      * Called when the animation into Recents was canceled. This call is made on the binder thread.
      */
-    void onAnimationCanceled(boolean deferredWithScreenshot);
+    void onAnimationCanceled(ThumbnailData thumbnailData);
 }

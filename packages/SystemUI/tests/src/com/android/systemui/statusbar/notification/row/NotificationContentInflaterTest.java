@@ -23,7 +23,6 @@ import static com.android.systemui.statusbar.notification.row.NotificationConten
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -44,12 +43,12 @@ import android.widget.RemoteViews;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationCallback;
+import com.android.systemui.tests.R;
 
 import org.junit.Assert;
 import org.junit.Before;

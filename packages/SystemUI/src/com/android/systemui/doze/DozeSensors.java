@@ -107,8 +107,7 @@ public class DozeSensors {
                         config.dozePickupSensorAvailable(),
                         DozeLog.REASON_SENSOR_PICKUP, false /* touchCoords */,
                         false /* touchscreen */,
-                        false /* ignoresSetting */,
-                        mDozeParameters.getPickupPerformsProxCheck()),
+                        false /* ignoresSetting */),
                 new TriggerSensor(
                         findSensorWithType(config.doubleTapSensorType()),
                         Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
@@ -205,11 +204,8 @@ public class DozeSensors {
     public void updateListening() {
         boolean anyListening = false;
         for (TriggerSensor s : mSensors) {
-            // We don't want to be listening while we're PAUSED (prox sensor is covered)
-            // except when the sensor is already gated by prox.
-            boolean listen = mListening && (!mPaused || s.performsProxCheck());
-            s.setListening(listen);
-            if (listen) {
+            s.setListening(mListening);
+            if (mListening) {
                 anyListening = true;
             }
         }
@@ -391,7 +387,6 @@ public class DozeSensors {
         private final boolean mReportsTouchCoordinates;
         private final boolean mSettingDefault;
         private final boolean mRequiresTouchscreen;
-        private final boolean mSensorPerformsProxCheck;
 
         protected boolean mRequested;
         protected boolean mRegistered;
@@ -408,14 +403,12 @@ public class DozeSensors {
                 boolean configured, int pulseReason, boolean reportsTouchCoordinates,
                 boolean requiresTouchscreen) {
             this(sensor, setting, settingDef, configured, pulseReason, reportsTouchCoordinates,
-                    requiresTouchscreen, false /* ignoresSetting */,
-                    false /* sensorPerformsProxCheck */);
+                    requiresTouchscreen, false /* ignoresSetting */);
         }
 
         private TriggerSensor(Sensor sensor, String setting, boolean settingDef,
                 boolean configured, int pulseReason, boolean reportsTouchCoordinates,
-                boolean requiresTouchscreen, boolean ignoresSetting,
-                boolean sensorPerformsProxCheck) {
+                boolean requiresTouchscreen, boolean ignoresSetting) {
             mSensor = sensor;
             mSetting = setting;
             mSettingDefault = settingDef;
@@ -424,7 +417,6 @@ public class DozeSensors {
             mReportsTouchCoordinates = reportsTouchCoordinates;
             mRequiresTouchscreen = requiresTouchscreen;
             mIgnoresSetting = ignoresSetting;
-            mSensorPerformsProxCheck = sensorPerformsProxCheck;
         }
 
         public void setListening(boolean listen) {
@@ -498,21 +490,11 @@ public class DozeSensors {
                     screenX = event.values[0];
                     screenY = event.values[1];
                 }
-                mCallback.onSensorPulse(mPulseReason, mSensorPerformsProxCheck, screenX, screenY,
-                        event.values);
+                mCallback.onSensorPulse(mPulseReason, screenX, screenY, event.values);
                 if (!mRegistered) {
                     updateListening();  // reregister, this sensor only fires once
                 }
             }));
-        }
-
-        /**
-         * If the sensor itself performs proximity checks, to avoid pocket dialing.
-         * Gated sensors don't need to be stopped when the {@link DozeMachine} is
-         * {@link DozeMachine.State#DOZE_AOD_PAUSED}.
-         */
-        public boolean performsProxCheck() {
-            return mSensorPerformsProxCheck;
         }
 
         public void registerSettingsObserver(ContentObserver settingsObserver) {
@@ -610,8 +592,7 @@ public class DozeSensors {
                     return;
                 }
                 if (DEBUG) Log.d(TAG, "onSensorEvent: " + triggerEventToString(event));
-                mCallback.onSensorPulse(mPulseReason, true /* sensorPerformsProxCheck */, -1, -1,
-                        event.getValues());
+                mCallback.onSensorPulse(mPulseReason, -1, -1, event.getValues());
             }));
         }
     }
@@ -621,13 +602,11 @@ public class DozeSensors {
         /**
          * Called when a sensor requests a pulse
          * @param pulseReason Requesting sensor, e.g. {@link DozeLog#REASON_SENSOR_PICKUP}
-         * @param sensorPerformedProxCheck true if the sensor already checked for FAR proximity.
          * @param screenX the location on the screen where the sensor fired or -1
- *                if the sensor doesn't support reporting screen locations.
+         *                if the sensor doesn't support reporting screen locations.
          * @param screenY the location on the screen where the sensor fired or -1
          * @param rawValues raw values array from the event.
          */
-        void onSensorPulse(int pulseReason, boolean sensorPerformedProxCheck,
-                float screenX, float screenY, float[] rawValues);
+        void onSensorPulse(int pulseReason, float screenX, float screenY, float[] rawValues);
     }
 }

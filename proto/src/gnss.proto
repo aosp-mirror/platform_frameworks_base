@@ -48,6 +48,27 @@ message GnssLog {
 
   // Hardware revision (EVT, DVT, PVT etc.)
   optional string hardware_revision = 13;
+
+  // Total number of sv status messages processed
+  optional int32 num_sv_status_processed = 14;
+
+  // Total number of L5 sv status messages processed
+  optional int32 num_l5_sv_status_processed = 15;
+
+  // Total number of sv status messages processed, where sv is used in fix
+  optional int32 num_sv_status_used_in_fix = 16;
+
+  // Total number of L5 sv status messages processed, where sv is used in fix
+  optional int32 num_l5_sv_status_used_in_fix = 17;
+
+  // Number of l5 top 4 average CN0 processed
+  optional int32 num_l5_top_four_average_cn0_processed = 18;
+
+  // Mean of l5 top 4 average CN0 (dB-Hz)
+  optional double mean_l5_top_four_average_cn0_db_hz = 19;
+
+  // Standard deviation of l5 top 4 average CN0 (dB-Hz)
+  optional double standard_deviation_l5_top_four_average_cn0_db_hz = 20;
 }
 
 // Power metrics

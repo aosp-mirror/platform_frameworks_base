@@ -40,6 +40,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 
+import static org.mockito.ArgumentMatchers.eq;
+
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
@@ -72,6 +74,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.am.PendingIntentController;
 import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
+import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.TaskRecord.TaskRecordFactory;
@@ -92,6 +95,7 @@ import java.util.function.Consumer;
  */
 class ActivityTestsBase {
     private static int sNextDisplayId = DEFAULT_DISPLAY + 1;
+    private static final int[] TEST_USER_PROFILE_IDS = {};
 
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
@@ -204,6 +208,8 @@ class ActivityTestsBase {
         private ActivityStack mStack;
         private int mActivityFlags;
         private int mLaunchMode;
+        private int mLaunchedFromPid;
+        private int mLaunchedFromUid;
 
         ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
@@ -254,6 +260,16 @@ class ActivityTestsBase {
             return this;
         }
 
+        ActivityBuilder setLaunchedFromPid(int pid) {
+            mLaunchedFromPid = pid;
+            return this;
+        }
+
+        ActivityBuilder setLaunchedFromUid(int uid) {
+            mLaunchedFromUid = uid;
+            return this;
+        }
+
         ActivityRecord build() {
             if (mComponent == null) {
                 final int id = sCurrentActivityId++;
@@ -281,10 +297,11 @@ class ActivityTestsBase {
             aInfo.launchMode = mLaunchMode;
 
             final ActivityRecord activity = new ActivityRecord(mService, null /* caller */,
-                    0 /* launchedFromPid */, 0, null, intent, null,
-                    aInfo /*aInfo*/, new Configuration(), null /* resultTo */, null /* resultWho */,
-                    0 /* reqCode */, false /*componentSpecified*/, false /* rootVoiceInteraction */,
-                    mService.mStackSupervisor, null /* options */, null /* sourceRecord */);
+                    mLaunchedFromPid /* launchedFromPid */, mLaunchedFromUid /* launchedFromUid */,
+                    null, intent, null, aInfo /*aInfo*/, new Configuration(), null /* resultTo */,
+                    null /* resultWho */, 0 /* reqCode */, false /*componentSpecified*/,
+                    false /* rootVoiceInteraction */, mService.mStackSupervisor,
+                    null /* options */, null /* sourceRecord */);
             spyOn(activity);
             activity.mAppWindowToken = mock(AppWindowToken.class);
             doCallRealMethod().when(activity.mAppWindowToken).getOrientationIgnoreVisibility();
@@ -471,6 +488,11 @@ class ActivityTestsBase {
             // allow background activity starts by default
             doReturn(true).when(this).isBackgroundActivityStartsEnabled();
             doNothing().when(this).updateCpuStats();
+
+            // UserManager
+            final UserManagerService ums = mock(UserManagerService.class);
+            doReturn(ums).when(this).getUserManager();
+            doReturn(TEST_USER_PROFILE_IDS).when(ums).getProfileIds(anyInt(), eq(true));
         }
 
         void setup(IntentFirewall intentFirewall, PendingIntentController intentController,

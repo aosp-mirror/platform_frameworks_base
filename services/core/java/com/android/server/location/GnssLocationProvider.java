@@ -1459,7 +1459,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 info.mSvCarrierFreqs);
 
         // Log CN0 as part of GNSS metrics
-        mGnssMetrics.logCn0(info.mCn0s, info.mSvCount);
+        mGnssMetrics.logCn0(info.mCn0s, info.mSvCount, info.mSvCarrierFreqs);
 
         if (VERBOSE) {
             Log.v(TAG, "SV count: " + info.mSvCount);
@@ -1510,6 +1510,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 SystemClock.elapsedRealtime() - mLastFixTime > RECENT_FIX_TIMEOUT) {
             updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE);
         }
+
+        mGnssMetrics.logSvStatus(info.mSvCount, info.mSvidWithFlags, info.mSvCarrierFreqs);
     }
 
     @NativeEntryPoint

@@ -21,4 +21,8 @@
         coreApp="true">
     <!-- This permission is required to monitor car power state. -->
     <uses-permission android:name="android.car.permission.CAR_POWER" />
+    <!-- This permission is required to get the trusted device list of a user. -->
+    <uses-permission android:name="android.car.permission.CAR_ENROLL_TRUST"/>
+    <!-- This permission is required to get bluetooth broadcast. -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
 </manifest>

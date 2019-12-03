@@ -206,10 +206,16 @@ public abstract class CameraMetadata<TKey> {
                     continue;
                 }
 
-                if (filterTags == null || Arrays.binarySearch(filterTags,
-                        CameraMetadataNative.getTag(keyName, vendorId)) >= 0) {
+
+                if (filterTags != null && Arrays.binarySearch(filterTags,
+                        CameraMetadataNative.getTag(keyName, vendorId)) < 0) {
+                    // ignore vendor keys not in filterTags
+                    continue;
+                }
+                if (instance == null || instance.getProtected(k) != null)  {
                     keyList.add(k);
                 }
+
             }
         }
 

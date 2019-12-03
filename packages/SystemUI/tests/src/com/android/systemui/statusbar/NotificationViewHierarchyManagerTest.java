@@ -41,7 +41,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.bubbles.BubbleData;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -110,8 +110,9 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         mViewHierarchyManager = new NotificationViewHierarchyManager(mContext,
                 mHandler, mLockscreenUserManager, mGroupManager, mVisualStabilityManager,
                 mock(StatusBarStateControllerImpl.class), mEntryManager,
-                () -> mShadeController, new BubbleData(mContext),
+                () -> mShadeController,
                 mock(KeyguardBypassController.class),
+                mock(BubbleController.class),
                 mock(DynamicPrivacyController.class));
         Dependency.get(InitController.class).executePostInitTasks();
         mViewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);

@@ -33,9 +33,9 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.FakeShadowView;
@@ -130,7 +130,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private boolean mLastInSection;
     private boolean mFirstInSection;
     private boolean mIsBelowSpeedBump;
-    private FalsingManager mFalsingManager;
+    private final FalsingManager mFalsingManager;
 
     private float mNormalBackgroundVisibilityAmount;
     private float mDimmedBackgroundFadeInAmount = -1;
@@ -164,10 +164,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         super(context, attrs);
         mSlowOutFastInInterpolator = new PathInterpolator(0.8f, 0.0f, 0.6f, 1.0f);
         mSlowOutLinearInInterpolator = new PathInterpolator(0.8f, 0.0f, 1.0f, 1.0f);
+        mFalsingManager = Dependency.get(FalsingManager.class);  // TODO: inject into a controller.
         setClipChildren(false);
         setClipToPadding(false);
         updateColors();
-        mFalsingManager = FalsingManagerFactory.getInstance(context);
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
 
         mDoubleTapHelper = new DoubleTapHelper(this, (active) -> {

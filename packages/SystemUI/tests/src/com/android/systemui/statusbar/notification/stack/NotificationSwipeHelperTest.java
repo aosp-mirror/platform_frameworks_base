@@ -40,6 +40,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -76,7 +77,8 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     public void setUp() throws Exception {
         mCallback = mock(NotificationSwipeHelper.NotificationCallback.class);
         mListener = mock(NotificationMenuRowPlugin.OnMenuEventListener.class);
-        mSwipeHelper = spy(new NotificationSwipeHelper(SwipeHelper.X, mCallback, mContext, mListener));
+        mSwipeHelper = spy(new NotificationSwipeHelper(
+                SwipeHelper.X, mCallback, mContext, mListener, new FalsingManagerFake()));
         mView = mock(View.class);
         mEvent = mock(MotionEvent.class);
         mMenuRow = mock(NotificationMenuRowPlugin.class);

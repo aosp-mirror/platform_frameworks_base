@@ -114,16 +114,12 @@ public class WindowContainerTests extends WindowTestsBase {
     @Test
     public void testAddChildSetsSurfacePosition() {
         try (MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer(mWm)) {
-
-            final SurfaceControl.Transaction transaction = mock(SurfaceControl.Transaction.class);
-            mWm.mTransactionFactory = () -> transaction;
-
             WindowContainer child = new WindowContainer(mWm);
             child.setBounds(1, 1, 10, 10);
 
-            verify(transaction, never()).setPosition(any(), anyFloat(), anyFloat());
+            verify(mTransaction, never()).setPosition(any(), anyFloat(), anyFloat());
             top.addChild(child, 0);
-            verify(transaction, times(1)).setPosition(any(), eq(1.f), eq(1.f));
+            verify(mTransaction, times(1)).setPosition(any(), eq(1.f), eq(1.f));
         }
     }
 

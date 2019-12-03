@@ -127,7 +127,7 @@ public enum ScrimState {
     PULSING(5) {
         @Override
         public void prepare(ScrimState previousState) {
-            mCurrentInFrontAlpha = 0f;
+            mCurrentInFrontAlpha = mAodFrontScrimAlpha;
             mCurrentBehindTint = Color.BLACK;
             mCurrentInFrontTint = Color.BLACK;
             mBlankScreen = mDisplayRequiresBlanking;
@@ -159,6 +159,7 @@ public enum ScrimState {
             mAnimationDuration = mKeyguardFadingAway
                     ? mKeyguardFadingAwayDuration
                     : StatusBar.FADE_KEYGUARD_DURATION;
+
             mAnimateChange = !mLaunchingAffordanceWithPreview;
 
             if (previousState == ScrimState.AOD) {

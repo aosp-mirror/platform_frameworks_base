@@ -1792,6 +1792,25 @@ message ExperimentValues {
 
   // Indicates if we are logging LinkSpeedCount in metrics
   optional bool link_speed_counts_logging_enabled = 4;
+
+  // Duration for evaluating Wifi condition to trigger a data stall
+  // measured in milliseconds
+  optional int32 data_stall_duration_ms = 5;
+
+  // Threshold of Tx throughput below which to trigger a data stall
+  // measured in Mbps
+  optional int32 data_stall_tx_tput_thr_mbps = 6;
+
+  // Threshold of Rx throughput below which to trigger a data stall
+  // measured in Mbps
+  optional int32 data_stall_rx_tput_thr_mbps = 7;
+
+  // Threshold of Tx packet error rate above which to trigger a data stall
+  // in percentage
+  optional int32 data_stall_tx_per_thr = 8;
+
+  // Threshold of CCA level above which to trigger a data stall in percentage
+  optional int32 data_stall_cca_level_thr = 9;
 }
 
 message WifiIsUnusableEvent {

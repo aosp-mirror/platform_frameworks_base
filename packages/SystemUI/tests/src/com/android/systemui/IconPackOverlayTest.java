@@ -32,6 +32,7 @@ import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.XmlUtils;
+import com.android.systemui.tests.R;
 
 import org.junit.After;
 import org.junit.Before;

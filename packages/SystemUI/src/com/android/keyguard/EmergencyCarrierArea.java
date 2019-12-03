@@ -21,6 +21,8 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.android.systemui.R;
+
 public class EmergencyCarrierArea extends AlphaOptimizedLinearLayout {
 
     private CarrierText mCarrierText;

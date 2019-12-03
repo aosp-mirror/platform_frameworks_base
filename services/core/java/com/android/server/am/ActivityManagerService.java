@@ -5283,7 +5283,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             storageManager.commitChanges();
         } catch (Exception e) {
             PowerManager pm = (PowerManager)
-                     mContext.getSystemService(Context.POWER_SERVICE);
+                     mInjector.getContext().getSystemService(Context.POWER_SERVICE);
             pm.reboot("Checkpoint commit failed");
         }
 
@@ -9055,7 +9055,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Integer.toString(currentUserId), currentUserId);
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
                 Integer.toString(currentUserId), currentUserId);
-        mSystemServiceManager.startUser(currentUserId);
+
+        // On Automotive, at this point the system user has already been started and unlocked,
+        // and some of the tasks we do here have already been done. So skip those in that case.
+        // TODO(b/132262830): this workdound shouldn't be necessary once we move the
+        // headless-user start logic to UserManager-land
+        final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
+
+        if (bootingSystemUser) {
+            mSystemServiceManager.startUser(currentUserId);
+        }
 
         synchronized (this) {
             // Only start up encryption-aware persistent apps; once user is
@@ -9079,43 +9088,53 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw e.rethrowAsRuntimeException();
                 }
             }
-            mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
+
+            if (bootingSystemUser) {
+                mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
+            }
 
             mAtmInternal.showSystemReadyErrorDialogsIfNeeded();
 
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
-            long ident = Binder.clearCallingIdentity();
-            try {
-                Intent intent = new Intent(Intent.ACTION_USER_STARTED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                        | Intent.FLAG_RECEIVER_FOREGROUND);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
-                broadcastIntentLocked(null, null, intent,
-                        null, null, 0, null, null, null, OP_NONE,
-                        null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
-                        currentUserId);
-                intent = new Intent(Intent.ACTION_USER_STARTING);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
-                broadcastIntentLocked(null, null, intent,
-                        null, new IIntentReceiver.Stub() {
-                            @Override
-                            public void performReceive(Intent intent, int resultCode, String data,
-                                    Bundle extras, boolean ordered, boolean sticky, int sendingUser)
-                                    throws RemoteException {
-                            }
-                        }, 0, null, null,
-                        new String[] {INTERACT_ACROSS_USERS}, OP_NONE,
-                        null, true, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
-                        UserHandle.USER_ALL);
-            } catch (Throwable t) {
-                Slog.wtf(TAG, "Failed sending first user broadcasts", t);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            if (bootingSystemUser) {
+                final int callingUid = Binder.getCallingUid();
+                final int callingPid = Binder.getCallingPid();
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    Intent intent = new Intent(Intent.ACTION_USER_STARTED);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                            | Intent.FLAG_RECEIVER_FOREGROUND);
+                    intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
+                    broadcastIntentLocked(null, null, intent,
+                            null, null, 0, null, null, null, OP_NONE,
+                            null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
+                            currentUserId);
+                    intent = new Intent(Intent.ACTION_USER_STARTING);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
+                    broadcastIntentLocked(null, null, intent,
+                            null, new IIntentReceiver.Stub() {
+                                @Override
+                                public void performReceive(Intent intent, int resultCode, String data,
+                                        Bundle extras, boolean ordered, boolean sticky, int sendingUser)
+                                        throws RemoteException {
+                                }
+                            }, 0, null, null,
+                            new String[] {INTERACT_ACROSS_USERS}, OP_NONE,
+                            null, true, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
+                            UserHandle.USER_ALL);
+                } catch (Throwable t) {
+                    Slog.wtf(TAG, "Failed sending first user broadcasts", t);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            } else {
+                Slog.i(TAG, "Not sending multi-user broadcasts for non-system user "
+                        + currentUserId);
             }
             mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
-            mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
+            if (bootingSystemUser) {
+                mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
+            }
 
             BinderInternal.nSetBinderProxyCountWatermarks(BINDER_PROXY_HIGH_WATERMARK,
                     BINDER_PROXY_LOW_WATERMARK);
@@ -15007,7 +15026,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                             final int uid = getUidFromIntent(intent);
                             if (uid >= 0) {
                                 mBatteryStatsService.removeUid(uid);
-                                mAppOpsService.uidRemoved(uid);
+                                if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                                    mAppOpsService.resetAllModes(UserHandle.getUserId(uid),
+                                            intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME));
+                                } else {
+                                    mAppOpsService.uidRemoved(uid);
+                                }
                             }
                             break;
                         case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:

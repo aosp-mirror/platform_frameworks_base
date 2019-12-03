@@ -722,10 +722,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    public void notePhoneDataConnectionState(int dataType, boolean hasData) {
+    public void notePhoneDataConnectionState(int dataType, boolean hasData, int serviceType) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.notePhoneDataConnectionStateLocked(dataType, hasData);
+            mStats.notePhoneDataConnectionStateLocked(dataType, hasData, serviceType);
         }
     }
 
@@ -756,7 +756,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public void noteStartAudio(int uid) {
-        enforceSelfOrCallingPermission(uid);
+        enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteAudioOnLocked(uid);
             StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, uid, null,
@@ -765,7 +765,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public void noteStopAudio(int uid) {
-        enforceSelfOrCallingPermission(uid);
+        enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteAudioOffLocked(uid);
             StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, uid, null,
@@ -774,7 +774,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public void noteStartVideo(int uid) {
-        enforceSelfOrCallingPermission(uid);
+        enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteVideoOnLocked(uid);
             StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_STATE_CHANGED, uid, null,
@@ -783,7 +783,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public void noteStopVideo(int uid) {
-        enforceSelfOrCallingPermission(uid);
+        enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteVideoOffLocked(uid);
             StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_STATE_CHANGED, uid,
@@ -1182,13 +1182,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
         mContext.enforcePermission(android.Manifest.permission.UPDATE_DEVICE_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
-    }
-
-    private void enforceSelfOrCallingPermission(int uid) {
-        if (Binder.getCallingUid() == uid) {
-            return;
-        }
-        enforceCallingPermission();
     }
 
     final class WakeupReasonThread extends Thread {

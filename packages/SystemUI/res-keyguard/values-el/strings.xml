@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Λανθασμένος κωδικός PIN."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Μη έγκυρη κάρτα."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Πλήρως φορτισμένη"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ασύρματη φόρτιση"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ασύρματη φόρτιση"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Φόρτιση"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Γρήγορη φόρτιση"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Αργή φόρτιση"</string>
@@ -151,7 +151,84 @@
       <item quantity="other">Η κάρτα SIM απενεργοποιήθηκε. Καταχωρίστε τον κωδικό PUK, για να συνεχίσετε. Απομένουν <xliff:g id="_NUMBER_1">%d</xliff:g> ακόμη προσπάθειες προτού να μην είναι πλέον δυνατή η χρήση της κάρτας SIM. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας για λεπτομέρειες.</item>
       <item quantity="one">Η κάρτα SIM απενεργοποιήθηκε. Καταχωρίστε τον κωδικό PUK, για να συνεχίσετε. Απομένει <xliff:g id="_NUMBER_0">%d</xliff:g> ακόμη προσπάθεια προτού να μην είναι πλέον δυνατή η χρήση της κάρτας SIM. Επικοινωνήστε με την εταιρεία κινητής τηλεφωνίας για λεπτομέρειες.</item>
     </plurals>
-    <string name="clock_title_default" msgid="6645600990069154049">"Προεπιλογή"</string>
-    <string name="clock_title_bubble" msgid="1286365278681892114">"Συννεφάκι"</string>
-    <string name="clock_title_analog" msgid="4047401488577315053">"Αναλογικό"</string>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"Είναι"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"Είναι"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Δώδεκα"</item>
+    <item msgid="7389464214252023751">"Μία"</item>
+    <item msgid="8803180377002008046">"Δύο"</item>
+    <item msgid="8614897059944644719">"Τρία"</item>
+    <item msgid="2293058674782619556">"Τέσσερα"</item>
+    <item msgid="4815402358455041664">"Πέντε"</item>
+    <item msgid="3325754778509665687">"Έξι"</item>
+    <item msgid="5805551341866280575">"Επτά"</item>
+    <item msgid="203334816668238610">"Οκτώ"</item>
+    <item msgid="4828052671464488923">"Εννέα"</item>
+    <item msgid="2233497913571137419">"Δέκα"</item>
+    <item msgid="5621554266768657830">"Έντεκα"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"Ακριβώς"</item>
+    <item msgid="8837126587669001578">"Ένα"</item>
+    <item msgid="4294343372940455660">"Δύο"</item>
+    <item msgid="7129166637707421536">"Τρεις"</item>
+    <item msgid="7579404865008788673">"Τέσσερα"</item>
+    <item msgid="3873924689207380586">"Πέντε"</item>
+    <item msgid="4849565597850069377">"Έξι"</item>
+    <item msgid="4404219424523572364">"Επτά"</item>
+    <item msgid="8740481214764087329">"Οκτώ"</item>
+    <item msgid="1713216865806811237">"Εννέα"</item>
+    <item msgid="3508406095411245038">"Δέκα"</item>
+    <item msgid="7161996337755311711">"Έντεκα"</item>
+    <item msgid="4044549963329624197">"Δώδεκα"</item>
+    <item msgid="333373157917379088">"Δεκατρία"</item>
+    <item msgid="2631202907124819385">"Δεκατέσσερα"</item>
+    <item msgid="6472396076858033453">"Δεκαπέντε"</item>
+    <item msgid="8656981856181581643">"Δεκαέξι"</item>
+    <item msgid="7289026608562030619">"Δεκαεπτά"</item>
+    <item msgid="3881477602692646573">"Δεκαοκτώ"</item>
+    <item msgid="3358129827772984226">"Δεκαεννέα"</item>
+    <item msgid="3308575407402865807">"Είκοσι"</item>
+    <item msgid="5346560955382229629">"Είκοσι\nένα"</item>
+    <item msgid="226750304761473436">"Είκοσι\nδύο"</item>
+    <item msgid="616811325336838734">"Είκοσι\nτρία"</item>
+    <item msgid="616346116869053440">"Είκοσι\nτέσσερα"</item>
+    <item msgid="4642996410384042830">"Είκοσι\nπέντε"</item>
+    <item msgid="7506092849993571465">"Είκοσι\nέξι"</item>
+    <item msgid="1915078191101042031">"Είκοσι\nεπτά"</item>
+    <item msgid="4292378641900520252">"Είκοσι\nοκτώ"</item>
+    <item msgid="5339513901773103696">"Είκοσι\nεννέα"</item>
+    <item msgid="3574673250891657607">"Τριάντα"</item>
+    <item msgid="5796923836589110940">"Τριάντα\nένα"</item>
+    <item msgid="5859323597571702052">"Τριάντα\nδύο"</item>
+    <item msgid="5133326723148876507">"Τριάντα\nοκτώ"</item>
+    <item msgid="2693999494655663096">"Τριάντα\nοκτώ"</item>
+    <item msgid="3316754944962836197">"Τριάντα\nπέντε"</item>
+    <item msgid="816891008836796723">"Τριάντα\nέξι"</item>
+    <item msgid="9158890488666520078">"Τριάντα\nεπτά"</item>
+    <item msgid="1894769703213894011">"Τριάντα\nοκτώ"</item>
+    <item msgid="5638820345598572399">"Τριάντα\nεννέα"</item>
+    <item msgid="8838304023017895439">"Σαράντα"</item>
+    <item msgid="1834742948932559597">"Σαράντα\nένα"</item>
+    <item msgid="6573707308847773944">"Σαράντα\nδύο"</item>
+    <item msgid="2450149950652678001">"Σαράντα\nτρία"</item>
+    <item msgid="2874667401318178036">"Σαράντα\nτέσσερα"</item>
+    <item msgid="3391101532763048862">"Σαράντα\nπέντε"</item>
+    <item msgid="1671489330863254362">"Σαράντα\nέξι"</item>
+    <item msgid="5916017359554531038">"Σαράντα\nεπτά"</item>
+    <item msgid="8205413177993059967">"Σαράντα\nοκτώ"</item>
+    <item msgid="6607867415142171302">"Σαράντα\nεννέα"</item>
+    <item msgid="8358850748472089162">"Πενήντα"</item>
+    <item msgid="3551313125255080234">"Πενήντα\nένα"</item>
+    <item msgid="1559678130725716542">"Πενήντα\nδύο"</item>
+    <item msgid="431441994725492377">"Πενήντα\nτρία"</item>
+    <item msgid="6345774640539623024">"Πενήντα\nτέσσερα"</item>
+    <item msgid="8018192990793931120">"Πενήντα\nπέντε"</item>
+    <item msgid="6187650843754604534">"Πενήντα\nέξι"</item>
+    <item msgid="8727240174015993259">"Πενήντα\nεπτά"</item>
+    <item msgid="848339003778952950">"Πενήντα\nοκτώ"</item>
+    <item msgid="5798985802835423618">"Πενήντα\nεννέα"</item>
+  </string-array>
 </resources>

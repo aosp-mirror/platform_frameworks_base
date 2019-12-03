@@ -35,6 +35,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.Utils;
+import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
 import java.io.File;

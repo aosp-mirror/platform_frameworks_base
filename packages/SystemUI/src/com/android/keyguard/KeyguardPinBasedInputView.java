@@ -23,6 +23,8 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.android.systemui.R;
+
 /**
  * A Pin based Keyguard input view
  */

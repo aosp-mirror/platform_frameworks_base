@@ -208,7 +208,8 @@ public class StatusBarTest extends SysuiTestCase {
 
         mNotificationInterruptionStateProvider =
                 new TestableNotificationInterruptionStateProvider(mContext, mPowerManager,
-                        mDreamManager, mAmbientDisplayConfiguration);
+                        mDreamManager, mAmbientDisplayConfiguration, mNotificationFilter,
+                        mStatusBarStateController);
         mDependency.injectTestDependency(NotificationInterruptionStateProvider.class,
                 mNotificationInterruptionStateProvider);
         mDependency.injectMockDependency(NavigationBarController.class);
@@ -870,8 +871,11 @@ public class StatusBarTest extends SysuiTestCase {
                 Context context,
                 PowerManager powerManager,
                 IDreamManager dreamManager,
-                AmbientDisplayConfiguration ambientDisplayConfiguration) {
-            super(context, powerManager, dreamManager, ambientDisplayConfiguration);
+                AmbientDisplayConfiguration ambientDisplayConfiguration,
+                NotificationFilter filter,
+                StatusBarStateController controller) {
+            super(context, powerManager, dreamManager, ambientDisplayConfiguration, filter,
+                    controller);
             mUseHeadsUp = true;
         }
     }
