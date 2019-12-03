@@ -6415,19 +6415,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         changes.addRematchedNetwork(new NetworkReassignment.NetworkBgStatePair(newNetwork,
                 newNetwork.isBackgroundNetwork()));
 
-        final int score = newNetwork.getCurrentScore();
-
         if (VDBG || DDBG) log("rematching " + newNetwork.name());
 
         final ArrayMap<NetworkRequestInfo, NetworkAgentInfo> reassignedRequests =
                 computeRequestReassignmentForNetwork(newNetwork);
 
-        NetworkCapabilities nc = newNetwork.networkCapabilities;
-        if (VDBG) log(" network has: " + nc);
-
         // Find and migrate to this Network any NetworkRequests for
         // which this network is now the best.
-        final ArrayList<NetworkAgentInfo> removedRequests = new ArrayList<>();
         for (final Map.Entry<NetworkRequestInfo, NetworkAgentInfo> entry :
                 reassignedRequests.entrySet()) {
             final NetworkRequestInfo nri = entry.getKey();
@@ -6441,7 +6435,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
                     previousSatisfier.removeRequest(nri.request.requestId);
                     previousSatisfier.lingerRequest(nri.request, now, mLingerDelayMs);
-                    removedRequests.add(previousSatisfier);
                 } else {
                     if (VDBG || DDBG) log("   accepting network in place of null");
                 }
@@ -6507,17 +6500,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     now, newNetwork, oldDefaultNetwork);
             // Have a new default network, release the transition wakelock in
             scheduleReleaseNetworkTransitionWakelock();
-        }
-
-        if (!newNetwork.networkCapabilities.equalRequestableCapabilities(nc)) {
-            Slog.wtf(TAG, String.format(
-                    "BUG: %s changed requestable capabilities during rematch: %s -> %s",
-                    newNetwork.name(), nc, newNetwork.networkCapabilities));
-        }
-        if (newNetwork.getCurrentScore() != score) {
-            Slog.wtf(TAG, String.format(
-                    "BUG: %s changed score during rematch: %d -> %d",
-                    newNetwork.name(), score, newNetwork.getCurrentScore()));
         }
     }
 
