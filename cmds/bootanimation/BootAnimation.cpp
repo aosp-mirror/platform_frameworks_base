@@ -1161,7 +1161,6 @@ BootAnimation::Animation* BootAnimation::loadAnimation(const String8& fn)
         return nullptr;
     }
 
-
     mLoadedFiles.remove(fn);
     return animation;
 }
