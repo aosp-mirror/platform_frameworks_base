@@ -16,6 +16,7 @@
 
 package android.provider.settings.validators;
 
+import static android.provider.settings.validators.SettingsValidators.ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.COLON_SEPARATED_COMPONENT_LIST_VALIDATOR;
@@ -71,10 +72,13 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.TOUCH_EXPLORATION_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
-                Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, NULLABLE_COMPONENT_NAME_VALIDATOR);
+                Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
+                ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
         // technically either ComponentName or class name, but there's proper value
         // validation at callsites, so allow any non-null string
-        VALIDATORS.put(Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT, value -> value != null);
+        VALIDATORS.put(
+                Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
+                ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_SHORTCUT_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN, BOOLEAN_VALIDATOR);
