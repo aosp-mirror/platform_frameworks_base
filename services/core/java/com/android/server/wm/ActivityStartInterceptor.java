@@ -156,14 +156,14 @@ class ActivityStartInterceptor {
         mInTask = inTask;
         mActivityOptions = activityOptions;
 
-        if (interceptSuspendedPackageIfNeeded()) {
-            // Skip the rest of interceptions as the package is suspended by device admin so
-            // no user action can undo this.
-            return true;
-        }
         if (interceptQuietProfileIfNeeded()) {
             // If work profile is turned off, skip the work challenge since the profile can only
             // be unlocked when profile's user is running.
+            return true;
+        }
+        if (interceptSuspendedPackageIfNeeded()) {
+            // Skip the rest of interceptions as the package is suspended by device admin so
+            // no user action can undo this.
             return true;
         }
         if (interceptHarmfulAppIfNeeded()) {

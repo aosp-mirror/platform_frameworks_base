@@ -167,16 +167,8 @@ public class ActivityStartInterceptorTest {
 
     @Test
     public void testSuspendedPackage() {
-        mAInfo.applicationInfo.flags = FLAG_SUSPENDED;
         final String suspendingPackage = "com.test.suspending.package";
-        final SuspendDialogInfo dialogInfo = new SuspendDialogInfo.Builder()
-                .setMessage("Test Message")
-                .setIcon(0x11110001)
-                .build();
-        when(mPackageManagerInternal.getSuspendingPackage(TEST_PACKAGE_NAME, TEST_USER_ID))
-                .thenReturn(suspendingPackage);
-        when(mPackageManagerInternal.getSuspendedDialogInfo(TEST_PACKAGE_NAME, suspendingPackage,
-                TEST_USER_ID)).thenReturn(dialogInfo);
+        final SuspendDialogInfo dialogInfo = suspendPackage(suspendingPackage);
         // THEN calling intercept returns true
         assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
 
@@ -190,8 +182,35 @@ public class ActivityStartInterceptorTest {
         assertEquals(TEST_USER_ID, mInterceptor.mIntent.getIntExtra(Intent.EXTRA_USER_ID, -1000));
     }
 
+    private SuspendDialogInfo suspendPackage(String suspendingPackage) {
+        mAInfo.applicationInfo.flags = FLAG_SUSPENDED;
+        final SuspendDialogInfo dialogInfo = new SuspendDialogInfo.Builder()
+                .setMessage("Test Message")
+                .setIcon(0x11110001)
+                .build();
+        when(mPackageManagerInternal.getSuspendingPackage(TEST_PACKAGE_NAME, TEST_USER_ID))
+                .thenReturn(suspendingPackage);
+        when(mPackageManagerInternal.getSuspendedDialogInfo(TEST_PACKAGE_NAME, suspendingPackage,
+                TEST_USER_ID)).thenReturn(dialogInfo);
+        return dialogInfo;
+    }
+
     @Test
     public void testInterceptQuietProfile() {
+        // GIVEN that the user the activity is starting as is currently in quiet mode
+        when(mUserManager.isQuietModeEnabled(eq(UserHandle.of(TEST_USER_ID)))).thenReturn(true);
+
+        // THEN calling intercept returns true
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+
+        // THEN the returned intent is the quiet mode intent
+        assertTrue(UnlaunchableAppActivity.createInQuietModeDialogIntent(TEST_USER_ID)
+                .filterEquals(mInterceptor.mIntent));
+    }
+
+    @Test
+    public void testInterceptQuietProfileWhenPackageSuspended() {
+        suspendPackage("com.test.suspending.package");
         // GIVEN that the user the activity is starting as is currently in quiet mode
         when(mUserManager.isQuietModeEnabled(eq(UserHandle.of(TEST_USER_ID)))).thenReturn(true);
 
