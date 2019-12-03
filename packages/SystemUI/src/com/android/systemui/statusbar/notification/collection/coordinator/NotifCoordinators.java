@@ -44,8 +44,15 @@ public class NotifCoordinators implements Dumpable {
      * Creates all the coordinators.
      */
     @Inject
-    public NotifCoordinators(KeyguardCoordinator keyguardNotificationCoordinator) {
-        mCoordinators.add(keyguardNotificationCoordinator);
+    public NotifCoordinators(
+            KeyguardCoordinator keyguardCoordinator,
+            RankingCoordinator rankingCoordinator,
+            ForegroundCoordinator foregroundCoordinator,
+            DeviceProvisionedCoordinator deviceProvisionedCoordinator) {
+        mCoordinators.add(keyguardCoordinator);
+        mCoordinators.add(rankingCoordinator);
+        mCoordinators.add(foregroundCoordinator);
+        mCoordinators.add(deviceProvisionedCoordinator);
         // TODO: add new Coordinators here! (b/145134683, b/112656837)
     }
 

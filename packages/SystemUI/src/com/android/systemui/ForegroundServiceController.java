@@ -37,7 +37,7 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class ForegroundServiceController {
-    private static final int[] APP_OPS = new int[] {AppOpsManager.OP_CAMERA,
+    public static final int[] APP_OPS = new int[] {AppOpsManager.OP_CAMERA,
             AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
             AppOpsManager.OP_RECORD_AUDIO,
             AppOpsManager.OP_COARSE_LOCATION,
