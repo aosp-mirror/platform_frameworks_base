@@ -87,7 +87,7 @@ public class DataUsageUtilsTest {
     public void getMobileTemplate_groupUuidNull_returnMobileAll() {
         when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(mInfo1);
         when(mInfo1.getGroupUuid()).thenReturn(null);
-        when(mTelephonyManager.getMergedSubscriberIdsFromGroup())
+        when(mTelephonyManager.getMergedImsisFromGroup())
                 .thenReturn(new String[] {SUBSCRIBER_ID});
 
         final NetworkTemplate networkTemplate = DataUsageUtils.getMobileTemplate(mContext, SUB_ID);
@@ -99,7 +99,7 @@ public class DataUsageUtilsTest {
     public void getMobileTemplate_groupUuidExist_returnMobileMerged() {
         when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(mInfo1);
         when(mInfo1.getGroupUuid()).thenReturn(mParcelUuid);
-        when(mTelephonyManager.getMergedSubscriberIdsFromGroup())
+        when(mTelephonyManager.getMergedImsisFromGroup())
                 .thenReturn(new String[] {SUBSCRIBER_ID, SUBSCRIBER_ID_2});
 
         final NetworkTemplate networkTemplate = DataUsageUtils.getMobileTemplate(mContext, SUB_ID);
