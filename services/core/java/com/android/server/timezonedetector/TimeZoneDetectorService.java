@@ -19,6 +19,7 @@ package com.android.server.timezonedetector;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.timezonedetector.ITimeZoneDetectorService;
+import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.PhoneTimeZoneSuggestion;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -28,7 +29,6 @@ import android.provider.Settings;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
 
@@ -75,7 +75,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
                 Settings.Global.getUriFor(Settings.Global.AUTO_TIME_ZONE), true,
                 new ContentObserver(handler) {
                     public void onChange(boolean selfChange) {
-                        timeZoneDetectorStrategy.handleTimeZoneDetectionChange();
+                        timeZoneDetectorStrategy.handleAutoTimeZoneDetectionChange();
                     }
                 });
 
@@ -91,8 +91,16 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     }
 
     @Override
+    public void suggestManualTimeZone(@NonNull ManualTimeZoneSuggestion timeZoneSuggestion) {
+        enforceSuggestManualTimeZonePermission();
+        Objects.requireNonNull(timeZoneSuggestion);
+
+        mHandler.post(() -> mTimeZoneDetectorStrategy.suggestManualTimeZone(timeZoneSuggestion));
+    }
+
+    @Override
     public void suggestPhoneTimeZone(@NonNull PhoneTimeZoneSuggestion timeZoneSuggestion) {
-        enforceSetTimeZonePermission();
+        enforceSuggestPhoneTimeZonePermission();
         Objects.requireNonNull(timeZoneSuggestion);
 
         mHandler.post(() -> mTimeZoneDetectorStrategy.suggestPhoneTimeZone(timeZoneSuggestion));
@@ -103,12 +111,16 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             @Nullable String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-        mTimeZoneDetectorStrategy.dumpState(pw);
-        mTimeZoneDetectorStrategy.dumpLogs(new IndentingPrintWriter(pw, " "));
+        mTimeZoneDetectorStrategy.dumpState(pw, args);
     }
 
-    private void enforceSetTimeZonePermission() {
+    private void enforceSuggestPhoneTimeZonePermission() {
         mContext.enforceCallingPermission(
+                android.Manifest.permission.SET_TIME_ZONE, "set time zone");
+    }
+
+    private void enforceSuggestManualTimeZonePermission() {
+        mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.SET_TIME_ZONE, "set time zone");
     }
 }
