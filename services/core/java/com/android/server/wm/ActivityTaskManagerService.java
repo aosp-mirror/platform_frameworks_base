@@ -247,6 +247,8 @@ import com.android.internal.policy.KeyguardDismissCallback;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledConsumer;
+import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
@@ -694,6 +696,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         int PROCESS_CHANGE = 3;
         int caller() default NONE;
     }
+
+    private final Runnable mUpdateOomAdjRunnable = new Runnable() {
+        @Override
+	public void run() {
+            mAmInternal.updateOomAdj();
+        }
+    };
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public ActivityTaskManagerService(Context context) {
@@ -1661,7 +1670,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (getLockTaskController().activityBlockedFromFinish(r)) {
                     return false;
                 }
-                r.finishActivityAffinity();
+
+                final PooledFunction p = PooledLambda.obtainFunction(
+                        ActivityRecord::finishIfSameAffinity, r,
+                        PooledLambda.__(ActivityRecord.class));
+                r.getTask().forAllActivities(
+                        p, r, true /*includeBoundary*/, true /*traverseTopToBottom*/);
+                p.recycle();
+
                 return true;
             } finally {
                 Binder.restoreCallingIdentity(origId);
@@ -1994,10 +2010,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (r == null) {
                     return false;
                 }
-                final Task task = r.getTask();
-                int index = task.mChildren.lastIndexOf(r);
-                if (index > 0) {
-                    ActivityRecord under = task.getChildAt(index - 1);
+                final ActivityRecord under = r.getTask().getActivityBelow(r);
+                if (under != null) {
                     under.returningOptions = safeOptions != null ? safeOptions.getOptions(r) : null;
                 }
                 return r.setOccludesParent(false);
@@ -2163,7 +2177,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
             if (r != null) {
-                return r.getActivityStack().navigateUpToLocked(
+                return r.getActivityStack().navigateUpTo(
                         r, destIntent, resultCode, resultData);
             }
             return false;
@@ -2548,11 +2562,22 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public final void finishSubActivity(IBinder token, String resultWho, int requestCode) {
         synchronized (mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
-            ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            if (r != null) {
-                r.getActivityStack().finishSubActivityLocked(r, resultWho, requestCode);
+            try {
+                ActivityRecord r = ActivityRecord.isInStackLocked(token);
+                if (r == null) return;
+
+                final PooledConsumer c = PooledLambda.obtainConsumer(
+                        ActivityRecord::finishIfSubActivity, PooledLambda.__(ActivityRecord.class),
+                        r, resultWho, requestCode);
+                // TODO: This should probably only loop over the task since you need to be in the
+                // same task to return results.
+                r.getActivityStack().forAllActivities(c);
+                c.recycle();
+
+                updateOomAdj();
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
-            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -2561,7 +2586,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             ActivityStack stack = ActivityRecord.getStackLocked(token);
             if (stack != null) {
-                return stack.willActivityBeVisibleLocked(token);
+                return stack.willActivityBeVisible(token);
             }
             return false;
         }
@@ -3332,7 +3357,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             final long origId = Binder.clearCallingIdentity();
             try {
                 final WindowProcessController app = getProcessController(appInt);
-                mRootActivityContainer.releaseSomeActivitiesLocked(app, "low-mem");
+                app.releaseSomeActivities("low-mem");
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -5545,7 +5570,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     void updateOomAdj() {
-        mH.post(mAmInternal::updateOomAdj);
+        mH.removeCallbacks(mUpdateOomAdjRunnable);
+        mH.post(mUpdateOomAdjRunnable);
     }
 
     void updateCpuStats() {

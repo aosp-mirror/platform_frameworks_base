@@ -722,11 +722,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return true;
     }
 
-    ArraySet<Task> getReleaseSomeActivitiesTasks() {
+    void releaseSomeActivities(String reason) {
         // Examine all activities currently running in the process.
-        Task firstTask = null;
-        // Tasks is non-null only if two or more tasks are found.
-        ArraySet<Task> tasks = null;
+        // Candidate activities that can be destroyed.
+        ArrayList<ActivityRecord> candidates = null;
         if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Trying to release some activities in " + this);
         for (int i = 0; i < mActivities.size(); i++) {
             final ActivityRecord r = mActivities.get(i);
@@ -735,33 +734,37 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             // down before we try to prune more activities.
             if (r.finishing || r.isState(DESTROYING, DESTROYED)) {
                 if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Abort release; already destroying: " + r);
-                return null;
+                return;
             }
             // Don't consider any activities that are currently not in a state where they
             // can be destroyed.
-            if (r.mVisibleRequested || !r.stopped || !r.hasSavedState()
+            if (r.mVisibleRequested || !r.stopped || !r.hasSavedState() || !r.isDestroyable()
                     || r.isState(STARTED, RESUMED, PAUSING, PAUSED, STOPPING)) {
                 if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Not releasing in-use activity: " + r);
                 continue;
             }
 
-            final Task task = r.getTask();
-            if (task != null) {
-                if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Collecting release task " + task
-                        + " from " + r);
-                if (firstTask == null) {
-                    firstTask = task;
-                } else if (firstTask != task) {
-                    if (tasks == null) {
-                        tasks = new ArraySet<>();
-                        tasks.add(firstTask);
-                    }
-                    tasks.add(task);
+            if (r.getParent() != null) {
+                if (candidates == null) {
+                    candidates = new ArrayList<>();
                 }
+                candidates.add(r);
             }
         }
 
-        return tasks;
+        if (candidates != null) {
+            // Sort based on z-order in hierarchy.
+            candidates.sort(WindowContainer::compareTo);
+            // Release some older activities
+            int maxRelease = Math.max(candidates.size(), 1);
+            do {
+                final ActivityRecord r = candidates.remove(0);
+                if (DEBUG_RELEASE) Slog.v(TAG_RELEASE, "Destroying " + r
+                        + " in state " + r.getState() + " for reason " + reason);
+                r.destroyImmediately(true /*removeFromApp*/, reason);
+                --maxRelease;
+            } while (maxRelease > 0);
+        }
     }
 
     public interface ComputeOomAdjCallback {

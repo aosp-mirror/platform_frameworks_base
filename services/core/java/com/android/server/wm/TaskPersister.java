@@ -514,7 +514,7 @@ public class TaskPersister implements PersisterQueue.Listener {
             mService = service;
         }
 
-        private StringWriter saveToXml(Task task) throws IOException, XmlPullParserException {
+        private StringWriter saveToXml(Task task) throws Exception {
             if (DEBUG) Slog.d(TAG, "saveToXml: task=" + task);
             final XmlSerializer xmlSerializer = new FastXmlSerializer();
             StringWriter stringWriter = new StringWriter();
@@ -550,8 +550,7 @@ public class TaskPersister implements PersisterQueue.Listener {
                     try {
                         if (DEBUG) Slog.d(TAG, "Saving task=" + task);
                         stringWriter = saveToXml(task);
-                    } catch (IOException e) {
-                    } catch (XmlPullParserException e) {
+                    } catch (Exception e) {
                     }
                 }
             }

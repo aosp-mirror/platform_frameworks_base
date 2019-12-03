@@ -301,6 +301,9 @@ import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.XmlUtils;
+import com.android.internal.util.function.pooled.PooledConsumer;
+import com.android.internal.util.function.pooled.PooledFunction;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
 import com.android.server.am.AppTimeTracker;
@@ -695,12 +698,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    void dump(PrintWriter pw, String prefix) {
-    }
-
-    /**
-     * Copied from old AppWindowToken.
-     */
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         final long now = SystemClock.uptimeMillis();
@@ -940,6 +937,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    void setAppTimeTracker(AppTimeTracker att) {
+        appTimeTracker = att;
+    }
+
     /** Update the saved state of an activity. */
     void setSavedState(@Nullable Bundle savedState) {
         mIcicle = savedState;
@@ -1167,6 +1168,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         super.onParentChanged(newParent, oldParent);
 
+        if (isPersistable()) {
+            if (oldTask != null) {
+                mAtmService.notifyTaskPersisterLocked(oldTask, false);
+            }
+            if (newTask != null) {
+                mAtmService.notifyTaskPersisterLocked(newTask, false);
+            }
+        }
+
         if (oldParent == null && newParent != null) {
             // First time we are adding the activity to the system.
             mVoiceInteraction = newTask.voiceSession != null;
@@ -1261,12 +1271,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (prevDc.mFocusedApp == this) {
             prevDc.setFocusedApp(null);
-            final ActivityStack stack = dc.getTopStack();
-            if (stack != null) {
-                final Task task = stack.getTopChild();
-                if (task != null && task.getTopChild() == this) {
-                    dc.setFocusedApp(this);
-                }
+            if (dc.getTopMostActivity() == this) {
+                dc.setFocusedApp(this);
             }
         }
 
@@ -2212,7 +2218,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 OP_PICTURE_IN_PICTURE, info.applicationInfo.uid, packageName) == MODE_ALLOWED;
     }
 
-    boolean isAlwaysFocusable() {
+    private boolean isAlwaysFocusable() {
         return (info.flags & FLAG_ALWAYS_FOCUSABLE) != 0;
     }
 
@@ -2269,23 +2275,28 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return true;
     }
 
+    void finishIfSubActivity(ActivityRecord parent, String otherResultWho, int otherRequestCode) {
+        if (resultTo != parent
+                || requestCode != otherRequestCode
+                || !Objects.equals(resultWho, otherResultWho)) return;
+
+        finishIfPossible("request-sub", false /* oomAdj */);
+    }
+
     /** Finish all activities in the task with the same affinity as this one. */
-    void finishActivityAffinity() {
-        final ArrayList<ActivityRecord> activities = task.mChildren;
-        for (int index = activities.indexOf(this); index >= 0; --index) {
-            final ActivityRecord cur = activities.get(index);
-            if (!Objects.equals(cur.taskAffinity, taskAffinity)) {
-                break;
-            }
-            cur.finishIfPossible("request-affinity", true /* oomAdj */);
-        }
+    boolean finishIfSameAffinity(ActivityRecord r) {
+        // End search once we get to the activity that doesn't have the same affinity.
+        if (!Objects.equals(r.taskAffinity, taskAffinity)) return true;
+
+        r.finishIfPossible("request-affinity", true /* oomAdj */);
+        return false;
     }
 
     /**
      * Sets the result for activity that started this one, clears the references to activities
      * started for result from this one, and clears new intents.
      */
-    void finishActivityResults(int resultCode, Intent resultData) {
+    private void finishActivityResults(int resultCode, Intent resultData) {
         // Send the result if needed
         if (resultTo != null) {
             if (DEBUG_RESULTS) {
@@ -2384,14 +2395,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final Task task = getTask();
             EventLogTags.writeWmFinishActivity(mUserId, System.identityHashCode(this),
                     task.mTaskId, shortComponentName, reason);
-            final ArrayList<ActivityRecord> activities = task.mChildren;
-            final int index = activities.indexOf(this);
-            if (index < (task.getChildCount() - 1)) {
+            ActivityRecord next = task.getActivityAbove(this);
+            if (next != null) {
                 if ((intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
                     // If the caller asked that this activity (and all above it)
                     // be cleared when the task is reset, don't lose that information,
                     // but propagate it up to the next activity.
-                    final ActivityRecord next = task.getChildAt(index + 1);
                     next.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
                 }
             }
@@ -2409,7 +2418,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 } else {
                     // Only move the next stack to top in its display.
                     final ActivityDisplay display = stack.getDisplay();
-                    final ActivityRecord next = display.topRunningActivity();
+                    next = display.topRunningActivity();
                     if (next != null) {
                         display.positionChildAtTop(next.getActivityStack(),
                                 false /* includingParents */, "finish-display-top");
@@ -2419,7 +2428,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             finishActivityResults(resultCode, resultData);
 
-            final boolean endTask = index <= 0 && !task.isClearingToReuseTask();
+            final boolean endTask = task.getActivityBelow(this) == null
+                    && !task.isClearingToReuseTask();
             final int transit = endTask ? TRANSIT_TASK_CLOSE : TRANSIT_ACTIVITY_CLOSE;
             if (isState(RESUMED)) {
                 if (endTask) {
@@ -2479,16 +2489,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // sync with the activity visibility being set for this finishing activity above.
                 // In this case, we can set the visibility of all the task overlay activities when
                 // we detect the last one is finishing to keep them in sync.
-                if (task.onlyHasTaskOverlayActivities(true /* excludeFinishing */)) {
-                    for (int i = task.getChildCount() - 1; i >= 0 ; --i) {
-                        final ActivityRecord taskOverlay = task.getChildAt(i);
-                        if (!taskOverlay.mTaskOverlay) {
-                            continue;
-                        }
-                        taskOverlay.prepareActivityHideTransitionAnimation(transit);
-                    }
+                if (task.onlyHasTaskOverlayActivities(false /* includeFinishing */)) {
+                    final PooledConsumer c = PooledLambda.obtainConsumer(
+                            ActivityRecord::prepareActivityHideTransitionAnimationIfOvarlay,
+                            PooledLambda.__(ActivityRecord.class), transit);
+                    task.forAllActivities(c);
+                    c.recycle();
                 }
-
                 return removedActivity ? FINISH_RESULT_REMOVED : FINISH_RESULT_REQUESTED;
             } else {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish waiting for pause of: " + this);
@@ -2497,6 +2504,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return FINISH_RESULT_REQUESTED;
         } finally {
             mAtmService.continueWindowLayout();
+        }
+    }
+
+    private void prepareActivityHideTransitionAnimationIfOvarlay(int transit) {
+        if (mTaskOverlay) {
+            prepareActivityHideTransitionAnimation(transit);
         }
     }
 
@@ -3271,15 +3284,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * immediately finishes after, so we have to transfer T to M.
      */
     void transferStartingWindowFromHiddenAboveTokenIfNeeded() {
-        for (int i = task.mChildren.size() - 1; i >= 0; i--) {
-            final ActivityRecord fromActivity = task.mChildren.get(i);
-            if (fromActivity == this) {
-                return;
-            }
-            if (!fromActivity.mVisibleRequested && transferStartingWindow(fromActivity.token)) {
-                return;
-            }
-        }
+        final PooledFunction p = PooledLambda.obtainFunction(ActivityRecord::transferStartingWindow,
+                this, PooledLambda.__(ActivityRecord.class));
+        task.forAllActivities(p);
+        p.recycle();
+    }
+
+    private boolean transferStartingWindow(ActivityRecord fromActivity) {
+        if (fromActivity == this) return true;
+
+        return !fromActivity.mVisibleRequested && transferStartingWindow(fromActivity.token);
     }
 
     void checkKeyguardFlagsChanged() {
@@ -3351,7 +3365,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!inPinnedWindowingMode() && (mShowWhenLocked || containsShowWhenLockedWindow())) {
             return true;
         } else if (mInheritShownWhenLocked) {
-            final ActivityRecord r = getActivityBelow();
+            final ActivityRecord r = task.getActivityBelow(this);
             return r != null && !r.inPinnedWindowingMode() && (r.mShowWhenLocked
                     || r.containsShowWhenLockedWindow());
         } else {
@@ -3374,19 +3388,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean hasNonDefaultColorWindow() {
         return forAllWindows(ws -> ws.mAttrs.getColorMode() != COLOR_MODE_DEFAULT,
                 true /* topToBottom */);
-    }
-
-    /**
-     * @return an {@link ActivityRecord} of the activity below this activity, or {@code null} if no
-     * such activity exists.
-     */
-    @Nullable
-    private ActivityRecord getActivityBelow() {
-        final int pos = task.mChildren.indexOf(this);
-        if (pos == -1) {
-            throw new IllegalStateException("Activity not found in its task");
-        }
-        return pos == 0 ? null : task.getChildAt(pos - 1);
     }
 
     WindowState getImeTargetBelowWindow(WindowState w) {
@@ -3432,7 +3433,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    boolean forAllActivities(Function<ActivityRecord, Boolean> callback) {
+    boolean forAllActivities(
+            Function<ActivityRecord, Boolean> callback, boolean traverseTopToBottom) {
         return callback.apply(this);
     }
 
@@ -3609,7 +3611,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 clearOptionsLocked(false /* withAbort */);
             } else {
                 // This will clear the options for all the ActivityRecords for this Task.
-                task.clearAllPendingOptions();
+                task.forAllActivities((r) -> {
+                    r.clearOptionsLocked(false /* withAbort */);
+                });
             }
         }
     }
@@ -4602,16 +4606,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Check if position in task allows to become paused
-        final int positionInTask = task.mChildren.indexOf(this);
-        if (positionInTask == -1) {
+        if (!task.hasChild(this)) {
             throw new IllegalStateException("Activity not found in its task");
         }
-        if (positionInTask == task.getChildCount() - 1) {
+        final ActivityRecord activityAbove = task.getActivityAbove(this);
+        if (activityAbove == null) {
             // It's the topmost activity in the task - should become resumed now
             return true;
         }
         // Check if activity above is finishing now and this one becomes the topmost in task.
-        final ActivityRecord activityAbove = task.getChildAt(positionInTask + 1);
         if (activityAbove.finishing) {
             return true;
         }
@@ -4667,7 +4670,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         stopped = false;
 
         if (isActivityTypeHome()) {
-            mStackSupervisor.updateHomeProcess(task.getChildAt(0).app);
+            mStackSupervisor.updateHomeProcess(task.getBottomMostActivity().app);
         }
 
         if (nowVisible) {
@@ -5294,6 +5297,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 && mAtmService.mAmInternal.isUserRunning(mUserId, 0 /* flags */));
     }
 
+    boolean canBeTopRunning() {
+        return !finishing && okToShowLocked();
+    }
+
     /**
      * This method will return true if the activity is either visible, is becoming visible, is
      * currently pausing, or is resumed.
@@ -5325,13 +5332,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     static int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        if (r == null) {
+        if (r == null || r.getParent() == null) {
             return INVALID_TASK_ID;
         }
         final Task task = r.task;
-        final int activityNdx = task.mChildren.indexOf(r);
-        if (activityNdx < 0
-                || (onlyRoot && activityNdx > task.findRootIndex(true /* effectiveRoot */))) {
+        if (onlyRoot && r.compareTo(task.getRootActivity(
+                false /*ignoreRelinquishIdentity*/, true /*setToBottomIfNone*/)) > 0) {
             return INVALID_TASK_ID;
         }
         return task.mTaskId;
@@ -7222,6 +7228,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return info.applicationInfo.uid;
     }
 
+    boolean isUid(int uid) {
+        return info.applicationInfo.uid == uid;
+    }
+
     int getPid() {
         return app != null ? app.getPid() : 0;
     }
@@ -7285,13 +7295,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (task == null) {
             return false;
         }
-        final ActivityRecord rootActivity = task.getRootActivity();
-        if (rootActivity != null) {
-            return this == rootActivity;
-        }
-        // No non-finishing activity found. In this case the bottom-most activity is considered to
-        // be the root.
-        return task.getChildAt(0) == this;
+        final ActivityRecord rootActivity = task.getRootActivity(true);
+        return this == rootActivity;
     }
 
     @Override

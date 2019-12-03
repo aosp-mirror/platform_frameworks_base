@@ -42,6 +42,8 @@ import android.os.Trace;
 import android.util.Slog;
 import android.view.IRecentsAnimationRunner;
 
+import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallbacks;
 
@@ -490,13 +492,15 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             return null;
         }
 
-        for (int i = targetStack.getChildCount() - 1; i >= 0; i--) {
-            final Task task = targetStack.getChildAt(i);
-            if (task.mUserId == mUserId
-                    && task.getBaseIntent().getComponent().equals(mTargetIntent.getComponent())) {
-                return task.getTopNonFinishingActivity();
-            }
-        }
-        return null;
+        final PooledPredicate p = PooledLambda.obtainPredicate(RecentsAnimation::matchesTarget,
+                this, PooledLambda.__(Task.class));
+        final Task task = targetStack.getTask(p);
+        p.recycle();
+        return task != null ? task.getTopNonFinishingActivity() : null;
+    }
+
+    private boolean matchesTarget(Task task) {
+        return task.mUserId == mUserId
+                && task.getBaseIntent().getComponent().equals(mTargetIntent.getComponent());
     }
 }

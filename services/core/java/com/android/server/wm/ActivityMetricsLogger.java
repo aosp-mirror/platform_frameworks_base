@@ -546,13 +546,7 @@ class ActivityMetricsLogger {
 
     /** @return {@code true} if the given task has an activity will be drawn. */
     private static boolean hasActivityToBeDrawn(Task t) {
-        for (int i = t.getChildCount() - 1; i >= 0; --i) {
-            final ActivityRecord r = t.getChildAt(i);
-            if (r.mVisibleRequested && !r.mDrawn && !r.finishing) {
-                return true;
-            }
-        }
-        return false;
+        return t.forAllActivities((r) -> r.mVisibleRequested && !r.mDrawn && !r.finishing);
     }
 
     private void checkVisibility(Task t, ActivityRecord r) {

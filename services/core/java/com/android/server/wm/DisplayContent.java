@@ -2482,7 +2482,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 && !mDividerControllerLocked.isImeHideRequested();
         final ActivityStack dockedStack = getSplitScreenPrimaryStack();
         final boolean dockVisible = dockedStack != null;
-        final Task topDockedTask = dockVisible ? dockedStack.getTopChild() : null;
+        final Task topDockedTask = dockVisible ? dockedStack.getTask((t) -> true): null;
         final ActivityStack imeTargetStack = mWmService.getImeFocusStackLocked();
         final int imeDockSide = (dockVisible && imeTargetStack != null) ?
                 imeTargetStack.getDockSide() : DOCKED_INVALID;

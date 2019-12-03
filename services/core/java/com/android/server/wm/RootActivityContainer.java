@@ -33,6 +33,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 
 import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
@@ -86,6 +87,7 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.power.V1_0.PowerHint;
+import android.net.Uri;
 import android.os.FactoryTest;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -108,6 +110,11 @@ import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
+import com.android.internal.util.ToBooleanFunction;
+import com.android.internal.util.function.pooled.PooledConsumer;
+import com.android.internal.util.function.pooled.PooledFunction;
+import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.AppTimeTracker;
@@ -121,6 +128,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -201,13 +209,45 @@ class RootActivityContainer extends ConfigurationContainer
 
     // Whether tasks have moved and we need to rank the tasks before next OOM scoring
     private boolean mTaskLayersChanged = true;
+    private int mTmpTaskLayerRank;
 
-    private final ArrayList<ActivityRecord> mTmpActivityList = new ArrayList<>();
+    private boolean mTmpBoolean;
+    private RemoteException mTmpRemoteException;
 
     private final FindTaskResult mTmpFindTaskResult = new FindTaskResult();
-    static class FindTaskResult {
+    static class FindTaskResult implements ToBooleanFunction<Task> {
         ActivityRecord mRecord;
         boolean mIdealMatch;
+
+        private ActivityRecord mTarget;
+        private Intent intent;
+        private ActivityInfo info;
+        private ComponentName cls;
+        private int userId;
+        private boolean isDocument;
+        private Uri documentData;
+
+        /**
+         * Returns the top activity in any existing task matching the given Intent in the input
+         * result. Returns null if no such task is found.
+         */
+        void process(ActivityRecord target, ActivityStack parent) {
+            mTarget = target;
+
+            intent = target.intent;
+            info = target.info;
+            cls = intent.getComponent();
+            if (info.targetActivity != null) {
+                cls = new ComponentName(info.packageName, info.targetActivity);
+            }
+            userId = UserHandle.getUserId(info.applicationInfo.uid);
+            isDocument = intent != null & intent.isDocument();
+            // If documentData is non-null then it must match the existing task data.
+            documentData = isDocument ? intent.getData() : null;
+
+            if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Looking for task of " + target + " in " + parent);
+            parent.forAllTasks(this);
+        }
 
         void clear() {
             mRecord = null;
@@ -217,6 +257,84 @@ class RootActivityContainer extends ConfigurationContainer
         void setTo(FindTaskResult result) {
             mRecord = result.mRecord;
             mIdealMatch = result.mIdealMatch;
+        }
+
+        @Override
+        public boolean apply(Task task) {
+            if (task.voiceSession != null) {
+                // We never match voice sessions; those always run independently.
+                if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping " + task + ": voice session");
+                return false;
+            }
+            if (task.mUserId != userId) {
+                // Looking for a different task.
+                if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping " + task + ": different user");
+                return false;
+            }
+
+            // Overlays should not be considered as the task's logical top activity.
+            final ActivityRecord r = task.getTopNonFinishingActivity(false /* includeOverlays */);
+            if (r == null || r.finishing || r.mUserId != userId ||
+                    r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
+                if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping " + task + ": mismatch root " + r);
+                return false;
+            }
+            if (!r.hasCompatibleActivityType(mTarget)) {
+                if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping " + task + ": mismatch activity type");
+                return false;
+            }
+
+            final Intent taskIntent = task.intent;
+            final Intent affinityIntent = task.affinityIntent;
+            final boolean taskIsDocument;
+            final Uri taskDocumentData;
+            if (taskIntent != null && taskIntent.isDocument()) {
+                taskIsDocument = true;
+                taskDocumentData = taskIntent.getData();
+            } else if (affinityIntent != null && affinityIntent.isDocument()) {
+                taskIsDocument = true;
+                taskDocumentData = affinityIntent.getData();
+            } else {
+                taskIsDocument = false;
+                taskDocumentData = null;
+            }
+
+            if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Comparing existing cls="
+                    + (task.realActivity != null ? task.realActivity.flattenToShortString() : "")
+                    + "/aff=" + r.getTask().rootAffinity + " to new cls="
+                    + intent.getComponent().flattenToShortString() + "/aff=" + info.taskAffinity);
+            // TODO Refactor to remove duplications. Check if logic can be simplified.
+            if (task.realActivity != null && task.realActivity.compareTo(cls) == 0
+                    && Objects.equals(documentData, taskDocumentData)) {
+                if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Found matching class!");
+                //dump();
+                if (DEBUG_TASKS) Slog.d(TAG_TASKS,
+                        "For Intent " + intent + " bringing to top: " + r.intent);
+                mRecord = r;
+                mIdealMatch = true;
+                return true;
+            } else if (affinityIntent != null && affinityIntent.getComponent() != null &&
+                    affinityIntent.getComponent().compareTo(cls) == 0 &&
+                    Objects.equals(documentData, taskDocumentData)) {
+                if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Found matching class!");
+                if (DEBUG_TASKS) Slog.d(TAG_TASKS,
+                        "For Intent " + intent + " bringing to top: " + r.intent);
+                mRecord = r;
+                mIdealMatch = true;
+                return true;
+            } else if (!isDocument && !taskIsDocument
+                    && mRecord == null && task.rootAffinity != null) {
+                if (task.rootAffinity.equals(mTarget.taskAffinity)) {
+                    if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Found matching affinity candidate!");
+                    // It is possible for multiple tasks to have the same root affinity especially
+                    // if they are in separate stacks. We save off this candidate, but keep looking
+                    // to see if there is a better candidate.
+                    mRecord = r;
+                    mIdealMatch = false;
+                }
+            } else if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Not a match: " + task);
+
+            return false;
         }
     }
 
@@ -772,32 +890,47 @@ class RootActivityContainer extends ConfigurationContainer
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
             final ActivityStack stack = display.getFocusedStack();
-            if (stack != null) {
-                stack.getAllRunningVisibleActivitiesLocked(mTmpActivityList);
-                final ActivityRecord top = stack.topRunningActivityLocked();
-                final int size = mTmpActivityList.size();
-                for (int i = 0; i < size; i++) {
-                    final ActivityRecord activity = mTmpActivityList.get(i);
-                    if (activity.app == null && app.mUid == activity.info.applicationInfo.uid
-                            && processName.equals(activity.processName)) {
-                        try {
-                            if (mStackSupervisor.realStartActivityLocked(activity, app,
-                                    top == activity /* andResume */, true /* checkConfig */)) {
-                                didSomething = true;
-                            }
-                        } catch (RemoteException e) {
-                            Slog.w(TAG, "Exception in new application when starting activity "
-                                    + top.intent.getComponent().flattenToShortString(), e);
-                            throw e;
-                        }
-                    }
-                }
+            if (stack == null) {
+                continue;
             }
+
+            mTmpRemoteException = null;
+            mTmpBoolean = false; // Set to true if an activity was started.
+            final PooledFunction c = PooledLambda.obtainFunction(
+                    RootActivityContainer::startActivityForAttachedApplicationIfNeeded, this,
+                    PooledLambda.__(ActivityRecord.class), app, stack.topRunningActivityLocked());
+            stack.forAllActivities(c);
+            c.recycle();
+            if (mTmpRemoteException != null) {
+                throw mTmpRemoteException;
+            }
+            didSomething |= mTmpBoolean;
         }
         if (!didSomething) {
             ensureActivitiesVisible(null, 0, false /* preserve_windows */);
         }
         return didSomething;
+    }
+
+    private boolean startActivityForAttachedApplicationIfNeeded(ActivityRecord r,
+            WindowProcessController app, ActivityRecord top) {
+        if (r.finishing || !r.okToShowLocked() || !r.visibleIgnoringKeyguard || r.app != null
+                || app.mUid != r.info.applicationInfo.uid || !app.mName.equals(r.processName)) {
+            return false;
+        }
+
+        try {
+            if (mStackSupervisor.realStartActivityLocked(r, app, top == r /*andResume*/,
+                    true /*checkConfig*/)) {
+                mTmpBoolean = true;
+            }
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Exception in new application when starting activity "
+                    + top.intent.getComponent().flattenToShortString(), e);
+            mTmpRemoteException = e;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -1526,14 +1659,12 @@ class RootActivityContainer extends ConfigurationContainer
         }
     }
 
-    void addStartingWindowsForVisibleActivities(boolean taskSwitch) {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                stack.addStartingWindowsForVisibleActivities(taskSwitch);
+    void addStartingWindowsForVisibleActivities() {
+        mRootWindowContainer.forAllActivities((r) -> {
+            if (r.mVisibleRequested) {
+                r.showStartingWindow(null /* prev */, false /* newTask */, true /*taskSwitch*/);
             }
-        }
+        });
     }
 
     void invalidateTaskLayers() {
@@ -1541,27 +1672,37 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     void rankTaskLayersIfNeeded() {
-        if (!mTaskLayersChanged) {
+        if (!mTaskLayersChanged || mRootWindowContainer == null) {
             return;
         }
         mTaskLayersChanged = false;
-        for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); displayNdx++) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            int baseLayer = 0;
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                baseLayer += stack.rankTaskLayers(baseLayer);
-            }
+        mTmpTaskLayerRank = 0;
+        final PooledConsumer c = PooledLambda.obtainConsumer(
+                RootActivityContainer::rankTaskLayerForActivity, this,
+                PooledLambda.__(ActivityRecord.class));
+        mRootWindowContainer.forAllActivities(c);
+        c.recycle();
+    }
+
+    private void rankTaskLayerForActivity(ActivityRecord r) {
+        if (r.canBeTopRunning() && r.mVisibleRequested) {
+            r.getTask().mLayerRank = ++mTmpTaskLayerRank;
+        } else {
+            r.getTask().mLayerRank = -1;
         }
     }
 
     void clearOtherAppTimeTrackers(AppTimeTracker except) {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                stack.clearOtherAppTimeTrackers(except);
-            }
+        final PooledConsumer c = PooledLambda.obtainConsumer(
+                RootActivityContainer::clearOtherAppTimeTrackers,
+                PooledLambda.__(ActivityRecord.class), except);
+        mRootWindowContainer.forAllActivities(c);
+        c.recycle();
+    }
+
+    private static void clearOtherAppTimeTrackers(ActivityRecord r, AppTimeTracker except) {
+        if ( r.appTimeTracker != except) {
+            r.appTimeTracker = null;
         }
     }
 
@@ -1571,30 +1712,6 @@ class RootActivityContainer extends ConfigurationContainer
             for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
                 stack.scheduleDestroyActivities(app, reason);
-            }
-        }
-    }
-
-    void releaseSomeActivitiesLocked(WindowProcessController app, String reason) {
-        // Tasks is non-null only if two or more tasks are found.
-        ArraySet<Task> tasks = app.getReleaseSomeActivitiesTasks();
-        if (tasks == null) {
-            if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Didn't find two or more tasks to release");
-            return;
-        }
-        // If we have activities in multiple tasks that are in a position to be destroyed,
-        // let's iterate through the tasks and release the oldest one.
-        final int numDisplays = mActivityDisplays.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            final int stackCount = display.getChildCount();
-            // Step through all stacks starting from behind, to hit the oldest things first.
-            for (int stackNdx = 0; stackNdx < stackCount; stackNdx++) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                // Try to release activities in this stack; if we manage to, we are done.
-                if (stack.releaseSomeActivitiesLocked(app, tasks, reason) > 0) {
-                    return;
-                }
             }
         }
     }
@@ -1625,28 +1742,52 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     void handleAppCrash(WindowProcessController app) {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                stack.handleAppCrash(app);
-            }
-        }
+        final PooledConsumer c = PooledLambda.obtainConsumer(
+                RootActivityContainer::handleAppCrash, PooledLambda.__(ActivityRecord.class), app);
+        mRootWindowContainer.forAllActivities(c);
+        c.recycle();
+    }
+
+    private static void handleAppCrash(ActivityRecord r, WindowProcessController app) {
+        if (r.app != app) return;
+        Slog.w(TAG, "  Force finishing activity "
+                + r.intent.getComponent().flattenToShortString());
+        // Force the destroy to skip right to removal.
+        r.app = null;
+        r.getDisplay().mDisplayContent.prepareAppTransition(
+                TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
+        r.destroyIfPossible("handleAppCrashed");
     }
 
     ActivityRecord findActivity(Intent intent, ActivityInfo info, boolean compareIntentFilters) {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                final ActivityRecord ar = stack.findActivityLocked(
-                        intent, info, compareIntentFilters);
-                if (ar != null) {
-                    return ar;
-                }
+        ComponentName cls = intent.getComponent();
+        if (info.targetActivity != null) {
+            cls = new ComponentName(info.packageName, info.targetActivity);
+        }
+        final int userId = UserHandle.getUserId(info.applicationInfo.uid);
+
+        final PooledPredicate p = PooledLambda.obtainPredicate(
+                RootActivityContainer::matchesActivity, PooledLambda.__(ActivityRecord.class),
+                userId, compareIntentFilters, intent, cls);
+        final ActivityRecord r = mRootWindowContainer.getActivity(p);
+        p.recycle();
+        return r;
+    }
+
+    private static boolean matchesActivity(ActivityRecord r, int userId,
+            boolean compareIntentFilters, Intent intent, ComponentName cls) {
+        if (!r.canBeTopRunning() || r.mUserId != userId)  return false;
+
+        if (compareIntentFilters) {
+            if (r.intent.filterEquals(intent)) {
+                return true;
+            }
+        } else {
+            if (r.intent.getComponent().equals(cls)) {
+                return true;
             }
         }
-        return null;
+        return false;
     }
 
     boolean hasAwakeDisplay() {
@@ -1978,39 +2119,104 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     void closeSystemDialogs() {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                stack.closeSystemDialogsLocked();
+        mRootWindowContainer.forAllActivities((r) -> {
+            if ((r.info.flags & ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
+                r.finishIfPossible("close-sys", true /* oomAdj */);
             }
+        });
+    }
+
+    FinishDisabledPackageActivitiesHelper mFinishDisabledPackageActivitiesHelper =
+            new FinishDisabledPackageActivitiesHelper();
+    class FinishDisabledPackageActivitiesHelper {
+        private boolean mDidSomething;
+        private String mPackageName;
+        private Set<String> mFilterByClasses;
+        private boolean mDoit;
+        private boolean mEvenPersistent;
+        private int mUserId;
+        private Task mLastTask;
+        private ComponentName mHomeActivity;
+
+        private void reset(String packageName, Set<String> filterByClasses,
+                boolean doit, boolean evenPersistent, int userId) {
+            mDidSomething = false;
+            mPackageName = packageName;
+            mFilterByClasses = filterByClasses;
+            mDoit = doit;
+            mEvenPersistent = evenPersistent;
+            mUserId = userId;
+            mLastTask = null;
+            mHomeActivity = null;
+        }
+
+        boolean process(String packageName, Set<String> filterByClasses,
+                boolean doit, boolean evenPersistent, int userId) {
+            reset(packageName, filterByClasses, doit, evenPersistent, userId);
+
+            final PooledFunction f = PooledLambda.obtainFunction(
+                    FinishDisabledPackageActivitiesHelper::processActivity, this,
+                    PooledLambda.__(ActivityRecord.class));
+            mRootWindowContainer.forAllActivities(f);
+            f.recycle();
+            return mDidSomething;
+        }
+
+        private boolean processActivity(ActivityRecord r) {
+            final boolean sameComponent =
+                    (r.packageName.equals(mPackageName) && (mFilterByClasses == null
+                            || mFilterByClasses.contains(r.mActivityComponent.getClassName())))
+                            || (mPackageName == null && r.mUserId == mUserId);
+            if ((mUserId == UserHandle.USER_ALL || r.mUserId == mUserId)
+                    && (sameComponent || r.getTask() == mLastTask)
+                    && (r.app == null || mEvenPersistent || !r.app.isPersistent())) {
+                if (!mDoit) {
+                    if (r.finishing) {
+                        // If this activity is just finishing, then it is not
+                        // interesting as far as something to stop.
+                        return false;
+                    }
+                    return true;
+                }
+                if (r.isActivityTypeHome()) {
+                    if (mHomeActivity != null && mHomeActivity.equals(r.mActivityComponent)) {
+                        Slog.i(TAG, "Skip force-stop again " + r);
+                        return false;
+                    } else {
+                        mHomeActivity = r.mActivityComponent;
+                    }
+                }
+                mDidSomething = true;
+                Slog.i(TAG, "  Force finishing activity " + r);
+                mLastTask = r.getTask();
+                r.finishIfPossible("force-stop", true);
+            }
+
+            return false;
         }
     }
 
     /** @return true if some activity was finished (or would have finished if doit were true). */
     boolean finishDisabledPackageActivities(String packageName, Set<String> filterByClasses,
             boolean doit, boolean evenPersistent, int userId) {
-        boolean didSomething = false;
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                if (stack.finishDisabledPackageActivitiesLocked(
-                        packageName, filterByClasses, doit, evenPersistent, userId)) {
-                    didSomething = true;
-                }
-            }
-        }
-        return didSomething;
+        return mFinishDisabledPackageActivitiesHelper.process(packageName, filterByClasses, doit,
+                evenPersistent, userId);
     }
 
     void updateActivityApplicationInfo(ApplicationInfo aInfo) {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                stack.updateActivityApplicationInfoLocked(aInfo);
-            }
+        final String packageName = aInfo.packageName;
+        final int userId = UserHandle.getUserId(aInfo.uid);
+        final PooledConsumer c = PooledLambda.obtainConsumer(
+                RootActivityContainer::updateActivityApplicationInfo,
+                PooledLambda.__(ActivityRecord.class), aInfo, userId, packageName);
+        mRootWindowContainer.forAllActivities(c);
+        c.recycle();
+    }
+
+    private static void updateActivityApplicationInfo(
+            ActivityRecord r, ApplicationInfo aInfo, int userId, String packageName) {
+        if (r.mUserId == userId && packageName.equals(r.packageName)) {
+            r.updateApplicationInfo(aInfo);
         }
     }
 
@@ -2063,7 +2269,7 @@ class RootActivityContainer extends ConfigurationContainer
             // If the focused stack is not null or not empty, there should have some activities
             // resuming or resumed. Make sure these activities are idle.
             final ActivityStack stack = display.getFocusedStack();
-            if (stack == null || stack.numActivities() == 0) {
+            if (stack == null || !stack.hasActivity()) {
                 continue;
             }
             final ActivityRecord resumedActivity = stack.getResumedActivity();

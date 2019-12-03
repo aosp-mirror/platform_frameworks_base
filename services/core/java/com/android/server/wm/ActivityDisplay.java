@@ -73,7 +73,9 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
@@ -617,7 +619,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
                 continue;
             }
 
-            stack.findTaskLocked(r, mTmpFindTaskResult);
+            mTmpFindTaskResult.process(r, stack);
             // It is possible to have tasks in multiple stacks with the same root affinity, so
             // we should keep looking after finding an affinity match to see if there is a
             // better match in another stack. Also, task affinity isn't a good enough reason
@@ -1190,12 +1192,11 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     }
 
     boolean isUidPresent(int uid) {
-        for (ActivityStack stack : mStacks) {
-            if (stack.isUidPresent(uid)) {
-                return true;
-            }
-        }
-        return false;
+        final PooledPredicate p = PooledLambda.obtainPredicate(
+                ActivityRecord::isUid, PooledLambda.__(ActivityRecord.class), uid);
+        final boolean isUidPresent = mDisplayContent.getActivity(p) != null;
+        p.recycle();
+        return isUidPresent;
     }
 
     /**
@@ -1291,12 +1292,16 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     /** Update and get all UIDs that are present on the display and have access to it. */
     IntArray getPresentUIDs() {
         mDisplayAccessUIDs.clear();
-        for (ActivityStack stack : mStacks) {
-            stack.getPresentUIDs(mDisplayAccessUIDs);
-        }
+        final PooledConsumer c = PooledLambda.obtainConsumer(ActivityDisplay::addActivityUid,
+                PooledLambda.__(ActivityRecord.class), mDisplayAccessUIDs);
+        mDisplayContent.forAllActivities(c);
+        c.recycle();
         return mDisplayAccessUIDs;
     }
 
+    private static void addActivityUid(ActivityRecord r, IntArray uids) {
+        uids.add(r.getUid());
+    }
     /**
      * Checks if system decorations should be shown on this display.
      *
@@ -1449,22 +1454,16 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             return null;
         }
 
-        final ArrayList<Task> tasks = mHomeStack.getAllTasks();
-        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final Task task = tasks.get(taskNdx);
-            if (!task.isActivityTypeHome()) {
-                continue;
-            }
+        final PooledPredicate p = PooledLambda.obtainPredicate(
+                ActivityDisplay::isHomeActivityForUser, PooledLambda.__(ActivityRecord.class),
+                userId);
+        final ActivityRecord r = mHomeStack.getActivity(p);
+        p.recycle();
+        return r;
+    }
 
-            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = task.getChildAt(activityNdx);
-                if (r.isActivityTypeHome()
-                        && ((userId == UserHandle.USER_ALL) || (r.mUserId == userId))) {
-                    return r;
-                }
-            }
-        }
-        return null;
+    private static boolean isHomeActivityForUser(ActivityRecord r, int userId) {
+        return r.isActivityTypeHome() && (userId == UserHandle.USER_ALL || r.mUserId == userId);
     }
 
     boolean isSleeping() {
