@@ -132,7 +132,7 @@ public class LocalBluetoothProfileManagerTest {
         mShadowBluetoothAdapter.setSupportedProfiles(generateList(
                 new int[] {BluetoothProfile.HID_HOST}));
         mProfileManager.updateLocalProfiles();
-        ParcelUuid[] uuids = new ParcelUuid[]{BluetoothUuid.Hid};
+        ParcelUuid[] uuids = new ParcelUuid[]{BluetoothUuid.HID};
         ParcelUuid[] localUuids = new ParcelUuid[]{};
         List<LocalBluetoothProfile> profiles = new ArrayList<>();
         List<LocalBluetoothProfile> removedProfiles = new ArrayList<>();

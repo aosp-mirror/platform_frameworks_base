@@ -46,7 +46,7 @@ public class PbapServerProfile implements LocalBluetoothProfile {
     // The UUIDs indicate that remote device might access pbap server
     static final ParcelUuid[] PBAB_CLIENT_UUIDS = {
         BluetoothUuid.HSP,
-        BluetoothUuid.Handsfree,
+        BluetoothUuid.HFP,
         BluetoothUuid.PBAP_PCE
     };
 
