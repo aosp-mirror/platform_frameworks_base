@@ -6538,7 +6538,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (currentNetwork == null || currentNetwork.getCurrentScore() < score) {
                     reassignedRequests.put(nri, newNetwork);
                 }
-            } else if (newNetwork.isSatisfyingRequest(nri.request.requestId)) {
+            } else if (newNetwork == currentNetwork) {
                 reassignedRequests.put(nri, null);
             }
         }
