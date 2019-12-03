@@ -4784,7 +4784,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private CheckForTap mPendingCheckForTap = null;
     private PerformClick mPerformClick;
     private SendViewScrolledAccessibilityEvent mSendViewScrolledAccessibilityEvent;
-
+    private SendAccessibilityEventThrottle mSendStateChangedAccessibilityEvent;
     private UnsetPressedState mUnsetPressedState;
 
     /**
@@ -8154,11 +8154,44 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((event.getEventType() & POPULATING_ACCESSIBILITY_EVENT_TYPES) != 0) {
             dispatchPopulateAccessibilityEvent(event);
         }
-        // In the beginning we called #isShown(), so we know that getParent() is not null.
+        SendAccessibilityEventThrottle throttle = getThrottleForAccessibilityEvent(event);
+        if (throttle != null) {
+            throttle.post(event);
+        } else {
+            requestParentSendAccessibilityEvent(event);
+        }
+    }
+
+    private void requestParentSendAccessibilityEvent(AccessibilityEvent event) {
         ViewParent parent = getParent();
         if (parent != null) {
             getParent().requestSendAccessibilityEvent(this, event);
         }
+    }
+
+    private SendAccessibilityEventThrottle getThrottleForAccessibilityEvent(
+            AccessibilityEvent event) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+            if (mSendViewScrolledAccessibilityEvent == null) {
+                mSendViewScrolledAccessibilityEvent = new SendViewScrolledAccessibilityEvent();
+            }
+            return mSendViewScrolledAccessibilityEvent;
+        }
+        boolean isStateContentChanged = (event.getContentChangeTypes()
+                & AccessibilityEvent.CONTENT_CHANGE_TYPE_STATE_DESCRIPTION) != 0;
+        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+                && isStateContentChanged) {
+            if (mSendStateChangedAccessibilityEvent == null) {
+                mSendStateChangedAccessibilityEvent = new SendAccessibilityEventThrottle();
+            }
+            return mSendStateChangedAccessibilityEvent;
+        }
+        return null;
+    }
+
+    private void clearAccessibilityThrottles() {
+        cancel(mSendViewScrolledAccessibilityEvent);
+        cancel(mSendStateChangedAccessibilityEvent);
     }
 
     /**
@@ -10381,8 +10414,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 && getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
-        notifyViewAccessibilityStateChangedIfNeeded(
-                AccessibilityEvent.CONTENT_CHANGE_TYPE_STATE_DESCRIPTION);
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            AccessibilityEvent event = AccessibilityEvent.obtain();
+            event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+            event.setContentChangeTypes(AccessibilityEvent.CONTENT_CHANGE_TYPE_STATE_DESCRIPTION);
+            sendAccessibilityEventUnchecked(event);
+        }
     }
 
     /**
@@ -15986,10 +16023,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         notifySubtreeAccessibilityStateChangedIfNeeded();
-
-        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-            postSendViewScrolledAccessibilityEventCallback(l - oldl, t - oldt);
-        }
+        postSendViewScrolledAccessibilityEventCallback(l - oldl, t - oldt);
 
         mBackgroundSizeChanged = true;
         mDefaultFocusHighlightSizeChanged = true;
@@ -18712,10 +18746,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}.
      */
     private void postSendViewScrolledAccessibilityEventCallback(int dx, int dy) {
-        if (mSendViewScrolledAccessibilityEvent == null) {
-            mSendViewScrolledAccessibilityEvent = new SendViewScrolledAccessibilityEvent();
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            AccessibilityEvent event =
+                    AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_SCROLLED);
+            event.setScrollDeltaX(dx);
+            event.setScrollDeltaY(dy);
+            sendAccessibilityEventUnchecked(event);
         }
-        mSendViewScrolledAccessibilityEvent.post(dx, dy);
     }
 
     /**
@@ -20013,7 +20050,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         removeUnsetPressCallback();
         removeLongPressCallback();
         removePerformClickCallback();
-        cancel(mSendViewScrolledAccessibilityEvent);
+        clearAccessibilityThrottles();
         stopNestedScroll();
 
         // Anything that started animating right before detach should already
@@ -28997,49 +29034,67 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    /**
-     * Resuable callback for sending
-     * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} accessibility event.
-     */
-    private class SendViewScrolledAccessibilityEvent implements Runnable {
+    private class SendAccessibilityEventThrottle implements Runnable {
         public volatile boolean mIsPending;
-        public int mDeltaX;
-        public int mDeltaY;
+        private AccessibilityEvent mAccessibilityEvent;
 
-        public void post(int dx, int dy) {
-            mDeltaX += dx;
-            mDeltaY += dy;
+        public void post(AccessibilityEvent accessibilityEvent) {
+            updateWithAccessibilityEvent(accessibilityEvent);
             if (!mIsPending) {
                 mIsPending = true;
-                postDelayed(this, ViewConfiguration.getSendRecurringAccessibilityEventsInterval());
+                postDelayed(this,
+                        ViewConfiguration.getSendRecurringAccessibilityEventsInterval());
             }
         }
 
         @Override
         public void run() {
             if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-                AccessibilityEvent event = AccessibilityEvent.obtain(
-                        AccessibilityEvent.TYPE_VIEW_SCROLLED);
-                event.setScrollDeltaX(mDeltaX);
-                event.setScrollDeltaY(mDeltaY);
-                sendAccessibilityEventUnchecked(event);
+                requestParentSendAccessibilityEvent(mAccessibilityEvent);
             }
             reset();
         }
 
-        private void reset() {
+        public void updateWithAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
+            mAccessibilityEvent = accessibilityEvent;
+        }
+
+        public void reset() {
             mIsPending = false;
+            mAccessibilityEvent = null;
+        }
+
+    }
+
+    /**
+     * Resuable callback for sending
+     * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} accessibility event.
+     */
+    private class SendViewScrolledAccessibilityEvent extends SendAccessibilityEventThrottle {
+        public int mDeltaX;
+        public int mDeltaY;
+
+        @Override
+        public void updateWithAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
+            super.updateWithAccessibilityEvent(accessibilityEvent);
+            mDeltaX += accessibilityEvent.getScrollDeltaX();
+            mDeltaY += accessibilityEvent.getScrollDeltaY();
+            accessibilityEvent.setScrollDeltaX(mDeltaX);
+            accessibilityEvent.setScrollDeltaY(mDeltaY);
+        }
+
+        @Override
+        public void reset() {
+            super.reset();
             mDeltaX = 0;
             mDeltaY = 0;
         }
     }
-
     /**
-     * Remove the pending callback for sending a
-     * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} accessibility event.
+     * Remove the pending callback for sending a throttled accessibility event.
      */
     @UnsupportedAppUsage
-    private void cancel(@Nullable SendViewScrolledAccessibilityEvent callback) {
+    private void cancel(@Nullable SendAccessibilityEventThrottle callback) {
         if (callback == null || !callback.mIsPending) return;
         removeCallbacks(callback);
         callback.reset();
