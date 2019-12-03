@@ -24,8 +24,8 @@ import java.util.List;
 /** A helper class to parse rules into the {@link Rule} model. */
 public interface RuleParser {
 
-    /** Parse rules from a string. */
-    List<Rule> parse(String ruleText) throws RuleParseException;
+    /** Parse rules from bytes. */
+    List<Rule> parse(byte[] ruleBytes) throws RuleParseException;
 
     /** Parse rules from an input stream. */
     List<Rule> parse(InputStream inputStream) throws RuleParseException;

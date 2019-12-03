@@ -30,6 +30,7 @@ import org.junit.runners.JUnit4;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -109,7 +110,7 @@ public class RuleXmlParserTest {
                                                 /* isHashedValue= */ false))),
                         Rule.DENY);
 
-        List<Rule> rules = xmlParser.parse(ruleXmlCompoundFormula);
+        List<Rule> rules = xmlParser.parse(ruleXmlCompoundFormula.getBytes(StandardCharsets.UTF_8));
 
         assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
     }
@@ -154,7 +155,7 @@ public class RuleXmlParserTest {
                                                 "test_cert",
                                                 /* isHashedValue= */ false))),
                         Rule.DENY);
-        List<Rule> rules = xmlParser.parse(ruleXmlCompoundFormula);
+        List<Rule> rules = xmlParser.parse(ruleXmlCompoundFormula.getBytes(StandardCharsets.UTF_8));
 
         assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
     }
@@ -200,7 +201,7 @@ public class RuleXmlParserTest {
                                                 /* isHashedValue= */ false))),
                         Rule.DENY);
 
-        List<Rule> rules = xmlParser.parse(ruleXmlCompoundFormula);
+        List<Rule> rules = xmlParser.parse(ruleXmlCompoundFormula.getBytes(StandardCharsets.UTF_8));
 
         assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
     }
@@ -237,7 +238,7 @@ public class RuleXmlParserTest {
                                                 /* isHashedValue= */ false))),
                         Rule.DENY);
 
-        List<Rule> rules = xmlParser.parse(ruleXmlCompoundFormula);
+        List<Rule> rules = xmlParser.parse(ruleXmlCompoundFormula.getBytes(StandardCharsets.UTF_8));
 
         assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
     }
@@ -273,7 +274,7 @@ public class RuleXmlParserTest {
         assertExpectException(
                 RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "Connector NOT must have 1 formula only",
-                () -> xmlParser.parse(ruleXmlCompoundFormula));
+                () -> xmlParser.parse(ruleXmlCompoundFormula.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -302,7 +303,7 @@ public class RuleXmlParserTest {
         assertExpectException(
                 RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "For input string: \"INVALID_OPERATOR\"",
-                () -> xmlParser.parse(ruleXmlCompoundFormula));
+                () -> xmlParser.parse(ruleXmlCompoundFormula.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -330,7 +331,7 @@ public class RuleXmlParserTest {
         assertExpectException(
                 RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "For input string: \"INVALID_EFFECT\"",
-                () -> xmlParser.parse(ruleXmlCompoundFormula));
+                () -> xmlParser.parse(ruleXmlCompoundFormula.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -360,7 +361,7 @@ public class RuleXmlParserTest {
         assertExpectException(
                 RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "Found unexpected tag: InvalidAtomicFormula",
-                () -> xmlParser.parse(ruleXmlCompoundFormula));
+                () -> xmlParser.parse(ruleXmlCompoundFormula.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -387,7 +388,7 @@ public class RuleXmlParserTest {
                                 /* isHashedValue= */ false),
                         Rule.DENY);
 
-        List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula);
+        List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula.getBytes(StandardCharsets.UTF_8));
 
         assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
     }
@@ -415,7 +416,7 @@ public class RuleXmlParserTest {
                                 AtomicFormula.VERSION_CODE, AtomicFormula.EQ, 1),
                         Rule.DENY);
 
-        List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula);
+        List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula.getBytes(StandardCharsets.UTF_8));
 
         assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
     }
@@ -441,7 +442,7 @@ public class RuleXmlParserTest {
                         new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
                         Rule.DENY);
 
-        List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula);
+        List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula.getBytes(StandardCharsets.UTF_8));
 
         assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
     }
@@ -470,7 +471,7 @@ public class RuleXmlParserTest {
                                 /* isHashedValue= */ false),
                         Rule.DENY);
 
-        List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula);
+        List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula.getBytes(StandardCharsets.UTF_8));
 
         assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
     }
@@ -495,7 +496,7 @@ public class RuleXmlParserTest {
         assertExpectException(
                 RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "Found unexpected key: -1",
-                () -> xmlParser.parse(ruleXmlAtomicFormula));
+                () -> xmlParser.parse(ruleXmlAtomicFormula.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -517,7 +518,7 @@ public class RuleXmlParserTest {
         assertExpectException(
                 RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "Unknown effect: -1",
-                () -> xmlParser.parse(ruleXmlAtomicFormula));
+                () -> xmlParser.parse(ruleXmlAtomicFormula.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -545,7 +546,7 @@ public class RuleXmlParserTest {
         assertExpectException(
                 RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "Unknown connector: -1",
-                () -> xmlParser.parse(ruleXmlCompoundFormula));
+                () -> xmlParser.parse(ruleXmlCompoundFormula.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -569,7 +570,7 @@ public class RuleXmlParserTest {
         assertExpectException(
                 RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "For input string: \"com.app.test\"",
-                () -> xmlParser.parse(ruleXmlAtomicFormula));
+                () -> xmlParser.parse(ruleXmlAtomicFormula.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -595,7 +596,7 @@ public class RuleXmlParserTest {
         assertExpectException(
                 RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "Rules must start with RuleList <RL> tag",
-                () -> xmlParser.parse(ruleXmlWithNoRuleList));
+                () -> xmlParser.parse(ruleXmlWithNoRuleList.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
