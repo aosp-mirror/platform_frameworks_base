@@ -967,11 +967,6 @@ public class SettingsProvider extends ContentProvider {
                     final long identity = Binder.clearCallingIdentity();
                     try {
                         synchronized (mLock) {
-                            Setting enable = getGlobalSetting(
-                                    Settings.Global.PACKAGE_VERIFIER_ENABLE);
-                            String enableValue = enable != null ? enable.getValue() : null;
-                            updateGlobalSetting(Settings.Global.PACKAGE_VERIFIER_ENABLE,
-                                    enableValue, null, true, userId, true);
                             Setting include = getGlobalSetting(
                                     Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB);
                             String includeValue = include != null ? include.getValue() : null;
