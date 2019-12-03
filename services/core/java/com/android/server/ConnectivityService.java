@@ -6549,6 +6549,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             final NetworkRequestInfo nri = entry.getKey();
             final NetworkAgentInfo previousSatisfier = nri.mSatisfier;
             final NetworkAgentInfo newSatisfier = entry.getValue();
+            changes.addRequestReassignment(new NetworkReassignment.RequestReassignment(
+                    nri, previousSatisfier, newSatisfier));
             if (newSatisfier != null) {
                 if (VDBG) log("rematch for " + newSatisfier.name());
                 if (previousSatisfier != null) {
@@ -6565,8 +6567,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (!newSatisfier.addRequest(nri.request)) {
                     Slog.wtf(TAG, "BUG: " + newSatisfier.name() + " already has " + nri.request);
                 }
-                changes.addRequestReassignment(new NetworkReassignment.RequestReassignment(
-                        nri, previousSatisfier, newSatisfier));
                 // Tell NetworkProviders about the new score, so they can stop
                 // trying to connect if they know they cannot match it.
                 // TODO - this could get expensive if we have a lot of requests for this
@@ -6600,14 +6600,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             newNetwork.name() +
                             " without updating mSatisfier or providers!");
                 }
-                // TODO: Technically, sending CALLBACK_LOST here is
-                // incorrect if there is a replacement network currently
-                // connected that can satisfy nri, which is a request
-                // (not a listen). However, the only capability that can both
-                // a) be requested and b) change is NET_CAPABILITY_TRUSTED,
-                // so this code is only incorrect for a network that loses
-                // the TRUSTED capability, which is a rare case.
-                callCallbackForRequest(nri, newNetwork, ConnectivityManager.CALLBACK_LOST, 0);
             }
         }
     }
@@ -6657,6 +6649,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 changes.getRequestReassignments()) {
             if (null != event.mNewNetwork) {
                 notifyNetworkAvailable(event.mNewNetwork, event.mRequest);
+            } else {
+                // TODO: Technically, sending CALLBACK_LOST here is
+                // incorrect if there is a replacement network currently
+                // connected that can satisfy nri, which is a request
+                // (not a listen). However, the only capability that can both
+                // a) be requested and b) change is NET_CAPABILITY_TRUSTED,
+                // so this code is only incorrect for a network that loses
+                // the TRUSTED capability, which is a rare case.
+                callCallbackForRequest(event.mRequest, event.mOldNetwork,
+                        ConnectivityManager.CALLBACK_LOST, 0);
             }
         }
 
