@@ -6452,18 +6452,37 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         @NonNull private final Set<NetworkBgStatePair> mRematchedNetworks = new ArraySet<>();
-        @NonNull private final List<RequestReassignment> mReassignments = new ArrayList<>();
+        @NonNull private final Map<NetworkRequestInfo, RequestReassignment> mReassignments =
+                new ArrayMap<>();
 
         @NonNull Iterable<NetworkBgStatePair> getRematchedNetworks() {
             return mRematchedNetworks;
         }
 
         @NonNull Iterable<RequestReassignment> getRequestReassignments() {
-            return mReassignments;
+            return mReassignments.values();
         }
 
         void addRequestReassignment(@NonNull final RequestReassignment reassignment) {
-            mReassignments.add(reassignment);
+            final RequestReassignment oldChange = mReassignments.get(reassignment.mRequest);
+            if (null == oldChange) {
+                mReassignments.put(reassignment.mRequest, reassignment);
+                return;
+            }
+            if (oldChange.mNewNetwork != reassignment.mOldNetwork) {
+                throw new IllegalArgumentException("Reassignment <" + reassignment.mRequest + "> ["
+                        + reassignment.mOldNetwork + " -> " + reassignment.mNewNetwork
+                        + "] conflicts with ["
+                        + oldChange.mOldNetwork + " -> " + oldChange.mNewNetwork + "]");
+            }
+            // There was already a note to reassign this request from a network A to a network B,
+            // and a reassignment is added from network B to some other network C. The following
+            // synthesizes the merged reassignment that goes A -> C. An interesting (but not
+            // special) case to think about is when B is null, which can happen when the rematch
+            // loop notices the current satisfier doesn't satisfy the request any more, but
+            // hasn't yet encountered another network that could.
+            mReassignments.put(reassignment.mRequest, new RequestReassignment(reassignment.mRequest,
+                    oldChange.mOldNetwork, reassignment.mNewNetwork));
         }
 
         void addRematchedNetwork(@NonNull final NetworkBgStatePair network) {
@@ -6653,13 +6672,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (null != event.mNewNetwork) {
                 notifyNetworkAvailable(event.mNewNetwork, event.mRequest);
             } else {
-                // TODO: Technically, sending CALLBACK_LOST here is
-                // incorrect if there is a replacement network currently
-                // connected that can satisfy nri, which is a request
-                // (not a listen). However, the only capability that can both
-                // a) be requested and b) change is NET_CAPABILITY_TRUSTED,
-                // so this code is only incorrect for a network that loses
-                // the TRUSTED capability, which is a rare case.
                 callCallbackForRequest(event.mRequest, event.mOldNetwork,
                         ConnectivityManager.CALLBACK_LOST, 0);
             }
