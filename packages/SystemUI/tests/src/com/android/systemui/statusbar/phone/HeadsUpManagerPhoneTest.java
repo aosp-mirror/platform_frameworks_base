@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -125,6 +126,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
         assertTrue(mHeadsUpManager.canRemoveImmediately(mEntry.getKey()));
     }
 
+    @Ignore("b/141538055")
     @Test
     public void testCanRemoveImmediately_notTopEntry() {
         NotificationEntry laterEntry = new NotificationEntryBuilder()

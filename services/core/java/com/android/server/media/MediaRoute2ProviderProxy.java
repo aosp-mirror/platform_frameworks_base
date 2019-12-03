@@ -26,6 +26,7 @@ import android.media.IMediaRoute2ProviderClient;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
@@ -253,6 +254,20 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         setAndNotifyProviderInfo(info);
     }
 
+    private void onRouteSelected(Connection connection,
+            String packageName, String routeId, Bundle controlHints, int seq) {
+        if (mActiveConnection != connection) {
+            return;
+        }
+        MediaRoute2ProviderInfo providerInfo = getProviderInfo();
+        MediaRoute2Info route = (providerInfo == null) ? null : providerInfo.getRoute(routeId);
+        if (route == null) {
+            Slog.w(TAG, this + ": Unknown route " + routeId + " is selected from remove provider");
+            return;
+        }
+        mCallback.onRouteSelected(this, packageName, route, controlHints, seq);
+    }
+
     private void disconnect() {
         if (mActiveConnection != null) {
             mConnectionReady = false;
@@ -341,6 +356,11 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         void postProviderInfoUpdated(MediaRoute2ProviderInfo info) {
             mHandler.post(() -> onProviderInfoUpdated(Connection.this, info));
         }
+
+        void postRouteSelected(String packageName, String routeId, Bundle controlHints, int seq) {
+            mHandler.post(() -> onRouteSelected(Connection.this,
+                    packageName, routeId, controlHints, seq));
+        }
     }
 
     private static final class ProviderClient extends IMediaRoute2ProviderClient.Stub  {
@@ -361,5 +381,15 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
                 connection.postProviderInfoUpdated(info);
             }
         }
+
+        @Override
+        public void notifyRouteSelected(String packageName, String routeId,
+                Bundle controlHints, int seq) {
+            Connection connection = mConnectionRef.get();
+            if (connection != null) {
+                connection.postRouteSelected(packageName, routeId, controlHints, seq);
+            }
+        }
+
     }
 }

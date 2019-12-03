@@ -2363,9 +2363,11 @@
          1 (0b001) - enforce (only install system packages if they are whitelisted)
          2 (0b010) - log (log when a non-whitelisted package is run)
          4 (0b100) - treat any package not mentioned in the whitelist file as implicitly whitelisted
+         8 (0b1000) - ignore OTAs (don't install system packages during OTAs)
         Note: This list must be kept current with PACKAGE_WHITELIST_MODE_PROP in
         frameworks/base/services/core/java/com/android/server/pm/UserSystemPackageInstaller.java -->
-    <integer name="config_userTypePackageWhitelistMode">5</integer> <!-- 0b101 -->
+    <integer name="config_userTypePackageWhitelistMode">13</integer> <!-- 0b1101 -->
+    <!-- TODO(b/143200798): Change to value 5, i.e. 0b0101, when b/143200798 is resolved. -->
 
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>

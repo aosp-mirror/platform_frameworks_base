@@ -19,75 +19,105 @@ import static com.google.common.truth.Truth.assertThat;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.google.android.icing.proto.DocumentProto;
+import com.google.android.icing.proto.PropertyProto;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class FakeIcingTest {
     @Test
     public void query() {
         FakeIcing icing = new FakeIcing();
-        icing.put("uri:cat", "The cat said meow");
-        icing.put("uri:dog", "The dog said woof");
+        icing.put(createDoc("uri:cat", "The cat said meow"));
+        icing.put(createDoc("uri:dog", "The dog said woof"));
 
-        assertThat(icing.query("meow")).containsExactly("uri:cat");
-        assertThat(icing.query("said")).containsExactly("uri:cat", "uri:dog");
-        assertThat(icing.query("fred")).isEmpty();
+        assertThat(queryGetUris(icing, "meow")).containsExactly("uri:cat");
+        assertThat(queryGetUris(icing, "said")).containsExactly("uri:cat", "uri:dog");
+        assertThat(queryGetUris(icing, "fred")).isEmpty();
     }
 
     @Test
     public void queryNorm() {
         FakeIcing icing = new FakeIcing();
-        icing.put("uri:cat", "The cat said meow");
-        icing.put("uri:dog", "The dog said woof");
+        icing.put(createDoc("uri:cat", "The cat said meow"));
+        icing.put(createDoc("uri:dog", "The dog said woof"));
 
-        assertThat(icing.query("the")).containsExactly("uri:cat", "uri:dog");
-        assertThat(icing.query("The")).containsExactly("uri:cat", "uri:dog");
-        assertThat(icing.query("tHe")).containsExactly("uri:cat", "uri:dog");
+        assertThat(queryGetUris(icing, "the")).containsExactly("uri:cat", "uri:dog");
+        assertThat(queryGetUris(icing, "The")).containsExactly("uri:cat", "uri:dog");
+        assertThat(queryGetUris(icing, "tHe")).containsExactly("uri:cat", "uri:dog");
     }
 
     @Test
     public void get() {
+        DocumentProto cat = createDoc("uri:cat", "The cat said meow");
         FakeIcing icing = new FakeIcing();
-        icing.put("uri:cat", "The cat said meow");
-        assertThat(icing.get("uri:cat")).isEqualTo("The cat said meow");
+        icing.put(cat);
+        assertThat(icing.get("uri:cat")).isEqualTo(cat);
     }
 
     @Test
     public void replace() {
-        FakeIcing icing = new FakeIcing();
-        icing.put("uri:cat", "The cat said meow");
-        icing.put("uri:dog", "The dog said woof");
+        DocumentProto cat = createDoc("uri:cat", "The cat said meow");
+        DocumentProto dog = createDoc("uri:dog", "The dog said woof");
 
-        assertThat(icing.query("meow")).containsExactly("uri:cat");
-        assertThat(icing.query("said")).containsExactly("uri:cat", "uri:dog");
-        assertThat(icing.get("uri:cat")).isEqualTo("The cat said meow");
+        FakeIcing icing = new FakeIcing();
+        icing.put(cat);
+        icing.put(dog);
+
+        assertThat(queryGetUris(icing, "meow")).containsExactly("uri:cat");
+        assertThat(queryGetUris(icing, "said")).containsExactly("uri:cat", "uri:dog");
+        assertThat(icing.get("uri:cat")).isEqualTo(cat);
 
         // Replace
-        icing.put("uri:cat", "The cat said purr");
-        icing.put("uri:bird", "The cat said tweet");
+        DocumentProto cat2 = createDoc("uri:cat", "The cat said purr");
+        DocumentProto bird = createDoc("uri:bird", "The cat said tweet");
+        icing.put(cat2);
+        icing.put(bird);
 
-        assertThat(icing.query("meow")).isEmpty();
-        assertThat(icing.query("said")).containsExactly("uri:cat", "uri:dog", "uri:bird");
-        assertThat(icing.get("uri:cat")).isEqualTo("The cat said purr");
+        assertThat(queryGetUris(icing, "meow")).isEmpty();
+        assertThat(queryGetUris(icing, "said")).containsExactly("uri:cat", "uri:dog", "uri:bird");
+        assertThat(icing.get("uri:cat")).isEqualTo(cat2);
     }
 
     @Test
     public void delete() {
-        FakeIcing icing = new FakeIcing();
-        icing.put("uri:cat", "The cat said meow");
-        icing.put("uri:dog", "The dog said woof");
+        DocumentProto cat = createDoc("uri:cat", "The cat said meow");
+        DocumentProto dog = createDoc("uri:dog", "The dog said woof");
 
-        assertThat(icing.query("meow")).containsExactly("uri:cat");
-        assertThat(icing.query("said")).containsExactly("uri:cat", "uri:dog");
-        assertThat(icing.get("uri:cat")).isEqualTo("The cat said meow");
+        FakeIcing icing = new FakeIcing();
+        icing.put(cat);
+        icing.put(dog);
+
+        assertThat(queryGetUris(icing, "meow")).containsExactly("uri:cat");
+        assertThat(queryGetUris(icing, "said")).containsExactly("uri:cat", "uri:dog");
+        assertThat(icing.get("uri:cat")).isEqualTo(cat);
 
         // Delete
         icing.delete("uri:cat");
         icing.delete("uri:notreal");
 
-        assertThat(icing.query("meow")).isEmpty();
-        assertThat(icing.query("said")).containsExactly("uri:dog");
+        assertThat(queryGetUris(icing, "meow")).isEmpty();
+        assertThat(queryGetUris(icing, "said")).containsExactly("uri:dog");
         assertThat(icing.get("uri:cat")).isNull();
+    }
+
+    private static DocumentProto createDoc(String uri, String body) {
+        return DocumentProto.newBuilder()
+                .setUri(uri)
+                .addProperties(PropertyProto.newBuilder().addStringValues(body))
+                .build();
+    }
+
+    private static List<String> queryGetUris(FakeIcing icing, String term) {
+        List<String> uris = new ArrayList<>();
+        for (DocumentProto result : icing.query(term)) {
+            uris.add(result.getUri());
+        }
+        return uris;
     }
 }

@@ -1114,9 +1114,10 @@ public final class SystemServer {
             SignedConfigService.registerUpdateReceiver(mSystemContext);
             t.traceEnd();
 
-        } catch (RuntimeException e) {
+        } catch (Throwable e) {
             Slog.e("System", "******************************************");
-            Slog.e("System", "************ Failure starting core service", e);
+            Slog.e("System", "************ Failure starting core service");
+            throw e;
         }
 
         // Before things start rolling, be sure we have decided whether

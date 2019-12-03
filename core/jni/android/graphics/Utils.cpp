@@ -18,6 +18,8 @@
 #include "SkUtils.h"
 #include "SkData.h"
 
+#include <log/log.h>
+
 using namespace android;
 
 AssetStreamAdaptor::AssetStreamAdaptor(Asset* asset)

@@ -17,13 +17,11 @@
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 
-#include <minikin/Layout.h>
-#include <renderthread/RenderProxy.h>
-
 #include "core_jni_helpers.h"
 #include <unistd.h>
 
 #include <bionic/malloc.h>
+#include <android/graphics/renderthread.h>
 
 namespace android {
 
@@ -35,7 +33,7 @@ static void android_app_ActivityThread_purgePendingResources(JNIEnv* env, jobjec
 static void
 android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor) {
     int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
-    android::uirenderer::renderthread::RenderProxy::dumpGraphicsMemory(fd);
+    ARenderThread_dumpGraphicsMemory(fd);
 }
 
 static void android_app_ActivityThread_initZygoteChildHeapProfiling(JNIEnv* env, jobject clazz) {

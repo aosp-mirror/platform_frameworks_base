@@ -39,7 +39,6 @@ import android.text.TextUtils;
 import android.util.BackupUtils;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.TimeUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -49,6 +48,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Calendar;
 import java.util.HashMap;
 
 /**
@@ -2006,6 +2006,16 @@ public class WifiConfiguration implements Parcelable {
                 && enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE;
     }
 
+    private static String logTimeOfDay(long millis) {
+        Calendar c = Calendar.getInstance();
+        if (millis >= 0) {
+            c.setTimeInMillis(millis);
+            return String.format("%tm-%td %tH:%tM:%tS.%tL", c, c, c, c, c, c);
+        } else {
+            return Long.toString(millis);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
@@ -2042,7 +2052,7 @@ public class WifiConfiguration implements Parcelable {
         if (mNetworkSelectionStatus.getConnectChoice() != null) {
             sbuf.append(" connect choice: ").append(mNetworkSelectionStatus.getConnectChoice());
             sbuf.append(" connect choice set time: ")
-                    .append(TimeUtils.logTimeOfDay(
+                    .append(logTimeOfDay(
                             mNetworkSelectionStatus.getConnectChoiceTimestamp()));
         }
         sbuf.append(" hasEverConnected: ")
@@ -2081,7 +2091,7 @@ public class WifiConfiguration implements Parcelable {
         sbuf.append(" mRandomizedMacAddress: ").append(mRandomizedMacAddress).append("\n");
         sbuf.append(" randomizedMacExpirationTimeMs: ")
                 .append(randomizedMacExpirationTimeMs == 0 ? "<none>"
-                        : TimeUtils.logTimeOfDay(randomizedMacExpirationTimeMs)).append("\n");
+                        : logTimeOfDay(randomizedMacExpirationTimeMs)).append("\n");
         sbuf.append(" KeyMgmt:");
         for (int k = 0; k < this.allowedKeyManagement.size(); k++) {
             if (this.allowedKeyManagement.get(k)) {
@@ -2205,7 +2215,7 @@ public class WifiConfiguration implements Parcelable {
 
         if (this.lastConnected != 0) {
             sbuf.append('\n');
-            sbuf.append("lastConnected: ").append(TimeUtils.logTimeOfDay(this.lastConnected));
+            sbuf.append("lastConnected: ").append(logTimeOfDay(this.lastConnected));
             sbuf.append(" ");
         }
         sbuf.append('\n');
@@ -2355,7 +2365,7 @@ public class WifiConfiguration implements Parcelable {
                 ? getSsidAndSecurityTypeString()
                 : FQDN + KeyMgmt.strings[KeyMgmt.WPA_EAP];
         if (!shared) {
-            key += "-" + UserHandle.getUserId(creatorUid);
+            key += "-" + UserHandle.getUserHandleForUid(creatorUid).getIdentifier();
         }
         return key;
     }
@@ -2426,13 +2436,13 @@ public class WifiConfiguration implements Parcelable {
     @NonNull
     @SystemApi
     public IpConfiguration.IpAssignment getIpAssignment() {
-        return mIpConfiguration.ipAssignment;
+        return mIpConfiguration.getIpAssignment();
     }
 
     /** @hide */
     @UnsupportedAppUsage
     public void setIpAssignment(IpConfiguration.IpAssignment ipAssignment) {
-        mIpConfiguration.ipAssignment = ipAssignment;
+        mIpConfiguration.setIpAssignment(ipAssignment);
     }
 
     /**
@@ -2442,13 +2452,13 @@ public class WifiConfiguration implements Parcelable {
     @NonNull
     @SystemApi
     public IpConfiguration.ProxySettings getProxySettings() {
-        return mIpConfiguration.proxySettings;
+        return mIpConfiguration.getProxySettings();
     }
 
     /** @hide */
     @UnsupportedAppUsage
     public void setProxySettings(IpConfiguration.ProxySettings proxySettings) {
-        mIpConfiguration.proxySettings = proxySettings;
+        mIpConfiguration.setProxySettings(proxySettings);
     }
 
     /**
@@ -2457,10 +2467,10 @@ public class WifiConfiguration implements Parcelable {
      *                  WifiConfiguration, or {@code null} if no proxy is specified.
      */
     public ProxyInfo getHttpProxy() {
-        if (mIpConfiguration.proxySettings == IpConfiguration.ProxySettings.NONE) {
+        if (mIpConfiguration.getProxySettings() == IpConfiguration.ProxySettings.NONE) {
             return null;
         }
-        return new ProxyInfo(mIpConfiguration.httpProxy);
+        return new ProxyInfo(mIpConfiguration.getHttpProxy());
     }
 
     /**
@@ -2485,12 +2495,12 @@ public class WifiConfiguration implements Parcelable {
         if (!Uri.EMPTY.equals(httpProxy.getPacFileUrl())) {
             proxySettingCopy = IpConfiguration.ProxySettings.PAC;
             // Construct a new PAC URL Proxy
-            httpProxyCopy = new ProxyInfo(httpProxy.getPacFileUrl(), httpProxy.getPort());
+            httpProxyCopy = ProxyInfo.buildPacProxy(httpProxy.getPacFileUrl(), httpProxy.getPort());
         } else {
             proxySettingCopy = IpConfiguration.ProxySettings.STATIC;
             // Construct a new HTTP Proxy
-            httpProxyCopy = new ProxyInfo(httpProxy.getHost(), httpProxy.getPort(),
-                    httpProxy.getExclusionListAsString());
+            httpProxyCopy = ProxyInfo.buildDirectProxy(httpProxy.getHost(), httpProxy.getPort(),
+                    Arrays.asList(httpProxy.getExclusionList()));
         }
         if (!httpProxyCopy.isValid()) {
             throw new IllegalArgumentException("Invalid ProxyInfo: " + httpProxyCopy.toString());
@@ -2505,8 +2515,8 @@ public class WifiConfiguration implements Parcelable {
      */
     @SystemApi
     public void setProxy(@NonNull ProxySettings settings, @NonNull ProxyInfo proxy) {
-        mIpConfiguration.proxySettings = settings;
-        mIpConfiguration.httpProxy = proxy;
+        mIpConfiguration.setProxySettings(settings);
+        mIpConfiguration.setHttpProxy(proxy);
     }
 
     /** Implement the Parcelable interface {@hide} */

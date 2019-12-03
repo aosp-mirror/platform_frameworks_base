@@ -76,6 +76,19 @@ public class VisibilityLoggerMixin implements LifecycleObserver, OnAttach {
     }
 
     /**
+     * Logs the elapsed time from onAttach to calling {@link #writeElapsedTimeMetric(int, String)}.
+     * @param action : The value of the Action Enums.
+     * @param key : The value of special key string.
+     */
+    public void writeElapsedTimeMetric(int action, String key) {
+        if (mMetricsFeature == null || mMetricsCategory == METRICS_CATEGORY_UNKNOWN) {
+            return;
+        }
+        final int elapse = (int) (SystemClock.elapsedRealtime() - mTimestamp);
+        mMetricsFeature.action(METRICS_CATEGORY_UNKNOWN, action, mMetricsCategory, key, elapse);
+    }
+
+    /**
      * Sets source metrics category for this logger. Source is the caller that opened this UI.
      */
     public void setSourceMetricsCategory(Activity activity) {

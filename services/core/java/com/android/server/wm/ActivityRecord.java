@@ -1520,7 +1520,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         hasBeenLaunched = false;
         mStackSupervisor = supervisor;
 
-        taskAffinity = aInfo.taskAffinity;
+        // b/35954083: Limit task affinity to uid to avoid various issues associated with sharing
+        // affinity across uids.
+        final String uid = Integer.toString(info.applicationInfo.uid);
+        if (info.taskAffinity != null && !info.taskAffinity.startsWith(uid)) {
+            info.taskAffinity = uid + ":" + info.taskAffinity;
+        }
+        taskAffinity = info.taskAffinity;
         stateNotNeeded = (aInfo.flags & FLAG_STATE_NOT_NEEDED) != 0;
         nonLocalizedLabel = aInfo.nonLocalizedLabel;
         labelRes = aInfo.labelRes;
@@ -1798,7 +1804,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // task snapshot starting window.
                 return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
             }
-            return snapshot == null ? STARTING_WINDOW_TYPE_SPLASH_SCREEN
+            return snapshot == null ? STARTING_WINDOW_TYPE_NONE
                     : snapshotOrientationSameAsTask(snapshot) || fromRecents
                             ? STARTING_WINDOW_TYPE_SNAPSHOT : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else {

@@ -46,6 +46,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.location.LocationManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.view.WindowManager.LayoutParams;
@@ -486,13 +487,13 @@ public class UserManager {
      *
      * <p>This user restriction is different from {@link #DISALLOW_SHARE_LOCATION},
      * as the device owner or profile owner can still enable or disable location mode via
-     * {@link DevicePolicyManager#setSecureSetting} when this restriction is on.
+     * {@link DevicePolicyManager#setLocationEnabled} when this restriction is on.
      *
      * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
-     * @see android.location.LocationManager#isProviderEnabled(String)
+     * @see LocationManager#isLocationEnabled()
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()

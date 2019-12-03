@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
+import android.os.Bundle;
 import android.os.IBinder;
 
 import java.util.HashMap;
@@ -95,7 +96,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onSelectRoute(String packageName, String routeId) {
+    public void onSelectRoute(String packageName, String routeId, SelectToken token) {
         MediaRoute2Info route = mRoutes.get(routeId);
         if (route == null) {
             return;
@@ -104,6 +105,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
                 .setClientPackageName(packageName)
                 .build());
         publishRoutes();
+        notifyRouteSelected(token, Bundle.EMPTY);
     }
 
     @Override

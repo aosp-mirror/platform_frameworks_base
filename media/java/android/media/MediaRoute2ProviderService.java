@@ -18,13 +18,18 @@ package android.media;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+
+import java.util.Objects;
 
 /**
  * @hide
@@ -44,7 +49,7 @@ public abstract class MediaRoute2ProviderService extends Service {
     }
 
     @Override
-    public IBinder onBind(Intent intent) {
+    public IBinder onBind(@NonNull Intent intent) {
         //TODO: Allow binding from media router service only?
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             if (mStub == null) {
@@ -57,11 +62,17 @@ public abstract class MediaRoute2ProviderService extends Service {
 
     /**
      * Called when selectRoute is called on a route of the provider.
+     * Once the route is ready to be used , call {@link #notifyRouteSelected(SelectToken, Bundle)}
+     * to notify that.
      *
      * @param packageName the package name of the application that selected the route
      * @param routeId the id of the route being selected
+     * @param token token that contains select info
+     *
+     * @see #notifyRouteSelected
      */
-    public abstract void onSelectRoute(String packageName, String routeId);
+    public abstract void onSelectRoute(@NonNull String packageName, @NonNull String routeId,
+            @NonNull SelectToken token);
 
     /**
      * Called when unselectRoute is called on a route of the provider.
@@ -69,7 +80,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param packageName the package name of the application that has selected the route.
      * @param routeId the id of the route being unselected
      */
-    public abstract void onUnselectRoute(String packageName, String routeId);
+    public abstract void onUnselectRoute(@NonNull String packageName, @NonNull String routeId);
 
     /**
      * Called when sendControlRequest is called on a route of the provider
@@ -78,21 +89,21 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param request the media control request intent
      */
     //TODO: Discuss what to use for request (e.g., Intent? Request class?)
-    public abstract void onControlRequest(String routeId, Intent request);
+    public abstract void onControlRequest(@NonNull String routeId, @NonNull Intent request);
 
     /**
      * Called when requestSetVolume is called on a route of the provider
      * @param routeId the id of the route
      * @param volume the target volume
      */
-    public abstract void onSetVolume(String routeId, int volume);
+    public abstract void onSetVolume(@NonNull String routeId, int volume);
 
     /**
      * Called when requestUpdateVolume is called on a route of the provider
      * @param routeId id of the route
      * @param delta the delta to add to the current volume
      */
-    public abstract void onUpdateVolume(String routeId, int delta);
+    public abstract void onUpdateVolume(@NonNull String routeId, int delta);
 
     /**
      * Updates provider info and publishes routes
@@ -100,6 +111,29 @@ public abstract class MediaRoute2ProviderService extends Service {
     public final void setProviderInfo(MediaRoute2ProviderInfo info) {
         mProviderInfo = info;
         publishState();
+    }
+
+    /**
+     * Notifies the client of that the selected route is ready for use. If the selected route can be
+     * controlled, pass a {@link Bundle} that contains how to control it.
+     *
+     * @param token token passed in {@link #onSelectRoute}
+     * @param controlHints a {@link Bundle} that contains how to control the given route.
+     * Pass {@code null} if the route is not available.
+     */
+    public final void notifyRouteSelected(@NonNull SelectToken token,
+            @Nullable Bundle controlHints) {
+        Objects.requireNonNull(token, "token must not be null");
+
+        if (mClient == null) {
+            return;
+        }
+        try {
+            mClient.notifyRouteSelected(token.mPackageName, token.mRouteId,
+                    controlHints, token.mSeq);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Failed to notify route selected");
+        }
     }
 
     void setClient(IMediaRoute2ProviderClient client) {
@@ -118,6 +152,23 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
     }
 
+    /**
+     * Route selection information.
+     *
+     * @see #notifyRouteSelected
+     */
+    public final class SelectToken {
+        final String mPackageName;
+        final String mRouteId;
+        final int mSeq;
+
+        SelectToken(String packageName, String routeId, int seq) {
+            mPackageName = packageName;
+            mRouteId = routeId;
+            mSeq = seq;
+        }
+    }
+
     final class ProviderStub extends IMediaRoute2Provider.Stub {
         ProviderStub() { }
 
@@ -129,10 +180,10 @@ public abstract class MediaRoute2ProviderService extends Service {
 
         @Override
         public void requestSelectRoute(String packageName, String id, int seq) {
-            // TODO: When introducing MediaRoute2ProviderService#sendConnectionHints(),
-            // use the sequence number here properly.
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSelectRoute,
-                    MediaRoute2ProviderService.this, packageName, id));
+                    MediaRoute2ProviderService.this, packageName, id,
+                    new SelectToken(packageName, id, seq)));
+
         }
 
         @Override

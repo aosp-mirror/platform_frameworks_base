@@ -17,10 +17,13 @@
 package android.media;
 
 import android.media.MediaRoute2ProviderInfo;
+import android.media.MediaRoute2Info;
+import android.os.Bundle;
 
 /**
  * @hide
  */
 oneway interface IMediaRoute2ProviderClient {
     void updateProviderInfo(in MediaRoute2ProviderInfo info);
+    void notifyRouteSelected(String packageName, String routeId, in Bundle controlHints, int seq);
 }

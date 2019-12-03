@@ -580,7 +580,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         // semantics of WakeupMessage guarantee that if cancel is called then the alarm will
         // never call its callback (handleLingerComplete), even if it has already fired.
         // WakeupMessage makes no such guarantees about rescheduling a message, so if mLingerMessage
-        // has already been dispatched, rescheduling to some time in the future it won't stop it
+        // has already been dispatched, rescheduling to some time in the future won't stop it
         // from calling its callback immediately.
         if (mLingerMessage != null) {
             mLingerMessage.cancel();

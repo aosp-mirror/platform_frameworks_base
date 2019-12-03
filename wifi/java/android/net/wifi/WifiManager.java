@@ -36,15 +36,12 @@ import android.content.pm.ParceledListSlice;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
 import android.net.NetworkStack;
 import android.net.wifi.hotspot2.IProvisioningCallback;
 import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.ProvisioningCallback;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
@@ -57,7 +54,6 @@ import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.net.NetworkPinner;
 
 import dalvik.system.CloseGuard;
 
@@ -2022,28 +2018,11 @@ public class WifiManager {
      */
     @Deprecated
     public boolean enableNetwork(int netId, boolean attemptConnect) {
-        final boolean pin = attemptConnect && mTargetSdkVersion < Build.VERSION_CODES.LOLLIPOP;
-        if (pin) {
-            NetworkRequest request = new NetworkRequest.Builder()
-                    .clearCapabilities()
-                    .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
-                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                    .build();
-            NetworkPinner.pin(mContext, request);
-        }
-
-        boolean success;
         try {
-            success = mService.enableNetwork(netId, attemptConnect, mContext.getOpPackageName());
+            return mService.enableNetwork(netId, attemptConnect, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-
-        if (pin && !success) {
-            NetworkPinner.unpin();
-        }
-
-        return success;
     }
 
     /**
@@ -5105,9 +5084,9 @@ public class WifiManager {
                                 Log.v(TAG, "OnWifiUsabilityStatsListener: "
                                         + "onWifiUsabilityStats: seqNum=" + seqNum);
                             }
-                            Binder.withCleanCallingIdentity(() ->
-                                    executor.execute(() -> listener.onWifiUsabilityStats(seqNum,
-                                            isSameBssidAndFreq, stats)));
+                            Binder.clearCallingIdentity();
+                            executor.execute(() -> listener.onWifiUsabilityStats(
+                                    seqNum, isSameBssidAndFreq, stats));
                         }
                     },
                     listener.hashCode()

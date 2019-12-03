@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
+import android.os.Bundle;
 
 import java.util.Objects;
 
@@ -29,7 +30,7 @@ abstract class MediaRoute2Provider {
     final ComponentName mComponentName;
     final String mUniqueId;
 
-    private Callback mCallback;
+    Callback mCallback;
     private MediaRoute2ProviderInfo mProviderInfo;
 
     MediaRoute2Provider(@NonNull ComponentName componentName) {
@@ -77,6 +78,9 @@ abstract class MediaRoute2Provider {
     }
 
     public interface Callback {
-        void onProviderStateChanged(MediaRoute2Provider provider);
+        void onProviderStateChanged(@Nullable MediaRoute2Provider provider);
+        void onRouteSelected(@NonNull MediaRoute2ProviderProxy provider,
+                @NonNull String clientPackageName, @NonNull MediaRoute2Info route,
+                @Nullable Bundle controlHints, int seq);
     }
 }

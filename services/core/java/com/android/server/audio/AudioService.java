@@ -269,6 +269,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_OBSERVE_DEVICES_FOR_ALL_STREAMS = 27;
     private static final int MSG_HDMI_VOLUME_CHECK = 28;
     private static final int MSG_PLAYBACK_CONFIG_CHANGE = 29;
+    private static final int MSG_BROADCAST_MICROPHONE_MUTE = 30;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -2925,9 +2926,8 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.muteMicrophone(muted);
             try {
                 if (muted != currentMute) {
-                    mContext.sendBroadcastAsUser(
-                        new Intent(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED)
-                                .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), UserHandle.ALL);
+                    sendMsg(mAudioHandler, MSG_BROADCAST_MICROPHONE_MUTE,
+                                SENDMSG_NOOP, 0, 0, null, 0);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -5235,6 +5235,13 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_PLAYBACK_CONFIG_CHANGE:
                     onPlaybackConfigChange((List<AudioPlaybackConfiguration>) msg.obj);
+                    break;
+
+                case MSG_BROADCAST_MICROPHONE_MUTE:
+                    mContext.sendBroadcastAsUser(
+                            new Intent(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED)
+                                    .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                                    UserHandle.ALL);
                     break;
             }
         }
