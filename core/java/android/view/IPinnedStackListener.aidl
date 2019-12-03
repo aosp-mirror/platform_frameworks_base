@@ -67,20 +67,20 @@ oneway interface IPinnedStackListener {
     void onActionsChanged(in ParceledListSlice actions);
 
     /**
-     * Called by the window manager to notify the listener to save the reentry fraction,
+     * Called by the window manager to notify the listener to save the reentry fraction and size,
      * typically when an Activity leaves PiP (picture-in-picture) mode to fullscreen.
      * {@param componentName} represents the application component of PiP window
      * while {@param bounds} is the current PiP bounds used to calculate the
-     * reentry snap fraction.
+     * reentry snap fraction and size.
      */
-    void onSaveReentrySnapFraction(in ComponentName componentName, in Rect bounds);
+    void onSaveReentryBounds(in ComponentName componentName, in Rect bounds);
 
     /**
-     * Called by the window manager to notify the listener to reset saved reentry fraction,
+     * Called by the window manager to notify the listener to reset saved reentry fraction and size,
      * typically when an Activity enters PiP (picture-in-picture) mode from fullscreen.
      * {@param componentName} represents the application component of PiP window.
      */
-    void onResetReentrySnapFraction(in ComponentName componentName);
+    void onResetReentryBounds(in ComponentName componentName);
 
     /**
      * Called when the window manager has detected change on DisplayInfo,  or

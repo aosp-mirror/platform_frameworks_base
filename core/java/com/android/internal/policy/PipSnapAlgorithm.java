@@ -360,6 +360,28 @@ public class PipSnapAlgorithm {
     }
 
     /**
+     * @return the adjusted size so that it conforms to the given aspectRatio, ensuring that the
+     * minimum edge is at least minEdgeSize.
+     */
+    public Size getSizeForAspectRatio(Size size, float aspectRatio, float minEdgeSize) {
+        final int smallestSize = Math.min(size.getWidth(), size.getHeight());
+        final int minSize = (int) Math.max(minEdgeSize, smallestSize);
+
+        final int width;
+        final int height;
+        if (aspectRatio <= 1) {
+            // Portrait, width is the minimum size.
+            width = minSize;
+            height = Math.round(width / aspectRatio);
+        } else {
+            // Landscape, height is the minimum size
+            height = minSize;
+            width = Math.round(height * aspectRatio);
+        }
+        return new Size(width, height);
+    }
+
+    /**
      * @return the closest point in {@param points} to the given {@param x} and {@param y}.
      */
     private Point findClosestPoint(int x, int y, Point[] points) {

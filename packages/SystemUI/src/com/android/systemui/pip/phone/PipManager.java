@@ -65,6 +65,7 @@ public class PipManager implements BasePipManager {
     private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
     private final Rect mTmpInsetBounds = new Rect();
     private final Rect mTmpNormalBounds = new Rect();
+    private final Rect mReentryBounds = new Rect();
 
     private PipBoundsHandler mPipBoundsHandler;
     private InputConsumerController mInputConsumerController;
@@ -164,13 +165,25 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
-        public void onSaveReentrySnapFraction(ComponentName componentName, Rect bounds) {
-            mHandler.post(() -> mPipBoundsHandler.onSaveReentrySnapFraction(componentName, bounds));
+        public void onSaveReentryBounds(ComponentName componentName, Rect bounds) {
+            mHandler.post(() -> {
+                // On phones, the expansion animation that happens on pip tap before restoring
+                // to fullscreen makes it so that the bounds received here are the expanded
+                // bounds. We want to restore to the unexpanded bounds when re-entering pip,
+                // so we save the bounds before expansion (normal) instead of the current
+                // bounds.
+                mReentryBounds.set(mTouchHandler.getNormalBounds());
+                // Apply the snap fraction of the current bounds to the normal bounds.
+                float snapFraction = mPipBoundsHandler.getSnapFraction(bounds);
+                mPipBoundsHandler.applySnapFraction(mReentryBounds, snapFraction);
+                // Save reentry bounds (normal non-expand bounds with current position applied).
+                mPipBoundsHandler.onSaveReentryBounds(componentName, mReentryBounds);
+            });
         }
 
         @Override
-        public void onResetReentrySnapFraction(ComponentName componentName) {
-            mHandler.post(() -> mPipBoundsHandler.onResetReentrySnapFraction(componentName));
+        public void onResetReentryBounds(ComponentName componentName) {
+            mHandler.post(() -> mPipBoundsHandler.onResetReentryBounds(componentName));
         }
 
         @Override
