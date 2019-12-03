@@ -23,7 +23,10 @@ uidir="/product/media/audio/notifications"
 adb push $OUT/system/bin/soundpool_stress /system/bin
 
 # test SoundPool playback of all the UI sound samples (loaded twice) looping 10s 1 thread.
-#adb shell /system/bin/soundpool_stress -l -1 $uidir/*.ogg $uidir/*.ogg
+adb shell /system/bin/soundpool_stress -l -1 $uidir/*.ogg $uidir/*.ogg
+
+# test SoundPool playback of all the UI sound samples (repeating 3 times) looping 10s 1 thread.
+adb shell /system/bin/soundpool_stress -l 1 -r 3 $uidir/*.ogg
 
 # performance test SoundPool playback of all the UI sound samples (x2)
 # 1 iterations, looping, 1 second playback, 4 threads.

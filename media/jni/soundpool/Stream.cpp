@@ -179,6 +179,7 @@ bool Stream::requestStop(int32_t streamID)
 {
     std::lock_guard lock(mLock);
     if (streamID == mStreamID) {
+        ALOGV("%s: track streamID: %d", __func__, streamID);
         if (mAudioTrack != nullptr) {
             if (mState == PLAYING && !mMuted && (mLeftVolume != 0.f || mRightVolume != 0.f)) {
                 setVolume_l(0.f, 0.f);
@@ -202,6 +203,7 @@ void Stream::stop()
 void Stream::stop_l()
 {
     if (mState != IDLE) {
+        ALOGV("%s: track streamID: %d", __func__, (int)mStreamID);
         if (mAudioTrack != nullptr) {
             mAudioTrack->stop();
         }
@@ -227,6 +229,7 @@ Stream* Stream::playPairStream() {
     LOG_ALWAYS_FATAL_IF(pairStream == nullptr, "No pair stream!");
     sp<AudioTrack> releaseTracks[2];
     {
+        ALOGV("%s: track streamID: %d", __func__, (int)mStreamID);
         // TODO: Do we really want to force a simultaneous synchronization between
         // the stream and its pair?
 
