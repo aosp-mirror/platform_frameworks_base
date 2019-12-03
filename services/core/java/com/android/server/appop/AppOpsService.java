@@ -1115,6 +1115,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     // There is some actively running operation...  need to find it
                     // and appropriately update its state.
                     final long now = System.currentTimeMillis();
+                    final long nowElapsed = SystemClock.elapsedRealtime();
                     for (int i = uidState.pkgOps.size() - 1; i >= 0; i--) {
                         final Ops ops = uidState.pkgOps.valueAt(i);
                         for (int j = ops.size() - 1; j >= 0; j--) {
@@ -1136,7 +1137,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                                     featureOp.finished(now, duration, oldPendingState,
                                             AppOpsManager.OP_FLAG_SELF);
                                     // Start the op in the new state
-                                    featureOp.startRealtime = now;
+                                    featureOp.startRealtime = nowElapsed;
                                     featureOp.started(now, newState, AppOpsManager.OP_FLAG_SELF);
                                 }
                             }
