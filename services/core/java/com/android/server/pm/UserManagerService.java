@@ -3107,36 +3107,11 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
 
-        // First try to use a pre-created user (if available).
-        // TODO(b/142482943): Move this to its own function later.
-        if (!preCreate
-                && (parentId < 0 && isUserTypeEligibleForPreCreation(userTypeDetails))) {
-            final UserData preCreatedUserData;
-            synchronized (mUsersLock) {
-                preCreatedUserData = getPreCreatedUserLU(userType);
-            }
-            if (preCreatedUserData != null) {
-                final UserInfo preCreatedUser = preCreatedUserData.info;
-                final int newFlags = preCreatedUser.flags | flags;
-                if (!checkUserTypeConsistency(newFlags)) {
-                    Slog.wtf(LOG_TAG, "Cannot reuse pre-created user " + preCreatedUser.id
-                            + " of type " + userType + " because flags are inconsistent. "
-                            + "Flags (" + Integer.toHexString(flags) + "); preCreatedUserFlags ( "
-                            + Integer.toHexString(preCreatedUser.flags) + ").");
-                } else {
-                    Log.i(LOG_TAG, "Reusing pre-created user " + preCreatedUser.id + " of type "
-                            + userType + " and bestowing on it flags "
-                            + UserInfo.flagsToString(flags));
-                    preCreatedUser.name = name;
-                    preCreatedUser.flags = newFlags;
-                    preCreatedUser.preCreated = false;
-                    preCreatedUser.creationTime = getCreationTime();
-
-                    dispatchUserAddedIntent(preCreatedUser);
-                    writeUserLP(preCreatedUserData);
-                    writeUserListLP();
-                    return preCreatedUser;
-                }
+        // Try to use a pre-created user (if available).
+        if (!preCreate && parentId < 0 && isUserTypeEligibleForPreCreation(userTypeDetails)) {
+            final UserInfo preCreatedUser = convertPreCreatedUserIfPossible(userType, flags, name);
+            if (preCreatedUser != null) {
+                return preCreatedUser;
             }
         }
 
@@ -3318,6 +3293,44 @@ public class UserManagerService extends IUserManager.Stub {
         // "real" max exceeds the max here.
 
         return userInfo;
+    }
+
+    /**
+     * Finds and converts a previously pre-created user into a regular user, if possible.
+     *
+     * @return the converted user, or {@code null} if no pre-created user could be converted.
+     */
+    private @Nullable UserInfo convertPreCreatedUserIfPossible(String userType,
+            @UserInfoFlag int flags, String name) {
+        final UserData preCreatedUserData;
+        synchronized (mUsersLock) {
+            preCreatedUserData = getPreCreatedUserLU(userType);
+        }
+        if (preCreatedUserData == null) {
+            return null;
+        }
+        final UserInfo preCreatedUser = preCreatedUserData.info;
+        final int newFlags = preCreatedUser.flags | flags;
+        if (!checkUserTypeConsistency(newFlags)) {
+            Slog.wtf(LOG_TAG, "Cannot reuse pre-created user " + preCreatedUser.id
+                    + " of type " + userType + " because flags are inconsistent. "
+                    + "Flags (" + Integer.toHexString(flags) + "); preCreatedUserFlags ( "
+                    + Integer.toHexString(preCreatedUser.flags) + ").");
+            return null;
+        }
+        Log.i(LOG_TAG, "Reusing pre-created user " + preCreatedUser.id + " of type "
+                + userType + " and bestowing on it flags " + UserInfo.flagsToString(flags));
+        preCreatedUser.name = name;
+        preCreatedUser.flags = newFlags;
+        preCreatedUser.preCreated = false;
+        preCreatedUser.creationTime = getCreationTime();
+
+        dispatchUserAddedIntent(preCreatedUser);
+        synchronized (mPackagesLock) {
+            writeUserLP(preCreatedUserData);
+            writeUserListLP();
+        }
+        return preCreatedUser;
     }
 
     /** Checks that the flags do not contain mutually exclusive types/properties. */
