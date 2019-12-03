@@ -25,9 +25,12 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.LauncherApps;
+import android.content.pm.ShortcutInfo;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
@@ -343,6 +346,26 @@ public class TaskEmbedder {
         } catch (PendingIntent.CanceledException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Launch an activity represented by {@link ShortcutInfo} into this container.
+     * <p>The owner of this container must be allowed to access the shortcut information,
+     * as defined in {@link LauncherApps#hasShortcutHostPermission()} to use this method.
+     *
+     * @param shortcut the shortcut used to launch the activity.
+     * @param options options for the activity.
+     * @param sourceBounds the rect containing the source bounds of the clicked icon to open
+     *                     this shortcut.
+     *
+     * @see #startActivity(Intent)
+     */
+    public void startShortcutActivity(@NonNull ShortcutInfo shortcut,
+            @NonNull ActivityOptions options, @Nullable Rect sourceBounds) {
+        LauncherApps service =
+                (LauncherApps) mContext.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+        options.setLaunchDisplayId(mVirtualDisplay.getDisplay().getDisplayId());
+        service.startShortcut(shortcut, sourceBounds, options.toBundle());
     }
 
     /**
