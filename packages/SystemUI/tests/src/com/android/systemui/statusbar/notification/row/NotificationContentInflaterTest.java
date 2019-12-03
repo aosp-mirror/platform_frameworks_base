@@ -64,6 +64,7 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
+@Ignore
 public class NotificationContentInflaterTest extends SysuiTestCase {
 
     private NotificationContentInflater mNotificationInflater;
