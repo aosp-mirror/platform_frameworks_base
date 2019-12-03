@@ -78,6 +78,9 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.EventLog;
@@ -282,6 +285,16 @@ public final class ProcessList {
 
     // lmkd reconnect delay in msecs
     private final static long LMDK_RECONNECT_DELAY_MS = 1000;
+
+    /**
+     * How long between a process kill and we actually receive its death recipient
+     */
+    private static final long PROC_KILL_TIMEOUT = 2000; // 2 seconds;
+
+    /**
+     * How long between polls to check if the given process is dead or not.
+     */
+    private static final long PROC_DEATH_POLL_INTERVAL = 100;
 
     ActivityManagerService mService = null;
 
@@ -1421,7 +1434,7 @@ public final class ProcessList {
         if (app.pendingStart) {
             return true;
         }
-        long startTime = SystemClock.elapsedRealtime();
+        long startTime = SystemClock.uptimeMillis();
         if (app.pid > 0 && app.pid != ActivityManagerService.MY_PID) {
             checkSlow(startTime, "startProcess: removing from pids map");
             mService.mPidsSelfLocked.remove(app);
@@ -1856,7 +1869,7 @@ public final class ProcessList {
             boolean knownToBeDead, int intentFlags, HostingRecord hostingRecord,
             boolean allowWhileBooting, boolean isolated, int isolatedUid, boolean keepIfLarge,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
-        long startTime = SystemClock.elapsedRealtime();
+        long startTime = SystemClock.uptimeMillis();
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(processName, info.uid, keepIfLarge);
@@ -1917,10 +1930,9 @@ public final class ProcessList {
             // An application record is attached to a previous process,
             // clean it up now.
             if (DEBUG_PROCESSES) Slog.v(TAG_PROCESSES, "App died: " + app);
-            checkSlow(startTime, "startProcess: bad proc running, killing");
-            ProcessList.killProcessGroup(app.uid, app.pid);
-            mService.handleAppDiedLocked(app, true, true);
-            checkSlow(startTime, "startProcess: done killing old proc");
+            // do the killing
+            killProcAndWaitIfNecessaryLocked(app, true, app.uid == info.uid || app.isolated,
+                    "startProcess: bad proc running, killing: %s", startTime);
         }
 
         if (app == null) {
@@ -1959,6 +1971,70 @@ public final class ProcessList {
         final boolean success = startProcessLocked(app, hostingRecord, abiOverride);
         checkSlow(startTime, "startProcess: done starting proc!");
         return success ? app : null;
+    }
+
+    /**
+     * A lite version of checking if a process is alive or not, by using kill(2) with signal 0.
+     *
+     * <p>
+     * Note that, zombie processes are stil "alive" in this case, use the {@link
+     * ActivityManagerService#isProcessAliveLocked} if zombie processes need to be excluded.
+     * </p>
+     */
+    @GuardedBy("mService")
+    private boolean isProcessAliveLiteLocked(ProcessRecord app) {
+        try {
+            Os.kill(app.pid, 0);
+        } catch (ErrnoException e) {
+            return e.errno != OsConstants.ESRCH;
+        }
+        return true;
+    }
+
+    /**
+     * Kill (if asked to) and wait for the given process died if necessary
+     * @param app - The process record to kill
+     * @param doKill - Kill the given process record
+     * @param wait - Wait for the death of the given process
+     * @param formatString - The log message for slow operation
+     * @param startTime - The start timestamp of the operation
+     */
+    @GuardedBy("mService")
+    void killProcAndWaitIfNecessaryLocked(final ProcessRecord app, final boolean doKill,
+            final boolean wait, final String formatString, final long startTime) {
+
+        checkSlow(startTime, String.format(formatString, "before appDied"));
+
+        if (doKill) {
+            // do the killing
+            ProcessList.killProcessGroup(app.uid, app.pid);
+        }
+
+        // wait for the death
+        if (wait) {
+            boolean isAlive = true;
+            // ideally we should use pidfd_open(2) but it's available on kernel 5.3 or later
+
+            final long timeout = SystemClock.uptimeMillis() + PROC_KILL_TIMEOUT;
+            isAlive = isProcessAliveLiteLocked(app);
+            while (timeout > SystemClock.uptimeMillis() && isAlive) {
+                try {
+                    Thread.sleep(PROC_DEATH_POLL_INTERVAL);
+                } catch (InterruptedException e) {
+                }
+                isAlive = isProcessAliveLiteLocked(app);
+            }
+
+            if (isAlive) {
+                // Maybe the process goes into zombie, use an expensive API to check again.
+                if (mService.isProcessAliveLocked(app)) {
+                    Slog.w(TAG, String.format(formatString,
+                              "waiting for app killing timed out"));
+                }
+            }
+        }
+
+        checkSlow(startTime, String.format(formatString, "after appDied"));
     }
 
     @GuardedBy("mService")

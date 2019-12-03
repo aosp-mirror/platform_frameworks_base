@@ -6694,7 +6694,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private final long[] mProcessStateStatsLongs = new long[1];
 
-    private boolean isProcessAliveLocked(ProcessRecord proc) {
+    boolean isProcessAliveLocked(ProcessRecord proc) {
         if (proc.pid <= 0) {
             if (DEBUG_OOM_ADJ) Slog.d(TAG, "Process hasn't started yet: " + proc);
             return false;
@@ -6711,7 +6711,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long state = mProcessStateStatsLongs[0];
         if (DEBUG_OOM_ADJ) Slog.d(TAG, "RETRIEVED STATE FOR " + proc.procStatFile + ": "
                 + (char)state);
-        return state != 'Z' && state != 'X' && state != 'x' && state != 'K';
+        if (state != 'Z' && state != 'X' && state != 'x' && state != 'K') {
+            return Process.getUidForPid(proc.pid) == proc.uid;
+        }
+        return false;
     }
 
     private String checkContentProviderAssociation(ProcessRecord callingApp, int callingUid,
@@ -6784,14 +6787,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // (See the commit message on I2c4ba1e87c2d47f2013befff10c49b3dc337a9a7 to see
                 // how to test this case.)
                 if (cpr.proc.killed && cpr.proc.killedByAm) {
-                    checkTime(startTime, "getContentProviderImpl: before appDied (killedByAm)");
                     final long iden = Binder.clearCallingIdentity();
                     try {
-                        appDiedLocked(cpr.proc);
+                        mProcessList.killProcAndWaitIfNecessaryLocked(cpr.proc, false,
+                                cpr.uid == cpr.proc.uid || cpr.proc.isolated,
+                                "getContentProviderImpl: %s (killedByAm)", startTime);
                     } finally {
                         Binder.restoreCallingIdentity(iden);
                     }
-                    checkTime(startTime, "getContentProviderImpl: after appDied (killedByAm)");
                 }
             }
 
@@ -6895,9 +6898,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Slog.i(TAG, "Existing provider " + cpr.name.flattenToShortString()
                             + " is crashing; detaching " + r);
                     boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
-                    checkTime(startTime, "getContentProviderImpl: before appDied");
-                    appDiedLocked(cpr.proc);
-                    checkTime(startTime, "getContentProviderImpl: after appDied");
+                    mProcessList.killProcAndWaitIfNecessaryLocked(cpr.proc,
+                            false, true, "getContentProviderImpl: %s", startTime);
                     if (!lastRef) {
                         // This wasn't the last ref our process had on
                         // the provider...  we have now been killed, bail.
