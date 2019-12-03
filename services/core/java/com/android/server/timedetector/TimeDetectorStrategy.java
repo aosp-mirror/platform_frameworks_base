@@ -27,12 +27,14 @@ import java.io.PrintWriter;
 
 /**
  * The interface for classes that implement the time detection algorithm used by the
- * TimeDetectorService. The TimeDetectorService handles thread safety: all calls to implementations
- * of this interface can be assumed to be single threaded (though the thread used may vary).
+ * TimeDetectorService.
+ *
+ * <p>Most calls will be handled by a single thread but that is not true for all calls. For example
+ * {@link #dump(PrintWriter, String[])}) may be called on a different thread so implementations must
+ * handle thread safety.
  *
  * @hide
  */
-// @NotThreadSafe
 public interface TimeDetectorStrategy {
 
     /**
@@ -79,7 +81,7 @@ public interface TimeDetectorStrategy {
     void suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
 
     /** Handle the auto-time setting being toggled on or off. */
-    void handleAutoTimeDetectionToggle(boolean enabled);
+    void handleAutoTimeDetectionChanged();
 
     /** Dump debug information. */
     void dump(@NonNull PrintWriter pw, @Nullable String[] args);
