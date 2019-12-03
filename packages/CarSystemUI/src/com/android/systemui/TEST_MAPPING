@@ -1,5 +1,5 @@
 {
-  "auto-end-to-end-postsubmit": [
+  "auto-end-to-end-presubmit": [
     {
       "name": "AndroidAutoUiTests",
       "options" : [
