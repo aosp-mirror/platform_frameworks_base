@@ -67,6 +67,15 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             codeRoot = Environment.getSystemExtDirectory();
         } else if (FileUtils.contains(Environment.getOdmDirectory(), codePath)) {
             codeRoot = Environment.getOdmDirectory();
+        } else if (FileUtils.contains(Environment.getApexDirectory(), codePath)) {
+            String fullPath = codePath.getAbsolutePath();
+            String[] parts = fullPath.split(File.separator);
+            if (parts.length > 2) {
+                codeRoot = new File(parts[1] + File.separator + parts[2]);
+            } else {
+                Slog.w(PackageManagerService.TAG, "Can't canonicalize code path " + codePath);
+                codeRoot = Environment.getApexDirectory();
+            }
         } else {
             // Unrecognized code path; take its top real segment as the apk root:
             // e.g. /something/app/blah.apk => /something
