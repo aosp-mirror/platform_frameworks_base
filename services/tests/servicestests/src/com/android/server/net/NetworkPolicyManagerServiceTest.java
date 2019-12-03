@@ -37,6 +37,7 @@ import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.TAG_ALL;
+import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.MB_IN_BYTES;
@@ -1680,6 +1681,57 @@ public class NetworkPolicyManagerServiceTest {
 
         assertNetworkPolicyEquals(DEFAULT_CYCLE_DAY, mDefaultWarningBytes, mDefaultLimitBytes,
                 true);
+    }
+
+    /**
+     * Test that when StatsProvider triggers limit reached, new limit will be calculated and
+     * re-armed.
+     */
+    @Test
+    public void testStatsProviderLimitReached() throws Exception {
+        final int CYCLE_DAY = 15;
+
+        final NetworkStats stats = new NetworkStats(0L, 1);
+        stats.addEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
+                2999, 1, 2000, 1, 0);
+        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
+                .thenReturn(stats.getTotalBytes());
+        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
+                .thenReturn(stats);
+
+        // Get active mobile network in place
+        expectMobileDefaults();
+        mService.updateNetworks();
+        verify(mStatsService).setStatsProviderLimit(TEST_IFACE, Long.MAX_VALUE);
+
+        // Set limit to 10KB.
+        setNetworkPolicies(new NetworkPolicy(
+                sTemplateMobileAll, CYCLE_DAY, TIMEZONE_UTC, WARNING_DISABLED, 10000L,
+                true));
+        postMsgAndWaitForCompletion();
+
+        // Verifies that remaining quota is set to providers.
+        verify(mStatsService).setStatsProviderLimit(TEST_IFACE, 10000L - 4999L);
+
+        reset(mStatsService);
+
+        // Increase the usage.
+        stats.addEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
+                1000, 1, 999, 1, 0);
+        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
+                .thenReturn(stats.getTotalBytes());
+        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
+                .thenReturn(stats);
+
+        // Simulates that limit reached fires earlier by provider, but actually the quota is not
+        // yet reached.
+        final NetworkPolicyManagerInternal npmi = LocalServices
+                .getService(NetworkPolicyManagerInternal.class);
+        npmi.onStatsProviderLimitReached("TEST");
+
+        // Verifies that the limit reached leads to a force update.
+        postMsgAndWaitForCompletion();
+        verify(mStatsService).forceUpdate();
     }
 
     /**
