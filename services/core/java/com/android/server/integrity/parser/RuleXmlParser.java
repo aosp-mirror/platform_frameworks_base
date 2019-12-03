@@ -51,10 +51,10 @@ public final class RuleXmlParser implements RuleParser {
     private static final String IS_HASHED_VALUE_ATTRIBUTE = "H";
 
     @Override
-    public List<Rule> parse(String ruleText) throws RuleParseException {
+    public List<Rule> parse(byte[] ruleBytes) throws RuleParseException {
         try {
             XmlPullParser xmlPullParser = Xml.newPullParser();
-            xmlPullParser.setInput(new StringReader(ruleText));
+            xmlPullParser.setInput(new StringReader(new String(ruleBytes, StandardCharsets.UTF_8)));
             return parseRules(xmlPullParser);
         } catch (Exception e) {
             throw new RuleParseException(e.getMessage(), e);
