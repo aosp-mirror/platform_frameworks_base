@@ -138,6 +138,14 @@ static struct {
     jmethodID builder;
 } gScreenshotGraphicBufferClassInfo;
 
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+    jfieldID defaultModeId;
+    jfieldID minRefreshRate;
+    jfieldID maxRefreshRate;
+} gDesiredDisplayConfigSpecsClassInfo;
+
 class JNamedColorSpace {
 public:
     // ColorSpace.Named.SRGB.ordinal() = 0;
@@ -810,13 +818,20 @@ static jintArray nativeGetAllowedDisplayConfigs(JNIEnv* env, jclass clazz, jobje
     return allowedConfigsArray;
 }
 
-static jboolean nativeSetDesiredDisplayConfigSpecs(JNIEnv* env, jclass clazz,
-        jobject tokenObj, jint displayModeId, jfloat minRefreshRate, jfloat maxRefreshRate) {
+static jboolean nativeSetDesiredDisplayConfigSpecs(JNIEnv* env, jclass clazz, jobject tokenObj,
+                                                   jobject desiredDisplayConfigSpecs) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == nullptr) return JNI_FALSE;
 
+    jint defaultModeId = env->GetIntField(desiredDisplayConfigSpecs,
+                                          gDesiredDisplayConfigSpecsClassInfo.defaultModeId);
+    jfloat minRefreshRate = env->GetFloatField(desiredDisplayConfigSpecs,
+                                               gDesiredDisplayConfigSpecsClassInfo.minRefreshRate);
+    jfloat maxRefreshRate = env->GetFloatField(desiredDisplayConfigSpecs,
+                                               gDesiredDisplayConfigSpecsClassInfo.maxRefreshRate);
+
     size_t result = SurfaceComposerClient::setDesiredDisplayConfigSpecs(
-        token, displayModeId, minRefreshRate, maxRefreshRate);
+            token, defaultModeId, minRefreshRate, maxRefreshRate);
     return result == NO_ERROR ? JNI_TRUE : JNI_FALSE;
 }
 
@@ -1376,7 +1391,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetAllowedDisplayConfigs },
     {"nativeGetAllowedDisplayConfigs", "(Landroid/os/IBinder;)[I",
             (void*)nativeGetAllowedDisplayConfigs },
-    {"nativeSetDesiredDisplayConfigSpecs", "(Landroid/os/IBinder;IFF)Z",
+    {"nativeSetDesiredDisplayConfigSpecs",
+            "(Landroid/os/IBinder;Landroid/view/SurfaceControl$DesiredDisplayConfigSpecs;)Z",
             (void*)nativeSetDesiredDisplayConfigSpecs },
     {"nativeGetDisplayColorModes", "(Landroid/os/IBinder;)[I",
             (void*)nativeGetDisplayColorModes},
@@ -1546,6 +1562,19 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             "Landroid/view/SurfaceControl$CieXyz;");
     gDisplayPrimariesClassInfo.white = GetFieldIDOrDie(env, displayPrimariesClazz, "white",
             "Landroid/view/SurfaceControl$CieXyz;");
+
+    jclass desiredDisplayConfigSpecsClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$DesiredDisplayConfigSpecs");
+    gDesiredDisplayConfigSpecsClassInfo.clazz =
+            MakeGlobalRefOrDie(env, desiredDisplayConfigSpecsClazz);
+    gDesiredDisplayConfigSpecsClassInfo.ctor =
+            GetMethodIDOrDie(env, gDesiredDisplayConfigSpecsClassInfo.clazz, "<init>", "(IFF)V");
+    gDesiredDisplayConfigSpecsClassInfo.defaultModeId =
+            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "mDefaultModeId", "I");
+    gDesiredDisplayConfigSpecsClassInfo.minRefreshRate =
+            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "mMinRefreshRate", "F");
+    gDesiredDisplayConfigSpecsClassInfo.maxRefreshRate =
+            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "mMaxRefreshRate", "F");
 
     return err;
 }

@@ -693,8 +693,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
 
             final IBinder token = getDisplayTokenLocked();
-            SurfaceControl.setDesiredDisplayConfigSpecs(token, defaultModeId, minRefreshRate,
-                    maxRefreshRate);
+            SurfaceControl.setDesiredDisplayConfigSpecs(token,
+                    new SurfaceControl.DesiredDisplayConfigSpecs(
+                            defaultModeId, minRefreshRate, maxRefreshRate));
             int activePhysIndex = SurfaceControl.getActiveConfig(token);
             return updateActiveModeLocked(activePhysIndex);
         }

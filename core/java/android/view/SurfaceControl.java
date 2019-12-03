@@ -162,7 +162,7 @@ public final class SurfaceControl implements Parcelable {
                                                                  int[] allowedConfigs);
     private static native int[] nativeGetAllowedDisplayConfigs(IBinder displayToken);
     private static native boolean nativeSetDesiredDisplayConfigSpecs(IBinder displayToken,
-            int defaultModeId, float minRefreshRate, float maxRefreshRate);
+            SurfaceControl.DesiredDisplayConfigSpecs desiredDisplayConfigSpecs);
     private static native int[] nativeGetDisplayColorModes(IBinder displayToken);
     private static native SurfaceControl.DisplayPrimaries nativeGetDisplayNativePrimaries(
             IBinder displayToken);
@@ -1492,16 +1492,47 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * Contains information about desired display configuration.
+     *
+     * @hide
+     */
+    public static final class DesiredDisplayConfigSpecs {
+        /**
+         * @hide
+         */
+        public int mDefaultModeId;
+
+        /**
+         * @hide
+         */
+        public float mMinRefreshRate;
+
+        /**
+         * @hide
+         */
+        public float mMaxRefreshRate;
+
+        /**
+         * @hide
+         */
+        public DesiredDisplayConfigSpecs(
+                int defaultModeId, float minRefreshRate, float maxRefreshRate) {
+            mDefaultModeId = defaultModeId;
+            mMinRefreshRate = minRefreshRate;
+            mMaxRefreshRate = maxRefreshRate;
+        }
+    }
+
+    /**
      * @hide
      */
     public static boolean setDesiredDisplayConfigSpecs(IBinder displayToken,
-            int defaultModeId, float minRefreshRate, float maxRefreshRate) {
+            SurfaceControl.DesiredDisplayConfigSpecs desiredDisplayConfigSpecs) {
         if (displayToken == null) {
             throw new IllegalArgumentException("displayToken must not be null");
         }
 
-        return nativeSetDesiredDisplayConfigSpecs(displayToken, defaultModeId, minRefreshRate,
-            maxRefreshRate);
+        return nativeSetDesiredDisplayConfigSpecs(displayToken, desiredDisplayConfigSpecs);
     }
 
     /**
