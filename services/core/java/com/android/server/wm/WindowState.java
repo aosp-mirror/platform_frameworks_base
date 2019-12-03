@@ -983,7 +983,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             - mWindowFrames.mVisibleFrame.bottom;
                     if (bottomOverlap > 0) {
                         final int distanceToTop = Math.max(mWindowFrames.mContainingFrame.top
-                                - mWindowFrames.mDisplayFrame.top, 0);
+                                - mWindowFrames.mContentFrame.top, 0);
                         int offs = Math.min(bottomOverlap, distanceToTop);
                         mWindowFrames.mContainingFrame.top -= offs;
                     }
