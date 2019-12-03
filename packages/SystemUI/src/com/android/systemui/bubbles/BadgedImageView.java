@@ -16,16 +16,13 @@
 package com.android.systemui.bubbles;
 
 import android.annotation.Nullable;
-import android.app.Notification;
 import android.content.Context;
-import android.content.pm.LauncherApps;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
 import android.util.PathParser;
 import android.widget.ImageView;
@@ -283,8 +280,8 @@ public class BadgedImageView extends ImageView {
             return;
         }
 
-        Drawable bubbleDrawable = getBubbleDrawable(mContext);
-        BitmapInfo badgeBitmapInfo = mBubbleIconFactory.getBadgedBitmap(mBubble);
+        Drawable bubbleDrawable = mBubbleIconFactory.getBubbleDrawable(mBubble, mContext);
+        BitmapInfo badgeBitmapInfo = mBubbleIconFactory.getBadgeBitmap(mBubble);
         BitmapInfo bubbleBitmapInfo = mBubbleIconFactory.getBubbleBitmap(bubbleDrawable,
                 badgeBitmapInfo);
         setImageBitmap(bubbleBitmapInfo.icon);
@@ -306,18 +303,5 @@ public class BadgedImageView extends ImageView {
         drawDot(iconPath);
 
         animateDot();
-    }
-
-    Drawable getBubbleDrawable(Context context) {
-        if (mBubble.getShortcutInfo() != null && mBubble.usingShortcutInfo()) {
-            LauncherApps launcherApps =
-                    (LauncherApps) getContext().getSystemService(Context.LAUNCHER_APPS_SERVICE);
-            int density = getContext().getResources().getConfiguration().densityDpi;
-            return launcherApps.getShortcutIconDrawable(mBubble.getShortcutInfo(), density);
-        } else {
-            Notification.BubbleMetadata metadata = mBubble.getEntry().getBubbleMetadata();
-            Icon ic = metadata.getIcon();
-            return ic.loadDrawable(context);
-        }
     }
 }

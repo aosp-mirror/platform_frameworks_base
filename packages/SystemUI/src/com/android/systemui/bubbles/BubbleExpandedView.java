@@ -99,7 +99,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private int mExpandedViewTouchSlop;
 
     private Bubble mBubble;
-    private String mAppName;
 
     private BubbleController mBubbleController = Dependency.get(BubbleController.class);
     private WindowManager mWindowManager;
@@ -339,26 +338,41 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         }
     }
 
-    /**
-     * Sets the bubble used to populate this view.
-     */
-    public void setBubble(Bubble bubble, BubbleStackView stackView) {
-        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-            Log.d(TAG, "setBubble: bubble=" + (bubble != null ? bubble.getKey() : "null"));
-        }
+    void setStackView(BubbleStackView stackView) {
         mStackView = stackView;
-        mBubble = bubble;
-        mAppName = bubble.getAppName();
-
-        applyThemeAttrs();
-        showSettingsIcon();
-        updateExpandedView();
     }
 
     /**
-     * Lets activity view know it should be shown / populated.
+     * Sets the bubble used to populate this view.
      */
-    public void populateExpandedView() {
+    void update(Bubble bubble) {
+        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
+            Log.d(TAG, "update: bubble=" + (bubble != null ? bubble.getKey() : "null"));
+        }
+        boolean isNew = mBubble == null;
+        if (isNew || bubble.getKey().equals(mBubble.getKey())) {
+            mBubble = bubble;
+            mSettingsIcon.setContentDescription(getResources().getString(
+                    R.string.bubbles_settings_button_description, bubble.getAppName()));
+
+            if (isNew) {
+                mBubbleIntent = mBubble.getBubbleIntent();
+                if (mBubbleIntent != null) {
+                    setContentVisibility(false);
+                    mActivityView.setVisibility(VISIBLE);
+                }
+            }
+            applyThemeAttrs();
+        } else {
+            Log.w(TAG, "Trying to update entry with different key, new bubble: "
+                    + bubble.getKey() + " old bubble: " + bubble.getKey());
+        }
+    }
+
+    /**
+     * Lets activity view know it should be shown / populated with activity content.
+     */
+    void populateExpandedView() {
         if (DEBUG_BUBBLE_EXPANDED_VIEW) {
             Log.d(TAG, "populateExpandedView: "
                     + "bubble=" + getBubbleKey());
@@ -369,38 +383,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         } else {
             Log.e(TAG, "Cannot populate expanded view.");
         }
-    }
-
-    /**
-     * Updates the bubble backing this view. This will not re-populate ActivityView, it will
-     * only update the deep-links in the title, and the height of the view.
-     */
-    public void update(Bubble bubble) {
-        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-            Log.d(TAG, "update: bubble=" + (bubble != null ? bubble.getKey() : "null"));
-        }
-        if (bubble.getKey().equals(mBubble.getKey())) {
-            mBubble = bubble;
-            updateSettingsContentDescription();
-            updateHeight();
-        } else {
-            Log.w(TAG, "Trying to update entry with different key, new bubble: "
-                    + bubble.getKey() + " old bubble: " + bubble.getKey());
-        }
-    }
-
-    private void updateExpandedView() {
-        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-            Log.d(TAG, "updateExpandedView: bubble="
-                    + getBubbleKey());
-        }
-
-        mBubbleIntent = mBubble.getBubbleIntent();
-        if (mBubbleIntent != null) {
-            setContentVisibility(false);
-            mActivityView.setVisibility(VISIBLE);
-        }
-        updateView();
     }
 
     boolean performBackPressIfNeeded() {
@@ -488,16 +470,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                         StatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
             });
         }
-    }
-
-    private void updateSettingsContentDescription() {
-        mSettingsIcon.setContentDescription(getResources().getString(
-                R.string.bubbles_settings_button_description, mAppName));
-    }
-
-    void showSettingsIcon() {
-        updateSettingsContentDescription();
-        mSettingsIcon.setVisibility(VISIBLE);
     }
 
     /**

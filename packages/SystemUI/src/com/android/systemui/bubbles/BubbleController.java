@@ -103,7 +103,6 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -151,6 +150,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     private BubbleData mBubbleData;
     @Nullable private BubbleStackView mStackView;
+    private BubbleIconFactory mBubbleIconFactory;
 
     // Tracks the id of the current (foreground) user.
     private int mCurrentUserId;
@@ -353,6 +353,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mUserBlockedBubbles = new HashSet<>();
 
         mScreenshotHelper = new ScreenshotHelper(context);
+        mBubbleIconFactory = new BubbleIconFactory(context);
     }
 
     /**
@@ -416,13 +417,21 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     @Override
     public void onUiModeChanged() {
-        if (mStackView != null) {
-            mStackView.onThemeChanged();
-        }
+        updateForThemeChanges();
     }
 
     @Override
     public void onOverlayChanged() {
+        updateForThemeChanges();
+    }
+
+    private void updateForThemeChanges() {
+        mBubbleIconFactory = new BubbleIconFactory(mContext);
+        for (Bubble b: mBubbleData.getBubbles()) {
+            b.getIconView().setBubbleIconFactory(mBubbleIconFactory);
+            b.getIconView().updateViews();
+            b.getExpandedView().applyThemeAttrs();
+        }
         if (mStackView != null) {
             mStackView.onThemeChanged();
         }
@@ -509,14 +518,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         return (isSummary && isSuppressedSummary) || isBubbleAndSuppressed;
     }
 
-    void selectBubble(Bubble bubble) {
-        mBubbleData.setSelectedBubble(bubble);
-    }
-
     @VisibleForTesting
     void selectBubble(String key) {
         Bubble bubble = mBubbleData.getBubbleWithKey(key);
-        selectBubble(bubble);
+        mBubbleData.setSelectedBubble(bubble);
     }
 
     /**
