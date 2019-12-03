@@ -22,7 +22,6 @@ import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_AUTO;
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_DISABLED;
-import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_DEFAULT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -38,6 +37,7 @@ import android.util.Xml;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayInfo;
+import android.view.IWindowManager;
 import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -111,8 +111,7 @@ class DisplayWindowSettings {
         private boolean mShouldShowWithInsecureKeyguard = false;
         private boolean mShouldShowSystemDecors = false;
         private boolean mShouldShowIme = false;
-        private @DisplayRotation.FixedToUserRotation int mFixedToUserRotation =
-                FIXED_TO_USER_ROTATION_DEFAULT;
+        private int mFixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
 
         private Entry(String name) {
             mName = name;
@@ -145,7 +144,7 @@ class DisplayWindowSettings {
                     && !mShouldShowWithInsecureKeyguard
                     && !mShouldShowSystemDecors
                     && !mShouldShowIme
-                    && mFixedToUserRotation == FIXED_TO_USER_ROTATION_DEFAULT;
+                    && mFixedToUserRotation == IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
         }
     }
 
@@ -242,8 +241,7 @@ class DisplayWindowSettings {
         writeSettingsIfNeeded(entry, displayInfo);
     }
 
-    void setFixedToUserRotation(DisplayContent displayContent,
-            @DisplayRotation.FixedToUserRotation int fixedToUserRotation) {
+    void setFixedToUserRotation(DisplayContent displayContent, int fixedToUserRotation) {
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final Entry entry = getOrCreateEntry(displayInfo);
         entry.mFixedToUserRotation = fixedToUserRotation;
@@ -610,7 +608,7 @@ class DisplayWindowSettings {
                 if (entry.mShouldShowIme) {
                     out.attribute(null, "shouldShowIme", Boolean.toString(entry.mShouldShowIme));
                 }
-                if (entry.mFixedToUserRotation != FIXED_TO_USER_ROTATION_DEFAULT) {
+                if (entry.mFixedToUserRotation != IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT) {
                     out.attribute(null, "fixedToUserRotation",
                             Integer.toString(entry.mFixedToUserRotation));
                 }

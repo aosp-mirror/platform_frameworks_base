@@ -52,6 +52,7 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.IDisplayWindowRotationCallback;
+import android.view.IWindowManager;
 import android.view.Surface;
 import android.view.WindowContainerTransaction;
 
@@ -184,32 +185,11 @@ public class DisplayRotation {
     private boolean mDefaultFixedToUserRotation;
 
     /**
-     * No overridden behavior is provided in terms of fixing rotation to user rotation. Use other
-     * flags to derive the default behavior, such as {@link WindowManagerService#mIsPc} and
-     * {@link WindowManagerService#mForceDesktopModeOnExternalDisplays}.
-     */
-    static final int FIXED_TO_USER_ROTATION_DEFAULT = 0;
-    /**
-     * Don't fix display rotation to {@link #mUserRotation} only. Always allow other factors to play
-     * a role in deciding display rotation.
-     */
-    static final int FIXED_TO_USER_ROTATION_DISABLED = 1;
-    /**
-     * Only use {@link #mUserRotation} as the display rotation.
-     */
-    static final int FIXED_TO_USER_ROTATION_ENABLED = 2;
-    @IntDef({ FIXED_TO_USER_ROTATION_DEFAULT, FIXED_TO_USER_ROTATION_DISABLED,
-            FIXED_TO_USER_ROTATION_ENABLED })
-    @Retention(RetentionPolicy.SOURCE)
-    @interface FixedToUserRotation {}
-
-    /**
      * A flag to indicate if the display rotation should be fixed to user specified rotation
      * regardless of all other states (including app requrested orientation). {@code true} the
      * display rotation should be fixed to user specified rotation, {@code false} otherwise.
      */
-    @FixedToUserRotation
-    private int mFixedToUserRotation = FIXED_TO_USER_ROTATION_DEFAULT;
+    private int mFixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
 
     private int mDemoHdmiRotation;
     private int mDemoRotation;
@@ -723,8 +703,7 @@ public class DisplayRotation {
         }
     }
 
-    void restoreSettings(int userRotationMode, int userRotation,
-            @FixedToUserRotation int fixedToUserRotation) {
+    void restoreSettings(int userRotationMode, int userRotation, int fixedToUserRotation) {
         mFixedToUserRotation = fixedToUserRotation;
 
         // We will retrieve user rotation and user rotation mode from settings for default display.
@@ -746,7 +725,7 @@ public class DisplayRotation {
         mUserRotation = userRotation;
     }
 
-    void setFixedToUserRotation(@FixedToUserRotation int fixedToUserRotation) {
+    void setFixedToUserRotation(int fixedToUserRotation) {
         if (mFixedToUserRotation == fixedToUserRotation) {
             return;
         }
@@ -808,9 +787,9 @@ public class DisplayRotation {
 
     boolean isFixedToUserRotation() {
         switch (mFixedToUserRotation) {
-            case FIXED_TO_USER_ROTATION_DISABLED:
+            case IWindowManager.FIXED_TO_USER_ROTATION_DISABLED:
                 return false;
-            case FIXED_TO_USER_ROTATION_ENABLED:
+            case IWindowManager.FIXED_TO_USER_ROTATION_ENABLED:
                 return true;
             default:
                 return mDefaultFixedToUserRotation;
