@@ -20,7 +20,6 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_LOW
-import android.app.Person
 import android.service.notification.NotificationListenerService.RankingMap
 import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
@@ -36,6 +35,7 @@ import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.notification.NotificationFilter
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.logging.NotifLog
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT
 import com.android.systemui.statusbar.phone.NotificationGroupManager
@@ -52,41 +52,38 @@ import org.mockito.Mockito.mock
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class NotificationRankingManagerTest
-    : SysuiTestCase() {
+class NotificationRankingManagerTest : SysuiTestCase() {
 
-    private var lazyMedia: Lazy<NotificationMediaManager> = Lazy {
-        mock<NotificationMediaManager>(NotificationMediaManager::class.java)
+    private val lazyMedia: Lazy<NotificationMediaManager> = Lazy {
+        mock(NotificationMediaManager::class.java)
     }
-
-    private val rankingManager = TestableNotificationRankingManager(
-            lazyMedia,
-            mock<NotificationGroupManager>(NotificationGroupManager::class.java),
-            mock<HeadsUpManager>(HeadsUpManager::class.java),
-            mock<NotificationFilter>(NotificationFilter::class.java),
-            mock<NotifLog>(NotifLog::class.java),
-            mock<NotificationSectionsFeatureManager>(NotificationSectionsFeatureManager::class.java)
-    )
+    private lateinit var personNotificationIdentifier: PeopleNotificationIdentifier
+    private lateinit var rankingManager: TestableNotificationRankingManager
 
     @Before
     fun setup() {
+        personNotificationIdentifier =
+                mock(PeopleNotificationIdentifier::class.java)
+        rankingManager = TestableNotificationRankingManager(
+                lazyMedia,
+                mock(NotificationGroupManager::class.java),
+                mock(HeadsUpManager::class.java),
+                mock(NotificationFilter::class.java),
+                mock(NotifLog::class.java),
+                mock(NotificationSectionsFeatureManager::class.java),
+                personNotificationIdentifier
+        )
     }
 
     @Test
     fun testPeopleNotification_isHighPriority() {
-        val person = Person.Builder()
-                .setName("name")
-                .setKey("abc")
-                .setUri("uri")
-                .setBot(true)
-                .build()
-
         val notification = Notification.Builder(mContext, "test")
-                .addPerson(person)
                 .build()
 
         val sbn = StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
                 notification, mContext.user, "", 0)
+
+        `when`(personNotificationIdentifier.isPeopleNotification(sbn)).thenReturn(true)
 
         val e = NotificationEntryBuilder()
                 .setNotification(notification)
@@ -97,27 +94,9 @@ class NotificationRankingManagerTest
     }
 
     @Test
-    fun messagingStyleHighPriority() {
-
-        val notif = Notification.Builder(mContext, "test")
-                .setStyle(Notification.MessagingStyle(""))
-                .build()
-
-        val sbn = StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
-                notif, mContext.getUser(), "", 0)
-
-        val e = NotificationEntryBuilder()
-                .setNotification(notif)
-                .setSbn(sbn)
-                .build()
-
-        assertTrue(rankingManager.isHighPriority2(e))
-    }
-
-    @Test
     fun lowForegroundHighPriority() {
         val notification = mock(Notification::class.java)
-        `when`<Boolean>(notification.isForegroundService).thenReturn(true)
+        `when`(notification.isForegroundService).thenReturn(true)
 
         val sbn = StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
                 notification, mContext.user, "", 0)
@@ -136,21 +115,15 @@ class NotificationRankingManagerTest
 
     @Test
     fun userChangeTrumpsHighPriorityCharacteristics() {
-        val person = Person.Builder()
-                .setName("name")
-                .setKey("abc")
-                .setUri("uri")
-                .setBot(true)
-                .build()
-
         val notification = Notification.Builder(mContext, "test")
-                .addPerson(person)
                 .setStyle(Notification.MessagingStyle(""))
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build()
 
         val sbn = StatusBarNotification("pkg", "pkg", 0, "tag", 0, 0,
                 notification, mContext.user, "", 0)
+
+        `when`(personNotificationIdentifier.isPeopleNotification(sbn)).thenReturn(true)
 
         val channel = NotificationChannel("a", "a", IMPORTANCE_LOW)
         channel.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE)
@@ -297,14 +270,16 @@ class NotificationRankingManagerTest
         headsUpManager: HeadsUpManager,
         filter: NotificationFilter,
         notifLog: NotifLog,
-        sectionsFeatureManager: NotificationSectionsFeatureManager
+        sectionsFeatureManager: NotificationSectionsFeatureManager,
+        peopleNotificationIdentifier: PeopleNotificationIdentifier
     ) : NotificationRankingManager(
         mediaManager,
         groupManager,
         headsUpManager,
         filter,
         notifLog,
-        sectionsFeatureManager
+        sectionsFeatureManager,
+        peopleNotificationIdentifier
     ) {
 
         fun isHighPriority2(e: NotificationEntry): Boolean {

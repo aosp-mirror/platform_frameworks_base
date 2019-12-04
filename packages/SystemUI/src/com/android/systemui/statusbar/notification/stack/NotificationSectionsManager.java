@@ -318,7 +318,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
                 }
                 mParent.addView(mPeopleHubView, targetIndex);
                 return true;
-            } else if (currentHubIndex != targetIndex - 1) {
+            } else if (currentHubIndex != targetIndex) {
                 if (currentHubIndex < targetIndex) {
                     targetIndex--;
                 }

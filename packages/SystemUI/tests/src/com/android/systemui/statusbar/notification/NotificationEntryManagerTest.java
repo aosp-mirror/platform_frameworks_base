@@ -85,6 +85,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationRowBin
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
@@ -228,7 +229,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                         mHeadsUpManager,
                         mock(NotificationFilter.class),
                         mNotifLog,
-                        mock(NotificationSectionsFeatureManager.class)),
+                        mock(NotificationSectionsFeatureManager.class),
+                        mock(PeopleNotificationIdentifier.class)),
                 mEnvironment
         );
         Dependency.get(InitController.class).executePostInitTasks();

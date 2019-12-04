@@ -16,36 +16,28 @@
 
 package com.android.systemui.statusbar.notification.collection
 
-import android.app.Notification
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.NotificationManager.IMPORTANCE_LOW
 import android.app.NotificationManager.IMPORTANCE_MIN
-import android.app.Person
 import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.NotificationListenerService.RankingMap
 import android.service.notification.StatusBarNotification
 import com.android.internal.annotations.VisibleForTesting
-
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.notification.NotificationFilter
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.logging.NotifEvent
 import com.android.systemui.statusbar.notification.logging.NotifLog
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_PEOPLE
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT
 import com.android.systemui.statusbar.phone.NotificationGroupManager
 import com.android.systemui.statusbar.policy.HeadsUpManager
-
-import java.util.Objects
-import java.util.ArrayList
-
-import javax.inject.Inject
-
-import kotlin.Comparator
-
 import dagger.Lazy
+import java.util.Objects
+import javax.inject.Inject
 
 private const val TAG = "NotifRankingManager"
 
@@ -64,7 +56,8 @@ open class NotificationRankingManager @Inject constructor(
     private val headsUpManager: HeadsUpManager,
     private val notifFilter: NotificationFilter,
     private val notifLog: NotifLog,
-    sectionsFeatureManager: NotificationSectionsFeatureManager
+    sectionsFeatureManager: NotificationSectionsFeatureManager,
+    private val peopleNotificationIdentifier: PeopleNotificationIdentifier
 ) {
 
     var rankingMap: RankingMap? = null
@@ -79,6 +72,9 @@ open class NotificationRankingManager @Inject constructor(
         val aRank = a.ranking.rank
         val bRank = b.ranking.rank
 
+        val aIsPeople = a.isPeopleNotification()
+        val bIsPeople = b.isPeopleNotification()
+
         val aMedia = isImportantMedia(a)
         val bMedia = isImportantMedia(b)
 
@@ -88,25 +84,19 @@ open class NotificationRankingManager @Inject constructor(
         val aHeadsUp = a.isRowHeadsUp
         val bHeadsUp = b.isRowHeadsUp
 
-        if (usePeopleFiltering && a.isPeopleNotification() != b.isPeopleNotification()) {
-            if (a.isPeopleNotification()) -1 else 1
-        } else if (aHeadsUp != bHeadsUp) {
-            if (aHeadsUp) -1 else 1
-        } else if (aHeadsUp) {
+        when {
+            usePeopleFiltering && aIsPeople != bIsPeople -> if (aIsPeople) -1 else 1
+            aHeadsUp != bHeadsUp -> if (aHeadsUp) -1 else 1
             // Provide consistent ranking with headsUpManager
-            headsUpManager.compare(a, b)
-        } else if (aMedia != bMedia) {
+            aHeadsUp -> headsUpManager.compare(a, b)
             // Upsort current media notification.
-            if (aMedia) -1 else 1
-        } else if (aSystemMax != bSystemMax) {
+            aMedia != bMedia -> if (aMedia) -1 else 1
             // Upsort PRIORITY_MAX system notifications
-            if (aSystemMax) -1 else 1
-        } else if (a.isHighPriority != b.isHighPriority) {
-            -1 * java.lang.Boolean.compare(a.isHighPriority, b.isHighPriority)
-        } else if (aRank != bRank) {
-            aRank - bRank
-        } else {
-            nb.notification.`when`.compareTo(na.notification.`when`)
+            aSystemMax != bSystemMax -> if (aSystemMax) -1 else 1
+            a.isHighPriority != b.isHighPriority ->
+                -1 * a.isHighPriority.compareTo(b.isHighPriority)
+            aRank != bRank -> aRank - bRank
+            else -> nb.notification.`when`.compareTo(na.notification.`when`)
         }
     }
 
@@ -138,10 +128,9 @@ open class NotificationRankingManager @Inject constructor(
         val c = entry.channel
         val n = entry.sbn.notification
 
-        if (((n.isForegroundService && entry.ranking.importance >= IMPORTANCE_LOW) ||
-            n.hasMediaSession() ||
-            n.hasPerson() ||
-            n.hasStyle(Notification.MessagingStyle::class.java))) {
+        if ((n.isForegroundService && entry.ranking.importance >= IMPORTANCE_LOW) ||
+                n.hasMediaSession() ||
+                entry.isPeopleNotification()) {
             // Users who have long pressed and demoted to silent should not see the notification
             // in the top section
             if (c != null && c.hasUserSetImportance()) {
@@ -204,7 +193,7 @@ open class NotificationRankingManager @Inject constructor(
         isMedia: Boolean,
         isSystemMax: Boolean
     ) {
-        if (usePeopleFiltering && entry.hasAssociatedPeople()) {
+        if (usePeopleFiltering && entry.isPeopleNotification()) {
             entry.bucket = BUCKET_PEOPLE
         } else if (isHeadsUp || isMedia || isSystemMax || entry.isHighPriority) {
             entry.bucket = BUCKET_ALERTING
@@ -235,6 +224,11 @@ open class NotificationRankingManager @Inject constructor(
             }
         }
     }
+
+    private fun NotificationEntry.isPeopleNotification() =
+            sbn.isPeopleNotification()
+    private fun StatusBarNotification.isPeopleNotification() =
+            peopleNotificationIdentifier.isPeopleNotification(this)
 }
 
 // Convenience functions
@@ -245,16 +239,3 @@ private fun NotificationEntry.isSystemMax(): Boolean {
 private fun StatusBarNotification.isSystemNotification(): Boolean {
     return "android" == packageName || "com.android.systemui" == packageName
 }
-
-private fun Notification.hasPerson(): Boolean {
-    val people: ArrayList<Person> =
-            (extras?.getParcelableArrayList(Notification.EXTRA_PEOPLE_LIST)) ?: ArrayList()
-    return people.isNotEmpty()
-}
-
-private fun Notification.hasStyle(targetStyleClass: Class<*>): Boolean {
-    return targetStyleClass == notificationStyle
-}
-
-private fun NotificationEntry.isPeopleNotification(): Boolean =
-        sbn.notification.hasStyle(Notification.MessagingStyle::class.java)
