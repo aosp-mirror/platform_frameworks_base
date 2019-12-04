@@ -238,9 +238,21 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         return true;
     }
 
+    private void setSelectableForHeaders(View view) {
+        if (mAccessibilityManager.isTouchExplorationEnabled()) {
+            final boolean selectable = mAccessibilityAction == ACTION_NONE;
+            view.setFocusable(selectable);
+            view.setImportantForAccessibility(selectable
+                    ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
+                    : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+            view.setFocusableInTouchMode(selectable);
+        }
+    }
+
     @Override
     public void onBindViewHolder(final Holder holder, int position) {
         if (holder.getItemViewType() == TYPE_HEADER) {
+            setSelectableForHeaders(holder.itemView);
             return;
         }
         if (holder.getItemViewType() == TYPE_DIVIDER) {
@@ -260,6 +272,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             }
 
             ((TextView) holder.itemView.findViewById(android.R.id.title)).setText(titleText);
+            setSelectableForHeaders(holder.itemView);
+
             return;
         }
         if (holder.getItemViewType() == TYPE_ACCESSIBLE_DROP) {
@@ -306,6 +320,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             holder.mTileView.setImportantForAccessibility(selectable
                     ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
                     : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+            holder.mTileView.setFocusableInTouchMode(selectable);
             if (selectable) {
                 holder.mTileView.setOnClickListener(new OnClickListener() {
                     @Override

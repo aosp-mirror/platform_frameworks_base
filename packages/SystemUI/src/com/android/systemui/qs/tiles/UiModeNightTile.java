@@ -22,6 +22,7 @@ import android.content.res.Configuration;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
+import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.R;
@@ -112,6 +113,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
             state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         }
         state.showRippleEffect = false;
+        state.expandedAccessibilityClassName = Switch.class.getName();
     }
 
     @Override
