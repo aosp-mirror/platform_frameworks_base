@@ -16,14 +16,14 @@
 package com.android.internal.os;
 
 import android.os.BatteryStats;
-import android.telephony.SignalStrength;
+import android.telephony.CellSignalStrength;
 import android.util.Log;
 
 public class MobileRadioPowerCalculator extends PowerCalculator {
     private static final String TAG = "MobileRadioPowerController";
     private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
     private final double mPowerRadioOn;
-    private final double[] mPowerBins = new double[SignalStrength.NUM_SIGNAL_STRENGTH_BINS];
+    private final double[] mPowerBins = new double[CellSignalStrength.getNumSignalStrengthLevels()];
     private final double mPowerScan;
     private BatteryStats mStats;
     private long mTotalAppMobileActiveMs = 0;
