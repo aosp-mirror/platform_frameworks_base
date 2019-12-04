@@ -86,7 +86,7 @@ public class Instrument {
     String logPath = null;
     public boolean noWindowAnimation = false;
     public boolean disableHiddenApiChecks = false;
-    public boolean disableTestApiChecks = false;
+    public boolean disableTestApiChecks = true;
     public boolean disableIsolatedStorage = false;
     public String abi = null;
     public int userId = UserHandle.USER_CURRENT;
