@@ -22,6 +22,9 @@ import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
 
 import static com.android.systemui.bubbles.BubbleController.canLaunchIntentInActivityView;
+import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_EXPERIMENTS;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -35,6 +38,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -47,6 +51,7 @@ import java.util.List;
  * Common class for experiments controlled via secure settings.
  */
 public class BubbleExperimentConfig {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleController" : TAG_BUBBLES;
 
     private static final String SHORTCUT_DUMMY_INTENT = "bubble_experiment_shortcut_intent";
     private static PendingIntent sDummyShortcutIntent;
@@ -104,8 +109,7 @@ public class BubbleExperimentConfig {
      * the notification has necessary info for BubbleMetadata.
      */
     static void adjustForExperiments(Context context, NotificationEntry entry,
-            Bubble previousBubble) {
-
+            boolean previouslyUserCreated) {
         Notification.BubbleMetadata metadata = null;
         boolean addedMetadata = false;
 
@@ -118,6 +122,19 @@ public class BubbleExperimentConfig {
         boolean useShortcutInfo = useShortcutInfoToBubble(context);
         String shortcutId = entry.getSbn().getNotification().getShortcutId();
 
+        boolean hasMetadata = entry.getBubbleMetadata() != null;
+        if ((!hasMetadata && (previouslyUserCreated || bubbleNotifForExperiment))
+                || useShortcutInfo) {
+            if (DEBUG_EXPERIMENTS) {
+                Log.d(TAG, "Adjusting " + entry.getKey() + " for bubble experiment."
+                        + " allowMessages=" + allowMessageNotifsToBubble(context)
+                        + " isMessage=" + isMessage
+                        + " allowNotifs=" + allowAnyNotifToBubble(context)
+                        + " useShortcutInfo=" + useShortcutInfo
+                        + " previouslyUserCreated=" + previouslyUserCreated);
+            }
+        }
+
         if (useShortcutInfo && shortcutId != null) {
             // We don't actually get anything useful from ShortcutInfo so just check existence
             ShortcutInfo info = getShortcutInfo(context, entry.getSbn().getPackageName(),
@@ -127,26 +144,37 @@ public class BubbleExperimentConfig {
             }
 
             // Replace existing metadata with shortcut, or we're bubbling for experiment
-            boolean shouldBubble = entry.getBubbleMetadata() != null || bubbleNotifForExperiment;
-
+            boolean shouldBubble = entry.getBubbleMetadata() != null
+                    || bubbleNotifForExperiment
+                    || previouslyUserCreated;
             if (shouldBubble && metadata != null) {
+                if (DEBUG_EXPERIMENTS) {
+                    Log.d(TAG, "Adding experimental shortcut bubble for: " + entry.getKey());
+                }
                 entry.setBubbleMetadata(metadata);
                 addedMetadata = true;
             }
         }
 
         // Didn't get metadata from a shortcut & we're bubbling for experiment
-        if (entry.getBubbleMetadata() == null && bubbleNotifForExperiment) {
+        if (entry.getBubbleMetadata() == null
+                && (bubbleNotifForExperiment || previouslyUserCreated)) {
             metadata = createFromNotif(context, entry);
             if (metadata != null) {
+                if (DEBUG_EXPERIMENTS) {
+                    Log.d(TAG, "Adding experimental notification bubble for: " + entry.getKey());
+                }
                 entry.setBubbleMetadata(metadata);
                 addedMetadata = true;
             }
         }
 
-        if (previousBubble != null && addedMetadata) {
-            // Update to a previously bubble, set its flag now so the update goes
+        if (previouslyUserCreated && addedMetadata) {
+            // Update to a previous bubble, set its flag now so the update goes
             // to the bubble.
+            if (DEBUG_EXPERIMENTS) {
+                Log.d(TAG, "Setting FLAG_BUBBLE for: " + entry.getKey());
+            }
             entry.setFlagBubble(true);
         }
     }
