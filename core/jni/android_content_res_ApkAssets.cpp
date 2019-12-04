@@ -32,6 +32,11 @@ using ::android::base::unique_fd;
 
 namespace android {
 
+static struct overlayableinfo_offsets_t {
+  jclass classObject;
+  jmethodID constructor;
+} gOverlayableInfoOffsets;
+
 static jlong NativeLoad(JNIEnv* env, jclass /*clazz*/, jstring java_path, jboolean system,
                         jboolean force_shared_lib, jboolean overlay, jboolean for_loader) {
   ScopedUtfChars path(env, java_path);
@@ -222,12 +227,9 @@ static jobject NativeGetOverlayableInfo(JNIEnv* env, jclass /*clazz*/, jlong ptr
     return 0;
   }
 
-  jclass overlayable_class = env->FindClass("android/content/om/OverlayableInfo");
-  jmethodID overlayable_constructor = env->GetMethodID(overlayable_class, "<init>",
-                                                       "(Ljava/lang/String;Ljava/lang/String;I)V");
   return env->NewObject(
-      overlayable_class,
-      overlayable_constructor,
+      gOverlayableInfoOffsets.classObject,
+      gOverlayableInfoOffsets.constructor,
       overlayable_name,
       actor_string
   );
@@ -267,6 +269,11 @@ static const JNINativeMethod gApkAssetsMethods[] = {
 };
 
 int register_android_content_res_ApkAssets(JNIEnv* env) {
+  jclass overlayableInfoClass = FindClassOrDie(env, "android/content/om/OverlayableInfo");
+  gOverlayableInfoOffsets.classObject = MakeGlobalRefOrDie(env, overlayableInfoClass);
+  gOverlayableInfoOffsets.constructor = GetMethodIDOrDie(env, gOverlayableInfoOffsets.classObject,
+      "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
+
   return RegisterMethodsOrDie(env, "android/content/res/ApkAssets", gApkAssetsMethods,
                               arraysize(gApkAssetsMethods));
 }
