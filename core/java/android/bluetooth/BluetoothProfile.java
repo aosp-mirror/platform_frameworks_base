@@ -225,7 +225,9 @@ public interface BluetoothProfile {
      * and outgoing connections for the profile
      *
      * @hide
+     * @deprecated Replaced with {@link #CONNECTION_POLICY_ALLOWED}
      **/
+    @Deprecated
     @SystemApi
     int PRIORITY_ON = 100;
 
@@ -234,7 +236,9 @@ public interface BluetoothProfile {
      * connections and outgoing connections for the profile.
      *
      * @hide
+     * @deprecated Replaced with {@link #CONNECTION_POLICY_FORBIDDEN}
      **/
+    @Deprecated
     @SystemApi
     int PRIORITY_OFF = 0;
 
@@ -245,6 +249,38 @@ public interface BluetoothProfile {
      */
     @UnsupportedAppUsage
     int PRIORITY_UNDEFINED = -1;
+
+    /** @hide */
+    @IntDef(prefix = "CONNECTION_POLICY_", value = {CONNECTION_POLICY_ALLOWED,
+            CONNECTION_POLICY_FORBIDDEN, CONNECTION_POLICY_UNKNOWN})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ConnectionPolicy{}
+
+    /**
+     * Default connection policy for devices that allow incoming and outgoing connections
+     * for the profile
+     *
+     * @hide
+     **/
+    @SystemApi
+    int CONNECTION_POLICY_ALLOWED = 100;
+
+    /**
+     * Default connection policy for devices that do not allow incoming or outgoing connections
+     * for the profile.
+     *
+     * @hide
+     **/
+    @SystemApi
+    int CONNECTION_POLICY_FORBIDDEN = 0;
+
+    /**
+     * Default connection policy when not set or when the device is unpaired
+     *
+     * @hide
+     */
+    @SystemApi
+    int CONNECTION_POLICY_UNKNOWN = -1;
 
     /**
      * Get connected devices for this specific profile.
