@@ -27,6 +27,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
+import android.bluetooth.BluetoothProfile.ConnectionPolicy;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.PeriodicAdvertisingManager;
@@ -3446,5 +3447,49 @@ public final class BluetoothAdapter {
          */
         void onMetadataChanged(@NonNull BluetoothDevice device, int key,
                 @Nullable byte[] value);
+    }
+
+    /**
+     * Converts old constant of priority to the new for connection policy
+     *
+     * @param priority is the priority to convert to connection policy
+     * @return the equivalent connection policy constant to the priority
+     *
+     * @hide
+     */
+    public static @ConnectionPolicy int priorityToConnectionPolicy(int priority) {
+        switch(priority) {
+            case BluetoothProfile.PRIORITY_AUTO_CONNECT:
+                return BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+            case BluetoothProfile.PRIORITY_ON:
+                return BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+            case BluetoothProfile.PRIORITY_OFF:
+                return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+            case BluetoothProfile.PRIORITY_UNDEFINED:
+                return BluetoothProfile.CONNECTION_POLICY_UNKNOWN;
+            default:
+                Log.e(TAG, "setPriority: Invalid priority: " + priority);
+                return BluetoothProfile.CONNECTION_POLICY_UNKNOWN;
+        }
+    }
+
+    /**
+     * Converts new constant of connection policy to the old for priority
+     *
+     * @param connectionPolicy is the connection policy to convert to priority
+     * @return the equivalent priority constant to the connectionPolicy
+     *
+     * @hide
+     */
+    public static int connectionPolicyToPriority(@ConnectionPolicy int connectionPolicy) {
+        switch(connectionPolicy) {
+            case BluetoothProfile.CONNECTION_POLICY_ALLOWED:
+                return BluetoothProfile.PRIORITY_ON;
+            case BluetoothProfile.CONNECTION_POLICY_FORBIDDEN:
+                return BluetoothProfile.PRIORITY_OFF;
+            case BluetoothProfile.CONNECTION_POLICY_UNKNOWN:
+                return BluetoothProfile.PRIORITY_UNDEFINED;
+        }
+        return BluetoothProfile.PRIORITY_UNDEFINED;
     }
 }
