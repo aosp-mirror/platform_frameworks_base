@@ -23,10 +23,13 @@ import android.app.AlarmManager;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
 import android.content.Intent;
+import android.util.LocalLog;
 import android.util.Slog;
 import android.util.TimestampedValue;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -34,13 +37,14 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * An implementation of TimeDetectorStrategy that passes only NITZ suggestions to
- * {@link AlarmManager}. The TimeDetectorService handles thread safety: all calls to
- * this class can be assumed to be single threaded (though the thread used may vary).
+ * {@link AlarmManager}.
+ *
+ * <p>Most public methods are marked synchronized to ensure thread safety around internal state.
  */
-// @NotThreadSafe
 public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
 
-    private final static String TAG = "timedetector.SimpleTimeDetectorStrategy";
+    private static final boolean DBG = false;
+    private static final String LOG_TAG = "SimpleTimeDetectorStrategy";
 
     @IntDef({ ORIGIN_PHONE, ORIGIN_MANUAL })
     @Retention(RetentionPolicy.SOURCE)
@@ -61,6 +65,9 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
      */
     private static final long SYSTEM_CLOCK_PARANOIA_THRESHOLD_MILLIS = 2 * 1000;
 
+    // A log for changes made to the system clock and why.
+    @NonNull private final LocalLog mTimeChangesLog = new LocalLog(30);
+
     // @NonNull after initialize()
     private Callback mCallback;
 
@@ -80,7 +87,7 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
     }
 
     @Override
-    public void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSuggestion) {
+    public synchronized void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSuggestion) {
         // NITZ logic
 
         // Empty suggestions are just ignored as we don't currently keep track of suggestion origin.
@@ -103,7 +110,7 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
     }
 
     @Override
-    public void suggestManualTime(ManualTimeSuggestion timeSuggestion) {
+    public synchronized void suggestManualTime(ManualTimeSuggestion timeSuggestion) {
         final TimestampedValue<Long> newUtcTime = timeSuggestion.getUtcTime();
         setSystemClockIfRequired(ORIGIN_MANUAL, newUtcTime, timeSuggestion);
     }
@@ -116,7 +123,7 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
                     newSuggestion.getUtcTime(), lastSuggestion.getUtcTime());
             if (referenceTimeDifference < 0 || referenceTimeDifference > Integer.MAX_VALUE) {
                 // Out of order or bogus.
-                Slog.w(TAG, "validateNewNitzTime: Bad NITZ signal received."
+                Slog.w(LOG_TAG, "Bad NITZ signal received."
                         + " referenceTimeDifference=" + referenceTimeDifference
                         + " lastSuggestion=" + lastSuggestion
                         + " newSuggestion=" + newSuggestion);
@@ -126,6 +133,7 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
         return true;
     }
 
+    @GuardedBy("this")
     private void setSystemClockIfRequired(
             @Origin int origin, TimestampedValue<Long> time, Object cause) {
         // Historically, Android has sent a TelephonyIntents.ACTION_NETWORK_SET_TIME broadcast only
@@ -140,16 +148,20 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
             mLastAutoSystemClockTimeSendNetworkBroadcast = sendNetworkBroadcast;
 
             if (!mCallback.isAutoTimeDetectionEnabled()) {
-                Slog.d(TAG, "setSystemClockIfRequired: Auto time detection is not enabled."
-                        + " time=" + time
-                        + ", cause=" + cause);
+                if (DBG) {
+                    Slog.d(LOG_TAG, "Auto time detection is not enabled."
+                            + " time=" + time
+                            + ", cause=" + cause);
+                }
                 return;
             }
         } else {
             if (mCallback.isAutoTimeDetectionEnabled()) {
-                Slog.d(TAG, "setSystemClockIfRequired: Auto time detection is enabled."
-                        + " time=" + time
-                        + ", cause=" + cause);
+                if (DBG) {
+                    Slog.d(LOG_TAG, "Auto time detection is enabled."
+                            + " time=" + time
+                            + ", cause=" + cause);
+                }
                 return;
             }
         }
@@ -167,7 +179,7 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
                             mLastAutoSystemClockTimeSet, elapsedRealtimeMillis);
                     long absSystemClockDifference = Math.abs(expectedTimeMillis - actualTimeMillis);
                     if (absSystemClockDifference > SYSTEM_CLOCK_PARANOIA_THRESHOLD_MILLIS) {
-                        Slog.w(TAG,
+                        Slog.w(LOG_TAG,
                                 "System clock has not tracked elapsed real time clock. A clock may"
                                         + " be inaccurate or something unexpectedly set the system"
                                         + " clock."
@@ -190,9 +202,10 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
     }
 
     @Override
-    public void handleAutoTimeDetectionToggle(boolean enabled) {
+    public synchronized void handleAutoTimeDetectionChanged() {
         // If automatic time detection is enabled we update the system clock instantly if we can.
         // Conversely, if automatic time detection is disabled we leave the clock as it is.
+        boolean enabled = mCallback.isAutoTimeDetectionEnabled();
         if (enabled) {
             if (mLastAutoSystemClockTime != null) {
                 // Only send the network broadcast if the last candidate would have caused one.
@@ -218,14 +231,27 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
     }
 
     @Override
-    public void dump(@NonNull PrintWriter pw, @Nullable String[] args) {
+    public synchronized void dump(@NonNull PrintWriter pw, @Nullable String[] args) {
         pw.println("mLastPhoneSuggestion=" + mLastPhoneSuggestion);
         pw.println("mLastAutoSystemClockTimeSet=" + mLastAutoSystemClockTimeSet);
         pw.println("mLastAutoSystemClockTime=" + mLastAutoSystemClockTime);
         pw.println("mLastAutoSystemClockTimeSendNetworkBroadcast="
                 + mLastAutoSystemClockTimeSendNetworkBroadcast);
+
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, " ");
+
+        ipw.println("TimeDetectorStrategyImpl logs:");
+        ipw.increaseIndent(); // level 1
+
+        ipw.println("Time change log:");
+        ipw.increaseIndent(); // level 2
+        mTimeChangesLog.dump(ipw);
+        ipw.decreaseIndent(); // level 2
+
+        ipw.decreaseIndent(); // level 1
     }
 
+    @GuardedBy("this")
     private void adjustAndSetDeviceSystemClock(
             TimestampedValue<Long> newTime, boolean sendNetworkBroadcast,
             long elapsedRealtimeMillis, long actualSystemClockMillis, Object cause) {
@@ -238,21 +264,27 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
         long absTimeDifference = Math.abs(newSystemClockMillis - actualSystemClockMillis);
         long systemClockUpdateThreshold = mCallback.systemClockUpdateThresholdMillis();
         if (absTimeDifference < systemClockUpdateThreshold) {
-            Slog.d(TAG, "adjustAndSetDeviceSystemClock: Not setting system clock. New time and"
-                    + " system clock are close enough."
-                    + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
-                    + " newTime=" + newTime
-                    + " cause=" + cause
-                    + " systemClockUpdateThreshold=" + systemClockUpdateThreshold
-                    + " absTimeDifference=" + absTimeDifference);
+            if (DBG) {
+                Slog.d(LOG_TAG, "Not setting system clock. New time and"
+                        + " system clock are close enough."
+                        + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
+                        + " newTime=" + newTime
+                        + " cause=" + cause
+                        + " systemClockUpdateThreshold=" + systemClockUpdateThreshold
+                        + " absTimeDifference=" + absTimeDifference);
+            }
             return;
         }
 
-        Slog.d(TAG, "Setting system clock using time=" + newTime
+        mCallback.setSystemClock(newSystemClockMillis);
+        String logMsg = "Set system clock using time=" + newTime
                 + " cause=" + cause
                 + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
-                + " newTimeMillis=" + newSystemClockMillis);
-        mCallback.setSystemClock(newSystemClockMillis);
+                + " newSystemClockMillis=" + newSystemClockMillis;
+        if (DBG) {
+            Slog.d(LOG_TAG, logMsg);
+        }
+        mTimeChangesLog.log(logMsg);
 
         // CLOCK_PARANOIA : Record the last time this class set the system clock.
         mLastAutoSystemClockTimeSet = newTime;
