@@ -58,7 +58,6 @@ public final class Telecom extends BaseCommand {
     private static final String COMMAND_SET_TEST_CALL_SCREENING_APP = "set-test-call-screening-app";
     private static final String COMMAND_ADD_OR_REMOVE_CALL_COMPANION_APP =
             "add-or-remove-call-companion-app";
-    private static final String COMMAND_SET_TEST_AUTO_MODE_APP = "set-test-auto-mode-app";
     private static final String COMMAND_SET_PHONE_ACCOUNT_SUGGESTION_COMPONENT =
             "set-phone-acct-suggestion-component";
     private static final String COMMAND_UNREGISTER_PHONE_ACCOUNT = "unregister-phone-account";
@@ -99,7 +98,6 @@ public final class Telecom extends BaseCommand {
                 + "<USER_SN>\n"
                 + "usage: telecom set-test-call-redirection-app <PACKAGE>\n"
                 + "usage: telecom set-test-call-screening-app <PACKAGE>\n"
-                + "usage: telecom set-test-auto-mode-app <PACKAGE>\n"
                 + "usage: telecom set-phone-acct-suggestion-component <COMPONENT>\n"
                 + "usage: telecom add-or-remove-call-companion-app <PACKAGE> <1/0>\n"
                 + "usage: telecom register-sim-phone-account <COMPONENT> <ID> <USER_SN>"
@@ -190,9 +188,6 @@ public final class Telecom extends BaseCommand {
                 break;
             case COMMAND_ADD_OR_REMOVE_CALL_COMPANION_APP:
                 runAddOrRemoveCallCompanionApp();
-                break;
-            case COMMAND_SET_TEST_AUTO_MODE_APP:
-                runSetTestAutoModeApp();
                 break;
             case COMMAND_SET_PHONE_ACCOUNT_SUGGESTION_COMPONENT:
                 runSetTestPhoneAcctSuggestionComponent();
@@ -303,11 +298,6 @@ public final class Telecom extends BaseCommand {
         String isAdded = nextArgRequired();
         boolean isAddedBool = "1".equals(isAdded);
         mTelecomService.addOrRemoveTestCallCompanionApp(packageName, isAddedBool);
-    }
-
-    private void runSetTestAutoModeApp() throws RemoteException {
-        final String packageName = nextArg();
-        mTelecomService.setTestAutoModeApp(packageName);
     }
 
     private void runSetTestPhoneAcctSuggestionComponent() throws RemoteException {
