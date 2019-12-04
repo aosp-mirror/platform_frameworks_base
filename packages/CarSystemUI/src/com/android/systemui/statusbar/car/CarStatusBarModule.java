@@ -186,7 +186,6 @@ public class CarStatusBarModule {
             ViewMediatorCallback viewMediatorCallback,
             DismissCallbackRegistry dismissCallbackRegistry,
             CarServiceProvider carServiceProvider,
-            Lazy<DrivingStateHelper> drivingStateHelperLazy,
             Lazy<PowerManagerHelper> powerManagerHelperLazy,
             Lazy<FullscreenUserSwitcher> fullscreenUserSwitcherLazy,
             CarNavigationBarController carNavigationBarController) {
@@ -263,7 +262,6 @@ public class CarStatusBarModule {
                 viewMediatorCallback,
                 dismissCallbackRegistry,
                 carServiceProvider,
-                drivingStateHelperLazy,
                 powerManagerHelperLazy,
                 fullscreenUserSwitcherLazy,
                 carNavigationBarController);
