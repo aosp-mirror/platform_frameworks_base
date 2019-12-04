@@ -221,6 +221,9 @@
       <!-- Permission required for CTS test - CarModeInCallServiceTest -->
     <uses-permission android:name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
 
+    <!-- Permission requried for CTS test - CellBroadcastIntentsTest -->
+    <uses-permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS"/>
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
