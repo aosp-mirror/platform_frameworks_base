@@ -217,13 +217,16 @@ public:
         canvas->setMatrix(mMatrix);
         switch (mType) {
             case Type::Rect:
-                canvas->clipRect(mRRect.rect(), mOp);
+                // Don't anti-alias rectangular clips
+                canvas->clipRect(mRRect.rect(), mOp, false);
                 break;
             case Type::RRect:
-                canvas->clipRRect(mRRect, mOp);
+                // Ensure rounded rectangular clips are anti-aliased
+                canvas->clipRRect(mRRect, mOp, true);
                 break;
             case Type::Path:
-                canvas->clipPath(mPath.value(), mOp);
+                // Ensure path clips are anti-aliased
+                canvas->clipPath(mPath.value(), mOp, true);
                 break;
         }
     }
@@ -392,7 +395,7 @@ bool SkiaCanvas::clipRect(float left, float top, float right, float bottom, SkCl
 
 bool SkiaCanvas::clipPath(const SkPath* path, SkClipOp op) {
     this->recordClip(*path, op);
-    mCanvas->clipPath(*path, op);
+    mCanvas->clipPath(*path, op, true);
     return !mCanvas->isClipEmpty();
 }
 
