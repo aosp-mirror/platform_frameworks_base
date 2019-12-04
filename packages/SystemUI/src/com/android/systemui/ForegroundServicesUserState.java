@@ -24,7 +24,7 @@ import java.util.Arrays;
 /**
  * Struct to track relevant packages and notifications for a userid's foreground services.
  */
-class ForegroundServicesUserState {
+public class ForegroundServicesUserState {
     // shelf life of foreground services before they go bad
     private static final long FG_SERVICE_GRACE_MILLIS = 5000;
 
