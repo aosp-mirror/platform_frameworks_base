@@ -96,3 +96,8 @@ platform_compat_config {
     name: "services-platform-compat-config",
     src: ":services",
 }
+
+filegroup {
+    name: "art-profile",
+    srcs: ["art-profile"],
+}
