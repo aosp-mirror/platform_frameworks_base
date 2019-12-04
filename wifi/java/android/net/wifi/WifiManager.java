@@ -723,7 +723,9 @@ public class WifiManager {
      * had been reset.
      * @hide
      */
-    public static final String WIFI_NETWORK_SETTINGS_RESET_ACTION =
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_CARRIER_PROVISIONING)
+    public static final String ACTION_NETWORK_SETTINGS_RESET =
             "android.net.wifi.action.NETWORK_SETTINGS_RESET";
 
     /**
