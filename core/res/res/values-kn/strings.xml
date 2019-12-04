@@ -1523,10 +1523,6 @@
     <string name="submit" msgid="1602335572089911941">"ಸಲ್ಲಿಸು"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"ಡ್ರೈವಿಂಗ್‌ ಅಪ್ಲಿಕೇಶನ್ ಚಾಲನೆಯಲ್ಲಿದೆ"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"ಡ್ರೈವಿಂಗ್‌ ಅಪ್ಲಿಕೇಶನ್ ನಿರ್ಗಮಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"ಟೆಥರಿಂಗ್ ಅಥವಾ ಹಾಟ್‌ಸ್ಪಾಟ್ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"ಟೆಥರಿಂಗ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"ವಿವರಗಳಿಗಾಗಿ ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ"</string>
     <string name="back_button_label" msgid="2300470004503343439">"ಹಿಂದೆ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"ಮುಂದಿನದು"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"ಸ್ಕಿಪ್‌"</string>

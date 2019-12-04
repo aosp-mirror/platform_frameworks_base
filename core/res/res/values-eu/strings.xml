@@ -1523,10 +1523,6 @@
     <string name="submit" msgid="1602335572089911941">"Bidali"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Abian da gidatzeko aplikazioa"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Sakatu gidatzeko aplikaziotik irteteko."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Konexioa partekatzea edo sare publikoa aktibo"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"Sakatu konfiguratzeko."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Desgaituta dago konexioa partekatzeko aukera"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Xehetasunak lortzeko, jarri administratzailearekin harremanetan"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Atzera"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Hurrengoa"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Saltatu"</string>

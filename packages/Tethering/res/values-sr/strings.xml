@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Активно повезивање са интернетом преко мобилног уређаја или хотспот"</string>
+    <string name="tethered_notification_message" msgid="2113628520792055377">"Додирните да бисте подесили."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Привезивање је онемогућено"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Потражите детаље од администратора"</string>
+</resources>
