@@ -8636,20 +8636,42 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean checkDeviceIdentifierAccess(String packageName, int pid, int uid) {
-        // If the caller is not a system app then it should only be able to check its own device
-        // identifier access.
-        int callingUid = mInjector.binderGetCallingUid();
-        int callingPid = mInjector.binderGetCallingPid();
-        if (UserHandle.getAppId(callingUid) >= Process.FIRST_APPLICATION_UID
-                && (callingUid != uid || callingPid != pid)) {
-            String message = String.format(
-                    "Calling uid %d, pid %d cannot check device identifier access for package %s "
-                            + "(uid=%d, pid=%d)", callingUid, callingPid, packageName, uid, pid);
-            Log.w(LOG_TAG, message);
-            throw new SecurityException(message);
-        }
+        ensureCallerIdentityMatchesIfNotSystem(packageName, pid, uid);
+
         // Verify that the specified packages matches the provided uid.
-        int userId = UserHandle.getUserId(uid);
+        if (!doesPackageMatchUid(packageName, uid)) {
+            return false;
+        }
+        // A device or profile owner must also have the READ_PHONE_STATE permission to access device
+        // identifiers. If the package being checked does not have this permission then deny access.
+        if (mContext.checkPermission(android.Manifest.permission.READ_PHONE_STATE, pid, uid)
+                != PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+
+        // Allow access to the device owner or delegate cert installer.
+        ComponentName deviceOwner = getDeviceOwnerComponent(true);
+        if (deviceOwner != null && (deviceOwner.getPackageName().equals(packageName)
+                    || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
+            return true;
+        }
+        final int userId = UserHandle.getUserId(uid);
+        // Allow access to the profile owner for the specified user, or delegate cert installer
+        // But only if this is an organization-owned device.
+        ComponentName profileOwner = getProfileOwnerAsUser(userId);
+        if (profileOwner != null && canProfileOwnerAccessDeviceIds(userId)
+                && (profileOwner.getPackageName().equals(packageName)
+                || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
+            return true;
+        }
+
+        Log.w(LOG_TAG, String.format("Package %s (uid=%d, pid=%d) cannot access Device IDs",
+                    packageName, uid, pid));
+        return false;
+    }
+
+    private boolean doesPackageMatchUid(String packageName, int uid) {
+        final int userId = UserHandle.getUserId(uid);
         try {
             ApplicationInfo appInfo = mIPackageManager.getApplicationInfo(packageName, 0, userId);
             // Since this call goes directly to PackageManagerService a NameNotFoundException is not
@@ -8671,29 +8693,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Log.e(LOG_TAG, "Exception caught obtaining appInfo for package " + packageName, e);
             return false;
         }
-        // A device or profile owner must also have the READ_PHONE_STATE permission to access device
-        // identifiers. If the package being checked does not have this permission then deny access.
-        if (mContext.checkPermission(android.Manifest.permission.READ_PHONE_STATE, pid, uid)
-                != PackageManager.PERMISSION_GRANTED) {
-            return false;
-        }
+        return true;
+    }
 
-        // Allow access to the device owner or delegate cert installer.
-        ComponentName deviceOwner = getDeviceOwnerComponent(true);
-        if (deviceOwner != null && (deviceOwner.getPackageName().equals(packageName)
-                    || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
-            return true;
+    private void ensureCallerIdentityMatchesIfNotSystem(String packageName, int pid, int uid) {
+        // If the caller is not a system app then it should only be able to check its own device
+        // identifier access.
+        int callingUid = mInjector.binderGetCallingUid();
+        int callingPid = mInjector.binderGetCallingPid();
+        if (UserHandle.getAppId(callingUid) >= Process.FIRST_APPLICATION_UID
+                && (callingUid != uid || callingPid != pid)) {
+            String message = String.format(
+                    "Calling uid %d, pid %d cannot check device identifier access for package %s "
+                            + "(uid=%d, pid=%d)", callingUid, callingPid, packageName, uid, pid);
+            Log.w(LOG_TAG, message);
+            throw new SecurityException(message);
         }
-        // Allow access to the profile owner for the specified user, or delegate cert installer
-        ComponentName profileOwner = getProfileOwnerAsUser(userId);
-        if (profileOwner != null && (profileOwner.getPackageName().equals(packageName)
-                    || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
-            return true;
-        }
-
-        Log.w(LOG_TAG, String.format("Package %s (uid=%d, pid=%d) cannot access Device IDs",
-                    packageName, uid, pid));
-        return false;
     }
 
     /**
