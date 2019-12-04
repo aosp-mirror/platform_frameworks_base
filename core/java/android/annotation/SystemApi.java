@@ -41,4 +41,29 @@ import java.lang.annotation.Target;
 @Target({TYPE, FIELD, METHOD, CONSTRUCTOR, ANNOTATION_TYPE, PACKAGE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SystemApi {
+    enum Client {
+        /**
+         * Specifies that the intended clients of a SystemApi are privileged apps.
+         * This is the default value for {@link #client}.
+         */
+        PRIVILEGED_APPS,
+    }
+
+    enum Process {
+        /**
+         * Specifies that the SystemAPI is available in every Java processes.
+         * This is the default value for {@link #process}.
+         */
+        ALL,
+    }
+
+    /**
+     * The intended client of this SystemAPI.
+     */
+    Client client() default android.annotation.SystemApi.Client.PRIVILEGED_APPS;
+
+    /**
+     * The process(es) that this SystemAPI is available
+     */
+    Process process() default android.annotation.SystemApi.Process.ALL;
 }
