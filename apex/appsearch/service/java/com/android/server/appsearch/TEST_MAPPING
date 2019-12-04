@@ -1,0 +1,15 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsAppSearchTestCases"
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.appsearch"
+        }
+      ]
+    }
+  ]
+}
