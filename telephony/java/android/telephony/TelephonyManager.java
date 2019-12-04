@@ -5539,16 +5539,24 @@ public class TelephonyManager {
                     new ICellInfoCallback.Stub() {
                         @Override
                         public void onCellInfo(List<CellInfo> cellInfo) {
-                            Binder.withCleanCallingIdentity(() ->
-                                    executor.execute(() -> callback.onCellInfo(cellInfo)));
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> callback.onCellInfo(cellInfo));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
                         }
 
                         @Override
                         public void onError(int errorCode, String exceptionName, String message) {
-                            Binder.withCleanCallingIdentity(() ->
-                                    executor.execute(() -> callback.onError(
-                                            errorCode,
-                                            createThrowableByClassName(exceptionName, message))));
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> callback.onError(
+                                        errorCode,
+                                        createThrowableByClassName(exceptionName, message)));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
                         }
                     }, getOpPackageName());
         } catch (RemoteException ex) {
@@ -5581,16 +5589,25 @@ public class TelephonyManager {
                     new ICellInfoCallback.Stub() {
                         @Override
                         public void onCellInfo(List<CellInfo> cellInfo) {
-                            Binder.withCleanCallingIdentity(() ->
-                                    executor.execute(() -> callback.onCellInfo(cellInfo)));
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> callback.onCellInfo(cellInfo));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
+
                         }
 
                         @Override
                         public void onError(int errorCode, String exceptionName, String message) {
-                            Binder.withCleanCallingIdentity(() ->
-                                    executor.execute(() -> callback.onError(
-                                            errorCode,
-                                            createThrowableByClassName(exceptionName, message))));
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> callback.onError(
+                                        errorCode,
+                                        createThrowableByClassName(exceptionName, message)));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
                         }
                     }, getOpPackageName(), workSource);
         } catch (RemoteException ex) {
@@ -6455,16 +6472,24 @@ public class TelephonyManager {
         INumberVerificationCallback internalCallback = new INumberVerificationCallback.Stub() {
             @Override
             public void onCallReceived(String phoneNumber) {
-                Binder.withCleanCallingIdentity(() ->
-                        executor.execute(() ->
-                                callback.onCallReceived(phoneNumber)));
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() ->
+                            callback.onCallReceived(phoneNumber));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
 
             @Override
             public void onVerificationFailed(int reason) {
-                Binder.withCleanCallingIdentity(() ->
-                        executor.execute(() ->
-                                callback.onVerificationFailed(reason)));
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() ->
+                            callback.onVerificationFailed(reason));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         };
 
@@ -10678,6 +10703,7 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
     public boolean setOpportunisticNetworkState(boolean enable) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         boolean ret = false;
@@ -10705,6 +10731,7 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
     public boolean isOpportunisticNetworkEnabled() {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         boolean isEnabled = false;
@@ -11266,9 +11293,14 @@ public class TelephonyManager {
                 if (executor == null || callback == null) {
                     return;
                 }
-                Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
-                    callback.accept(SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION);
-                }));
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> {
+                        callback.accept(SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION);
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
                 return;
             }
             ISetOpportunisticDataCallback callbackStub = new ISetOpportunisticDataCallback.Stub() {
@@ -11277,9 +11309,14 @@ public class TelephonyManager {
                     if (executor == null || callback == null) {
                         return;
                     }
-                    Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
-                        callback.accept(result);
-                    }));
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> {
+                            callback.accept(result);
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
             };
 
@@ -11351,14 +11388,24 @@ public class TelephonyManager {
                     return;
                 }
                 if (iOpportunisticNetworkService == null) {
-                    /* Todo<b/130595455> passing unknown due to lack of good error codes */
-                    Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
-                        callback.accept(UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE);
-                    }));
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        /* Todo<b/130595455> passing unknown due to lack of good error codes */
+                        executor.execute(() -> {
+                            callback.accept(UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE);
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 } else {
-                    Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
-                        callback.accept(UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS);
-                    }));
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> {
+                            callback.accept(UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS);
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
                 return;
             }
@@ -11369,9 +11416,14 @@ public class TelephonyManager {
                             if (executor == null || callback == null) {
                                 return;
                             }
-                            Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
-                                callback.accept(result);
-                            }));
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> {
+                                    callback.accept(result);
+                                });
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
                         }
                     };
             iOpportunisticNetworkService.updateAvailableNetworks(availableNetworks, callbackStub,
@@ -11417,6 +11469,7 @@ public class TelephonyManager {
      * @param slotIndex which slot it's checking.
      * @hide
      */
+    @SystemApi
     public boolean isModemEnabledForSlot(int slotIndex) {
         try {
             ITelephony telephony = getITelephony();
