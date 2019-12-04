@@ -30,7 +30,7 @@ import java.util.List;
 public class RequestQueue {
     private static final String TAG = "RequestQueue";
 
-    private static final long INVALID_FRAME = -1;
+    public static final long INVALID_FRAME = -1;
 
     private BurstHolder mRepeatingRequest = null;
     private final ArrayDeque<BurstHolder> mRequestQueue = new ArrayDeque<BurstHolder>();
