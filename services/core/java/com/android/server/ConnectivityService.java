@@ -3097,7 +3097,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         handleUpdateLinkProperties(nai, new LinkProperties(nai.linkProperties));
     }
 
-    private void updateLingerState(NetworkAgentInfo nai, long now) {
+    /**
+     * Updates the linger state from the network requests inside the NAI.
+     * @param nai the agent info to update
+     * @param now the timestamp of the event causing this update
+     * @return whether the network was lingered as a result of this update
+     */
+    private boolean updateLingerState(@NonNull final NetworkAgentInfo nai, final long now) {
         // 1. Update the linger timer. If it's changed, reschedule or cancel the alarm.
         // 2. If the network was lingering and there are now requests, unlinger it.
         // 3. If this network is unneeded (which implies it is not lingering), and there is at least
@@ -3108,12 +3114,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
             nai.unlinger();
             logNetworkEvent(nai, NetworkEvent.NETWORK_UNLINGER);
         } else if (unneeded(nai, UnneededFor.LINGER) && nai.getLingerExpiry() > 0) {
-            int lingerTime = (int) (nai.getLingerExpiry() - now);
-            if (DBG) log("Lingering " + nai.name() + " for " + lingerTime + "ms");
+            if (DBG) {
+                final int lingerTime = (int) (nai.getLingerExpiry() - now);
+                log("Lingering " + nai.name() + " for " + lingerTime + "ms");
+            }
             nai.linger();
             logNetworkEvent(nai, NetworkEvent.NETWORK_LINGER);
-            notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOSING, lingerTime);
+            return true;
         }
+        return false;
     }
 
     private void handleAsyncChannelHalfConnect(Message msg) {
@@ -3457,7 +3466,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 // If there are still lingered requests on this network, don't tear it down,
                 // but resume lingering instead.
-                updateLingerState(nai, SystemClock.elapsedRealtime());
+                final long now = SystemClock.elapsedRealtime();
+                if (updateLingerState(nai, now)) {
+                    notifyNetworkLosing(nai, now);
+                }
                 if (unneeded(nai, UnneededFor.TEARDOWN)) {
                     if (DBG) log("no live requests for " + nai.name() + "; disconnecting");
                     teardownUnneededNetwork(nai);
@@ -6600,6 +6612,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         nri, currentNetwork, null));
             }
         }
+
         return reassignedRequests;
     }
 
@@ -6746,13 +6759,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
             processNewlySatisfiedListenRequests(event.mNetwork);
         }
 
+        final ArrayList<NetworkAgentInfo> lingeredNetworks = new ArrayList<>();
         for (final NetworkAgentInfo nai : nais) {
             // Rematching may have altered the linger state of some networks, so update all linger
             // timers. updateLingerState reads the state from the network agent and does nothing
             // if the state has not changed : the source of truth is controlled with
             // NetworkAgentInfo#lingerRequest and NetworkAgentInfo#unlingerRequest, which have been
             // called while rematching the individual networks above.
-            updateLingerState(nai, now);
+            if (updateLingerState(nai, now)) {
+                lingeredNetworks.add(nai);
+            }
+        }
+
+        for (final NetworkAgentInfo nai : lingeredNetworks) {
+            notifyNetworkLosing(nai, now);
         }
 
         updateLegacyTypeTrackerAndVpnLockdownForRematch(oldDefaultNetwork, newDefaultNetwork, nais);
@@ -6768,7 +6788,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     // and became unneeded due to another network improving its score to the
                     // point where this network will no longer be able to satisfy any requests
                     // even if it validates.
-                    updateLingerState(nai, now);
+                    if (updateLingerState(nai, now)) {
+                        notifyNetworkLosing(nai, now);
+                    }
                 } else {
                     if (DBG) log("Reaping " + nai.name());
                     teardownUnneededNetwork(nai);
@@ -7019,6 +7041,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final boolean blocked = isUidNetworkingWithVpnBlocked(nri.mUid, mUidRules.get(nri.mUid),
                 metered, mRestrictBackground);
         callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_AVAILABLE, blocked ? 1 : 0);
+    }
+
+    // Notify the requests on this NAI that the network is now lingered.
+    private void notifyNetworkLosing(@NonNull final NetworkAgentInfo nai, final long now) {
+        final int lingerTime = (int) (nai.getLingerExpiry() - now);
+        notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOSING, lingerTime);
     }
 
     /**
