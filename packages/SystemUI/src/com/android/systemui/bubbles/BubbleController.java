@@ -700,10 +700,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         @Override
         public void onPendingEntryAdded(NotificationEntry entry) {
             boolean previouslyUserCreated = mUserCreatedBubbles.contains(entry.getKey());
-            BubbleExperimentConfig.adjustForExperiments(mContext, entry, previouslyUserCreated);
+            boolean wasAdjusted = BubbleExperimentConfig.adjustForExperiments(
+                    mContext, entry, previouslyUserCreated);
 
             if (mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
-                    && canLaunchInActivityView(mContext, entry)) {
+                    && (canLaunchInActivityView(mContext, entry) || wasAdjusted)) {
                 updateBubble(entry);
             }
         }
@@ -711,10 +712,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         @Override
         public void onPreEntryUpdated(NotificationEntry entry) {
             boolean previouslyUserCreated = mUserCreatedBubbles.contains(entry.getKey());
-            BubbleExperimentConfig.adjustForExperiments(mContext, entry, previouslyUserCreated);
+            boolean wasAdjusted = BubbleExperimentConfig.adjustForExperiments(
+                    mContext, entry, previouslyUserCreated);
 
             boolean shouldBubble = mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
-                    && canLaunchInActivityView(mContext, entry);
+                    && (canLaunchInActivityView(mContext, entry) || wasAdjusted);
             if (!shouldBubble && mBubbleData.hasBubbleWithKey(entry.getKey())) {
                 // It was previously a bubble but no longer a bubble -- lets remove it
                 removeBubble(entry.getKey(), DISMISS_NO_LONGER_BUBBLE);
@@ -1022,11 +1024,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         PendingIntent intent = entry.getBubbleMetadata() != null
                 ? entry.getBubbleMetadata().getIntent()
                 : null;
-        return canLaunchIntentInActivityView(context, entry, intent);
-    }
-
-    static boolean canLaunchIntentInActivityView(Context context, NotificationEntry entry,
-            PendingIntent intent) {
         if (intent == null) {
             Log.w(TAG, "Unable to create bubble -- no intent: " + entry.getKey());
             return false;
