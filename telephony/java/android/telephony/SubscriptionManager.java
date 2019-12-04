@@ -3104,7 +3104,11 @@ public class SubscriptionManager {
     }
 
     /**
-     * Enables or disables a subscription. This is currently used in the settings page.
+     * Enables or disables a subscription. This is currently used in the settings page. It will
+     * fail and return false if operation is not supported or failed.
+     *
+     * To disable an active subscription on a physical (non-Euicc) SIM,
+     * {@link #canDisablePhysicalSubscription} needs to be true.
      *
      * <p>
      * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
@@ -3127,6 +3131,38 @@ public class SubscriptionManager {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
                 return iSub.setSubscriptionEnabled(enable, subscriptionId);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        return false;
+    }
+
+    /**
+     * Whether it's supported to disable / re-enable a subscription on a physical (non-euicc) SIM.
+     *
+     * Physical SIM refers non-euicc, or aka non-programmable SIM.
+     *
+     * It provides whether a physical SIM card can be disabled without taking it out, which is done
+     * via {@link #setSubscriptionEnabled(int, boolean)} API.
+     *
+     * Requires Permission: READ_PRIVILEGED_PHONE_STATE.
+     *
+     * @return whether can disable subscriptions on physical SIMs.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean canDisablePhysicalSubscription() {
+        if (VDBG) {
+            logd("canDisablePhysicalSubscription");
+        }
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                return iSub.canDisablePhysicalSubscription();
             }
         } catch (RemoteException ex) {
             // ignore it
