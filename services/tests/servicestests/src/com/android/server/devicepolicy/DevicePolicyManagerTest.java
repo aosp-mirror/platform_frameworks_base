@@ -138,6 +138,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             permission.MANAGE_USERS, permission.INTERACT_ACROSS_USERS_FULL);
     public static final String NOT_DEVICE_OWNER_MSG = "does not own the device";
     public static final String NOT_PROFILE_OWNER_MSG = "does not own the profile";
+    public static final String NOT_ORG_OWNED_PROFILE_OWNER_MSG =
+            "not the profile owner on organization-owned device";
     public static final String ONGOING_CALL_MSG = "ongoing call on the device";
 
     // TODO replace all instances of this with explicit {@link #mServiceContext}.
@@ -2114,12 +2116,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.isAdminActive(admin1));
 
         // Test 2. Caller has DA, but not DO.
-        assertExpectException(SecurityException.class, /* messageRegex= */ NOT_DEVICE_OWNER_MSG,
+        assertExpectException(SecurityException.class,
+                /* messageRegex= */ NOT_ORG_OWNED_PROFILE_OWNER_MSG,
                 () -> dpm.getWifiMacAddress(admin1));
 
         // Test 3. Caller has PO, but not DO.
         assertTrue(dpm.setProfileOwner(admin1, null, UserHandle.USER_SYSTEM));
-        assertExpectException(SecurityException.class, /* messageRegex= */ NOT_DEVICE_OWNER_MSG,
+        assertExpectException(SecurityException.class,
+                /* messageRegex= */ NOT_ORG_OWNED_PROFILE_OWNER_MSG,
                 () -> dpm.getWifiMacAddress(admin1));
 
         // Remove PO.
@@ -2136,6 +2140,15 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertNull(dpm.getWifiMacAddress(admin1));
 
         // 4-3. With a real MAC address.
+        final String[] macAddresses = new String[]{"11:22:33:44:55:66"};
+        when(getServices().wifiManager.getFactoryMacAddresses()).thenReturn(macAddresses);
+        assertEquals("11:22:33:44:55:66", dpm.getWifiMacAddress(admin1));
+    }
+
+    public void testGetMacAddressByOrgOwnedPO() throws Exception {
+        setupProfileOwner();
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
+
         final String[] macAddresses = new String[]{"11:22:33:44:55:66"};
         when(getServices().wifiManager.getFactoryMacAddresses()).thenReturn(macAddresses);
         assertEquals("11:22:33:44:55:66", dpm.getWifiMacAddress(admin1));
