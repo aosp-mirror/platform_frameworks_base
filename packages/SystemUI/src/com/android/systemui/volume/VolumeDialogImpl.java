@@ -429,7 +429,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         row.icon.setImageResource(iconRes);
         if (row.stream != AudioSystem.STREAM_ACCESSIBILITY) {
             row.icon.setOnClickListener(v -> {
-                Events.writeEvent(mContext, Events.EVENT_ICON_CLICK, row.stream, row.iconState);
+                Events.writeEvent(Events.EVENT_ICON_CLICK, row.stream, row.iconState);
                 mController.setActiveStream(row.stream);
                 if (row.stream == AudioManager.STREAM_RING) {
                     final boolean hasVibrator = mController.hasVibrator();
@@ -468,7 +468,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
         if (mSettingsIcon != null) {
             mSettingsIcon.setOnClickListener(v -> {
-                Events.writeEvent(mContext, Events.EVENT_SETTINGS_CLICK);
+                Events.writeEvent(Events.EVENT_SETTINGS_CLICK);
                 Intent intent = new Intent(Settings.Panel.ACTION_VOLUME);
                 dismissH(DISMISS_REASON_SETTINGS_CLICKED);
                 Dependency.get(ActivityStarter.class).startActivity(intent,
@@ -504,7 +504,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                         mController.setStreamVolume(AudioManager.STREAM_RING, 1);
                     }
                 }
-                Events.writeEvent(mContext, Events.EVENT_RINGER_TOGGLE, newRingerMode);
+                Events.writeEvent(Events.EVENT_RINGER_TOGGLE, newRingerMode);
                 incrementManualToggleCount();
                 updateRingerH();
                 provideTouchFeedbackH(newRingerMode);
@@ -519,7 +519,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         if (mODICaptionsIcon != null) {
             mODICaptionsIcon.setOnConfirmedTapListener(() -> {
                 onCaptionIconClicked();
-                Events.writeEvent(mContext, Events.EVENT_ODI_CAPTIONS_CLICK);
+                Events.writeEvent(Events.EVENT_ODI_CAPTIONS_CLICK);
             }, mHandler);
         }
 
@@ -541,7 +541,7 @@ public class VolumeDialogImpl implements VolumeDialog,
             mODICaptionsTooltipView = mODICaptionsTooltipViewStub.inflate();
             mODICaptionsTooltipView.findViewById(R.id.dismiss).setOnClickListener(v -> {
                 hideCaptionsTooltip();
-                Events.writeEvent(mContext, Events.EVENT_ODI_CAPTIONS_TOOLTIP_CLICK);
+                Events.writeEvent(Events.EVENT_ODI_CAPTIONS_TOOLTIP_CLICK);
             });
             mODICaptionsTooltipViewStub = null;
             rescheduleTimeoutH();
@@ -694,7 +694,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         initSettingsH();
         mShowing = true;
         mDialog.show();
-        Events.writeEvent(mContext, Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
+        Events.writeEvent(Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
         mController.notifyVisible(true);
         mController.getCaptionsComponentState(false);
         checkODICaptionsTooltip(false);
@@ -741,7 +741,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         if (mShowing) {
             mShowing = false;
             // Only logs when the volume dialog visibility is changed.
-            Events.writeEvent(mContext, Events.EVENT_DISMISS_DIALOG, reason);
+            Events.writeEvent(Events.EVENT_DISMISS_DIALOG, reason);
         }
         mDialogView.setTranslationX(0);
         mDialogView.setAlpha(1);
@@ -1400,7 +1400,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                     mController.setActiveStream(mRow.stream);
                     mController.setStreamVolume(mRow.stream, userLevel);
                     mRow.requestedLevel = userLevel;
-                    Events.writeEvent(mContext, Events.EVENT_TOUCH_LEVEL_CHANGED, mRow.stream,
+                    Events.writeEvent(Events.EVENT_TOUCH_LEVEL_CHANGED, mRow.stream,
                             userLevel);
                 }
             }
@@ -1419,7 +1419,7 @@ public class VolumeDialogImpl implements VolumeDialog,
             mRow.tracking = false;
             mRow.userAttempt = SystemClock.uptimeMillis();
             final int userLevel = getImpliedLevel(seekBar, seekBar.getProgress());
-            Events.writeEvent(mContext, Events.EVENT_TOUCH_LEVEL_DONE, mRow.stream, userLevel);
+            Events.writeEvent(Events.EVENT_TOUCH_LEVEL_DONE, mRow.stream, userLevel);
             if (mRow.ss.level != userLevel) {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(H.RECHECK, mRow),
                         USER_ATTEMPT_GRACE_PERIOD);

@@ -16,7 +16,6 @@
 
 package com.android.systemui.volume;
 
-import android.content.Context;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.provider.Settings.Global;
@@ -125,7 +124,12 @@ public class Events {
 
     public static Callback sCallback;
 
-    public static void writeEvent(Context context, int tag, Object... list) {
+    /**
+     * Logs an event to the system log and the event log.
+     * @param tag One of the EVENT_* codes above.
+     * @param list Any additional event-specific arguments, documented above.
+     */
+    public static void writeEvent(int tag, Object... list) {
         MetricsLogger logger = new MetricsLogger();
         final long time = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder("writeEvent ").append(EVENT_TAGS[tag]);
@@ -133,33 +137,33 @@ public class Events {
             sb.append(" ");
             switch (tag) {
                 case EVENT_SHOW_DIALOG:
-                    MetricsLogger.visible(context, MetricsEvent.VOLUME_DIALOG);
-                    MetricsLogger.histogram(context, "volume_from_keyguard",
+                    logger.visible(MetricsEvent.VOLUME_DIALOG);
+                    logger.histogram("volume_from_keyguard",
                             (Boolean) list[1] ? 1 : 0);
                     sb.append(SHOW_REASONS[(Integer) list[0]]).append(" keyguard=").append(list[1]);
                     break;
                 case EVENT_EXPAND:
-                    MetricsLogger.visibility(context, MetricsEvent.VOLUME_DIALOG_DETAILS,
+                    logger.visibility(MetricsEvent.VOLUME_DIALOG_DETAILS,
                             (Boolean) list[0]);
                     sb.append(list[0]);
                     break;
                 case EVENT_DISMISS_DIALOG:
-                    MetricsLogger.hidden(context, MetricsEvent.VOLUME_DIALOG);
+                    logger.hidden(MetricsEvent.VOLUME_DIALOG);
                     sb.append(DISMISS_REASONS[(Integer) list[0]]);
                     break;
                 case EVENT_ACTIVE_STREAM_CHANGED:
-                    MetricsLogger.action(context, MetricsEvent.ACTION_VOLUME_STREAM,
+                    logger.action(MetricsEvent.ACTION_VOLUME_STREAM,
                             (Integer) list[0]);
                     sb.append(AudioSystem.streamToString((Integer) list[0]));
                     break;
                 case EVENT_ICON_CLICK:
-                    MetricsLogger.action(context, MetricsEvent.ACTION_VOLUME_ICON,
+                    logger.action(MetricsEvent.ACTION_VOLUME_ICON,
                             (Integer) list[0]);
                     sb.append(AudioSystem.streamToString((Integer) list[0])).append(' ')
                             .append(iconStateToString((Integer) list[1]));
                     break;
                 case EVENT_TOUCH_LEVEL_DONE:
-                    MetricsLogger.action(context, MetricsEvent.ACTION_VOLUME_SLIDER,
+                    logger.action(MetricsEvent.ACTION_VOLUME_SLIDER,
                             (Integer) list[1]);
                     // fall through
                 case EVENT_TOUCH_LEVEL_CHANGED:
@@ -169,7 +173,7 @@ public class Events {
                             .append(list[1]);
                     break;
                 case EVENT_KEY:
-                    MetricsLogger.action(context, MetricsEvent.ACTION_VOLUME_KEY,
+                    logger.action(MetricsEvent.ACTION_VOLUME_KEY,
                             (Integer) list[0]);
                     sb.append(AudioSystem.streamToString((Integer) list[0])).append(' ')
                             .append(list[1]);
@@ -181,7 +185,7 @@ public class Events {
                     logger.action(MetricsEvent.ACTION_VOLUME_SETTINGS);
                     break;
                 case EVENT_EXTERNAL_RINGER_MODE_CHANGED:
-                    MetricsLogger.action(context, MetricsEvent.ACTION_RINGER_MODE,
+                    logger.action(MetricsEvent.ACTION_RINGER_MODE,
                             (Integer) list[0]);
                     // fall through
                 case EVENT_INTERNAL_RINGER_MODE_CHANGED:
@@ -194,14 +198,14 @@ public class Events {
                     sb.append(list[0]).append(' ').append(list[1]);
                     break;
                 case EVENT_SHOW_USB_OVERHEAT_ALARM:
-                    MetricsLogger.visible(context, MetricsEvent.POWER_OVERHEAT_ALARM);
-                    MetricsLogger.histogram(context, "show_usb_overheat_alarm",
+                    logger.visible(MetricsEvent.POWER_OVERHEAT_ALARM);
+                    logger.histogram("show_usb_overheat_alarm",
                             (Boolean) list[1] ? 1 : 0);
                     sb.append(SHOW_REASONS[(Integer) list[0]]).append(" keyguard=").append(list[1]);
                     break;
                 case EVENT_DISMISS_USB_OVERHEAT_ALARM:
-                    MetricsLogger.hidden(context, MetricsEvent.POWER_OVERHEAT_ALARM);
-                    MetricsLogger.histogram(context, "dismiss_usb_overheat_alarm",
+                    logger.hidden(MetricsEvent.POWER_OVERHEAT_ALARM);
+                    logger.histogram("dismiss_usb_overheat_alarm",
                             (Boolean) list[1] ? 1 : 0);
                     sb.append(DISMISS_REASONS[(Integer) list[0]])
                         .append(" keyguard=").append(list[1]);
@@ -255,4 +259,5 @@ public class Events {
         void writeEvent(long time, int tag, Object[] list);
         void writeState(long time, State state);
     }
+
 }
