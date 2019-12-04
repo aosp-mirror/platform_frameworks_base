@@ -24,10 +24,8 @@ import android.util.SparseArray;
 
 import com.google.android.icing.proto.DocumentProto;
 import com.google.android.icing.proto.PropertyProto;
+import com.google.android.icing.proto.SearchResultProto;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -94,23 +92,25 @@ public class FakeIcing {
      * Returns documents containing the given term.
      *
      * @param term A single exact term to look up in the index.
-     * @return The matching documents, or an empty {@code List} if no documents match.
+     * @return A {@link SearchResultProto} containing the matching documents, which may have no
+     *   results if no documents match.
      */
     @NonNull
-    public List<DocumentProto> query(@NonNull String term) {
+    public SearchResultProto query(@NonNull String term) {
         String normTerm = normalizeString(term);
         Set<Integer> docIds = mIndex.get(normTerm);
         if (docIds == null || docIds.isEmpty()) {
-            return Collections.emptyList();
+            return SearchResultProto.getDefaultInstance();
         }
-        List<DocumentProto> matches = new ArrayList<>(docIds.size());
+        SearchResultProto.Builder results = SearchResultProto.newBuilder();
         for (int docId : docIds) {
             DocumentProto document = mDocStore.get(docId);
             if (document != null) {
-                matches.add(document);
+                results.addResults(
+                        SearchResultProto.ResultProto.newBuilder().setDocument(document));
             }
         }
-        return matches;
+        return results.build();
     }
 
     /**
