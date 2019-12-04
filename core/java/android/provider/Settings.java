@@ -10296,6 +10296,19 @@ public final class Settings {
         public static final String ERROR_LOGCAT_PREFIX = "logcat_for_";
 
         /**
+         * Maximum number of bytes of a system crash/ANR/etc. report that
+         * ActivityManagerService should send to DropBox, as a prefix of the
+         * dropbox tag of the report type. For example,
+         * "max_error_bytes_for_system_server_anr" controls the maximum
+         * number of bytes captured with system server ANR reports.
+         * <p>
+         * Type: int (max size in bytes)
+         *
+         * @hide
+         */
+        public static final String MAX_ERROR_BYTES_PREFIX = "max_error_bytes_for_";
+
+        /**
          * The interval in minutes after which the amount of free storage left
          * on the device is logged to the event log
          *
