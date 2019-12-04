@@ -10992,6 +10992,53 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Sets the set of package names that are allowed to request user consent for cross-profile
+     * communication.
+     *
+     * <p>Assumes that the caller is a profile owner and is the given {@code admin}.
+     *
+     * <p>Previous calls are overridden by each subsequent call to this method.
+     *
+     * @param admin the {@link DeviceAdminReceiver} this request is associated with
+     * @param packageNames the new cross-profile package names
+     */
+    public void setCrossProfilePackages(
+            @NonNull ComponentName admin, @NonNull Set<String> packageNames) {
+        throwIfParentInstance("setCrossProfilePackages");
+        if (mService != null) {
+            try {
+                mService.setCrossProfilePackages(admin, new ArrayList<>(packageNames));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the set of package names that the admin has previously set as allowed to request user
+     * consent for cross-profile communication, via {@link
+     * #setCrossProfilePackages(ComponentName, Set)}.
+     *
+     * <p>Assumes that the caller is a profile owner and is the given {@code admin}.
+     *
+     * @param admin the {@link DeviceAdminReceiver} this request is associated with
+     * @return the set of package names the admin has previously set as allowed to request user
+     * consent for cross-profile communication, via {@link
+     * #setCrossProfilePackages(ComponentName, Set)}
+     */
+    public @NonNull Set<String> getCrossProfilePackages(@NonNull ComponentName admin) {
+        throwIfParentInstance("getCrossProfilePackages");
+        if (mService != null) {
+            try {
+                return new ArraySet<>(mService.getCrossProfilePackages(admin));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return Collections.emptySet();
+    }
+
+    /**
      * Returns whether the device is being used as a managed kiosk. These requirements are as
      * follows:
      * <ul>
