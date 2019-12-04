@@ -37,20 +37,28 @@ public class Event {
     public static final int INFO = 4;
     public static final int WARN = 5;
     public static final int ERROR = 6;
+    public static final @Level int DEFAULT_LOG_LEVEL = DEBUG;
 
     private long mTimestamp;
-    private @Level int mLogLevel = DEBUG;
-    protected String mMessage;
+    private @Level int mLogLevel = DEFAULT_LOG_LEVEL;
+    private String mMessage = "";
 
-    public Event(String message) {
-        mTimestamp = System.currentTimeMillis();
-        mMessage = message;
+    /**
+     * initialize an event with a message
+     */
+    public Event init(String message) {
+        init(DEFAULT_LOG_LEVEL, message);
+        return this;
     }
 
-    public Event(@Level int logLevel, String message) {
+    /**
+     * initialize an event with a logLevel and message
+     */
+    public Event init(@Level int logLevel, String message) {
         mTimestamp = System.currentTimeMillis();
         mLogLevel = logLevel;
         mMessage = message;
+        return this;
     }
 
     public String getMessage() {
@@ -63,5 +71,14 @@ public class Event {
 
     public @Level int getLogLevel() {
         return mLogLevel;
+    }
+
+    /**
+     * Recycle this event
+     */
+    void recycle() {
+        mTimestamp = -1;
+        mLogLevel = DEFAULT_LOG_LEVEL;
+        mMessage = "";
     }
 }

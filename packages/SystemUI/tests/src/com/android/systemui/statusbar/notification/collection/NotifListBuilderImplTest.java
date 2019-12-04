@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.SectionsProvider;
+import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -76,6 +77,7 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
     private NotifListBuilderImpl mListBuilder;
     private FakeSystemClock mSystemClock = new FakeSystemClock();
 
+    @Mock private NotifLog mNotifLog;
     @Mock private NotifCollection mNotifCollection;
     @Spy private OnBeforeTransformGroupsListener mOnBeforeTransformGroupsListener;
     @Spy private OnBeforeSortListener mOnBeforeSortListener;
@@ -97,7 +99,7 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
 
-        mListBuilder = new NotifListBuilderImpl(mSystemClock);
+        mListBuilder = new NotifListBuilderImpl(mSystemClock, mNotifLog);
         mListBuilder.setOnRenderListListener(mOnRenderListListener);
 
         mListBuilder.attach(mNotifCollection);
