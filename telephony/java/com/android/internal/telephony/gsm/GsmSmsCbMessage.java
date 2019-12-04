@@ -32,6 +32,7 @@ import android.telephony.CbGeoUtils.LatLng;
 import android.telephony.CbGeoUtils.Polygon;
 import android.telephony.SmsCbLocation;
 import android.telephony.SmsCbMessage;
+import android.telephony.SubscriptionManager;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -95,6 +96,14 @@ public class GsmSmsCbMessage {
     public static SmsCbMessage createSmsCbMessage(Context context, SmsCbHeader header,
             SmsCbLocation location, byte[][] pdus, int slotIndex)
             throws IllegalArgumentException {
+        SubscriptionManager sm = (SubscriptionManager) context.getSystemService(
+                Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+        int subId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
+        int[] subIds = sm.getSubscriptionIds(slotIndex);
+        if (subIds != null && subIds.length > 0) {
+            subId = subIds[0];
+        }
+
         long receivedTimeMillis = System.currentTimeMillis();
         if (header.isEtwsPrimaryNotification()) {
             // ETSI TS 23.041 ETWS Primary Notification message
@@ -105,7 +114,8 @@ public class GsmSmsCbMessage {
                     header.getSerialNumber(), location, header.getServiceCategory(), null,
                     getEtwsPrimaryMessage(context, header.getEtwsInfo().getWarningType()),
                     SmsCbMessage.MESSAGE_PRIORITY_EMERGENCY, header.getEtwsInfo(),
-                    header.getCmasInfo(), 0, null /* geometries */, receivedTimeMillis, slotIndex);
+                    header.getCmasInfo(), 0, null /* geometries */, receivedTimeMillis, slotIndex,
+                    subId);
         } else if (header.isUmtsFormat()) {
             // UMTS format has only 1 PDU
             byte[] pdu = pdus[0];
@@ -139,7 +149,7 @@ public class GsmSmsCbMessage {
                     header.getGeographicalScope(), header.getSerialNumber(), location,
                     header.getServiceCategory(), language, body, priority,
                     header.getEtwsInfo(), header.getCmasInfo(), maximumWaitingTimeSec, geometries,
-                    receivedTimeMillis, slotIndex);
+                    receivedTimeMillis, slotIndex, subId);
         } else {
             String language = null;
             StringBuilder sb = new StringBuilder();
@@ -155,7 +165,7 @@ public class GsmSmsCbMessage {
                     header.getGeographicalScope(), header.getSerialNumber(), location,
                     header.getServiceCategory(), language, sb.toString(), priority,
                     header.getEtwsInfo(), header.getCmasInfo(), 0, null /* geometries */,
-                    receivedTimeMillis, slotIndex);
+                    receivedTimeMillis, slotIndex, subId);
         }
     }
 

@@ -6520,6 +6520,7 @@ package android.provider {
     field public static final String SERIAL_NUMBER = "serial_number";
     field public static final String SERVICE_CATEGORY = "service_category";
     field public static final String SLOT_INDEX = "slot_index";
+    field public static final String SUB_ID = "sub_id";
   }
 
   public static final class Telephony.Sms.Intents {
@@ -8530,7 +8531,7 @@ package android.telephony {
   }
 
   public final class SmsCbMessage implements android.os.Parcelable {
-    ctor public SmsCbMessage(int, int, int, @NonNull android.telephony.SmsCbLocation, int, @Nullable String, @Nullable String, int, @Nullable android.telephony.SmsCbEtwsInfo, @Nullable android.telephony.SmsCbCmasInfo, int, @Nullable java.util.List<android.telephony.CbGeoUtils.Geometry>, long, int);
+    ctor public SmsCbMessage(int, int, int, @NonNull android.telephony.SmsCbLocation, int, @Nullable String, @Nullable String, int, @Nullable android.telephony.SmsCbEtwsInfo, @Nullable android.telephony.SmsCbCmasInfo, int, @Nullable java.util.List<android.telephony.CbGeoUtils.Geometry>, long, int, int);
     method @NonNull public static android.telephony.SmsCbMessage createFromCursor(@NonNull android.database.Cursor);
     method public int describeContents();
     method @Nullable public android.telephony.SmsCbCmasInfo getCmasWarningInfo();
@@ -8547,6 +8548,7 @@ package android.telephony {
     method public int getSerialNumber();
     method public int getServiceCategory();
     method public int getSlotIndex();
+    method public int getSubscriptionId();
     method public boolean isCmasMessage();
     method public boolean isEmergencyMessage();
     method public boolean isEtwsMessage();
