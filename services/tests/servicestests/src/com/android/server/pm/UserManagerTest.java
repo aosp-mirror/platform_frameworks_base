@@ -263,6 +263,19 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     @MediumTest
+    public void testFindExistingGuest_guestExists() throws Exception {
+        UserInfo userInfo1 = createUser("Guest", UserInfo.FLAG_GUEST);
+        UserInfo foundGuest = mUserManager.findCurrentGuestUser();
+        assertNotNull(foundGuest);
+    }
+
+    @SmallTest
+    public void testFindExistingGuest_guestDoesNotExist() throws Exception {
+        UserInfo foundGuest = mUserManager.findCurrentGuestUser();
+        assertNull(foundGuest);
+    }
+
+    @MediumTest
     public void testSetUserAdmin() throws Exception {
         UserInfo userInfo = createUser("SecondaryUser", /*flags=*/ 0);
 

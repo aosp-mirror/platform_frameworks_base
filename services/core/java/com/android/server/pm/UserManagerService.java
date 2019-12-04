@@ -3452,8 +3452,13 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * Find the current guest user. If the Guest user is partial,
      * then do not include it in the results as it is about to die.
+     *
+     * @return The current guest user.  Null if it doesn't exist.
+     * @hide
      */
-    private UserInfo findCurrentGuestUser() {
+    @Override
+    public UserInfo findCurrentGuestUser() {
+        checkManageUsersPermission("findCurrentGuestUser");
         synchronized (mUsersLock) {
             final int size = mUsers.size();
             for (int i = 0; i < size; i++) {
