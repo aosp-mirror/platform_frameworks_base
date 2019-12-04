@@ -1123,7 +1123,7 @@ droidstubs {
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
-    args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi ",
+    args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\) ",
     write_sdk_values: true,
 }
 
@@ -1434,7 +1434,7 @@ droidstubs {
     merge_annotations_dirs: [
         "metalava-manual",
     ],
-    args: " --show-annotation android.annotation.SystemApi",
+    args: " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\)",
 }
 
 java_library_static {
@@ -1456,7 +1456,7 @@ droidstubs {
     removed_dex_api_filename: "removed-dex.txt",
     args: metalava_framework_docs_args +
         " --show-unannotated " +
-        " --show-annotation android.annotation.SystemApi " +
+        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\) " +
         " --show-annotation android.annotation.TestApi ",
 }
 
@@ -1475,7 +1475,7 @@ droidstubs {
         " --hide ReferencesHidden " +
         " --hide UnhiddenSystemApi " +
         " --show-unannotated " +
-        " --show-annotation android.annotation.SystemApi " +
+        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\) " +
         " --show-annotation android.annotation.TestApi ",
 }
 
@@ -1519,7 +1519,7 @@ droidstubs {
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
-    args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi",
+    args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\)",
     check_api: {
         current: {
             api_file: "api/system-current.txt",
