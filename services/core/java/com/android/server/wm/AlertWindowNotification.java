@@ -21,7 +21,7 @@ import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION;
+import static android.provider.Settings.ACTION_MANAGE_APP_OVERLAY_PERMISSION;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -29,13 +29,11 @@ import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -137,7 +135,7 @@ class AlertWindowNotification {
     }
 
     private PendingIntent getContentIntent(Context context, String packageName) {
-        final Intent intent = new Intent(ACTION_MANAGE_OVERLAY_PERMISSION,
+        final Intent intent = new Intent(ACTION_MANAGE_APP_OVERLAY_PERMISSION,
                 Uri.fromParts("package", packageName, null));
         intent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK);
         // Calls into activity manager...

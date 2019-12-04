@@ -832,8 +832,7 @@ public final class Settings {
     /**
      * Activity Action: Show screen for controlling which apps can draw on top of other apps.
      * <p>
-     * In some cases, a matching Activity may not exist, so ensure you
-     * safeguard against this.
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
      * <p>
      * Input: Optionally, in versions of Android prior to 11, the Intent's data URI can specify the
      * application package name to directly invoke the management GUI specific to the package name.
@@ -844,6 +843,31 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_OVERLAY_PERMISSION =
             "android.settings.action.MANAGE_OVERLAY_PERMISSION";
+
+    /**
+     * Activity Action: Show screen for controlling if the app specified in the data URI of the
+     * intent can draw on top of other apps.
+     * <p>
+     * Unlike {@link #ACTION_MANAGE_OVERLAY_PERMISSION}, which in Android 11 can't be used to show
+     * a GUI for a specific package, permission {@code android.permission.INTERNAL_SYSTEM_WINDOW} is
+     * needed to start an activity with this intent.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: The Intent's data URI MUST specify the application package name whose ability of
+     * drawing on top of other apps you want to control.
+     * For example "package:com.my.app".
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_APP_OVERLAY_PERMISSION =
+            "android.settings.MANAGE_APP_OVERLAY_PERMISSION";
 
     /**
      * Activity Action: Show screen for controlling which apps are allowed to write/modify
