@@ -46,11 +46,6 @@ public abstract class CellSignalStrength {
     protected static final int NUM_SIGNAL_STRENGTH_THRESHOLDS = NUM_SIGNAL_STRENGTH_BINS - 1;
 
     /** @hide */
-    public static final String[] SIGNAL_STRENGTH_NAMES = {
-        "none", "poor", "moderate", "good", "great"
-    };
-
-    /** @hide */
     protected CellSignalStrength() {
     }
 
@@ -156,5 +151,13 @@ public abstract class CellSignalStrength {
             int value, int rangeMin, int rangeMax, int special) {
         if ((value < rangeMin || value > rangeMax) && value != special) return CellInfo.UNAVAILABLE;
         return value;
+    }
+
+    /**
+     * Returns the number of signal strength levels.
+     * @return Number of signal strength levels, enforced to be 5
+     */
+    public static final int getNumSignalStrengthLevels() {
+        return NUM_SIGNAL_STRENGTH_BINS;
     }
 }
