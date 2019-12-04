@@ -24,7 +24,7 @@ import android.content.om.OverlayInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.Build.VERSION_CODES;
-import android.os.IIdmap2;
+import android.os.OverlayablePolicy;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -148,38 +148,38 @@ class IdmapManager {
     private int calculateFulfilledPolicies(@NonNull final PackageInfo targetPackage,
             @NonNull final PackageInfo overlayPackage, int userId)  {
         final ApplicationInfo ai = overlayPackage.applicationInfo;
-        int fulfilledPolicies = IIdmap2.POLICY_PUBLIC;
+        int fulfilledPolicies = OverlayablePolicy.PUBLIC;
 
         // Overlay matches target signature
         if (mPackageManager.signaturesMatching(targetPackage.packageName,
                 overlayPackage.packageName, userId)) {
-            fulfilledPolicies |= IIdmap2.POLICY_SIGNATURE;
+            fulfilledPolicies |= OverlayablePolicy.SIGNATURE;
         }
 
         // Vendor partition (/vendor)
         if (ai.isVendor()) {
-            return fulfilledPolicies | IIdmap2.POLICY_VENDOR_PARTITION;
+            return fulfilledPolicies | OverlayablePolicy.VENDOR_PARTITION;
         }
 
         // Product partition (/product)
         if (ai.isProduct()) {
-            return fulfilledPolicies | IIdmap2.POLICY_PRODUCT_PARTITION;
+            return fulfilledPolicies | OverlayablePolicy.PRODUCT_PARTITION;
         }
 
         // Odm partition (/odm)
         if (ai.isOdm()) {
-            return fulfilledPolicies | IIdmap2.POLICY_ODM_PARTITION;
+            return fulfilledPolicies | OverlayablePolicy.ODM_PARTITION;
         }
 
         // Oem partition (/oem)
         if (ai.isOem()) {
-            return fulfilledPolicies | IIdmap2.POLICY_OEM_PARTITION;
+            return fulfilledPolicies | OverlayablePolicy.OEM_PARTITION;
         }
 
         // System_ext partition (/system_ext) is considered as system
         // Check this last since every partition except for data is scanned as system in the PMS.
         if (ai.isSystemApp() || ai.isSystemExt()) {
-            return fulfilledPolicies | IIdmap2.POLICY_SYSTEM_PARTITION;
+            return fulfilledPolicies | OverlayablePolicy.SYSTEM_PARTITION;
         }
 
         return fulfilledPolicies;
