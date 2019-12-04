@@ -283,4 +283,6 @@ interface ISub {
     boolean setAlwaysAllowMmsData(int subId, boolean alwaysAllow);
 
     int getActiveDataSubscriptionId();
+
+    boolean canDisablePhysicalSubscription();
 }
