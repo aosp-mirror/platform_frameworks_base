@@ -339,7 +339,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         if (mQsDisabled) {
             lp.height = resources.getDimensionPixelSize(
                     com.android.internal.R.dimen.quick_qs_offset_height);
-        } else if (useQsMediaPlayer(mContext)) {
+        } else if (useQsMediaPlayer(mContext) && mHeaderQsPanel.hasMediaPlayerSession()) {
             lp.height = Math.max(getMinimumHeight(),
                     resources.getDimensionPixelSize(
                             com.android.internal.R.dimen.quick_qs_total_height_with_media));
@@ -405,6 +405,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                 mHeaderTextContainerView.setVisibility(INVISIBLE);
             }
         }
+        if (expansionFraction < 1 && expansionFraction > 0.99) {
+            if (mHeaderQsPanel.switchTileLayout()) {
+                updateResources();
+            }
+        }
     }
 
     public void disable(int state1, int state2, boolean animate) {
@@ -453,6 +458,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             return;
         }
         mHeaderQsPanel.setListening(listening);
+        if (mHeaderQsPanel.switchTileLayout()) {
+            updateResources();
+        }
         mListening = listening;
 
         if (listening) {
