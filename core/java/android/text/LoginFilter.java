@@ -19,7 +19,10 @@ package android.text;
 /**
  * Abstract class for filtering login-related text (user names and passwords)
  * 
+ * @deprecated Password requirements should not be hardcoded in clients. This class also does not
+ * handle non-BMP characters.
  */
+@Deprecated
 public abstract class LoginFilter implements InputFilter {
     private boolean mAppendInvalid;  // whether to append or ignore invalid characters
     /**
@@ -130,7 +133,9 @@ public abstract class LoginFilter implements InputFilter {
      * account creation. It prevents the user from entering user names with characters other than 
      * [a-zA-Z0-9.]. 
      * 
+     * @deprecated Do not encode assumptions about Google account names into client applications.
      */
+    @Deprecated
     public static class UsernameFilterGMail extends LoginFilter {
         
         public UsernameFilterGMail() {
@@ -190,8 +195,12 @@ public abstract class LoginFilter implements InputFilter {
     /**
      * This filter is compatible with GMail passwords which restricts characters to 
      * the Latin-1 (ISO8859-1) char set.
-     * 
+     *
+     * @deprecated Do not handle a user's Google password. Refer to
+     *   <a href="https://support.google.com/accounts/answer/32040">Google Help</a> for
+     *   password restriction information.
      */
+    @Deprecated
     public static class PasswordFilterGMail extends LoginFilter {
         
         public PasswordFilterGMail() {
