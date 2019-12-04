@@ -189,6 +189,7 @@ static int write_java_methods(
         }
 
         fprintf(out, "\n");
+        fprintf(out, "%s        builder.usePooledBuffer();\n", indent.c_str());
         fprintf(out, "%s        StatsLog.write(builder.build());\n", indent.c_str());
 
         // Add support for writing using Q schema if this is not the default module.
