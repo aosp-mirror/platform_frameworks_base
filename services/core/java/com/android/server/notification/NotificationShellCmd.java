@@ -125,9 +125,13 @@ public class NotificationShellCmd extends ShellCommand {
         final int callingUid = Binder.getCallingUid();
         long identity = Binder.clearCallingIdentity();
         try {
-            String[] packages = mPm.getPackagesForUid(callingUid);
-            if (packages != null && packages.length > 0) {
-                callingPackage = packages[0];
+            if (callingUid == Process.ROOT_UID) {
+                callingPackage = NotificationManagerService.ROOT_PKG;
+            } else {
+                String[] packages = mPm.getPackagesForUid(callingUid);
+                if (packages != null && packages.length > 0) {
+                    callingPackage = packages[0];
+                }
             }
         } catch (Exception e) {
             Slog.e(TAG, "failed to get caller pkg", e);
