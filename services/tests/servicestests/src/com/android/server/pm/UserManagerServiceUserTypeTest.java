@@ -27,16 +27,23 @@ import static android.content.pm.UserInfo.FLAG_SYSTEM;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertThrows;
 
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
 import android.os.UserManager;
+import android.util.ArrayMap;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.frameworks.servicestests.R;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -51,6 +58,13 @@ import java.util.Arrays;
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 public class UserManagerServiceUserTypeTest {
+
+    private Resources mResources;
+
+    @Before
+    public void setup() {
+        mResources = InstrumentationRegistry.getTargetContext().getResources();
+    }
 
     @Test
     public void testUserTypeBuilder_createUserType() {
@@ -183,6 +197,126 @@ public class UserManagerServiceUserTypeTest {
         // No type, which defaults to {@link UserManager#USER_TYPE_FULL_SECONDARY}.
         assertEquals(UserManager.USER_TYPE_FULL_SECONDARY,
                 UserInfo.getDefaultUserType(FLAG_EPHEMERAL));
+    }
+
+    /** Tests {@link UserTypeFactory#customizeBuilders} for a reasonable xml file. */
+    @Test
+    public void testUserTypeFactoryCustomize_normal() throws Exception {
+        final String userTypeAosp1 = "android.test.1"; // Profile user that is not customized
+        final String userTypeAosp2 = "android.test.2"; // Profile user that is customized
+        final String userTypeOem1 = "custom.test.1"; // Custom-defined profile
+
+        // Mock some "AOSP defaults".
+        final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
+        builders.put(userTypeAosp1, new UserTypeDetails.Builder()
+                .setName(userTypeAosp1)
+                .setBaseType(FLAG_PROFILE)
+                .setMaxAllowedPerParent(31));
+        builders.put(userTypeAosp2, new UserTypeDetails.Builder()
+                .setName(userTypeAosp1)
+                .setBaseType(FLAG_PROFILE)
+                .setMaxAllowedPerParent(32)
+                .setIconBadge(401)
+                .setBadgeColors(402, 403, 404));
+
+        final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_profile);
+        UserTypeFactory.customizeBuilders(builders, parser);
+
+        // userTypeAosp1 should not be modified.
+        UserTypeDetails aospType = builders.get(userTypeAosp1).createUserTypeDetails();
+        assertEquals(31, aospType.getMaxAllowedPerParent());
+        assertEquals(Resources.ID_NULL, aospType.getIconBadge());
+
+        // userTypeAosp2 should be modified.
+        aospType = builders.get(userTypeAosp2).createUserTypeDetails();
+        assertEquals(12, aospType.getMaxAllowedPerParent());
+        assertEquals(com.android.internal.R.drawable.ic_corp_icon_badge_case,
+                aospType.getIconBadge());
+        assertEquals(Resources.ID_NULL, aospType.getBadgePlain()); // No resId for 'garbage'
+        assertEquals(com.android.internal.R.drawable.ic_corp_badge_no_background,
+                aospType.getBadgeNoBackground());
+        assertEquals(com.android.internal.R.string.managed_profile_label_badge,
+                aospType.getBadgeLabel(0));
+        assertEquals(com.android.internal.R.string.managed_profile_label_badge_2,
+                aospType.getBadgeLabel(1));
+        assertEquals(com.android.internal.R.string.managed_profile_label_badge_2,
+                aospType.getBadgeLabel(2));
+        assertEquals(com.android.internal.R.string.managed_profile_label_badge_2,
+                aospType.getBadgeLabel(3));
+        assertEquals(com.android.internal.R.color.profile_badge_1,
+                aospType.getBadgeColor(0));
+        assertEquals(com.android.internal.R.color.profile_badge_2,
+                aospType.getBadgeColor(1));
+        assertEquals(com.android.internal.R.color.profile_badge_2,
+                aospType.getBadgeColor(2));
+        assertEquals(com.android.internal.R.color.profile_badge_2,
+                aospType.getBadgeColor(3));
+
+        // userTypeOem1 should be created.
+        UserTypeDetails.Builder customType = builders.get(userTypeOem1);
+        assertNotNull(customType);
+        assertEquals(14, customType.createUserTypeDetails().getMaxAllowedPerParent());
+    }
+
+    /**
+     * Tests {@link UserTypeFactory#customizeBuilders} when custom user type deletes the
+     * badge-colors.
+     */
+    @Test
+    public void testUserTypeFactoryCustomize_eraseArray() throws Exception {
+        final String typeName = "android.test";
+
+        final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
+        builders.put(typeName, new UserTypeDetails.Builder()
+                .setName(typeName)
+                .setBaseType(FLAG_PROFILE)
+                .setMaxAllowedPerParent(1)
+                .setBadgeColors(501, 502));
+
+        final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_eraseArray);
+        UserTypeFactory.customizeBuilders(builders, parser);
+
+        UserTypeDetails typeDetails =  builders.get(typeName).createUserTypeDetails();
+        assertEquals(2, typeDetails.getMaxAllowedPerParent());
+        assertEquals(Resources.ID_NULL, typeDetails.getBadgeColor(0));
+        assertEquals(Resources.ID_NULL, typeDetails.getBadgeColor(1));
+    }
+
+    /** Tests {@link UserTypeFactory#customizeBuilders} when custom user type has illegal name. */
+    @Test
+    public void testUserTypeFactoryCustomize_illegalOemName() throws Exception {
+        final String userTypeAosp = "android.aosp.legal";
+        final String userTypeOem = "android.oem.illegal.name"; // Custom-defined profile
+
+        final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
+        builders.put(userTypeAosp, new UserTypeDetails.Builder()
+                .setName(userTypeAosp)
+                .setBaseType(FLAG_PROFILE)
+                .setMaxAllowedPerParent(21));
+
+        final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_illegalOemName);
+
+        // parser is illegal because non-AOSP user types cannot be prefixed with "android.".
+        assertThrows(IllegalArgumentException.class,
+                () -> UserTypeFactory.customizeBuilders(builders, parser));
+    }
+
+    /** Tests {@link UserTypeFactory#customizeBuilders} when illegally customizing a non-profile. */
+    @Test
+    public void testUserTypeFactoryCustomize_illegalUserBaseType() throws Exception {
+        final String userTypeFull = "android.test";
+
+        final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
+        builders.put(userTypeFull, new UserTypeDetails.Builder()
+                .setName(userTypeFull)
+                .setBaseType(FLAG_FULL)
+                .setMaxAllowedPerParent(21));
+
+        XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_illegalUserBaseType);
+
+        // parser is illegal because customization of FULL is not supported.
+        assertThrows(IllegalArgumentException.class,
+                () -> UserTypeFactory.customizeBuilders(builders, parser));
     }
 
     /** Returns a minimal {@link UserTypeDetails.Builder} that can legitimately be created. */

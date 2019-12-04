@@ -180,7 +180,7 @@ public final class UserTypeDetails {
         return mIconBadge != Resources.ID_NULL;
     }
 
-    /** Resource ID of the badge put on icons. */
+    /** Resource ID of the badge to put on icons. */
     public @DrawableRes int getIconBadge() {
         return mIconBadge;
     }
@@ -270,9 +270,9 @@ public final class UserTypeDetails {
         private int mLabel = Resources.ID_NULL;
         private int[] mBadgeLabels = null;
         private int[] mBadgeColors = null;
-        private int mIconBadge = Resources.ID_NULL;
-        private int mBadgePlain = Resources.ID_NULL;
-        private int mBadgeNoBackground = Resources.ID_NULL;
+        private @DrawableRes int mIconBadge = Resources.ID_NULL;
+        private @DrawableRes int mBadgePlain = Resources.ID_NULL;
+        private @DrawableRes int mBadgeNoBackground = Resources.ID_NULL;
 
         public Builder setName(String name) {
             mName = name;
@@ -304,27 +304,27 @@ public final class UserTypeDetails {
             return this;
         }
 
-        public Builder setBadgeLabels(int ... badgeLabels) {
+        public Builder setBadgeLabels(@StringRes int ... badgeLabels) {
             mBadgeLabels = badgeLabels;
             return this;
         }
 
-        public Builder setBadgeColors(int ... badgeColors) {
+        public Builder setBadgeColors(@ColorRes int ... badgeColors) {
             mBadgeColors = badgeColors;
             return this;
         }
 
-        public Builder setIconBadge(int badgeIcon) {
+        public Builder setIconBadge(@DrawableRes int badgeIcon) {
             mIconBadge = badgeIcon;
             return this;
         }
 
-        public Builder setBadgePlain(int badgePlain) {
+        public Builder setBadgePlain(@DrawableRes int badgePlain) {
             mBadgePlain = badgePlain;
             return this;
         }
 
-        public Builder setBadgeNoBackground(int badgeNoBackground) {
+        public Builder setBadgeNoBackground(@DrawableRes int badgeNoBackground) {
             mBadgeNoBackground = badgeNoBackground;
             return this;
         }
@@ -337,6 +337,10 @@ public final class UserTypeDetails {
         public Builder setDefaultRestrictions(ArrayList<String> restrictions) {
             mDefaultRestrictions = restrictions;
             return this;
+        }
+
+        public boolean isBaseTypeProfile() {
+            return mBaseType == UserInfo.FLAG_PROFILE;
         }
 
         public UserTypeDetails createUserTypeDetails() {

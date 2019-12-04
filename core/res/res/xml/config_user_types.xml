@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2019 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!--
+This xml file allows customization of Android multiuser user types.
+It is parsed by frameworks/base/services/core/java/com/android/server/pm/UserTypeFactory.java.
+
+Pre-defined (AOSP) user types can be customized and new types can be defined. The syntax is the
+same in both cases.
+Currently, only profiles (not full or system users) can be customized/defined.
+
+The following example modifies an AOSP user type (android.os.usertype.profile.MANAGED) and creates
+a new user type (com.example.profilename):
+
+<user-types>
+    <profile-type
+        name='android.os.usertype.profile.MANAGED'
+        max-allowed-per-parent='2'
+        icon-badge='@android:drawable/ic_corp_icon_badge_case'
+        badge-plain='@android:drawable/ic_corp_badge_case'
+        badge-no-background='@android:drawable/ic_corp_badge_no_background' >
+        <badge-labels>
+            <item res='@android:string/managed_profile_label_badge' />
+            <item res='@android:string/managed_profile_label_badge_2' />
+        </badge-labels>
+        <badge-colors>
+            <item res='@android:color/profile_badge_1' />
+            <item res='@android:color/profile_badge_2' />
+        </badge-colors>
+    </profile-type>
+
+    <profile-type
+        name="com.example.profilename"
+        max-allowed-per-parent="2" \>
+</user-types>
+
+Mandatory attributes:
+    name
+
+Supported optional properties (to be used as shown in the example above):
+    max-allowed-per-parent
+    icon-badge
+    badge-plain
+    badge-no-background
+    badge-labels
+    badge-colors
+
+See UserTypeFactory.java and UserTypeDetails.java for the meaning (and default values) of these
+fields.
+-->
+<user-types>
+</user-types>
