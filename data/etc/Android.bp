@@ -98,7 +98,7 @@ prebuilt_etc {
 
 prebuilt_etc {
     name: "privapp_whitelist_com.android.settings",
-    product_specific: true,
+    system_ext_specific: true,
     sub_dir: "permissions",
     src: "com.android.settings.xml",
     filename_from_src: true,
