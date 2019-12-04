@@ -3768,4 +3768,8 @@
   <java-symbol type="string" name="accessibility_system_action_toggle_split_screen_label" />
 
   <java-symbol type="string" name="accessibility_freeform_caption" />
+
+  <!-- For contacts provider. -->
+  <java-symbol type="string" name="config_rawContactsLocalAccountName" />
+  <java-symbol type="string" name="config_rawContactsLocalAccountType" />
 </resources>
