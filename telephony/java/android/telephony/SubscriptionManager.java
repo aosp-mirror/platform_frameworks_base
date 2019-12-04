@@ -51,12 +51,10 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
-import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.telephony.Annotation.NetworkType;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.util.DisplayMetrics;
@@ -1292,12 +1290,32 @@ public class SubscriptionManager {
     }
 
     /**
-     * This is similar to {@link #getActiveSubscriptionInfoList()}, but if userVisibleOnly
-     * is true, it will filter out the hidden subscriptions.
+     * Get both hidden and visible SubscriptionInfo(s) of the currently active SIM(s).
+     * The records will be sorted by {@link SubscriptionInfo#getSimSlotIndex}
+     * then by {@link SubscriptionInfo#getSubscriptionId}.
      *
-     * @hide
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see
+     * {@link TelephonyManager#hasCarrierPrivileges}). In the latter case, only records accessible
+     * to the calling app are returned.
+     *
+     * @return Sorted list of the currently available {@link SubscriptionInfo}
+     * records on the device.
+     * This is similar to {@link #getActiveSubscriptionInfoList} except that it will return
+     * both active and hidden SubscriptionInfos.
+     *
      */
-    public List<SubscriptionInfo> getActiveSubscriptionInfoList(boolean userVisibleOnly) {
+    public @Nullable List<SubscriptionInfo> getActiveAndHiddenSubscriptionInfoList() {
+        return getActiveSubscriptionInfoList(/* userVisibleonly */false);
+    }
+
+    /**
+    * This is similar to {@link #getActiveSubscriptionInfoList()}, but if userVisibleOnly
+    * is true, it will filter out the hidden subscriptions.
+    *
+    * @hide
+    */
+    public @Nullable List<SubscriptionInfo> getActiveSubscriptionInfoList(boolean userVisibleOnly) {
         List<SubscriptionInfo> activeList = null;
 
         try {
@@ -2685,9 +2703,14 @@ public class SubscriptionManager {
                     if (executor == null || callback == null) {
                         return;
                     }
-                    Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
-                        callback.accept(result);
-                    }));
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> {
+                            callback.accept(result);
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
             };
             iSub.setPreferredDataSubscriptionId(subId, needValidation, callbackStub);
