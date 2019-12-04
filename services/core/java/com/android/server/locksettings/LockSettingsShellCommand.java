@@ -44,6 +44,7 @@ class LockSettingsShellCommand extends ShellCommand {
     private static final String COMMAND_SET_DISABLED = "set-disabled";
     private static final String COMMAND_VERIFY = "verify";
     private static final String COMMAND_GET_DISABLED = "get-disabled";
+    private static final String COMMAND_REMOVE_CACHE = "remove-cache";
     private static final String COMMAND_HELP = "help";
 
     private int mCurrentUserId;
@@ -76,6 +77,15 @@ class LockSettingsShellCommand extends ShellCommand {
                         return -1;
                 }
             }
+            switch (cmd) {
+                // Commands that do not require authentication go here.
+                case COMMAND_REMOVE_CACHE:
+                    runRemoveCache();
+                    return 0;
+                case COMMAND_HELP:
+                    onHelp();
+                    return 0;
+            }
             if (!checkCredential()) {
                 return -1;
             }
@@ -104,9 +114,6 @@ class LockSettingsShellCommand extends ShellCommand {
                     break;
                 case COMMAND_GET_DISABLED:
                     runGetDisabled();
-                    break;
-                case COMMAND_HELP:
-                    onHelp();
                     break;
                 default:
                     getErrPrintWriter().println("Unknown command: " + cmd);
@@ -162,6 +169,9 @@ class LockSettingsShellCommand extends ShellCommand {
             pw.println("");
             pw.println("  verify [--old <CREDENTIAL>] [--user USER_ID]");
             pw.println("    Verifies the lock credentials.");
+            pw.println("");
+            pw.println("  remove-cache [--user USER_ID]");
+            pw.println("    Removes cached unified challenge for the managed profile.");
             pw.println("");
         }
     }
@@ -321,5 +331,10 @@ class LockSettingsShellCommand extends ShellCommand {
             }
             return true;
         }
+    }
+
+    private void runRemoveCache() {
+        mLockPatternUtils.removeCachedUnifiedChallenge(mCurrentUserId);
+        getOutPrintWriter().println("Password cached removed for user " + mCurrentUserId);
     }
 }

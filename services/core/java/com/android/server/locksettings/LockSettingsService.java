@@ -139,6 +139,7 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
@@ -224,6 +225,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final KeyStore mKeyStore;
 
     private final RecoverableKeyStoreManager mRecoverableKeyStoreManager;
+    private ManagedProfilePasswordCache mManagedProfilePasswordCache;
 
     private final RebootEscrowManager mRebootEscrowManager;
 
@@ -387,6 +389,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             setLockCredentialInternal(unifiedProfilePassword, managedUserPassword, managedUserId,
                     /* isLockTiedToParent= */ true);
             tieProfileLockToParent(managedUserId, unifiedProfilePassword);
+            mManagedProfilePasswordCache.storePassword(managedUserId, unifiedProfilePassword);
         }
     }
 
@@ -527,6 +530,16 @@ public class LockSettingsService extends ILockSettings.Stub {
                 int defaultValue) {
             return Settings.Global.getInt(contentResolver, keyName, defaultValue);
         }
+
+        public @NonNull ManagedProfilePasswordCache getManagedProfilePasswordCache() {
+            try {
+                java.security.KeyStore ks = java.security.KeyStore.getInstance("AndroidKeyStore");
+                ks.load(null);
+                return new ManagedProfilePasswordCache(ks, getUserManager());
+            } catch (Exception e) {
+                throw new IllegalStateException("Cannot load keystore", e);
+            }
+        }
     }
 
     public LockSettingsService(Context context) {
@@ -560,6 +573,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStrongAuthTracker.register(mStrongAuth);
 
         mSpManager = injector.getSyntheticPasswordManager(mStorage);
+        mManagedProfilePasswordCache = injector.getManagedProfilePasswordCache();
 
         mRebootEscrowManager = injector.getRebootEscrowManager(new RebootEscrowCallbacks(),
                 mStorage);
@@ -706,7 +720,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     private void ensureProfileKeystoreUnlocked(int userId) {
         final KeyStore ks = KeyStore.getInstance();
         if (ks.state(userId) == KeyStore.State.LOCKED
-                && tiedManagedProfileReadyToUnlock(mUserManager.getUserInfo(userId))) {
+                && mUserManager.getUserInfo(userId).isManagedProfile()
+                && hasUnifiedChallenge(userId)) {
             Slog.i(TAG, "Managed profile got unlocked, will unlock its keystore");
             // If boot took too long and the password in vold got expired, parent keystore will
             // be still locked, we ignore this case since the user will be prompted to unlock
@@ -1302,6 +1317,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         LockscreenCredential credential = LockscreenCredential.createManagedPassword(
                 decryptionResult);
         Arrays.fill(decryptionResult, (byte) 0);
+        mManagedProfilePasswordCache.storePassword(userId, credential);
         return credential;
     }
 
@@ -1381,12 +1397,25 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         for (UserInfo profile : mUserManager.getProfiles(userId)) {
-            // Unlock managed profile with unified lock
-            if (tiedManagedProfileReadyToUnlock(profile)) {
-                // Must pass the challenge on for resetLockout, so it's not over-written, which
-                // causes LockSettingsService to revokeChallenge inappropriately.
-                unlockChildProfile(profile.id, false /* ignoreUserNotAuthenticated */,
-                        challengeType, challenge, resetLockouts);
+            if (profile.id == userId) continue;
+            if (!profile.isManagedProfile()) continue;
+
+            if (hasUnifiedChallenge(profile.id)) {
+                if (mUserManager.isUserRunning(profile.id)) {
+                    // Unlock managed profile with unified lock
+                    // Must pass the challenge on for resetLockout, so it's not over-written, which
+                    // causes LockSettingsService to revokeChallenge inappropriately.
+                    unlockChildProfile(profile.id, false /* ignoreUserNotAuthenticated */,
+                            challengeType, challenge, resetLockouts);
+                } else {
+                    try {
+                        // Profile not ready for unlock yet, but decrypt the unified challenge now
+                        // so it goes into the cache
+                        getDecryptedPasswordForTiedProfile(profile.id);
+                    } catch (GeneralSecurityException | IOException e) {
+                        Slog.d(TAG, "Cache work profile password failed", e);
+                    }
+                }
             }
             // Now we have unlocked the parent user and attempted to unlock the profile we should
             // show notifications if the profile is still locked.
@@ -1417,11 +1446,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private boolean tiedManagedProfileReadyToUnlock(UserInfo userInfo) {
-        return userInfo.isManagedProfile()
-                && !getSeparateProfileChallengeEnabledInternal(userInfo.id)
-                && mStorage.hasChildProfileLock(userInfo.id)
-                && mUserManager.isUserRunning(userInfo.id);
+    private boolean hasUnifiedChallenge(int userId) {
+        return !getSeparateProfileChallengeEnabledInternal(userId)
+                && mStorage.hasChildProfileLock(userId);
     }
 
     private Map<Integer, LockscreenCredential> getDecryptedPasswordsForAllTiedProfiles(int userId) {
@@ -2233,6 +2260,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         final KeyStore ks = KeyStore.getInstance();
         ks.onUserRemoved(userId);
+        mManagedProfilePasswordCache.removePassword(userId);
 
         gateKeeperClearSecureUserId(userId);
         if (unknownUser || mUserManager.getUserInfo(userId).isManagedProfile()) {
@@ -2783,6 +2811,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         synchronizeUnifiedWorkChallengeForProfiles(userId, profilePasswords);
 
         setUserPasswordMetrics(credential, userId);
+        mManagedProfilePasswordCache.removePassword(userId);
 
         if (profilePasswords != null) {
             for (Map.Entry<Integer, LockscreenCredential> entry : profilePasswords.entrySet()) {
@@ -3095,6 +3124,22 @@ public class LockSettingsService extends ILockSettings.Stub {
         // reset logic.
         onCredentialVerified(authResult.authToken, CHALLENGE_NONE, 0, null, userId);
         return true;
+    }
+
+    @Override
+    public boolean tryUnlockWithCachedUnifiedChallenge(int userId) {
+        try (LockscreenCredential cred = mManagedProfilePasswordCache.retrievePassword(userId)) {
+            if (cred == null) {
+                return false;
+            }
+            return doVerifyCredential(cred, CHALLENGE_NONE, 0, userId, null /* progressCallback */)
+                    .getResponseCode() == VerifyCredentialResponse.RESPONSE_OK;
+        }
+    }
+
+    @Override
+    public void removeCachedUnifiedChallenge(int userId) {
+        mManagedProfilePasswordCache.removePassword(userId);
     }
 
     static String timestampToString(long timestamp) {

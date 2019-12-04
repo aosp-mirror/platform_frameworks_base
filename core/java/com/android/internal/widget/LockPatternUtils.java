@@ -55,9 +55,9 @@ import android.util.SparseLongArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
-import libcore.util.HexEncoding;
-
 import com.google.android.collect.Lists;
+
+import libcore.util.HexEncoding;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1754,5 +1754,34 @@ public class LockPatternUtils {
     public static boolean frpCredentialEnabled(Context context) {
         return FRP_CREDENTIAL_ENABLED && context.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableCredentialFactoryResetProtection);
+    }
+
+    /**
+     * Attempt to rederive the unified work challenge for the specified profile user and unlock the
+     * user. If successful, this would allow the user to leave quiet mode automatically without
+     * additional user authentication.
+     *
+     * This is made possible by the framework storing an encrypted copy of the unified challenge
+     * auth-bound to the primary user's lockscreen. As long as the primery user has unlocked
+     * recently (7 days), the framework will be able to decrypt it and plug the secret into the
+     * unlock flow.
+     *
+     * @return {@code true} if automatic unlocking is successful, {@code false} otherwise.
+     */
+    public boolean tryUnlockWithCachedUnifiedChallenge(int userId) {
+        try {
+            return getLockSettings().tryUnlockWithCachedUnifiedChallenge(userId);
+        } catch (RemoteException re) {
+            return false;
+        }
+    }
+
+    /** Remove cached unified profile challenge, for testing and CTS usage. */
+    public void removeCachedUnifiedChallenge(int userId) {
+        try {
+            getLockSettings().removeCachedUnifiedChallenge(userId);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
     }
 }
