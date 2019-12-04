@@ -43,6 +43,7 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic;
 
 /**
  * Annotation processor for {@link UnsupportedAppUsage} annotations.
@@ -68,6 +69,7 @@ public class UnsupportedAppUsageProcessor extends AbstractProcessor {
     private static final ImmutableSet<String> SUPPORTED_ANNOTATION_NAMES =
             SUPPORTED_ANNOTATIONS.stream().map(annotation -> annotation.getCanonicalName()).collect(
                     ImmutableSet.toImmutableSet());
+    private static final String OVERRIDE_SOURCE_POSITION_PROPERTY = "overrideSourcePosition";
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
@@ -126,6 +128,9 @@ public class UnsupportedAppUsageProcessor extends AbstractProcessor {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> e
                 : annotation.getElementValues().entrySet()) {
+            if (e.getKey().getSimpleName().toString().equals(OVERRIDE_SOURCE_POSITION_PROPERTY)) {
+                continue;
+            }
             if (sb.length() > 0) {
                 sb.append("&");
             }
@@ -134,6 +139,34 @@ public class UnsupportedAppUsageProcessor extends AbstractProcessor {
                     .append(URLEncoder.encode(e.getValue().toString()));
         }
         return sb.toString();
+    }
+
+    private SourcePosition getSourcePositionOverride(
+            Element annotatedElement, AnnotationMirror annotation) {
+        for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> e
+                : annotation.getElementValues().entrySet()) {
+            if (e.getKey().getSimpleName().toString().equals(OVERRIDE_SOURCE_POSITION_PROPERTY)) {
+                String[] position = e.getValue().getValue().toString().split(":");
+                if (position.length != 5) {
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, String.format(
+                            "Expected %s to have format file:startLine:startCol:endLine:endCol",
+                            OVERRIDE_SOURCE_POSITION_PROPERTY), annotatedElement, annotation);
+                    return null;
+                }
+                try {
+                    return new SourcePosition(position[0], Integer.parseInt(position[1]),
+                            Integer.parseInt(position[2]), Integer.parseInt(position[3]),
+                            Integer.parseInt(position[4]));
+                } catch (NumberFormatException nfe) {
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, String.format(
+                            "Expected %s to have format file:startLine:startCol:endLine:endCol; "
+                            + "error parsing integer: %s", OVERRIDE_SOURCE_POSITION_PROPERTY,
+                            nfe.getMessage()), annotatedElement, annotation);
+                    return null;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -152,16 +185,25 @@ public class UnsupportedAppUsageProcessor extends AbstractProcessor {
         JavacElements javacElem = (JavacElements) processingEnv.getElementUtils();
         AnnotationMirror unsupportedAppUsage =
                 getUnsupportedAppUsageAnnotationMirror(annotatedElement);
-        Pair<JCTree, JCTree.JCCompilationUnit> pair =
-                javacElem.getTreeAndTopLevel(annotatedElement, unsupportedAppUsage, null);
-        Position.LineMap lines = pair.snd.lineMap;
+        SourcePosition position = getSourcePositionOverride(annotatedElement, unsupportedAppUsage);
+        if (position == null) {
+            Pair<JCTree, JCTree.JCCompilationUnit> pair =
+                    javacElem.getTreeAndTopLevel(annotatedElement, unsupportedAppUsage, null);
+            Position.LineMap lines = pair.snd.lineMap;
+            position = new SourcePosition(
+                    pair.snd.getSourceFile().getName(),
+                    lines.getLineNumber(pair.fst.pos().getStartPosition()),
+                    lines.getColumnNumber(pair.fst.pos().getStartPosition()),
+                    lines.getLineNumber(pair.fst.pos().getEndPosition(pair.snd.endPositions)),
+                    lines.getColumnNumber(pair.fst.pos().getEndPosition(pair.snd.endPositions)));
+        }
         return Joiner.on(",").join(
                 signature,
-                pair.snd.getSourceFile().getName(),
-                lines.getLineNumber(pair.fst.pos().getStartPosition()),
-                lines.getColumnNumber(pair.fst.pos().getStartPosition()),
-                lines.getLineNumber(pair.fst.pos().getEndPosition(pair.snd.endPositions)),
-                lines.getColumnNumber(pair.fst.pos().getEndPosition(pair.snd.endPositions)),
+                position.filename,
+                position.startLine,
+                position.startCol,
+                position.endLine,
+                position.endCol,
                 encodeAnnotationProperties(unsupportedAppUsage));
     }
 
