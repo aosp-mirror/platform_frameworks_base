@@ -36,7 +36,10 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-/** Component which manages the various reasons a notification might be filtered out. */
+/** Component which manages the various reasons a notification might be filtered out.*/
+// TODO: delete NotificationFilter.java after migrating to new NotifPipeline b/145659174.
+//  Notification filtering is taken care of across the different Coordinators (mostly
+//  KeyguardCoordinator.java)
 @Singleton
 public class NotificationFilter {
 
@@ -109,7 +112,7 @@ public class NotificationFilter {
             return true;
         }
 
-        if (entry.isSuspended()) {
+        if (entry.getRanking().isSuspended()) {
             return true;
         }
 
