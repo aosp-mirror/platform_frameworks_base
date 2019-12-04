@@ -7366,6 +7366,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
 
+        // TODO: (b/145604635) Add upgrade case
         // Turn AUTO_TIME on in settings if it is required
         if (required) {
             long ident = mInjector.binderClearCallingIdentity();
@@ -7407,6 +7408,42 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             return false;
         }
+    }
+
+    /**
+     * Set whether auto time is enabled on the device.
+     */
+    @Override
+    public void setAutoTime(ComponentName who, boolean enabled) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        // TODO (b/145286957) Refactor security checks
+        enforceDeviceOwnerOrProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
+
+        mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.settingsGlobalPutInt(Settings.Global.AUTO_TIME, enabled ? 1 : 0));
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_AUTO_TIME)
+                .setAdmin(who)
+                .setBoolean(enabled)
+                .write();
+    }
+
+    /**
+     * Returns whether or auto time is used on the device or not.
+     */
+    @Override
+    public boolean getAutoTime(ComponentName who) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        enforceDeviceOwnerOrProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
+
+        return mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) > 0;
     }
 
     @Override
@@ -8881,6 +8918,28 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkState(isCallerWithSystemUid(),
                 "Only profile owner, device owner and system may call this method.");
+    }
+
+    private ActiveAdmin enforceDeviceOwnerOrProfileOwnerOnUser0OrProfileOwnerOrganizationOwned() {
+        synchronized (getLockObject()) {
+            // Check if there is a device owner
+            ActiveAdmin deviceOwner = getActiveAdminWithPolicyForUidLocked(null,
+                    DeviceAdminInfo.USES_POLICY_DEVICE_OWNER, mInjector.binderGetCallingUid());
+            if (deviceOwner != null) return deviceOwner;
+
+            ActiveAdmin profileOwner = getActiveAdminWithPolicyForUidLocked(null,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, mInjector.binderGetCallingUid());
+
+            // Check if there is a profile owner of an organization owned device
+            if (isProfileOwnerOfOrganizationOwnedDevice(profileOwner)) return profileOwner;
+
+            // Check if there is a profile owner called on user 0
+            if (profileOwner != null) {
+                enforceCallerSystemUserHandle();
+                return profileOwner;
+            }
+        }
+        throw new SecurityException("No active admin found");
     }
 
     private void enforceProfileOwnerOrFullCrossUsersPermission(int userId) {
