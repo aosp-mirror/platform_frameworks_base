@@ -536,6 +536,11 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   overlayable_item_boz.policies |= PolicyFlags::ODM_PARTITION;
   overlayable_item_boz.policies |= PolicyFlags::OEM_PARTITION;
 
+  OverlayableItem overlayable_item_actor_config(std::make_shared<Overlayable>(
+      "ActorConfig", "overlay://theme"));
+  overlayable_item_actor_config.policies |= PolicyFlags::SIGNATURE;
+  overlayable_item_actor_config.policies |= PolicyFlags::ACTOR_SIGNATURE;
+
   OverlayableItem overlayable_item_biz(std::make_shared<Overlayable>(
       "Other", "overlay://customization"));
   overlayable_item_biz.comment ="comment";
@@ -548,6 +553,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
           .SetOverlayable("com.app.a:bool/baz", overlayable_item_baz)
           .SetOverlayable("com.app.a:bool/boz", overlayable_item_boz)
           .SetOverlayable("com.app.a:bool/biz", overlayable_item_biz)
+          .SetOverlayable("com.app.a:bool/actor_config", overlayable_item_actor_config)
           .AddValue("com.app.a:bool/fiz", ResourceUtils::TryParseBool("true"))
           .Build();
 
@@ -596,6 +602,15 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   EXPECT_THAT(overlayable_item.policies, Eq(PolicyFlags::SIGNATURE
                                             | PolicyFlags::ODM_PARTITION
                                             | PolicyFlags::OEM_PARTITION));
+
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/actor_config"));
+  ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(overlayable_item.overlayable->name, Eq("ActorConfig"));
+  EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://theme"));
+  EXPECT_THAT(overlayable_item.policies, Eq(PolicyFlags::SIGNATURE
+                                            | PolicyFlags::ACTOR_SIGNATURE));
 
   search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/biz"));
   ASSERT_TRUE(search_result);

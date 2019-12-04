@@ -67,6 +67,14 @@ TEST(PoliciesTests, PoliciesToBitmaskResults) {
 
   const auto bitmask10 = PoliciesToBitmaskResult({"system "});
   ASSERT_FALSE(bitmask10);
+
+  const auto bitmask11 = PoliciesToBitmaskResult({"signature"});
+  ASSERT_TRUE(bitmask11);
+  ASSERT_EQ(*bitmask11, PolicyFlags::SIGNATURE);
+
+  const auto bitmask12 = PoliciesToBitmaskResult({"actor"});
+  ASSERT_TRUE(bitmask12);
+  ASSERT_EQ(*bitmask12, PolicyFlags::ACTOR_SIGNATURE);
 }
 
 TEST(PoliciesTests, BitmaskToPolicies) {
@@ -91,6 +99,14 @@ TEST(PoliciesTests, BitmaskToPolicies) {
   ASSERT_EQ(policies3[3], "public");
   ASSERT_EQ(policies3[4], "system");
   ASSERT_EQ(policies3[5], "vendor");
+
+  const auto policies4 = BitmaskToPolicies(PolicyFlags::SIGNATURE);
+  ASSERT_EQ(1, policies4.size());
+  ASSERT_EQ(policies4[0], "signature");
+
+  const auto policies5 = BitmaskToPolicies(PolicyFlags::ACTOR_SIGNATURE);
+  ASSERT_EQ(1, policies5.size());
+  ASSERT_EQ(policies5[0], "actor");
 }
 
 }  // namespace android::idmap2

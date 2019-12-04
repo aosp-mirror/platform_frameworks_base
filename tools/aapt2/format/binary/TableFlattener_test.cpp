@@ -775,6 +775,7 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayable) {
   std::string name_three = "com.app.test:integer/overlayable_three";
   OverlayableItem overlayable_item_three(group_one);
   overlayable_item_three.policies |= PolicyFlags::SIGNATURE;
+  overlayable_item_three.policies |= PolicyFlags::ACTOR_SIGNATURE;
 
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
@@ -828,7 +829,8 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayable) {
   result_overlayable = search_result.value().entry->overlayable_item.value();
   EXPECT_EQ(result_overlayable.overlayable->name, "OtherName");
   EXPECT_EQ(result_overlayable.overlayable->actor, "overlay://customization");
-  EXPECT_EQ(result_overlayable.policies, PolicyFlags::SIGNATURE);
+  EXPECT_EQ(result_overlayable.policies, PolicyFlags::SIGNATURE
+                                           | PolicyFlags::ACTOR_SIGNATURE);
 }
 
 TEST_F(TableFlattenerTest, FlattenOverlayableNoPolicyFails) {

@@ -279,17 +279,25 @@ TEST(IdmapTests, CreateIdmapDataFromApkAssetsSharedLibOverlay) {
 
   const auto& target_entries = data->GetTargetEntries();
   ASSERT_EQ(target_entries.size(), 4U);
-  ASSERT_TARGET_ENTRY(target_entries[0], 0x7f010000, Res_value::TYPE_DYNAMIC_REFERENCE, 0x00010000);
-  ASSERT_TARGET_ENTRY(target_entries[1], 0x7f02000c, Res_value::TYPE_DYNAMIC_REFERENCE, 0x00020000);
-  ASSERT_TARGET_ENTRY(target_entries[2], 0x7f02000e, Res_value::TYPE_DYNAMIC_REFERENCE, 0x00020001);
-  ASSERT_TARGET_ENTRY(target_entries[3], 0x7f02000f, Res_value::TYPE_DYNAMIC_REFERENCE, 0x00020002);
+  ASSERT_TARGET_ENTRY(target_entries[0], R::target::integer::int1,
+                      Res_value::TYPE_DYNAMIC_REFERENCE, R::overlay_shared::integer::int1);
+  ASSERT_TARGET_ENTRY(target_entries[1], R::target::string::str1, Res_value::TYPE_DYNAMIC_REFERENCE,
+                      R::overlay_shared::string::str1);
+  ASSERT_TARGET_ENTRY(target_entries[2], R::target::string::str3, Res_value::TYPE_DYNAMIC_REFERENCE,
+                      R::overlay_shared::string::str3);
+  ASSERT_TARGET_ENTRY(target_entries[3], R::target::string::str4, Res_value::TYPE_DYNAMIC_REFERENCE,
+                      R::overlay_shared::string::str4);
 
   const auto& overlay_entries = data->GetOverlayEntries();
   ASSERT_EQ(target_entries.size(), 4U);
-  ASSERT_OVERLAY_ENTRY(overlay_entries[0], 0x00010000, 0x7f010000);
-  ASSERT_OVERLAY_ENTRY(overlay_entries[1], 0x00020000, 0x7f02000c);
-  ASSERT_OVERLAY_ENTRY(overlay_entries[2], 0x00020001, 0x7f02000e);
-  ASSERT_OVERLAY_ENTRY(overlay_entries[3], 0x00020002, 0x7f02000f);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[0], R::overlay_shared::integer::int1,
+                       R::target::integer::int1);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[1], R::overlay_shared::string::str1,
+                       R::target::string::str1);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[2], R::overlay_shared::string::str3,
+                       R::target::string::str3);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[3], R::overlay_shared::string::str4,
+                       R::target::string::str4);
 }
 
 TEST(IdmapTests, CreateIdmapDataDoNotRewriteNonOverlayResourceId) {

@@ -1682,7 +1682,6 @@ struct ResTable_overlayable_policy_header
    * Flags for a bitmask for all possible overlayable policy options.
    *
    * Any changes to this set should also update aidl/android/os/OverlayablePolicy.aidl
-   * and proto/OverlayablePolicy.proto.
    */
   enum PolicyFlags : uint32_t {
     // Base
@@ -1703,8 +1702,8 @@ struct ResTable_overlayable_policy_header
     // partition before an upgrade to overlay these resources.
     PRODUCT_PARTITION = 0x00000008,
 
-    // The overlay must be signed with the same signature as the actor of the target resource,
-    // which can be separate or the same as the target package with the resource.
+    // The overlay must be signed with the same signature as the package containing the target
+    // resource
     SIGNATURE = 0x00000010,
 
     // The overlay must reside of the odm partition or must have existed on the odm
@@ -1714,6 +1713,10 @@ struct ResTable_overlayable_policy_header
     // The overlay must reside of the oem partition or must have existed on the oem
     // partition before an upgrade to overlay these resources.
     OEM_PARTITION = 0x00000040,
+
+    // The overlay must be signed with the same signature as the actor declared for the target
+    // resource
+    ACTOR_SIGNATURE = 0x00000080,
   };
 
   using PolicyBitmask = uint32_t;

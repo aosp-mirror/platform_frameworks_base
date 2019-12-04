@@ -21,6 +21,7 @@ import static com.android.server.om.OverlayManagerService.TAG;
 
 import android.annotation.NonNull;
 import android.content.om.OverlayInfo;
+import android.content.om.OverlayableInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.Build.VERSION_CODES;
@@ -29,9 +30,8 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Slog;
 
-import com.android.server.om.OverlayManagerServiceImpl.PackageManagerHelper;
-
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Handle the creation and deletion of idmap files.
@@ -55,11 +55,11 @@ class IdmapManager {
         VENDOR_IS_Q_OR_LATER = isQOrLater;
     }
 
-    private final PackageManagerHelper mPackageManager;
+    private final OverlayableInfoCallback mOverlayableCallback;
     private final IdmapDaemon mIdmapDaemon;
 
-    IdmapManager(final PackageManagerHelper packageManager) {
-        mPackageManager = packageManager;
+    IdmapManager(final OverlayableInfoCallback verifyCallback) {
+        mOverlayableCallback = verifyCallback;
         mIdmapDaemon = IdmapDaemon.getInstance();
     }
 
@@ -151,9 +151,14 @@ class IdmapManager {
         int fulfilledPolicies = OverlayablePolicy.PUBLIC;
 
         // Overlay matches target signature
-        if (mPackageManager.signaturesMatching(targetPackage.packageName,
+        if (mOverlayableCallback.signaturesMatching(targetPackage.packageName,
                 overlayPackage.packageName, userId)) {
             fulfilledPolicies |= OverlayablePolicy.SIGNATURE;
+        }
+
+        // Overlay matches actor signature
+        if (matchesActorSignature(targetPackage, overlayPackage, userId)) {
+            fulfilledPolicies |= OverlayablePolicy.ACTOR_SIGNATURE;
         }
 
         // Vendor partition (/vendor)
@@ -183,5 +188,27 @@ class IdmapManager {
         }
 
         return fulfilledPolicies;
+    }
+
+    private boolean matchesActorSignature(@NonNull PackageInfo targetPackage,
+            @NonNull PackageInfo overlayPackage, int userId) {
+        String targetOverlayableName = overlayPackage.targetOverlayableName;
+        if (targetOverlayableName != null) {
+            try {
+                OverlayableInfo overlayableInfo = mOverlayableCallback.getOverlayableForTarget(
+                        targetPackage.packageName, targetOverlayableName, userId);
+                if (overlayableInfo != null) {
+                    String actorPackageName = OverlayActorEnforcer.getPackageNameForActor(
+                            overlayableInfo.actor, mOverlayableCallback.getNamedActors()).first;
+                    if (mOverlayableCallback.signaturesMatching(actorPackageName,
+                            overlayPackage.packageName, userId)) {
+                        return true;
+                    }
+                }
+            } catch (IOException ignored) {
+            }
+        }
+
+        return false;
     }
 }

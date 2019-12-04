@@ -29,6 +29,7 @@ using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
 namespace android::idmap2::policy {
 
+constexpr const char* kPolicyActor = "actor";
 constexpr const char* kPolicyOdm = "odm";
 constexpr const char* kPolicyOem = "oem";
 constexpr const char* kPolicyProduct = "product";
@@ -37,8 +38,9 @@ constexpr const char* kPolicySignature = "signature";
 constexpr const char* kPolicySystem = "system";
 constexpr const char* kPolicyVendor = "vendor";
 
-inline static const std::array<std::pair<StringPiece, PolicyFlags>, 7> kPolicyStringToFlag = {
-    std::pair{kPolicyOdm, PolicyFlags::ODM_PARTITION},
+inline static const std::array<std::pair<StringPiece, PolicyFlags>, 8> kPolicyStringToFlag = {
+    std::pair{kPolicyActor, PolicyFlags::ACTOR_SIGNATURE},
+    {kPolicyOdm, PolicyFlags::ODM_PARTITION},
     {kPolicyOem, PolicyFlags::OEM_PARTITION},
     {kPolicyProduct, PolicyFlags::PRODUCT_PARTITION},
     {kPolicyPublic, PolicyFlags::PUBLIC},

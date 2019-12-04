@@ -28,4 +28,5 @@ interface OverlayablePolicy {
   const int SIGNATURE = 0x00000010;
   const int ODM_PARTITION = 0x00000020;
   const int OEM_PARTITION = 0x00000040;
+  const int ACTOR_SIGNATURE = 0x00000080;
 }

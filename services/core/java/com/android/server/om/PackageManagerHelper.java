@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-#ifndef IDMAP2_TESTS_TESTCONSTANTS_H
-#define IDMAP2_TESTS_TESTCONSTANTS_H
+package com.android.server.om;
 
-namespace android::idmap2::TestConstants {
+import android.annotation.NonNull;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 
-constexpr const auto TARGET_CRC = 0x41c60c8c;
-constexpr const auto TARGET_CRC_STRING = "41c60c8c";
+import java.util.List;
 
-constexpr const auto OVERLAY_CRC = 0xc054fb26;
-constexpr const auto OVERLAY_CRC_STRING = "c054fb26";
-
-}  // namespace android::idmap2::TestConstants
-
-#endif  // IDMAP2_TESTS_TESTCONSTANTS_H
+/**
+ * Delegate for {@link PackageManager} and {@link PackageManagerInternal} functionality,
+ * separated for easy testing.
+ *
+ * @hide
+ */
+interface PackageManagerHelper {
+    PackageInfo getPackageInfo(@NonNull String packageName, int userId);
+    boolean signaturesMatching(@NonNull String pkgName1, @NonNull String pkgName2, int userId);
+    List<PackageInfo> getOverlayPackages(int userId);
+}
