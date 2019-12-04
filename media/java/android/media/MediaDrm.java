@@ -36,9 +36,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -203,6 +206,16 @@ public final class MediaDrm implements AutoCloseable {
                 securityLevel);
     }
 
+    /**
+     * @return list of crypto schemes (as {@link UUID}s) for which
+     * {@link #isCryptoSchemeSupported(UUID)} returns true; each {@link UUID}
+     * can be used as input to create {@link MediaDrm} objects via {@link #MediaDrm(UUID)}.
+     */
+    public static final @NonNull List<UUID> getSupportedCryptoSchemes(){
+        byte[] uuidBytes = getSupportedCryptoSchemesNative();
+        return getUUIDsFromByteArray(uuidBytes);
+    }
+
     private static final byte[] getByteArrayFromUUID(@NonNull UUID uuid) {
         long msb = uuid.getMostSignificantBits();
         long lsb = uuid.getLeastSignificantBits();
@@ -215,6 +228,28 @@ public final class MediaDrm implements AutoCloseable {
 
         return uuidBytes;
     }
+
+    private static final UUID getUUIDFromByteArray(@NonNull byte[] uuidBytes, int off) {
+        long msb = 0;
+        long lsb = 0;
+
+        for (int i = 0; i < 8; ++i) {
+            msb = (msb << 8) | (0xffl & uuidBytes[off + i]);
+            lsb = (lsb << 8) | (0xffl & uuidBytes[off + i + 8]);
+        }
+
+        return new UUID(msb, lsb);
+    }
+
+    private static final List<UUID> getUUIDsFromByteArray(@NonNull byte[] uuidBytes) {
+        Set<UUID> uuids = new LinkedHashSet<>();
+        for (int off = 0; off < uuidBytes.length; off+=16) {
+            uuids.add(getUUIDFromByteArray(uuidBytes, off));
+        }
+        return new ArrayList<>(uuids);
+    }
+
+    private static final native byte[] getSupportedCryptoSchemesNative();
 
     private static final native boolean isCryptoSchemeSupportedNative(
             @NonNull byte[] uuid, @Nullable String mimeType, @SecurityLevel int securityLevel);

@@ -27,6 +27,7 @@
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 
+#include <android/hardware/drm/1.3/IDrmFactory.h>
 #include <binder/Parcel.h>
 #include <binder/PersistableBundle.h>
 #include <cutils/properties.h>
@@ -38,7 +39,7 @@
 #include <mediadrm/IDrm.h>
 
 using ::android::os::PersistableBundle;
-
+namespace drm = ::android::hardware::drm;
 
 namespace android {
 
@@ -969,6 +970,26 @@ DrmPlugin::SecurityLevel jintToSecurityLevel(jint jlevel) {
         level = DrmPlugin::kSecurityLevelUnknown;
     }
     return level;
+}
+
+static jbyteArray android_media_MediaDrm_getSupportedCryptoSchemesNative(JNIEnv *env) {
+    std::vector<uint8_t> bv;
+    for (auto &factory : DrmUtils::MakeDrmFactories()) {
+        sp<drm::V1_3::IDrmFactory> factoryV1_3 = drm::V1_3::IDrmFactory::castFrom(factory);
+        if (factoryV1_3 == nullptr) {
+            continue;
+        }
+        factoryV1_3->getSupportedCryptoSchemes(
+            [&](const hardware::hidl_vec<hardware::hidl_array<uint8_t, 16>>& schemes) {
+                for (const auto &scheme : schemes) {
+                    bv.insert(bv.end(), scheme.data(), scheme.data() + scheme.size());
+                }
+            });
+    }
+
+    jbyteArray jUuidBytes = env->NewByteArray(bv.size());
+    env->SetByteArrayRegion(jUuidBytes, 0, bv.size(), reinterpret_cast<const jbyte *>(bv.data()));
+    return jUuidBytes;
 }
 
 static jboolean android_media_MediaDrm_isCryptoSchemeSupportedNative(
@@ -1940,6 +1961,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "native_setup", "(Ljava/lang/Object;[BLjava/lang/String;)V",
       (void *)android_media_MediaDrm_native_setup },
+
+    { "getSupportedCryptoSchemesNative", "()[B",
+      (void *)android_media_MediaDrm_getSupportedCryptoSchemesNative },
 
     { "isCryptoSchemeSupportedNative", "([BLjava/lang/String;I)Z",
       (void *)android_media_MediaDrm_isCryptoSchemeSupportedNative },
