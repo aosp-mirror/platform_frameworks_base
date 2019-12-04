@@ -17,7 +17,6 @@
 package com.android.server.input;
 
 import android.text.TextUtils;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -29,7 +28,9 @@ import org.xmlpull.v1.XmlPullParser;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 class ConfigurationProcessor {
@@ -86,9 +87,9 @@ class ConfigurationProcessor {
      * the second item in the pair is the display port.
      */
     @VisibleForTesting
-    static List<Pair<String, String>> processInputPortAssociations(InputStream xml)
+    static Map<String, Integer> processInputPortAssociations(InputStream xml)
             throws Exception {
-        List<Pair<String, String>> associations = new ArrayList<>();
+        Map<String, Integer> associations = new HashMap<String, Integer>();
         try (InputStreamReader confReader = new InputStreamReader(xml)) {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(confReader);
@@ -101,19 +102,18 @@ class ConfigurationProcessor {
                     break;
                 }
                 String inputPort = parser.getAttributeValue(null, "input");
-                String displayPort = parser.getAttributeValue(null, "display");
-                if (TextUtils.isEmpty(inputPort) || TextUtils.isEmpty(displayPort)) {
+                String displayPortStr = parser.getAttributeValue(null, "display");
+                if (TextUtils.isEmpty(inputPort) || TextUtils.isEmpty(displayPortStr)) {
                     // This is likely an error by an OEM during device configuration
                     Slog.wtf(TAG, "Ignoring incomplete entry");
                     continue;
                 }
                 try {
-                    Integer.parseUnsignedInt(displayPort);
+                    int displayPort = Integer.parseUnsignedInt(displayPortStr);
+                    associations.put(inputPort, displayPort);
                 } catch (NumberFormatException e) {
                     Slog.wtf(TAG, "Display port should be an integer");
-                    continue;
                 }
-                associations.add(new Pair<>(inputPort, displayPort));
             }
         }
         return associations;
