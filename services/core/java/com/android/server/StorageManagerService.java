@@ -1556,8 +1556,6 @@ class StorageManagerService extends IStorageManager.Stub
     public StorageManagerService(Context context) {
         sSelf = this;
 
-        updateFusePropFromSettings();
-
         // Snapshot feature flag used for this boot
         SystemProperties.set(StorageManager.PROP_ISOLATED_STORAGE_SNAPSHOT, Boolean.toString(
                 SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, true)));
@@ -1757,6 +1755,7 @@ class StorageManagerService extends IStorageManager.Stub
     private void bootCompleted() {
         mBootCompleted = true;
         mHandler.obtainMessage(H_BOOT_COMPLETED).sendToTarget();
+        updateFusePropFromSettings();
     }
 
     private void handleBootCompleted() {
