@@ -150,6 +150,27 @@ public final class TelephonyPermissions {
         return false;
     }
 
+    /**
+     * Check whether the app with the given pid/uid can read phone state.
+     *
+     * <p>This method behaves in one of the following ways:
+     * <ul>
+     *   <li>return true: if the caller has the READ_PRIVILEGED_PHONE_STATE permission, the
+     *       READ_PHONE_STATE runtime permission, or carrier privileges on the given subId.
+     *   <li>throw SecurityException: if the caller didn't declare any of these permissions, or, for
+     *       apps which support runtime permissions, if the caller does not currently have any of
+     *       these permissions.
+     *   <li>return false: if the caller lacks all of these permissions and doesn't support runtime
+     *       permissions. This implies that the user revoked the ability to read phone state
+     *       manually (via AppOps). In this case we can't throw as it would break app compatibility,
+     *       so we return false to indicate that the calling function should return dummy data.
+     * </ul>
+     *
+     * <p>Note: for simplicity, this method always returns false for callers using legacy
+     * permissions and who have had READ_PHONE_STATE revoked, even if they are carrier-privileged.
+     * Such apps should migrate to runtime permissions or stop requiring READ_PHONE_STATE on P+
+     * devices.
+     */
     @VisibleForTesting
     public static boolean checkReadPhoneState(
             Context context, Supplier<ITelephony> telephonySupplier, int subId, int pid, int uid,
@@ -202,6 +223,20 @@ public final class TelephonyPermissions {
                     callingPackage, message);
     }
 
+    /**
+     * Check whether the app with the given pid/uid can read phone state, or has carrier
+     * privileges on any active subscription.
+     *
+     * <p>If the app does not have carrier privilege, this method will return {@code false} instead
+     * of throwing a SecurityException. Therefore, the callers cannot tell the difference
+     * between M+ apps which declare the runtime permission but do not have it, and pre-M apps
+     * which declare the static permission but had access revoked via AppOps. Apps in the former
+     * category expect SecurityExceptions; apps in the latter don't. So this method is suitable for
+     * use only if the behavior in both scenarios is meant to be identical.
+     *
+     * @return {@code true} if the app can read phone state or has carrier privilege;
+     *         {@code false} otherwise.
+     */
     @VisibleForTesting
     public static boolean checkReadPhoneStateOnAnyActiveSub(
             Context context, Supplier<ITelephony> telephonySupplier, int pid, int uid,
@@ -449,6 +484,11 @@ public final class TelephonyPermissions {
                 context, TELEPHONY_SUPPLIER, subId, pid, uid, callingPackage);
     }
 
+    /**
+     * Check whether the app with the given pid/uid can read the call log.
+     * @return {@code true} if the specified app has the read call log permission and AppOpp granted
+     *      to it, {@code false} otherwise.
+     */
     @VisibleForTesting
     public static boolean checkReadCallLog(
             Context context, Supplier<ITelephony> telephonySupplier, int subId, int pid, int uid,
@@ -485,6 +525,12 @@ public final class TelephonyPermissions {
                 callingPackage, message);
     }
 
+    /**
+     * Returns whether the caller can read phone numbers.
+     *
+     * <p>Besides apps with the ability to read phone state per {@link #checkReadPhoneState}, the
+     * default SMS app and apps with READ_SMS or READ_PHONE_NUMBERS can also read phone numbers.
+     */
     @VisibleForTesting
     public static boolean checkReadPhoneNumber(
             Context context, Supplier<ITelephony> telephonySupplier, int subId, int pid, int uid,
@@ -523,10 +569,10 @@ public final class TelephonyPermissions {
         } catch (SecurityException readPhoneNumberSecurityException) {
         }
 
-        throw new SecurityException(message + ": Neither user " + uid +
-                " nor current process has " + android.Manifest.permission.READ_PHONE_STATE +
-                ", " + android.Manifest.permission.READ_SMS + ", or " +
-                android.Manifest.permission.READ_PHONE_NUMBERS);
+        throw new SecurityException(message + ": Neither user " + uid
+                + " nor current process has " + android.Manifest.permission.READ_PHONE_STATE
+                + ", " + android.Manifest.permission.READ_SMS + ", or "
+                + android.Manifest.permission.READ_PHONE_NUMBERS);
     }
 
     /**
@@ -537,8 +583,8 @@ public final class TelephonyPermissions {
      */
     public static void enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(
             Context context, int subId, String message) {
-        if (context.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_PHONE_STATE) ==
-                PERMISSION_GRANTED) {
+        if (context.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+                == PERMISSION_GRANTED) {
             return;
         }
 
@@ -580,8 +626,8 @@ public final class TelephonyPermissions {
         }
 
         if (DBG) {
-            Rlog.d(LOG_TAG, "No READ_PRIVILEDED_PHONE_STATE permission, " +
-                    "check carrier privilege next.");
+            Rlog.d(LOG_TAG, "No READ_PRIVILEDED_PHONE_STATE permission, "
+                    + "check carrier privilege next.");
         }
 
         enforceCallingOrSelfCarrierPrivilege(subId, message);
@@ -606,8 +652,8 @@ public final class TelephonyPermissions {
 
     private static void enforceCarrierPrivilege(
             Supplier<ITelephony> telephonySupplier, int subId, int uid, String message) {
-        if (getCarrierPrivilegeStatus(telephonySupplier, subId, uid) !=
-                TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+        if (getCarrierPrivilegeStatus(telephonySupplier, subId, uid)
+                != TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
             if (DBG) Rlog.e(LOG_TAG, "No Carrier Privilege.");
             throw new SecurityException(message);
         }
