@@ -3134,14 +3134,11 @@ public class ConnectivityServiceTest {
                 .addTransportType(TRANSPORT_CELLULAR).build();
         final TestNetworkCallback cellCallback = new TestNetworkCallback();
         mCm.requestNetwork(cellRequest, cellCallback);
-        // NOTE: This request causes the network's capabilities to change. This
-        // is currently delivered before the onAvailable() callbacks.
-        // TODO: Fix this.
-        cellCallback.expectCapabilitiesWith(NET_CAPABILITY_FOREGROUND, mCellNetworkAgent);
         cellCallback.expectAvailableCallbacksValidated(mCellNetworkAgent);
         fgCallback.expectAvailableCallbacksValidated(mCellNetworkAgent);
         // Expect a network capabilities update with FOREGROUND, because the most recent
         // request causes its state to change.
+        cellCallback.expectCapabilitiesWith(NET_CAPABILITY_FOREGROUND, mCellNetworkAgent);
         callback.expectCapabilitiesWith(NET_CAPABILITY_FOREGROUND, mCellNetworkAgent);
         assertTrue(isForegroundNetwork(mCellNetworkAgent));
         assertTrue(isForegroundNetwork(mWiFiNetworkAgent));
