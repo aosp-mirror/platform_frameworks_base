@@ -17,6 +17,7 @@
 package android.hardware.input;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
@@ -958,6 +959,41 @@ public final class InputManager {
     public InputMonitor monitorGestureInput(String name, int displayId) {
         try {
             return mIm.monitorGestureInput(name, displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Add a runtime association between the input port and the display port. This overrides any
+     * static associations.
+     * @param inputPort The port of the input device.
+     * @param displayPort The physical port of the associated display.
+     * <p>
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY_BY_PORT}.
+     * </p>
+     * @hide
+     */
+    public void addPortAssociation(@NonNull String inputPort, int displayPort) {
+        try {
+            mIm.addPortAssociation(inputPort, displayPort);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Remove the runtime association between the input port and the display port. Any existing
+     * static association for the cleared input port will be restored.
+     * @param inputPort The port of the input device to be cleared.
+     * <p>
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY_BY_PORT}.
+     * </p>
+     * @hide
+     */
+    public void removePortAssociation(@NonNull String inputPort) {
+        try {
+            mIm.removePortAssociation(inputPort);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

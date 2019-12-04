@@ -83,11 +83,11 @@ import android.view.ViewConfiguration;
 import android.widget.Toast;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
@@ -186,6 +186,9 @@ public class InputManagerService extends IInputManager.Stub
     // The associations of input devices to displays by port. Maps from input device port (String)
     // to display id (int). Currently only accessed by InputReader.
     private final Map<String, Integer> mStaticAssociations;
+    private final Object mAssociationsLock = new Object();
+    @GuardedBy("mAssociationLock")
+    private final Map<String, Integer> mRuntimeAssociations = new HashMap<String, Integer>();
 
     private static native long nativeInit(InputManagerService service,
             Context context, MessageQueue messageQueue);
@@ -240,6 +243,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeSetCustomPointerIcon(long ptr, PointerIcon icon);
     private static native void nativeSetPointerCapture(long ptr, boolean detached);
     private static native boolean nativeCanDispatchToDisplay(long ptr, int deviceId, int displayId);
+    private static native void nativeNotifyPortAssociationsChanged(long ptr);
 
     // Input event injection constants defined in InputDispatcher.h.
     private static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
@@ -1723,6 +1727,49 @@ public class InputManagerService extends IInputManager.Stub
         nativeSetCustomPointerIcon(mPtr, icon);
     }
 
+    /**
+     * Add a runtime association between the input port and the display port. This overrides any
+     * static associations.
+     * @param inputPort The port of the input device.
+     * @param displayPort The physical port of the associated display.
+     */
+    @Override // Binder call
+    public void addPortAssociation(@NonNull String inputPort, int displayPort) {
+        if (!checkCallingPermission(
+                android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY_BY_PORT,
+                "addPortAssociation()")) {
+            throw new SecurityException(
+                    "Requires ASSOCIATE_INPUT_DEVICE_TO_DISPLAY_BY_PORT permission");
+        }
+
+        Objects.requireNonNull(inputPort);
+        synchronized (mAssociationsLock) {
+            mRuntimeAssociations.put(inputPort, displayPort);
+        }
+        nativeNotifyPortAssociationsChanged(mPtr);
+    }
+
+    /**
+     * Remove the runtime association between the input port and the display port. Any existing
+     * static association for the cleared input port will be restored.
+     * @param inputPort The port of the input device to be cleared.
+     */
+    @Override // Binder call
+    public void removePortAssociation(@NonNull String inputPort) {
+        if (!checkCallingPermission(
+                android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY_BY_PORT,
+                "clearPortAssociations()")) {
+            throw new SecurityException(
+                    "Requires ASSOCIATE_INPUT_DEVICE_TO_DISPLAY_BY_PORT permission");
+        }
+
+        Objects.requireNonNull(inputPort);
+        synchronized (mAssociationsLock) {
+            mRuntimeAssociations.remove(inputPort);
+        }
+        nativeNotifyPortAssociationsChanged(mPtr);
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
@@ -1742,6 +1789,16 @@ public class InputManagerService extends IInputManager.Stub
                 pw.print("  port: " + k);
                 pw.println("  display: " + v);
             });
+        }
+
+        synchronized (mAssociationsLock) {
+            if (!mRuntimeAssociations.isEmpty()) {
+                pw.println("Runtime Associations:");
+                mRuntimeAssociations.forEach((k, v) -> {
+                    pw.print("  port: " + k);
+                    pw.println("  display: " + v);
+                });
+            }
         }
     }
 
@@ -1766,6 +1823,7 @@ public class InputManagerService extends IInputManager.Stub
     @Override
     public void monitor() {
         synchronized (mInputFilterLock) { }
+        synchronized (mAssociationsLock) { /* Test if blocked by associations lock. */}
         nativeMonitor(mPtr);
     }
 
@@ -1930,7 +1988,7 @@ public class InputManagerService extends IInputManager.Stub
      * @return Flattened list
      */
     private static List<String> flatten(@NonNull Map<String, Integer> map) {
-        List<String> list = new ArrayList<>(map.size() * 2);
+        final List<String> list = new ArrayList<>(map.size() * 2);
         map.forEach((k, v)-> {
             list.add(k);
             list.add(v.toString());
@@ -1943,11 +2001,11 @@ public class InputManagerService extends IInputManager.Stub
      * directory.
      */
     private static Map<String, Integer> loadStaticInputPortAssociations() {
-        File baseDir = Environment.getVendorDirectory();
-        File confFile = new File(baseDir, PORT_ASSOCIATIONS_PATH);
+        final File baseDir = Environment.getVendorDirectory();
+        final File confFile = new File(baseDir, PORT_ASSOCIATIONS_PATH);
 
         try {
-            InputStream stream = new FileInputStream(confFile);
+            final InputStream stream = new FileInputStream(confFile);
             return ConfigurationProcessor.processInputPortAssociations(stream);
         } catch (FileNotFoundException e) {
             // Most of the time, file will not exist, which is expected.
@@ -1960,7 +2018,14 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback
     private String[] getInputPortAssociations() {
-        List<String> associationList = flatten(mStaticAssociations);
+        final Map<String, Integer> associations = new HashMap<>(mStaticAssociations);
+
+        // merge the runtime associations.
+        synchronized (mAssociationsLock) {
+            associations.putAll(mRuntimeAssociations);
+        }
+
+        final List<String> associationList = flatten(associations);
         return associationList.toArray(new String[0]);
     }
 
