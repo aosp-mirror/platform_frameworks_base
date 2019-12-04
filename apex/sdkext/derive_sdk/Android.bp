@@ -29,3 +29,9 @@ cc_binary {
         "libprotobuf-cpp-lite-ndk",
     ],
 }
+
+prebuilt_etc {
+    name: "derive_sdk.rc",
+    src: "derive_sdk.rc",
+    installable: false,
+}
