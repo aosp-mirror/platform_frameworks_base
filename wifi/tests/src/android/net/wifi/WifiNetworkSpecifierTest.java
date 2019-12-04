@@ -65,8 +65,10 @@ public class WifiNetworkSpecifierTest {
         assertEquals(Process.myUid(), wifiNetworkSpecifier.requestorUid);
         assertEquals(TEST_SSID, wifiNetworkSpecifier.ssidPatternMatcher.getPath());
         assertEquals(PATTERN_PREFIX, wifiNetworkSpecifier.ssidPatternMatcher.getType());
-        assertEquals(MacAddress.ALL_ZEROS_ADDRESS, wifiNetworkSpecifier.bssidPatternMatcher.first);
-        assertEquals(MacAddress.ALL_ZEROS_ADDRESS, wifiNetworkSpecifier.bssidPatternMatcher.second);
+        assertEquals(WifiManager.ALL_ZEROS_MAC_ADDRESS,
+                wifiNetworkSpecifier.bssidPatternMatcher.first);
+        assertEquals(WifiManager.ALL_ZEROS_MAC_ADDRESS,
+                wifiNetworkSpecifier.bssidPatternMatcher.second);
         assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedKeyManagement
                 .get(WifiConfiguration.KeyMgmt.NONE));
     }
@@ -210,7 +212,8 @@ public class WifiNetworkSpecifierTest {
     @Test(expected = IllegalStateException.class)
     public void testWifiNetworkSpecifierBuilderWithMatchAllBssidPattern() {
         new WifiNetworkSpecifier.Builder()
-                .setBssidPattern(MacAddress.ALL_ZEROS_ADDRESS, MacAddress.ALL_ZEROS_ADDRESS)
+                .setBssidPattern(WifiManager.ALL_ZEROS_MAC_ADDRESS,
+                        WifiManager.ALL_ZEROS_MAC_ADDRESS)
                 .build();
     }
 
@@ -265,7 +268,7 @@ public class WifiNetworkSpecifierTest {
     @Test(expected = IllegalStateException.class)
     public void testWifiNetworkSpecifierBuilderWithMatchNoneBssidPattern3() {
         new WifiNetworkSpecifier.Builder()
-                .setBssid(MacAddress.ALL_ZEROS_ADDRESS)
+                .setBssid(WifiManager.ALL_ZEROS_MAC_ADDRESS)
                 .build();
     }
 
@@ -513,7 +516,8 @@ public class WifiNetworkSpecifierTest {
 
         WifiNetworkSpecifier specifier2 =
                 new WifiNetworkSpecifier(new PatternMatcher(TEST_SSID, PATTERN_LITERAL),
-                        Pair.create(MacAddress.ALL_ZEROS_ADDRESS, MacAddress.ALL_ZEROS_ADDRESS),
+                        Pair.create(WifiManager.ALL_ZEROS_MAC_ADDRESS,
+                                WifiManager.ALL_ZEROS_MAC_ADDRESS),
                         wifiConfiguration,
                         TEST_UID, TEST_PACKAGE_NAME);
 

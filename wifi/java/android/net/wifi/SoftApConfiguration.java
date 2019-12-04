@@ -388,7 +388,7 @@ public final class SoftApConfiguration implements Parcelable {
         @NonNull
         public Builder setBssid(@Nullable MacAddress bssid) {
             if (bssid != null) {
-                Preconditions.checkArgument(!bssid.equals(MacAddress.ALL_ZEROS_ADDRESS));
+                Preconditions.checkArgument(!bssid.equals(WifiManager.ALL_ZEROS_MAC_ADDRESS));
                 Preconditions.checkArgument(!bssid.equals(MacAddress.BROADCAST_ADDRESS));
             }
             mBssid = bssid;

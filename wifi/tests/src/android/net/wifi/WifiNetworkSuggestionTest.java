@@ -294,7 +294,7 @@ public class WifiNetworkSuggestionTest {
     public void testWifiNetworkSuggestionBuilderWithInvalidAllZeroBssid() {
         new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
-                .setBssid(MacAddress.ALL_ZEROS_ADDRESS)
+                .setBssid(WifiManager.ALL_ZEROS_MAC_ADDRESS)
                 .build();
     }
 

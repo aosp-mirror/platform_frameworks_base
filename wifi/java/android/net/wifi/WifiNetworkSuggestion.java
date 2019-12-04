@@ -545,7 +545,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 }
                 if (mBssid != null
                         && (mBssid.equals(MacAddress.BROADCAST_ADDRESS)
-                        || mBssid.equals(MacAddress.ALL_ZEROS_ADDRESS))) {
+                        || mBssid.equals(WifiManager.ALL_ZEROS_MAC_ADDRESS))) {
                     throw new IllegalStateException("invalid bssid for suggestion");
                 }
                 wifiConfiguration = buildWifiConfiguration();

@@ -35,6 +35,7 @@ import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
+import android.net.MacAddress;
 import android.net.Network;
 import android.net.NetworkStack;
 import android.net.wifi.hotspot2.IProvisioningCallback;
@@ -1185,6 +1186,10 @@ public class WifiManager {
 
     /** Indicates an invalid SSID. */
     public static final String UNKNOWN_SSID = "<unknown ssid>";
+
+    /** @hide */
+    public static final MacAddress ALL_ZEROS_MAC_ADDRESS =
+            MacAddress.fromString("00:00:00:00:00:00");
 
     /* Number of currently active WifiLocks and MulticastLocks */
     @UnsupportedAppUsage
