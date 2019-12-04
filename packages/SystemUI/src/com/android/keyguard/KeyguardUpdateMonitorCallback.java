@@ -148,14 +148,6 @@ public class KeyguardUpdateMonitorCallback {
     public void onUserUnlocked() { }
 
     /**
-     * Called when boot completed.
-     *
-     * Note, this callback will only be received if boot complete occurs after registering with
-     * KeyguardUpdateMonitor.
-     */
-    public void onBootCompleted() { }
-
-    /**
      * Called when the emergency call button is pressed.
      */
     public void onEmergencyCallAction() { }

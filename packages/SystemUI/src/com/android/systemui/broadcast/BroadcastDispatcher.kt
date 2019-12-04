@@ -56,7 +56,7 @@ private const val DEBUG = false
  * a given broadcast.
  *
  * Use only for IntentFilters with actions and optionally categories. It does not support,
- * permissions, schemes, data types or data authorities.
+ * permissions, schemes, data types, data authorities or priority different than 0.
  * Cannot be used for getting sticky broadcasts.
  */
 @Singleton
@@ -104,6 +104,7 @@ open class BroadcastDispatcher @Inject constructor (
         if (filter.countDataPaths() != 0) sb.append("Filter cannot contain DataPaths. ")
         if (filter.countDataSchemes() != 0) sb.append("Filter cannot contain DataSchemes. ")
         if (filter.countDataTypes() != 0) sb.append("Filter cannot contain DataTypes. ")
+        if (filter.priority != 0) sb.append("Filter cannot modify priority. ")
         if (!TextUtils.isEmpty(sb)) throw IllegalArgumentException(sb.toString())
     }
 
