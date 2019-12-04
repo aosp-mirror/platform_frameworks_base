@@ -54,6 +54,7 @@ import android.text.TextUtils;
 import android.util.CloseGuard;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -70,6 +71,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.concurrent.Executor;
 
 /**
@@ -5177,6 +5179,7 @@ public class WifiManager {
         @Override
         public void onSuccessConfigReceived(int newNetworkId) {
             Log.d(TAG, "Easy Connect onSuccessConfigReceived callback");
+            Binder.clearCallingIdentity();
             mExecutor.execute(() -> {
                 mEasyConnectStatusCallback.onEnrolleeSuccess(newNetworkId);
             });
@@ -5185,22 +5188,28 @@ public class WifiManager {
         @Override
         public void onSuccess(int status) {
             Log.d(TAG, "Easy Connect onSuccess callback");
+            Binder.clearCallingIdentity();
             mExecutor.execute(() -> {
                 mEasyConnectStatusCallback.onConfiguratorSuccess(status);
             });
         }
 
         @Override
-        public void onFailure(int status) {
+        public void onFailure(int status, String ssid, String channelList,
+                int[] operatingClassArray) {
             Log.d(TAG, "Easy Connect onFailure callback");
+            Binder.clearCallingIdentity();
             mExecutor.execute(() -> {
-                mEasyConnectStatusCallback.onFailure(status);
+                SparseArray<int[]> channelListArray = parseDppChannelList(channelList);
+                mEasyConnectStatusCallback.onFailure(status, ssid, channelListArray,
+                        operatingClassArray);
             });
         }
 
         @Override
         public void onProgress(int status) {
             Log.d(TAG, "Easy Connect onProgress callback");
+            Binder.clearCallingIdentity();
             mExecutor.execute(() -> {
                 mEasyConnectStatusCallback.onProgress(status);
             });
@@ -5530,6 +5539,79 @@ public class WifiManager {
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Parse the list of channels the DPP enrollee reports when it fails to find an AP.
+     *
+     * @param channelList List of channels in the format defined in the DPP specification.
+     * @return A parsed sparse array, where the operating class is the key.
+     * @hide
+     */
+    @VisibleForTesting
+    public static SparseArray<int[]> parseDppChannelList(String channelList) {
+        SparseArray<int[]> channelListArray = new SparseArray<>();
+
+        if (TextUtils.isEmpty(channelList)) {
+            return channelListArray;
+        }
+        StringTokenizer str = new StringTokenizer(channelList, ",");
+        String classStr = null;
+        List<Integer> channelsInClass = new ArrayList<>();
+
+        try {
+            while (str.hasMoreElements()) {
+                String cur = str.nextToken();
+
+                /**
+                 * Example for a channel list:
+                 *
+                 * 81/1,2,3,4,5,6,7,8,9,10,11,115/36,40,44,48,118/52,56,60,64,121/100,104,108,112,
+                 * 116,120,124,128,132,136,140,0/144,124/149,153,157,161,125/165
+                 *
+                 * Detect operating class by the delimiter of '/' and use a string tokenizer with
+                 * ',' as a delimiter.
+                 */
+                int classDelim = cur.indexOf('/');
+                if (classDelim != -1) {
+                    if (classStr != null) {
+                        // Store the last channel array in the sparse array, where the operating
+                        // class is the key (as an integer).
+                        int[] channelsArray = new int[channelsInClass.size()];
+                        for (int i = 0; i < channelsInClass.size(); i++) {
+                            channelsArray[i] = channelsInClass.get(i);
+                        }
+                        channelListArray.append(Integer.parseInt(classStr), channelsArray);
+                        channelsInClass = new ArrayList<>();
+                    }
+
+                    // Init a new operating class and store the first channel
+                    classStr = cur.substring(0, classDelim);
+                    String channelStr = cur.substring(classDelim + 1);
+                    channelsInClass.add(Integer.parseInt(channelStr));
+                } else {
+                    if (classStr == null) {
+                        // Invalid format
+                        Log.e(TAG, "Cannot parse DPP channel list");
+                        return new SparseArray<>();
+                    }
+                    channelsInClass.add(Integer.parseInt(cur));
+                }
+            }
+
+            // Store the last array
+            if (classStr != null) {
+                int[] channelsArray = new int[channelsInClass.size()];
+                for (int i = 0; i < channelsInClass.size(); i++) {
+                    channelsArray[i] = channelsInClass.get(i);
+                }
+                channelListArray.append(Integer.parseInt(classStr), channelsArray);
+            }
+            return channelListArray;
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Cannot parse DPP channel list");
+            return new SparseArray<>();
         }
     }
 }

@@ -89,6 +89,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.connectivity.WifiActivityEnergyInfo;
 import android.os.test.TestLooper;
+import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 
@@ -2088,5 +2089,64 @@ public class WifiManagerTest {
         when(mWifiService.getSupportedFeatures())
                 .thenReturn(new Long(~WifiManager.WIFI_FEATURE_WAPI));
         assertFalse(mWifiManager.isWapiSupported());
+    }
+
+    /*
+     * Test that DPP channel list is parsed correctly
+     */
+    @Test
+    public void testparseDppChannelList() throws Exception {
+        String channelList = "81/1,2,3,4,5,6,7,8,9,10,11,115/36,40,44,48";
+        SparseArray<int[]> expectedResult = new SparseArray<>();
+        expectedResult.append(81, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11});
+        expectedResult.append(115, new int[]{36, 40, 44, 48});
+
+        SparseArray<int[]> result = WifiManager.parseDppChannelList(channelList);
+        assertEquals(expectedResult.size(), result.size());
+
+        int index = 0;
+        int key;
+
+        // Compare the two primitive int arrays
+        do {
+            try {
+                key = result.keyAt(index);
+            } catch (java.lang.ArrayIndexOutOfBoundsException e) {
+                break;
+            }
+            int[] expected = expectedResult.get(key);
+            int[] output = result.get(key);
+            assertEquals(expected.length, output.length);
+            for (int i = 0; i < output.length; i++) {
+                assertEquals(expected[i], output[i]);
+            }
+            index++;
+        } while (true);
+    }
+
+    /*
+     * Test that DPP channel list parser gracefully fails for invalid input
+     */
+    @Test
+    public void testparseDppChannelListWithInvalidFormats() throws Exception {
+        String channelList = "1,2,3,4,5,6,7,8,9,10,11,36,40,44,48";
+        SparseArray<int[]> result = WifiManager.parseDppChannelList(channelList);
+        assertEquals(result.size(), 0);
+
+        channelList = "ajgalskgjalskjg3-09683dh";
+        result = WifiManager.parseDppChannelList(channelList);
+        assertEquals(result.size(), 0);
+
+        channelList = "13/abc,46////";
+        result = WifiManager.parseDppChannelList(channelList);
+        assertEquals(result.size(), 0);
+
+        channelList = "11/4,5,13/";
+        result = WifiManager.parseDppChannelList(channelList);
+        assertEquals(result.size(), 0);
+
+        channelList = "/24,6";
+        result = WifiManager.parseDppChannelList(channelList);
+        assertEquals(result.size(), 0);
     }
 }
