@@ -387,29 +387,39 @@
 
     <dimen name="volume_dialog_panel_transparent_padding_right">4dp</dimen>
 
+    <dimen name="volume_dialog_panel_transparent_padding_right">8dp</dimen>
+
     <dimen name="volume_dialog_panel_transparent_padding">20dp</dimen>
 
     <dimen name="volume_dialog_stream_padding">8dp</dimen>
 
-    <dimen name="volume_dialog_panel_width">64dp</dimen>
+    <!-- the amount the volume panel should be offset at the end from the view next to it (or
+    the screen edge, in portrait-->
+    <dimen name="volume_dialog_base_margin">8dp</dimen>
+
+    <dimen name="volume_dialog_panel_width">42dip</dimen>
 
     <dimen name="volume_dialog_slider_height">175dp</dimen>
 
-    <dimen name="volume_dialog_ringer_size">64dp</dimen>
+    <dimen name="volume_dialog_row_height">252dp</dimen>
 
-    <dimen name="volume_dialog_ringer_icon_padding">20dp</dimen>
+    <dimen name="volume_dialog_ringer_size">46dip</dimen>
+
+    <dimen name="volume_dialog_ringer_icon_padding">8dp</dimen>
 
     <dimen name="volume_dialog_caption_size">64dp</dimen>
 
-    <dimen name="volume_dialog_tap_target_size">48dp</dimen>
+    <dimen name="volume_dialog_tap_target_size">46dip</dimen>
 
-    <dimen name="volume_dialog_spacer">4dp</dimen>
+    <dimen name="volume_dialog_spacer">9dip</dimen>
 
-    <dimen name="volume_dialog_slider_margin_top">14dp</dimen>
+    <dimen name="volume_dialog_slider_margin_top">-12dp</dimen>
 
-    <dimen name="volume_dialog_slider_margin_bottom">-2dp</dimen>
+    <dimen name="volume_dialog_slider_margin_bottom">-12dp</dimen>
 
-    <dimen name="volume_dialog_row_margin_bottom">8dp</dimen>
+    <dimen name="volume_dialog_row_margin_bottom">0dp</dimen>
+
+    <dimen name="volume_dialog_settings_icon_size">16dp</dimen>
 
     <dimen name="volume_dialog_elevation">9dp</dimen>
 
@@ -1164,5 +1174,12 @@
     <dimen name="dismiss_all_button_margin_top">30dp</dimen>
     <dimen name="dismiss_all_button_width">55dp</dimen>
     <dimen name="dismiss_all_fab_src_size">24dp</dimen>
+
+    <dimen name="custom_volume_dialog_seekbar_width">40dip</dimen>
+    <dimen name="custom_volume_dialog_seekbar_height">220dip</dimen>
+    <dimen name="volume_dialog_row_icon_margintop">-58dp</dimen>
+    <dimen name="volume_dialog_rows_padding_right">0.5dip</dimen>
+    <dimen name="volume_dialog_ringer_spacing">4dip</dimen>
+    <dimen name="volume_dialog_ringer_height">38dip</dimen>
 
 </resources>
