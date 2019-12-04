@@ -148,6 +148,18 @@ public @interface UnsupportedAppUsage {
     String publicAlternatives() default "";
 
     /**
+     * Override the default source position when generating an index of the annotations.
+     *
+     * <p>This is intended for use by tools that generate java source code, to point to the
+     * original source position of the annotation, rather than the position within the generated
+     * code. It should never be set manually.
+     *
+     * <p>The format of the value is "path/to/file:startline:startcol:endline:endcol" indicating
+     * the position of the annotation itself.
+     */
+    String overrideSourcePosition() default "";
+
+    /**
      * Container for {@link UnsupportedAppUsage} that allows it to be applied repeatedly to types.
      */
     @Retention(CLASS)
