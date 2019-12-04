@@ -5673,10 +5673,13 @@ package android.net.wifi {
     field public static final int SCAN_TYPE_HIGH_ACCURACY = 2; // 0x2
     field public static final int SCAN_TYPE_LOW_LATENCY = 0; // 0x0
     field public static final int SCAN_TYPE_LOW_POWER = 1; // 0x1
+    field public static final int WIFI_BAND_24_5_6_GHZ = 11; // 0xb
+    field public static final int WIFI_BAND_24_5_WITH_DFS_6_GHZ = 15; // 0xf
     field public static final int WIFI_BAND_24_GHZ = 1; // 0x1
     field public static final int WIFI_BAND_5_GHZ = 2; // 0x2
     field public static final int WIFI_BAND_5_GHZ_DFS_ONLY = 4; // 0x4
     field public static final int WIFI_BAND_5_GHZ_WITH_DFS = 6; // 0x6
+    field public static final int WIFI_BAND_6_GHZ = 8; // 0x8
     field public static final int WIFI_BAND_BOTH = 3; // 0x3
     field public static final int WIFI_BAND_BOTH_WITH_DFS = 7; // 0x7
     field public static final int WIFI_BAND_UNSPECIFIED = 0; // 0x0
