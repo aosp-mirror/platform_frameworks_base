@@ -578,7 +578,7 @@ public class AppIdleHistory {
                 }
             }
         } catch (IOException | XmlPullParserException e) {
-            Slog.e(TAG, "Unable to read app idle file for user " + userId);
+            Slog.e(TAG, "Unable to read app idle file for user " + userId, e);
         } finally {
             IoUtils.closeQuietly(fis);
         }
@@ -608,6 +608,11 @@ public class AppIdleHistory {
             final int N = userHistory.size();
             for (int i = 0; i < N; i++) {
                 String packageName = userHistory.keyAt(i);
+                // Skip any unexpected null package names
+                if (packageName == null) {
+                    Slog.w(TAG, "Skipping App Idle write for unexpected null package");
+                    continue;
+                }
                 AppUsageHistory history = userHistory.valueAt(i);
                 xml.startTag(null, TAG_PACKAGE);
                 xml.attribute(null, ATTR_NAME, packageName);
@@ -641,7 +646,7 @@ public class AppIdleHistory {
             appIdleFile.finishWrite(fos);
         } catch (Exception e) {
             appIdleFile.failWrite(fos);
-            Slog.e(TAG, "Error writing app idle file for user " + userId);
+            Slog.e(TAG, "Error writing app idle file for user " + userId, e);
         }
     }
 
