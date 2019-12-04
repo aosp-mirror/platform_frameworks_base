@@ -1522,10 +1522,6 @@
     <string name="submit" msgid="1602335572089911941">"Envoyer"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"L\'application de conduite est en cours d\'exécution"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Touchez pour quitter l\'application de conduite."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Partage de connexion ou point d\'accès sans fil activé"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"Touchez pour configurer."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Le partage de connexion est désactivé"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Communiquez avec votre administrateur pour obtenir plus de détails"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Précédent"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Suivante"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Passer"</string>

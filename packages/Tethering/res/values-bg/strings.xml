@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Има активна споделена връзка или безжична точка за достъп"</string>
+    <string name="tethered_notification_message" msgid="2113628520792055377">"Докоснете, за да настроите."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Функцията за тетъринг е деактивирана"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Свържете се с администратора си за подробности"</string>
+</resources>
