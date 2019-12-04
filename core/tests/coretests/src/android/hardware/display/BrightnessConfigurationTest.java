@@ -115,10 +115,26 @@ public class BrightnessConfigurationTest {
     }
 
     @Test
+    public void testLuxMultipliersMustBePositive() {
+        BrightnessConfiguration.Builder config = new BrightnessConfiguration.Builder(
+                LUX_LEVELS, NITS_LEVELS);
+        assertThrows(IllegalArgumentException.class, () -> {
+            config.setShortTermModelUpperLuxMultiplier(-1f);
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            config.setShortTermModelLowerLuxMultiplier(-1f);
+        });
+    }
+
+    @Test
     public void testParceledConfigIsEquivalent() {
         BrightnessConfiguration.Builder builder =
                 new BrightnessConfiguration.Builder(LUX_LEVELS, NITS_LEVELS);
         builder.setShouldCollectColorSamples(true);
+        builder.setShortTermModelTimeout(1234L);
+        builder.setShortTermModelLowerLuxMultiplier(0.9f);
+        builder.setShortTermModelUpperLuxMultiplier(0.2f);
         builder.addCorrectionByCategory(3,
                 BrightnessCorrection.createScaleAndTranslateLog(1.0f, 2.0f));
         builder.addCorrectionByPackageName("a.package.name",
@@ -137,6 +153,9 @@ public class BrightnessConfigurationTest {
         BrightnessConfiguration.Builder builder =
                 new BrightnessConfiguration.Builder(LUX_LEVELS, NITS_LEVELS);
         builder.setShouldCollectColorSamples(true);
+        builder.setShortTermModelTimeout(123L);
+        builder.setShortTermModelLowerLuxMultiplier(0.4f);
+        builder.setShortTermModelUpperLuxMultiplier(0.8f);
         builder.addCorrectionByCategory(3,
                 BrightnessCorrection.createScaleAndTranslateLog(1.0f, 2.0f));
         builder.addCorrectionByPackageName("a.package.name",
@@ -208,13 +227,28 @@ public class BrightnessConfigurationTest {
                 BrightnessCorrection.createScaleAndTranslateLog(1.0f, 2.0f));
         builder.addCorrectionByPackageName("a.package.name",
                 BrightnessCorrection.createScaleAndTranslateLog(1.0f, 2.0f));
+        BrightnessConfiguration correctionsDiffer = builder.build();
+        assertNotEquals(baseConfig, correctionsDiffer);
+
+        builder = new BrightnessConfiguration.Builder(LUX_LEVELS, NITS_LEVELS);
+        builder.setShouldCollectColorSamples(true);
         BrightnessConfiguration colorCollectionDiffers = builder.build();
         assertNotEquals(baseConfig, colorCollectionDiffers);
 
         builder = new BrightnessConfiguration.Builder(LUX_LEVELS, NITS_LEVELS);
-        builder.setShouldCollectColorSamples(true);
-        BrightnessConfiguration correctionsDiffer = builder.build();
-        assertNotEquals(baseConfig, correctionsDiffer);
+        builder.setShortTermModelTimeout(300L);
+        BrightnessConfiguration timeoutDiffers = builder.build();
+        assertNotEquals(baseConfig, timeoutDiffers);
+
+        builder = new BrightnessConfiguration.Builder(LUX_LEVELS, NITS_LEVELS);
+        builder.setShortTermModelLowerLuxMultiplier(0.7f);
+        BrightnessConfiguration lowerLuxDiffers = builder.build();
+        assertNotEquals(baseConfig, lowerLuxDiffers);
+
+        builder = new BrightnessConfiguration.Builder(LUX_LEVELS, NITS_LEVELS);
+        builder.setShortTermModelUpperLuxMultiplier(0.6f);
+        BrightnessConfiguration upperLuxDiffers = builder.build();
+        assertNotEquals(baseConfig, upperLuxDiffers);
     }
 
     private static void assertArrayEquals(float[] expected, float[] actual, String name) {
