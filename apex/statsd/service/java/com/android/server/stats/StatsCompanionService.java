@@ -1163,12 +1163,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 final WifiActivityEnergyInfo wifiInfo = awaitControllerInfo(wifiReceiver);
                 StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
                         wallClockNanos);
-                e.writeLong(wifiInfo.getTimeStamp());
+                e.writeLong(wifiInfo.getTimeSinceBootMillis());
                 e.writeInt(wifiInfo.getStackState());
-                e.writeLong(wifiInfo.getControllerTxTimeMillis());
-                e.writeLong(wifiInfo.getControllerRxTimeMillis());
-                e.writeLong(wifiInfo.getControllerIdleTimeMillis());
-                e.writeLong(wifiInfo.getControllerEnergyUsed());
+                e.writeLong(wifiInfo.getControllerTxDurationMillis());
+                e.writeLong(wifiInfo.getControllerRxDurationMillis());
+                e.writeLong(wifiInfo.getControllerIdleDurationMillis());
+                e.writeLong(wifiInfo.getControllerEnergyUsedMicroJoules());
                 pulledData.add(e);
             } catch (RemoteException e) {
                 Slog.e(TAG,
@@ -2183,6 +2183,20 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_ALL_TRUSTED));
                         e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_ALL_TRUSTED));
                         e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_ALL_TRUSTED));
+
+                        String perm = AppOpsManager.opToPermission(op.getOpCode());
+                        if (perm == null) {
+                            e.writeBoolean(false);
+                        } else {
+                            PermissionInfo permInfo;
+                            try {
+                                permInfo = mContext.getPackageManager().getPermissionInfo(perm, 0);
+                                e.writeBoolean(permInfo.getProtection() == PROTECTION_DANGEROUS);
+                            } catch (PackageManager.NameNotFoundException exception) {
+                                e.writeBoolean(false);
+                            }
+                        }
+
                         pulledData.add(e);
                     }
                 }

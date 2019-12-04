@@ -148,16 +148,18 @@ int32_t StreamManager::queueForPlay(const std::shared_ptr<Sound> &sound,
         sanityCheckQueue_l();
         // find an available stream, prefer one that has matching sound id.
         if (mAvailableStreams.size() > 0) {
-            newStream = *mAvailableStreams.begin();
             for (auto stream : mAvailableStreams) {
                 if (stream->getSoundID() == soundID) {
                     newStream = stream;
+                    ALOGV("%s: found soundID %d in available queue", __func__, soundID);
                     break;
                 }
             }
-            if (newStream != nullptr) {
-                newStream->setStopTimeNs(systemTime());
+            if (newStream == nullptr) {
+                ALOGV("%s: found stream in available queue", __func__);
+                newStream = *mAvailableStreams.begin();
             }
+            newStream->setStopTimeNs(systemTime());
             fromAvailableQueue = true;
         }
 
@@ -166,10 +168,12 @@ int32_t StreamManager::queueForPlay(const std::shared_ptr<Sound> &sound,
             for (auto [unused , stream] : mRestartStreams) {
                 if (!stream->getPairStream()->hasSound()) {
                     if (stream->getSoundID() == soundID) {
+                        ALOGV("%s: found soundID %d in restart queue", __func__, soundID);
                         newStream = stream;
                         fromAvailableQueue = false;
                         break;
                     } else if (newStream == nullptr) {
+                        ALOGV("%s: found stream in restart queue", __func__);
                         newStream = stream;
                     }
                 }
@@ -183,6 +187,7 @@ int32_t StreamManager::queueForPlay(const std::shared_ptr<Sound> &sound,
                     if (newStream == nullptr
                             || newStream->getPriority() > stream->getPriority()) {
                         newStream = stream;
+                        ALOGV("%s: found stream in active queue", __func__);
                     }
                 }
             }
@@ -195,6 +200,7 @@ int32_t StreamManager::queueForPlay(const std::shared_ptr<Sound> &sound,
         if (newStream == nullptr) {
             for (auto [unused, stream] : mRestartStreams) {
                 if (stream->getPairPriority() <= priority) {
+                    ALOGV("%s: evict stream from restart queue", __func__);
                     newStream = stream;
                     break;
                 }
@@ -210,6 +216,8 @@ int32_t StreamManager::queueForPlay(const std::shared_ptr<Sound> &sound,
 
         Stream *pairStream = newStream->getPairStream();
         streamID = getNextIdForStream(pairStream);
+        ALOGV("%s: newStream:%p  pairStream:%p, streamID:%d",
+                __func__, newStream, pairStream, streamID);
         pairStream->setPlay(
                 streamID, sound, soundID, leftVolume, rightVolume, priority, loop, rate);
         if (fromAvailableQueue && kPlayOnCallingThread) {

@@ -49,6 +49,7 @@ void usage(const char *name)
     printf("    -i #iterations, default 1\n");
     printf("    -l #loop looping mode, -1 forever\n");
     printf("    -p #playback_seconds, default 10\n");
+    printf("    -r #repeat soundIDs (0 or more times), default 0\n");
     printf("    -s #streams for concurrent sound playback, default 20\n");
     printf("    -t #threads, default 1\n");
     printf("    -z #snoozeSec after stopping, -1 forever, default 0\n");
@@ -112,7 +113,7 @@ void StaticCallbackManager(SoundPoolEvent event, SoundPool* soundPool, void* use
 }
 
 void testStreams(SoundPool *soundPool, const std::vector<const char *> &filenames,
-        int loop, int playSec)
+                 int loop, int repeat, int playSec)
 {
     const int64_t startTimeNs = systemTime();
     std::vector<int32_t> soundIDs;
@@ -153,23 +154,25 @@ void testStreams(SoundPool *soundPool, const std::vector<const char *> &filename
     // TODO: Use SoundPool::setCallback() for wait
 
     for (int32_t soundID : soundIDs) {
-        while (true) {
-            const int32_t streamID =
+        for (int i = 0; i <= repeat; ++i) {
+            while (true) {
+                const int32_t streamID =
                     soundPool->play(soundID, silentVol, silentVol, priority, 0 /*loop*/, rate);
-            if (streamID != 0) {
-                const int32_t events = gCallbackManager.getNumberEvents(soundID);
-                if (events != 1) {
-                   printf("WARNING: successful play for streamID:%d soundID:%d"
-                          " but callback events(%d) != 1\n", streamID, soundID, events);
-                   ++gWarnings;
+                if (streamID != 0) {
+                    const int32_t events = gCallbackManager.getNumberEvents(soundID);
+                    if (events != 1) {
+                       printf("WARNING: successful play for streamID:%d soundID:%d"
+                              " but callback events(%d) != 1\n", streamID, soundID, events);
+                       ++gWarnings;
+                    }
+                    soundPool->stop(streamID);
+                    break;
                 }
-                soundPool->stop(streamID);
-                break;
+                usleep(1000);
             }
-            usleep(1000);
+            printf("[%d]", soundID);
+            fflush(stdout);
         }
-        printf("[%d]", soundID);
-        fflush(stdout);
     }
 
     const int64_t loadTimeNs = systemTime();
@@ -178,14 +181,17 @@ void testStreams(SoundPool *soundPool, const std::vector<const char *> &filename
     // check and play (overlap with above).
     std::vector<int32_t> streamIDs;
     for (int32_t soundID : soundIDs) {
-        printf("\nplaying soundID=%d", soundID);
-        const int32_t streamID = soundPool->play(soundID, maxVol, maxVol, priority, loop, rate);
-        if (streamID == 0) {
-            printf(" failed!  ERROR");
-            ++gErrors;
-        } else {
-            printf(" streamID=%d", streamID);
-            streamIDs.emplace_back(streamID);
+        for (int i = 0; i <= repeat; ++i) {
+            printf("\nplaying soundID=%d", soundID);
+            const int32_t streamID =
+                    soundPool->play(soundID, maxVol, maxVol, priority, loop, rate);
+            if (streamID == 0) {
+                printf(" failed!  ERROR");
+                ++gErrors;
+            } else {
+                printf(" streamID=%d", streamID);
+                streamIDs.emplace_back(streamID);
+            }
         }
     }
     const int64_t playTimeNs = systemTime();
@@ -217,9 +223,10 @@ int main(int argc, char *argv[])
     int loop = 0;        // disable looping
     int maxStreams = 40; // change to have more concurrent playback streams
     int playSec = 10;
+    int repeat = 0;
     int snoozeSec = 0;
     int threadCount = 1;
-    for (int ch; (ch = getopt(argc, argv, "i:l:p:s:t:z:")) != -1; ) {
+    for (int ch; (ch = getopt(argc, argv, "i:l:p:r:s:t:z:")) != -1; ) {
         switch (ch) {
         case 'i':
             iterations = atoi(optarg);
@@ -229,6 +236,9 @@ int main(int argc, char *argv[])
             break;
         case 'p':
             playSec = atoi(optarg);
+            break;
+        case 'r':
+            repeat = atoi(optarg);
             break;
         case 's':
             maxStreams = atoi(optarg);
@@ -280,7 +290,7 @@ int main(int argc, char *argv[])
         printf("testing %zu threads\n", threads.size());
         for (auto &thread : threads) {
             thread = std::async(std::launch::async,
-                    [&]{ testStreams(soundPool.get(), filenames, loop, playSec);});
+                    [&]{ testStreams(soundPool.get(), filenames, loop, repeat, playSec);});
         }
         // automatically joins.
     }

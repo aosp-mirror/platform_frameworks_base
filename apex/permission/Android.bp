@@ -14,9 +14,12 @@
 
 apex {
     name: "com.android.permission",
-
+    defaults: ["com.android.permission-defaults"],
     manifest: "apex_manifest.json",
+}
 
+apex_defaults {
+    name: "com.android.permission-defaults",
     key: "com.android.permission.key",
     certificate: ":com.android.permission.certificate",
 }

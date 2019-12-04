@@ -17,6 +17,8 @@ package com.android.server.appsearch.impl;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.runner.AndroidJUnit4;
 
 import com.google.android.icing.proto.DocumentProto;
@@ -29,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
+@Presubmit
 public class FakeIcingTest {
     @Test
     public void query() {

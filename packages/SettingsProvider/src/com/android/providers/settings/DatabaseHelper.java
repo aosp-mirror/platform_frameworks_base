@@ -1191,19 +1191,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 81) {
-            // Add package verification setting
-            db.beginTransaction();
-            SQLiteStatement stmt = null;
-            try {
-                stmt = db.compileStatement("INSERT OR REPLACE INTO secure(name,value)"
-                        + " VALUES(?,?);");
-                loadBooleanSetting(stmt, Settings.Global.PACKAGE_VERIFIER_ENABLE,
-                        R.bool.def_package_verifier_enable);
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-                if (stmt != null) stmt.close();
-            }
+            // package_verifier_enable has been removed
             upgradeVersion = 82;
         }
 
@@ -1305,7 +1293,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
                 db.beginTransaction();
                 try {
                     String[] settingsToMove = {
-                            Settings.Global.PACKAGE_VERIFIER_ENABLE,
                             Settings.Global.PACKAGE_VERIFIER_TIMEOUT,
                             Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE
                     };
@@ -2470,9 +2457,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
             loadDefaultAnimationSettings(stmt);
 
             // --- Previously in 'secure'
-            loadBooleanSetting(stmt, Settings.Global.PACKAGE_VERIFIER_ENABLE,
-                    R.bool.def_package_verifier_enable);
-
             loadBooleanSetting(stmt, Settings.Global.WIFI_ON,
                     R.bool.def_wifi_on);
 

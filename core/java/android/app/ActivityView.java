@@ -22,11 +22,14 @@ import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.LauncherApps;
+import android.content.pm.ShortcutInfo;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -206,6 +209,32 @@ public class ActivityView extends ViewGroup implements TaskEmbedder.Host {
      */
     public boolean getSurfaceClipBounds(Rect outRect) {
         return mSurfaceView.getClipBounds(outRect);
+    }
+
+    /**
+     * Launch an activity represented by {@link ShortcutInfo} into this container.
+     * <p>The owner of this container must be allowed to access the shortcut information,
+     * as defined in {@link LauncherApps#hasShortcutHostPermission()} to use this method.
+     * <p>Activity resolved by the provided {@link ShortcutInfo} must have
+     * {@link android.R.attr#resizeableActivity} attribute set to {@code true} in order to be
+     * launched here. Also, if activity is not owned by the owner of this container, it must allow
+     * embedding and the caller must have permission to embed.
+     * <p>Note: This class must finish initializing and
+     * {@link StateCallback#onActivityViewReady(ActivityView)} callback must be triggered before
+     * this method can be called.
+     *
+     * @param shortcut the shortcut used to launch the activity.
+     * @param options for the activity.
+     * @param sourceBounds the rect containing the source bounds of the clicked icon to open
+     *                     this shortcut.
+     * @see StateCallback
+     * @see LauncherApps#startShortcut(ShortcutInfo, Rect, Bundle)
+     *
+     * @hide
+     */
+    public void startShortcutActivity(@NonNull ShortcutInfo shortcut,
+            @NonNull ActivityOptions options, @Nullable Rect sourceBounds) {
+        mTaskEmbedder.startShortcutActivity(shortcut, options, sourceBounds);
     }
 
     /**

@@ -120,7 +120,7 @@ public class AccessPointTest {
     private OsuProvider createOsuProvider() {
         Map<String, String> friendlyNames = new HashMap<>();
         friendlyNames.put("en", OSU_FRIENDLY_NAME);
-        return new OsuProvider((WifiSsid) null, friendlyNames, null, null, null, null, null);
+        return new OsuProvider((WifiSsid) null, friendlyNames, null, null, null, null);
     }
 
     @Before

@@ -50,6 +50,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.net.DhcpInfo;
@@ -116,6 +117,7 @@ public class WifiManagerTest {
     @Mock Runnable mRunnable;
     @Mock Executor mExecutor;
     @Mock Executor mAnotherExecutor;
+    @Mock ActivityManager mActivityManager;
 
     private Handler mHandler;
     private TestLooper mLooper;
@@ -178,6 +180,33 @@ public class WifiManagerTest {
 
         when(mWifiService.stopSoftAp()).thenReturn(false);
         assertFalse(mWifiManager.stopSoftAp());
+    }
+
+    /**
+     * Check the call to startSoftAp calls WifiService to startSoftAp with the provided
+     * WifiConfiguration.  Verify that the return value is propagated to the caller.
+     */
+    @Test
+    public void testStartTetheredHotspotCallsServiceWithSoftApConfig() throws Exception {
+        SoftApConfiguration mSoftApConfig = new SoftApConfiguration.Builder().build();
+        when(mWifiService.startTetheredHotspot(eq(mSoftApConfig))).thenReturn(true);
+        assertTrue(mWifiManager.startTetheredHotspot(mSoftApConfig));
+
+        when(mWifiService.startTetheredHotspot(eq(mSoftApConfig))).thenReturn(false);
+        assertFalse(mWifiManager.startTetheredHotspot(mSoftApConfig));
+    }
+
+    /**
+     * Check the call to startSoftAp calls WifiService to startSoftAp with a null config.  Verify
+     * that the return value is propagated to the caller.
+     */
+    @Test
+    public void testStartTetheredHotspotCallsServiceWithNullConfig() throws Exception {
+        when(mWifiService.startTetheredHotspot(eq(null))).thenReturn(true);
+        assertTrue(mWifiManager.startTetheredHotspot(null));
+
+        when(mWifiService.startTetheredHotspot(eq(null))).thenReturn(false);
+        assertFalse(mWifiManager.startTetheredHotspot(null));
     }
 
     /**
@@ -1148,6 +1177,43 @@ public class WifiManagerTest {
     }
 
     /**
+     * Verify that a successful call properly returns true.
+     */
+    @Test
+    public void testSetSoftApConfigurationSuccessReturnsTrue() throws Exception {
+        SoftApConfiguration apConfig = new SoftApConfiguration.Builder().build();
+
+        when(mWifiService.setSoftApConfiguration(eq(apConfig), eq(TEST_PACKAGE_NAME)))
+                .thenReturn(true);
+        assertTrue(mWifiManager.setSoftApConfiguration(apConfig));
+    }
+
+    /**
+     * Verify that a failed call properly returns false.
+     */
+    @Test
+    public void testSetSoftApConfigurationFailureReturnsFalse() throws Exception {
+        SoftApConfiguration apConfig = new SoftApConfiguration.Builder().build();
+
+        when(mWifiService.setSoftApConfiguration(eq(apConfig), eq(TEST_PACKAGE_NAME)))
+                .thenReturn(false);
+        assertFalse(mWifiManager.setSoftApConfiguration(apConfig));
+    }
+
+    /**
+     * Verify Exceptions are rethrown when underlying calls to WifiService throw exceptions.
+     */
+    @Test
+    public void testSetSoftApConfigurationRethrowsException() throws Exception {
+        doThrow(new SecurityException()).when(mWifiService).setSoftApConfiguration(any(), any());
+
+        try {
+            mWifiManager.setSoftApConfiguration(new SoftApConfiguration.Builder().build());
+            fail("setWifiApConfiguration should rethrow Exceptions from WifiService");
+        } catch (SecurityException e) { }
+    }
+
+    /**
      * Check the call to startScan calls WifiService.
      */
     @Test
@@ -1395,8 +1461,15 @@ public class WifiManagerTest {
      */
     @Test
     public void getMaxNumberOfNetworkSuggestionsPerApp() {
-        assertEquals(WifiManager.NETWORK_SUGGESTIONS_MAX_PER_APP,
-                mWifiManager.getMaxNumberOfNetworkSuggestionsPerApp());
+        when(mContext.getSystemServiceName(ActivityManager.class))
+                .thenReturn(Context.ACTIVITY_SERVICE);
+        when(mContext.getSystemService(Context.ACTIVITY_SERVICE))
+                .thenReturn(mActivityManager);
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        assertEquals(256, mWifiManager.getMaxNumberOfNetworkSuggestionsPerApp());
+
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        assertEquals(1024, mWifiManager.getMaxNumberOfNetworkSuggestionsPerApp());
     }
 
     /**
@@ -1620,7 +1693,7 @@ public class WifiManagerTest {
     @Test
     public void testGetControllerActivityEnergyInfo() throws Exception {
         WifiActivityEnergyInfo activityEnergyInfo =
-                new WifiActivityEnergyInfo(5, 3, 3, new long[]{5L, 5L, 5L}, 5, 5, 5, 5);
+                new WifiActivityEnergyInfo(5, 3, 3, 5, 5, 5, 5);
         when(mWifiService.reportActivityInfo()).thenReturn(activityEnergyInfo);
 
         assertEquals(activityEnergyInfo, mWifiManager.getControllerActivityEnergyInfo());

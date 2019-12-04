@@ -25,7 +25,7 @@ import java.util.List;
 public class RuleBinaryParser implements RuleParser {
 
     @Override
-    public List<Rule> parse(String ruleText) {
+    public List<Rule> parse(byte[] ruleBytes) {
         // TODO: Implement binary text parser.
         return null;
     }

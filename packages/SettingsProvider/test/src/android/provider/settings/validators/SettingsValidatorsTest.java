@@ -297,6 +297,18 @@ public class SettingsValidatorsTest {
     }
 
     @Test
+    public void testAccessibilityShortcutTargetValidator() {
+        assertTrue(SettingsValidators.ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR.validate(
+                "com.google.android/.AccessibilityShortcutTarget"));
+        assertTrue(SettingsValidators.ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR.validate(
+                "com.google.android"));
+        assertTrue(SettingsValidators.ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR.validate(
+                "com.google.android/.AccessibilityShortcutTarget:com.google.android"));
+        assertFalse(SettingsValidators.ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR.validate(
+                "com.google.android/.AccessibilityShortcutTarget:com.google.@android"));
+    }
+
+    @Test
     public void ensureAllBackedUpGlobalSettingsHaveValidators() {
         String offenders = getOffenders(concat(GlobalSettings.SETTINGS_TO_BACKUP,
                 Settings.Global.LEGACY_RESTORE_SETTINGS), GlobalSettingsValidators.VALIDATORS);

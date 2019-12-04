@@ -70,7 +70,8 @@ class KeepSet {
   }
 
  private:
-  friend void WriteKeepSet(const KeepSet& keep_set, io::OutputStream* out, bool minimal_keep);
+  friend void WriteKeepSet(const KeepSet& keep_set, io::OutputStream* out, bool minimal_keep,
+                           bool no_location_reference);
 
   friend bool CollectLocations(const UsageLocation& location, const KeepSet& keep_set,
                                std::set<UsageLocation>* locations);
@@ -89,7 +90,8 @@ bool CollectProguardRules(IAaptContext* context, xml::XmlResource* res, KeepSet*
 
 bool CollectResourceReferences(IAaptContext* context, ResourceTable* table, KeepSet* keep_set);
 
-void WriteKeepSet(const KeepSet& keep_set, io::OutputStream* out, bool minimal_keep);
+void WriteKeepSet(const KeepSet& keep_set, io::OutputStream* out, bool minimal_keep,
+                  bool no_location_reference);
 
 bool CollectLocations(const UsageLocation& location, const KeepSet& keep_set,
                       std::set<UsageLocation>* locations);

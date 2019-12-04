@@ -5,6 +5,7 @@
 #include "SkShader.h"
 #include "SkBlendMode.h"
 #include "core_jni_helpers.h"
+#include "src/shaders/SkRTShader.h"
 
 #include <jni.h>
 
@@ -212,6 +213,44 @@ static jlong ComposeShader_create(JNIEnv* env, jobject o, jlong matrixPtr,
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
+static jlong RuntimeShader_create(JNIEnv* env, jobject, jlong shaderFactory, jlong matrixPtr,
+        jbyteArray inputs, jlong colorSpaceHandle) {
+    SkRuntimeShaderFactory* factory = reinterpret_cast<SkRuntimeShaderFactory*>(shaderFactory);
+    AutoJavaByteArray arInputs(env, inputs);
+
+    sk_sp<SkData> fData;
+    fData = SkData::MakeWithCopy(arInputs.ptr(), arInputs.length());
+    const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
+    sk_sp<SkShader> shader = factory->make(fData, matrix);
+    ThrowIAE_IfNull(env, shader);
+
+    return reinterpret_cast<jlong>(shader.release());
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+static jlong RuntimeShader_createShaderFactory(JNIEnv* env, jobject, jstring sksl,
+        jboolean isOpaque) {
+    ScopedUtfChars strSksl(env, sksl);
+    SkRuntimeShaderFactory* shaderFactory = new SkRuntimeShaderFactory(SkString(strSksl.c_str()),
+            isOpaque == JNI_TRUE);
+    ThrowIAE_IfNull(env, shaderFactory);
+
+    return reinterpret_cast<jlong>(shaderFactory);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+static void RuntimeShader_delete(SkRuntimeShaderFactory* shaderFactory) {
+    delete shaderFactory;
+}
+
+static jlong RuntimeShader_getNativeFinalizer(JNIEnv*, jobject) {
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&RuntimeShader_delete));
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
 static const JNINativeMethod gColorMethods[] = {
     { "nativeRGBToHSV",    "(III[F)V", (void*)Color_RGBToHSV   },
     { "nativeHSVToColor",  "(I[F)I",   (void*)Color_HSVToColor }
@@ -241,6 +280,13 @@ static const JNINativeMethod gComposeShaderMethods[] = {
     { "nativeCreate",      "(JJJI)J",   (void*)ComposeShader_create     },
 };
 
+static const JNINativeMethod gRuntimeShaderMethods[] = {
+    { "nativeGetFinalizer",   "()J",    (void*)RuntimeShader_getNativeFinalizer },
+    { "nativeCreate",     "(JJ[BJ)J",  (void*)RuntimeShader_create     },
+    { "nativeCreateShaderFactory",     "(Ljava/lang/String;Z)J",
+      (void*)RuntimeShader_createShaderFactory     },
+};
+
 int register_android_graphics_Shader(JNIEnv* env)
 {
     android::RegisterMethodsOrDie(env, "android/graphics/Color", gColorMethods,
@@ -257,6 +303,8 @@ int register_android_graphics_Shader(JNIEnv* env)
                                   NELEM(gSweepGradientMethods));
     android::RegisterMethodsOrDie(env, "android/graphics/ComposeShader", gComposeShaderMethods,
                                   NELEM(gComposeShaderMethods));
+    android::RegisterMethodsOrDie(env, "android/graphics/RuntimeShader", gRuntimeShaderMethods,
+                                  NELEM(gRuntimeShaderMethods));
 
     return 0;
 }

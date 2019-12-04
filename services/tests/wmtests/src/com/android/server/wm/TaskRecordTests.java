@@ -27,6 +27,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
+import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
 
@@ -36,7 +37,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_FREE;
-import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -471,8 +471,9 @@ public class TaskRecordTests extends ActivityTestsBase {
         // Add an extra activity on top of the root one
         new ActivityBuilder(mService).setTask(task).build();
 
-        assertEquals("The root activity in the task must be reported.",
-                0, task.findRootIndex(false /* effectiveRoot*/));
+        assertEquals("The root activity in the task must be reported.", task.getChildAt(0),
+                task.getRootActivity(
+                        true /*ignoreRelinquishIdentity*/, true /*setToBottomIfNone*/));
     }
 
     /**
@@ -483,14 +484,15 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testFindRootIndex_finishing() {
         final Task task = getTestTask();
         // Add extra two activities and mark the two on the bottom as finishing.
-        final ActivityRecord activity0 = task.getChildAt(0);
+        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.finishing = true;
         final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
         activity1.finishing = true;
         new ActivityBuilder(mService).setTask(task).build();
 
         assertEquals("The first non-finishing activity in the task must be reported.",
-                2, task.findRootIndex(false /* effectiveRoot*/));
+                task.getChildAt(2), task.getRootActivity(
+                        true /*ignoreRelinquishIdentity*/, true /*setToBottomIfNone*/));
     }
 
     /**
@@ -504,7 +506,8 @@ public class TaskRecordTests extends ActivityTestsBase {
         new ActivityBuilder(mService).setTask(task).build();
 
         assertEquals("The root activity in the task must be reported.",
-                0, task.findRootIndex(true /* effectiveRoot*/));
+                task.getChildAt(0), task.getRootActivity(
+                        false /*ignoreRelinquishIdentity*/, true /*setToBottomIfNone*/));
     }
 
     /**
@@ -516,14 +519,15 @@ public class TaskRecordTests extends ActivityTestsBase {
         final Task task = getTestTask();
         // Add extra two activities. Mark the one on the bottom with "relinquishTaskIdentity" and
         // one above as finishing.
-        final ActivityRecord activity0 = task.getChildAt(0);
+        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
         final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
         activity1.finishing = true;
         new ActivityBuilder(mService).setTask(task).build();
 
         assertEquals("The first non-finishing activity and non-relinquishing task identity "
-                        + "must be reported.", 2, task.findRootIndex(true /* effectiveRoot*/));
+                + "must be reported.", task.getChildAt(2), task.getRootActivity(
+                        false /*ignoreRelinquishIdentity*/, true /*setToBottomIfNone*/));
     }
 
     /**
@@ -534,10 +538,11 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testFindRootIndex_effectiveRoot_relinquishingAndSingleActivity() {
         final Task task = getTestTask();
         // Set relinquishTaskIdentity for the only activity in the task
-        task.getChildAt(0).info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+        task.getBottomMostActivity().info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
 
         assertEquals("The root activity in the task must be reported.",
-                0, task.findRootIndex(true /* effectiveRoot*/));
+                task.getChildAt(0), task.getRootActivity(
+                        false /*ignoreRelinquishIdentity*/, true /*setToBottomIfNone*/));
     }
 
     /**
@@ -548,13 +553,14 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testFindRootIndex_effectiveRoot_relinquishingMultipleActivities() {
         final Task task = getTestTask();
         // Set relinquishTaskIdentity for all activities in the task
-        final ActivityRecord activity0 = task.getChildAt(0);
+        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
         final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
         activity1.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
 
         assertEquals("The topmost activity in the task must be reported.",
-                task.getChildCount() - 1, task.findRootIndex(true /* effectiveRoot*/));
+                task.getChildAt(task.getChildCount() - 1), task.getRootActivity(
+                        false /*ignoreRelinquishIdentity*/, true /*setToBottomIfNone*/));
     }
 
     /** Test that bottom-most activity is reported in {@link Task#getRootActivity()}. */
@@ -565,7 +571,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         new ActivityBuilder(mService).setTask(task).build();
 
         assertEquals("The root activity in the task must be reported.",
-                task.getChildAt(0), task.getRootActivity());
+                task.getBottomMostActivity(), task.getRootActivity());
     }
 
     /**
@@ -577,7 +583,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         // Add an extra activity on top of the root one
         new ActivityBuilder(mService).setTask(task).build();
         // Mark the root as finishing
-        task.getChildAt(0).finishing = true;
+        task.getBottomMostActivity().finishing = true;
 
         assertEquals("The first non-finishing activity in the task must be reported.",
                 task.getChildAt(1), task.getRootActivity());
@@ -590,13 +596,13 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testGetRootActivity_relinquishTaskIdentity() {
         final Task task = getTestTask();
         // Mark the bottom-most activity with FLAG_RELINQUISH_TASK_IDENTITY.
-        final ActivityRecord activity0 = task.getChildAt(0);
+        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
         // Add an extra activity on top of the root one.
         new ActivityBuilder(mService).setTask(task).build();
 
         assertEquals("The root activity in the task must be reported.",
-                task.getChildAt(0), task.getRootActivity());
+                task.getBottomMostActivity(), task.getRootActivity());
     }
 
     /**
@@ -607,7 +613,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testGetRootActivity_allFinishing() {
         final Task task = getTestTask();
         // Mark the bottom-most activity as finishing.
-        final ActivityRecord activity0 = task.getChildAt(0);
+        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.finishing = true;
         // Add an extra activity on top of the root one and mark it as finishing
         final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
@@ -623,7 +629,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testIsRootActivity() {
         final Task task = getTestTask();
         // Mark the bottom-most activity as finishing.
-        final ActivityRecord activity0 = task.getChildAt(0);
+        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.finishing = true;
         // Add an extra activity on top of the root one.
         final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
@@ -640,7 +646,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testIsRootActivity_allFinishing() {
         final Task task = getTestTask();
         // Mark the bottom-most activity as finishing.
-        final ActivityRecord activity0 = task.getChildAt(0);
+        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.finishing = true;
         // Add an extra activity on top of the root one and mark it as finishing
         final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
@@ -657,10 +663,10 @@ public class TaskRecordTests extends ActivityTestsBase {
     @Test
     public void testGetTaskForActivity() {
         final Task task0 = getTestTask();
-        final ActivityRecord activity0 = task0.getChildAt(0);
+        final ActivityRecord activity0 = task0.getBottomMostActivity();
 
         final Task task1 = getTestTask();
-        final ActivityRecord activity1 = task1.getChildAt(0);
+        final ActivityRecord activity1 = task1.getBottomMostActivity();
 
         assertEquals(task0.mTaskId,
                 ActivityRecord.getTaskForActivityLocked(activity0.appToken, false /* onlyRoot */));
@@ -676,7 +682,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testGetTaskForActivity_onlyRoot_finishing() {
         final Task task = getTestTask();
         // Make the current root activity finishing
-        final ActivityRecord activity0 = task.getChildAt(0);
+        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.finishing = true;
         // Add an extra activity on top - this will be the new root
         final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
@@ -699,7 +705,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testGetTaskForActivity_onlyRoot_relinquishTaskIdentity() {
         final Task task = getTestTask();
         // Make the current root activity relinquish task identity
-        final ActivityRecord activity0 = task.getChildAt(0);
+        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
         // Add an extra activity on top - this will be the new root
         final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
@@ -722,7 +728,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testGetTaskForActivity_notOnlyRoot() {
         final Task task = getTestTask();
         // Mark the bottom-most activity as finishing.
-        final ActivityRecord activity0 = task.getChildAt(0);
+        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.finishing = true;
 
         // Add an extra activity on top of the root one and make it relinquish task identity
@@ -747,7 +753,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testUpdateEffectiveIntent() {
         // Test simple case with a single activity.
         final Task task = getTestTask();
-        final ActivityRecord activity0 = task.getChildAt(0);
+        final ActivityRecord activity0 = task.getBottomMostActivity();
 
         spyOn(task);
         task.updateEffectiveIntent();
@@ -762,7 +768,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testUpdateEffectiveIntent_rootFinishing() {
         // Test simple case with a single activity.
         final Task task = getTestTask();
-        final ActivityRecord activity0 = task.getChildAt(0);
+        final ActivityRecord activity0 = task.getBottomMostActivity();
         // Mark the bottom-most activity as finishing.
         activity0.finishing = true;
         // Add an extra activity on top of the root one
@@ -782,7 +788,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testUpdateEffectiveIntent_allFinishing() {
         // Test simple case with a single activity.
         final Task task = getTestTask();
-        final ActivityRecord activity0 = task.getChildAt(0);
+        final ActivityRecord activity0 = task.getBottomMostActivity();
         // Mark the bottom-most activity as finishing.
         activity0.finishing = true;
         // Add an extra activity on top of the root one and make it relinquish task identity
@@ -818,7 +824,7 @@ public class TaskRecordTests extends ActivityTestsBase {
                 task.getResolvedOverrideConfiguration().windowConfiguration.getAppBounds());
     }
 
-    private byte[] serializeToBytes(Task r) throws IOException, XmlPullParserException {
+    private byte[] serializeToBytes(Task r) throws Exception {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             final XmlSerializer serializer = Xml.newSerializer();
             serializer.setOutput(os, "UTF-8");

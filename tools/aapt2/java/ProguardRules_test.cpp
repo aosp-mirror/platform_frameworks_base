@@ -30,7 +30,7 @@ namespace aapt {
 std::string GetKeepSetString(const proguard::KeepSet& set, bool minimal_rules) {
   std::string out;
   StringOutputStream sout(&out);
-  proguard::WriteKeepSet(set, &sout, minimal_rules);
+  proguard::WriteKeepSet(set, &sout, minimal_rules, false);
   sout.Flush();
   return out;
 }

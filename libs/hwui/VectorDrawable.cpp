@@ -135,8 +135,7 @@ const SkPath& FullPath::getUpdatedPath(bool useStagingData, SkPath* tempStagingP
     bool setFillPath = properties.getFillGradient() != nullptr ||
                        properties.getFillColor() != SK_ColorTRANSPARENT;
     if (setFillPath) {
-        SkPath::FillType ft = static_cast<SkPath::FillType>(properties.getFillType());
-        outPath->setFillType(ft);
+        outPath->setFillType(static_cast<SkPathFillType>(properties.getFillType()));
     }
     return *outPath;
 }

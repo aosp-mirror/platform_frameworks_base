@@ -33,20 +33,50 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArraySet;
 
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
+import com.android.server.SystemConfig;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Supplier;
 
 /**
  * Provides accessors and listeners for all location related settings.
  */
 public class LocationSettingsStore {
+
+    /**
+     * Listener for user-specific settings changes.
+     */
+    public interface UserSettingChangedListener {
+        /**
+         * Called when setting changes.
+         */
+        void onSettingChanged(int userId);
+    }
+
+    /**
+     * Listener for global settings changes.
+     */
+    public interface GlobalSettingChangedListener extends UserSettingChangedListener {
+        /**
+         * Called when setting changes.
+         */
+        void onSettingChanged();
+
+        @Override
+        default void onSettingChanged(int userId) {
+            onSettingChanged();
+        }
+    }
 
     private static final String LOCATION_PACKAGE_BLACKLIST = "locationPackagePrefixBlacklist";
     private static final String LOCATION_PACKAGE_WHITELIST = "locationPackagePrefixWhitelist";
@@ -63,9 +93,10 @@ public class LocationSettingsStore {
     private final LongGlobalSetting mBackgroundThrottleIntervalMs;
     private final StringListCachedSecureSetting mLocationPackageBlacklist;
     private final StringListCachedSecureSetting mLocationPackageWhitelist;
-    private final StringListCachedGlobalSetting mBackgroundThrottlePackageWhitelist;
-    private final StringListCachedGlobalSetting mIgnoreSettingsPackageWhitelist;
+    private final StringSetCachedGlobalSetting mBackgroundThrottlePackageWhitelist;
+    private final StringSetCachedGlobalSetting mIgnoreSettingsPackageWhitelist;
 
+    // TODO: get rid of handler
     public LocationSettingsStore(Context context, Handler handler) {
         mContext = context;
 
@@ -78,10 +109,12 @@ public class LocationSettingsStore {
                 LOCATION_PACKAGE_BLACKLIST, handler);
         mLocationPackageWhitelist = new StringListCachedSecureSetting(context,
                 LOCATION_PACKAGE_WHITELIST, handler);
-        mBackgroundThrottlePackageWhitelist = new StringListCachedGlobalSetting(context,
-                LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST, handler);
-        mIgnoreSettingsPackageWhitelist = new StringListCachedGlobalSetting(context,
-                LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST, handler);
+        mBackgroundThrottlePackageWhitelist = new StringSetCachedGlobalSetting(context,
+                LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
+                () -> SystemConfig.getInstance().getAllowUnthrottledLocation(), handler);
+        mIgnoreSettingsPackageWhitelist = new StringSetCachedGlobalSetting(context,
+                LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST,
+                () -> SystemConfig.getInstance().getAllowIgnoreLocationSettings(), handler);
     }
 
     /**
@@ -94,14 +127,14 @@ public class LocationSettingsStore {
     /**
      * Add a listener for changes to the location enabled setting.
      */
-    public void addOnLocationEnabledChangedListener(Runnable listener) {
+    public void addOnLocationEnabledChangedListener(UserSettingChangedListener listener) {
         mLocationMode.addListener(listener);
     }
 
     /**
      * Remove a listener for changes to the location enabled setting.
      */
-    public void removeOnLocationEnabledChangedListener(Runnable listener) {
+    public void removeOnLocationEnabledChangedListener(UserSettingChangedListener listener) {
         mLocationMode.addListener(listener);
     }
 
@@ -115,15 +148,16 @@ public class LocationSettingsStore {
     /**
      * Add a listener for changes to the currently allowed location providers.
      */
-    public void addOnLocationProvidersAllowedChangedListener(Runnable runnable) {
-        mLocationProvidersAllowed.addListener(runnable);
+    public void addOnLocationProvidersAllowedChangedListener(UserSettingChangedListener listener) {
+        mLocationProvidersAllowed.addListener(listener);
     }
 
     /**
      * Remove a listener for changes to the currently allowed location providers.
      */
-    public void removeOnLocationProvidersAllowedChangedListener(Runnable runnable) {
-        mLocationProvidersAllowed.removeListener(runnable);
+    public void removeOnLocationProvidersAllowedChangedListener(
+            UserSettingChangedListener listener) {
+        mLocationProvidersAllowed.removeListener(listener);
     }
 
     /**
@@ -136,14 +170,16 @@ public class LocationSettingsStore {
     /**
      * Add a listener for changes to the background throttle interval.
      */
-    public void addOnBackgroundThrottleIntervalChangedListener(Runnable listener) {
+    public void addOnBackgroundThrottleIntervalChangedListener(
+            GlobalSettingChangedListener listener) {
         mBackgroundThrottleIntervalMs.addListener(listener);
     }
 
     /**
      * Remove a listener for changes to the background throttle interval.
      */
-    public void removeOnBackgroundThrottleIntervalChangedListener(Runnable listener) {
+    public void removeOnBackgroundThrottleIntervalChangedListener(
+            GlobalSettingChangedListener listener) {
         mBackgroundThrottleIntervalMs.removeListener(listener);
     }
 
@@ -175,42 +211,46 @@ public class LocationSettingsStore {
     /**
      * Retrieve the background throttle package whitelist.
      */
-    public List<String> getBackgroundThrottlePackageWhitelist() {
+    public Set<String> getBackgroundThrottlePackageWhitelist() {
         return mBackgroundThrottlePackageWhitelist.getValue();
     }
 
     /**
      * Add a listener for changes to the background throttle package whitelist.
      */
-    public void addOnBackgroundThrottlePackageWhitelistChangedListener(Runnable listener) {
+    public void addOnBackgroundThrottlePackageWhitelistChangedListener(
+            GlobalSettingChangedListener listener) {
         mBackgroundThrottlePackageWhitelist.addListener(listener);
     }
 
     /**
      * Remove a listener for changes to the background throttle package whitelist.
      */
-    public void removeOnBackgroundThrottlePackageWhitelistChangedListener(Runnable listener) {
+    public void removeOnBackgroundThrottlePackageWhitelistChangedListener(
+            GlobalSettingChangedListener listener) {
         mBackgroundThrottlePackageWhitelist.removeListener(listener);
     }
 
     /**
      * Retrieve the ignore settings package whitelist.
      */
-    public List<String> getIgnoreSettingsPackageWhitelist() {
+    public Set<String> getIgnoreSettingsPackageWhitelist() {
         return mIgnoreSettingsPackageWhitelist.getValue();
     }
 
     /**
      * Add a listener for changes to the ignore settings package whitelist.
      */
-    public void addOnIgnoreSettingsPackageWhitelistChangedListener(Runnable listener) {
+    public void addOnIgnoreSettingsPackageWhitelistChangedListener(
+            GlobalSettingChangedListener listener) {
         mIgnoreSettingsPackageWhitelist.addListener(listener);
     }
 
     /**
      * Remove a listener for changes to the ignore settings package whitelist.
      */
-    public void removeOnIgnoreSettingsPackageWhitelistChangedListener(Runnable listener) {
+    public void removeOnIgnoreSettingsPackageWhitelistChangedListener(
+            GlobalSettingChangedListener listener) {
         mIgnoreSettingsPackageWhitelist.removeListener(listener);
     }
 
@@ -264,7 +304,7 @@ public class LocationSettingsStore {
             }
         }
 
-        List<String> backgroundThrottlePackageWhitelist =
+        Set<String> backgroundThrottlePackageWhitelist =
                 mBackgroundThrottlePackageWhitelist.getValue();
         if (!backgroundThrottlePackageWhitelist.isEmpty()) {
             ipw.println("Throttling Whitelisted Packages:");
@@ -275,7 +315,7 @@ public class LocationSettingsStore {
             ipw.decreaseIndent();
         }
 
-        List<String> ignoreSettingsPackageWhitelist = mIgnoreSettingsPackageWhitelist.getValue();
+        Set<String> ignoreSettingsPackageWhitelist = mIgnoreSettingsPackageWhitelist.getValue();
         if (!ignoreSettingsPackageWhitelist.isEmpty()) {
             ipw.println("Bypass Whitelisted Packages:");
             ipw.increaseIndent();
@@ -288,7 +328,7 @@ public class LocationSettingsStore {
 
     private abstract static class ObservingSetting extends ContentObserver {
 
-        private final CopyOnWriteArrayList<Runnable> mListeners;
+        private final CopyOnWriteArrayList<UserSettingChangedListener> mListeners;
 
         private ObservingSetting(Context context, String settingName, Handler handler) {
             super(handler);
@@ -298,11 +338,11 @@ public class LocationSettingsStore {
                     getUriFor(settingName), false, this, UserHandle.USER_ALL);
         }
 
-        public void addListener(Runnable listener) {
+        public void addListener(UserSettingChangedListener listener) {
             mListeners.add(listener);
         }
 
-        public void removeListener(Runnable listener) {
+        public void removeListener(UserSettingChangedListener listener) {
             mListeners.remove(listener);
         }
 
@@ -310,8 +350,8 @@ public class LocationSettingsStore {
 
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
-            for (Runnable listener : mListeners) {
-                listener.run();
+            for (UserSettingChangedListener listener : mListeners) {
+                listener.onSettingChanged(userId);
             }
         }
     }
@@ -354,6 +394,8 @@ public class LocationSettingsStore {
         }
 
         public synchronized List<String> getValueForUser(int userId) {
+            Preconditions.checkArgument(userId != UserHandle.USER_NULL);
+
             if (userId != mCachedUserId) {
                 String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                         mSettingName, userId);
@@ -409,29 +451,30 @@ public class LocationSettingsStore {
         }
     }
 
-    private static class StringListCachedGlobalSetting extends ObservingSetting {
+    private static class StringSetCachedGlobalSetting extends ObservingSetting {
 
         private final Context mContext;
         private final String mSettingName;
+        private final Supplier<ArraySet<String>> mBaseValuesSupplier;
 
         private boolean mValid;
-        private List<String> mCachedValue;
+        private ArraySet<String> mCachedValue;
 
-        private StringListCachedGlobalSetting(Context context, String settingName,
-                Handler handler) {
+        private StringSetCachedGlobalSetting(Context context, String settingName,
+                Supplier<ArraySet<String>> baseValuesSupplier, Handler handler) {
             super(context, settingName, handler);
             mContext = context;
             mSettingName = settingName;
+            mBaseValuesSupplier = baseValuesSupplier;
         }
 
-        public synchronized List<String> getValue() {
+        public synchronized Set<String> getValue() {
             if (!mValid) {
+                mCachedValue = new ArraySet<>(mBaseValuesSupplier.get());
                 String setting = Settings.Global.getString(mContext.getContentResolver(),
                         mSettingName);
-                if (TextUtils.isEmpty(setting)) {
-                    mCachedValue = Collections.emptyList();
-                } else {
-                    mCachedValue = Arrays.asList(setting.split(","));
+                if (!TextUtils.isEmpty(setting)) {
+                    mCachedValue.addAll(Arrays.asList(setting.split(",")));
                 }
                 mValid = true;
             }

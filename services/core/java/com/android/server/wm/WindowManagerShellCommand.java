@@ -321,7 +321,7 @@ public class WindowManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int runSetFixToUserRotation(PrintWriter pw) {
+    private int runSetFixToUserRotation(PrintWriter pw) throws RemoteException {
         int displayId = Display.DEFAULT_DISPLAY;
         String arg = getNextArgRequired();
         if ("-d".equals(arg)) {
@@ -329,16 +329,16 @@ public class WindowManagerShellCommand extends ShellCommand {
             arg = getNextArgRequired();
         }
 
-        final @DisplayRotation.FixedToUserRotation  int fixedToUserRotation;
+        final int fixedToUserRotation;
         switch (arg) {
             case "enabled":
-                fixedToUserRotation = DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED;
+                fixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
                 break;
             case "disabled":
-                fixedToUserRotation = DisplayRotation.FIXED_TO_USER_ROTATION_DISABLED;
+                fixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_DISABLED;
                 break;
             case "default":
-                fixedToUserRotation = DisplayRotation.FIXED_TO_USER_ROTATION_DISABLED;
+                fixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
                 break;
             default:
                 getErrPrintWriter().println("Error: expecting enabled, disabled or default, but we "
@@ -346,7 +346,7 @@ public class WindowManagerShellCommand extends ShellCommand {
                 return -1;
         }
 
-        mInternal.setRotateForApp(displayId, fixedToUserRotation);
+        mInterface.setFixedToUserRotation(displayId, fixedToUserRotation);
         return 0;
     }
 

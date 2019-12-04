@@ -22,8 +22,8 @@ import android.os.BatteryStats;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Annotation.NetworkType;
+import android.telephony.CellSignalStrength;
 import android.telephony.ModemActivityInfo;
-import android.telephony.SignalStrength;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -48,7 +48,7 @@ public final class CellularBatteryStats implements Parcelable {
     private long mEnergyConsumedMaMs = 0;
     private long[] mTimeInRatMs = new long[BatteryStats.NUM_DATA_CONNECTION_TYPES];
     private long[] mTimeInRxSignalStrengthLevelMs =
-            new long[SignalStrength.NUM_SIGNAL_STRENGTH_BINS];
+            new long[CellSignalStrength.getNumSignalStrengthLevels()];
     private long[] mTxTimeMs = new long[ModemActivityInfo.TX_POWER_LEVELS];
     private long mMonitoredRailChargeConsumedMaMs = 0;
 
@@ -354,7 +354,7 @@ public final class CellularBatteryStats implements Parcelable {
     /** @hide **/
     public void setTimeInRxSignalStrengthLevelMicros(@NonNull long[] t) {
         mTimeInRxSignalStrengthLevelMs = Arrays.copyOfRange(t, 0,
-            Math.min(t.length, SignalStrength.NUM_SIGNAL_STRENGTH_BINS));
+            Math.min(t.length, CellSignalStrength.getNumSignalStrengthLevels()));
         return;
     }
 

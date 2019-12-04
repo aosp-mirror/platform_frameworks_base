@@ -46,6 +46,10 @@ public class SoftApConfigurationTest {
         assertThat(original.getSsid()).isEqualTo("ssid");
         assertThat(original.getBssid()).isEqualTo(MacAddress.fromString("11:22:33:44:55:66"));
         assertThat(original.getWpa2Passphrase()).isNull();
+        assertThat(original.getSecurityType()).isEqualTo(SoftApConfiguration.SECURITY_TYPE_OPEN);
+        assertThat(original.getBand()).isEqualTo(SoftApConfiguration.BAND_2GHZ);
+        assertThat(original.getChannel()).isEqualTo(0);
+        assertThat(original.isHiddenSsid()).isEqualTo(false);
 
         SoftApConfiguration unparceled = parcelUnparcel(original);
         assertThat(unparceled).isNotSameAs(original);
@@ -64,6 +68,39 @@ public class SoftApConfigurationTest {
                 .setWpa2Passphrase("secretsecret")
                 .build();
         assertThat(original.getWpa2Passphrase()).isEqualTo("secretsecret");
+        assertThat(original.getSecurityType()).isEqualTo(
+                SoftApConfiguration.SECURITY_TYPE_WPA2_PSK);
+        assertThat(original.getBand()).isEqualTo(SoftApConfiguration.BAND_2GHZ);
+        assertThat(original.getChannel()).isEqualTo(0);
+        assertThat(original.isHiddenSsid()).isEqualTo(false);
+
+
+        SoftApConfiguration unparceled = parcelUnparcel(original);
+        assertThat(unparceled).isNotSameAs(original);
+        assertThat(unparceled).isEqualTo(original);
+        assertThat(unparceled.hashCode()).isEqualTo(original.hashCode());
+
+        SoftApConfiguration copy = new SoftApConfiguration.Builder(original).build();
+        assertThat(copy).isNotSameAs(original);
+        assertThat(copy).isEqualTo(original);
+        assertThat(copy.hashCode()).isEqualTo(original.hashCode());
+    }
+
+    @Test
+    public void testWpa2WithBandAndChannelAndHiddenNetwork() {
+        SoftApConfiguration original = new SoftApConfiguration.Builder()
+                .setWpa2Passphrase("secretsecret")
+                .setBand(SoftApConfiguration.BAND_ANY)
+                .setChannel(149)
+                .setHiddenSsid(true)
+                .build();
+        assertThat(original.getWpa2Passphrase()).isEqualTo("secretsecret");
+        assertThat(original.getSecurityType()).isEqualTo(
+                SoftApConfiguration.SECURITY_TYPE_WPA2_PSK);
+        assertThat(original.getBand()).isEqualTo(SoftApConfiguration.BAND_ANY);
+        assertThat(original.getChannel()).isEqualTo(149);
+        assertThat(original.isHiddenSsid()).isEqualTo(true);
+
 
         SoftApConfiguration unparceled = parcelUnparcel(original);
         assertThat(unparceled).isNotSameAs(original);

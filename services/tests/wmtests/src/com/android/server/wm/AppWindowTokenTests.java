@@ -54,6 +54,7 @@ import static org.mockito.Mockito.verify;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.view.IWindowManager;
 import android.view.Surface;
 import android.view.WindowManager;
 
@@ -334,7 +335,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         mActivity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         mDisplayContent.getDisplayRotation().setFixedToUserRotation(
-                DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED);
+                IWindowManager.FIXED_TO_USER_ROTATION_ENABLED);
         reset(mTask);
         mActivity.reportDescendantOrientationChangeIfNeeded();
         verify(mTask).onConfigurationChanged(any(Configuration.class));

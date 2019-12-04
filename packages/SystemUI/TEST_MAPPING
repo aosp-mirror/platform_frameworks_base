@@ -15,6 +15,9 @@
             "include-filter": "android.platform.test.scenario.notification"
         },
         {
+            "include-annotation": "android.platform.test.scenario.annotation.Scenario"
+        },
+        {
             "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]

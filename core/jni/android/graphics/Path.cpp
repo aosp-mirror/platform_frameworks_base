@@ -497,12 +497,12 @@ public:
 
     static jint getFillType(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        return obj->getFillType();
+        return static_cast<int>(obj->getFillType());
     }
 
     static void setFillType(CRITICAL_JNI_PARAMS_COMMA jlong pathHandle, jint ftHandle) {;
         SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
-        SkPath::FillType ft = static_cast<SkPath::FillType>(ftHandle);
+        SkPathFillType ft = static_cast<SkPathFillType>(ftHandle);
         path->setFillType(ft);
     }
 };

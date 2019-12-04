@@ -1429,10 +1429,6 @@
     <string name="submit" msgid="862795280643405865">"సమర్పించు"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"డ్రైవింగ్ యాప్ అమలవుతోంది"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"డ్రైవింగ్ యాప్ నుండి నిష్క్రమించడం కోసం నొక్కండి."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"టీథర్ చేయబడినది లేదా హాట్‌స్పాట్ సక్రియంగా ఉండేది"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"సెటప్ చేయడానికి నొక్కండి."</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"టెథెరింగ్ నిలిపివేయబడింది"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"వివరాల కోసం మీ నిర్వాహకులను సంప్రదించండి"</string>
     <string name="back_button_label" msgid="4078224038025043387">"వెనుకకు"</string>
     <string name="next_button_label" msgid="6040209156399907780">"తర్వాత"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"దాటవేయి"</string>

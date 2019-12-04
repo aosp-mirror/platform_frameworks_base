@@ -1429,10 +1429,6 @@
     <string name="submit" msgid="862795280643405865">"Жіберу"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Көлік жүргізу қолданбасы қосулы"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Көлік жүргізу қолданбасынан шығу үшін түртіңіз."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"Тетеринг немесе хотспот қосулы"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"Реттеу үшін түртіңіз."</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"Тетеринг өшірілді"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"Мәліметтерді әкімшіден алыңыз"</string>
     <string name="back_button_label" msgid="4078224038025043387">"Артқа"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Келесі"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"Өткізіп жіберу"</string>

@@ -73,6 +73,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Tests for the {@link RootActivityContainer} class.
@@ -149,9 +150,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         final Task task = stack.getAllTasks().get(0);
         final ArrayList<ActivityRecord> stackActivities = new ArrayList<>();
 
-        for (int i = 0; i < task.getChildCount(); i++) {
-            stackActivities.add(task.getChildAt(i));
-        }
+        task.forAllActivities((Consumer<ActivityRecord>) stackActivities::add, false);
 
         assertEquals("Expecting " + Arrays.deepToString(activities) + " got " + stackActivities,
                 stackActivities.size(), activities != null ? activities.length : 0);

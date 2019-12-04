@@ -67,7 +67,6 @@ cc_library {
                 "BackupData.cpp",
                 "BackupHelpers.cpp",
                 "CursorWindow.cpp",
-                "DisplayEventDispatcher.cpp",
             ],
             shared_libs: [
                 "libziparchive",
@@ -75,7 +74,6 @@ cc_library {
                 "libbinder",
                 "liblog",
                 "libcutils",
-                "libgui",
                 "libutils",
                 "libz",
             ],

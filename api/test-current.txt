@@ -1086,6 +1086,7 @@ package android.location {
     ctor public GnssMeasurement();
     method public void reset();
     method public void resetAutomaticGainControlLevel();
+    method public void resetBasebandCn0DbHz();
     method @Deprecated public void resetCarrierCycles();
     method public void resetCarrierFrequencyHz();
     method @Deprecated public void resetCarrierPhase();
@@ -1097,6 +1098,7 @@ package android.location {
     method public void setAccumulatedDeltaRangeState(int);
     method public void setAccumulatedDeltaRangeUncertaintyMeters(double);
     method public void setAutomaticGainControlLevelInDb(double);
+    method public void setBasebandCn0DbHz(double);
     method @Deprecated public void setCarrierCycles(long);
     method public void setCarrierFrequencyHz(float);
     method @Deprecated public void setCarrierPhase(double);

@@ -703,6 +703,21 @@ public class UserManagerTest extends AndroidTestCase {
         assertEquals(canBeCreatedCount, created.get());
     }
 
+    @MediumTest
+    public void testGetUserHandles_createNewUser_shouldFindNewUser() {
+        UserInfo user = createUser("Guest 1", UserManager.USER_TYPE_FULL_GUEST, /*flags*/ 0);
+
+        boolean found = false;
+        List<UserHandle> userHandles = mUserManager.getUserHandles(/* excludeDying= */ true);
+        for (UserHandle userHandle: userHandles) {
+            if (userHandle.getIdentifier() == user.id) {
+                found = true;
+            }
+        }
+
+        assertTrue(found);
+    }
+
     private boolean isPackageInstalledForUser(String packageName, int userId) {
         try {
             return mPackageManager.getPackageInfoAsUser(packageName, 0, userId) != null;

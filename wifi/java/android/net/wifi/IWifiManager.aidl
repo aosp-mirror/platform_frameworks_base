@@ -142,6 +142,8 @@ interface IWifiManager
 
     boolean startSoftAp(in WifiConfiguration wifiConfig);
 
+    boolean startTetheredHotspot(in SoftApConfiguration softApConfig);
+
     boolean stopSoftAp();
 
     int startLocalOnlyHotspot(in ILocalOnlyHotspotCallback callback, String packageName,
@@ -159,7 +161,13 @@ interface IWifiManager
     @UnsupportedAppUsage
     WifiConfiguration getWifiApConfiguration();
 
+    SoftApConfiguration getSoftApConfiguration();
+
     boolean setWifiApConfiguration(in WifiConfiguration wifiConfig, String packageName);
+
+    boolean setSoftApConfiguration(in SoftApConfiguration softApConfig, String packageName);
+
+    void notifyUserOfApBandConversion(String packageName);
 
     void enableTdls(String remoteIPAddress, boolean enable);
 
@@ -183,6 +191,10 @@ interface IWifiManager
     byte[] retrieveBackupData();
 
     void restoreBackupData(in byte[] data);
+
+    byte[] retrieveSoftApBackupData();
+
+    void restoreSoftApBackupData(in byte[] data);
 
     void restoreSupplicantBackupData(in byte[] supplicantData, in byte[] ipConfigData);
 

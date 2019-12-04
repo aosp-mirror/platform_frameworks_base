@@ -1431,10 +1431,6 @@
     <string name="submit" msgid="862795280643405865">"ដាក់​ស្នើ"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"កម្មវិធី​បើកបរ​កំពុង​ដំណើរការ"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"ចុច​ដើម្បី​ចាកចេញ​ពីកម្មវិធី​បើកបរ។"</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"ភ្ជាប់ ឬ​ហតស្ពត​សកម្ម"</string>
-    <string name="tethered_notification_message" msgid="6228080755828019453">"ប៉ះដើម្បីកំណត់"</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"ការភ្ជាប់​ត្រូវបានបិទ"</string>
-    <string name="disable_tether_notification_message" msgid="98281313984014775">"ទាក់ទងអ្នកគ្រប់គ្រង​របស់អ្នកសម្រាប់​ព័ត៌មានលម្អិត"</string>
     <string name="back_button_label" msgid="4078224038025043387">"ថយក្រោយ"</string>
     <string name="next_button_label" msgid="6040209156399907780">"បន្ទាប់​"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"រំលង"</string>

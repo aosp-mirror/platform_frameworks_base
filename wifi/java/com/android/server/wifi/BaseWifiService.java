@@ -285,6 +285,11 @@ public class BaseWifiService extends IWifiManager.Stub {
     }
 
     @Override
+    public boolean startTetheredHotspot(SoftApConfiguration softApConfig) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean stopSoftAp() {
         throw new UnsupportedOperationException();
     }
@@ -321,10 +326,21 @@ public class BaseWifiService extends IWifiManager.Stub {
     }
 
     @Override
+    public SoftApConfiguration getSoftApConfiguration() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean setWifiApConfiguration(WifiConfiguration wifiConfig, String packageName) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public boolean setSoftApConfiguration(SoftApConfiguration softApConfig, String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void notifyUserOfApBandConversion(String packageName) {
         throw new UnsupportedOperationException();
     }
@@ -381,6 +397,16 @@ public class BaseWifiService extends IWifiManager.Stub {
 
     @Override
     public void restoreBackupData(byte[] data) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public byte[] retrieveSoftApBackupData() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void restoreSoftApBackupData(byte[] data) {
         throw new UnsupportedOperationException();
     }
 
