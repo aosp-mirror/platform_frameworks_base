@@ -2350,8 +2350,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.setLastReportedMergedConfiguration(mergedConfiguration);
 
-            // Update the last inset values here because the values are sent back to the client.
-            // The last inset values represent the last client state.
+            // Update the last frames and inset values here because the values are sent back to the
+            // client. The last values represent the last client state.
+            win.updateLastFrames();
             win.updateLastInsetValues();
 
             win.getCompatFrame(outFrame);

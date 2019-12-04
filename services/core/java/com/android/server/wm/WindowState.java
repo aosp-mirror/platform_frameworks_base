@@ -1308,8 +1308,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // We update mLastFrame always rather than in the conditional with the last inset
         // variables, because mFrameSizeChanged only tracks the width and height changing.
-        mWindowFrames.mLastFrame.set(mWindowFrames.mFrame);
-        mWindowFrames.mLastRelFrame.set(mWindowFrames.mRelFrame);
+        updateLastFrames();
 
         if (didFrameInsetsChange
                 || winAnimator.mSurfaceResized
@@ -4815,6 +4814,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     boolean removeEmbeddedDisplayContent(DisplayContent dc) {
         return mEmbeddedDisplayContents.remove(dc);
+    }
+
+    /** Updates the last frames and relative frames to the current ones. */
+    void updateLastFrames() {
+        mWindowFrames.mLastFrame.set(mWindowFrames.mFrame);
+        mWindowFrames.mLastRelFrame.set(mWindowFrames.mRelFrame);
     }
 
     /**
