@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.util.Log;
 
@@ -186,6 +187,32 @@ public final class BugreportManager {
     public void cancelBugreport() {
         try {
             mBinder.cancelBugreport();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Requests a bugreport.
+     *
+     * <p>This requests the platform/system to take a bugreport and makes the final bugreport
+     * available to the user. The user may choose to share it with another app, but the bugreport
+     * is never given back directly to the app that requested it.
+     *
+     * @param params           {@link BugreportParams} that specify what kind of a bugreport should
+     *                         be taken, please note that not all kinds of bugreport allow for a
+     *                         progress notification
+     * @param shareTitle       title on the final share notification
+     * @param shareDescription description on the final share notification
+     */
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    public void requestBugreport(@NonNull BugreportParams params, @Nullable CharSequence shareTitle,
+            @Nullable CharSequence shareDescription) {
+        try {
+            String title = shareTitle == null ? null : shareTitle.toString();
+            String description = shareDescription == null ? null : shareDescription.toString();
+            ActivityManager.getService().requestBugReportWithDescription(title, description,
+                    params.getMode());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
