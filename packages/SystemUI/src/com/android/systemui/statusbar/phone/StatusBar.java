@@ -583,6 +583,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                     }
                 }
 
+                // TODO: (b/145659174) remove when moving to NewNotifPipeline. Replaced by
+                //  KeyguardCoordinator
                 @Override
                 public void onStrongAuthStateChanged(int userId) {
                     super.onStrongAuthStateChanged(userId);
