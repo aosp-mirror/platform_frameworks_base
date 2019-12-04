@@ -6796,19 +6796,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 "setShouldShowWithInsecureKeyguard()")) {
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+                if (displayContent == null) {
+                    ProtoLog.w(WM_ERROR, "Attempted to set flag to a display that does not exist: "
+                            + "%d", displayId);
+                    return;
+                }
 
-        synchronized (mGlobalLock) {
-            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
-            if (displayContent == null) {
-                ProtoLog.w(WM_ERROR, "Attempted to set flag to a display that does not exist: %d",
-                        displayId);
-                return;
+                mDisplayWindowSettings.setShouldShowWithInsecureKeyguardLocked(displayContent,
+                        shouldShow);
+
+                displayContent.reconfigureDisplayLocked();
             }
-
-            mDisplayWindowSettings.setShouldShowWithInsecureKeyguardLocked(displayContent,
-                    shouldShow);
-
-            displayContent.reconfigureDisplayLocked();
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -6837,22 +6841,26 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "setShouldShowSystemDecors()")) {
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+                if (displayContent == null) {
+                    ProtoLog.w(WM_ERROR, "Attempted to set system decors flag to a display that "
+                            + "does not exist: %d", displayId);
+                    return;
+                }
+                if (displayContent.isUntrustedVirtualDisplay()) {
+                    throw new SecurityException("Attempted to set system decors flag to an "
+                            + "untrusted virtual display: " + displayId);
+                }
 
-        synchronized (mGlobalLock) {
-            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
-            if (displayContent == null) {
-                ProtoLog.w(WM_ERROR, "Attempted to set system decors flag to a display that does "
-                        + "not exist: %d", displayId);
-                return;
+                mDisplayWindowSettings.setShouldShowSystemDecorsLocked(displayContent, shouldShow);
+
+                displayContent.reconfigureDisplayLocked();
             }
-            if (displayContent.isUntrustedVirtualDisplay()) {
-                throw new SecurityException("Attempted to set system decors flag to an untrusted "
-                        + "virtual display: " + displayId);
-            }
-
-            mDisplayWindowSettings.setShouldShowSystemDecorsLocked(displayContent, shouldShow);
-
-            displayContent.reconfigureDisplayLocked();
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -6883,23 +6891,26 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "setShouldShowIme()")) {
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+                if (displayContent == null) {
+                    ProtoLog.w(WM_ERROR, "Attempted to set IME flag to a display that does not "
+                            + "exist: %d", displayId);
+                    return;
+                }
+                if (displayContent.isUntrustedVirtualDisplay()) {
+                    throw new SecurityException("Attempted to set IME flag to an untrusted "
+                            + "virtual display: " + displayId);
+                }
 
-        synchronized (mGlobalLock) {
-            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
-            if (displayContent == null) {
-                ProtoLog.w(WM_ERROR,
-                        "Attempted to set IME flag to a display that does not exist: %d",
-                        displayId);
-                return;
+                mDisplayWindowSettings.setShouldShowImeLocked(displayContent, shouldShow);
+
+                displayContent.reconfigureDisplayLocked();
             }
-            if (displayContent.isUntrustedVirtualDisplay()) {
-                throw new SecurityException("Attempted to set IME flag to an untrusted "
-                        + "virtual display: " + displayId);
-            }
-
-            mDisplayWindowSettings.setShouldShowImeLocked(displayContent, shouldShow);
-
-            displayContent.reconfigureDisplayLocked();
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
