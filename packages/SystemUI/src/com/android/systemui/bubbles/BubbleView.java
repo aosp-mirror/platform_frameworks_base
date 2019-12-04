@@ -19,6 +19,7 @@ package com.android.systemui.bubbles;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
+import android.content.pm.LauncherApps;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -243,9 +244,16 @@ public class BubbleView extends FrameLayout {
     }
 
     Drawable getBubbleDrawable(Context context) {
-        Notification.BubbleMetadata metadata = getEntry().getBubbleMetadata();
-        Icon ic = metadata.getIcon();
-        return ic.loadDrawable(context);
+        if (mBubble.getShortcutInfo() != null && mBubble.usingShortcutInfo()) {
+            LauncherApps launcherApps =
+                    (LauncherApps) getContext().getSystemService(Context.LAUNCHER_APPS_SERVICE);
+            int density = getContext().getResources().getConfiguration().densityDpi;
+            return launcherApps.getShortcutIconDrawable(mBubble.getShortcutInfo(), density);
+        } else {
+            Notification.BubbleMetadata metadata = getEntry().getBubbleMetadata();
+            Icon ic = metadata.getIcon();
+            return ic.loadDrawable(context);
+        }
     }
 
     BitmapInfo getBadgedBitmap() {

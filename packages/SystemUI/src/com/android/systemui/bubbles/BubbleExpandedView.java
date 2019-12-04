@@ -130,12 +130,17 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                             Log.d(TAG, "onActivityViewReady: calling startActivity, "
                                     + "bubble=" + getBubbleKey());
                         }
-                        Intent fillInIntent = new Intent();
-                        // Apply flags to make behaviour match documentLaunchMode=always.
-                        fillInIntent.addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
-                        fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
                         try {
-                            mActivityView.startActivity(mBubbleIntent, fillInIntent, options);
+                            if (mBubble.usingShortcutInfo()) {
+                                mActivityView.startShortcutActivity(mBubble.getShortcutInfo(),
+                                        options, null /* sourceBounds */);
+                            } else {
+                                Intent fillInIntent = new Intent();
+                                // Apply flags to make behaviour match documentLaunchMode=always.
+                                fillInIntent.addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
+                                fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                                mActivityView.startActivity(mBubbleIntent, fillInIntent, options);
+                            }
                         } catch (RuntimeException e) {
                             // If there's a runtime exception here then there's something
                             // wrong with the intent, we can't really recover / try to populate
@@ -415,7 +420,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                     + getBubbleKey());
         }
 
-        mBubbleIntent = mBubble.getBubbleIntent(mContext);
+        mBubbleIntent = mBubble.getBubbleIntent();
         if (mBubbleIntent != null) {
             setContentVisibility(false);
             mActivityView.setVisibility(VISIBLE);
