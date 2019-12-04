@@ -6601,11 +6601,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return change;
     }
 
-    private ArrayMap<NetworkRequestInfo, NetworkAgentInfo> computeRequestReassignmentForNetwork(
-            @NonNull final NetworkReassignment changes,
+    private void computeRequestReassignmentForNetwork(@NonNull final NetworkReassignment changes,
             @NonNull final NetworkAgentInfo newNetwork) {
         final int score = newNetwork.getCurrentScore();
-        final ArrayMap<NetworkRequestInfo, NetworkAgentInfo> reassignedRequests = new ArrayMap<>();
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
             // Process requests in the first pass and listens in the second pass. This allows us to
             // change a network's capabilities depending on which requests it has. This is only
@@ -6631,18 +6629,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             + ", newScore = " + score);
                 }
                 if (currentNetwork == null || currentNetwork.getCurrentScore() < score) {
-                    reassignedRequests.put(nri, newNetwork);
                     changes.addRequestReassignment(new NetworkReassignment.RequestReassignment(
                             nri, currentNetwork, newNetwork));
                 }
             } else if (newNetwork == currentNetwork) {
-                reassignedRequests.put(nri, null);
                 changes.addRequestReassignment(new NetworkReassignment.RequestReassignment(
                         nri, currentNetwork, null));
             }
         }
-
-        return reassignedRequests;
     }
 
     // Handles a network appearing or improving its score.
@@ -6661,7 +6655,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // @param newNetwork is the network to be matched against NetworkRequests.
     // @param now the time the rematch starts, as returned by SystemClock.elapsedRealtime();
     private void rematchNetworkAndRequests(@NonNull final NetworkReassignment changes,
-            @NonNull final NetworkAgentInfo newNetwork, final long now) {
+            @NonNull final NetworkAgentInfo newNetwork) {
         ensureRunningOnConnectivityServiceThread();
         if (!newNetwork.everConnected) return;
 
@@ -6670,18 +6664,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         if (VDBG || DDBG) log("rematching " + newNetwork.name());
 
-        final ArrayMap<NetworkRequestInfo, NetworkAgentInfo> reassignedRequests =
-                computeRequestReassignmentForNetwork(changes, newNetwork);
-
-        // Find and migrate to this Network any NetworkRequests for
-        // which this network is now the best.
-        for (final Map.Entry<NetworkRequestInfo, NetworkAgentInfo> entry :
-                reassignedRequests.entrySet()) {
-            final NetworkRequestInfo nri = entry.getKey();
-            final NetworkAgentInfo previousSatisfier = nri.mSatisfier;
-            final NetworkAgentInfo newSatisfier = entry.getValue();
-            updateSatisfiersForRematchRequest(nri, previousSatisfier, newSatisfier, now);
-        }
+        computeRequestReassignmentForNetwork(changes, newNetwork);
     }
 
     private void updateSatisfiersForRematchRequest(@NonNull final NetworkRequestInfo nri,
@@ -6734,7 +6717,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
         Arrays.sort(nais);
         final NetworkReassignment changes = computeInitialReassignment();
         for (final NetworkAgentInfo nai : nais) {
-            rematchNetworkAndRequests(changes, nai, now);
+            rematchNetworkAndRequests(changes, nai);
+        }
+
+        // Now that the entire rematch is computed, update the lists of satisfied requests in
+        // the network agents. This is necessary because some code later depends on this state
+        // to be correct, most prominently computing the linger status.
+        for (final NetworkReassignment.RequestReassignment event :
+                changes.getRequestReassignments()) {
+            // The rematch is seeded with an entry for each request, and requests that don't
+            // change satisfiers have the same network as old and new.
+            // TODO : remove these entries when they are not needed any more.
+            if (event.mOldNetwork == event.mNewNetwork) continue;
+            updateSatisfiersForRematchRequest(event.mRequest, event.mOldNetwork,
+                    event.mNewNetwork, now);
         }
 
         final NetworkRequestInfo defaultRequestInfo = mNetworkRequests.get(mDefaultRequest);
