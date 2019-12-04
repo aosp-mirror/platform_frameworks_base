@@ -339,8 +339,10 @@ applications that come with the platform
         <permission name="android.permission.SYSTEM_CAMERA" />
         <!-- Permission required to test ExplicitHealthCheckServiceImpl. -->
         <permission name="android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE"/>
-        <!-- Permission required for UiModeManager cts test. -->
+        <!-- Permission required for UiModeManager CTS test. -->
         <permission name="android.permission.ENTER_CAR_MODE_PRIORITIZED"/>
+        <!-- Permission required for Telecom car mode CTS tests. -->
+        <permission name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
