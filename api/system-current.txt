@@ -4175,6 +4175,7 @@ package android.net {
   public class Network implements android.os.Parcelable {
     ctor public Network(@NonNull android.net.Network);
     method @NonNull public android.net.Network getPrivateDnsBypassingCopy();
+    field public final int netId;
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
