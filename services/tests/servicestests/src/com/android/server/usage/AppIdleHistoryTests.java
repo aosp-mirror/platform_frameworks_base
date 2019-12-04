@@ -28,7 +28,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.app.usage.UsageStatsManager;
 import android.os.FileUtils;
 import android.test.AndroidTestCase;
 
@@ -149,5 +148,22 @@ public class AppIdleHistoryTests extends AndroidTestCase {
 
         aih = new AppIdleHistory(mStorageDir, 5000);
         assertEquals(REASON_MAIN_TIMEOUT, aih.getAppStandbyReason(PACKAGE_1, USER_ID, 5000));
+    }
+
+    public void testNullPackage() throws Exception {
+        AppIdleHistory aih = new AppIdleHistory(mStorageDir, 1000);
+        // Report usage of a package
+        aih.reportUsage(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_SUB_USAGE_MOVE_TO_FOREGROUND, 2000, 0);
+        // "Accidentally" report usage against a null named package
+        aih.reportUsage(null, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_SUB_USAGE_MOVE_TO_FOREGROUND, 2000, 0);
+        // Persist data
+        aih.writeAppIdleTimes(USER_ID);
+        // Recover data from disk
+        aih = new AppIdleHistory(mStorageDir, 5000);
+        // Verify data is intact
+        assertEquals(REASON_MAIN_USAGE | REASON_SUB_USAGE_MOVE_TO_FOREGROUND,
+                aih.getAppStandbyReason(PACKAGE_1, USER_ID, 3000));
     }
 }
