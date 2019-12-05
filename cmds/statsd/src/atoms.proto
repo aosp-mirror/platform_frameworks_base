@@ -4599,36 +4599,69 @@ message RoleHolder {
 }
 
 message AggStats {
-    optional int64 min = 1;
+    // These are all in byte resolution.
+    optional int64 min = 1 [deprecated = true];
+    optional int64 average = 2 [deprecated = true];
+    optional int64 max = 3 [deprecated = true];
 
-    optional int64 average = 2;
-
-    optional int64 max = 3;
+    // These are all in kilobyte resolution. Can fit in int32, so smaller on the wire than the above
+    // int64 fields.
+    optional int32 mean_kb = 4;
+    optional int32 max_kb = 5;
 }
 
+// A reduced subset of process states; reducing the number of possible states allows more
+// aggressive device-side aggregation of statistics and hence reduces metric upload size.
+enum ProcessStateAggregated {
+    PROCESS_STATE_UNKNOWN = 0;
+    // Persistent system process.
+    PROCESS_STATE_PERSISTENT = 1;
+    // Top activity; actually any visible activity.
+    PROCESS_STATE_TOP = 2;
+    // Process binding to top or a foreground service.
+    PROCESS_STATE_BOUND_TOP_OR_FGS = 3;
+    // Processing running a foreground service.
+    PROCESS_STATE_FGS = 4;
+    // Important foreground process (ime, wallpaper, etc).
+    PROCESS_STATE_IMPORTANT_FOREGROUND = 5;
+    // Important background process.
+    PROCESS_STATE_BACKGROUND = 6;
+    // Process running a receiver.
+    PROCESS_STATE_RECEIVER = 7;
+    // All kinds of cached processes.
+    PROCESS_STATE_CACHED = 8;
+}
+
+// Next tag: 13
 message ProcessStatsStateProto {
     optional android.service.procstats.ScreenState screen_state = 1;
 
-    optional android.service.procstats.MemoryState memory_state = 2;
+    optional android.service.procstats.MemoryState memory_state = 2 [deprecated = true];
 
     // this enum list is from frameworks/base/core/java/com/android/internal/app/procstats/ProcessStats.java
     // and not frameworks/base/core/java/android/app/ActivityManager.java
-    optional android.service.procstats.ProcessState process_state = 3;
+    optional android.service.procstats.ProcessState process_state = 3 [deprecated = true];
+
+    optional ProcessStateAggregated process_state_aggregated = 10;
 
     // Millisecond uptime duration spent in this state
-    optional int64 duration_millis = 4;
+    optional int64 duration_millis = 4 [deprecated = true];
+    // Same as above, but with minute resolution so it fits into an int32.
+    optional int32 duration_minutes = 11;
 
     // Millisecond elapsed realtime duration spent in this state
-    optional int64 realtime_duration_millis = 9;
+    optional int64 realtime_duration_millis = 9 [deprecated = true];
+    // Same as above, but with minute resolution so it fits into an int32.
+    optional int32 realtime_duration_minutes = 12;
 
     // # of samples taken
     optional int32 sample_size = 5;
 
     // PSS is memory reserved for this process
-    optional AggStats pss = 6;
+    optional AggStats pss = 6 [deprecated = true];
 
     // USS is memory shared between processes, divided evenly for accounting
-    optional AggStats uss = 7;
+    optional AggStats uss = 7 [deprecated = true];
 
     // RSS is memory resident for this process
     optional AggStats rss = 8;
@@ -4653,7 +4686,7 @@ message ProcessStatsProto {
         // PSS stats during cached kill
         optional AggStats cached_pss = 3;
     }
-    optional Kill kill = 3;
+    optional Kill kill = 3 [deprecated = true];
 
     // Time and memory spent in various states.
     repeated ProcessStatsStateProto states = 5;
