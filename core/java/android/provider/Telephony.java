@@ -45,7 +45,6 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Patterns;
 
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.SmsApplication;
 
 import java.lang.annotation.Retention;
@@ -1344,7 +1343,7 @@ public final class Telephony {
                 }
 
                 String format = intent.getStringExtra("format");
-                int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
+                int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
                         SubscriptionManager.getDefaultSmsSubscriptionId());
 
                 Rlog.v(TAG, " getMessagesFromIntent sub_id : " + subId);
