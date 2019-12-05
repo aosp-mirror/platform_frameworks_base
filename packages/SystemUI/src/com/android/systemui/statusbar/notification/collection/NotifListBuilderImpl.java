@@ -29,6 +29,7 @@ import static com.android.systemui.statusbar.notification.collection.listbuilder
 import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
@@ -39,8 +40,6 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.SectionsProvider;
-import com.android.systemui.statusbar.notification.logging.NotifEvent;
-import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
 
@@ -60,8 +59,8 @@ import javax.inject.Singleton;
 @MainThread
 @Singleton
 public class NotifListBuilderImpl implements NotifListBuilder {
+
     private final SystemClock mSystemClock;
-    private final NotifLog mNotifLog;
 
     private final List<ListEntry> mNotifList = new ArrayList<>();
 
@@ -87,10 +86,9 @@ public class NotifListBuilderImpl implements NotifListBuilder {
     private final List<ListEntry> mReadOnlyNotifList = Collections.unmodifiableList(mNotifList);
 
     @Inject
-    public NotifListBuilderImpl(SystemClock systemClock, NotifLog notifLog) {
+    public NotifListBuilderImpl(SystemClock systemClock) {
         Assert.isMainThread();
         mSystemClock = systemClock;
-        mNotifLog = notifLog;
     }
 
     /**
@@ -195,8 +193,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
                     Assert.isMainThread();
                     mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
 
-                    mNotifLog.log(NotifEvent.ON_BUILD_LIST, "Request received from "
-                            + "NotifCollection");
+                    Log.i(TAG, "Build request received from NotifCollection");
                     mAllEntries = entries;
                     buildList();
                 }
@@ -205,7 +202,8 @@ public class NotifListBuilderImpl implements NotifListBuilder {
     private void onFilterInvalidated(NotifFilter filter) {
         Assert.isMainThread();
 
-        mNotifLog.log(NotifEvent.FILTER_INVALIDATED, String.format(
+        // TODO: Convert these log statements (here and elsewhere) into timeline logging
+        Log.i(TAG, String.format(
                 "Filter \"%s\" invalidated; pipeline state is %d",
                 filter.getName(),
                 mPipelineState.getState()));
@@ -216,7 +214,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
     private void onPromoterInvalidated(NotifPromoter filter) {
         Assert.isMainThread();
 
-        mNotifLog.log(NotifEvent.PROMOTER_INVALIDATED, String.format(
+        Log.i(TAG, String.format(
                 "NotifPromoter \"%s\" invalidated; pipeline state is %d",
                 filter.getName(),
                 mPipelineState.getState()));
@@ -227,7 +225,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
     private void onSectionsProviderInvalidated(SectionsProvider provider) {
         Assert.isMainThread();
 
-        mNotifLog.log(NotifEvent.SECTIONS_PROVIDER_INVALIDATED, String.format(
+        Log.i(TAG, String.format(
                 "Sections provider \"%s\" invalidated; pipeline state is %d",
                 provider.getName(),
                 mPipelineState.getState()));
@@ -238,7 +236,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
     private void onNotifComparatorInvalidated(NotifComparator comparator) {
         Assert.isMainThread();
 
-        mNotifLog.log(NotifEvent.COMPARATOR_INVALIDATED, String.format(
+        Log.i(TAG, String.format(
                 "Comparator \"%s\" invalidated; pipeline state is %d",
                 comparator.getName(),
                 mPipelineState.getState()));
@@ -256,7 +254,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
      * if we detect that behavior, we should crash instantly.
      */
     private void buildList() {
-        mNotifLog.log(NotifEvent.START_BUILD_LIST, "Run #" + mIterationCount + "...");
+        Log.i(TAG, "Starting notif list build #" + mIterationCount + "...");
 
         mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
         mPipelineState.setState(STATE_BUILD_STARTED);
@@ -290,16 +288,15 @@ public class NotifListBuilderImpl implements NotifListBuilder {
         freeEmptyGroups();
 
         // Step 5: Dispatch the new list, first to any listeners and then to the view layer
-        mNotifLog.log(NotifEvent.DISPATCH_FINAL_LIST, "List finalized, is:\n"
-                + dumpList(mNotifList));
+        Log.i(TAG, "List finalized, is:\n" + dumpList(mNotifList));
+        Log.i(TAG, "Dispatching final list to listeners...");
         dispatchOnBeforeRenderList(mReadOnlyNotifList);
         if (mOnRenderListListener != null) {
             mOnRenderListListener.onRenderList(mReadOnlyNotifList);
         }
 
         // Step 6: We're done!
-        mNotifLog.log(NotifEvent.LIST_BUILD_COMPLETE,
-                "Notif list build #" + mIterationCount + " completed");
+        Log.i(TAG, "Notif list build #" + mIterationCount + " completed");
         mPipelineState.setState(STATE_IDLE);
         mIterationCount++;
     }
@@ -357,7 +354,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
                     if (existingSummary == null) {
                         group.setSummary(entry);
                     } else {
-                        mNotifLog.log(NotifEvent.WARN, String.format(
+                        Log.w(TAG, String.format(
                                 "Duplicate summary for group '%s': '%s' vs. '%s'",
                                 group.getKey(),
                                 existingSummary.getKey(),
@@ -380,8 +377,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
 
                 final String topLevelKey = entry.getKey();
                 if (mGroups.containsKey(topLevelKey)) {
-                    mNotifLog.log(NotifEvent.WARN,
-                            "Duplicate non-group top-level key: " + topLevelKey);
+                    Log.wtf(TAG, "Duplicate non-group top-level key: " + topLevelKey);
                 } else {
                     entry.setParent(ROOT_ENTRY);
                     out.add(entry);
@@ -543,7 +539,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
     private void logParentingChanges() {
         for (NotificationEntry entry : mAllEntries) {
             if (entry.getParent() != entry.getPreviousParent()) {
-                mNotifLog.log(NotifEvent.PARENT_CHANGED, String.format(
+                Log.i(TAG, String.format(
                         "%s: parent changed from %s to %s",
                         entry.getKey(),
                         entry.getPreviousParent() == null
@@ -554,7 +550,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
         }
         for (GroupEntry group : mGroups.values()) {
             if (group.getParent() != group.getPreviousParent()) {
-                mNotifLog.log(NotifEvent.PARENT_CHANGED, String.format(
+                Log.i(TAG, String.format(
                         "%s: parent changed from %s to %s",
                         group.getKey(),
                         group.getPreviousParent() == null
@@ -611,17 +607,17 @@ public class NotifListBuilderImpl implements NotifListBuilder {
 
         if (filter != entry.mExcludingFilter) {
             if (entry.mExcludingFilter == null) {
-                mNotifLog.log(NotifEvent.FILTER_CHANGED, String.format(
+                Log.i(TAG, String.format(
                         "%s: filtered out by '%s'",
                         entry.getKey(),
                         filter.getName()));
             } else if (filter == null) {
-                mNotifLog.log(NotifEvent.FILTER_CHANGED, String.format(
+                Log.i(TAG, String.format(
                         "%s: no longer filtered out (previous filter was '%s')",
                         entry.getKey(),
                         entry.mExcludingFilter.getName()));
             } else {
-                mNotifLog.log(NotifEvent.FILTER_CHANGED, String.format(
+                Log.i(TAG, String.format(
                         "%s: filter changed: '%s' -> '%s'",
                         entry.getKey(),
                         entry.mExcludingFilter,
@@ -652,22 +648,23 @@ public class NotifListBuilderImpl implements NotifListBuilder {
 
         if (promoter != entry.mNotifPromoter) {
             if (entry.mNotifPromoter == null) {
-                mNotifLog.log(NotifEvent.PROMOTER_CHANGED, String.format(
+                Log.i(TAG, String.format(
                         "%s: Entry promoted to top level by '%s'",
                         entry.getKey(),
                         promoter.getName()));
             } else if (promoter == null) {
-                mNotifLog.log(NotifEvent.PROMOTER_CHANGED, String.format(
+                Log.i(TAG, String.format(
                         "%s: Entry is no longer promoted to top level (previous promoter was '%s')",
                         entry.getKey(),
                         entry.mNotifPromoter.getName()));
             } else {
-                mNotifLog.log(NotifEvent.PROMOTER_CHANGED, String.format(
+                Log.i(TAG, String.format(
                         "%s: Top-level promoter changed: '%s' -> '%s'",
                         entry.getKey(),
                         entry.mNotifPromoter,
                         promoter));
             }
+
             entry.mNotifPromoter = promoter;
         }
 
