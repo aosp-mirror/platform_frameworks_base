@@ -1132,7 +1132,7 @@ class ActivityStarter {
             request.outActivity[0] = mLastStartActivityRecord;
         }
 
-        return getExternalResult(mLastStartActivityResult);
+        return mLastStartActivityResult;
     }
 
     /**
