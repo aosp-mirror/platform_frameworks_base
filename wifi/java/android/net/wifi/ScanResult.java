@@ -499,10 +499,24 @@ public class ScanResult implements Parcelable {
 
     /**
      * @hide
+     */
+    public boolean is6GHz() {
+        return ScanResult.is6GHz(frequency);
+    }
+
+    /**
+     * @hide
      * TODO: makes real freq boundaries
      */
     public static boolean is5GHz(int freq) {
         return freq > 4900 && freq < 5900;
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean is6GHz(int freq) {
+        return freq > 5925 && freq < 7125;
     }
 
     /**
