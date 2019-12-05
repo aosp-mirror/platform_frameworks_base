@@ -1708,18 +1708,6 @@ public class WifiManagerTest {
     }
 
     /**
-     * Test behavior of {@link WifiManager#getControllerActivityEnergyInfo()}
-     */
-    @Test
-    public void testGetControllerActivityEnergyInfo() throws Exception {
-        WifiActivityEnergyInfo activityEnergyInfo =
-                new WifiActivityEnergyInfo(5, 3, 3, 5, 5, 5);
-        when(mWifiService.reportActivityInfo()).thenReturn(activityEnergyInfo);
-
-        assertEquals(activityEnergyInfo, mWifiManager.getControllerActivityEnergyInfo());
-    }
-
-    /**
      * Tests that passing a null Executor to {@link WifiManager#getWifiActivityEnergyInfoAsync}
      * throws an exception.
      */

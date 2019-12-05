@@ -76,11 +76,14 @@ public class BaseWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    /** @deprecated use {@link #getWifiActivityEnergyInfoAsync} instead */
+    @Deprecated
     public WifiActivityEnergyInfo reportActivityInfo() {
         throw new UnsupportedOperationException();
     }
 
+    /** @deprecated use {@link #getWifiActivityEnergyInfoAsync} instead */
+    @Deprecated
     public void requestActivityInfo(ResultReceiver result) {
         throw new UnsupportedOperationException();
     }
