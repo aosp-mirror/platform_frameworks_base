@@ -136,8 +136,11 @@ public class AppsFilter {
             DeviceConfig.addOnPropertiesChangedListener(
                     NAMESPACE_PACKAGE_MANAGER_SERVICE, FgThread.getExecutor(),
                     properties -> {
-                        synchronized (FeatureConfigImpl.this) {
-                            mFeatureEnabled = properties.getBoolean(FILTERING_ENABLED_NAME, false);
+                        if (properties.getKeyset().contains(FILTERING_ENABLED_NAME)) {
+                            synchronized (FeatureConfigImpl.this) {
+                                mFeatureEnabled = properties.getBoolean(FILTERING_ENABLED_NAME,
+                                        false);
+                            }
                         }
                     });
         }
