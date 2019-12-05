@@ -456,9 +456,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     SystemUiDeviceConfigFlags
                             .SCREENSHOT_NOTIFICATION_SMART_ACTIONS_TIMEOUT_MS,
                     1000);
-            List<Notification.Action> smartActions = buildSmartActions(
-                    GlobalScreenshot.getSmartActions(mScreenshotId, smartActionsFuture,
-                            timeoutMs, mSmartActionsProvider), context);
+            List<Notification.Action> smartActions = GlobalScreenshot.getSmartActions(mScreenshotId,
+                    smartActionsFuture, timeoutMs, mSmartActionsProvider);
+            smartActions = buildSmartActions(smartActions, context);
             for (Notification.Action action : smartActions) {
                 notificationBuilder.addAction(action);
             }
