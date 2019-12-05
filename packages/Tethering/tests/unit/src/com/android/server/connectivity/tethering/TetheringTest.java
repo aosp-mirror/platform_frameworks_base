@@ -19,6 +19,9 @@ package com.android.server.connectivity.tethering;
 import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
 import static android.hardware.usb.UsbManager.USB_FUNCTION_RNDIS;
+import static android.net.ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED;
+import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED;
+import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED;
 import static android.net.RouteInfo.RTN_UNICAST;
 import static android.net.TetheringManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.TetheringManager.EXTRA_ACTIVE_LOCAL_ONLY;
@@ -53,6 +56,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -61,6 +65,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.usage.NetworkStatsManager;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -69,6 +74,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
+import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.INetworkPolicyManager;
 import android.net.ITetheringEventCallback;
@@ -133,6 +139,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Vector;
 
 @RunWith(AndroidJUnit4.class)
@@ -167,6 +174,7 @@ public class TetheringTest {
     @Mock private INetd mNetd;
     @Mock private UserManager mUserManager;
     @Mock private NetworkRequest mNetworkRequest;
+    @Mock private ConnectivityManager mCm;
 
     private final MockIpServerDependencies mIpServerDependencies =
             spy(new MockIpServerDependencies());
@@ -218,6 +226,7 @@ public class TetheringTest {
             if (Context.TELEPHONY_SERVICE.equals(name)) return mTelephonyManager;
             if (Context.USER_SERVICE.equals(name)) return mUserManager;
             if (Context.NETWORK_STATS_SERVICE.equals(name)) return mStatsManager;
+            if (Context.CONNECTIVITY_SERVICE.equals(name)) return mCm;
             return super.getSystemService(name);
         }
 
@@ -340,11 +349,6 @@ public class TetheringTest {
         }
 
         @Override
-        public INetworkPolicyManager getINetworkPolicyManager() {
-            return mPolicyManager;
-        }
-
-        @Override
         public INetd getINetd(Context context) {
             return mNetd;
         }
@@ -357,6 +361,12 @@ public class TetheringTest {
         @Override
         public Context getContext() {
             return mServiceContext;
+        }
+
+        @Override
+        public BluetoothAdapter getBluetoothAdapter() {
+            // TODO: add test for bluetooth tethering.
+            return null;
         }
     }
 
@@ -1347,6 +1357,50 @@ public class TetheringTest {
     @Test
     public void workingWifiP2pGroupClientSansIfaceChanged() throws Exception {
         workingWifiP2pGroupClient(false);
+    }
+
+    private void setDataSaverEnabled(boolean enabled) {
+        final Intent intent = new Intent(ACTION_RESTRICT_BACKGROUND_CHANGED);
+        mServiceContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+
+        final int status = enabled ? RESTRICT_BACKGROUND_STATUS_ENABLED
+                : RESTRICT_BACKGROUND_STATUS_DISABLED;
+        when(mCm.getRestrictBackgroundStatus()).thenReturn(status);
+        mLooper.dispatchAll();
+    }
+
+    @Test
+    public void testDataSaverChanged() {
+        // Start Tethering.
+        final UpstreamNetworkState upstreamState = buildMobileIPv4UpstreamState();
+        runUsbTethering(upstreamState);
+        assertContains(Arrays.asList(mTethering.getTetheredIfaces()), TEST_USB_IFNAME);
+        // Data saver is ON.
+        setDataSaverEnabled(true);
+        // Verify that tethering should be disabled.
+        verify(mUsbManager, times(1)).setCurrentFunctions(UsbManager.FUNCTION_NONE);
+        mTethering.interfaceRemoved(TEST_USB_IFNAME);
+        mLooper.dispatchAll();
+        assertEquals(mTethering.getTetheredIfaces(), new String[0]);
+        reset(mUsbManager);
+
+        runUsbTethering(upstreamState);
+        // Verify that user can start tethering again without turning OFF data saver.
+        assertContains(Arrays.asList(mTethering.getTetheredIfaces()), TEST_USB_IFNAME);
+
+        // If data saver is keep ON with change event, tethering should not be OFF this time.
+        setDataSaverEnabled(true);
+        verify(mUsbManager, times(0)).setCurrentFunctions(UsbManager.FUNCTION_NONE);
+        assertContains(Arrays.asList(mTethering.getTetheredIfaces()), TEST_USB_IFNAME);
+
+        // If data saver is turned OFF, it should not change tethering.
+        setDataSaverEnabled(false);
+        verify(mUsbManager, times(0)).setCurrentFunctions(UsbManager.FUNCTION_NONE);
+        assertContains(Arrays.asList(mTethering.getTetheredIfaces()), TEST_USB_IFNAME);
+    }
+
+    private static <T> void assertContains(Collection<T> collection, T element) {
+        assertTrue(element + " not found in " + collection, collection.contains(element));
     }
 
     // TODO: Test that a request for hotspot mode doesn't interfere with an
