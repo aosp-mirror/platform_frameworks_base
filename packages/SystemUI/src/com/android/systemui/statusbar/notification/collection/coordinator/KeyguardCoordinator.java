@@ -51,7 +51,7 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class KeyguardCoordinator implements Coordinator {
-    private static final String TAG = "KeyguardNotificationCoordinator";
+    private static final String TAG = "KeyguardCoordinator";
 
     private final Context mContext;
     private final Handler mMainHandler;
@@ -86,7 +86,7 @@ public class KeyguardCoordinator implements Coordinator {
         notifListBuilder.addFilter(mNotifFilter);
     }
 
-    protected final NotifFilter mNotifFilter = new NotifFilter(TAG) {
+    private final NotifFilter mNotifFilter = new NotifFilter(TAG) {
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
             final StatusBarNotification sbn = entry.getSbn();

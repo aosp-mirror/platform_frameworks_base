@@ -56,7 +56,7 @@ public class DeviceProvisionedCoordinator implements Coordinator {
         notifListBuilder.addFilter(mNotifFilter);
     }
 
-    protected final NotifFilter mNotifFilter = new NotifFilter(TAG) {
+    private final NotifFilter mNotifFilter = new NotifFilter(TAG) {
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
             return !mDeviceProvisionedController.isDeviceProvisioned()

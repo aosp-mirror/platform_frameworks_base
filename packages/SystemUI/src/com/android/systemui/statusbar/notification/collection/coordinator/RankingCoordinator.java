@@ -26,7 +26,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Filters out NotificationEntries based on its Ranking.
+ * Filters out NotificationEntries based on its Ranking and dozing state.
+ * We check the NotificationEntry's Ranking for:
+ *  - whether the notification's app is suspended or hiding its notifications
+ *  - whether DND settings are hiding notifications from ambient display or the notification list
  */
 @Singleton
 public class RankingCoordinator implements Coordinator {
@@ -51,7 +54,7 @@ public class RankingCoordinator implements Coordinator {
      * NotifListBuilder invalidates the notification list each time the ranking is updated,
      * so we don't need to explicitly invalidate this filter on ranking update.
      */
-    protected final NotifFilter mNotifFilter = new NotifFilter(TAG) {
+    private final NotifFilter mNotifFilter = new NotifFilter(TAG) {
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
             // App suspended from Ranking
