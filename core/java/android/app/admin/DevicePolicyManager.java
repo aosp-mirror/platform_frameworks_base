@@ -7893,7 +7893,8 @@ public class DevicePolicyManager {
      *            for the list of keys.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
-    public void addUserRestriction(@NonNull ComponentName admin, String key) {
+    public void addUserRestriction(@NonNull ComponentName admin,
+            @UserManager.UserRestrictionKey String key) {
         throwIfParentInstance("addUserRestriction");
         if (mService != null) {
             try {
@@ -7915,7 +7916,8 @@ public class DevicePolicyManager {
      *            for the list of keys.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
-    public void clearUserRestriction(@NonNull ComponentName admin, String key) {
+    public void clearUserRestriction(@NonNull ComponentName admin,
+            @UserManager.UserRestrictionKey String key) {
         throwIfParentInstance("clearUserRestriction");
         if (mService != null) {
             try {
