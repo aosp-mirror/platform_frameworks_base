@@ -772,6 +772,31 @@ cc_library {
     },
 }
 
+filegroup {
+    name: "incremental_aidl",
+    srcs: [
+        "core/java/android/os/incremental/IncrementalFileSystemControlParcel.aidl",
+    ],
+    path: "core/java",
+}
+
+aidl_interface {
+    name: "libincremental_aidl",
+    srcs: [
+        ":incremental_aidl",
+    ],
+    backend: {
+        java: {
+            sdk_version: "28",
+        },
+        cpp: {
+            enabled: true,
+        },
+        ndk: {
+            enabled: true,
+        },
+    },
+}
 
 gensrcs {
     name: "gen-platform-proto-constants",
