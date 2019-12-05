@@ -66,6 +66,8 @@ public class BubbleExperimentConfig {
     private static final String ALLOW_SHORTCUTS_TO_BUBBLE = "allow_shortcuts_to_bubble";
     private static final boolean ALLOW_SHORTCUT_TO_BUBBLE_DEFAULT = false;
 
+    private static final String WHITELISTED_AUTO_BUBBLE_APPS = "whitelisted_auto_bubble_apps";
+
     /**
      * When true, if a notification has the information necessary to bubble (i.e. valid
      * contentIntent and an icon or image), then a {@link android.app.Notification.BubbleMetadata}
@@ -103,6 +105,24 @@ public class BubbleExperimentConfig {
     }
 
     /**
+     * Returns whether the provided package is whitelisted to bubble.
+     */
+    static boolean isPackageWhitelistedToAutoBubble(Context context, String packageName) {
+        String unsplitList = Settings.Secure.getString(context.getContentResolver(),
+                WHITELISTED_AUTO_BUBBLE_APPS);
+        if (unsplitList != null) {
+            // We expect the list to be separated by commas and no white space (but we trim in case)
+            String[] packageList = unsplitList.split(",");
+            for (int i = 0; i < packageList.length; i++) {
+                if (packageList[i].trim().equals(packageName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * If {@link #allowAnyNotifToBubble(Context)} is true, this method creates and adds
      * {@link android.app.Notification.BubbleMetadata} to the notification entry as long as
      * the notification has necessary info for BubbleMetadata.
@@ -113,6 +133,8 @@ public class BubbleExperimentConfig {
             boolean previouslyUserCreated) {
         Notification.BubbleMetadata metadata = null;
         boolean addedMetadata = false;
+        boolean whiteListedToAutoBubble =
+                isPackageWhitelistedToAutoBubble(context, entry.getSbn().getPackageName());
 
         Notification notification = entry.getSbn().getNotification();
         boolean isMessage = Notification.MessagingStyle.class.equals(
@@ -170,9 +192,9 @@ public class BubbleExperimentConfig {
             }
         }
 
-        if (previouslyUserCreated && addedMetadata) {
-            // Update to a previous bubble, set its flag now so the update goes
-            // to the bubble.
+        boolean bubbleForWhitelist = whiteListedToAutoBubble && (addedMetadata || hasMetadata);
+        if ((previouslyUserCreated && addedMetadata) || bubbleForWhitelist) {
+            // Update to a previous bubble (or new autobubble), set its flag now.
             if (DEBUG_EXPERIMENTS) {
                 Log.d(TAG, "Setting FLAG_BUBBLE for: " + entry.getKey());
             }
