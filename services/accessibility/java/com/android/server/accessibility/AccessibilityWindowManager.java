@@ -972,6 +972,9 @@ public class AccessibilityWindowManager {
         if (shouldComputeWindows) {
             mWindowManagerInternal.computeWindowsForAccessibility(displayId);
         }
+
+        mWindowManagerInternal.setAccessibilityIdToSurfaceMetadata(
+                windowToken.asBinder(), windowId);
         return windowId;
     }
 
@@ -991,7 +994,7 @@ public class AccessibilityWindowManager {
             final int removedWindowId = removeAccessibilityInteractionConnectionInternalLocked(
                     token, mGlobalWindowTokens, mGlobalInteractionConnections);
             if (removedWindowId >= 0) {
-                onAccessibilityInteractionConnectionRemovedLocked(removedWindowId);
+                onAccessibilityInteractionConnectionRemovedLocked(removedWindowId, token);
                 if (DEBUG) {
                     Slog.i(LOG_TAG, "Removed global connection for pid:" + Binder.getCallingPid()
                             + " with windowId: " + removedWindowId + " and token: "
@@ -1007,7 +1010,8 @@ public class AccessibilityWindowManager {
                                 getWindowTokensForUserLocked(userId),
                                 getInteractionConnectionsForUserLocked(userId));
                 if (removedWindowIdForUser >= 0) {
-                    onAccessibilityInteractionConnectionRemovedLocked(removedWindowIdForUser);
+                    onAccessibilityInteractionConnectionRemovedLocked(
+                            removedWindowIdForUser, token);
                     if (DEBUG) {
                         Slog.i(LOG_TAG, "Removed user connection for pid:" + Binder.getCallingPid()
                                 + " with windowId: " + removedWindowIdForUser + " and userId:"
@@ -1069,18 +1073,21 @@ public class AccessibilityWindowManager {
      * @param userId The userId to remove
      */
     private void removeAccessibilityInteractionConnectionLocked(int windowId, int userId) {
+        IBinder window = null;
         if (userId == UserHandle.USER_ALL) {
+            window = mGlobalWindowTokens.get(windowId);
             mGlobalWindowTokens.remove(windowId);
             mGlobalInteractionConnections.remove(windowId);
         } else {
             if (isValidUserForWindowTokensLocked(userId)) {
+                window = getWindowTokensForUserLocked(userId).get(windowId);
                 getWindowTokensForUserLocked(userId).remove(windowId);
             }
             if (isValidUserForInteractionConnectionsLocked(userId)) {
                 getInteractionConnectionsForUserLocked(userId).remove(windowId);
             }
         }
-        onAccessibilityInteractionConnectionRemovedLocked(windowId);
+        onAccessibilityInteractionConnectionRemovedLocked(windowId, window);
         if (DEBUG) {
             Slog.i(LOG_TAG, "Removing interaction connection to windowId: " + windowId);
         }
@@ -1091,11 +1098,16 @@ public class AccessibilityWindowManager {
      *
      * @param windowId Removed windowId
      */
-    private void onAccessibilityInteractionConnectionRemovedLocked(int windowId) {
+    private void onAccessibilityInteractionConnectionRemovedLocked(
+            int windowId, @Nullable IBinder binder) {
         // Active window will not update, if windows callback is unregistered.
         // Update active window to invalid, when its a11y interaction connection is removed.
         if (!isTrackingWindowsLocked() && windowId >= 0 && mActiveWindowId == windowId) {
             mActiveWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+        }
+        if (binder != null) {
+            mWindowManagerInternal.setAccessibilityIdToSurfaceMetadata(
+                    binder, AccessibilityWindowInfo.UNDEFINED_WINDOW_ID);
         }
     }
 

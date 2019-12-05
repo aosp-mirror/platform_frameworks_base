@@ -7398,6 +7398,27 @@ public class WindowManagerService extends IWindowManager.Stub
         public @Nullable KeyInterceptionInfo getKeyInterceptionInfoFromToken(IBinder inputToken) {
             return mKeyInterceptionInfoForToken.get(inputToken);
         }
+
+        @Override
+        public void setAccessibilityIdToSurfaceMetadata(
+                IBinder windowToken, int accessibilityWindowId) {
+            synchronized (mGlobalLock) {
+                final WindowState state = mWindowMap.get(windowToken);
+                if (state == null) {
+                    Slog.w(TAG, "Cannot find window which accessibility connection is added to");
+                    return;
+                }
+                try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
+                    t.setMetadata(
+                            state.mSurfaceControl,
+                            SurfaceControl.METADATA_ACCESSIBILITY_ID,
+                            accessibilityWindowId);
+                    t.apply();
+                } finally {
+                    SurfaceControl.closeTransaction();
+                }
+            }
+        }
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {
