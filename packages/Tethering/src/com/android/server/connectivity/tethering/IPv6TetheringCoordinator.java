@@ -21,7 +21,6 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkState;
 import android.net.RouteInfo;
 import android.net.ip.IpServer;
 import android.net.util.NetworkConstants;
@@ -72,7 +71,7 @@ public class IPv6TetheringCoordinator {
     private final LinkedList<Downstream> mActiveDownstreams;
     private final byte[] mUniqueLocalPrefix;
     private short mNextSubnetId;
-    private NetworkState mUpstreamNetworkState;
+    private UpstreamNetworkState mUpstreamNetworkState;
 
     public IPv6TetheringCoordinator(ArrayList<IpServer> notifyList, SharedLog log) {
         mNotifyList = notifyList;
@@ -115,11 +114,11 @@ public class IPv6TetheringCoordinator {
     }
 
     /**
-     * Call when upstream NetworkState may be changed.
-     * If upstream has ipv6 for tethering, update this new NetworkState
+     * Call when UpstreamNetworkState may be changed.
+     * If upstream has ipv6 for tethering, update this new UpstreamNetworkState
      * to IpServer. Otherwise stop ipv6 tethering on downstream interfaces.
      */
-    public void updateUpstreamNetworkState(NetworkState ns) {
+    public void updateUpstreamNetworkState(UpstreamNetworkState ns) {
         if (VDBG) {
             Log.d(TAG, "updateUpstreamNetworkState: " + toDebugString(ns));
         }
@@ -144,18 +143,15 @@ public class IPv6TetheringCoordinator {
         }
     }
 
-    private void setUpstreamNetworkState(NetworkState ns) {
+    private void setUpstreamNetworkState(UpstreamNetworkState ns) {
         if (ns == null) {
             mUpstreamNetworkState = null;
         } else {
             // Make a deep copy of the parts we need.
-            mUpstreamNetworkState = new NetworkState(
-                    null,
+            mUpstreamNetworkState = new UpstreamNetworkState(
                     new LinkProperties(ns.linkProperties),
                     new NetworkCapabilities(ns.networkCapabilities),
-                    new Network(ns.network),
-                    null,
-                    null);
+                    new Network(ns.network));
         }
 
         mLog.log("setUpstreamNetworkState: " + toDebugString(mUpstreamNetworkState));
@@ -295,14 +291,11 @@ public class IPv6TetheringCoordinator {
         return in6addr;
     }
 
-    private static String toDebugString(NetworkState ns) {
+    private static String toDebugString(UpstreamNetworkState ns) {
         if (ns == null) {
-            return "NetworkState{null}";
+            return "UpstreamNetworkState{null}";
         }
-        return String.format("NetworkState{%s, %s, %s}",
-                ns.network,
-                ns.networkCapabilities,
-                ns.linkProperties);
+        return ns.toString();
     }
 
     private static void stopIPv6TetheringOn(IpServer ipServer) {
