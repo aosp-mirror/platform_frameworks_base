@@ -645,12 +645,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
         refresh();
 
-        if (bondState == BluetoothDevice.BOND_BONDED) {
-            if (mDevice.isBluetoothDock()) {
-                onBondingDockConnect();
-            } else if (mDevice.isBondingInitiatedLocally()) {
-                connect(false);
-            }
+        if (bondState == BluetoothDevice.BOND_BONDED && mDevice.isBondingInitiatedLocally()) {
+            connect(false);
         }
     }
 
