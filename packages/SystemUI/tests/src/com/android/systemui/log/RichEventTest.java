@@ -57,7 +57,7 @@ public class RichEventTest extends SysuiTestCase {
 
     class TestableRichEvent extends RichEvent {
         TestableRichEvent(int logLevel, int type, String reason) {
-            init(logLevel, type, reason);
+            super(logLevel, type, reason);
         }
 
         @Override

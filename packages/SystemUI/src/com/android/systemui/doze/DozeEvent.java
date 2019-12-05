@@ -28,12 +28,10 @@ import java.lang.annotation.RetentionPolicy;
  * and triaging purposes.
  */
 public class DozeEvent extends RichEvent {
-    /**
-     * Initializes a doze event
-     */
-    public DozeEvent init(@EventType int type, String reason) {
-        super.init(DEBUG, type, reason);
-        return this;
+    public static final int TOTAL_EVENT_TYPES = 19;
+
+    public DozeEvent(int logLevel, int type, String reason) {
+        super(logLevel, type, reason);
     }
 
     /**
@@ -91,6 +89,21 @@ public class DozeEvent extends RichEvent {
         }
     }
 
+    /**
+     * Builds a DozeEvent.
+     */
+    public static class DozeEventBuilder extends RichEvent.Builder<DozeEventBuilder> {
+        @Override
+        public DozeEventBuilder getBuilder() {
+            return this;
+        }
+
+        @Override
+        public RichEvent build() {
+            return new DozeEvent(mLogLevel, mType, mReason);
+        }
+    }
+
     @IntDef({PICKUP_WAKEUP, PULSE_START, PULSE_FINISH, NOTIFICATION_PULSE, DOZING, FLING,
             EMERGENCY_CALL, KEYGUARD_BOUNCER_CHANGED, SCREEN_ON, SCREEN_OFF, MISSED_TICK,
             TIME_TICK_SCHEDULED, KEYGUARD_VISIBILITY_CHANGE, DOZE_STATE_CHANGED, WAKE_DISPLAY,
@@ -119,7 +132,6 @@ public class DozeEvent extends RichEvent {
     public static final int PULSE_DROPPED = 16;
     public static final int PULSE_DISABLED_BY_PROX = 17;
     public static final int SENSOR_TRIGGERED = 18;
-    public static final int TOTAL_EVENT_TYPES = 19;
 
     public static final int TOTAL_REASONS = 10;
     @IntDef({PULSE_REASON_NONE, PULSE_REASON_INTENT, PULSE_REASON_NOTIFICATION,
