@@ -1239,6 +1239,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
                 mScrimController, mActivityLaunchAnimator, mDynamicPrivacyController,
                 mNotificationAlertingManager, rowBinder, mKeyguardStateController,
+                mKeyguardIndicationController,
                 this /* statusBar */, mCommandQueue);
 
         mNotificationListController =
@@ -1280,11 +1281,6 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     protected void setUpDisableFlags(int state1, int state2) {
         mCommandQueue.disable(mDisplayId, state1, state2, false /* animate */);
-    }
-
-    @Override
-    public void addAfterKeyguardGoneRunnable(Runnable runnable) {
-        mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
     }
 
     /**
@@ -3454,13 +3450,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void showBouncerIfKeyguard() {
         if ((mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)
                 && !mKeyguardViewMediator.isHiding()) {
-            showBouncer(true /* scrimmed */);
+            mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
         }
-    }
-
-    @Override
-    public void showBouncer(boolean scrimmed) {
-        mStatusBarKeyguardViewManager.showBouncer(scrimmed);
     }
 
     @Override
@@ -3584,10 +3575,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarKeyguardViewManager.isOccluded());
     }
 
-    public void onActivationReset() {
-        mKeyguardIndicationController.hideTransientIndication();
-    }
-
     public void onTrackingStarted() {
         runPostCollapseRunnables();
     }
@@ -3629,7 +3616,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void onTrackingStopped(boolean expand) {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             if (!expand && !mKeyguardStateController.canDismissLockScreen()) {
-                showBouncer(false /* scrimmed */);
+                mStatusBarKeyguardViewManager.showBouncer(false /* scrimmed */);
             }
         }
     }
@@ -3685,15 +3672,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             mNotificationPanel.animateToFullShade(0 /* delay */);
             mStatusBarStateController.setState(StatusBarState.SHADE_LOCKED);
-        }
-    }
-
-    /**
-     * Goes back to the keyguard after hanging around in {@link StatusBarState#SHADE_LOCKED}.
-     */
-    public void goToKeyguard() {
-        if (mState == StatusBarState.SHADE_LOCKED) {
-            mStatusBarStateController.setState(StatusBarState.KEYGUARD);
         }
     }
 

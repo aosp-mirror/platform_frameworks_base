@@ -2989,7 +2989,7 @@ public class NotificationPanelView extends PanelView implements
                 return true;
             case StatusBarState.SHADE_LOCKED:
                 if (!mQsExpanded) {
-                    mShadeController.goToKeyguard();
+                    mStatusBarStateController.setState(StatusBarState.KEYGUARD);
                 }
                 return true;
             case StatusBarState.SHADE:

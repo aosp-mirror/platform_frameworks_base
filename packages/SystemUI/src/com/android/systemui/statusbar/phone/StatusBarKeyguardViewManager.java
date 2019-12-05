@@ -365,6 +365,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         cancelPendingWakeupAction();
     }
 
+    /**
+     * Shows the keyguard bouncer - the password challenge on the lock screen
+     *
+     * @param scrimmed true when the bouncer should show scrimmed, false when the user will be
+     * dragging it and translation should be deferred {@see KeyguardBouncer#show(boolean, boolean)}
+     */
     public void showBouncer(boolean scrimmed) {
         if (mShowing && !mBouncer.isShowing()) {
             mBouncer.show(false /* resetSecuritySelection */, scrimmed);

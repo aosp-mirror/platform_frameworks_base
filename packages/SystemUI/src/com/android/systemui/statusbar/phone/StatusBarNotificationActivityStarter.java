@@ -105,6 +105,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final NotificationPresenter mPresenter;
     private final LockPatternUtils mLockPatternUtils;
     private final HeadsUpManagerPhone mHeadsUpManager;
+    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final KeyguardManager mKeyguardManager;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private final IStatusBarService mBarService;
@@ -122,7 +123,9 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             NotificationPresenter presenter, NotificationEntryManager entryManager,
             HeadsUpManagerPhone headsUpManager, ActivityStarter activityStarter,
             ActivityLaunchAnimator activityLaunchAnimator, IStatusBarService statusBarService,
-            StatusBarStateController statusBarStateController, KeyguardManager keyguardManager,
+            StatusBarStateController statusBarStateController,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            KeyguardManager keyguardManager,
             IDreamManager dreamManager, NotificationRemoteInputManager remoteInputManager,
             StatusBarRemoteInputCallback remoteInputCallback, NotificationGroupManager groupManager,
             NotificationLockscreenUserManager lockscreenUserManager,
@@ -139,6 +142,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mActivityLaunchAnimator = activityLaunchAnimator;
         mBarService = statusBarService;
         mCommandQueue = commandQueue;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardManager = keyguardManager;
         mDreamManager = dreamManager;
         mRemoteInputManager = remoteInputManager;
@@ -258,7 +262,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mShadeController.collapsePanel(true /* animate */);
         } else if (mKeyguardStateController.isShowing()
                 && mStatusBar.isOccluded()) {
-            mShadeController.addAfterKeyguardGoneRunnable(runnable);
+            mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
             mShadeController.collapsePanel();
         } else {
             mBackgroundHandler.postAtFrontOfQueue(runnable);
@@ -504,6 +508,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         private final ActivityStarter mActivityStarter;
         private final IStatusBarService mStatusBarService;
         private final StatusBarStateController mStatusBarStateController;
+        private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
         private final KeyguardManager mKeyguardManager;
         private final IDreamManager mDreamManager;
         private final NotificationRemoteInputManager mRemoteInputManager;
@@ -533,6 +538,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 ActivityStarter activityStarter,
                 IStatusBarService statusBarService,
                 StatusBarStateController statusBarStateController,
+                StatusBarKeyguardViewManager statusBarKeyguardViewManager,
                 KeyguardManager keyguardManager,
                 IDreamManager dreamManager,
                 NotificationRemoteInputManager remoteInputManager,
@@ -556,6 +562,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mActivityStarter = activityStarter;
             mStatusBarService = statusBarService;
             mStatusBarStateController = statusBarStateController;
+            mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
             mKeyguardManager = keyguardManager;
             mDreamManager = dreamManager;
             mRemoteInputManager = remoteInputManager;
@@ -601,6 +608,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     mActivityLaunchAnimator,
                     mStatusBarService,
                     mStatusBarStateController,
+                    mStatusBarKeyguardViewManager,
                     mKeyguardManager,
                     mDreamManager,
                     mRemoteInputManager,
