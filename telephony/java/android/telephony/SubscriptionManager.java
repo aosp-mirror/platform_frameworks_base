@@ -835,6 +835,12 @@ public class SubscriptionManager {
     public static final String IMSI = "imsi";
 
     /**
+     * Whether uicc applications is set to be enabled or disabled. By default it's enabled.
+     * @hide
+     */
+    public static final String UICC_APPLICATIONS_ENABLED = "uicc_applications_enabled";
+
+    /**
      * Broadcast Action: The user has changed one of the default subs related to
      * data, phone calls, or sms</p>
      *
