@@ -80,6 +80,7 @@ public final class AccessNetworkConstants {
         public static final int EUTRAN = 3;
         public static final int CDMA2000 = 4;
         public static final int IWLAN = 5;
+        public static final int NGRAN = 6;
 
         /** @hide */
         private AccessNetworkType() {}
@@ -93,6 +94,7 @@ public final class AccessNetworkConstants {
                 case EUTRAN: return "EUTRAN";
                 case CDMA2000: return "CDMA2000";
                 case IWLAN: return "IWLAN";
+                case NGRAN: return "NGRAN";
                 default: return Integer.toString(type);
             }
         }
@@ -245,6 +247,61 @@ public final class AccessNetworkConstants {
 
         /** @hide */
         private CdmaBands() {};
+    }
+
+    /**
+     * Frequency bands for NGRAN
+     */
+    public static final class NgranBands {
+        /** FR1 bands */
+        public static final int BAND_1 = 1;
+        public static final int BAND_2 = 2;
+        public static final int BAND_3 = 3;
+        public static final int BAND_5 = 5;
+        public static final int BAND_7 = 7;
+        public static final int BAND_8 = 8;
+        public static final int BAND_12 = 12;
+        public static final int BAND_14 = 14;
+        public static final int BAND_18 = 18;
+        public static final int BAND_20 = 20;
+        public static final int BAND_25 = 25;
+        public static final int BAND_28 = 28;
+        public static final int BAND_29 = 29;
+        public static final int BAND_30 = 30;
+        public static final int BAND_34 = 34;
+        public static final int BAND_38 = 38;
+        public static final int BAND_39 = 39;
+        public static final int BAND_40 = 40;
+        public static final int BAND_41 = 41;
+        public static final int BAND_48 = 48;
+        public static final int BAND_50 = 50;
+        public static final int BAND_51 = 51;
+        public static final int BAND_65 = 65;
+        public static final int BAND_66 = 66;
+        public static final int BAND_70 = 70;
+        public static final int BAND_71 = 71;
+        public static final int BAND_74 = 74;
+        public static final int BAND_75 = 75;
+        public static final int BAND_76 = 76;
+        public static final int BAND_77 = 77;
+        public static final int BAND_78 = 78;
+        public static final int BAND_79 = 79;
+        public static final int BAND_80 = 80;
+        public static final int BAND_81 = 81;
+        public static final int BAND_82 = 82;
+        public static final int BAND_83 = 83;
+        public static final int BAND_84 = 84;
+        public static final int BAND_86 = 86;
+        public static final int BAND_90 = 90;
+
+        /** FR2 bands */
+        public static final int BAND_257 = 257;
+        public static final int BAND_258 = 258;
+        public static final int BAND_260 = 260;
+        public static final int BAND_261 = 261;
+
+        /** @hide */
+        private NgranBands() {};
     }
 
     /** @hide */
