@@ -1295,7 +1295,18 @@ Status StatsService::registerPullAtomCallback(int32_t uid, int32_t atomTag, int6
                                     const sp<android::os::IPullAtomCallback>& pullerCallback) {
     ENFORCE_UID(AID_SYSTEM);
 
-    VLOG("StatsService::registerPuller called.");
+    VLOG("StatsService::registerPullAtomCallback called.");
+    mPullerManager->RegisterPullAtomCallback(uid, atomTag, coolDownNs, timeoutNs, additiveFields,
+                                             pullerCallback);
+    return Status::ok();
+}
+
+Status StatsService::registerNativePullAtomCallback(int32_t atomTag, int64_t coolDownNs,
+                                    int64_t timeoutNs, const std::vector<int32_t>& additiveFields,
+                                    const sp<android::os::IPullAtomCallback>& pullerCallback) {
+
+    VLOG("StatsService::registerNativePullAtomCallback called.");
+    int32_t uid = IPCThreadState::self()->getCallingUid();
     mPullerManager->RegisterPullAtomCallback(uid, atomTag, coolDownNs, timeoutNs, additiveFields,
                                              pullerCallback);
     return Status::ok();

@@ -187,6 +187,13 @@ public:
             const sp<android::os::IPullAtomCallback>& pullerCallback) override;
 
     /**
+     * Binder call to register a callback function for a pulled atom.
+     */
+    virtual Status registerNativePullAtomCallback(int32_t atomTag, int64_t coolDownNs,
+            int64_t timeoutNs, const std::vector<int32_t>& additiveFields,
+            const sp<android::os::IPullAtomCallback>& pullerCallback) override;
+
+    /**
      * Binder call to unregister any existing callback function for a vendor pulled atom.
      */
     virtual Status unregisterPullerCallback(int32_t atomTag, const String16& packageName) override;

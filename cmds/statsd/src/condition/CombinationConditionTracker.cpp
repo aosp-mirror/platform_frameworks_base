@@ -86,7 +86,7 @@ bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConf
             ALOGW("Child initialization failed %lld ", (long long)child);
             return false;
         } else {
-            ALOGW("Child initialization success %lld ", (long long)child);
+            VLOG("Child initialization success %lld ", (long long)child);
         }
 
         if (allConditionTrackers[childIndex]->isSliced()) {

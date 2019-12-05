@@ -202,6 +202,13 @@ interface IStatsManager {
                            in int[] additiveFields, IPullAtomCallback pullerCallback);
 
    /**
+    * Registers a puller callback function that, when invoked, pulls the data
+    * for the specified atom tag.
+    */
+    oneway void registerNativePullAtomCallback(int atomTag, long coolDownNs, long timeoutNs,
+                           in int[] additiveFields, IPullAtomCallback pullerCallback);
+
+   /**
     * Unregisters a puller callback function for the given vendor atom.
     *
     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS
