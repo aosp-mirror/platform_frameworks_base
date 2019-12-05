@@ -45,8 +45,8 @@ java_library {
 filegroup {
     name: "updatable-media-srcs",
     srcs: [
-        ":mediasession2-srcs",
         ":mediaparser-srcs",
+        ":mediasession2-srcs",
     ],
 }
 
@@ -73,7 +73,8 @@ filegroup {
     name: "mediaparser-srcs",
     srcs: [
         "apex/java/android/media/MediaParser.java"
-    ]
+    ],
+    path: "apex/java"
 }
 
 metalava_updatable_media_args = " --error UnhiddenSystemApi " +
