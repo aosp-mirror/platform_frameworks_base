@@ -211,7 +211,7 @@ constructor(
             setUserLocked(mStartingChild!!, false)
             mStartingChild = null
         }
-        if (shadeController.isDozing) {
+        if (statusBarStateController.isDozing) {
             isWakingToShadeLocked = true
             wakeUpCoordinator.willWakeUp = true
             mPowerManager!!.wakeUp(SystemClock.uptimeMillis(), WAKE_REASON_GESTURE,

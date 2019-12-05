@@ -80,7 +80,7 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mView = new StatusBarWindowView(getContext(), null);
-        when(mStatusBar.isDozing()).thenReturn(false);
+        when(mStatusBarStateController.isDozing()).thenReturn(false);
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
 
         when(mDockManager.isDocked()).thenReturn(false);

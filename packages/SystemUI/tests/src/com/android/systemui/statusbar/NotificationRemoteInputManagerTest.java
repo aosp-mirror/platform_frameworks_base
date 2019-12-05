@@ -30,7 +30,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager.SmartReplyH
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 
 import com.google.android.collect.Sets;
@@ -76,7 +76,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
         mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext,
                 mLockscreenUserManager, mSmartReplyController, mEntryManager,
-                () -> mock(ShadeController.class),
+                () -> mock(StatusBar.class),
                 mStateController,
                 Handler.createAsync(Looper.myLooper()),
                 mRemoteInputUriController);
@@ -212,12 +212,12 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 NotificationLockscreenUserManager lockscreenUserManager,
                 SmartReplyController smartReplyController,
                 NotificationEntryManager notificationEntryManager,
-                Lazy<ShadeController> shadeController,
+                Lazy<StatusBar> statusBarLazy,
                 StatusBarStateController statusBarStateController,
                 Handler mainHandler,
                 RemoteInputUriController remoteInputUriController) {
             super(context, lockscreenUserManager, smartReplyController, notificationEntryManager,
-                    shadeController, statusBarStateController, mainHandler,
+                    statusBarLazy, statusBarStateController, mainHandler,
                     remoteInputUriController);
         }
 

@@ -24,17 +24,15 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
-import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import dagger.Lazy;
 
 /** Handles heads-up and pulsing behavior driven by notification changes. */
 @Singleton
@@ -44,7 +42,7 @@ public class NotificationAlertingManager {
 
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final VisualStabilityManager mVisualStabilityManager;
-    private final Lazy<ShadeController> mShadeController;
+    private final StatusBarStateController mStatusBarStateController;
     private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
     private final NotificationListener mNotificationListener;
 
@@ -55,12 +53,12 @@ public class NotificationAlertingManager {
             NotificationEntryManager notificationEntryManager,
             NotificationRemoteInputManager remoteInputManager,
             VisualStabilityManager visualStabilityManager,
-            Lazy<ShadeController> shadeController,
+            StatusBarStateController statusBarStateController,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             NotificationListener notificationListener) {
         mRemoteInputManager = remoteInputManager;
         mVisualStabilityManager = visualStabilityManager;
-        mShadeController = shadeController;
+        mStatusBarStateController = statusBarStateController;
         mNotificationInterruptionStateProvider = notificationInterruptionStateProvider;
         mNotificationListener = notificationListener;
 
@@ -102,7 +100,7 @@ public class NotificationAlertingManager {
             // If it does and we no longer need to heads up, we should free the view.
             if (mNotificationInterruptionStateProvider.shouldHeadsUp(entry)) {
                 mHeadsUpManager.showNotification(entry);
-                if (!mShadeController.get().isDozing()) {
+                if (!mStatusBarStateController.isDozing()) {
                     // Mark as seen immediately
                     setNotificationShown(entry.getSbn());
                 }

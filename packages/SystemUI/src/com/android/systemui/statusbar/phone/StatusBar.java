@@ -1287,12 +1287,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
     }
 
-    @Override
-    public boolean isDozing() {
-        return mDozing;
-    }
-
-    @Override
+    /**
+     * Ask the display to wake up if currently dozing, else do nothing
+     *
+     * @param time when to wake up
+     * @param where the view requesting the wakeup
+     * @param why the reason for the wake up
+     */
     public void wakeUpIfDozing(long time, View where, String why) {
         if (mDozing) {
             mPowerManager.wakeUp(
@@ -1708,7 +1709,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
         mEntryManager.updateNotifications("onHeadsUpStateChanged");
-        if (isDozing() && isHeadsUp) {
+        if (mStatusBarStateController.isDozing() && isHeadsUp) {
             entry.setPulseSuppressed(false);
             mDozeServiceHost.fireNotificationPulse(entry);
             if (mDozeServiceHost.isPulsing()) {
@@ -4019,7 +4020,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean shouldIgnoreTouch() {
-        return isDozing() && mDozeServiceHost.getIgnoreTouchWhilePulsing();
+        return mStatusBarStateController.isDozing()
+                && mDozeServiceHost.getIgnoreTouchWhilePulsing();
     }
 
     // Begin Extra BaseStatusBar methods.
