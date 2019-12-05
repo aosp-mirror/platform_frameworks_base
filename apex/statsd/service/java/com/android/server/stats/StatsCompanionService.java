@@ -64,8 +64,7 @@ import android.net.INetworkStatsService;
 import android.net.Network;
 import android.net.NetworkRequest;
 import android.net.NetworkStats;
-import android.net.wifi.IWifiManager;
-import android.net.wifi.WifiActivityEnergyInfo;
+import android.net.wifi.WifiManager;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
@@ -98,6 +97,7 @@ import android.os.SystemProperties;
 import android.os.Temperature;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.connectivity.WifiActivityEnergyInfo;
 import android.os.storage.DiskInfo;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
@@ -170,6 +170,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -342,7 +343,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
-    private IWifiManager mWifiManager = null;
+    private WifiManager mWifiManager = null;
     private TelephonyManager mTelephony = null;
     @GuardedBy("sStatsdLock")
     private final HashSet<Long> mDeathTimeMillis = new HashSet<>();
@@ -1148,35 +1149,48 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullWifiActivityInfo(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        long token = Binder.clearCallingIdentity();
+        WifiManager wifiManager;
         synchronized (this) {
             if (mWifiManager == null) {
-                mWifiManager =
-                        IWifiManager.Stub.asInterface(
-                                ServiceManager.getService(Context.WIFI_SERVICE));
+                mWifiManager = mContext.getSystemService(WifiManager.class);
             }
+            wifiManager = mWifiManager;
         }
-        if (mWifiManager != null) {
-            try {
-                SynchronousResultReceiver wifiReceiver = new SynchronousResultReceiver("wifi");
-                mWifiManager.requestActivityInfo(wifiReceiver);
-                final WifiActivityEnergyInfo wifiInfo = awaitControllerInfo(wifiReceiver);
-                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
-                        wallClockNanos);
-                e.writeLong(wifiInfo.getTimeSinceBootMillis());
-                e.writeInt(wifiInfo.getStackState());
-                e.writeLong(wifiInfo.getControllerTxDurationMillis());
-                e.writeLong(wifiInfo.getControllerRxDurationMillis());
-                e.writeLong(wifiInfo.getControllerIdleDurationMillis());
-                e.writeLong(wifiInfo.getControllerEnergyUsedMicroJoules());
-                pulledData.add(e);
-            } catch (RemoteException e) {
-                Slog.e(TAG,
-                        "Pulling wifiManager for wifi controller activity energy info has error",
-                        e);
-            } finally {
-                Binder.restoreCallingIdentity(token);
+        if (wifiManager == null) {
+            return;
+        }
+        long token = Binder.clearCallingIdentity();
+        try {
+            SynchronousResultReceiver wifiReceiver = new SynchronousResultReceiver("wifi");
+            wifiManager.getWifiActivityEnergyInfoAsync(
+                    new Executor() {
+                        @Override
+                        public void execute(Runnable runnable) {
+                            // run the listener on the binder thread, if it was run on the main
+                            // thread it would deadlock since we would be waiting on ourselves
+                            runnable.run();
+                        }
+                    },
+                    info -> {
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, info);
+                        wifiReceiver.send(0, bundle);
+                    }
+            );
+            final WifiActivityEnergyInfo wifiInfo = awaitControllerInfo(wifiReceiver);
+            if (wifiInfo == null) {
+                return;
             }
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeLong(wifiInfo.getTimeSinceBootMillis());
+            e.writeInt(wifiInfo.getStackState());
+            e.writeLong(wifiInfo.getControllerTxDurationMillis());
+            e.writeLong(wifiInfo.getControllerRxDurationMillis());
+            e.writeLong(wifiInfo.getControllerIdleDurationMillis());
+            e.writeLong(wifiInfo.getControllerEnergyUsedMicroJoules());
+            pulledData.add(e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
