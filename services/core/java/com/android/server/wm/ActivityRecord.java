@@ -6354,6 +6354,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         aspect ratio.
      */
     boolean shouldUseSizeCompatMode() {
+        if (inMultiWindowMode() || getWindowConfiguration().hasWindowDecorCaption()) {
+            final ActivityRecord root = task != null ? task.getRootActivity() : null;
+            if (root != null && root != this && !root.shouldUseSizeCompatMode()) {
+                // If the root activity doesn't use size compatibility mode, the activities above
+                // are forced to be the same for consistent visual appearance.
+                return false;
+            }
+        }
         return !isResizeable() && (info.isFixedOrientation() || info.hasFixedAspectRatio())
                 // The configuration of non-standard type should be enforced by system.
                 && isActivityTypeStandard()
