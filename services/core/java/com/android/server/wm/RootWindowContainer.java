@@ -37,7 +37,6 @@ import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.RootWindowContainerProto.DISPLAYS;
 import static com.android.server.wm.RootWindowContainerProto.WINDOWS;
 import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
@@ -71,7 +70,6 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
-import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -219,36 +217,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return null;
     }
 
-    DisplayContent createDisplayContent(final Display display, ActivityDisplay activityDisplay) {
-        final int displayId = display.getDisplayId();
-
-        // In select scenarios, it is possible that a DisplayContent will be created on demand
-        // rather than waiting for the controller. In this case, associate the controller and return
-        // the existing display.
-        final DisplayContent existing = getDisplayContent(displayId);
-
-        if (existing != null) {
-            existing.mActivityDisplay = activityDisplay;
-            existing.initializeDisplayOverrideConfiguration();
-            return existing;
-        }
-
-        final DisplayContent dc = new DisplayContent(display, mWmService, activityDisplay);
-
-        if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
-
-        mWmService.mDisplayWindowSettings.applySettingsToDisplayLocked(dc);
-        dc.initializeDisplayOverrideConfiguration();
-
-        if (mWmService.mDisplayManagerInternal != null) {
-            mWmService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
-                    displayId, dc.getDisplayInfo());
-            dc.configureDisplayPolicy();
-        }
-
-        return dc;
-    }
-
     /**
      * Called when DisplayWindowSettings values may change.
      */
@@ -262,7 +230,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 continue;
             }
 
-            displayContent.initializeDisplayOverrideConfiguration();
             displayContent.reconfigureDisplayLocked();
 
             // We need to update global configuration as well if config of default display has
@@ -1039,7 +1006,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final int count = mChildren.size();
             for (int i = 0; i < count; ++i) {
                 final DisplayContent displayContent = mChildren.get(i);
-                displayContent.writeToProto(proto, DISPLAYS, logLevel);
+                displayContent.writeToProtoInner(proto, DISPLAYS, logLevel);
             }
         }
         if (logLevel == WindowTraceLogLevel.ALL) {
@@ -1059,7 +1026,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void positionChildAt(int position, DisplayContent child, boolean includingParents) {
         super.positionChildAt(position, child, includingParents);
         if (mRootActivityContainer != null) {
-            mRootActivityContainer.onChildPositionChanged(child.mActivityDisplay, position);
+            mRootActivityContainer.onChildPositionChanged(child, position);
         }
     }
 

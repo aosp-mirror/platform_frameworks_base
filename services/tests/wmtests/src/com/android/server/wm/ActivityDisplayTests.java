@@ -123,7 +123,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         assertTrue(stack1.isFocusedStackOnDisplay());
 
         // Stack2 should be focused after removing stack1.
-        display.removeChild(stack1);
+        display.removeStack(stack1);
         assertTrue(stack2.isFocusedStackOnDisplay());
     }
 
@@ -224,7 +224,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true)
                 .setStack(alwaysOnTopStack).build();
         alwaysOnTopStack.setAlwaysOnTop(true);
-        display.positionChildAtTop(alwaysOnTopStack, false /* includingParents */);
+        display.positionStackAtTop(alwaysOnTopStack, false /* includingParents */);
         assertTrue(alwaysOnTopStack.isAlwaysOnTop());
         // Ensure always on top state is synced to the children of the stack.
         assertTrue(alwaysOnTopStack.getTopNonFinishingActivity().isAlwaysOnTop());
@@ -238,36 +238,36 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         final ActivityStack anotherAlwaysOnTopStack = display.createStack(
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         anotherAlwaysOnTopStack.setAlwaysOnTop(true);
-        display.positionChildAtTop(anotherAlwaysOnTopStack, false /* includingParents */);
+        display.positionStackAtTop(anotherAlwaysOnTopStack, false /* includingParents */);
         assertTrue(anotherAlwaysOnTopStack.isAlwaysOnTop());
-        int topPosition = display.getChildCount() - 1;
+        int topPosition = display.getStackCount() - 1;
         // Ensure the new alwaysOnTop stack is put below the pinned stack, but on top of the
         // existing alwaysOnTop stack.
-        assertEquals(anotherAlwaysOnTopStack, display.getChildAt(topPosition - 1));
+        assertEquals(anotherAlwaysOnTopStack, display.getStackAt(topPosition - 1));
 
         final ActivityStack nonAlwaysOnTopStack = display.createStack(
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         assertEquals(display, nonAlwaysOnTopStack.getDisplay());
-        topPosition = display.getChildCount() - 1;
+        topPosition = display.getStackCount() - 1;
         // Ensure the non-alwaysOnTop stack is put below the three alwaysOnTop stacks, but above the
         // existing other non-alwaysOnTop stacks.
-        assertEquals(nonAlwaysOnTopStack, display.getChildAt(topPosition - 3));
+        assertEquals(nonAlwaysOnTopStack, display.getStackAt(topPosition - 3));
 
         anotherAlwaysOnTopStack.setAlwaysOnTop(false);
-        display.positionChildAtTop(anotherAlwaysOnTopStack, false /* includingParents */);
+        display.positionStackAtTop(anotherAlwaysOnTopStack, false /* includingParents */);
         assertFalse(anotherAlwaysOnTopStack.isAlwaysOnTop());
         // Ensure, when always on top is turned off for a stack, the stack is put just below all
         // other always on top stacks.
-        assertEquals(anotherAlwaysOnTopStack, display.getChildAt(topPosition - 2));
+        assertEquals(anotherAlwaysOnTopStack, display.getStackAt(topPosition - 2));
         anotherAlwaysOnTopStack.setAlwaysOnTop(true);
 
         // Ensure always on top state changes properly when windowing mode changes.
         anotherAlwaysOnTopStack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         assertFalse(anotherAlwaysOnTopStack.isAlwaysOnTop());
-        assertEquals(anotherAlwaysOnTopStack, display.getChildAt(topPosition - 2));
+        assertEquals(anotherAlwaysOnTopStack, display.getStackAt(topPosition - 2));
         anotherAlwaysOnTopStack.setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertTrue(anotherAlwaysOnTopStack.isAlwaysOnTop());
-        assertEquals(anotherAlwaysOnTopStack, display.getChildAt(topPosition - 1));
+        assertEquals(anotherAlwaysOnTopStack, display.getStackAt(topPosition - 1));
     }
 
     @Test
@@ -299,14 +299,14 @@ public class ActivityDisplayTests extends ActivityTestsBase {
 
         // Reordering stacks while removing stacks.
         doAnswer(invocation -> {
-            display.positionChildAtTop(stack3, false);
+            display.positionStackAtTop(stack3, false);
             return true;
         }).when(mSupervisor).removeTaskByIdLocked(eq(task4.mTaskId), anyBoolean(), anyBoolean(),
                 any());
 
         // Removing stacks from the display while removing stacks.
         doAnswer(invocation -> {
-            display.removeChild(stack2);
+            display.removeStack(stack2);
             return true;
         }).when(mSupervisor).removeTaskByIdLocked(eq(task2.mTaskId), anyBoolean(), anyBoolean(),
                 any());

@@ -288,10 +288,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         final DisplayContent dc = newParent.getDisplayContent();
 
         mReparenting = true;
-        // Oddly enough we add to the new parent before removing from the old parent to avoid
-        // issues...
-        newParent.addChild(this, position);
         oldParent.removeChild(this);
+        newParent.addChild(this, position);
         mReparenting = false;
 
         // Relayout display(s)

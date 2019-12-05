@@ -475,8 +475,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
      * @return The top stack that is not always-on-top.
      */
     private ActivityStack getTopNonAlwaysOnTopStack() {
-        for (int i = mDefaultDisplay.getChildCount() - 1; i >= 0; i--) {
-            final ActivityStack s = mDefaultDisplay.getChildAt(i);
+        for (int i = mDefaultDisplay.getStackCount() - 1; i >= 0; i--) {
+            final ActivityStack s = mDefaultDisplay.getStackAt(i);
             if (s.getWindowConfiguration().isAlwaysOnTop()) {
                 continue;
             }

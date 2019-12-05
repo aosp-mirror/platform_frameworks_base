@@ -54,6 +54,7 @@ import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -64,6 +65,7 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Mock SurfaceControl mMockLeash;
@@ -84,7 +86,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         when(mMockRunner.asBinder()).thenReturn(new Binder());
         mAdapter = new RemoteAnimationAdapter(mMockRunner, 100, 50, true /* changeNeedsSnapshot */);
         mAdapter.setCallingPidUid(123, 456);
-        mWm.mH.runWithScissors(() -> mHandler = new TestHandler(null, mClock), 0);
+        runWithScissors(mWm.mH, () -> mHandler = new TestHandler(null, mClock), 0);
         mController = new RemoteAnimationController(mWm, mAdapter, mHandler);
     }
 

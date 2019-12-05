@@ -46,6 +46,7 @@ import com.android.server.wm.LaunchParamsController.LaunchParams;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import java.io.File;
@@ -63,6 +64,7 @@ import java.util.function.Predicate;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class LaunchParamsPersisterTests extends ActivityTestsBase {
     private static final int TEST_USER_ID = 3;
     private static final int ALTERNATIVE_USER_ID = 0;

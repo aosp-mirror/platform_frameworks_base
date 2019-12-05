@@ -531,8 +531,8 @@ class KeyguardController {
          * occlusion state.
          */
         private ActivityStack getStackForControllingOccluding(ActivityDisplay display) {
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
+            for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
+                final ActivityStack stack = display.getStackAt(stackNdx);
                 if (stack != null && stack.isFocusableAndVisible()
                         && !stack.inPinnedWindowingMode()) {
                     return stack;

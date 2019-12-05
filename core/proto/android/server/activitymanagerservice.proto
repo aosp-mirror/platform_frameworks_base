@@ -77,12 +77,14 @@ message ActivityStackSupervisorProto {
 message ActivityDisplayProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
+    // To be removed soon.
+    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1 [deprecated=true];
     optional int32 id = 2;
     repeated ActivityStackProto stacks = 3;
     optional int32 focused_stack_id = 4;
     optional .com.android.server.wm.IdentifierProto resumed_activity = 5;
     optional bool single_task_instance = 6;
+    optional .com.android.server.wm.DisplayContentProto display = 7;
 }
 
 message ActivityStackProto {

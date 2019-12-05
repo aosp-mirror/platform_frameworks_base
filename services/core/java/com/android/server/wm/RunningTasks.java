@@ -52,8 +52,8 @@ class RunningTasks {
         final int numDisplays = activityDisplays.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
             final ActivityDisplay display = activityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
+            for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
+                final ActivityStack stack = display.getStackAt(stackNdx);
                 mTmpStackTasks.clear();
                 stack.getRunningTasks(mTmpStackTasks, ignoreActivityType, ignoreWindowingMode,
                         callingUid, allowed, crossUser, profileIds);

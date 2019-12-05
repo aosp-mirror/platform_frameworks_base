@@ -226,20 +226,20 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     @Test
     public void testRemovingStackOnAppCrash() {
         final ActivityDisplay defaultDisplay = mRootActivityContainer.getDefaultDisplay();
-        final int originalStackCount = defaultDisplay.getChildCount();
+        final int originalStackCount = defaultDisplay.getStackCount();
         final ActivityStack stack = mRootActivityContainer.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
         final ActivityRecord firstActivity = new ActivityBuilder(mService).setCreateTask(true)
                 .setStack(stack).build();
 
-        assertEquals(originalStackCount + 1, defaultDisplay.getChildCount());
+        assertEquals(originalStackCount + 1, defaultDisplay.getStackCount());
 
         // Let's pretend that the app has crashed.
         firstActivity.app.setThread(null);
         mRootActivityContainer.finishTopCrashedActivities(firstActivity.app, "test");
 
         // Verify that the stack was removed.
-        assertEquals(originalStackCount, defaultDisplay.getChildCount());
+        assertEquals(originalStackCount, defaultDisplay.getStackCount());
     }
 
     @Test
@@ -392,7 +392,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
                 ACTIVITY_TYPE_STANDARD, false /* onTop */));
         final Task task = new TaskBuilder(mSupervisor).setStack(targetStack).build();
         final ActivityRecord activity = new ActivityBuilder(mService).setTask(task).build();
-        display.positionChildAtBottom(targetStack);
+        display.positionStackAtBottom(targetStack);
 
         // Assume the stack is not at the topmost position (e.g. behind always-on-top stacks) but it
         // is the current top focused stack.
@@ -493,7 +493,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         final Task task = new TaskBuilder(mSupervisor).setStack(targetStack).build();
         final ActivityRecord activity = new ActivityBuilder(mService).setTask(task).build();
         activity.setState(ActivityState.RESUMED, "test");
-        display.positionChildAtBottom(targetStack);
+        display.positionStackAtBottom(targetStack);
 
         // Assume the stack is at the topmost position
         assertFalse(targetStack.isTopStackOnDisplay());

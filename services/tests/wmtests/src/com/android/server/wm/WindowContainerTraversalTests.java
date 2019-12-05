@@ -31,6 +31,7 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.function.Consumer;
 
@@ -42,6 +43,7 @@ import java.util.function.Consumer;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class WindowContainerTraversalTests extends WindowTestsBase {
 
     @Test
