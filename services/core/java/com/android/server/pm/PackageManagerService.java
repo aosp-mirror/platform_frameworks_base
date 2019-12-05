@@ -21127,7 +21127,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mAvailableFeatures) {
             final int count = mAvailableFeatures.size();
             for (int i = 0; i < count; i++) {
-                mAvailableFeatures.valueAt(i).writeToProto(proto, PackageServiceDumpProto.FEATURES);
+                mAvailableFeatures.valueAt(i).dumpDebug(proto, PackageServiceDumpProto.FEATURES);
             }
         }
     }

@@ -294,7 +294,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         }
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         writeProtoMap(proto, IntentResolverProto.FULL_MIME_TYPES, mTypeToFilter);
         writeProtoMap(proto, IntentResolverProto.BASE_MIME_TYPES, mBaseTypeToFilter);

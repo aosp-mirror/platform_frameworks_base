@@ -1345,7 +1345,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
         if (mParcelledData != null) {

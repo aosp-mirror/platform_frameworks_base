@@ -141,20 +141,20 @@ public class UriPermissionOwner {
         }
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(UriPermissionOwnerProto.OWNER, mOwner.toString());
         if (mReadPerms != null) {
             synchronized (mReadPerms) {
                 for (UriPermission p : mReadPerms) {
-                    p.uri.writeToProto(proto, UriPermissionOwnerProto.READ_PERMS);
+                    p.uri.dumpDebug(proto, UriPermissionOwnerProto.READ_PERMS);
                 }
             }
         }
         if (mWritePerms != null) {
             synchronized (mWritePerms) {
                 for (UriPermission p : mWritePerms) {
-                    p.uri.writeToProto(proto, UriPermissionOwnerProto.WRITE_PERMS);
+                    p.uri.dumpDebug(proto, UriPermissionOwnerProto.WRITE_PERMS);
                 }
             }
         }

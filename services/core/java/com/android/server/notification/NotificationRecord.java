@@ -434,7 +434,7 @@ public final class NotificationRecord {
             proto.write(NotificationRecordProto.SOUND, getSound().toString());
         }
         if (getAudioAttributes() != null) {
-            getAudioAttributes().writeToProto(proto, NotificationRecordProto.AUDIO_ATTRIBUTES);
+            getAudioAttributes().dumpDebug(proto, NotificationRecordProto.AUDIO_ATTRIBUTES);
         }
         proto.write(NotificationRecordProto.PACKAGE, sbn.getPackageName());
         proto.write(NotificationRecordProto.DELEGATE_PACKAGE, sbn.getOpPkg());

@@ -417,7 +417,7 @@ final class BroadcastRecord extends Binder {
             + " u" + userId + " " + intent.getAction() + "}";
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(BroadcastRecordProto.USER_ID, userId);
         proto.write(BroadcastRecordProto.INTENT_ACTION, intent.getAction());

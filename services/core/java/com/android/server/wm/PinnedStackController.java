@@ -604,11 +604,11 @@ class PinnedStackController {
         pw.println(prefix + "  mDisplayInfo=" + mDisplayInfo);
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        getDefaultBounds(INVALID_SNAP_FRACTION).writeToProto(proto, DEFAULT_BOUNDS);
+        getDefaultBounds(INVALID_SNAP_FRACTION).dumpDebug(proto, DEFAULT_BOUNDS);
         mService.getStackBounds(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mTmpRect);
-        getMovementBounds(mTmpRect).writeToProto(proto, MOVEMENT_BOUNDS);
+        getMovementBounds(mTmpRect).dumpDebug(proto, MOVEMENT_BOUNDS);
         proto.end(token);
     }
 }

@@ -1564,10 +1564,10 @@ public class PreferencesHelper implements RankingConfig {
                 proto.write(RankingHelperProto.RecordProto.SHOW_BADGE, r.showBadge);
 
                 for (NotificationChannel channel : r.channels.values()) {
-                    channel.writeToProto(proto, RankingHelperProto.RecordProto.CHANNELS);
+                    channel.dumpDebug(proto, RankingHelperProto.RecordProto.CHANNELS);
                 }
                 for (NotificationChannelGroup group : r.groups.values()) {
-                    group.writeToProto(proto, RankingHelperProto.RecordProto.CHANNEL_GROUPS);
+                    group.dumpDebug(proto, RankingHelperProto.RecordProto.CHANNEL_GROUPS);
                 }
 
                 proto.end(fToken);

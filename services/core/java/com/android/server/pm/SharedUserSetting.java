@@ -65,7 +65,7 @@ public final class SharedUserSetting extends SettingBase {
                 + name + "/" + userId + "}";
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(PackageServiceDumpProto.SharedUserProto.UID, userId);
         proto.write(PackageServiceDumpProto.SharedUserProto.NAME, name);

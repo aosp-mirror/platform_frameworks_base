@@ -1398,9 +1398,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /** {@hide} */
-    public void writeToProto(ProtoOutputStream proto, long fieldId, int dumpFlags) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId, int dumpFlags) {
         long token = proto.start(fieldId);
-        super.writeToProto(proto, ApplicationInfoProto.PACKAGE, dumpFlags);
+        super.dumpDebug(proto, ApplicationInfoProto.PACKAGE, dumpFlags);
         proto.write(ApplicationInfoProto.PERMISSION, permission);
         proto.write(ApplicationInfoProto.PROCESS_NAME, processName);
         proto.write(ApplicationInfoProto.UID, uid);

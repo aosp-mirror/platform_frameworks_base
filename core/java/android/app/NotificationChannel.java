@@ -1116,7 +1116,7 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
         proto.write(NotificationChannelProto.ID, mId);
@@ -1142,7 +1142,7 @@ public final class NotificationChannel implements Parcelable {
         proto.write(NotificationChannelProto.IS_DELETED, mDeleted);
         proto.write(NotificationChannelProto.GROUP, mGroup);
         if (mAudioAttributes != null) {
-            mAudioAttributes.writeToProto(proto, NotificationChannelProto.AUDIO_ATTRIBUTES);
+            mAudioAttributes.dumpDebug(proto, NotificationChannelProto.AUDIO_ATTRIBUTES);
         }
         proto.write(NotificationChannelProto.IS_BLOCKABLE_SYSTEM, mBlockableSystem);
         proto.write(NotificationChannelProto.ALLOW_APP_OVERLAY, mAllowBubbles);

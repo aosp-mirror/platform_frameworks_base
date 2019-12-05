@@ -5432,7 +5432,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(ROTATION_MODE, mDefaultDisplayRotation.getUserRotationMode());
         proto.write(ROTATION, mDefaultDisplayRotation.getUserRotation());
@@ -5445,7 +5445,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         proto.write(KEYGUARD_OCCLUDED_CHANGED, mKeyguardOccludedChanged);
         proto.write(KEYGUARD_OCCLUDED_PENDING, mPendingKeyguardOccluded);
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.writeToProto(proto, KEYGUARD_DELEGATE);
+            mKeyguardDelegate.dumpDebug(proto, KEYGUARD_DELEGATE);
         }
         proto.end(token);
     }

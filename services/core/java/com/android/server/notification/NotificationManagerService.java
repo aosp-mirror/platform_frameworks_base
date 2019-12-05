@@ -4802,7 +4802,7 @@ public class NotificationManagerService extends SystemService {
             long zenLog = proto.start(NotificationServiceDumpProto.ZEN);
             mZenModeHelper.dump(proto);
             for (ComponentName suppressor : mEffectsSuppressors) {
-                suppressor.writeToProto(proto, ZenModeProto.SUPPRESSORS);
+                suppressor.dumpDebug(proto, ZenModeProto.SUPPRESSORS);
             }
             proto.end(zenLog);
 
@@ -4822,7 +4822,7 @@ public class NotificationManagerService extends SystemService {
                     mListenersDisablingEffects.valueAt(i);
                 for (int j = 0; j < listeners.size(); j++) {
                     final ComponentName componentName = listeners.valueAt(j);
-                    componentName.writeToProto(proto,
+                    componentName.dumpDebug(proto,
                             ListenersDisablingEffectsProto.LISTENER_COMPONENTS);
                 }
 

@@ -115,7 +115,7 @@ public class FeatureInfo implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         if (name != null) {
             proto.write(FeatureInfoProto.NAME, name);

@@ -684,7 +684,7 @@ public class NetworkStatsHistory implements Parcelable {
         }
     }
 
-    public void writeToProto(ProtoOutputStream proto, long tag) {
+    public void dumpDebug(ProtoOutputStream proto, long tag) {
         final long start = proto.start(tag);
 
         proto.write(NetworkStatsHistoryProto.BUCKET_DURATION_MS, bucketDuration);
@@ -693,11 +693,11 @@ public class NetworkStatsHistory implements Parcelable {
             final long startBucket = proto.start(NetworkStatsHistoryProto.BUCKETS);
 
             proto.write(NetworkStatsHistoryBucketProto.BUCKET_START_MS, bucketStart[i]);
-            writeToProto(proto, NetworkStatsHistoryBucketProto.RX_BYTES, rxBytes, i);
-            writeToProto(proto, NetworkStatsHistoryBucketProto.RX_PACKETS, rxPackets, i);
-            writeToProto(proto, NetworkStatsHistoryBucketProto.TX_BYTES, txBytes, i);
-            writeToProto(proto, NetworkStatsHistoryBucketProto.TX_PACKETS, txPackets, i);
-            writeToProto(proto, NetworkStatsHistoryBucketProto.OPERATIONS, operations, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.RX_BYTES, rxBytes, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.RX_PACKETS, rxPackets, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.TX_BYTES, txBytes, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.TX_PACKETS, txPackets, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.OPERATIONS, operations, i);
 
             proto.end(startBucket);
         }
@@ -705,7 +705,7 @@ public class NetworkStatsHistory implements Parcelable {
         proto.end(start);
     }
 
-    private static void writeToProto(ProtoOutputStream proto, long tag, long[] array, int index) {
+    private static void dumpDebug(ProtoOutputStream proto, long tag, long[] array, int index) {
         if (array != null) {
             proto.write(tag, array[index]);
         }

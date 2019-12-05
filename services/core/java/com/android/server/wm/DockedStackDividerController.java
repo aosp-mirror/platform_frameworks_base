@@ -1018,7 +1018,7 @@ public class DockedStackDividerController {
         pw.println(prefix + "  mAdjustedForDivider=" + mAdjustedForDivider);
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(MINIMIZED_DOCK, mMinimizedDock);
         proto.end(token);

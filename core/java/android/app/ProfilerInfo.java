@@ -135,7 +135,7 @@ public class ProfilerInfo implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(ProfilerInfoProto.PROFILE_FILE, profileFile);
         if (profileFd != null) {

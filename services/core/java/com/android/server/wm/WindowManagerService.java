@@ -5766,9 +5766,9 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param proto     Stream to write the WindowContainer object to.
      * @param logLevel  Determines the amount of data to be written to the Protobuf.
      */
-    void writeToProtoLocked(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
-        mPolicy.writeToProto(proto, POLICY);
-        mRoot.writeToProto(proto, ROOT_WINDOW_CONTAINER, logLevel);
+    void dumpDebugLocked(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
+        mPolicy.dumpDebug(proto, POLICY);
+        mRoot.dumpDebug(proto, ROOT_WINDOW_CONTAINER, logLevel);
         final DisplayContent topFocusedDisplayContent = mRoot.getTopFocusedDisplayContent();
         if (topFocusedDisplayContent.mCurrentFocus != null) {
             topFocusedDisplayContent.mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);
@@ -6091,7 +6091,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (useProto) {
             final ProtoOutputStream proto = new ProtoOutputStream(fd);
             synchronized (mGlobalLock) {
-                writeToProtoLocked(proto, WindowTraceLogLevel.ALL);
+                dumpDebugLocked(proto, WindowTraceLogLevel.ALL);
             }
             proto.flush();
             return;

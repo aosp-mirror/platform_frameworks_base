@@ -464,10 +464,10 @@ class RemoteAnimationController implements DeathRecipient {
         }
 
         @Override
-        public void writeToProto(ProtoOutputStream proto) {
+        public void dumpDebug(ProtoOutputStream proto) {
             final long token = proto.start(REMOTE);
             if (mRecord.mTarget != null) {
-                mRecord.mTarget.writeToProto(proto, TARGET);
+                mRecord.mTarget.dumpDebug(proto, TARGET);
             }
             proto.end(token);
         }

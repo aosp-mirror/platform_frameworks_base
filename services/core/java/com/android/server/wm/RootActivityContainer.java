@@ -2633,15 +2633,15 @@ class RootActivityContainer extends ConfigurationContainer
         return printed;
     }
 
-    protected void writeToProto(ProtoOutputStream proto, long fieldId,
+    protected void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, CONFIGURATION_CONTAINER, logLevel);
+        super.dumpDebug(proto, CONFIGURATION_CONTAINER, logLevel);
         for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
             final ActivityDisplay activityDisplay = mActivityDisplays.get(displayNdx);
-            activityDisplay.writeToProto(proto, DISPLAYS, logLevel);
+            activityDisplay.dumpDebug(proto, DISPLAYS, logLevel);
         }
-        mStackSupervisor.getKeyguardController().writeToProto(proto, KEYGUARD_CONTROLLER);
+        mStackSupervisor.getKeyguardController().dumpDebug(proto, KEYGUARD_CONTROLLER);
         // TODO(b/111541062): Update tests to look for resumed activities on all displays
         final ActivityStack focusedStack = getTopDisplayFocusedStack();
         if (focusedStack != null) {
@@ -2655,7 +2655,7 @@ class RootActivityContainer extends ConfigurationContainer
         }
         proto.write(IS_HOME_RECENTS_COMPONENT,
                 mStackSupervisor.mRecentTasks.isRecentsComponentHomeActivity(mCurrentUser));
-        mService.getActivityStartController().writeToProto(proto, PENDING_ACTIVITIES);
+        mService.getActivityStartController().dumpDebug(proto, PENDING_ACTIVITIES);
         proto.end(token);
     }
 

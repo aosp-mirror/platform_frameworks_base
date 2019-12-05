@@ -574,7 +574,7 @@ public final class Message implements Parcelable {
         return b.toString();
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long messageToken = proto.start(fieldId);
         proto.write(MessageProto.WHEN, when);
 

@@ -234,23 +234,23 @@ public class RemoteAnimationTarget implements Parcelable {
         pw.print(prefix); pw.print("leash="); pw.println(leash);
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(TASK_ID, taskId);
         proto.write(MODE, mode);
-        leash.writeToProto(proto, LEASH);
+        leash.dumpDebug(proto, LEASH);
         proto.write(IS_TRANSLUCENT, isTranslucent);
-        clipRect.writeToProto(proto, CLIP_RECT);
-        contentInsets.writeToProto(proto, CONTENT_INSETS);
+        clipRect.dumpDebug(proto, CLIP_RECT);
+        contentInsets.dumpDebug(proto, CONTENT_INSETS);
         proto.write(PREFIX_ORDER_INDEX, prefixOrderIndex);
-        position.writeToProto(proto, POSITION);
-        sourceContainerBounds.writeToProto(proto, SOURCE_CONTAINER_BOUNDS);
-        windowConfiguration.writeToProto(proto, WINDOW_CONFIGURATION);
+        position.dumpDebug(proto, POSITION);
+        sourceContainerBounds.dumpDebug(proto, SOURCE_CONTAINER_BOUNDS);
+        windowConfiguration.dumpDebug(proto, WINDOW_CONFIGURATION);
         if (startLeash != null) {
-            startLeash.writeToProto(proto, START_LEASH);
+            startLeash.dumpDebug(proto, START_LEASH);
         }
         if (startBounds != null) {
-            startBounds.writeToProto(proto, START_BOUNDS);
+            startBounds.dumpDebug(proto, START_BOUNDS);
         }
         proto.end(token);
     }

@@ -506,7 +506,7 @@ public class PowerProfile {
     /**
      * Dump power constants into PowerProfileProto
      */
-    public void writeToProto(ProtoOutputStream proto) {
+    public void dumpDebug(ProtoOutputStream proto) {
         // cpu.suspend
         writePowerConstantToProto(proto, POWER_CPU_SUSPEND, PowerProfileProto.CPU_SUSPEND);
 

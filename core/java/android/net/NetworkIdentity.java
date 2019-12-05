@@ -114,7 +114,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         return builder.append("}").toString();
     }
 
-    public void writeToProto(ProtoOutputStream proto, long tag) {
+    public void dumpDebug(ProtoOutputStream proto, long tag) {
         final long start = proto.start(tag);
 
         proto.write(NetworkIdentityProto.TYPE, mType);

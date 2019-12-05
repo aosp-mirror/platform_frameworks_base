@@ -1405,14 +1405,14 @@ class WindowStateAnimator {
         return mWin.isAnimating(TRANSITION | PARENTS);
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        mLastClipRect.writeToProto(proto, LAST_CLIP_RECT);
+        mLastClipRect.dumpDebug(proto, LAST_CLIP_RECT);
         if (mSurfaceController != null) {
-            mSurfaceController.writeToProto(proto, SURFACE);
+            mSurfaceController.dumpDebug(proto, SURFACE);
         }
         proto.write(DRAW_STATE, mDrawState);
-        mSystemDecorRect.writeToProto(proto, SYSTEM_DECOR_RECT);
+        mSystemDecorRect.dumpDebug(proto, SYSTEM_DECOR_RECT);
         proto.end(token);
     }
 

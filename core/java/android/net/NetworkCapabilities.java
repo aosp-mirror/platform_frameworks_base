@@ -1602,7 +1602,7 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(@NonNull ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
         for (int transport : getTransportTypes()) {

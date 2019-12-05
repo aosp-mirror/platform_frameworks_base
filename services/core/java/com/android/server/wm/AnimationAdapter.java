@@ -76,11 +76,11 @@ interface AnimationAdapter {
 
     void dump(PrintWriter pw, String prefix);
 
-    default void writeToProto(ProtoOutputStream proto, long fieldId) {
+    default void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        writeToProto(proto);
+        dumpDebug(proto);
         proto.end(token);
     }
 
-    void writeToProto(ProtoOutputStream proto);
+    void dumpDebug(ProtoOutputStream proto);
 }

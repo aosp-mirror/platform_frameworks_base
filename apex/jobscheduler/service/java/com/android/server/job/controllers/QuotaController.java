@@ -133,7 +133,7 @@ public final class QuotaController extends StateController {
             return string(userId, packageName);
         }
 
-        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
 
             proto.write(StateControllerProto.QuotaController.Package.USER_ID, userId);
@@ -1638,7 +1638,7 @@ public final class QuotaController extends StateController {
         public void dump(ProtoOutputStream proto, long fieldId, Predicate<JobStatus> predicate) {
             final long token = proto.start(fieldId);
 
-            mPkg.writeToProto(proto, StateControllerProto.QuotaController.Timer.PKG);
+            mPkg.dumpDebug(proto, StateControllerProto.QuotaController.Timer.PKG);
             proto.write(StateControllerProto.QuotaController.Timer.IS_ACTIVE, isActive());
             proto.write(StateControllerProto.QuotaController.Timer.START_TIME_ELAPSED,
                     mStartTimeElapsed);

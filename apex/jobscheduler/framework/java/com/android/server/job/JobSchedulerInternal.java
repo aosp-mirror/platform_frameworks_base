@@ -94,7 +94,7 @@ public interface JobSchedulerInternal {
         /**
          * Write the persist stats to the specified field.
          */
-        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
 
             final long flToken = proto.start(JobStorePersistStatsProto.FIRST_LOAD);

@@ -611,7 +611,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 try {
                     FileOutputStream fout = new ParcelFileDescriptor.AutoCloseOutputStream(fds[1]);
                     final ProtoOutputStream proto = new ProtoOutputStream(fout);
-                    stats.writeToProto(proto, stats.mTimePeriodEndRealtime, section);
+                    stats.dumpDebug(proto, stats.mTimePeriodEndRealtime, section);
                     proto.flush();
                     fout.close();
                 } catch (IOException e) {
@@ -1213,7 +1213,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             return;
         }
         final long token = proto.start(fieldId);
-        stats.writeToProto(proto, now, ProcessStats.REPORT_ALL);
+        stats.dumpDebug(proto, now, ProcessStats.REPORT_ALL);
         proto.end(token);
     }
 
@@ -1225,7 +1225,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         synchronized (mAm) {
             now = SystemClock.uptimeMillis();
             final long token = proto.start(ProcessStatsServiceDumpProto.PROCSTATS_NOW);
-            mProcessStats.writeToProto(proto, now, ProcessStats.REPORT_ALL);
+            mProcessStats.dumpDebug(proto, now, ProcessStats.REPORT_ALL);
             proto.end(token);
         }
 

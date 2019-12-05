@@ -298,9 +298,9 @@ class WindowTracing {
 
             long tokenInner = os.start(WINDOW_MANAGER_SERVICE);
             synchronized (mGlobalLock) {
-                Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "writeToProtoLocked");
+                Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "dumpDebugLocked");
                 try {
-                    mService.writeToProtoLocked(os, mLogLevel);
+                    mService.dumpDebugLocked(os, mLogLevel);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
                 }

@@ -3345,7 +3345,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             mConcurrencyManager.dumpProtoLocked(proto,
                     JobSchedulerServiceDumpProto.CONCURRENCY_MANAGER, now, nowElapsed);
 
-            mJobs.getPersistStats().writeToProto(proto, JobSchedulerServiceDumpProto.PERSIST_STATS);
+            mJobs.getPersistStats().dumpDebug(proto, JobSchedulerServiceDumpProto.PERSIST_STATS);
         }
 
         proto.flush();
