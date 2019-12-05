@@ -26,6 +26,7 @@ import android.content.pm.ChangedPackages;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IDexModuleRegisterCallback;
+import android.content.pm.InstallSourceInfo;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDeleteObserver2;
@@ -236,6 +237,8 @@ interface IPackageManager {
 
     @UnsupportedAppUsage
     String getInstallerPackageName(in String packageName);
+
+    InstallSourceInfo getInstallSourceInfo(in String packageName);
 
     void resetApplicationPreferences(int userId);
 

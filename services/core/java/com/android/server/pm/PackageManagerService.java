@@ -153,6 +153,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageManagerNative;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.InstallSourceInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
 import android.content.pm.InstrumentationInfo;
@@ -20128,17 +20129,93 @@ public class PackageManagerService extends IPackageManager.Stub
     public String getInstallerPackageName(String packageName) {
         final int callingUid = Binder.getCallingUid();
         synchronized (mLock) {
-            final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (shouldFilterApplicationLocked(
-                    ps, callingUid, UserHandle.getUserId(callingUid))) {
-                return null;
+            final InstallSource installSource = getInstallSourceLocked(packageName, callingUid);
+            if (installSource == null) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
             }
-            // InstallerPackageName for Apex is not stored in PackageManager
-            if (ps == null && mApexManager.isApexPackage(packageName)) {
-                return null;
+            String installerPackageName = installSource.installerPackageName;
+            if (installerPackageName != null) {
+                final PackageSetting ps = mSettings.mPackages.get(installerPackageName);
+                if (ps == null || shouldFilterApplicationLocked(ps, callingUid,
+                        UserHandle.getUserId(callingUid))) {
+                    installerPackageName = null;
+                }
             }
-            return mSettings.getInstallerPackageNameLPr(packageName);
+            return installerPackageName;
         }
+    }
+
+    @Override
+    @Nullable
+    public InstallSourceInfo getInstallSourceInfo(String packageName) {
+        final int callingUid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(callingUid);
+
+        String installerPackageName;
+        String initiatingPackageName;
+        String originatingPackageName;
+
+        synchronized (mLock) {
+            final InstallSource installSource = getInstallSourceLocked(packageName, callingUid);
+            if (installSource == null) {
+                return null;
+            }
+
+            installerPackageName = installSource.installerPackageName;
+            if (installerPackageName != null) {
+                final PackageSetting ps = mSettings.mPackages.get(installerPackageName);
+                if (ps == null || shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                    installerPackageName = null;
+                }
+            }
+
+            // All installSource strings are interned, so == is ok here
+            if (installSource.initiatingPackageName == installSource.installerPackageName) {
+                // The installer and initiator will often be the same, and when they are
+                // we can skip doing the same check again.
+                initiatingPackageName = installerPackageName;
+            } else {
+                initiatingPackageName = installSource.initiatingPackageName;
+                final PackageSetting ps = mSettings.mPackages.get(initiatingPackageName);
+                if (ps == null || shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                    initiatingPackageName = null;
+                }
+
+            }
+            originatingPackageName = installSource.originatingPackageName;
+            if (originatingPackageName != null) {
+                final PackageSetting ps = mSettings.mPackages.get(originatingPackageName);
+                if (ps == null || shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                    originatingPackageName = null;
+                }
+            }
+        }
+
+        if (originatingPackageName != null && mContext.checkCallingOrSelfPermission(
+                Manifest.permission.INSTALL_PACKAGES) != PackageManager.PERMISSION_GRANTED) {
+            originatingPackageName = null;
+        }
+
+        return new InstallSourceInfo(initiatingPackageName, originatingPackageName,
+                installerPackageName);
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
+    private InstallSource getInstallSourceLocked(String packageName, int callingUid) {
+        final PackageSetting ps = mSettings.mPackages.get(packageName);
+
+        // Installer info for Apex is not stored in PackageManager
+        if (ps == null && mApexManager.isApexPackage(packageName)) {
+            return InstallSource.EMPTY;
+        }
+
+        if (ps == null || shouldFilterApplicationLocked(ps, callingUid,
+                UserHandle.getUserId(callingUid))) {
+            return null;
+        }
+
+        return ps.installSource;
     }
 
     public boolean isOrphaned(String packageName) {
