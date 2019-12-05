@@ -200,6 +200,12 @@ public final class MultiClientInputMethodManagerService {
                                 Slog.w(TAG, "Failed to call onInlineSuggestionsUnsupported.", e);
                             }
                         }
+
+                        @Override
+                        public boolean switchToInputMethod(String imeId, @UserIdInt int userId) {
+                            reportNotSupported();
+                            return false;
+                        }
                     });
         }
 

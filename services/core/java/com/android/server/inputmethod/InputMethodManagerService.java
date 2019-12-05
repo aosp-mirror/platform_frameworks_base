@@ -4478,6 +4478,38 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    private boolean switchToInputMethod(String imeId, @UserIdInt int userId) {
+        synchronized (mMethodMap) {
+            if (userId == mSettings.getCurrentUserId()) {
+                if (!mMethodMap.containsKey(imeId)
+                        || !mSettings.getEnabledInputMethodListLocked()
+                                .contains(mMethodMap.get(imeId))) {
+                    return false; // IME is not is found or not enabled.
+                }
+                setInputMethodLocked(imeId, NOT_A_SUBTYPE_ID);
+                return true;
+            }
+            final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+            final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
+            final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
+                    new ArrayMap<>();
+            AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+            queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
+                    methodMap, methodList);
+            final InputMethodSettings settings = new InputMethodSettings(
+                    mContext.getResources(), mContext.getContentResolver(), methodMap,
+                    userId, false);
+            if (!methodMap.containsKey(imeId)
+                    || !settings.getEnabledInputMethodListLocked()
+                            .contains(methodMap.get(imeId))) {
+                return false; // IME is not is found or not enabled.
+            }
+            settings.putSelectedInputMethod(imeId);
+            settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
+            return true;
+        }
+    }
+
     private static final class LocalServiceImpl extends InputMethodManagerInternal {
         @NonNull
         private final InputMethodManagerService mService;
@@ -4513,6 +4545,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public void onCreateInlineSuggestionsRequest(ComponentName componentName,
                 AutofillId autofillId, IInlineSuggestionsRequestCallback cb) {
             mService.onCreateInlineSuggestionsRequest(componentName, autofillId, cb);
+        }
+
+        @Override
+        public boolean switchToInputMethod(String imeId, int userId) {
+            return mService.switchToInputMethod(imeId, userId);
         }
     }
 
@@ -5065,31 +5102,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (!userHasDebugPriv(userId, shellCommand)) {
                     continue;
                 }
-                boolean failedToSelectUnknownIme = false;
-                if (userId == mSettings.getCurrentUserId()) {
-                    if (mMethodMap.containsKey(imeId)) {
-                        setInputMethodLocked(imeId, NOT_A_SUBTYPE_ID);
-                    } else {
-                        failedToSelectUnknownIme = true;
-                    }
-                } else {
-                    final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
-                    final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
-                    final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
-                            new ArrayMap<>();
-                    AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
-                    queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
-                            methodMap, methodList);
-                    final InputMethodSettings settings = new InputMethodSettings(
-                            mContext.getResources(), mContext.getContentResolver(), methodMap,
-                            userId, false);
-                    if (methodMap.containsKey(imeId)) {
-                        settings.putSelectedInputMethod(imeId);
-                        settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
-                    } else {
-                        failedToSelectUnknownIme = true;
-                    }
-                }
+                boolean failedToSelectUnknownIme = !switchToInputMethod(imeId, userId);
                 if (failedToSelectUnknownIme) {
                     error.print("Unknown input method ");
                     error.print(imeId);

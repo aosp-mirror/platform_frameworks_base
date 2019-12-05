@@ -35,6 +35,7 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.view.Display;
 
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -261,6 +262,24 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     public int getSoftKeyboardShowMode() {
         final AccessibilityUserState userState = mUserStateWeakReference.get();
         return (userState != null) ? userState.getSoftKeyboardShowModeLocked() : 0;
+    }
+
+    @Override
+    public boolean switchToInputMethod(String imeId) {
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return false;
+            }
+        }
+        final boolean result;
+        final int callingUserId = UserHandle.getCallingUserId();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            result = InputMethodManagerInternal.get().switchToInputMethod(imeId, callingUserId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return result;
     }
 
     @Override
