@@ -22,7 +22,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.util.Slog;
+import android.util.Log;
 
 /**
  * A service that receives Intents and IBinder transactions
@@ -92,7 +92,7 @@ abstract public class AsyncService extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (DBG) Slog.d(TAG, "onStartCommand");
+        if (DBG) Log.d(TAG, "onStartCommand");
 
         Message msg = mHandler.obtainMessage();
         msg.what = CMD_ASYNC_SERVICE_ON_START_INTENT;
@@ -111,7 +111,7 @@ abstract public class AsyncService extends Service {
      */
     @Override
     public void onDestroy() {
-        if (DBG) Slog.d(TAG, "onDestroy");
+        if (DBG) Log.d(TAG, "onDestroy");
 
         Message msg = mHandler.obtainMessage();
         msg.what = CMD_ASYNC_SERVICE_DESTROY;
