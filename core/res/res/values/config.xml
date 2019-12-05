@@ -2844,10 +2844,6 @@
     <!-- Whether to use voip audio mode for ims call -->
     <bool name="config_use_voip_mode_for_ims">false</bool>
 
-    <!-- ImsService package name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_ims_package"/>
-
     <!-- String array containing numbers that shouldn't be logged. Country-specific. -->
     <string-array name="unloggable_phone_numbers" />
 
