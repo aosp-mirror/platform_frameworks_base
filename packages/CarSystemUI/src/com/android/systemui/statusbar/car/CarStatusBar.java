@@ -174,7 +174,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     private final Object mQueueLock = new Object();
     private final CarNavigationBarController mCarNavigationBarController;
-    private final Lazy<DrivingStateHelper> mDrivingStateHelperLazy;
     private final Lazy<PowerManagerHelper> mPowerManagerHelperLazy;
     private final CarServiceProvider mCarServiceProvider;
 
@@ -314,7 +313,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             DismissCallbackRegistry dismissCallbackRegistry,
             /* Car Settings injected components. */
             CarServiceProvider carServiceProvider,
-            Lazy<DrivingStateHelper> drivingStateHelperLazy,
             Lazy<PowerManagerHelper> powerManagerHelperLazy,
             Lazy<FullscreenUserSwitcher> fullscreenUserSwitcherLazy,
             CarNavigationBarController carNavigationBarController) {
@@ -396,7 +394,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mLockscreenLockIconController = lockscreenLockIconController;
         mDeviceProvisionedController = deviceProvisionedController;
         mCarServiceProvider = carServiceProvider;
-        mDrivingStateHelperLazy = drivingStateHelperLazy;
         mPowerManagerHelperLazy = powerManagerHelperLazy;
         mFullscreenUserSwitcherLazy = fullscreenUserSwitcherLazy;
         mCarNavigationBarController = carNavigationBarController;
