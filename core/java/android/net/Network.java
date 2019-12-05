@@ -63,7 +63,7 @@ public class Network implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public final int netId;
 
     // Objects used to perform per-network operations such as getSocketFactory
