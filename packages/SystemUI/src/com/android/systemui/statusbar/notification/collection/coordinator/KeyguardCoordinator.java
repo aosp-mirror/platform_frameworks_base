@@ -32,6 +32,7 @@ import android.service.notification.StatusBarNotification;
 import androidx.annotation.MainThread;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -165,6 +166,7 @@ public class KeyguardCoordinator implements Coordinator {
     private void setupInvalidateNotifListCallbacks() {
         // register onKeyguardShowing callback
         mKeyguardStateController.addCallback(mKeyguardCallback);
+        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
 
         // register lockscreen settings changed callbacks:
         final ContentObserver settingsObserver = new ContentObserver(mMainHandler) {
@@ -229,5 +231,14 @@ public class KeyguardCoordinator implements Coordinator {
                     // maybe public mode changed
                     invalidateListFromFilter("onStatusBarStateChanged");
                 }
+    };
+
+    private final KeyguardUpdateMonitorCallback mKeyguardUpdateCallback =
+            new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onStrongAuthStateChanged(int userId) {
+            // maybe lockdown mode changed
+            invalidateListFromFilter("onStrongAuthStateChanged");
+        }
     };
 }

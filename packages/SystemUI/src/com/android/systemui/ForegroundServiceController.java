@@ -139,6 +139,8 @@ public class ForegroundServiceController {
             }
         }
 
+        // TODO: (b/145659174) remove when moving to NewNotifPipeline. Replaced by
+        //  ForegroundCoordinator
         // Update appOp if there's an associated pending or visible notification:
         final String foregroundKey = getStandardLayoutKey(userId, packageName);
         if (foregroundKey != null) {
