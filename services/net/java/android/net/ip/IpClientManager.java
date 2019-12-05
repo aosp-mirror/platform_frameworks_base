@@ -234,7 +234,7 @@ public class IpClientManager {
                     slot, KeepalivePacketDataUtil.toStableParcelable(pkt));
             return true;
         } catch (RemoteException e) {
-            log("Error adding Keepalive Packet Filter ", e);
+            log("Error adding NAT-T Keepalive Packet Filter ", e);
             return false;
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -267,6 +267,24 @@ public class IpClientManager {
             return true;
         } catch (RemoteException e) {
             log("Failed setL2KeyAndGroupHint", e);
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /**
+     * Notify IpClient that preconnection is complete and that the link is ready for use.
+     * The success parameter indicates whether the packets passed in by 'onPreconnectionStart'
+     * were successfully sent to the network or not.
+     */
+    public boolean notifyPreconnectionComplete(boolean success) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mIpClient.notifyPreconnectionComplete(success);
+            return true;
+        } catch (RemoteException e) {
+            log("Error notifying IpClient Preconnection completed", e);
             return false;
         } finally {
             Binder.restoreCallingIdentity(token);
