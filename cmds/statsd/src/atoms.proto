@@ -5798,10 +5798,10 @@ message PermissionGrantRequestResultReported {
     optional int64 request_id = 1;
 
     // UID of package requesting the permission grant
-    optional int32 requesting_uid = 2 [(is_uid) = true];
+    optional int32 uid = 2 [(is_uid) = true];
 
     // Name of package requesting the permission grant
-    optional string requesting_package_name = 3;
+    optional string package_name = 3;
 
     // The permission to be granted
     optional string permission_name = 4;
