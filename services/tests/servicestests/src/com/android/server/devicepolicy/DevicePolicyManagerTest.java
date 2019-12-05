@@ -64,6 +64,8 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.PasswordMetrics;
 import android.app.timedetector.ManualTimeSuggestion;
+import android.app.timezonedetector.ManualTimeZoneSuggestion;
+import android.app.timezonedetector.TimeZoneDetector;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -3506,7 +3508,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
         dpm.setTimeZone(admin1, "Asia/Shanghai");
-        verify(getServices().alarmManager).setTimeZone("Asia/Shanghai");
+        ManualTimeZoneSuggestion suggestion =
+                TimeZoneDetector.createManualTimeZoneSuggestion("Asia/Shanghai", "Test debug info");
+        verify(getServices().timeZoneDetector).suggestManualTimeZone(suggestion);
     }
 
     public void testSetTimeZoneFailWithPO() throws Exception {
