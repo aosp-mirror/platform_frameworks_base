@@ -4730,6 +4730,14 @@ public final class Settings {
         public static final String SHOW_BATTERY_PERCENT = "status_bar_show_battery_percent";
 
         /**
+         * Whether or not to enable multiple audio focus.
+         * When enabled, requires more management by user over application playback activity,
+         * for instance pausing media apps when another starts.
+         * @hide
+         */
+        public static final String MULTI_AUDIO_FOCUS_ENABLED = "multi_audio_focus_enabled";
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate

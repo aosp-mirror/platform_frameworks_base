@@ -8286,6 +8286,23 @@ public class AudioService extends IAudioService.Stub
     }
 
     //======================
+    // Multi Audio Focus
+    //======================
+    public void setMultiAudioFocusEnabled(boolean enabled) {
+        enforceModifyAudioRoutingPermission();
+        if (mMediaFocusControl != null) {
+            boolean mafEnabled = mMediaFocusControl.getMultiAudioFocusEnabled();
+            if (mafEnabled != enabled) {
+                mMediaFocusControl.updateMultiAudioFocus(enabled);
+                if (!enabled) {
+                    mDeviceBroker.postBroadcastBecomingNoisy();
+                }
+            }
+        }
+    }
+
+
+    //======================
     // misc
     //======================
     private final HashMap<IBinder, AudioPolicyProxy> mAudioPolicies =

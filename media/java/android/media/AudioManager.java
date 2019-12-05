@@ -6001,6 +6001,17 @@ public class AudioManager {
         }
     }
 
+    /** @hide
+     * TODO: make this a @SystemApi */
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void setMultiAudioFocusEnabled(boolean enabled) {
+        try {
+            getService().setMultiAudioFocusEnabled(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     //---------------------------------------------------------
     // Inner classes
     //--------------------
