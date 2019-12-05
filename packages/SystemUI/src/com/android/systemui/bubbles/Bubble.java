@@ -199,7 +199,7 @@ class Bubble {
 
         mExpandedView = (BubbleExpandedView) inflater.inflate(
                 R.layout.bubble_expanded_view, stackView, false /* attachToRoot */);
-        mExpandedView.setBubble(this, stackView, mAppName);
+        mExpandedView.setBubble(this, stackView);
 
         mInflated = true;
     }
