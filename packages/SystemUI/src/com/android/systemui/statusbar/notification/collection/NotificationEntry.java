@@ -21,7 +21,6 @@ import static android.app.Notification.CATEGORY_CALL;
 import static android.app.Notification.CATEGORY_EVENT;
 import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.CATEGORY_REMINDER;
-import static android.app.Notification.EXTRA_MESSAGES;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
@@ -42,7 +41,6 @@ import android.app.Person;
 import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
@@ -92,7 +90,6 @@ public final class NotificationEntry extends ListEntry {
     private StatusBarNotification mSbn;
     private Ranking mRanking;
 
-
     /*
      * Bookkeeping members
      */
@@ -120,7 +117,6 @@ public final class NotificationEntry extends ListEntry {
     public int targetSdk;
     private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
     public CharSequence remoteInputText;
-    private final List<Person> mAssociatedPeople = new ArrayList<>();
     private Notification.BubbleMetadata mBubbleMetadata;
 
     /**
@@ -156,12 +152,6 @@ public final class NotificationEntry extends ListEntry {
      * Has the user sent a reply through this Notification.
      */
     private boolean hasSentReply;
-
-    /**
-     * Whether this notification is shown to the user as a high priority notification: visible on
-     * the lock screen/status bar and in the top section in the shade.
-     */
-    private boolean mHighPriority;
 
     private boolean mSensitive = true;
     private Runnable mOnSensitiveChangedListener;
@@ -212,9 +202,11 @@ public final class NotificationEntry extends ListEntry {
                     + " doesn't match existing key " + mKey);
         }
 
-        mSbn = sbn;
-        mBubbleMetadata = mSbn.getNotification().getBubbleMetadata();
-        updatePeopleList();
+        if (!Objects.equals(mSbn, sbn)) {
+            mSbn = sbn;
+            mBubbleMetadata = mSbn.getNotification().getBubbleMetadata();
+            onSbnUpdated();
+        }
     }
 
     /**
@@ -239,9 +231,11 @@ public final class NotificationEntry extends ListEntry {
                     + " doesn't match existing key " + mKey);
         }
 
-        mRanking = ranking;
+        if (!Objects.equals(mRanking, ranking)) {
+            mRanking = ranking;
+            onRankingUpdated();
+        }
     }
-
 
     /*
      * Convenience getters for SBN and Ranking members
@@ -304,47 +298,8 @@ public final class NotificationEntry extends ListEntry {
         return interruption;
     }
 
-    public boolean isHighPriority() {
-        return mHighPriority;
-    }
-
-    public void setIsHighPriority(boolean highPriority) {
-        this.mHighPriority = highPriority;
-    }
-
     public boolean isBubble() {
         return (mSbn.getNotification().flags & FLAG_BUBBLE) != 0;
-    }
-
-    private void updatePeopleList() {
-        mAssociatedPeople.clear();
-
-        Bundle extras = mSbn.getNotification().extras;
-        if (extras == null) {
-            return;
-        }
-
-        List<Person> p = extras.getParcelableArrayList(Notification.EXTRA_PEOPLE_LIST);
-
-        if (p != null) {
-            mAssociatedPeople.addAll(p);
-        }
-
-        if (Notification.MessagingStyle.class.equals(
-                mSbn.getNotification().getNotificationStyle())) {
-            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
-            if (!ArrayUtils.isEmpty(messages)) {
-                for (Notification.MessagingStyle.Message message :
-                        Notification.MessagingStyle.Message
-                                .getMessagesFromBundleArray(messages)) {
-                    mAssociatedPeople.add(message.getSenderPerson());
-                }
-            }
-        }
-    }
-
-    boolean hasAssociatedPeople() {
-        return mAssociatedPeople.size() > 0;
     }
 
     /**

@@ -37,6 +37,8 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.collection.GroupEntry;
+import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
@@ -133,8 +135,8 @@ public class KeyguardCoordinator implements Coordinator {
                 // to be shown on the lockscreen
                 // TODO: grouping hasn't happened yet (b/145134683)
                 if (entry.getParent() != null) {
-                    final NotificationEntry summary = entry.getParent().getRepresentativeEntry();
-                    if (priorityExceedsLockscreenShowingThreshold(summary)) {
+                    final GroupEntry parent = entry.getParent();
+                    if (priorityExceedsLockscreenShowingThreshold(parent)) {
                         return false;
                     }
                 }
@@ -144,7 +146,7 @@ public class KeyguardCoordinator implements Coordinator {
         }
     };
 
-    private boolean priorityExceedsLockscreenShowingThreshold(NotificationEntry entry) {
+    private boolean priorityExceedsLockscreenShowingThreshold(ListEntry entry) {
         if (entry == null) {
             return false;
         }
@@ -154,7 +156,7 @@ public class KeyguardCoordinator implements Coordinator {
             //  correctly updated before reaching this point (b/145134683)
             return entry.isHighPriority();
         } else {
-            return !entry.getRanking().isAmbient();
+            return !entry.getRepresentativeEntry().getRanking().isAmbient();
         }
     }
 

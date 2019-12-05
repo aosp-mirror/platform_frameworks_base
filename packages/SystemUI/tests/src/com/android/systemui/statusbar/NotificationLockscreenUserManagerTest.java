@@ -26,12 +26,14 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
+import android.app.Notification;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -198,11 +200,13 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
 
+        final Notification notification = mock(Notification.class);
+        when(notification.isForegroundService()).thenReturn(true);
         NotificationEntry entry = new NotificationEntryBuilder()
                 .setImportance(IMPORTANCE_LOW)
+                .setNotification(notification)
                 .build();
         entry.setBucket(BUCKET_SILENT);
-        entry.setIsHighPriority(true);
         assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(entry));
     }
 

@@ -20,6 +20,7 @@ import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
@@ -383,15 +384,14 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
         ExpandableNotificationRow row = spy(mHelper.createRow());
         row.setBlockingHelperShowing(true);
-        modifyRanking(row.getEntry())
+        final NotificationEntry entry = row.getEntry();
+        modifyRanking(entry)
                 .setUserSentiment(USER_SENTIMENT_NEGATIVE)
-                .setImportance(IMPORTANCE_DEFAULT)
+                .setImportance(IMPORTANCE_HIGH)
                 .build();
-        row.getEntry().setIsHighPriority(true);
-        when(row.getIsNonblockable()).thenReturn(false);
-        StatusBarNotification statusBarNotification = row.getEntry().getSbn();
-        NotificationEntry entry = row.getEntry();
 
+        when(row.getIsNonblockable()).thenReturn(false);
+        StatusBarNotification statusBarNotification = entry.getSbn();
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
 
         verify(notificationInfoView).bindNotification(
@@ -408,7 +408,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false),
                 eq(true) /* isForBlockingHelper */,
-                eq(IMPORTANCE_DEFAULT),
+                eq(IMPORTANCE_HIGH),
                 eq(true) /* wasShownHighPriority */);
     }
 
