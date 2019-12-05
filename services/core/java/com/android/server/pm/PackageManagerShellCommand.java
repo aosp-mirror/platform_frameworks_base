@@ -1854,22 +1854,23 @@ class PackageManagerShellCommand extends ShellCommand {
         if (internal.isApexPackage(packageName)) {
             internal.uninstallApex(
                     packageName, versionCode, translatedUserId, receiver.getIntentSender(), flags);
-        } else if ((flags & PackageManager.DELETE_ALL_USERS) != 0) {
-            final PackageInfo info = mInterface.getPackageInfo(packageName,
-                    PackageManager.MATCH_STATIC_SHARED_LIBRARIES, translatedUserId);
-            if (info == null) {
-                pw.println("Failure [not installed for " + translatedUserId + "]");
-                return 1;
+        } else {
+            if ((flags & PackageManager.DELETE_ALL_USERS) == 0) {
+                final PackageInfo info = mInterface.getPackageInfo(packageName,
+                        PackageManager.MATCH_STATIC_SHARED_LIBRARIES, translatedUserId);
+                if (info == null) {
+                    pw.println("Failure [not installed for " + translatedUserId + "]");
+                    return 1;
+                }
+                final boolean isSystem =
+                        (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+                // If we are being asked to delete a system app for just one
+                // user set flag so it disables rather than reverting to system
+                // version of the app.
+                if (isSystem) {
+                    flags |= PackageManager.DELETE_SYSTEM_APP;
+                }
             }
-            final boolean isSystem =
-                    (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-            // If we are being asked to delete a system app for just one
-            // user set flag so it disables rather than reverting to system
-            // version of the app.
-            if (isSystem) {
-                flags |= PackageManager.DELETE_SYSTEM_APP;
-            }
-
             mInterface.getPackageInstaller().uninstall(new VersionedPackage(packageName,
                             versionCode), null /*callerPackageName*/, flags,
                     receiver.getIntentSender(), translatedUserId);
