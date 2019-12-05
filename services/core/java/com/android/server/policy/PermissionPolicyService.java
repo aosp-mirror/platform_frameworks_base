@@ -29,10 +29,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -171,23 +169,6 @@ public final class PermissionPolicyService extends SystemService {
         } catch (RemoteException doesNotHappen) {
             Slog.wtf(LOG_TAG, "Cannot set up app-ops listener");
         }
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        intentFilter.addDataScheme("package");
-
-        getContext().registerReceiverAsUser(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                UserHandle user =
-                        UserHandle.getUserHandleForUid(intent.getIntExtra(Intent.EXTRA_UID, -1));
-                new PermissionControllerManager(
-                        getUserContext(getContext(), user), FgThread.getHandler())
-                        .updateUserSensitive();
-            }
-        }, UserHandle.ALL, intentFilter, null, null);
-
     }
 
     /**
