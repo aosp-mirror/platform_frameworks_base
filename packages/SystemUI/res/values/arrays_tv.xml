@@ -36,5 +36,6 @@
 
     <string-array name="audio_recording_disclosure_exempt_apps" translatable="false">
       <item>com.google.android.katniss</item>
+      <item>com.google.android.apps.mediashell</item>
     </string-array>
 </resources>
