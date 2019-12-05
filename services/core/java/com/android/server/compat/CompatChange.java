@@ -55,7 +55,7 @@ public final class CompatChange extends CompatibilityChangeInfo {
     private Map<String, Boolean> mPackageOverrides;
 
     public CompatChange(long changeId) {
-        this(changeId, null, -1, false);
+        this(changeId, null, -1, false, null);
     }
 
     /**
@@ -66,8 +66,8 @@ public final class CompatChange extends CompatibilityChangeInfo {
      * @param disabled If {@code true}, overrides any {@code enableAfterTargetSdk} set.
      */
     public CompatChange(long changeId, @Nullable String name, int enableAfterTargetSdk,
-            boolean disabled) {
-        super(changeId, name, enableAfterTargetSdk, disabled);
+            boolean disabled, String description) {
+        super(changeId, name, enableAfterTargetSdk, disabled, description);
     }
 
     /**
@@ -75,7 +75,7 @@ public final class CompatChange extends CompatibilityChangeInfo {
      */
     public CompatChange(Change change) {
         super(change.getId(), change.getName(), change.getEnableAfterTargetSdk(),
-                change.getDisabled());
+                change.getDisabled(), change.getDescription());
     }
 
     void registerListener(ChangeListener listener) {

@@ -319,7 +319,8 @@ final class CompatConfig {
                 changeInfos[i] = new CompatibilityChangeInfo(change.getId(),
                         change.getName(),
                         change.getEnableAfterTargetSdk(),
-                        change.getDisabled());
+                        change.getDisabled(),
+                        change.getDescription());
             }
             return changeInfos;
         }
