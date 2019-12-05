@@ -147,7 +147,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     }
 
     private static void ensureStackPlacement(ActivityStack stack, ActivityRecord... activities) {
-        final Task task = stack.getAllTasks().get(0);
+        final Task task = stack.getBottomMostTask();
         final ArrayList<ActivityRecord> stackActivities = new ArrayList<>();
 
         task.forAllActivities((Consumer<ActivityRecord>) stackActivities::add, false);
@@ -320,7 +320,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
                 .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
                 .setOnTop(true)
                 .build();
-        final Task task = primaryStack.topTask();
+        final Task task = primaryStack.getTopMostTask();
 
         // Resize dock stack.
         mService.resizeDockedStack(stackSize, taskSize, null, null, null);
@@ -340,7 +340,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         final ActivityStack targetStack = new StackBuilder(mRootActivityContainer)
                 .setOnTop(false)
                 .build();
-        final Task targetTask = targetStack.getChildAt(0);
+        final Task targetTask = targetStack.getBottomMostTask();
 
         // Create Recents on top of the display.
         final ActivityStack stack = new StackBuilder(mRootActivityContainer).setActivityType(

@@ -72,7 +72,7 @@ public class SizeCompatTests extends ActivityTestsBase {
 
     private void setUpApp(ActivityDisplay display) {
         mStack = new StackBuilder(mRootActivityContainer).setDisplay(display).build();
-        mTask = mStack.getChildAt(0);
+        mTask = mStack.getBottomMostTask();
         mActivity = mTask.getTopNonFinishingActivity();
     }
 

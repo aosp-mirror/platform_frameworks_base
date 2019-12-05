@@ -1202,9 +1202,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom) {
+        return getActivity(callback, traverseTopToBottom, null /*boundary*/);
+    }
+
+    ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom,
+            WindowContainer boundary) {
         if (traverseTopToBottom) {
             for (int i = mChildren.size() - 1; i >= 0; --i) {
-                final ActivityRecord r = mChildren.get(i).getActivity(callback, traverseTopToBottom);
+                final WindowContainer wc = mChildren.get(i);
+                if (wc == boundary) return null;
+
+                final ActivityRecord r = wc.getActivity(callback, traverseTopToBottom, boundary);
                 if (r != null) {
                     return r;
                 }
@@ -1212,7 +1220,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         } else {
             final int count = mChildren.size();
             for (int i = 0; i < count; i++) {
-                final ActivityRecord r = mChildren.get(i).getActivity(callback, traverseTopToBottom);
+                final WindowContainer wc = mChildren.get(i);
+                if (wc == boundary) return null;
+
+                final ActivityRecord r = wc.getActivity(callback, traverseTopToBottom, boundary);
                 if (r != null) {
                     return r;
                 }
@@ -1320,12 +1331,55 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     /**
      * For all tasks at or below this container call the callback.
      *
+     * @param callback Calls the {@link ToBooleanFunction#apply} method for each task found and
+     *                 stops the search if {@link ToBooleanFunction#apply} returns {@code true}.
+     */
+    boolean forAllTasks(Function<Task, Boolean> callback) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            if (mChildren.get(i).forAllTasks(callback)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * For all tasks at or below this container call the callback.
+     *
      * @param callback Callback to be called for every task.
      */
     void forAllTasks(Consumer<Task> callback) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            mChildren.get(i).forAllTasks(callback);
+        forAllTasks(callback, true /*traverseTopToBottom*/);
+    }
+
+    void forAllTasks(Consumer<Task> callback, boolean traverseTopToBottom) {
+        final int count = mChildren.size();
+        if (traverseTopToBottom) {
+            for (int i = count - 1; i >= 0; --i) {
+                mChildren.get(i).forAllTasks(callback, traverseTopToBottom);
+            }
+        } else {
+            for (int i = 0; i < count; i++) {
+                mChildren.get(i).forAllTasks(callback, traverseTopToBottom);
+            }
         }
+    }
+
+    Task getTaskAbove(Task t) {
+        return getTask(
+                (above) -> true, t, false /*includeBoundary*/, false /*traverseTopToBottom*/);
+    }
+
+    Task getTaskBelow(Task t) {
+        return getTask((below) -> true, t, false /*includeBoundary*/, true /*traverseTopToBottom*/);
+    }
+
+    Task getBottomMostTask() {
+        return getTask((t) -> true, false /*traverseTopToBottom*/);
+    }
+
+    Task getTopMostTask() {
+        return getTask((t) -> true, true /*traverseTopToBottom*/);
     }
 
     Task getTask(Predicate<Task> callback) {
@@ -1354,18 +1408,59 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * For all tasks at or below this container call the callback.
+     * Gets an task in a branch of the tree.
      *
-     * @param callback Calls the {@link ToBooleanFunction#apply} method for each task found and
-     *                 stops the search if {@link ToBooleanFunction#apply} returns {@code true}.
+     * @param callback called to test if this is the task that should be returned.
+     * @param boundary We don't return tasks via {@param callback} until we get to this node in
+     *                 the tree.
+     * @param includeBoundary If the boundary from be processed to return tasks.
+     * @param traverseTopToBottom direction to traverse the tree.
+     * @return The task if found or null.
      */
-    boolean forAllTasks(ToBooleanFunction<Task> callback) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            if (mChildren.get(i).forAllTasks(callback)) {
-                return true;
+    final Task getTask(Predicate<Task> callback, WindowContainer boundary, boolean includeBoundary,
+            boolean traverseTopToBottom) {
+        return getTask(callback, boundary, includeBoundary, traverseTopToBottom, new boolean[1]);
+    }
+
+    private Task getTask(Predicate<Task> callback,
+            WindowContainer boundary, boolean includeBoundary, boolean traverseTopToBottom,
+            boolean[] boundaryFound) {
+        if (traverseTopToBottom) {
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                final Task t = processGetTaskWithBoundary(callback, boundary,
+                        includeBoundary, traverseTopToBottom, boundaryFound, mChildren.get(i));
+                if (t != null) {
+                    return t;
+                }
+            }
+        } else {
+            final int count = mChildren.size();
+            for (int i = 0; i < count; i++) {
+                final Task t = processGetTaskWithBoundary(callback, boundary,
+                        includeBoundary, traverseTopToBottom, boundaryFound, mChildren.get(i));
+                if (t != null) {
+                    return t;
+                }
             }
         }
-        return false;
+
+        return null;
+    }
+
+    private Task processGetTaskWithBoundary(Predicate<Task> callback,
+            WindowContainer boundary, boolean includeBoundary, boolean traverseTopToBottom,
+            boolean[] boundaryFound, WindowContainer wc) {
+        if (wc == boundary || boundary == null) {
+            boundaryFound[0] = true;
+            if (!includeBoundary) return null;
+        }
+
+        if (boundaryFound[0]) {
+            return wc.getTask(callback, traverseTopToBottom);
+        }
+
+        return wc.getTask(
+                callback, boundary, includeBoundary, traverseTopToBottom, boundaryFound);
     }
 
     WindowState getWindow(Predicate<WindowState> callback) {

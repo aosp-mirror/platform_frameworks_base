@@ -211,7 +211,7 @@ class RecentTasks {
                     final DisplayContent dc = rac.getActivityDisplay(displayId).mDisplayContent;
                     if (dc.pointWithinAppWindow(x, y)) {
                         final ActivityStack stack = mService.getTopDisplayFocusedStack();
-                        final Task topTask = stack != null ? stack.topTask() : null;
+                        final Task topTask = stack != null ? stack.getTopMostTask() : null;
                         resetFreezeTaskListReordering(topTask);
                     }
                 }
@@ -319,7 +319,7 @@ class RecentTasks {
     void resetFreezeTaskListReorderingOnTimeout() {
         synchronized (mService.mGlobalLock) {
             final ActivityStack focusedStack = mService.getTopDisplayFocusedStack();
-            final Task topTask = focusedStack != null ? focusedStack.topTask() : null;
+            final Task topTask = focusedStack != null ? focusedStack.getTopMostTask() : null;
             resetFreezeTaskListReordering(topTask);
         }
     }
@@ -630,8 +630,7 @@ class RecentTasks {
                     && task.realActivitySuspended != suspended) {
                task.realActivitySuspended = suspended;
                if (suspended) {
-                   mSupervisor.removeTaskByIdLocked(task.mTaskId, false,
-                           REMOVE_FROM_RECENTS, "suspended-package");
+                   mSupervisor.removeTask(task, false, REMOVE_FROM_RECENTS, "suspended-package");
                }
                notifyTaskPersisterLocked(task, false);
             }
@@ -658,8 +657,7 @@ class RecentTasks {
             if (task.mUserId != userId) continue;
             if (!taskPackageName.equals(packageName)) continue;
 
-            mSupervisor.removeTaskByIdLocked(task.mTaskId, true, REMOVE_FROM_RECENTS,
-                    "remove-package-task");
+            mSupervisor.removeTask(task, true, REMOVE_FROM_RECENTS, "remove-package-task");
         }
     }
 
@@ -687,8 +685,7 @@ class RecentTasks {
             final boolean sameComponent = cn != null && cn.getPackageName().equals(packageName)
                     && (filterByClasses == null || filterByClasses.contains(cn.getClassName()));
             if (sameComponent) {
-                mSupervisor.removeTaskByIdLocked(task.mTaskId, false,
-                        REMOVE_FROM_RECENTS, "disabled-package");
+                mSupervisor.removeTask(task, false, REMOVE_FROM_RECENTS, "disabled-package");
             }
         }
     }
@@ -1306,9 +1303,9 @@ class RecentTasks {
             case WINDOWING_MODE_PINNED:
                 return false;
             case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
-                if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "\ttop=" + task.getStack().topTask());
+                if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "\ttop=" + task.getStack().getTopMostTask());
                 final ActivityStack stack = task.getStack();
-                if (stack != null && stack.topTask() == task) {
+                if (stack != null && stack.getTopMostTask() == task) {
                     // Only the non-top task of the primary split screen mode is visible
                     return false;
                 }

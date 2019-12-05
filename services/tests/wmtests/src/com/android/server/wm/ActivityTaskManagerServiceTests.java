@@ -59,7 +59,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
     @Test
     public void testActivityFinish() {
         final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
-        final ActivityRecord activity = stack.getChildAt(0).getTopNonFinishingActivity();
+        final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
         assertTrue("Activity must be finished", mService.finishActivity(activity.appToken,
                 0 /* resultCode */, null /* resultData */,
                 Activity.DONT_FINISH_TASK_WITH_ACTIVITY));
@@ -75,7 +75,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
         removeGlobalMinSizeRestriction();
         final ActivityStack stack = new StackBuilder(mRootActivityContainer)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
-        final Task task = stack.topTask();
+        final Task task = stack.getTopMostTask();
         WindowContainerTransaction t = new WindowContainerTransaction();
         Rect newBounds = new Rect(10, 10, 100, 100);
         t.setBounds(task.mRemoteToken, new Rect(10, 10, 100, 100));

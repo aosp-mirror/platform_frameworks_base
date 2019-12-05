@@ -194,6 +194,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.util.function.pooled.PooledConsumer;
+import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
@@ -2277,19 +2278,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     Task findTaskForResizePoint(int x, int y) {
         final int delta = dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
-        mTmpTaskForResizePointSearchResult.reset();
-        for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityStack stack = mTaskStackContainers.getChildAt(stackNdx);
-            if (!stack.getWindowConfiguration().canResizeTask()) {
-                return null;
-            }
-
-            stack.findTaskForResizePoint(x, y, delta, mTmpTaskForResizePointSearchResult);
-            if (mTmpTaskForResizePointSearchResult.searchDone) {
-                return mTmpTaskForResizePointSearchResult.taskForResize;
-            }
-        }
-        return null;
+        return mTmpTaskForResizePointSearchResult.process(mTaskStackContainers, x, y, delta);
     }
 
     void updateTouchExcludeRegion() {
@@ -2299,13 +2288,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         } else {
             mTouchExcludeRegion.set(mBaseDisplayRect);
             final int delta = dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
+            mTmpRect.setEmpty();
             mTmpRect2.setEmpty();
-            for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0;
-                    --stackNdx) {
-                final ActivityStack stack = mTaskStackContainers.getChildAt(stackNdx);
-                stack.setTouchExcludeRegion(focusedTask, delta, mTouchExcludeRegion,
-                        mDisplayFrames.mContent, mTmpRect2);
-            }
+
+            final PooledConsumer c = PooledLambda.obtainConsumer(
+                    DisplayContent::processTaskForTouchExcludeRegion, this,
+                    PooledLambda.__(Task.class), focusedTask, delta);
+            mTaskStackContainers.forAllTasks(c);
+            c.recycle();
+
             // If we removed the focused task above, add it back and only leave its
             // outside touch area in the exclusion. TapDetector is not interested in
             // any touch inside the focused task itself.
@@ -2335,12 +2326,56 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion);
     }
 
+    private void processTaskForTouchExcludeRegion(Task task, Task focusedTask, int delta) {
+        final ActivityRecord topVisibleActivity = task.getTopVisibleActivity();
+
+        if (topVisibleActivity == null || !topVisibleActivity.hasContentToDisplay()) {
+            return;
+        }
+
+        // Exclusion region is the region that TapDetector doesn't care about.
+        // Here we want to remove all non-focused tasks from the exclusion region.
+        // We also remove the outside touch area for resizing for all freeform
+        // tasks (including the focused).
+        // We save the focused task region once we find it, and add it back at the end.
+        // If the task is home stack and it is resizable in the minimized state, we want to
+        // exclude the docked stack from touch so we need the entire screen area and not just a
+        // small portion which the home stack currently is resized to.
+        if (task.isActivityTypeHome() && task.getStack().isMinimizedDockAndHomeStackResizable()) {
+            mDisplayContent.getBounds(mTmpRect);
+        } else {
+            task.getDimBounds(mTmpRect);
+        }
+
+        if (task == focusedTask) {
+            // Add the focused task rect back into the exclude region once we are done
+            // processing stacks.
+            mTmpRect2.set(mTmpRect);
+        }
+
+        final boolean isFreeformed = task.inFreeformWindowingMode();
+        if (task != focusedTask || isFreeformed) {
+            if (isFreeformed) {
+                // If the task is freeformed, enlarge the area to account for outside
+                // touch area for resize.
+                mTmpRect.inset(-delta, -delta);
+                // Intersect with display content rect. If we have system decor (status bar/
+                // navigation bar), we want to exclude that from the tap detection.
+                // Otherwise, if the app is partially placed under some system button (eg.
+                // Recents, Home), pressing that button would cause a full series of
+                // unwanted transfer focus/resume/pause, before we could go home.
+                mTmpRect.intersect(mDisplayFrames.mContent);
+            }
+            mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
+        }
+    }
+
     /**
      * Union the region with all the tap exclude region provided by windows on this display.
      *
      * @param inOutRegion The region to be amended.
      */
-    void amendWindowTapExcludeRegion(Region inOutRegion) {
+    private void amendWindowTapExcludeRegion(Region inOutRegion) {
         for (int i = mTapExcludeProvidingWindows.size() - 1; i >= 0; i--) {
             final WindowState win = mTapExcludeProvidingWindows.valueAt(i);
             win.amendTapExcludeRegion(inOutRegion);
@@ -3852,12 +3887,56 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     static final class TaskForResizePointSearchResult {
-        boolean searchDone;
-        Task taskForResize;
+        private Task taskForResize;
+        private int x;
+        private int y;
+        private int delta;
+        private Rect mTmpRect = new Rect();
 
-        void reset() {
-            searchDone = false;
+        Task process(WindowContainer root, int x, int y, int delta) {
             taskForResize = null;
+            this.x = x;
+            this.y = y;
+            this.delta = delta;
+            mTmpRect.setEmpty();
+
+            final PooledFunction f = PooledLambda.obtainFunction(
+                    TaskForResizePointSearchResult::processTask, this, PooledLambda.__(Task.class));
+            root.forAllTasks(f);
+            f.recycle();
+
+            return taskForResize;
+        }
+
+        private boolean processTask(Task task) {
+            if (!task.getStack().getWindowConfiguration().canResizeTask()) {
+                return true;
+            }
+
+            if (task.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+                return true;
+            }
+
+            // We need to use the task's dim bounds (which is derived from the visible bounds of
+            // its apps windows) for any touch-related tests. Can't use the task's original
+            // bounds because it might be adjusted to fit the content frame. One example is when
+            // the task is put to top-left quadrant, the actual visible area would not start at
+            // (0,0) after it's adjusted for the status bar.
+            task.getDimBounds(mTmpRect);
+            mTmpRect.inset(-delta, -delta);
+            if (mTmpRect.contains(x, y)) {
+                mTmpRect.inset(delta, delta);
+
+                if (!mTmpRect.contains(x, y)) {
+                    taskForResize = task;
+                    return true;
+                }
+                // User touched inside the task. No need to look further,
+                // focus transfer will be handled in ACTION_UP.
+                return true;
+            }
+
+            return false;
         }
     }
 

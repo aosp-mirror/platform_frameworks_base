@@ -106,6 +106,7 @@ public class LockTaskControllerTest {
 
     @Mock private ActivityStackSupervisor mSupervisor;
     @Mock private RootActivityContainer mRootActivityContainer;
+    @Mock private RootWindowContainer mRootWindowContainer;
     @Mock private IDevicePolicyManager mDevicePolicyManager;
     @Mock private IStatusBarService mStatusBarService;
     @Mock private WindowManagerService mWindowManager;
@@ -134,6 +135,7 @@ public class LockTaskControllerTest {
 
         mSupervisor.mRecentTasks = mRecentTasks;
         mSupervisor.mRootActivityContainer = mRootActivityContainer;
+        mRootActivityContainer.mRootWindowContainer = mRootWindowContainer;
 
         mLockTaskController = new LockTaskController(mContext, mSupervisor,
                 new ImmediatelyExecuteHandler());

@@ -107,7 +107,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Before
     public void setUp() throws Exception {
         mStack = new StackBuilder(mRootActivityContainer).build();
-        mTask = mStack.getChildAt(0);
+        mTask = mStack.getBottomMostTask();
         mActivity = mTask.getTopNonFinishingActivity();
 
         doReturn(false).when(mService).isBooting();
@@ -640,7 +640,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // stacks. Then when mActivity is finishing, its stack will be invisible (no running
         // activities in the stack) that is the key condition to verify.
         final ActivityStack stack2 = new StackBuilder(mRootActivityContainer).build();
-        stack2.moveToBack("test", stack2.getChildAt(0));
+        stack2.moveToBack("test", stack2.getBottomMostTask());
 
         assertTrue(mStack.isTopStackOnDisplay());
 
@@ -948,9 +948,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testDestroyIfPossible_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
         final ActivityStack homeStack = mActivity.getDisplay().getHomeStack();
-        for (Task t : homeStack.getAllTasks()) {
-            homeStack.removeChild(t, "test");
-        }
+        homeStack.forAllTasks((t) -> { homeStack.removeChild(t, "test"); });
         mActivity.finishing = true;
         doReturn(false).when(mRootActivityContainer).resumeFocusedStacksTopActivities();
         spyOn(mStack);
@@ -974,9 +972,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testCompleteFinishing_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
         final ActivityStack homeStack = mActivity.getDisplay().getHomeStack();
-        for (Task t : homeStack.getAllTasks()) {
-            homeStack.removeChild(t, "test");
-        }
+        homeStack.forAllTasks((t) -> { homeStack.removeChild(t, "test"); });
         mActivity.finishing = true;
         spyOn(mStack);
 

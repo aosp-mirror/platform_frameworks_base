@@ -744,7 +744,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final ActivityStack stack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
                         .setDisplay(dc).build();
-        final ActivityRecord activity = stack.topTask().getTopNonFinishingActivity();
+        final ActivityRecord activity = stack.getTopMostTask().getTopNonFinishingActivity();
 
         activity.setRequestedOrientation(newOrientation);
 
@@ -766,7 +766,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final ActivityStack stack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
                         .setDisplay(dc).build();
-        final ActivityRecord activity = stack.topTask().getTopNonFinishingActivity();
+        final ActivityRecord activity = stack.getTopMostTask().getTopNonFinishingActivity();
 
         activity.setRequestedOrientation(newOrientation);
 

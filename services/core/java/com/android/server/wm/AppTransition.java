@@ -130,6 +130,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils.Dump;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.AttributeCache;
 import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.animation.ClipRectLRAnimation;
@@ -1897,7 +1898,10 @@ public class AppTransition implements Dump {
                 for (int i = 0; i < specs.length; i++) {
                     AppTransitionAnimationSpec spec = specs[i];
                     if (spec != null) {
-                        final WindowContainer container = findTask(spec.taskId);
+                        final PooledPredicate p = PooledLambda.obtainPredicate(
+                                Task::isTaskId, PooledLambda.__(Task.class), spec.taskId);
+                        final WindowContainer container = mDisplayContent.getTask(p);
+                        p.recycle();
                         if (container == null) {
                             continue;
                         }
@@ -1916,21 +1920,6 @@ public class AppTransition implements Dump {
             mNextAppTransitionCallback = onAnimationStartedCallback;
             mAnimationFinishedCallback = onAnimationFinishedCallback;
         }
-    }
-
-    private Task findTask(int taskId) {
-        if (taskId < 0) {
-            return null;
-        }
-        final ArrayList<Task> tasks = new ArrayList<>();
-        mDisplayContent.forAllTasks(task -> {
-            if (task.mTaskId == taskId) {
-                tasks.add(task);
-                return true;
-            }
-            return false;
-        });
-        return tasks.size() == 1 ? tasks.get(0) : null;
     }
 
     void overridePendingAppTransitionMultiThumbFuture(
