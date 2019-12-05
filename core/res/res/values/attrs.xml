@@ -3750,6 +3750,14 @@
              </p>
          -->
         <attr name="canRequestFingerprintGestures" format="boolean" />
+
+        <!-- Animated image of the accessibility service purpose or behavior, to help users
+             understand how the service can help them.-->
+        <attr name="animatedImageDrawable" format="reference"/>
+        <!-- Html description of the accessibility service, to help users understand
+             how the service can help them.-->
+        <attr name="htmlDescription" format="string"/>
+
         <!-- Short description of the accessibility service purpose or behavior.-->
         <attr name="description" />
         <!-- Brief summary of the accessibility service purpose or behavior. -->
