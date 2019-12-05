@@ -4505,7 +4505,7 @@ public final class Telephony {
         /**
          * The current registered voice network operator name in long alphanumeric format.
          * <p>
-         * This is the same as {@link ServiceState#getVoiceOperatorAlphaLong()}.
+         * This is the same as {@link ServiceState#getOperatorAlphaLong()}.
          * @hide
          */
         public static final String VOICE_OPERATOR_ALPHA_LONG = "voice_operator_alpha_long";
@@ -4516,11 +4516,10 @@ public final class Telephony {
          * In GSM/UMTS, short format can be up to 8 characters long. The current registered voice
          * network operator name in long alphanumeric format.
          * <p>
-         * This is the same as {@link ServiceState#getVoiceOperatorAlphaShort()}.
+         * This is the same as {@link ServiceState#getOperatorAlphaShort()}.
          * @hide
          */
         public static final String VOICE_OPERATOR_ALPHA_SHORT = "voice_operator_alpha_short";
-
 
         /**
          * The current registered operator numeric id.
@@ -4535,7 +4534,7 @@ public final class Telephony {
         /**
          * The current registered data network operator name in long alphanumeric format.
          * <p>
-         * This is the same as {@link ServiceState#getDataOperatorAlphaLong()}.
+         * This is the same as {@link ServiceState#getOperatorAlphaLong()}.
          * @hide
          */
         public static final String DATA_OPERATOR_ALPHA_LONG = "data_operator_alpha_long";
@@ -4543,7 +4542,7 @@ public final class Telephony {
         /**
          * The current registered data network operator name in short alphanumeric format.
          * <p>
-         * This is the same as {@link ServiceState#getDataOperatorAlphaShort()}.
+         * This is the same as {@link ServiceState#getOperatorAlphaShort()}.
          * @hide
          */
         public static final String DATA_OPERATOR_ALPHA_SHORT = "data_operator_alpha_short";
@@ -4551,7 +4550,7 @@ public final class Telephony {
         /**
          * The current registered data network operator numeric id.
          * <p>
-         * This is the same as {@link ServiceState#getDataOperatorNumeric()}.
+         * This is the same as {@link ServiceState#getOperatorNumeric()}.
          * @hide
          */
         public static final String DATA_OPERATOR_NUMERIC = "data_operator_numeric";
