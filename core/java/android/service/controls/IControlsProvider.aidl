@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package android.service.notification;
+package android.service.controls;
 
-import android.net.Uri;
-import android.service.notification.Condition;
+import android.service.controls.ControlAction;
 
 /** @hide */
-oneway interface IConditionProvider {
-    void onConnected();
-    void onSubscribe(in Uri conditionId);
-    void onUnsubscribe(in Uri conditionId);
+oneway interface IControlsProvider {
+    void load();
+
+    void subscribe(in List<String> controlIds);
+
+    void unsubscribe();
+
+    void onAction(in String controlId, in ControlAction action);
 }
