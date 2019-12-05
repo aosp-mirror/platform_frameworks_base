@@ -35,9 +35,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.telephony.Annotation.RilRadioTechnology;
-import android.telephony.ServiceState;
-import android.telephony.TelephonyManager;
+import android.telephony.ims.ImsStreamMediaProfile;
 import android.util.ArraySet;
 import android.view.Surface;
 
@@ -475,6 +473,52 @@ public abstract class Connection extends Conferenceable {
     //**********************************************************************************************
 
     /**
+     * Define IMS Audio Codec
+     */
+    // Current audio codec is NONE
+    public static final int AUDIO_CODEC_NONE = ImsStreamMediaProfile.AUDIO_QUALITY_NONE; // 0
+    // Current audio codec is AMR
+    public static final int AUDIO_CODEC_AMR = ImsStreamMediaProfile.AUDIO_QUALITY_AMR; // 1
+    // Current audio codec is AMR_WB
+    public static final int AUDIO_CODEC_AMR_WB = ImsStreamMediaProfile.AUDIO_QUALITY_AMR_WB; // 2
+    // Current audio codec is QCELP13K
+    public static final int AUDIO_CODEC_QCELP13K = ImsStreamMediaProfile.AUDIO_QUALITY_QCELP13K; //3
+    // Current audio codec is EVRC
+    public static final int AUDIO_CODEC_EVRC = ImsStreamMediaProfile.AUDIO_QUALITY_EVRC; // 4
+    // Current audio codec is EVRC_B
+    public static final int AUDIO_CODEC_EVRC_B = ImsStreamMediaProfile.AUDIO_QUALITY_EVRC_B; // 5
+    // Current audio codec is EVRC_WB
+    public static final int AUDIO_CODEC_EVRC_WB = ImsStreamMediaProfile.AUDIO_QUALITY_EVRC_WB; // 6
+    // Current audio codec is EVRC_NW
+    public static final int AUDIO_CODEC_EVRC_NW = ImsStreamMediaProfile.AUDIO_QUALITY_EVRC_NW; // 7
+    // Current audio codec is GSM_EFR
+    public static final int AUDIO_CODEC_GSM_EFR = ImsStreamMediaProfile.AUDIO_QUALITY_GSM_EFR; // 8
+    // Current audio codec is GSM_FR
+    public static final int AUDIO_CODEC_GSM_FR = ImsStreamMediaProfile.AUDIO_QUALITY_GSM_FR; // 9
+    // Current audio codec is GSM_HR
+    public static final int AUDIO_CODEC_GSM_HR = ImsStreamMediaProfile.AUDIO_QUALITY_GSM_HR; // 10
+    // Current audio codec is G711U
+    public static final int AUDIO_CODEC_G711U = ImsStreamMediaProfile.AUDIO_QUALITY_G711U; // 11
+    // Current audio codec is G723
+    public static final int AUDIO_CODEC_G723 = ImsStreamMediaProfile.AUDIO_QUALITY_G723; // 12
+    // Current audio codec is G711A
+    public static final int AUDIO_CODEC_G711A = ImsStreamMediaProfile.AUDIO_QUALITY_G711A; // 13
+    // Current audio codec is G722
+    public static final int AUDIO_CODEC_G722 = ImsStreamMediaProfile.AUDIO_QUALITY_G722; // 14
+    // Current audio codec is G711AB
+    public static final int AUDIO_CODEC_G711AB = ImsStreamMediaProfile.AUDIO_QUALITY_G711AB; // 15
+    // Current audio codec is G729
+    public static final int AUDIO_CODEC_G729 = ImsStreamMediaProfile.AUDIO_QUALITY_G729; // 16
+    // Current audio codec is EVS_NB
+    public static final int AUDIO_CODEC_EVS_NB = ImsStreamMediaProfile.AUDIO_QUALITY_EVS_NB; // 17
+    // Current audio codec is EVS_WB
+    public static final int AUDIO_CODEC_EVS_WB = ImsStreamMediaProfile.AUDIO_QUALITY_EVS_WB; // 18
+    // Current audio codec is EVS_SWB
+    public static final int AUDIO_CODEC_EVS_SWB = ImsStreamMediaProfile.AUDIO_QUALITY_EVS_SWB; // 19
+    // Current audio codec is EVS_FB
+    public static final int AUDIO_CODEC_EVS_FB = ImsStreamMediaProfile.AUDIO_QUALITY_EVS_FB; // 20
+
+    /**
      * Connection extra key used to store the last forwarded number associated with the current
      * connection.  Used to communicate to the user interface that the connection was forwarded via
      * the specified number.
@@ -565,6 +609,13 @@ public abstract class Connection extends Conferenceable {
      */
     public static final String EXTRA_IS_RTT_AUDIO_PRESENT =
             "android.telecom.extra.IS_RTT_AUDIO_PRESENT";
+
+    /**
+     * The audio codec in use for the current {@link Connection}, if known. Valid values include
+     * {@link #AUDIO_CODEC_AMR_WB} and {@link #AUDIO_CODEC_EVS_WB}.
+     */
+    public static final String EXTRA_AUDIO_CODEC =
+            "android.telecom.extra.AUDIO_CODEC";
 
     /**
      * Connection event used to inform Telecom that it should play the on hold tone.  This is used
