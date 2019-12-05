@@ -175,6 +175,7 @@ import android.net.NetworkUtils;
 import android.net.ProxyInfo;
 import android.net.ResolverParamsParcel;
 import android.net.RouteInfo;
+import android.net.RouteInfoParcel;
 import android.net.SocketKeepalive;
 import android.net.UidRange;
 import android.net.Uri;
@@ -6037,6 +6038,7 @@ public class ConnectivityServiceTest {
             verify(mBatteryStatsService).noteNetworkInterfaceType(stackedLp.getInterfaceName(),
                     TYPE_MOBILE);
         }
+        reset(mMockNetd);
 
         // Add ipv4 address, expect that clatd and prefix discovery are stopped and stacked
         // linkproperties are cleaned up.
@@ -6087,7 +6089,6 @@ public class ConnectivityServiceTest {
                 kNat64PrefixString, 96);
         networkCallback.expectCallback(CallbackEntry.LINK_PROPERTIES_CHANGED, mCellNetworkAgent);
         verify(mMockNetd, times(1)).clatdStart(MOBILE_IFNAME, kNat64Prefix.toString());
-
 
         // Clat iface comes up. Expect stacked link to be added.
         clat.interfaceLinkStateChanged(CLAT_PREFIX + MOBILE_IFNAME, true);
@@ -6674,17 +6675,45 @@ public class ConnectivityServiceTest {
         }
     }
 
+    private void assertRouteInfoParcelMatches(RouteInfo route, RouteInfoParcel parcel) {
+        assertEquals(route.getDestination().toString(), parcel.destination);
+        assertEquals(route.getInterface(), parcel.ifName);
+        assertEquals(route.getMtu(), parcel.mtu);
+
+        switch (route.getType()) {
+            case RouteInfo.RTN_UNICAST:
+                if (route.hasGateway()) {
+                    assertEquals(route.getGateway().getHostAddress(), parcel.nextHop);
+                } else {
+                    assertEquals(INetd.NEXTHOP_NONE, parcel.nextHop);
+                }
+                break;
+            case RouteInfo.RTN_UNREACHABLE:
+                assertEquals(INetd.NEXTHOP_UNREACHABLE, parcel.nextHop);
+                break;
+            case RouteInfo.RTN_THROW:
+                assertEquals(INetd.NEXTHOP_THROW, parcel.nextHop);
+                break;
+            default:
+                assertEquals(INetd.NEXTHOP_NONE, parcel.nextHop);
+                break;
+        }
+    }
+
     private void assertRoutesAdded(int netId, RouteInfo... routes) throws Exception {
-        InOrder inOrder = inOrder(mNetworkManagementService);
+        ArgumentCaptor<RouteInfoParcel> captor = ArgumentCaptor.forClass(RouteInfoParcel.class);
+        verify(mMockNetd, times(routes.length)).networkAddRouteParcel(eq(netId), captor.capture());
         for (int i = 0; i < routes.length; i++) {
-            inOrder.verify(mNetworkManagementService).addRoute(eq(netId), eq(routes[i]));
+            assertRouteInfoParcelMatches(routes[i], captor.getAllValues().get(i));
         }
     }
 
     private void assertRoutesRemoved(int netId, RouteInfo... routes) throws Exception {
-        InOrder inOrder = inOrder(mNetworkManagementService);
+        ArgumentCaptor<RouteInfoParcel> captor = ArgumentCaptor.forClass(RouteInfoParcel.class);
+        verify(mMockNetd, times(routes.length)).networkRemoveRouteParcel(eq(netId),
+                captor.capture());
         for (int i = 0; i < routes.length; i++) {
-            inOrder.verify(mNetworkManagementService).removeRoute(eq(netId), eq(routes[i]));
+            assertRouteInfoParcelMatches(routes[i], captor.getAllValues().get(i));
         }
     }
 
@@ -6928,5 +6957,61 @@ public class ConnectivityServiceTest {
         // Wait for onNetworkConnectivityReported to fire
         verify(mConnectivityDiagnosticsCallback)
                 .onNetworkConnectivityReported(eq(n), eq(noConnectivity));
+    }
+
+    @Test
+    public void testRouteAddDeleteUpdate() throws Exception {
+        final NetworkRequest request = new NetworkRequest.Builder().build();
+        final TestNetworkCallback networkCallback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(request, networkCallback);
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
+        reset(mMockNetd);
+        mCellNetworkAgent.connect(false);
+        networkCallback.expectAvailableCallbacksUnvalidated(mCellNetworkAgent);
+        final int netId = mCellNetworkAgent.getNetwork().netId;
+
+        final String iface = "rmnet_data0";
+        final InetAddress gateway = InetAddress.getByName("fe80::5678");
+        RouteInfo direct = RouteInfo.makeHostRoute(gateway, iface);
+        RouteInfo rio1 = new RouteInfo(new IpPrefix("2001:db8:1::/48"), gateway, iface);
+        RouteInfo rio2 = new RouteInfo(new IpPrefix("2001:db8:2::/48"), gateway, iface);
+        RouteInfo defaultRoute = new RouteInfo((IpPrefix) null, gateway, iface);
+        RouteInfo defaultWithMtu = new RouteInfo(null, gateway, iface, RouteInfo.RTN_UNICAST,
+                                                 1280 /* mtu */);
+
+        // Send LinkProperties and check that we ask netd to add routes.
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName(iface);
+        lp.addRoute(direct);
+        lp.addRoute(rio1);
+        lp.addRoute(defaultRoute);
+        mCellNetworkAgent.sendLinkProperties(lp);
+        networkCallback.expectLinkPropertiesThat(mCellNetworkAgent, x -> x.getRoutes().size() == 3);
+
+        assertRoutesAdded(netId, direct, rio1, defaultRoute);
+        reset(mMockNetd);
+
+        // Send updated LinkProperties and check that we ask netd to add, remove, update routes.
+        assertTrue(lp.getRoutes().contains(defaultRoute));
+        lp.removeRoute(rio1);
+        lp.addRoute(rio2);
+        lp.addRoute(defaultWithMtu);
+        // Ensure adding the same route with a different MTU replaces the previous route.
+        assertFalse(lp.getRoutes().contains(defaultRoute));
+        assertTrue(lp.getRoutes().contains(defaultWithMtu));
+
+        mCellNetworkAgent.sendLinkProperties(lp);
+        networkCallback.expectLinkPropertiesThat(mCellNetworkAgent,
+                x -> x.getRoutes().contains(rio2));
+
+        assertRoutesRemoved(netId, rio1);
+        assertRoutesAdded(netId, rio2);
+
+        ArgumentCaptor<RouteInfoParcel> captor = ArgumentCaptor.forClass(RouteInfoParcel.class);
+        verify(mMockNetd).networkUpdateRouteParcel(eq(netId), captor.capture());
+        assertRouteInfoParcelMatches(defaultWithMtu, captor.getValue());
+
+
+        mCm.unregisterNetworkCallback(networkCallback);
     }
 }
