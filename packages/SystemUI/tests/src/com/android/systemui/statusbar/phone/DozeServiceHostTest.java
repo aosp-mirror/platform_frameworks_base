@@ -85,7 +85,6 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private StatusBar mStatusBar;
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private StatusBarWindowViewController mStatusBarWindowViewController;
-    @Mock private StatusBarWindowView mStatusBarWindow;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock private NotificationPanelView mNotificationPanel;
     @Mock private View mAmbientIndicationContainer;
@@ -101,10 +100,11 @@ public class DozeServiceHostTest extends SysuiTestCase {
                 mKeyguardViewMediator, () -> mAssistManager, mDozeScrimController,
                 mKeyguardUpdateMonitor, mVisualStabilityManager, mPulseExpansionHandler,
                 mStatusBarWindowController, mNotificationWakeUpCoordinator,
-                mStatusBarWindowViewController, mLockscreenLockIconController);
+                mLockscreenLockIconController);
 
-        mDozeServiceHost.initialize(mStatusBar, mNotificationIconAreaController, mStatusBarWindow,
-                mStatusBarKeyguardViewManager, mNotificationPanel, mAmbientIndicationContainer);
+        mDozeServiceHost.initialize(mStatusBar, mNotificationIconAreaController,
+                mStatusBarKeyguardViewManager, mStatusBarWindowViewController, mNotificationPanel,
+                mAmbientIndicationContainer);
     }
 
     @Test

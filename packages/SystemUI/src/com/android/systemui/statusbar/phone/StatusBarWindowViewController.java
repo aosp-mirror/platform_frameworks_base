@@ -43,7 +43,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -57,14 +56,13 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 /**
  * Controller for {@link StatusBarWindowView}.
  */
-@Singleton
+//@Singleton
 public class StatusBarWindowViewController {
     private final InjectionInflationController mInjectionInflationController;
     private final NotificationWakeUpCoordinator mCoordinator;
@@ -116,9 +114,9 @@ public class StatusBarWindowViewController {
             DozeLog dozeLog,
             DozeParameters dozeParameters,
             CommandQueue commandQueue,
-            SuperStatusBarViewFactory superStatusBarViewFactory,
             Lazy<ShadeController> shadeControllerLazy,
-            DockManager dockManager) {
+            DockManager dockManager,
+            StatusBarWindowView statusBarWindowView) {
         mInjectionInflationController = injectionInflationController;
         mCoordinator = coordinator;
         mPulseExpansionHandler = pulseExpansionHandler;
@@ -134,7 +132,7 @@ public class StatusBarWindowViewController {
         mDozeLog = dozeLog;
         mDozeParameters = dozeParameters;
         mCommandQueue = commandQueue;
-        mView = superStatusBarViewFactory.getStatusBarWindowView();
+        mView = statusBarWindowView;
         mShadeControllerLazy = shadeControllerLazy;
         mDockManager = dockManager;
 
