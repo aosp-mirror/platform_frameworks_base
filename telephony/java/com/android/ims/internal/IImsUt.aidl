@@ -122,4 +122,10 @@ interface IImsUt {
      */
     int updateCallBarringForServiceClass(int cbType, int action, in String[] barrList,
             int serviceClass);
+
+    /**
+     * Updates the configuration of the call barring for specified service class with password.
+     */
+    int updateCallBarringWithPassword(int cbType, int action, in String[] barrList,
+            int serviceClass, String password);
 }
