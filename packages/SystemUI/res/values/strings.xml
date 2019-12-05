@@ -990,12 +990,6 @@
     <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
     <string name="keyguard_retry">Swipe up to try again</string>
 
-    <!-- Indication when device is slow charging due to misalignment on the dock. [CHAR LIMIT=60] -->
-    <string name="dock_alignment_slow_charging" product="default">Realign phone for faster charging</string>
-
-    <!-- Indication when device is not charging due to bad placement on the dock. [CHAR LIMIT=60] -->
-    <string name="dock_alignment_not_charging" product="default">Realign phone to charge wirelessly</string>
-
     <!-- Text on keyguard screen and in Quick Settings footer indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=60] -->
     <string name="do_disclosure_generic">This device is managed by your organization</string>
 
@@ -2498,9 +2492,4 @@
 
     <!-- Title of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=25] -->
     <string name="inattentive_sleep_warning_title">Standby</string>
-    <!-- Message of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=NONE] -->
-    <string name="inattentive_sleep_warning_message" product="tv">The Android TV device will soon turn off; press a button to keep it on.</string>
-    <!-- Message of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=NONE] -->
-    <string name="inattentive_sleep_warning_message" product="default">The device will soon turn off; press to keep it on.</string>
-
 </resources>

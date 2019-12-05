@@ -960,6 +960,4 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ছিষ্টেম নেভিগেশ্বন আপডে’ট কৰা হ’ল। সলনি কৰিবলৈ ছেটিংসমূহ-লৈ যাওক।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ছিষ্টেম নেভিগেশ্বন আপডে’ট কৰিবলৈ ছেটিংসমূহ-লৈ যাওক"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ষ্টেণ্ডবাই"</string>
-    <string name="inattentive_sleep_warning_message" product="tv" msgid="6017523991455860482">"Android TV ডিভাইচটো অতি সোনকালে অফ হ\'ব, এইটো অন ৰাখিবলৈ যিকোনো এটা বুটাম টিপক।"</string>
-    <string name="inattentive_sleep_warning_message" product="default" msgid="4866963937818527643">"এই ডিভাইচটো অতি সোনকালে অফ হ\'ব, এইটো অন ৰাখিবলৈ টিপক।"</string>
 </resources>

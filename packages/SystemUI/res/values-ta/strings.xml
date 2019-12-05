@@ -958,6 +958,4 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"சிஸ்டம் நேவிகேஷன் மாற்றப்பட்டது. மாற்றங்களைச் செய்ய ‘அமைப்புகளுக்குச்’ செல்லவும்."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"சிஸ்டம் நேவிகேஷனை மாற்ற ’அமைப்புகளுக்குச்’ செல்லவும்"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"இயக்க நேரம்"</string>
-    <string name="inattentive_sleep_warning_message" product="tv" msgid="6017523991455860482">"Android TV விரைவில் ஆஃப் ஆகலாம். இதைத் தொடர்ந்து ஆனில் வைக்க ஒரு பட்டனைத் தட்டவும்."</string>
-    <string name="inattentive_sleep_warning_message" product="default" msgid="4866963937818527643">"இந்தச் சாதனம் விரைவில் ஆஃப் ஆகலாம், இதைத் தொடர்ந்து ஆனில் வைக்கத் தட்டவும்."</string>
 </resources>

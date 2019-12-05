@@ -958,6 +958,4 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"प्रणालीको नेभिगेसन अद्यावधिक गरियो। परिवर्तन गर्न सेटिङमा जानुहोस्।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"प्रणालीको नेभिगेसन अद्यावधिक गर्न सेटिङमा जानुहोस्"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्ट्यान्डबाई"</string>
-    <string name="inattentive_sleep_warning_message" product="tv" msgid="6017523991455860482">"Android TV यन्त्र चाँडै निष्क्रिय हुने छ; सक्रिय राख्न कुनै बटन थिच्नुहोस्।"</string>
-    <string name="inattentive_sleep_warning_message" product="default" msgid="4866963937818527643">"यो यन्त्र चाँडै निष्क्रिय हुने छ; सक्रिय राख्न थिच्नुहोस्।"</string>
 </resources>

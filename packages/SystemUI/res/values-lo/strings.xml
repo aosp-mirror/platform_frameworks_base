@@ -958,6 +958,4 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ອັບເດດການນຳທາງລະບົບແລ້ວ. ເພື່ອປ່ຽນແປງ, ກະລຸນາໄປທີ່ການຕັ້ງຄ່າ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ໄປທີ່ການຕັ້ງຄ່າເພື່ອອັບເດດການນຳທາງລະບົບ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ສະແຕນບາຍ"</string>
-    <string name="inattentive_sleep_warning_message" product="tv" msgid="6017523991455860482">"ອຸປະກອນ Android TV ຈະປິດໃນອີກບໍ່ດົນ, ກົດປຸ່ມໃດໜຶ່ງເພື່ອເປີດມັນໄວ້ຕໍ່."</string>
-    <string name="inattentive_sleep_warning_message" product="default" msgid="4866963937818527643">"ອຸປະກອນຈະປິດໃນອີກບໍ່ດົນ, ກົດເພື່ອເປີດມັນໄວ້ຕໍ່."</string>
 </resources>

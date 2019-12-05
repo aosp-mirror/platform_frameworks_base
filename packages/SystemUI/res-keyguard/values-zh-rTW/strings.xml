@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"按選單鍵解鎖。"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"網路已鎖定"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"沒有 SIM 卡"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"平板電腦中沒有 SIM 卡。"</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"手機中沒有 SIM 卡。"</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"請插入 SIM 卡。"</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"找不到或無法讀取 SIM 卡。請插入 SIM 卡。"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"SIM 卡無法使用。"</string>
@@ -83,17 +81,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"請輸入 4 到 8 碼的 PIN 碼。"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK 碼至少必須為 8 碼。"</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"請重新輸入正確的 PUK 碼。如果錯誤次數過多，SIM 卡將會遭到永久停用。"</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"PIN 碼不符"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"解鎖圖案畫錯次數過多"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"你已輸入錯誤的 PIN 碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"你已輸入錯誤的密碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"你已畫出錯誤的解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"你嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次機會。如果失敗次數超過限制，系統會重設這台平板電腦，其中的所有資料也會一併遭到刪除。"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"你嘗試解鎖手機已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次機會。如果失敗次數超過限制，系統會重設這支手機，其中的所有資料也會一併遭到刪除。"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"你嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統會重設這台平板電腦，其中的所有資料也會一併遭到刪除。"</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"你嘗試解鎖手機已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統會重設這支手機，其中的所有資料也會一併遭到刪除。"</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"你嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次機會。如果失敗次數超過限制，這位使用者將遭到移除，所有相關的使用者資料也會一併遭到刪除。"</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"你嘗試解鎖手機已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次機會。如果失敗次數超過限制，這位使用者將遭到移除，所有相關的使用者資料也會一併遭到刪除。"</string>
     <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
     <skip />
     <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
@@ -102,10 +93,6 @@
     <skip />
     <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
     <skip />
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"你嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。你的工作資料夾將遭到移除，所有設定檔資料也會一併遭到刪除。"</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"你嘗試解鎖手機已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。你的工作資料夾將遭到移除，所有設定檔資料也會一併遭到刪除。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"你的解鎖圖案已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次機會。如果失敗次數超過限制，系統就會要求你透過電子郵件帳戶解鎖平板電腦。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"你的解鎖圖案已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次機會。如果失敗次數超過限制，系統就會要求你透過電子郵件帳戶解鎖手機。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM 卡的 PIN 碼輸入錯誤，你現在必須請電信業者為裝置解鎖。"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="other">SIM 卡的 PIN 碼輸入錯誤，你還可以再試 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>

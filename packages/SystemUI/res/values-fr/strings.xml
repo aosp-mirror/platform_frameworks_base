@@ -958,6 +958,4 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigation système mise à jour. Pour apporter des modifications, accédez aux paramètres."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Accédez aux paramètres pour mettre à jour la navigation système"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Mode Veille imminent"</string>
-    <string name="inattentive_sleep_warning_message" product="tv" msgid="6017523991455860482">"L\'appareil Android TV va bientôt passer en mode Veille. Appuyez sur un bouton pour qu\'il reste allumé."</string>
-    <string name="inattentive_sleep_warning_message" product="default" msgid="4866963937818527643">"L\'appareil va bientôt passer en mode Veille. Appuyez dessus pour qu\'il reste allumé."</string>
 </resources>

@@ -978,6 +978,4 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"تم تحديث التنقل داخل النظام. لإجراء التغييرات، يُرجى الانتقال إلى \"الإعدادات\"."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"الانتقال إلى \"الإعدادات\" لتعديل التنقل داخل النظام"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"وضع الاستعداد"</string>
-    <string name="inattentive_sleep_warning_message" product="tv" msgid="6017523991455860482">"‏سيتم إيقاف جهاز Android TV قريبًا، اضغط على أحد الأزرار لمواصلة تشغيله."</string>
-    <string name="inattentive_sleep_warning_message" product="default" msgid="4866963937818527643">"سيتم إيقاف الجهاز قريبًا، اضغط لمواصلة تشغيله."</string>
 </resources>

@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"നെറ്റ്‌വർക്ക് ലോക്കുചെയ്‌തു"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"സിം കാർഡില്ല"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"ടാബ്‌ലെറ്റിൽ സിം കാർഡൊന്നുമില്ല."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"ഫോണിൽ സിം കാർഡൊന്നുമില്ല."</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"ഒരു ‌സിം കാർഡ് ഇടുക."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"സിം കാർഡ് കാണുന്നില്ല, അല്ലെങ്കിൽ റീഡുചെയ്യാനായില്ല. ഒരു സിം കാർഡ് ഇടുക."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"ഉപയോഗയോഗ്യമല്ലാത്ത സിം കാർഡ്."</string>
@@ -83,17 +81,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"4 മുതൽ 8 വരെ അക്കങ്ങളുള്ള ഒരു പിൻ ടൈപ്പുചെയ്യുക."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK കോഡിൽ 8 അല്ലെങ്കിൽ അതിലധികം സംഖ്യകൾ ഉണ്ടായിരിക്കണം."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"ശരിയായ PUK കോഡ് വീണ്ടും നൽകുക. ആവർത്തിച്ചുള്ള ശ്രമങ്ങൾ സിം ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കും."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"പിൻ കോഡുകൾ പൊരുത്തപ്പെടുന്നില്ല"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"വളരെയധികം പാറ്റേൺ ശ്രമങ്ങൾ"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ പിൻ ‌തെറ്റായി ‌ടൈപ്പുചെയ്തു. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> സെക്കന്റിനു‌ശേഷം വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ നിങ്ങളുടെ പാസ്‌വേഡ് ‌തെറ്റായി ‌ടൈപ്പുചെയ്തു. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> സെക്കന്റിനു‌ശേഷം വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ അൺലോക്ക് പാറ്റേൺ ‌തെറ്റായി ‌വരച്ചു. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> സെക്കന്റിനു‌ശേഷം വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ, ഈ ടാബ്‌ലെറ്റ് ‌റീസെറ്റുചെയ്യപ്പെടുകയും, അതുവഴി അതിലെ എല്ലാ ‌ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി ഫോൺ അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ ഈ ഫോൺ റീസെറ്റുചെയ്യപ്പെടുകയും, അതുവഴി അതിലെ എല്ലാ ‌ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"നിങ്ങൾ <xliff:g id="NUMBER">%d</xliff:g> തവണ തെറ്റായി ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. ഈ ഫോൺ റീസെറ്റുചെയ്യപ്പെടുകയും, അതുവഴി അതിലെ എല്ലാ ‌ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"നിങ്ങൾ <xliff:g id="NUMBER">%d</xliff:g> തവണ തെറ്റായി ഫോൺ അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. ഈ ഫോൺ റീസെറ്റുചെയ്യപ്പെടുകയും, അതുവഴി അതിലെ എല്ലാ ‌ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ ഈ ഉപയോക്താവിനെ ‌നീക്കം ചെയ്യുകയും, അതുവഴി ‌ഉപയോക്താവിന്റെ എല്ലാ ‌ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി ഫോൺ അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ ഈ ഉപയോക്താവിനെ ‌നീക്കം ചെയ്യുകയും, അതുവഴി ‌ഉപയോക്താവിന്റെ എല്ലാ ‌ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
     <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
     <skip />
     <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
@@ -102,10 +93,6 @@
     <skip />
     <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
     <skip />
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"നിങ്ങൾ <xliff:g id="NUMBER">%d</xliff:g> തവണ തെറ്റായി ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. ഔദ്യോഗിക പ്രൊഫൈൽ നീക്കംചെയ്യപ്പെടുകയും, അതുവഴി എല്ലാ പ്രൊഫൈൽ ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"നിങ്ങൾ <xliff:g id="NUMBER">%d</xliff:g> തവണ തെറ്റായി ഫോൺ അൺലോക്കുചെയ്യാൻ ശ്രമിച്ചു. ഔദ്യോഗിക പ്രൊഫൈൽ നീക്കംചെയ്യപ്പെടുകയും, അതുവഴി എല്ലാ പ്രൊഫൈൽ ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി അൺലോക്ക് പാറ്റേൺ വരച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ, ഒരു ഇമെയിൽ അക്കൗണ്ടുപയോഗിച്ച് ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> സെക്കന്റ് കഴിഞ്ഞ് വീണ്ടും ‌ശ്രമിക്കുക."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി അൺലോക്ക് പാറ്റേൺ വരച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ, ഒരു ഇമെയിൽ അക്കൗണ്ടുപയോഗിച്ച് ഫോൺ അൺലോക്കുചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> സെക്കന്റ് കഴിഞ്ഞ് വീണ്ടും ‌ശ്രമിക്കുക."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"സിം പിൻ കോഡ് തെറ്റാണ്, നിങ്ങളുടെ ഉപകരണം അൺലോക്കുചെയ്യാൻ ഇനി നിങ്ങളുടെ കാരിയറുമായി ബന്ധപ്പെടണം."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="other">സിം പിൻ കോഡ് തെറ്റാണ്, നിങ്ങൾക്ക് <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു.</item>

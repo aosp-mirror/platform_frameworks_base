@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Presiona Menú para desbloquear."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Bloqueada para la red"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Sin tarjeta SIM"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"No hay tarjeta SIM en la tablet."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"No hay tarjeta SIM en el teléfono."</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Inserta una tarjeta SIM."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"Falta la tarjeta SIM o no se puede leer. Introduce una tarjeta SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Tarjeta SIM inutilizable"</string>
@@ -83,17 +81,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Escribe un PIN que tenga entre 4 y 8 números."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"El código PUK debe tener al menos 8 números."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Vuelve a ingresar el código PUK correcto. Si ingresas un código incorrecto varias veces, se inhabilitará la tarjeta SIM."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"Los códigos PIN no coinciden"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Demasiados intentos incorrectos para el ingreso del patrón"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Escribiste tu PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de manera incorrecta. \n\nVuelve a intentarlo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Escribiste tu contraseña <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de manera incorrecta. \n\nVuelve a intentarlo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Dibujaste tu patrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de manera incorrecta. \n\nVuelve a intentarlo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"Intentaste desbloquear la tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de manera incorrecta. Después de <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos más, se restablecerá la tablet, lo que borrará todos los datos."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"Intentaste desbloquear el teléfono <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de manera incorrecta. Después de <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos más, se restablecerá el teléfono, lo que borrará todos los datos."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"Intentaste desbloquear la tablet <xliff:g id="NUMBER">%d</xliff:g> veces de manera incorrecta. Se restablecerá la tablet, lo que borrará todos los datos."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"Intentaste desbloquear el teléfono <xliff:g id="NUMBER">%d</xliff:g> veces de manera incorrecta. Se restablecerá el teléfono, lo que borrará todos los datos."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"Intentaste desbloquear la tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de manera incorrecta. Después de <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos más, se quitará este usuario, lo que borrará todos los datos asociados."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"Intentaste desbloquear el teléfono <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de manera incorrecta. Después de <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos más, se quitará este usuario, lo que borrará todos los datos asociados."</string>
     <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
     <skip />
     <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
@@ -102,10 +93,6 @@
     <skip />
     <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
     <skip />
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"Intentaste desbloquear la tablet <xliff:g id="NUMBER">%d</xliff:g> veces de manera incorrecta. Se quitará el perfil de trabajo, lo que borrará todos los datos asociados."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"Intentaste desbloquear el teléfono <xliff:g id="NUMBER">%d</xliff:g> veces de manera incorrecta. Se quitará el perfil de trabajo, lo que borrará todos los datos asociados."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees tu tablet mediante una cuenta de correo electrónico.\n\n Vuelve a intentarlo en <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees tu dispositivo mediante una cuenta de correo electrónico.\n\n Vuelve a intentarlo en <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"El código PIN de la tarjeta SIM es incorrecto. Debes comunicarte con tu proveedor para desbloquear el dispositivo."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="other">El código PIN de la tarjeta SIM es incorrecto. Te quedan <xliff:g id="NUMBER_1">%d</xliff:g> intentos más.</item>
