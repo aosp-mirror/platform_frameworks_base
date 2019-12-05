@@ -164,23 +164,50 @@ public class LocationManager {
      * Broadcast intent action when the set of enabled location providers changes. To check the
      * status of a provider, use {@link #isProviderEnabled(String)}. From Android Q and above, will
      * include a string intent extra, {@link #EXTRA_PROVIDER_NAME}, with the name of the provider
-     * whose state has changed.
+     * whose state has changed. From Android R and above, will include a boolean intent extra,
+     * {@link #EXTRA_PROVIDER_ENABLED}, with the enabled state of the provider.
      *
      * @see #EXTRA_PROVIDER_NAME
+     * @see #EXTRA_PROVIDER_ENABLED
+     * @see #isProviderEnabled(String)
      */
     public static final String PROVIDERS_CHANGED_ACTION = "android.location.PROVIDERS_CHANGED";
 
     /**
      * Intent extra included with {@link #PROVIDERS_CHANGED_ACTION} broadcasts, containing the name
-     * of the location provider that has changed, to be used with location provider APIs.
+     * of the location provider that has changed.
+     *
+     * @see #PROVIDERS_CHANGED_ACTION
+     * @see #EXTRA_PROVIDER_ENABLED
      */
     public static final String EXTRA_PROVIDER_NAME = "android.location.extra.PROVIDER_NAME";
 
     /**
-     * Broadcast intent action when the device location mode changes. To check the location mode,
-     * use {@link #isLocationEnabled()}.
+     * Intent extra included with {@link #PROVIDERS_CHANGED_ACTION} broadcasts, containing the
+     * boolean enabled state of the location provider that has changed.
+     *
+     * @see #PROVIDERS_CHANGED_ACTION
+     * @see #EXTRA_PROVIDER_NAME
+     */
+    public static final String EXTRA_PROVIDER_ENABLED = "android.location.extra.PROVIDER_ENABLED";
+
+    /**
+     * Broadcast intent action when the device location enabled state changes. From Android R and
+     * above, will include a boolean intent extra, {@link #EXTRA_LOCATION_ENABLED}, with the enabled
+     * state of location.
+     *
+     * @see #EXTRA_LOCATION_ENABLED
+     * @see #isLocationEnabled()
      */
     public static final String MODE_CHANGED_ACTION = "android.location.MODE_CHANGED";
+
+    /**
+     * Intent extra included with {@link #MODE_CHANGED_ACTION} broadcasts, containing the boolean
+     * enabled state of location.
+     *
+     * @see #MODE_CHANGED_ACTION
+     */
+    public static final String EXTRA_LOCATION_ENABLED = "android.location.extra.LOCATION_ENABLED";
 
     /**
      * Broadcast intent action indicating that a high power location requests
