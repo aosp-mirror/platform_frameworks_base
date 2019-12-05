@@ -726,7 +726,7 @@ public class Activity extends ContextThemeWrapper
         implements LayoutInflater.Factory2,
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks2,
-        Window.OnWindowDismissedCallback, WindowControllerCallback,
+        Window.OnWindowDismissedCallback,
         AutofillManager.AutofillClient, ContentCaptureManager.ContentCaptureClient {
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
@@ -937,6 +937,62 @@ public class Activity extends ContextThemeWrapper
     /** Track last dispatched multi-window and PiP mode to client, internal debug purpose **/
     private Boolean mLastDispatchedIsInMultiWindowMode;
     private Boolean mLastDispatchedIsInPictureInPictureMode;
+
+    private final WindowControllerCallback mWindowControllerCallback =
+            new WindowControllerCallback() {
+        /**
+         * Moves the activity between {@link WindowConfiguration#WINDOWING_MODE_FREEFORM} windowing
+         * mode and {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}.
+         *
+         * @hide
+         */
+        @Override
+        public void toggleFreeformWindowingMode() throws RemoteException {
+            ActivityTaskManager.getService().toggleFreeformWindowingMode(mToken);
+        }
+
+        /**
+         * Puts the activity in picture-in-picture mode if the activity supports.
+         * @see android.R.attr#supportsPictureInPicture
+         * @hide
+         */
+        @Override
+        public void enterPictureInPictureModeIfPossible() {
+            if (mActivityInfo.supportsPictureInPicture()) {
+                enterPictureInPictureMode();
+            }
+        }
+
+        @Override
+        public boolean isTaskRoot() {
+            try {
+                return ActivityTaskManager.getService().getTaskForActivity(mToken, true) >= 0;
+            } catch (RemoteException e) {
+                return false;
+            }
+        }
+
+        /**
+         * Update the forced status bar color.
+         * @hide
+         */
+        @Override
+        public void updateStatusBarColor(int color) {
+            mTaskDescription.setStatusBarColor(color);
+            setTaskDescription(mTaskDescription);
+        }
+
+        /**
+         * Update the forced navigation bar color.
+         * @hide
+         */
+        @Override
+        public void updateNavigationBarColor(int color) {
+            mTaskDescription.setNavigationBarColor(color);
+            setTaskDescription(mTaskDescription);
+        }
+
+    };
 
     private static native String getDlWarning();
 
@@ -3915,49 +3971,6 @@ public class Activity extends ContextThemeWrapper
 
 
     /**
-     * Moves the activity between {@link WindowConfiguration#WINDOWING_MODE_FREEFORM} windowing mode
-     * and {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}.
-     *
-     * @hide
-     */
-    @Override
-    public void toggleFreeformWindowingMode() throws RemoteException {
-        ActivityTaskManager.getService().toggleFreeformWindowingMode(mToken);
-    }
-
-    /**
-     * Update the forced status bar color.
-     * @hide
-     */
-    @Override
-    public void updateStatusBarColor(int color) {
-        mTaskDescription.setStatusBarColor(color);
-        setTaskDescription(mTaskDescription);
-    }
-
-    /**
-     * Update the forced navigation bar color.
-     * @hide
-     */
-    @Override
-    public void updateNavigationBarColor(int color) {
-        mTaskDescription.setNavigationBarColor(color);
-        setTaskDescription(mTaskDescription);
-    }
-
-    /**
-     * Puts the activity in picture-in-picture mode if the activity supports.
-     * @see android.R.attr#supportsPictureInPicture
-     * @hide
-     */
-    @Override
-    public void enterPictureInPictureModeIfPossible() {
-        if (mActivityInfo.supportsPictureInPicture()) {
-            enterPictureInPictureMode();
-        }
-    }
-
-    /**
      * Called to process key events.  You can override this to intercept all
      * key events before they are dispatched to the window.  Be sure to call
      * this implementation for key events that should be handled normally.
@@ -6603,13 +6616,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @return True if this is the root activity, else false.
      */
-    @Override
     public boolean isTaskRoot() {
-        try {
-            return ActivityTaskManager.getService().getTaskForActivity(mToken, true) >= 0;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mWindowControllerCallback.isTaskRoot();
     }
 
     /**
@@ -7801,7 +7809,7 @@ public class Activity extends ContextThemeWrapper
         mFragments.attachHost(null /*parent*/);
 
         mWindow = new PhoneWindow(this, window, activityConfigCallback);
-        mWindow.setWindowControllerCallback(this);
+        mWindow.setWindowControllerCallback(mWindowControllerCallback);
         mWindow.setCallback(this);
         mWindow.setOnWindowDismissedCallback(this);
         mWindow.getLayoutInflater().setPrivateFactory(this);
