@@ -17,14 +17,13 @@
 package com.android.systemui.statusbar;
 
 import android.annotation.NonNull;
-import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 
-import com.android.systemui.dagger.qualifiers.BgHandler;
+import com.android.systemui.dagger.qualifiers.Background;
 
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -49,10 +48,10 @@ public class FeatureFlags {
     private final Map<String, Boolean> mCachedDeviceConfigFlags = new ArrayMap<>();
 
     @Inject
-    public FeatureFlags(@BgHandler Handler bgHandler) {
+    public FeatureFlags(@Background Executor executor) {
         DeviceConfig.addOnPropertiesChangedListener(
                 "systemui",
-                new HandlerExecutor(bgHandler),
+                executor,
                 this::onPropertiesChanged);
     }
 
