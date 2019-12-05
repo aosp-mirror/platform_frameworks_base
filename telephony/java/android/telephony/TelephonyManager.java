@@ -11893,6 +11893,32 @@ public class TelephonyManager {
     }
 
     /**
+     * Get the calling application status about carrier privileges for the subscription created
+     * in TelephonyManager. Used by Telephony Module for permission checking.
+     *
+     * @param uid Uid to check.
+     * @return any value of {@link #CARRIER_PRIVILEGE_STATUS_HAS_ACCESS},
+     *         {@link #CARRIER_PRIVILEGE_STATUS_NO_ACCESS},
+     *         {@link #CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED}, or
+     *         {@link #CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES}
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public int getCarrierPrivilegeStatus(int uid) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getCarrierPrivilegeStatusForUid(getSubId(), uid);
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getCarrierPrivilegeStatus RemoteException", ex);
+        }
+        return TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
+    }
+
+    /**
      * Return whether data is enabled for certain APN type. This will tell if framework will accept
      * corresponding network requests on a subId.
      *

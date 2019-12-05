@@ -1313,7 +1313,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // only CarrierService with carrier privilege rule should have the permission
         int[] subIds = Arrays.stream(SubscriptionManager.from(mContext)
                     .getActiveSubscriptionIdList(false))
-                    .filter(i -> TelephonyPermissions.checkCarrierPrivilegeForSubId(i)).toArray();
+                    .filter(i -> TelephonyPermissions.checkCarrierPrivilegeForSubId(mContext,
+                            i)).toArray();
         if (ArrayUtils.isEmpty(subIds)) {
             loge("notifyCarrierNetworkChange without carrier privilege");
             // the active subId does not have carrier privilege.
@@ -2328,7 +2329,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
 
-        TelephonyPermissions.enforceCallingOrSelfCarrierPrivilege(
+        TelephonyPermissions.enforceCallingOrSelfCarrierPrivilege(mContext,
                 SubscriptionManager.getDefaultSubscriptionId(), method);
     }
 
