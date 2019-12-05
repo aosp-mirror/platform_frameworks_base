@@ -222,7 +222,8 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState appWindow = createWindow(null, TYPE_APPLICATION, "appWindow");
         final WindowState imeWindow = createWindow(null, TYPE_INPUT_METHOD, "imeWindow");
 
-        // Setting FLAG_NOT_FOCUSABLE prevents the window from being an IME target.
+        // Setting FLAG_NOT_FOCUSABLE without FLAG_ALT_FOCUSABLE_IM prevents the window from being
+        // an IME target.
         appWindow.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
         imeWindow.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
 
@@ -230,7 +231,7 @@ public class WindowStateTests extends WindowTestsBase {
         appWindow.setHasSurface(true);
         imeWindow.setHasSurface(true);
 
-        // Windows with FLAG_NOT_FOCUSABLE can't be IME targets
+        // Windows without flags (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM) can't be IME targets
         assertFalse(appWindow.canBeImeTarget());
         assertFalse(imeWindow.canBeImeTarget());
 
@@ -238,16 +239,10 @@ public class WindowStateTests extends WindowTestsBase {
         appWindow.mAttrs.flags |= (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM);
         imeWindow.mAttrs.flags |= (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM);
 
-        // Visible app window with flags FLAG_NOT_FOCUSABLE or FLAG_ALT_FOCUSABLE_IM can't be IME
-        // target while an IME window can never be an IME target regardless of its visibility
-        // or flags.
-        assertFalse(appWindow.canBeImeTarget());
-        assertFalse(imeWindow.canBeImeTarget());
-
-        appWindow.mAttrs.flags &= ~FLAG_ALT_FOCUSABLE_IM;
-        assertFalse(appWindow.canBeImeTarget());
-        appWindow.mAttrs.flags &= ~FLAG_NOT_FOCUSABLE;
+        // Visible app window with flags can be IME target while an IME window can never be an IME
+        // target regardless of its visibility or flags.
         assertTrue(appWindow.canBeImeTarget());
+        assertFalse(imeWindow.canBeImeTarget());
 
         // Make windows invisible
         appWindow.hideLw(false /* doAnimation */);

@@ -35,6 +35,7 @@ import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_B
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
@@ -2157,12 +2158,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        // Can be an IME target only if:
-        // 1. FLAG_NOT_FOCUSABLE is not set
-        // 2. FLAG_ALT_FOCUSABLE_IM is not set
-        // 3. not a starting window.
-        if (!WindowManager.LayoutParams.mayUseInputMethod(mAttrs.flags)
-                || mAttrs.type == TYPE_APPLICATION_STARTING) {
+        final int fl = mAttrs.flags & (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM);
+        final int type = mAttrs.type;
+
+        // Can only be an IME target if both FLAG_NOT_FOCUSABLE and FLAG_ALT_FOCUSABLE_IM are set or
+        // both are cleared...and not a starting window.
+        if (fl != 0 && fl != (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM)
+                && type != TYPE_APPLICATION_STARTING) {
             return false;
         }
 
