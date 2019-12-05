@@ -54,6 +54,7 @@ public final class ParcelableConnection implements Parcelable {
     private final Bundle mExtras;
     private String mParentCallId;
     private @Call.Details.CallDirection int mCallDirection;
+    private @Connection.VerificationStatus int mCallerNumberVerificationStatus;
 
     /** @hide */
     public ParcelableConnection(
@@ -77,12 +78,13 @@ public final class ParcelableConnection implements Parcelable {
             List<String> conferenceableConnectionIds,
             Bundle extras,
             String parentCallId,
-            @Call.Details.CallDirection int callDirection) {
+            @Call.Details.CallDirection int callDirection,
+            @Connection.VerificationStatus int callerNumberVerificationStatus) {
         this(phoneAccount, state, capabilities, properties, supportedAudioRoutes, address,
                 addressPresentation, callerDisplayName, callerDisplayNamePresentation,
                 videoProvider, videoState, ringbackRequested, isVoipAudioMode, connectTimeMillis,
                 connectElapsedTimeMillis, statusHints, disconnectCause, conferenceableConnectionIds,
-                extras);
+                extras, callerNumberVerificationStatus);
         mParentCallId = parentCallId;
         mCallDirection = callDirection;
     }
@@ -107,7 +109,8 @@ public final class ParcelableConnection implements Parcelable {
             StatusHints statusHints,
             DisconnectCause disconnectCause,
             List<String> conferenceableConnectionIds,
-            Bundle extras) {
+            Bundle extras,
+            @Connection.VerificationStatus int callerNumberVerificationStatus) {
         mPhoneAccount = phoneAccount;
         mState = state;
         mConnectionCapabilities = capabilities;
@@ -129,6 +132,7 @@ public final class ParcelableConnection implements Parcelable {
         mExtras = extras;
         mParentCallId = null;
         mCallDirection = Call.Details.DIRECTION_UNKNOWN;
+        mCallerNumberVerificationStatus = callerNumberVerificationStatus;
     }
 
     public PhoneAccountHandle getPhoneAccount() {
@@ -227,6 +231,10 @@ public final class ParcelableConnection implements Parcelable {
         return mCallDirection;
     }
 
+    public @Connection.VerificationStatus int getCallerNumberVerificationStatus() {
+        return mCallerNumberVerificationStatus;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder()
@@ -276,6 +284,7 @@ public final class ParcelableConnection implements Parcelable {
             String parentCallId = source.readString();
             long connectElapsedTimeMillis = source.readLong();
             int callDirection = source.readInt();
+            int callerNumberVerificationStatus = source.readInt();
 
             return new ParcelableConnection(
                     phoneAccount,
@@ -298,7 +307,8 @@ public final class ParcelableConnection implements Parcelable {
                     conferenceableConnectionIds,
                     extras,
                     parentCallId,
-                    callDirection);
+                    callDirection,
+                    callerNumberVerificationStatus);
         }
 
         @Override
@@ -338,5 +348,6 @@ public final class ParcelableConnection implements Parcelable {
         destination.writeString(mParentCallId);
         destination.writeLong(mConnectElapsedTimeMillis);
         destination.writeInt(mCallDirection);
+        destination.writeInt(mCallerNumberVerificationStatus);
     }
 }
