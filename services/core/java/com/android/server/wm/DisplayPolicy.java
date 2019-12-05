@@ -2215,9 +2215,22 @@ public class DisplayPolicy {
     }
 
     private void offsetInputMethodWindowLw(WindowState win, DisplayFrames displayFrames) {
+        final int rotation = displayFrames.mRotation;
+        final int navBarPosition = navigationBarPosition(displayFrames.mDisplayWidth,
+                displayFrames.mDisplayHeight, rotation);
+
         int top = Math.max(win.getDisplayFrameLw().top, win.getContentFrameLw().top);
         top += win.getGivenContentInsetsLw().top;
         displayFrames.mContent.bottom = Math.min(displayFrames.mContent.bottom, top);
+        if (navBarPosition == NAV_BAR_BOTTOM) {
+            // Always account for the nav bar frame height on the bottom since in all navigation
+            // modes we make room to show the dismiss-ime button, even if the IME does not report
+            // insets (ie. when floating)
+            final int uimode = mService.mPolicy.getUiMode();
+            final int navFrameHeight = getNavigationBarFrameHeight(rotation, uimode);
+            displayFrames.mContent.bottom = Math.min(displayFrames.mContent.bottom,
+                    displayFrames.mUnrestricted.bottom - navFrameHeight);
+        }
         displayFrames.mVoiceContent.bottom = Math.min(displayFrames.mVoiceContent.bottom, top);
         top = win.getVisibleFrameLw().top;
         top += win.getGivenVisibleInsetsLw().top;
