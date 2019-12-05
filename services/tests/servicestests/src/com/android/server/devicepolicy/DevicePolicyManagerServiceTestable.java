@@ -23,6 +23,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.backup.IBackupManager;
 import android.app.timedetector.TimeDetector;
+import android.app.timezonedetector.TimeZoneDetector;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.content.Intent;
@@ -232,6 +233,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         TimeDetector getTimeDetector() {
             return services.timeDetector;
+        }
+
+        @Override
+        TimeZoneDetector getTimeZoneDetector() {
+            return services.timeZoneDetector;
         }
 
         @Override

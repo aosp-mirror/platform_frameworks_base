@@ -139,6 +139,8 @@ import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TimeDetector;
+import android.app.timezonedetector.ManualTimeZoneSuggestion;
+import android.app.timezonedetector.TimeZoneDetector;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.compat.annotation.ChangeId;
@@ -1960,6 +1962,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         TimeDetector getTimeDetector() {
             return mContext.getSystemService(TimeDetector.class);
+        }
+
+        TimeZoneDetector getTimeZoneDetector() {
+            return mContext.getSystemService(TimeZoneDetector.class);
         }
 
         ConnectivityManager getConnectivityManager() {
@@ -11123,8 +11129,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) == 1) {
             return false;
         }
+        ManualTimeZoneSuggestion manualTimeZoneSuggestion =
+                TimeZoneDetector.createManualTimeZoneSuggestion(
+                        timeZone, "DevicePolicyManagerService: setTimeZone");
         mInjector.binderWithCleanCallingIdentity(() ->
-            mInjector.getAlarmManager().setTimeZone(timeZone));
+                mInjector.getTimeZoneDetector().suggestManualTimeZone(manualTimeZoneSuggestion));
         return true;
     }
 
