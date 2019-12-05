@@ -61,6 +61,7 @@ import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiTvClient;
 import android.hardware.input.InputManager;
 import android.hardware.usb.UsbManager;
+import android.hidl.manager.V1_0.IServiceManager;
 import android.media.AudioAttributes;
 import android.media.AudioFocusInfo;
 import android.media.AudioFocusRequest;
@@ -148,10 +149,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -721,6 +724,8 @@ public class AudioService extends IAudioService.Stub
 
         AudioSystem.setErrorCallback(mAudioSystemCallback);
 
+        updateAudioHalPids();
+
         boolean cameraSoundForced = readCameraSoundForced();
         mCameraSoundForced = new Boolean(cameraSoundForced);
         sendMsg(mAudioHandler,
@@ -948,6 +953,8 @@ public class AudioService extends IAudioService.Stub
             return;
         }
         Log.e(TAG, "Audioserver started.");
+
+        updateAudioHalPids();
 
         // indicate to audio HAL that we start the reconfiguration phase after a media
         // server crash
@@ -7288,6 +7295,41 @@ public class AudioService extends IAudioService.Stub
     public boolean isAudioServerRunning() {
         checkMonitorAudioServerStatePermission();
         return (AudioSystem.checkAudioFlinger() == AudioSystem.AUDIO_STATUS_OK);
+    }
+
+    //======================
+    // Audio HAL process dump
+    //======================
+
+    private static final String AUDIO_HAL_SERVICE_PREFIX = "android.hardware.audio";
+
+    private Set<Integer> getAudioHalPids() {
+        try {
+            IServiceManager serviceManager = IServiceManager.getService();
+            ArrayList<IServiceManager.InstanceDebugInfo> dump =
+                    serviceManager.debugDump();
+            HashSet<Integer> pids = new HashSet<>();
+            for (IServiceManager.InstanceDebugInfo info : dump) {
+                if (info.pid != IServiceManager.PidConstant.NO_PID
+                        && info.interfaceName != null
+                        && info.interfaceName.startsWith(AUDIO_HAL_SERVICE_PREFIX)) {
+                    pids.add(info.pid);
+                }
+            }
+            return pids;
+        } catch (RemoteException e) {
+            return new HashSet<Integer>();
+        }
+    }
+
+    private void updateAudioHalPids() {
+        Set<Integer> pidsSet = getAudioHalPids();
+        if (pidsSet.isEmpty()) {
+            Slog.w(TAG, "Could not retrieve audio HAL service pids");
+            return;
+        }
+        int[] pidsArray = pidsSet.stream().mapToInt(Integer::intValue).toArray();
+        AudioSystem.setAudioHalPids(pidsArray);
     }
 
     //======================
