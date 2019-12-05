@@ -77,14 +77,6 @@ public interface ShadeController {
     void goToKeyguard();
 
     /**
-     * When the keyguard is showing and covered by something (bouncer, keyguard activity, etc.) it
-     * is occluded. This is controlled by {@link com.android.server.policy.PhoneWindowManager}
-     *
-     * @return whether the keyguard is currently occluded
-     */
-    boolean isOccluded();
-
-    /**
      * Notify the shade controller that the current user changed
      *
      * @param newUserId userId of the new user
