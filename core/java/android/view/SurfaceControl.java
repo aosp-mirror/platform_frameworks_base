@@ -2657,6 +2657,7 @@ public final class SurfaceControl implements Parcelable {
          * @hide
          */
         public Transaction setMetadata(SurfaceControl sc, int key, Parcel data) {
+            sc.checkNotReleased();
             nativeSetMetadata(mNativeObject, sc.mNativeObject, key, data);
             return this;
         }
