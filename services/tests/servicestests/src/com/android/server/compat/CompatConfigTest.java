@@ -73,36 +73,36 @@ public class CompatConfigTest {
     @Test
     public void testDisabledChangeDisabled() {
         CompatConfig pc = new CompatConfig();
-        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, true));
+        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, true, ""));
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 1))).isFalse();
     }
 
     @Test
     public void testTargetSdkChangeDisabled() {
         CompatConfig pc = new CompatConfig();
-        pc.addChange(new CompatChange(1234L, "MY_CHANGE", 2, false));
+        pc.addChange(new CompatChange(1234L, "MY_CHANGE", 2, false, null));
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 2))).isFalse();
     }
 
     @Test
     public void testTargetSdkChangeEnabled() {
         CompatConfig pc = new CompatConfig();
-        pc.addChange(new CompatChange(1234L, "MY_CHANGE", 2, false));
+        pc.addChange(new CompatChange(1234L, "MY_CHANGE", 2, false, ""));
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 3))).isTrue();
     }
 
     @Test
     public void testDisabledOverrideTargetSdkChange() {
         CompatConfig pc = new CompatConfig();
-        pc.addChange(new CompatChange(1234L, "MY_CHANGE", 2, true));
+        pc.addChange(new CompatChange(1234L, "MY_CHANGE", 2, true, null));
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 3))).isFalse();
     }
 
     @Test
     public void testGetDisabledChanges() {
         CompatConfig pc = new CompatConfig();
-        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, true));
-        pc.addChange(new CompatChange(2345L, "OTHER_CHANGE", -1, false));
+        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, true, null));
+        pc.addChange(new CompatChange(2345L, "OTHER_CHANGE", -1, false, null));
         assertThat(pc.getDisabledChanges(
                 makeAppInfo("com.some.package", 2))).asList().containsExactly(1234L);
     }
@@ -110,9 +110,9 @@ public class CompatConfigTest {
     @Test
     public void testGetDisabledChangesSorted() {
         CompatConfig pc = new CompatConfig();
-        pc.addChange(new CompatChange(1234L, "MY_CHANGE", 2, true));
-        pc.addChange(new CompatChange(123L, "OTHER_CHANGE", 2, true));
-        pc.addChange(new CompatChange(12L, "THIRD_CHANGE", 2, true));
+        pc.addChange(new CompatChange(1234L, "MY_CHANGE", 2, true, null));
+        pc.addChange(new CompatChange(123L, "OTHER_CHANGE", 2, true, null));
+        pc.addChange(new CompatChange(12L, "THIRD_CHANGE", 2, true, null));
         assertThat(pc.getDisabledChanges(
                 makeAppInfo("com.some.package", 2))).asList().containsExactly(12L, 123L, 1234L);
     }
@@ -120,7 +120,7 @@ public class CompatConfigTest {
     @Test
     public void testPackageOverrideEnabled() {
         CompatConfig pc = new CompatConfig();
-        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, true)); // disabled
+        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, true, null)); // disabled
         pc.addOverride(1234L, "com.some.package", true);
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 2))).isTrue();
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.other.package", 2))).isFalse();
@@ -129,7 +129,7 @@ public class CompatConfigTest {
     @Test
     public void testPackageOverrideDisabled() {
         CompatConfig pc = new CompatConfig();
-        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, false));
+        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, false, null));
         pc.addOverride(1234L, "com.some.package", false);
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 2))).isFalse();
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.other.package", 2))).isTrue();
@@ -152,7 +152,7 @@ public class CompatConfigTest {
     @Test
     public void testRemovePackageOverride() {
         CompatConfig pc = new CompatConfig();
-        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, false));
+        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, false, null));
         pc.addOverride(1234L, "com.some.package", false);
         pc.removeOverride(1234L, "com.some.package");
         assertThat(pc.isChangeEnabled(1234L, makeAppInfo("com.some.package", 2))).isTrue();
@@ -161,8 +161,8 @@ public class CompatConfigTest {
     @Test
     public void testLookupChangeId() {
         CompatConfig pc = new CompatConfig();
-        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, false));
-        pc.addChange(new CompatChange(2345L, "ANOTHER_CHANGE", -1, false));
+        pc.addChange(new CompatChange(1234L, "MY_CHANGE", -1, false, null));
+        pc.addChange(new CompatChange(2345L, "ANOTHER_CHANGE", -1, false, null));
         assertThat(pc.lookupChangeId("MY_CHANGE")).isEqualTo(1234L);
     }
 
@@ -174,8 +174,9 @@ public class CompatConfigTest {
 
     @Test
     public void testReadConfig() {
-        Change[] changes = {new Change(1234L, "MY_CHANGE1", false, 2), new Change(1235L,
-                "MY_CHANGE2", true, null), new Change(1236L, "MY_CHANGE3", false, null)};
+        Change[] changes = {new Change(1234L, "MY_CHANGE1", false, 2, null), new Change(1235L,
+                "MY_CHANGE2", true, null, "description"), new Change(1236L, "MY_CHANGE3", false,
+                null, "")};
 
         File dir = createTempDir();
         writeChangesToFile(changes, new File(dir.getPath() + "/platform_compat_config.xml"));
@@ -191,9 +192,9 @@ public class CompatConfigTest {
 
     @Test
     public void testReadConfigMultipleFiles() {
-        Change[] changes1 = {new Change(1234L, "MY_CHANGE1", false, 2)};
-        Change[] changes2 = {new Change(1235L, "MY_CHANGE2", true, null), new Change(1236L,
-                "MY_CHANGE3", false, null)};
+        Change[] changes1 = {new Change(1234L, "MY_CHANGE1", false, 2, null)};
+        Change[] changes2 = {new Change(1235L, "MY_CHANGE2", true, null, ""), new Change(1236L,
+                "MY_CHANGE3", false, null, null)};
 
         File dir = createTempDir();
         writeChangesToFile(changes1,

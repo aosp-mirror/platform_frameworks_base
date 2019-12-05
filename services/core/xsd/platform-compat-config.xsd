@@ -28,6 +28,7 @@
                 <xs:attribute type="xs:string" name="name" use="required"/>
                 <xs:attribute type="xs:boolean" name="disabled"/>
                 <xs:attribute type="xs:int" name="enableAfterTargetSdk"/>
+                <xs:attribute type="xs:string" name="description"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
