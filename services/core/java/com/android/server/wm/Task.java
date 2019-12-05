@@ -968,6 +968,11 @@ class Task extends WindowContainer<WindowContainer> {
         final ActivityStack oldStack = ((ActivityStack) oldParent);
         final ActivityStack newStack = ((ActivityStack) newParent);
 
+        // Task is going to be removed, clean it up before detaching from hierarchy.
+        if (oldParent != null && newParent == null) {
+            cleanUpResourcesForDestroy();
+        }
+
         mStack = newStack;
 
         super.onParentChanged(newParent, oldParent);
@@ -1011,12 +1016,6 @@ class Task extends WindowContainer<WindowContainer> {
             // before we unified Task level. Look into if this can be done in a better place.
             updateOverrideConfigurationFromLaunchBounds();
         }
-
-        // Task is being removed.
-        if (oldParent != null && newParent == null) {
-            cleanUpResourcesForDestroy();
-        }
-
 
         // Update task bounds if needed.
         adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
