@@ -9135,7 +9135,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to get the MAC address of the Wi-Fi device.
+     * Called by device owner, or profile owner on organization-owned device, to get the MAC
+     * address of the Wi-Fi device.
+     *
+     * NOTE: The MAC address returned here should only be used for inventory management and is
+     * not likely to be the MAC address used by the device to connect to Wi-Fi networks: MAC
+     * addresses used for scanning and connecting to Wi-Fi networks are randomized by default.
+     * To get the randomized MAC address used, call
+     * {@link android.net.wifi.WifiConfiguration#getRandomizedMacAddress}.
      *
      * @param admin Which device owner this request is associated with.
      * @return the MAC address of the Wi-Fi device, or null when the information is not available.
