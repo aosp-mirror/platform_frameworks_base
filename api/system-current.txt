@@ -2042,6 +2042,7 @@ package android.content.pm {
     method public boolean getInstallAsInstantApp(boolean);
     method public boolean getInstallAsVirtualPreload();
     method public boolean getRequestDowngrade();
+    method public int getRollbackDataPolicy();
     method @NonNull public java.util.Set<java.lang.String> getWhitelistedRestrictedPermissions();
   }
 
@@ -2050,6 +2051,7 @@ package android.content.pm {
     method @Deprecated public void setAllowDowngrade(boolean);
     method public void setDontKillApp(boolean);
     method public void setEnableRollback(boolean);
+    method public void setEnableRollback(boolean, int);
     method @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS) public void setGrantedRuntimePermissions(String[]);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setIncrementalParams(@NonNull android.content.pm.DataLoaderParams);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setInstallAsApex();

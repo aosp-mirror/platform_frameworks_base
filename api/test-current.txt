@@ -778,11 +778,13 @@ package android.content.pm {
   }
 
   public static class PackageInstaller.SessionInfo implements android.os.Parcelable {
+    method public int getRollbackDataPolicy();
     method @NonNull public java.util.Set<java.lang.String> getWhitelistedRestrictedPermissions();
   }
 
   public static class PackageInstaller.SessionParams implements android.os.Parcelable {
     method public void setEnableRollback(boolean);
+    method public void setEnableRollback(boolean, int);
     method @RequiresPermission("android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS") public void setGrantedRuntimePermissions(String[]);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setInstallAsApex();
     method public void setInstallerPackageName(@Nullable String);
