@@ -240,25 +240,6 @@ public class TelephonyIntents {
      */
     public static final String ACTION_NETWORK_SET_TIME = "android.intent.action.NETWORK_SET_TIME";
 
-
-    /**
-     * Broadcast Action: The timezone was set by the carrier (typically by the NITZ string).
-     * This is a sticky broadcast.
-     * The intent will have the following extra values:</p>
-     * <ul>
-     *   <li><em>time-zone</em> - The java.util.TimeZone.getID() value identifying the new time
-     *          zone.</li>
-     * </ul>
-     *
-     * <p class="note">
-     * Requires the READ_PHONE_STATE permission.
-     *
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     */
-    public static final String ACTION_NETWORK_SET_TIMEZONE
-            = "android.intent.action.NETWORK_SET_TIMEZONE";
-
     /**
      * <p>Broadcast Action: It indicates the Emergency callback mode blocks datacall/sms
      * <p class="note">.
