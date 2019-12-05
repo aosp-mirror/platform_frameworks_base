@@ -61,7 +61,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
@@ -97,10 +96,12 @@ import java.util.Map;
  * Tests for {@link com.android.server.power.PowerManagerService}
  */
 public class PowerManagerServiceTest {
+    private static final String SYSTEM_PROPERTY_QUIESCENT = "ro.boot.quiescent";
+    private static final String SYSTEM_PROPERTY_REBOOT_REASON = "sys.boot.reason";
+
     private static final float PRECISION = 0.001f;
     private static final float BRIGHTNESS_FACTOR = 0.7f;
     private static final boolean BATTERY_SAVER_ENABLED = true;
-    private static final String TEST_LAST_REBOOT_PROPERTY = "test.sys.boot.reason";
 
     @Mock private BatterySaverPolicy mBatterySaverPolicyMock;
     @Mock private LightsManager mLightsManagerMock;
@@ -112,6 +113,7 @@ public class PowerManagerServiceTest {
     @Mock private Notifier mNotifierMock;
     @Mock private WirelessChargerDetector mWirelessChargerDetectorMock;
     @Mock private AmbientDisplayConfiguration mAmbientDisplayConfigurationMock;
+    @Mock private SystemPropertiesWrapper mSystemPropertiesMock;
 
     @Mock
     private InattentiveSleepWarningController mInattentiveSleepWarningControllerMock;
@@ -159,6 +161,7 @@ public class PowerManagerServiceTest {
         when(mBatteryManagerInternalMock.isPowered(anyInt())).thenReturn(false);
         when(mInattentiveSleepWarningControllerMock.isShown()).thenReturn(false);
         when(mDisplayManagerInternalMock.requestPowerState(any(), anyBoolean())).thenReturn(true);
+        when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), anyString())).thenReturn("");
 
         mDisplayPowerRequest = new DisplayPowerRequest();
         addLocalServiceMock(LightsManager.class, mLightsManagerMock);
@@ -218,6 +221,11 @@ public class PowerManagerServiceTest {
             InattentiveSleepWarningController createInattentiveSleepWarningController() {
                 return mInattentiveSleepWarningControllerMock;
             }
+
+            @Override
+            public SystemPropertiesWrapper createSystemPropertiesWrapper() {
+                return mSystemPropertiesMock;
+            }
         });
         return mService;
     }
@@ -228,12 +236,6 @@ public class PowerManagerServiceTest {
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.removeServiceForTest(BatteryManagerInternal.class);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
-
-        Settings.Global.putInt(
-                mContextSpy.getContentResolver(), Settings.Global.THEATER_MODE_ON, 0);
-        setAttentiveTimeout(-1);
-        Settings.Global.putInt(mContextSpy.getContentResolver(),
-                Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
     }
 
     /**
@@ -322,10 +324,10 @@ public class PowerManagerServiceTest {
 
     @Test
     public void testGetLastShutdownReasonInternal() {
+        when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_REBOOT_REASON), any())).thenReturn(
+                "shutdown,thermal");
         createService();
-        SystemProperties.set(TEST_LAST_REBOOT_PROPERTY, "shutdown,thermal");
-        int reason = mService.getLastShutdownReasonInternal(TEST_LAST_REBOOT_PROPERTY);
-        SystemProperties.set(TEST_LAST_REBOOT_PROPERTY, "");
+        int reason = mService.getLastShutdownReasonInternal();
         assertThat(reason).isEqualTo(PowerManager.SHUTDOWN_REASON_THERMAL_SHUTDOWN);
     }
 
