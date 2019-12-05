@@ -2616,11 +2616,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public boolean canReceiveKeys() {
-        return isVisibleOrAdding()
+        return canReceiveKeys(false /* fromUserTouch */);
+    }
+
+    public boolean canReceiveKeys(boolean fromUserTouch) {
+        final boolean canReceiveKeys = isVisibleOrAdding()
                 && (mViewVisibility == View.VISIBLE) && !mRemoveOnExit
                 && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0)
                 && (mActivityRecord == null || mActivityRecord.windowsAreFocusable())
                 && !cantReceiveTouchInput();
+        if (!canReceiveKeys) {
+            return false;
+        }
+        // Do not allow untrusted virtual display to receive keys unless user intentionally
+        // touches the display.
+        return fromUserTouch || getDisplayContent().isOnTop()
+                || !getDisplayContent().isUntrustedVirtualDisplay();
     }
 
     @Override

@@ -202,6 +202,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     @Override
+    boolean isOnTop() {
+        // Considered always on top
+        return true;
+    }
+
+    @Override
     void onChildPositionChanged(WindowContainer child) {
         mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
                 !mWmService.mPerDisplayFocusEnabled /* updateInputWindows */);

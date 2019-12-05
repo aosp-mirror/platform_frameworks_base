@@ -19,6 +19,9 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -112,6 +115,10 @@ public class TaskStackContainersTests extends WindowTestsBase {
 
     @Test
     public void testDisplayPositionWithPinnedStack() {
+        // Make sure the display is system owned display which capable to move the stack to top.
+        spyOn(mDisplayContent);
+        doReturn(false).when(mDisplayContent).isUntrustedVirtualDisplay();
+
         // The display contains pinned stack that was added in {@link #setUp}.
         final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
