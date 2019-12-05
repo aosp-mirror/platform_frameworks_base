@@ -494,7 +494,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
             // Only apps with INSTALL_PACKAGES are allowed to set an installer that is not the
             // caller.
-            if (!requestedInstallerPackageName.equals(installerPackageName)) {
+            if (!TextUtils.equals(requestedInstallerPackageName, installerPackageName)) {
                 if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES)
                         != PackageManager.PERMISSION_GRANTED) {
                     mAppOps.checkPackage(callingUid, requestedInstallerPackageName);

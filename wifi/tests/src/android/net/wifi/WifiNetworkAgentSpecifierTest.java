@@ -208,7 +208,7 @@ public class WifiNetworkAgentSpecifierTest {
         PatternMatcher ssidPattern =
                 new PatternMatcher(TEST_SSID_PATTERN, PatternMatcher.PATTERN_PREFIX);
         Pair<MacAddress, MacAddress> bssidPattern =
-                Pair.create(MacAddress.ALL_ZEROS_ADDRESS, MacAddress.ALL_ZEROS_ADDRESS);
+                Pair.create(WifiManager.ALL_ZEROS_MAC_ADDRESS, WifiManager.ALL_ZEROS_MAC_ADDRESS);
         WifiConfiguration wificonfigurationNetworkSpecifier = new WifiConfiguration();
         wificonfigurationNetworkSpecifier.allowedKeyManagement
                 .set(WifiConfiguration.KeyMgmt.WPA_PSK);
@@ -299,7 +299,7 @@ public class WifiNetworkAgentSpecifierTest {
         PatternMatcher ssidPattern =
                 new PatternMatcher(TEST_SSID_PATTERN, PatternMatcher.PATTERN_PREFIX);
         Pair<MacAddress, MacAddress> bssidPattern =
-                Pair.create(MacAddress.ALL_ZEROS_ADDRESS, MacAddress.ALL_ZEROS_ADDRESS);
+                Pair.create(WifiManager.ALL_ZEROS_MAC_ADDRESS, WifiManager.ALL_ZEROS_MAC_ADDRESS);
         WifiConfiguration wificonfigurationNetworkSpecifier = new WifiConfiguration();
         wificonfigurationNetworkSpecifier.allowedKeyManagement
                 .set(WifiConfiguration.KeyMgmt.WPA_PSK);

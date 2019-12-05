@@ -23,6 +23,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
+import com.android.systemui.statusbar.notification.collection.coordinator.NotifCoordinators;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -37,6 +38,7 @@ import javax.inject.Singleton;
 public class NewNotifPipeline implements Dumpable {
     private final NotifCollection mNotifCollection;
     private final NotifListBuilderImpl mNotifPipeline;
+    private final NotifCoordinators mNotifPluggableCoordinators;
     private final DumpController mDumpController;
 
     private final FakePipelineConsumer mFakePipelineConsumer = new FakePipelineConsumer();
@@ -45,9 +47,11 @@ public class NewNotifPipeline implements Dumpable {
     public NewNotifPipeline(
             NotifCollection notifCollection,
             NotifListBuilderImpl notifPipeline,
+            NotifCoordinators notifCoordinators,
             DumpController dumpController) {
         mNotifCollection = notifCollection;
         mNotifPipeline = notifPipeline;
+        mNotifPluggableCoordinators = notifCoordinators;
         mDumpController = dumpController;
     }
 
@@ -57,6 +61,7 @@ public class NewNotifPipeline implements Dumpable {
         mFakePipelineConsumer.attach(mNotifPipeline);
         mNotifPipeline.attach(mNotifCollection);
         mNotifCollection.attach(notificationService);
+        mNotifPluggableCoordinators.attach(mNotifCollection, mNotifPipeline);
 
         Log.d(TAG, "Notif pipeline initialized");
 
@@ -66,6 +71,7 @@ public class NewNotifPipeline implements Dumpable {
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mFakePipelineConsumer.dump(fd, pw, args);
+        mNotifPluggableCoordinators.dump(fd, pw, args);
     }
 
     private static final String TAG = "NewNotifPipeline";

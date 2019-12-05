@@ -90,6 +90,8 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     private final KeyguardManager mKeyguard;
     private final int mNormalTimeout;
     private final int mHoveringTimeout;
+    private final int mExpNormalTimeout;
+    private final int mExpHoveringTimeout;
 
     private Window mWindow;
     private CustomDialog mDialog;
@@ -176,6 +178,10 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                 R.integer.car_volume_dialog_display_normal_timeout);
         mHoveringTimeout = mContext.getResources().getInteger(
                 R.integer.car_volume_dialog_display_hovering_timeout);
+        mExpNormalTimeout = mContext.getResources().getInteger(
+                R.integer.car_volume_dialog_display_expanded_normal_timeout);
+        mExpHoveringTimeout = mContext.getResources().getInteger(
+                R.integer.car_volume_dialog_display_expanded_hovering_timeout);
     }
 
     /** Sets a {@link CarServiceProvider} which connects to the audio service. */
@@ -290,7 +296,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         mShowing = true;
         clearAllAndSetupDefaultCarVolumeLineItem(mCurrentlyDisplayingGroupId);
         mDialog.show();
-        Events.writeEvent(mContext, Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
+        Events.writeEvent(Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
     }
 
     private void clearAllAndSetupDefaultCarVolumeLineItem(int groupId) {
@@ -313,7 +319,11 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     }
 
     private int computeTimeoutH() {
-        return mHovering ? mHoveringTimeout : mNormalTimeout;
+        if (mExpanded) {
+            return mHovering ? mExpHoveringTimeout : mExpNormalTimeout;
+        } else {
+            return mHovering ? mHoveringTimeout : mNormalTimeout;
+        }
     }
 
     private void dismissH(int reason) {
@@ -349,7 +359,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                 }, DISMISS_DELAY_IN_MILLIS))
                 .start();
 
-        Events.writeEvent(mContext, Events.EVENT_DISMISS_DIALOG, reason);
+        Events.writeEvent(Events.EVENT_DISMISS_DIALOG, reason);
     }
 
     private void loadAudioUsageItems() {
@@ -532,6 +542,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         public void onClick(final View v) {
             mExpandIcon = v;
             toggleDialogExpansion(true);
+            rescheduleTimeoutH();
         }
     }
 

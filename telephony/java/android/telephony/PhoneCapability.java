@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,12 +29,13 @@ import java.util.Objects;
 /**
  * Define capability of a modem group. That is, the capabilities
  * are shared between those modems defined by list of modem IDs.
- * @hide
  */
-public class PhoneCapability implements Parcelable {
+public final class PhoneCapability implements Parcelable {
     // Hardcoded default DSDS capability.
+    /** @hide */
     public static final PhoneCapability DEFAULT_DSDS_CAPABILITY;
     // Hardcoded default Single SIM single standby capability.
+    /** @hide */
     public static final PhoneCapability DEFAULT_SSSS_CAPABILITY;
 
     static {
@@ -48,13 +51,18 @@ public class PhoneCapability implements Parcelable {
         logicalModemList.add(modemInfo1);
         DEFAULT_SSSS_CAPABILITY = new PhoneCapability(1, 1, 0, logicalModemList, false);
     }
-
+    /** @hide */
     public final int maxActiveVoiceCalls;
+    /** @hide */
     public final int maxActiveData;
+    /** @hide */
     public final int max5G;
+    /** @hide */
     public final boolean validationBeforeSwitchSupported;
+    /** @hide */
     public final List<ModemInfo> logicalModemList;
 
+    /** @hide */
     public PhoneCapability(int maxActiveVoiceCalls, int maxActiveData, int max5G,
             List<ModemInfo> logicalModemList, boolean validationBeforeSwitchSupported) {
         this.maxActiveVoiceCalls = maxActiveVoiceCalls;
@@ -116,7 +124,7 @@ public class PhoneCapability implements Parcelable {
     /**
      * {@link Parcelable#writeToParcel}
      */
-    public void writeToParcel(Parcel dest, @Parcelable.WriteFlags int flags) {
+    public void writeToParcel(@NonNull Parcel dest, @Parcelable.WriteFlags int flags) {
         dest.writeInt(maxActiveVoiceCalls);
         dest.writeInt(maxActiveData);
         dest.writeInt(max5G);

@@ -29,7 +29,7 @@ public interface RuleSerializer {
     void serialize(List<Rule> rules, Optional<Integer> formatVersion, OutputStream outputStream)
             throws RuleSerializeException;
 
-    /** Serialize rules to a string. */
-    String serialize(List<Rule> rule, Optional<Integer> formatVersion)
+    /** Serialize rules to a ByteArray. */
+    byte[] serialize(List<Rule> rule, Optional<Integer> formatVersion)
             throws RuleSerializeException;
 }

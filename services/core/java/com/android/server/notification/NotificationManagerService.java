@@ -324,6 +324,7 @@ public class NotificationManagerService extends SystemService {
     static final int VIBRATE_PATTERN_MAXLEN = 8 * 2 + 1; // up to eight bumps
 
     static final int INVALID_UID = -1;
+    static final String ROOT_PKG = "root";
 
     static final boolean ENABLE_BLOCKED_TOASTS = true;
 
@@ -7779,7 +7780,8 @@ public class NotificationManagerService extends SystemService {
 
     protected boolean isUidSystemOrPhone(int uid) {
         final int appid = UserHandle.getAppId(uid);
-        return (appid == Process.SYSTEM_UID || appid == Process.PHONE_UID || uid == 0);
+        return (appid == Process.SYSTEM_UID || appid == Process.PHONE_UID
+                || uid == Process.ROOT_UID);
     }
 
     // TODO: Most calls should probably move to isCallerSystem.
@@ -7788,7 +7790,8 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void checkCallerIsSystemOrShell() {
-        if (Binder.getCallingUid() == Process.SHELL_UID) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
             return;
         }
         checkCallerIsSystem();
@@ -7802,7 +7805,8 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void checkCallerIsSystemOrSystemUiOrShell() {
-        if (Binder.getCallingUid() == Process.SHELL_UID) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
             return;
         }
         if (isCallerSystemOrPhone()) {
@@ -7877,6 +7881,9 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void checkCallerIsSameApp(String pkg, int uid, int userId) {
+        if (uid == Process.ROOT_UID && ROOT_PKG.equals(pkg)) {
+            return;
+        }
         try {
             ApplicationInfo ai = mPackageManager.getApplicationInfo(
                     pkg, 0, userId);

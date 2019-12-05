@@ -56,6 +56,7 @@ import android.view.SurfaceSession;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import java.util.Comparator;
@@ -68,6 +69,7 @@ import java.util.Comparator;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class WindowContainerTests extends WindowTestsBase {
 
     @Test

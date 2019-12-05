@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.Toolbar;
 import android.widget.Toolbar.OnMenuItemClickListener;
 
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -118,7 +119,13 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mTileQueryHelper.setListener(mTileAdapter);
         mRecyclerView.setAdapter(mTileAdapter);
         mTileAdapter.getItemTouchHelper().attachToRecyclerView(mRecyclerView);
-        GridLayoutManager layout = new GridLayoutManager(getContext(), 3);
+        GridLayoutManager layout = new GridLayoutManager(getContext(), 3) {
+            @Override
+            public void onInitializeAccessibilityNodeInfoForItem(RecyclerView.Recycler recycler,
+                    RecyclerView.State state, View host, AccessibilityNodeInfoCompat info) {
+                // Do not read row and column every time it changes.
+            }
+        };
         layout.setSpanSizeLookup(mTileAdapter.getSizeLookup());
         mRecyclerView.setLayoutManager(layout);
         mRecyclerView.addItemDecoration(mTileAdapter.getItemDecoration());

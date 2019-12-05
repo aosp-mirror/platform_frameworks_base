@@ -150,7 +150,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mNotificationManager = (NotificationManager) mContext.getSystemService(
                 Context.NOTIFICATION_SERVICE);
-        Events.writeEvent(mContext, Events.EVENT_COLLECTION_STARTED);
+        Events.writeEvent(Events.EVENT_COLLECTION_STARTED);
         mWorkerThread = new HandlerThread(VolumeDialogControllerImpl.class.getSimpleName());
         mWorkerThread.start();
         mWorker = new W(mWorkerThread.getLooper());
@@ -237,7 +237,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         if (D.BUG) Log.d(TAG, "destroy");
         if (mDestroyed) return;
         mDestroyed = true;
-        Events.writeEvent(mContext, Events.EVENT_COLLECTION_STOPPED);
+        Events.writeEvent(Events.EVENT_COLLECTION_STOPPED);
         mMediaSessions.destroy();
         mObserver.destroy();
         mReceiver.destroy();
@@ -487,7 +487,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             mCallbacks.onShowSilentHint();
         }
         if (changed && fromKey) {
-            Events.writeEvent(mContext, Events.EVENT_KEY, stream, lastAudibleStreamVolume);
+            Events.writeEvent(Events.EVENT_KEY, stream, lastAudibleStreamVolume);
         }
         return changed;
     }
@@ -495,7 +495,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private boolean updateActiveStreamW(int activeStream) {
         if (activeStream == mState.activeStream) return false;
         mState.activeStream = activeStream;
-        Events.writeEvent(mContext, Events.EVENT_ACTIVE_STREAM_CHANGED, activeStream);
+        Events.writeEvent(Events.EVENT_ACTIVE_STREAM_CHANGED, activeStream);
         if (D.BUG) Log.d(TAG, "updateActiveStreamW " + activeStream);
         final int s = activeStream < DYNAMIC_STREAM_START_INDEX ? activeStream : -1;
         if (D.BUG) Log.d(TAG, "forceVolumeControlStream " + s);
@@ -544,7 +544,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         if (ss.level == level) return false;
         ss.level = level;
         if (isLogWorthy(stream)) {
-            Events.writeEvent(mContext, Events.EVENT_LEVEL_CHANGED, stream, level);
+            Events.writeEvent(Events.EVENT_LEVEL_CHANGED, stream, level);
         }
         return true;
     }
@@ -567,7 +567,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         if (ss.muted == muted) return false;
         ss.muted = muted;
         if (isLogWorthy(stream)) {
-            Events.writeEvent(mContext, Events.EVENT_MUTE_CHANGED, stream, muted);
+            Events.writeEvent(Events.EVENT_MUTE_CHANGED, stream, muted);
         }
         if (muted && isRinger(stream)) {
             updateRingerModeInternalW(mAudio.getRingerModeInternal());
@@ -583,7 +583,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         if (Objects.equals(mState.effectsSuppressor, effectsSuppressor)) return false;
         mState.effectsSuppressor = effectsSuppressor;
         mState.effectsSuppressorName = getApplicationName(mContext, mState.effectsSuppressor);
-        Events.writeEvent(mContext, Events.EVENT_SUPPRESSOR_CHANGED, mState.effectsSuppressor,
+        Events.writeEvent(Events.EVENT_SUPPRESSOR_CHANGED, mState.effectsSuppressor,
                 mState.effectsSuppressorName);
         return true;
     }
@@ -607,7 +607,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
         if (mState.zenMode == zen) return false;
         mState.zenMode = zen;
-        Events.writeEvent(mContext, Events.EVENT_ZEN_MODE_CHANGED, zen);
+        Events.writeEvent(Events.EVENT_ZEN_MODE_CHANGED, zen);
         return true;
     }
 
@@ -633,23 +633,23 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mState.disallowMedia = disallowMedia;
         mState.disallowSystem = disallowSystem;
         mState.disallowRinger = disallowRinger;
-        Events.writeEvent(mContext, Events.EVENT_ZEN_CONFIG_CHANGED, "disallowAlarms=" +
-                disallowAlarms + " disallowMedia=" + disallowMedia + " disallowSystem=" +
-                disallowSystem + " disallowRinger=" + disallowRinger);
+        Events.writeEvent(Events.EVENT_ZEN_CONFIG_CHANGED, "disallowAlarms="
+                + disallowAlarms + " disallowMedia=" + disallowMedia + " disallowSystem="
+                + disallowSystem + " disallowRinger=" + disallowRinger);
         return true;
     }
 
     private boolean updateRingerModeExternalW(int rm) {
         if (rm == mState.ringerModeExternal) return false;
         mState.ringerModeExternal = rm;
-        Events.writeEvent(mContext, Events.EVENT_EXTERNAL_RINGER_MODE_CHANGED, rm);
+        Events.writeEvent(Events.EVENT_EXTERNAL_RINGER_MODE_CHANGED, rm);
         return true;
     }
 
     private boolean updateRingerModeInternalW(int rm) {
         if (rm == mState.ringerModeInternal) return false;
         mState.ringerModeInternal = rm;
-        Events.writeEvent(mContext, Events.EVENT_INTERNAL_RINGER_MODE_CHANGED, rm);
+        Events.writeEvent(Events.EVENT_INTERNAL_RINGER_MODE_CHANGED, rm);
 
         if (mState.ringerModeInternal == RINGER_MODE_NORMAL) {
             playTouchFeedback();

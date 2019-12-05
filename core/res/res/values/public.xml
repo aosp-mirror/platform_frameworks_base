@@ -3013,6 +3013,7 @@
     </public-group>
 
     <public-group type="id" first-id="0x0102004a">
+      <public name="accessibilityActionPressAndHold" />
     </public-group>
 
     <public-group type="string" first-id="0x01040025">

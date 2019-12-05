@@ -320,7 +320,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         synchronized (mWm.mGlobalLock) {
             return new ActivityTestsBase.StackBuilder(
                     dc.mWmService.mAtmService.mRootActivityContainer)
-                    .setDisplay(dc.mActivityDisplay)
+                    .setDisplay(dc)
                     .setWindowingMode(windowingMode)
                     .setActivityType(activityType)
                     .setCreateActivity(false)

@@ -27,9 +27,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -57,6 +61,7 @@ class Bubble {
     private final String mGroupId;
     private String mAppName;
     private Drawable mUserBadgedAppIcon;
+    private ShortcutInfo mShortcutInfo;
 
     private boolean mInflated;
     private BubbleView mIconView;
@@ -93,6 +98,14 @@ class Bubble {
         mKey = e.getKey();
         mLastUpdated = e.getSbn().getPostTime();
         mGroupId = groupId(e);
+
+        String shortcutId = e.getSbn().getNotification().getShortcutId();
+        if (BubbleExperimentConfig.useShortcutInfoToBubble(context)
+                && shortcutId != null) {
+            mShortcutInfo = BubbleExperimentConfig.getShortcutInfo(context,
+                    e.getSbn().getPackageName(),
+                    e.getSbn().getUser(), shortcutId);
+        }
 
         PackageManager pm = context.getPackageManager();
         ApplicationInfo info;
@@ -135,6 +148,21 @@ class Bubble {
 
     public Drawable getUserBadgedAppIcon() {
         return mUserBadgedAppIcon;
+    }
+
+    @Nullable
+    public ShortcutInfo getShortcutInfo() {
+        return mShortcutInfo;
+    }
+
+    /**
+     * Whether shortcut information should be used to populate the bubble.
+     * <p>
+     * To populate the activity use {@link LauncherApps#startShortcut(ShortcutInfo, Rect, Bundle)}.
+     * To populate the icon use {@link LauncherApps#getShortcutIconDrawable(ShortcutInfo, int)}.
+     */
+    public boolean usingShortcutInfo() {
+        return BubbleExperimentConfig.isShortcutIntent(getBubbleIntent());
     }
 
     boolean isInflated() {
@@ -293,20 +321,6 @@ class Bubble {
         return (flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
     }
 
-    /**
-     * Whether this bubble was explicitly created by the user via a SysUI affordance.
-     */
-    boolean isUserCreated() {
-        return mIsUserCreated;
-    }
-
-    /**
-     * Set whether this bubble was explicitly created by the user via a SysUI affordance.
-     */
-    void setUserCreated(boolean isUserCreated) {
-        mIsUserCreated = isUserCreated;
-    }
-
     float getDesiredHeight(Context context) {
         Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
         boolean useRes = data.getDesiredHeightResId() != 0;
@@ -331,7 +345,7 @@ class Bubble {
     }
 
     @Nullable
-    PendingIntent getBubbleIntent(Context context) {
+    PendingIntent getBubbleIntent() {
         Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
         if (data != null) {
             return data.getIntent();

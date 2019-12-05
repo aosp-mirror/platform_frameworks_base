@@ -355,8 +355,7 @@ class StorageManagerService extends IStorageManager.Stub
     @GuardedBy("mLock")
     private String mMoveTargetUuid;
 
-    @Nullable
-    private volatile String mMediaStoreAuthorityPackageName = null;
+    private volatile int mMediaStoreAuthorityAppId = -1;
 
     private volatile int mCurrentUserId = UserHandle.USER_SYSTEM;
 
@@ -1557,8 +1556,6 @@ class StorageManagerService extends IStorageManager.Stub
     public StorageManagerService(Context context) {
         sSelf = this;
 
-        updateFusePropFromSettings();
-
         // Snapshot feature flag used for this boot
         SystemProperties.set(StorageManager.PROP_ISOLATED_STORAGE_SNAPSHOT, Boolean.toString(
                 SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, true)));
@@ -1725,7 +1722,7 @@ class StorageManagerService extends IStorageManager.Stub
                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                 UserHandle.getUserId(UserHandle.USER_SYSTEM));
         if (provider != null) {
-            mMediaStoreAuthorityPackageName = provider.packageName;
+            mMediaStoreAuthorityAppId = UserHandle.getAppId(provider.applicationInfo.uid);
         }
 
         try {
@@ -1758,6 +1755,7 @@ class StorageManagerService extends IStorageManager.Stub
     private void bootCompleted() {
         mBootCompleted = true;
         mHandler.obtainMessage(H_BOOT_COMPLETED).sendToTarget();
+        updateFusePropFromSettings();
     }
 
     private void handleBootCompleted() {
@@ -3752,8 +3750,10 @@ class StorageManagerService extends IStorageManager.Stub
                 return Zygote.MOUNT_EXTERNAL_NONE;
             }
 
-            if (mIsFuseEnabled && packageName.equals(mMediaStoreAuthorityPackageName)) {
-                // Determine if caller requires pass_through mount
+            if (mIsFuseEnabled && mMediaStoreAuthorityAppId == UserHandle.getAppId(uid)) {
+                // Determine if caller requires pass_through mount; note that we do this for
+                // all processes that share a UID with MediaProvider; but this is fine, since
+                // those processes anyway share the same rights as MediaProvider.
                 return Zygote.MOUNT_EXTERNAL_PASS_THROUGH;
             }
 

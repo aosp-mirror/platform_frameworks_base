@@ -45,6 +45,7 @@ import android.view.IRecentsAnimationRunner;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.protolog.common.ProtoLog;
+import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
 import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallbacks;
 
 /**
@@ -196,7 +197,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     true /* forceSend */, targetActivity);
         }
 
-        mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunching(mTargetIntent);
+        final LaunchingState launchingState =
+                mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunching(mTargetIntent);
 
         if (mCaller != null) {
             mCaller.setRunningRecentsAnimation(true);
@@ -255,8 +257,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             // we fetch the visible tasks to be controlled by the animation
             mService.mRootActivityContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
 
-            mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunched(START_TASK_TO_FRONT,
-                    targetActivity);
+            mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState,
+                    START_TASK_TO_FRONT, targetActivity);
 
             // Register for stack order changes
             mDefaultDisplay.registerStackOrderChangedListener(this);
@@ -473,8 +475,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
      * @return The top stack that is not always-on-top.
      */
     private ActivityStack getTopNonAlwaysOnTopStack() {
-        for (int i = mDefaultDisplay.getChildCount() - 1; i >= 0; i--) {
-            final ActivityStack s = mDefaultDisplay.getChildAt(i);
+        for (int i = mDefaultDisplay.getStackCount() - 1; i >= 0; i--) {
+            final ActivityStack s = mDefaultDisplay.getStackAt(i);
             if (s.getWindowConfiguration().isAlwaysOnTop()) {
                 continue;
             }

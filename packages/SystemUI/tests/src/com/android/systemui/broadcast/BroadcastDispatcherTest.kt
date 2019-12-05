@@ -178,6 +178,14 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         broadcastDispatcher.registerReceiver(broadcastReceiver, testFilter)
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun testFilterMustNotSetPriority() {
+        val testFilter = IntentFilter(TEST_ACTION).apply {
+            priority = IntentFilter.SYSTEM_HIGH_PRIORITY
+        }
+        broadcastDispatcher.registerReceiver(broadcastReceiver, testFilter)
+    }
+
     private class TestBroadcastDispatcher(
         context: Context,
         mainHandler: Handler,

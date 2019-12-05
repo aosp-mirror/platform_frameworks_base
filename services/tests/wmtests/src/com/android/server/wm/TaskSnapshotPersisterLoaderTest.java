@@ -38,6 +38,7 @@ import androidx.test.filters.MediumTest;
 import com.android.server.wm.TaskSnapshotPersister.RemoveObsoleteFilesQueueItem;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.util.function.Predicate;
@@ -50,6 +51,7 @@ import java.util.function.Predicate;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBase {
 
     private static final Rect TEST_INSETS = new Rect(10, 20, 30, 40);

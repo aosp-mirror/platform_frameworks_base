@@ -1,0 +1,17 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksUiServicesTests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit-managedprofile-stress": [
+    {
+      "name": "ManagedProfileLifecycleStressTest"
+    }
+  ]
+}

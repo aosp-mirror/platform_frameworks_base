@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.collection;
 
 import android.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,7 +36,8 @@ public class GroupEntry extends ListEntry {
     private final List<NotificationEntry> mUnmodifiableChildren =
             Collections.unmodifiableList(mChildren);
 
-    GroupEntry(String key) {
+    @VisibleForTesting
+    public GroupEntry(String key) {
         super(key);
     }
 
@@ -52,7 +55,8 @@ public class GroupEntry extends ListEntry {
         return mUnmodifiableChildren;
     }
 
-    void setSummary(@Nullable NotificationEntry summary) {
+    @VisibleForTesting
+    public void setSummary(@Nullable NotificationEntry summary) {
         mSummary = summary;
     }
 

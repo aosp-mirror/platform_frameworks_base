@@ -142,6 +142,7 @@ import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.UserState;
+import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -443,8 +444,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mInitialized = true;
         setRunningTasks(new RunningTasks());
 
-        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext,
-                mHandler.getLooper());
+        mActivityMetricsLogger = new ActivityMetricsLogger(this, mHandler.getLooper());
         mKeyguardController = new KeyguardController(mService, this);
 
         mPersisterQueue = new PersisterQueue();
@@ -576,8 +576,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     void stopWaitingForActivityVisible(ActivityRecord r) {
-        stopWaitingForActivityVisible(r,
-                getActivityMetricsLogger().getLastDrawnDelayMs(r.getWindowingMode()));
+        stopWaitingForActivityVisible(r, getActivityMetricsLogger().getLastDrawnDelayMs(r));
     }
 
     void stopWaitingForActivityVisible(ActivityRecord r, long totalTime) {
@@ -1501,13 +1500,11 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     mRootActivityContainer.getActivityDisplay(toDisplayId);
 
             if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                // Tell the display we are exiting split-screen mode.
-                toDisplay.onExitingSplitScreenMode();
                 // We are moving all tasks from the docked stack to the fullscreen stack,
                 // which is dismissing the docked stack, so resize all other stacks to
                 // fullscreen here already so we don't end up with resize trashing.
-                for (int i = toDisplay.getChildCount() - 1; i >= 0; --i) {
-                    final ActivityStack otherStack = toDisplay.getChildAt(i);
+                for (int i = toDisplay.getStackCount() - 1; i >= 0; --i) {
+                    final ActivityStack otherStack = toDisplay.getStackAt(i);
                     if (!otherStack.inSplitScreenSecondaryWindowingMode()) {
                         continue;
                     }
@@ -1655,8 +1652,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // screen controls and is also the same for all stacks.
                 final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
                 final Rect otherTaskRect = new Rect();
-                for (int i = display.getChildCount() - 1; i >= 0; --i) {
-                    final ActivityStack current = display.getChildAt(i);
+                for (int i = display.getStackCount() - 1; i >= 0; --i) {
+                    final ActivityStack current = display.getStackAt(i);
                     if (!current.inSplitScreenSecondaryWindowingMode()) {
                         continue;
                     }
@@ -1741,7 +1738,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
              * to the fullscreen stack.  This is to guarantee that when we are removing a stack,
              * that the client receives onStop() before it is reparented.  We do this by detaching
              * the stack from the display so that it will be considered invisible when
-             * ensureActivitiesVisible() is called, and all of its activitys will be marked
+             * ensureActivitiesVisible() is called, and all of its activities will be marked
              * invisible as well and added to the stopping list.  After which we process the
              * stopping list by handling the idle.
              */
@@ -2762,7 +2759,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
                 mRootActivityContainer.sendPowerHintForLaunchStartIfNeeded(
                         true /* forceSend */, targetActivity);
-                mActivityMetricsLogger.notifyActivityLaunching(task.intent);
+                final LaunchingState launchingState =
+                        mActivityMetricsLogger.notifyActivityLaunching(task.intent);
                 try {
                     mService.moveTaskToFrontLocked(null /* appThread */, null /* callingPackage */,
                             task.mTaskId, 0, options, true /* fromRecents */);
@@ -2770,8 +2768,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     // the override pending app transition will be applied immediately.
                     targetActivity.applyOptionsLocked();
                 } finally {
-                    mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT,
-                            targetActivity);
+                    mActivityMetricsLogger.notifyActivityLaunched(launchingState,
+                            START_TASK_TO_FRONT, targetActivity);
                 }
 
                 mService.getActivityStartController().postStartActivityProcessingForLastStarter(

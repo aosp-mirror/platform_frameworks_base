@@ -28,15 +28,15 @@ import android.net.wifi.IActionListener;
 import android.net.wifi.IDppCallback;
 import android.net.wifi.ILocalOnlyHotspotCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
+import android.net.wifi.IOnWifiActivityEnergyInfoListener;
+import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.IScanResultsCallback;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ISuggestionConnectionStatusListener;
 import android.net.wifi.ITrafficStateCallback;
 import android.net.wifi.ITxPacketCountListener;
-import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.ScanResult;
 import android.net.wifi.SoftApConfiguration;
-import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiNetworkSuggestion;
@@ -44,6 +44,7 @@ import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Messenger;
 import android.os.ResultReceiver;
 import android.os.WorkSource;
+import android.os.connectivity.WifiActivityEnergyInfo;
 
 /**
  * Interface that allows controlling and querying Wi-Fi connectivity.
@@ -56,13 +57,7 @@ interface IWifiManager
 
     WifiActivityEnergyInfo reportActivityInfo();
 
-    /**
-     * Requests the controller activity info asynchronously.
-     * The implementor is expected to reply with the
-     * {@link android.net.wifi.WifiActivityEnergyInfo} object placed into the Bundle with the key
-     * {@link android.os.BatteryStats#RESULT_RECEIVER_CONTROLLER_KEY}. The result code is ignored.
-     */
-    oneway void requestActivityInfo(in ResultReceiver result);
+    oneway void getWifiActivityEnergyInfoAsync(in IOnWifiActivityEnergyInfoListener listener);
 
     ParceledListSlice getConfiguredNetworks(String packageName, String featureId);
 

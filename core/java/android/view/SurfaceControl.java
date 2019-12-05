@@ -1909,7 +1909,9 @@ public final class SurfaceControl implements Parcelable {
      *
      * @param layer            The root layer to capture.
      * @param sourceCrop       The portion of the root surface to capture; caller may pass in 'new
-     *                         Rect()' or null if no cropping is desired.
+     *                         Rect()' or null if no cropping is desired. If the root layer does not
+     *                         have a buffer or a crop set, then a non-empty source crop must be
+     *                         specified.
      * @param frameScale       The desired scale of the returned buffer; the raw
      *                         screen will be scaled up/down.
      *
@@ -1926,7 +1928,9 @@ public final class SurfaceControl implements Parcelable {
      *
      * @param layer            The root layer to capture.
      * @param sourceCrop       The portion of the root surface to capture; caller may pass in 'new
-     *                         Rect()' or null if no cropping is desired.
+     *                         Rect()' or null if no cropping is desired. If the root layer does not
+     *                         have a buffer or a crop set, then a non-empty source crop must be
+     *                         specified.
      * @param frameScale       The desired scale of the returned buffer; the raw
      *                         screen will be scaled up/down.
      * @param format           The desired pixel format of the returned buffer.

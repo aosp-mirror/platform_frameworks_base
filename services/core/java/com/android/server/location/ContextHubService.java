@@ -795,6 +795,10 @@ public class ContextHubService extends IContextHubService.Stub {
         // Dump nanoAppHash
         mNanoAppStateManager.foreachNanoAppInstanceInfo((info) -> pw.println(info));
 
+        pw.println("");
+        pw.println("=================== CLIENTS ====================");
+        pw.println(mClientManager);
+
         // dump eventLog
     }
 

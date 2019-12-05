@@ -16,12 +16,12 @@
 
 package android.app.timezonedetector;
 
+import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
+import static android.app.timezonedetector.ParcelableTestSupport.roundTripParcelable;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import org.junit.Test;
 
@@ -151,20 +151,5 @@ public class PhoneTimeZoneSuggestionTest {
         PhoneTimeZoneSuggestion suggestion1_2 = roundTripParcelable(suggestion1);
         assertEquals(suggestion1, suggestion1_2);
         assertTrue(suggestion1_2.getDebugInfo().contains(debugString));
-    }
-
-    private static void assertRoundTripParcelable(PhoneTimeZoneSuggestion instance) {
-        assertEquals(instance, roundTripParcelable(instance));
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends Parcelable> T roundTripParcelable(T one) {
-        Parcel parcel = Parcel.obtain();
-        parcel.writeTypedObject(one, 0);
-        parcel.setDataPosition(0);
-
-        T toReturn = (T) parcel.readTypedObject(PhoneTimeZoneSuggestion.CREATOR);
-        parcel.recycle();
-        return toReturn;
     }
 }

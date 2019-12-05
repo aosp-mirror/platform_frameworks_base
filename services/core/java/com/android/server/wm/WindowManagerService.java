@@ -1732,20 +1732,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-
-        // Create an instance if possible instead of waiting for the ActivityManagerService to drive
-        // the creation.
-        if (displayContent == null) {
-            final Display display = mDisplayManager.getDisplay(displayId);
-
-            if (display != null) {
-                displayContent = mRoot.createDisplayContent(display, null /* activityDisplay */);
-                displayContent.reconfigureDisplayLocked();
-            }
-        }
-
-        return displayContent;
+        return mAtmService.mRootActivityContainer.getActivityDisplayOrCreate(displayId);
     }
 
     private boolean doesAddToastWindowRequireToken(String packageName, int callingUid,
@@ -2350,8 +2337,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.setLastReportedMergedConfiguration(mergedConfiguration);
 
-            // Update the last inset values here because the values are sent back to the client.
-            // The last inset values represent the last client state.
+            // Update the last frames and inset values here because the values are sent back to the
+            // client. The last values represent the last client state.
+            win.updateLastFrames();
             win.updateLastInsetValues();
 
             win.getCompatFrame(outFrame);
@@ -6795,19 +6783,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 "setShouldShowWithInsecureKeyguard()")) {
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+                if (displayContent == null) {
+                    ProtoLog.w(WM_ERROR, "Attempted to set flag to a display that does not exist: "
+                            + "%d", displayId);
+                    return;
+                }
 
-        synchronized (mGlobalLock) {
-            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
-            if (displayContent == null) {
-                ProtoLog.w(WM_ERROR, "Attempted to set flag to a display that does not exist: %d",
-                        displayId);
-                return;
+                mDisplayWindowSettings.setShouldShowWithInsecureKeyguardLocked(displayContent,
+                        shouldShow);
+
+                displayContent.reconfigureDisplayLocked();
             }
-
-            mDisplayWindowSettings.setShouldShowWithInsecureKeyguardLocked(displayContent,
-                    shouldShow);
-
-            displayContent.reconfigureDisplayLocked();
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -6836,22 +6828,26 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "setShouldShowSystemDecors()")) {
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+                if (displayContent == null) {
+                    ProtoLog.w(WM_ERROR, "Attempted to set system decors flag to a display that "
+                            + "does not exist: %d", displayId);
+                    return;
+                }
+                if (displayContent.isUntrustedVirtualDisplay()) {
+                    throw new SecurityException("Attempted to set system decors flag to an "
+                            + "untrusted virtual display: " + displayId);
+                }
 
-        synchronized (mGlobalLock) {
-            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
-            if (displayContent == null) {
-                ProtoLog.w(WM_ERROR, "Attempted to set system decors flag to a display that does "
-                        + "not exist: %d", displayId);
-                return;
+                mDisplayWindowSettings.setShouldShowSystemDecorsLocked(displayContent, shouldShow);
+
+                displayContent.reconfigureDisplayLocked();
             }
-            if (displayContent.isUntrustedVirtualDisplay()) {
-                throw new SecurityException("Attempted to set system decors flag to an untrusted "
-                        + "virtual display: " + displayId);
-            }
-
-            mDisplayWindowSettings.setShouldShowSystemDecorsLocked(displayContent, shouldShow);
-
-            displayContent.reconfigureDisplayLocked();
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -6882,23 +6878,26 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "setShouldShowIme()")) {
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+                if (displayContent == null) {
+                    ProtoLog.w(WM_ERROR, "Attempted to set IME flag to a display that does not "
+                            + "exist: %d", displayId);
+                    return;
+                }
+                if (displayContent.isUntrustedVirtualDisplay()) {
+                    throw new SecurityException("Attempted to set IME flag to an untrusted "
+                            + "virtual display: " + displayId);
+                }
 
-        synchronized (mGlobalLock) {
-            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
-            if (displayContent == null) {
-                ProtoLog.w(WM_ERROR,
-                        "Attempted to set IME flag to a display that does not exist: %d",
-                        displayId);
-                return;
+                mDisplayWindowSettings.setShouldShowImeLocked(displayContent, shouldShow);
+
+                displayContent.reconfigureDisplayLocked();
             }
-            if (displayContent.isUntrustedVirtualDisplay()) {
-                throw new SecurityException("Attempted to set IME flag to an untrusted "
-                        + "virtual display: " + displayId);
-            }
-
-            mDisplayWindowSettings.setShouldShowImeLocked(displayContent, shouldShow);
-
-            displayContent.reconfigureDisplayLocked();
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -7664,7 +7663,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // to do so because it seems possible to resume activities as part of a larger
             // transaction and it's too early to resume based on current order when performing
             // updateTopResumedActivityIfNeeded().
-            displayContent.mActivityDisplay.ensureActivitiesVisible(null /* starting */,
+            // TODO(display-merge): Remove cast
+            ((ActivityDisplay) displayContent).ensureActivitiesVisible(null /* starting */,
                     0 /* configChanges */, !PRESERVE_WINDOWS, true /* notifyClients */);
         }
     }

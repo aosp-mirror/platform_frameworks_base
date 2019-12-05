@@ -44,6 +44,7 @@ import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -56,6 +57,7 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class SurfaceAnimatorTest extends WindowTestsBase {
 
     @Mock AnimationAdapter mSpec;

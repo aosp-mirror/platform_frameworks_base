@@ -295,6 +295,9 @@ interface IDevicePolicyManager {
     void setAutoTimeRequired(in ComponentName who, boolean required);
     boolean getAutoTimeRequired();
 
+    void setAutoTime(in ComponentName who, boolean enabled);
+    boolean getAutoTime(in ComponentName who);
+
     void setForceEphemeralUsers(in ComponentName who, boolean forceEpehemeralUsers);
     boolean getForceEphemeralUsers(in ComponentName who);
 

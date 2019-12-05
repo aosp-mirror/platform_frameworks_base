@@ -32,7 +32,7 @@ public class RuleBinarySerializer implements RuleSerializer {
     }
 
     @Override
-    public String serialize(List<Rule> rules, Optional<Integer> formatVersion) {
+    public byte[] serialize(List<Rule> rules, Optional<Integer> formatVersion) {
         // TODO: Implement text serializer.
         return null;
     }

@@ -709,13 +709,13 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final ActivityStack stack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
-                        .setDisplay(dc.mActivityDisplay)
+                        .setDisplay(dc)
                         .build();
         doReturn(true).when(stack).isVisible();
 
         final ActivityStack freeformStack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
-                        .setDisplay(dc.mActivityDisplay)
+                        .setDisplay(dc)
                         .setWindowingMode(WINDOWING_MODE_FREEFORM)
                         .build();
         doReturn(true).when(freeformStack).isVisible();
@@ -743,7 +743,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final ActivityStack stack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
-                        .setDisplay(dc.mActivityDisplay).build();
+                        .setDisplay(dc).build();
         final ActivityRecord activity = stack.topTask().getTopNonFinishingActivity();
 
         activity.setRequestedOrientation(newOrientation);
@@ -765,12 +765,13 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final ActivityStack stack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
-                        .setDisplay(dc.mActivityDisplay).build();
+                        .setDisplay(dc).build();
         final ActivityRecord activity = stack.topTask().getTopNonFinishingActivity();
 
         activity.setRequestedOrientation(newOrientation);
 
-        verify(dc.mActivityDisplay, never()).updateDisplayOverrideConfigurationLocked(any(),
+        // TODO(display-merge): Remove cast
+        verify((ActivityDisplay) dc, never()).updateDisplayOverrideConfigurationLocked(any(),
                 eq(activity), anyBoolean(), same(null));
         assertEquals(dc.getDisplayRotation().getUserRotation(), dc.getRotation());
     }
@@ -940,6 +941,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent displayContent = createNewDisplay();
         Mockito.doReturn(mockLogger).when(displayContent).getMetricsLogger();
         Mockito.doReturn(oldConfig).doReturn(newConfig).when(displayContent).getConfiguration();
+        doNothing().when(displayContent).preOnConfigurationChanged();
 
         displayContent.onConfigurationChanged(newConfig);
 
@@ -959,12 +961,12 @@ public class DisplayContentTests extends WindowTestsBase {
         Mockito.doCallRealMethod().when(dr).updateRotationUnchecked(anyBoolean());
         Mockito.doReturn(ROTATION_90).when(dr).rotationForOrientation(anyInt(), anyInt());
         final boolean[] continued = new boolean[1];
-        spyOn(dc.mActivityDisplay);
+        // TODO(display-merge): Remove cast
         Mockito.doAnswer(
                 invocation -> {
                     continued[0] = true;
                     return true;
-                }).when(dc.mActivityDisplay).updateDisplayOverrideConfigurationLocked();
+                }).when((ActivityDisplay) dc).updateDisplayOverrideConfigurationLocked();
         final boolean[] called = new boolean[1];
         mWm.mDisplayRotationController =
                 new IDisplayWindowRotationController.Stub() {

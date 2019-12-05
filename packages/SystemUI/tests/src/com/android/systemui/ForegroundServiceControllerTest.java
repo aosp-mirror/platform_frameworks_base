@@ -49,6 +49,7 @@ import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import junit.framework.Assert;
@@ -70,6 +71,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private AppOpsController mAppOpsController;
     @Mock private Handler mMainHandler;
+    @Mock private NotifCollection mNotifCollection;
 
     @Before
     public void setUp() throws Exception {
@@ -79,7 +81,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mFsc = new ForegroundServiceController(mEntryManager, mAppOpsController, mMainHandler);
         mListener = new ForegroundServiceNotificationListener(
-                mContext, mFsc, mEntryManager);
+                mContext, mFsc, mEntryManager, mNotifCollection);
         ArgumentCaptor<NotificationEntryListener> entryListenerCaptor =
                 ArgumentCaptor.forClass(NotificationEntryListener.class);
         verify(mEntryManager).addNotificationEntryListener(

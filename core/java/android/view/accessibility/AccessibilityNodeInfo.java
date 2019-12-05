@@ -529,6 +529,20 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final String ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN =
             "android.view.accessibility.action.ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN";
 
+    /**
+     * Argument to represent the duration in milliseconds to press and hold a node.
+     * <p>
+     * <strong>Type:</strong> int<br>
+     * <strong>Actions:</strong>
+     * <ul>
+     *     <li>{@link AccessibilityAction#ACTION_PRESS_AND_HOLD}</li>
+     * </ul>
+     *
+     * @see AccessibilityAction#ACTION_PRESS_AND_HOLD
+     */
+    public static final String ACTION_ARGUMENT_PRESS_HOLD_DURATION_MILLIS_INT =
+            "android.view.accessibility.action.ARGUMENT_PRESS_HOLD_DURATION_MILLIS_INT";
+
     // Focus types
 
     /**
@@ -4035,6 +4049,8 @@ public class AccessibilityNodeInfo implements Parcelable {
                 return "ACTION_SHOW_TOOLTIP";
             case R.id.accessibilityActionHideTooltip:
                 return "ACTION_HIDE_TOOLTIP";
+            case R.id.accessibilityActionPressAndHold:
+                return "ACTION_PRESS_AND_HOLD";
             default:
                 return "ACTION_UNKNOWN";
         }
@@ -4625,6 +4641,31 @@ public class AccessibilityNodeInfo implements Parcelable {
          */
         public static final AccessibilityAction ACTION_HIDE_TOOLTIP =
                 new AccessibilityAction(R.id.accessibilityActionHideTooltip);
+
+        /**
+         * Action that presses and holds a node.
+         * <p>
+         * This action is for nodes that have distinct behavior that depends on how long a press is
+         * held. Nodes having a single action for long press should use {@link #ACTION_LONG_CLICK}
+         *  instead of this action, and nodes should not expose both actions.
+         * <p>
+         * Use {@link #ACTION_ARGUMENT_PRESS_HOLD_DURATION_MILLIS_INT} to specify how long the
+         * node is pressed. To ensure reasonable behavior, the first value of this argument should
+         * be 0 and the others should greater than 0 and less than 10,000. UIs requested to hold for
+         * times outside of this range should ignore the action.
+         * <p>
+         * The total time the element is held could be specified by an accessibility user up-front,
+         * or may depend on what happens on the UI as the user continues to request the hold.
+         * <p>
+         *   <strong>Note:</strong> The time between dispatching the action and it arriving in the
+         *     UI process is not guaranteed. It is possible on a busy system for the time to expire
+         *     unexpectedly. For the case of holding down a key for a repeating action, a delayed
+         *     arrival should be benign. Please do not use this sort of action in cases where such
+         *     delays will lead to unexpected UI behavior.
+         * <p>
+         */
+        @NonNull public static final AccessibilityAction ACTION_PRESS_AND_HOLD =
+                new AccessibilityAction(R.id.accessibilityActionPressAndHold);
 
         private final int mActionId;
         private final CharSequence mLabel;

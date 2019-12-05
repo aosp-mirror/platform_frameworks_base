@@ -53,6 +53,7 @@ import com.android.server.wm.LaunchParamsController.LaunchParams;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +67,7 @@ import java.util.Locale;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     private static final Rect DISPLAY_BOUNDS = new Rect(/* left */ 0, /* top */ 0,
             /* right */ 1920, /* bottom */ 1080);

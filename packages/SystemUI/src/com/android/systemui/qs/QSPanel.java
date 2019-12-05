@@ -284,7 +284,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         }
 
         Log.d(TAG, "setting player session");
-        player.setMediaSession(token, icon, iconColor, bgColor, actionsContainer,
+        player.setMediaSession(this, token, icon, iconColor, bgColor, actionsContainer,
                 notif.getNotification(), mDevice);
 
         if (mMediaPlayers.size() > 0) {
@@ -301,6 +301,27 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     protected View getMediaPanel() {
         return mMediaCarousel;
+    }
+
+    /**
+     * Remove the media player from the carousel
+     * @param player Player to remove
+     * @return true if removed, false if player was not found
+     */
+    protected boolean removeMediaPlayer(QSMediaPlayer player) {
+        // Remove from list
+        if (!mMediaPlayers.remove(player)) {
+            return false;
+        }
+
+        // Check if we need to collapse the carousel now
+        mMediaCarousel.removeView(player.getView());
+        if (mMediaPlayers.size() == 0) {
+            ((View) mMediaCarousel.getParent()).setVisibility(View.GONE);
+            mLocalMediaManager.stopScan();
+            mLocalMediaManager.unregisterCallback(mDeviceCallback);
+        }
+        return true;
     }
 
     protected void addDivider() {

@@ -312,7 +312,7 @@ import com.android.server.display.color.ColorDisplayService;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
 import com.android.server.uri.UriPermissionOwner;
-import com.android.server.wm.ActivityMetricsLogger.WindowingModeTransitionInfoSnapshot;
+import com.android.server.wm.ActivityMetricsLogger.TransitionInfoSnapshot;
 import com.android.server.wm.ActivityStack.ActivityState;
 import com.android.server.wm.WindowManagerService.H;
 import com.android.server.wm.utils.InsetUtils;
@@ -2237,7 +2237,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
         return (getWindowConfiguration().canReceiveKeys() || isAlwaysFocusable())
-                && getParent() != null;
+                && getDisplay() != null;
     }
 
     /** Move activity with its stack to front and make the stack focused. */
@@ -2420,7 +2420,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     final ActivityDisplay display = stack.getDisplay();
                     next = display.topRunningActivity();
                     if (next != null) {
-                        display.positionChildAtTop(next.getActivityStack(),
+                        display.positionStackAtTop(next.getActivityStack(),
                                 false /* includingParents */, "finish-display-top");
                     }
                 }
@@ -3010,6 +3010,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         getDisplayContent().mChangingApps.remove(this);
         getDisplayContent().mUnknownAppVisibilityController.appRemovedOrHidden(this);
         mWmService.mTaskSnapshotController.onAppRemoved(this);
+        mStackSupervisor.getActivityMetricsLogger().notifyActivityRemoved(this);
         waitingToShow = false;
         if (getDisplayContent().mClosingApps.contains(this)) {
             delayed = true;
@@ -4985,7 +4986,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void reportFullyDrawnLocked(boolean restoredFromBundle) {
-        final WindowingModeTransitionInfoSnapshot info = mStackSupervisor
+        final TransitionInfoSnapshot info = mStackSupervisor
             .getActivityMetricsLogger().logAppTransitionReportedDrawn(this, restoredFromBundle);
         if (info != null) {
             mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
@@ -5017,8 +5018,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!drawn) {
             return;
         }
-        final WindowingModeTransitionInfoSnapshot info = mStackSupervisor
-            .getActivityMetricsLogger().notifyWindowsDrawn(getWindowingMode(), timestampNs);
+        final TransitionInfoSnapshot info = mStackSupervisor
+                .getActivityMetricsLogger().notifyWindowsDrawn(this, timestampNs);
         final int windowsDrawnDelayMs = info != null ? info.windowsDrawnDelayMs : INVALID_DELAY;
         final @LaunchState int launchState = info != null ? info.getLaunchState() : -1;
         mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
@@ -5219,20 +5220,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     }
                 }
             } else if (w.isDrawnLw()) {
-                onStartingWindowDrawn(SystemClock.elapsedRealtimeNanos());
+                // The starting window for this container is drawn.
+                mStackSupervisor.getActivityMetricsLogger().notifyStartingWindowDrawn(this);
                 startingDisplayed = true;
             }
         }
 
         return isInterestingAndDrawn;
-    }
-
-    /** Called when the starting window for this container is drawn. */
-    private void onStartingWindowDrawn(long timestampNs) {
-        synchronized (mAtmService.mGlobalLock) {
-            mAtmService.mStackSupervisor.getActivityMetricsLogger().notifyStartingWindowDrawn(
-                    getWindowingMode(), timestampNs);
-        }
     }
 
     /**
@@ -5694,8 +5688,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     boolean isWaitingForTransitionStart() {
         final DisplayContent dc = getDisplayContent();
-        // TODO(display-unify): Test for null can be removed once unification is done.
-        if (dc == null) return false;
         return dc.mAppTransition.isTransitionSet()
                 && (dc.mOpeningApps.contains(this)
                 || dc.mClosingApps.contains(this)

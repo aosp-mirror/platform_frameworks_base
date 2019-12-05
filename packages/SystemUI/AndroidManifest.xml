@@ -206,6 +206,9 @@
     <!-- shortcut manager -->
     <uses-permission android:name="android.permission.RESET_SHORTCUT_MANAGER_THROTTLING" />
 
+    <!-- launcher apps -->
+    <uses-permission android:name="android.permission.ACCESS_SHORTCUTS" />
+
     <uses-permission android:name="android.permission.MODIFY_THEME_OVERLAY" />
 
     <!-- accessibility -->

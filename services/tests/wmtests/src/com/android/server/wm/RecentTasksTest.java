@@ -977,9 +977,9 @@ public class RecentTasksTest extends ActivityTestsBase {
     private void assertNotRestoreTask(Runnable action) {
         // Verify stack count doesn't change because task with fullscreen mode and standard type
         // would have its own stack.
-        final int orignalStackCount = mDisplay.getChildCount();
+        final int originalStackCount = mDisplay.getStackCount();
         action.run();
-        assertEquals(orignalStackCount, mDisplay.getChildCount());
+        assertEquals(originalStackCount, mDisplay.getStackCount());
     }
 
     @Test

@@ -5001,14 +5001,15 @@ public class DevicePolicyManager {
      * <p>Device owner, profile owner and their delegated certificate installer can use
      * {@link #ID_TYPE_BASE_INFO} to request inclusion of the general device information
      * including manufacturer, model, brand, device and product in the attestation record.
-     * Only device owner and their delegated certificate installer can use
-     * {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and {@link #ID_TYPE_MEID} to request
-     * unique device identifiers to be attested (the serial number, IMEI and MEID correspondingly),
-     * if supported by the device (see {@link #isDeviceIdAttestationSupported()}).
-     * Additionally, device owner and their delegated certificate installer can also request the
-     * attestation record to be signed using an individual attestation certificate by specifying
-     * the {@link #ID_TYPE_INDIVIDUAL_ATTESTATION} flag (if supported by the device, see
-     * {@link #isUniqueDeviceAttestationSupported()}).
+     * Only device owner, profile owner on an organization-owned device and their delegated
+     * certificate installers can use {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and
+     * {@link #ID_TYPE_MEID} to request unique device identifiers to be attested (the serial number,
+     * IMEI and MEID correspondingly), if supported by the device
+     * (see {@link #isDeviceIdAttestationSupported()}).
+     * Additionally, device owner, profile owner on an organization-owned device and their delegated
+     * certificate installers can also request the attestation record to be signed using an
+     * individual attestation certificate by specifying the {@link #ID_TYPE_INDIVIDUAL_ATTESTATION}
+     * flag (if supported by the device, see {@link #isUniqueDeviceAttestationSupported()}).
      * <p>
      * If any of {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and {@link #ID_TYPE_MEID}
      * is set, it is implicitly assumed that {@link #ID_TYPE_BASE_INFO} is also set.
@@ -5696,11 +5697,21 @@ public class DevicePolicyManager {
      * <p>
      * The calling device admin must be a device owner, or alternatively a profile owner from
      * Android 8.0 (API level 26) or higher. If it is not, a security exception will be thrown.
+     * <p>
+     * Staring from Android 11, this API switches to use
+     * {@link UserManager#DISALLOW_CONFIG_DATE_TIME} to enforce the auto time settings. Calling
+     * this API to enforce auto time will result in
+     * {@link UserManager#DISALLOW_CONFIG_DATE_TIME} being set, while calling this API to lift
+     * the requirement will result in {@link UserManager#DISALLOW_CONFIG_DATE_TIME} being cleared.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param required Whether auto time is set required or not.
      * @throws SecurityException if {@code admin} is not a device owner.
+     * @deprecated From {@link android.os.Build.VERSION_CODES#R}. Use {@link #setAutoTime}
+     * to turn auto time on or off and use {@link UserManager#DISALLOW_CONFIG_DATE_TIME}
+     * to prevent the user from changing this setting.
      */
+    @Deprecated
     public void setAutoTimeRequired(@NonNull ComponentName admin, boolean required) {
         throwIfParentInstance("setAutoTimeRequired");
         if (mService != null) {
@@ -5714,12 +5725,55 @@ public class DevicePolicyManager {
 
     /**
      * @return true if auto time is required.
+     * @deprecated From {@link android.os.Build.VERSION_CODES#R}. Use {@link #getAutoTime}
      */
+    @Deprecated
     public boolean getAutoTimeRequired() {
         throwIfParentInstance("getAutoTimeRequired");
         if (mService != null) {
             try {
                 return mService.getAutoTimeRequired();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Called by a device owner, a profile owner for the primary user or a profile
+     * owner of an organization-owned managed profile to turn auto time on and off.
+     * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME}
+     * to prevent the user from changing this setting.
+     * <p>
+     * If user restriction {@link UserManager#DISALLOW_CONFIG_DATE_TIME} is used,
+     * no user will be able set the date and time. Instead, the network date
+     * and time will be used.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param enabled Whether time should be obtained automatically from the network or not.
+     * @throws SecurityException if caller is not a device owner, a profile owner for the
+     * primary user, or a profile owner of an organization-owned managed profile.
+     */
+    public void setAutoTime(@NonNull ComponentName admin, boolean enabled) {
+        if (mService != null) {
+            try {
+                mService.setAutoTime(admin, enabled);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * @return true if auto time is enabled on the device.
+     * @throws SecurityException if caller is not a device owner, a profile owner for the
+     * primary user, or a profile owner of an organization-owned managed profile.
+     */
+    public boolean getAutoTime(@NonNull ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getAutoTime(admin);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

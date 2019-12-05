@@ -275,10 +275,6 @@ public final class NotificationEntry extends ListEntry {
         return mRanking.getSuppressedVisualEffects();
     }
 
-    public boolean isSuspended() {
-        return mRanking.isSuspended();
-    }
-
     /** @see Ranking#canBubble() */
     public boolean canBubble() {
         return mRanking.canBubble();
@@ -948,6 +944,15 @@ public final class NotificationEntry extends ListEntry {
 
     private static boolean isCategory(String category, Notification n) {
         return Objects.equals(n.category, category);
+    }
+
+    /**
+     * Whether or not this row represents a system notification. Note that if this is
+     * {@code null}, that means we were either unable to retrieve the info or have yet to
+     * retrieve the info.
+     */
+    public Boolean isSystemNotification() {
+        return mIsSystemNotification;
     }
 
     /**

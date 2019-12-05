@@ -17,10 +17,12 @@
 package com.android.systemui.statusbar.notification.logging;
 
 import android.annotation.IntDef;
-import android.service.notification.NotificationListenerService.Ranking;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.log.RichEvent;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,103 +33,71 @@ import java.lang.annotation.RetentionPolicy;
  * here to mitigate memory usage.
  */
 public class NotifEvent extends RichEvent {
-    public static final int TOTAL_EVENT_TYPES = 11;
-
     /**
-     * Creates a NotifEvent with an event type that matches with an index in the array
-     * getSupportedEvents() and {@link EventType}.
-     *
-     * The status bar notification and ranking objects are stored as shallow copies of the current
-     * state of the event when this event occurred.
+     * Initializes a rich event that includes an event type that matches with an index in the array
+     * getEventLabels().
      */
-    public NotifEvent(int logLevel, int type, String reason, StatusBarNotification sbn,
-            Ranking ranking) {
-        super(logLevel, type, reason);
-        mMessage += getExtraInfo(sbn, ranking);
-    }
-
-    private String getExtraInfo(StatusBarNotification sbn, Ranking ranking) {
-        StringBuilder extraInfo = new StringBuilder();
-
+    public NotifEvent init(@EventType int type, StatusBarNotification sbn,
+            NotificationListenerService.Ranking ranking, String reason) {
+        StringBuilder extraInfo = new StringBuilder(reason);
         if (sbn != null) {
-            extraInfo.append(" Sbn=");
-            extraInfo.append(sbn);
+            extraInfo.append(" " + sbn.getKey());
         }
 
         if (ranking != null) {
             extraInfo.append(" Ranking=");
-            extraInfo.append(ranking);
+            extraInfo.append(ranking.getRank());
         }
-
-        return extraInfo.toString();
+        super.init(INFO, type, extraInfo.toString());
+        return this;
     }
 
     /**
-     * Event labels for NotifEvents
-     * Index corresponds to the {@link EventType}
+     * Event labels for ListBuilderEvents
+     * Index corresponds to an # in {@link EventType}
      */
     @Override
     public String[] getEventLabels() {
-        final String[] events = new String[]{
-                "NotifAdded",
-                "NotifRemoved",
-                "NotifUpdated",
-                "Filter",
-                "Sort",
-                "FilterAndSort",
-                "NotifVisibilityChanged",
-                "LifetimeExtended",
-                "RemoveIntercepted",
-                "InflationAborted",
-                "Inflated"
-        };
-
-        if (events.length != TOTAL_EVENT_TYPES) {
-            throw new IllegalStateException("NotifEvents events.length should match "
-                    + TOTAL_EVENT_TYPES
-                    + " events.length=" + events.length
-                    + " TOTAL_EVENT_LENGTH=" + TOTAL_EVENT_TYPES);
-        }
-        return events;
+        assert (TOTAL_EVENT_LABELS == (TOTAL_NEM_EVENT_TYPES + TOTAL_LIST_BUILDER_EVENT_TYPES));
+        return EVENT_LABELS;
     }
 
     /**
-     * Builds a NotifEvent.
+     * @return if this event occurred in {@link NotifListBuilder}
      */
-    public static class NotifEventBuilder extends RichEvent.Builder<NotifEventBuilder> {
-        private StatusBarNotification mSbn;
-        private Ranking mRanking;
-
-        @Override
-        public NotifEventBuilder getBuilder() {
-            return this;
-        }
-
-        /**
-         * Stores the status bar notification object. A shallow copy is stored in the NotifEvent's
-         * constructor.
-         */
-        public NotifEventBuilder setSbn(StatusBarNotification sbn) {
-            mSbn = sbn;
-            return this;
-        }
-
-        /**
-         * Stores the ranking object. A shallow copy is stored in the NotifEvent's
-         * constructor.
-         */
-        public NotifEventBuilder setRanking(Ranking ranking) {
-            mRanking = ranking;
-            return this;
-        }
-
-        @Override
-        public RichEvent build() {
-            return new NotifEvent(mLogLevel, mType, mReason, mSbn, mRanking);
-        }
+    static boolean isListBuilderEvent(@EventType int type) {
+        return isBetweenInclusive(type, 0, TOTAL_LIST_BUILDER_EVENT_TYPES);
     }
 
-    @IntDef({NOTIF_ADDED,
+    /**
+     * @return if this event occurred in {@link NotificationEntryManager}
+     */
+    static boolean isNemEvent(@EventType int type) {
+        return isBetweenInclusive(type, TOTAL_LIST_BUILDER_EVENT_TYPES,
+                TOTAL_LIST_BUILDER_EVENT_TYPES + TOTAL_NEM_EVENT_TYPES);
+    }
+
+    private static boolean isBetweenInclusive(int x, int a, int b) {
+        return x >= a && x <= b;
+    }
+
+    @IntDef({
+            // NotifListBuilder events:
+            WARN,
+            ON_BUILD_LIST,
+            START_BUILD_LIST,
+            DISPATCH_FINAL_LIST,
+            LIST_BUILD_COMPLETE,
+            FILTER_INVALIDATED,
+            PROMOTER_INVALIDATED,
+            SECTIONS_PROVIDER_INVALIDATED,
+            COMPARATOR_INVALIDATED,
+            PARENT_CHANGED,
+            FILTER_CHANGED,
+            PROMOTER_CHANGED,
+
+            // NotificationEntryManager events:
+            NOTIF_ADDED,
             NOTIF_REMOVED,
             NOTIF_UPDATED,
             FILTER,
@@ -139,22 +109,72 @@ public class NotifEvent extends RichEvent {
             INFLATION_ABORTED,
             INFLATED
     })
-
-    /**
-     * Types of NotifEvents
-     */
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {}
-    public static final int NOTIF_ADDED = 0;
-    public static final int NOTIF_REMOVED = 1;
-    public static final int NOTIF_UPDATED = 2;
-    public static final int FILTER = 3;
-    public static final int SORT = 4;
-    public static final int FILTER_AND_SORT = 5;
-    public static final int NOTIF_VISIBILITY_CHANGED = 6;
-    public static final int LIFETIME_EXTENDED = 7;
+
+    private static final String[] EVENT_LABELS =
+            new String[]{
+                    // NotifListBuilder labels:
+                    "Warning",
+                    "OnBuildList",
+                    "StartBuildList",
+                    "DispatchFinalList",
+                    "ListBuildComplete",
+                    "FilterInvalidated",
+                    "PromoterInvalidated",
+                    "SectionsProviderInvalidated",
+                    "ComparatorInvalidated",
+                    "ParentChanged",
+                    "FilterChanged",
+                    "PromoterChanged",
+
+                    // NEM event labels:
+                    "NotifAdded",
+                    "NotifRemoved",
+                    "NotifUpdated",
+                    "Filter",
+                    "Sort",
+                    "FilterAndSort",
+                    "NotifVisibilityChanged",
+                    "LifetimeExtended",
+                    "RemoveIntercepted",
+                    "InflationAborted",
+                    "Inflated"
+            };
+
+    private static final int TOTAL_EVENT_LABELS = EVENT_LABELS.length;
+
+    /**
+     * Events related to {@link NotifListBuilder}
+     */
+    public static final int WARN = 0;
+    public static final int ON_BUILD_LIST = 1;
+    public static final int START_BUILD_LIST = 2;
+    public static final int DISPATCH_FINAL_LIST = 3;
+    public static final int LIST_BUILD_COMPLETE = 4;
+    public static final int FILTER_INVALIDATED = 5;
+    public static final int PROMOTER_INVALIDATED = 6;
+    public static final int SECTIONS_PROVIDER_INVALIDATED = 7;
+    public static final int COMPARATOR_INVALIDATED = 8;
+    public static final int PARENT_CHANGED = 9;
+    public static final int FILTER_CHANGED = 10;
+    public static final int PROMOTER_CHANGED = 11;
+    private static final int TOTAL_LIST_BUILDER_EVENT_TYPES = 12;
+
+    /**
+     * Events related to {@link NotificationEntryManager}
+     */
+    public static final int NOTIF_ADDED = TOTAL_LIST_BUILDER_EVENT_TYPES + 0;
+    public static final int NOTIF_REMOVED = TOTAL_LIST_BUILDER_EVENT_TYPES + 1;
+    public static final int NOTIF_UPDATED = TOTAL_LIST_BUILDER_EVENT_TYPES + 2;
+    public static final int FILTER = TOTAL_LIST_BUILDER_EVENT_TYPES + 3;
+    public static final int SORT = TOTAL_LIST_BUILDER_EVENT_TYPES + 4;
+    public static final int FILTER_AND_SORT = TOTAL_LIST_BUILDER_EVENT_TYPES + 5;
+    public static final int NOTIF_VISIBILITY_CHANGED = TOTAL_LIST_BUILDER_EVENT_TYPES + 6;
+    public static final int LIFETIME_EXTENDED = TOTAL_LIST_BUILDER_EVENT_TYPES + 7;
     // unable to remove notif - removal intercepted by {@link NotificationRemoveInterceptor}
-    public static final int REMOVE_INTERCEPTED = 8;
-    public static final int INFLATION_ABORTED = 9;
-    public static final int INFLATED = 10;
+    public static final int REMOVE_INTERCEPTED = TOTAL_LIST_BUILDER_EVENT_TYPES + 8;
+    public static final int INFLATION_ABORTED = TOTAL_LIST_BUILDER_EVENT_TYPES + 9;
+    public static final int INFLATED = TOTAL_LIST_BUILDER_EVENT_TYPES + 10;
+    private static final int TOTAL_NEM_EVENT_TYPES = 11;
 }

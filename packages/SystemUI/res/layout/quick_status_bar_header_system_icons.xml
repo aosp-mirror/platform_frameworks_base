@@ -14,7 +14,7 @@
 ** See the License for the specific language governing permissions and
 ** limitations under the License.
 -->
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/quick_status_bar_system_icons"
@@ -28,13 +28,6 @@
     android:paddingStart="@dimen/status_bar_padding_start"
     android:paddingEnd="@dimen/status_bar_padding_end" >
 
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:gravity="center_vertical|start" >
-
     <com.android.systemui.statusbar.policy.Clock
         android:id="@+id/clock"
         android:layout_width="wrap_content"
@@ -46,23 +39,5 @@
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.StatusBar.Clock"
         systemui:showDark="false" />
-    </LinearLayout>
 
-    <android.widget.Space
-        android:id="@+id/space"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_vertical|center_horizontal"
-        android:visibility="gone" />
-
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:gravity="center_vertical|end" >
-
-    <include layout="@layout/ongoing_privacy_chip" />
-
-    </LinearLayout>
-</LinearLayout>
+</FrameLayout>

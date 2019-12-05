@@ -121,6 +121,7 @@ import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
+import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
 import com.android.server.wm.ActivityStackSupervisor.PendingActivityLaunch;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 
@@ -572,15 +573,16 @@ class ActivityStarter {
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             int startFlags, boolean doResume, ActivityOptions options, Task inTask) {
         try {
-            mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(r.intent);
+            final LaunchingState launchingState = mSupervisor.getActivityMetricsLogger()
+                    .notifyActivityLaunching(r.intent, r.resultTo);
             mLastStartReason = "startResolvedActivity";
             mLastStartActivityTimeMs = System.currentTimeMillis();
             mLastStartActivityRecord = r;
             mLastStartActivityResult = startActivityUnchecked(r, sourceRecord, voiceSession,
                     voiceInteractor, startFlags, doResume, options, inTask,
                     false /* restrictedBgActivity */);
-            mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(mLastStartActivityResult,
-                    mLastStartActivityRecord);
+            mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState,
+                    mLastStartActivityResult, mLastStartActivityRecord);
         } finally {
             onExecutionComplete();
         }
@@ -598,8 +600,14 @@ class ActivityStarter {
                 throw new IllegalArgumentException("File descriptors passed in Intent");
             }
 
-            mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(mRequest.intent);
+            final LaunchingState launchingState;
+            synchronized (mService.mGlobalLock) {
+                final ActivityRecord caller = ActivityRecord.forTokenLocked(mRequest.resultTo);
+                launchingState = mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(
+                        mRequest.intent, caller);
+            }
 
+            // Do not lock the resolving to avoid potential deadlock.
             if (mRequest.activityInfo == null) {
                 mRequest.resolveActivity(mSupervisor);
             }
@@ -643,7 +651,7 @@ class ActivityStarter {
                 // Notify ActivityMetricsLogger that the activity has launched.
                 // ActivityMetricsLogger will then wait for the windows to be drawn and populate
                 // WaitResult.
-                mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(res,
+                mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState, res,
                         mLastStartActivityRecord);
                 return getExternalResult(mRequest.waitResult == null ? res
                         : waitForResult(res, mLastStartActivityRecord));

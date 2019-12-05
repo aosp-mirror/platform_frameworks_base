@@ -455,7 +455,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
             verify(mService.getLifecycleManager()).scheduleTransaction(
                     eq(mActivity.app.getThread()), eq(mActivity.appToken), eq(expected));
         } finally {
-            stack.getDisplay().removeChild(stack);
+            stack.getDisplay().removeStack(stack);
         }
     }
 

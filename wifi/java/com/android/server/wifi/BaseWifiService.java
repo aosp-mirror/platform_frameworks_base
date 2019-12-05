@@ -25,6 +25,7 @@ import android.net.wifi.IActionListener;
 import android.net.wifi.IDppCallback;
 import android.net.wifi.ILocalOnlyHotspotCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
+import android.net.wifi.IOnWifiActivityEnergyInfoListener;
 import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.IScanResultsCallback;
 import android.net.wifi.IScanResultsListener;
@@ -35,7 +36,6 @@ import android.net.wifi.ITxPacketCountListener;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.SoftApConfiguration;
-import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiNetworkSuggestion;
@@ -46,6 +46,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.WorkSource;
+import android.os.connectivity.WifiActivityEnergyInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -80,8 +81,12 @@ public class BaseWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public void requestActivityInfo(ResultReceiver result) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void getWifiActivityEnergyInfoAsync(IOnWifiActivityEnergyInfoListener listener) {
         throw new UnsupportedOperationException();
     }
 

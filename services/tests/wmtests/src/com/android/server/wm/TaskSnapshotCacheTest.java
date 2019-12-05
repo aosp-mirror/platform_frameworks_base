@@ -18,21 +18,21 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static junit.framework.Assert.assertEquals;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import android.app.ActivityManager.TaskSnapshot;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
-import android.app.ActivityManager.TaskSnapshot;
-
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Test class for {@link TaskSnapshotCache}.
@@ -42,6 +42,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
 
     private TaskSnapshotCache mCache;

@@ -151,7 +151,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final int MSG_DPM_STATE_CHANGED = 309;
     private static final int MSG_USER_SWITCHING = 310;
     private static final int MSG_KEYGUARD_RESET = 312;
-    private static final int MSG_BOOT_COMPLETED = 313;
     private static final int MSG_USER_SWITCH_COMPLETE = 314;
     private static final int MSG_USER_INFO_CHANGED = 317;
     private static final int MSG_REPORT_EMERGENCY_CALL_ACTION = 318;
@@ -234,7 +233,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mGoingToSleep;
     private boolean mBouncer;
     private boolean mAuthInterruptActive;
-    private boolean mBootCompleted;
     private boolean mNeedsSlowUnlockTransition;
     private boolean mHasLockscreenWallpaper;
     private boolean mAssistantVisible;
@@ -1075,8 +1073,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_PHONE_STATE_CHANGED, state));
             } else if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(action)) {
                 mHandler.sendEmptyMessage(MSG_AIRPLANE_MODE_CHANGED);
-            } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
-                dispatchBootCompleted();
             } else if (TelephonyIntents.ACTION_SERVICE_STATE_CHANGED.equals(action)) {
                 ServiceState serviceState = ServiceState.newFromBundle(intent.getExtras());
                 int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
@@ -1550,9 +1546,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     case MSG_KEYGUARD_BOUNCER_CHANGED:
                         handleKeyguardBouncerChanged(msg.arg1);
                         break;
-                    case MSG_BOOT_COMPLETED:
-                        handleBootCompleted();
-                        break;
                     case MSG_USER_INFO_CHANGED:
                         handleUserInfoChanged(msg.arg1);
                         break;
@@ -1647,11 +1640,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         broadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, mHandler);
-
-        final IntentFilter bootCompleteFilter = new IntentFilter();
-        bootCompleteFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        bootCompleteFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
-        broadcastDispatcher.registerReceiver(mBroadcastReceiver, bootCompleteFilter, mHandler);
 
         final IntentFilter allUserFilter = new IntentFilter();
         allUserFilter.addAction(Intent.ACTION_USER_INFO_CHANGED);
@@ -2100,39 +2088,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 cb.onUserSwitchComplete(userId);
             }
         }
-    }
-
-    /**
-     * This is exposed since {@link Intent#ACTION_BOOT_COMPLETED} is not sticky. If
-     * keyguard crashes sometime after boot, then it will never receive this
-     * broadcast and hence not handle the event. This method is ultimately called by
-     * PhoneWindowManager in this case.
-     */
-    public void dispatchBootCompleted() {
-        mHandler.sendEmptyMessage(MSG_BOOT_COMPLETED);
-    }
-
-    /**
-     * Handle {@link #MSG_BOOT_COMPLETED}
-     */
-    private void handleBootCompleted() {
-        checkIsHandlerThread();
-        if (mBootCompleted) return;
-        mBootCompleted = true;
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onBootCompleted();
-            }
-        }
-    }
-
-    /**
-     * We need to store this state in the KeyguardUpdateMonitor since this class will not be
-     * destroyed.
-     */
-    public boolean hasBootCompleted() {
-        return mBootCompleted;
     }
 
     /**

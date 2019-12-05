@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.TaskPositioner.MIN_ASPECT;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
@@ -33,7 +32,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import android.app.IActivityTaskManager;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
@@ -46,6 +44,7 @@ import androidx.test.filters.SmallTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link TaskPositioner} class.
@@ -55,6 +54,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class TaskPositionerTests extends WindowTestsBase {
 
     private static final boolean DEBUGGING = false;

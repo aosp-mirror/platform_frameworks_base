@@ -32,6 +32,7 @@ import android.provider.Settings;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Test for {@link WindowManagerService.SettingsObserver}.
@@ -40,6 +41,7 @@ import org.junit.Test;
  *  atest WmTests:WindowManagerSettingsTests
  */
 @SmallTest
+@RunWith(WindowTestRunner.class)
 public class WindowManagerSettingsTests extends WindowTestsBase {
 
     @Test

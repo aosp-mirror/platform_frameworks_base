@@ -47,6 +47,7 @@ import com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Test class for {@link BoundsAnimationController} to ensure that it sends the right callbacks
@@ -63,6 +64,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     /**

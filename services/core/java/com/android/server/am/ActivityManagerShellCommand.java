@@ -3065,7 +3065,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("          even if in the background.");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
             pw.println("          [--user <USER_ID> | current]");
-            pw.println("          [--no-hidden-api-checks [--no-test-api-checks]]");
+            pw.println("          [--no-hidden-api-checks [--no-test-api-access]]");
             pw.println("          [--no-isolated-storage]");
             pw.println("          [--no-window-animation] [--abi <ABI>] <COMPONENT>");
             pw.println("      Start an Instrumentation.  Typically this target <COMPONENT> is in the");
@@ -3085,7 +3085,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --user <USER_ID> | current: Specify user instrumentation runs in;");
             pw.println("          current user if not specified.");
             pw.println("      --no-hidden-api-checks: disable restrictions on use of hidden API.");
-            pw.println("      --no-test-api-checks: disable restrictions to test APIs, if hidden");
+            pw.println("      --no-test-api-access: do not allow access to test APIs, if hidden");
             pw.println("          API checks are enabled.");
             pw.println("      --no-isolated-storage: don't use isolated storage sandbox and ");
             pw.println("          mount full external storage");

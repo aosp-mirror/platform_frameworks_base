@@ -88,7 +88,7 @@ public class UserIconProvider {
      * @param userInfo User whose avatar is set to default icon.
      * @return Bitmap of the user icon.
      */
-    private Bitmap assignDefaultIcon(
+    public Bitmap assignDefaultIcon(
             UserManager userManager, Resources resources, UserInfo userInfo) {
         Bitmap bitmap = userInfo.isGuest()
                 ? getGuestUserDefaultIcon(resources)

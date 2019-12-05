@@ -508,7 +508,7 @@
         -->
     <string translatable="false" name="config_mobile_hotspot_provision_app_no_ui"></string>
     <!-- Sent in response to a provisioning check. The caller must hold the
-         permission android.permission.CONNECTIVITY_INTERNAL for Settings to
+         permission android.permission.TETHER_PRIVILEGED for Settings to
          receive this response.
 
          See config_mobile_hotspot_provision_response

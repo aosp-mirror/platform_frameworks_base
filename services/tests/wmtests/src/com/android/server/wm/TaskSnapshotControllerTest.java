@@ -33,6 +33,7 @@ import androidx.test.filters.SmallTest;
 import com.google.android.collect.Sets;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Test class for {@link TaskSnapshotController}.
@@ -42,6 +43,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class TaskSnapshotControllerTest extends WindowTestsBase {
 
     @Test

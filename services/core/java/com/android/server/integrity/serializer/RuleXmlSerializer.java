@@ -62,14 +62,14 @@ public class RuleXmlSerializer implements RuleSerializer {
     }
 
     @Override
-    public String serialize(List<Rule> rules, Optional<Integer> formatVersion)
+    public byte[] serialize(List<Rule> rules, Optional<Integer> formatVersion)
             throws RuleSerializeException {
         try {
             XmlSerializer xmlSerializer = Xml.newSerializer();
             StringWriter writer = new StringWriter();
             xmlSerializer.setOutput(writer);
             serializeRules(rules, xmlSerializer);
-            return writer.toString();
+            return writer.toString().getBytes(StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new RuleSerializeException(e.getMessage(), e);
         }

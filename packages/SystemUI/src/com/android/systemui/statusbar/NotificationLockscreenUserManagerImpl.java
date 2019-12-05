@@ -435,7 +435,7 @@ public class NotificationLockscreenUserManagerImpl implements
      * Has the given user chosen to allow notifications to be shown even when the lockscreen is in
      * "public" (secure & locked) mode?
      */
-    private boolean userAllowsNotificationsInPublic(int userHandle) {
+    public boolean userAllowsNotificationsInPublic(int userHandle) {
         if (isCurrentProfile(userHandle) && userHandle != mCurrentUserId) {
             return true;
         }

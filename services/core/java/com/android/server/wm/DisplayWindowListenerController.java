@@ -63,7 +63,7 @@ class DisplayWindowListenerController {
         mDisplayListeners.finishBroadcast();
     }
 
-    void dispatchDisplayChanged(ActivityDisplay display, Configuration newConfig) {
+    void dispatchDisplayChanged(DisplayContent display, Configuration newConfig) {
         // Only report changed if this has actually been added to the hierarchy already.
         boolean isInHierarchy = false;
         for (int i = 0; i < display.getParent().getChildCount(); ++i) {
@@ -78,7 +78,7 @@ class DisplayWindowListenerController {
         for (int i = 0; i < count; ++i) {
             try {
                 mDisplayListeners.getBroadcastItem(i).onDisplayConfigurationChanged(
-                        display.mDisplayId, newConfig);
+                        display.getDisplayId(), newConfig);
             } catch (RemoteException e) {
             }
         }

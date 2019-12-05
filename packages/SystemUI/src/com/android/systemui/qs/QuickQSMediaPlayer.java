@@ -16,19 +16,27 @@
 
 package com.android.systemui.qs;
 
+import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +50,8 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import com.android.systemui.R;
 
+import java.util.List;
+
 /**
  * QQS mini media player
  */
@@ -53,6 +63,54 @@ public class QuickQSMediaPlayer {
     private LinearLayout mMediaNotifView;
     private MediaSession.Token mToken;
     private MediaController mController;
+    private int mBackgroundColor;
+    private int mForegroundColor;
+    private ComponentName mRecvComponent;
+
+    private MediaController.Callback mSessionCallback = new MediaController.Callback() {
+        @Override
+        public void onSessionDestroyed() {
+            Log.d(TAG, "session destroyed");
+            mController.unregisterCallback(mSessionCallback);
+
+            // Hide all the old buttons
+            final int[] actionIds = {R.id.action0, R.id.action1, R.id.action2};
+            for (int i = 0; i < actionIds.length; i++) {
+                ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
+                if (thisBtn != null) {
+                    thisBtn.setVisibility(View.GONE);
+                }
+            }
+
+            // Add a restart button
+            ImageButton btn = mMediaNotifView.findViewById(actionIds[0]);
+            btn.setOnClickListener(v -> {
+                Log.d(TAG, "Attempting to restart session");
+                // Send a media button event to previously found receiver
+                if (mRecvComponent != null) {
+                    Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+                    intent.setComponent(mRecvComponent);
+                    int keyCode = KeyEvent.KEYCODE_MEDIA_PLAY;
+                    intent.putExtra(
+                            Intent.EXTRA_KEY_EVENT,
+                            new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
+                    mContext.sendBroadcast(intent);
+                } else {
+                    Log.d(TAG, "No receiver to restart");
+                    // If we don't have a receiver, try relaunching the activity instead
+                    try {
+                        mController.getSessionActivity().send();
+                    } catch (PendingIntent.CanceledException e) {
+                        Log.e(TAG, "Pending intent was canceled");
+                        e.printStackTrace();
+                    }
+                }
+            });
+            btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_replay));
+            btn.setImageTintList(ColorStateList.valueOf(mForegroundColor));
+            btn.setVisibility(View.VISIBLE);
+        }
+    };
 
     /**
      *
@@ -83,8 +141,24 @@ public class QuickQSMediaPlayer {
             View actionsContainer, int[] actionsToShow) {
         Log.d(TAG, "Setting media session: " + token);
         mToken = token;
+        mForegroundColor = iconColor;
+        mBackgroundColor = bgColor;
         mController = new MediaController(mContext, token);
         MediaMetadata mMediaMetadata = mController.getMetadata();
+
+        // Try to find a receiver for the media button that matches this app
+        PackageManager pm = mContext.getPackageManager();
+        Intent it = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        List<ResolveInfo> info = pm.queryBroadcastReceiversAsUser(it, 0, mContext.getUser());
+        if (info != null) {
+            for (ResolveInfo inf : info) {
+                if (inf.activityInfo.packageName.equals(mController.getPackageName())) {
+                    Log.d(TAG, "Found receiver for package: " + inf);
+                    mRecvComponent = inf.getComponentInfo().getComponentName();
+                }
+            }
+        }
+        mController.registerCallback(mSessionCallback);
 
         if (mMediaMetadata == null) {
             Log.e(TAG, "Media metadata was null");
@@ -92,25 +166,25 @@ public class QuickQSMediaPlayer {
         }
 
         // Album art
-        addAlbumArtBackground(mMediaMetadata, bgColor);
+        addAlbumArtBackground(mMediaMetadata, mBackgroundColor);
 
         // App icon
         ImageView appIcon = mMediaNotifView.findViewById(R.id.icon);
         Drawable iconDrawable = icon.loadDrawable(mContext);
-        iconDrawable.setTint(iconColor);
+        iconDrawable.setTint(mForegroundColor);
         appIcon.setImageDrawable(iconDrawable);
 
         // Artist name
         TextView appText = mMediaNotifView.findViewById(R.id.header_title);
         String artistName = mMediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
         appText.setText(artistName);
-        appText.setTextColor(iconColor);
+        appText.setTextColor(mForegroundColor);
 
         // Song name
         TextView titleText = mMediaNotifView.findViewById(R.id.header_text);
         String songName = mMediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
         titleText.setText(songName);
-        titleText.setTextColor(iconColor);
+        titleText.setTextColor(mForegroundColor);
 
         // Buttons we can display
         final int[] actionIds = {R.id.action0, R.id.action1, R.id.action2};
@@ -178,6 +252,7 @@ public class QuickQSMediaPlayer {
 
     private void addAlbumArtBackground(MediaMetadata metadata, int bgColor) {
         Bitmap albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+        float radius = mContext.getResources().getDimension(R.dimen.qs_media_corner_radius);
         if (albumArt != null) {
             Rect bounds = new Rect();
             mMediaNotifView.getBoundsOnScreen(bounds);
@@ -197,12 +272,15 @@ public class QuickQSMediaPlayer {
 
             RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(
                     mContext.getResources(), scaled);
-            roundedDrawable.setCornerRadius(20);
+            roundedDrawable.setCornerRadius(radius);
 
             mMediaNotifView.setBackground(roundedDrawable);
         } else {
             Log.e(TAG, "No album art available");
-            mMediaNotifView.setBackground(null);
+            GradientDrawable rect = new GradientDrawable();
+            rect.setCornerRadius(radius);
+            rect.setColor(bgColor);
+            mMediaNotifView.setBackground(rect);
         }
     }
 

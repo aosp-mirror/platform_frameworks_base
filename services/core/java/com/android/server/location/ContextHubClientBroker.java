@@ -29,10 +29,12 @@ import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
 import android.hardware.location.NanoAppMessage;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
@@ -97,6 +99,16 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private final PendingIntentRequest mPendingIntentRequest;
 
     /*
+     * The host package associated with this client.
+     */
+    private final String mPackage;
+
+    /*
+     * True if a PendingIntent has been cancelled.
+     */
+    private AtomicBoolean mIsPendingIntentCancelled = new AtomicBoolean(false);
+
+    /*
      * Helper class to manage registered PendingIntent requests from the client.
      */
     private class PendingIntentRequest {
@@ -110,11 +122,14 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
          */
         private long mNanoAppId;
 
+        private boolean mValid = false;
+
         PendingIntentRequest() {}
 
         PendingIntentRequest(PendingIntent pendingIntent, long nanoAppId) {
             mPendingIntent = pendingIntent;
             mNanoAppId = nanoAppId;
+            mValid = true;
         }
 
         public long getNanoAppId() {
@@ -132,6 +147,10 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         public void clear() {
             mPendingIntent = null;
         }
+
+        public boolean isValid() {
+            return mValid;
+        }
     }
 
     /* package */ ContextHubClientBroker(
@@ -145,6 +164,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         mHostEndPointId = hostEndPointId;
         mCallbackInterface = callback;
         mPendingIntentRequest = new PendingIntentRequest();
+        mPackage = mContext.getPackageManager().getNameForUid(Binder.getCallingUid());
     }
 
     /* package */ ContextHubClientBroker(
@@ -157,6 +177,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         mAttachedContextHubInfo = contextHubInfo;
         mHostEndPointId = hostEndPointId;
         mPendingIntentRequest = new PendingIntentRequest(pendingIntent, nanoAppId);
+        mPackage = pendingIntent.getCreatorPackage();
     }
 
     /**
@@ -313,6 +334,13 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     /**
+     * @return true if the client is a PendingIntent client that has been cancelled.
+     */
+    /* package */ boolean isPendingIntentCancelled() {
+        return mIsPendingIntentCancelled.get();
+    }
+
+    /**
      * Helper function to invoke a specified client callback, if the connection is open.
      *
      * @param consumer the consumer specifying the callback to invoke
@@ -392,6 +420,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                     Manifest.permission.LOCATION_HARDWARE /* requiredPermission */,
                     null /* options */);
         } catch (PendingIntent.CanceledException e) {
+            mIsPendingIntentCancelled.set(true);
             // The PendingIntent is no longer valid
             Log.w(TAG, "PendingIntent has been canceled, unregistering from client"
                     + " (host endpoint ID " + mHostEndPointId + ")");
@@ -418,5 +447,21 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             mClientManager.unregisterClient(mHostEndPointId);
             mRegistered = false;
         }
+    }
+
+    @Override
+    public String toString() {
+        String out = "[ContextHubClient ";
+        out += "endpointID: " + getHostEndPointId() + ", ";
+        out += "contextHub: " + getAttachedContextHubId() + ", ";
+        if (mPendingIntentRequest.isValid()) {
+            out += "intentCreatorPackage: " + mPackage + ", ";
+            out += "nanoAppId: 0x" + Long.toHexString(mPendingIntentRequest.getNanoAppId());
+        } else {
+            out += "package: " + mPackage;
+        }
+        out += "]";
+
+        return out;
     }
 }
