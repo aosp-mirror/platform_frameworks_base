@@ -1233,7 +1233,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
                 mScrimController, mActivityLaunchAnimator, mDynamicPrivacyController,
-                mNotificationAlertingManager, rowBinder, mKeyguardStateController, mCommandQueue);
+                mNotificationAlertingManager, rowBinder, mKeyguardStateController,
+                this /* statusBar */, mCommandQueue);
 
         mNotificationListController =
                 new NotificationListController(
@@ -1246,7 +1247,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mNotificationActivityStarter =
                 mStatusBarNotificationActivityStarterBuilder
-                        .setShadeController(this)
+                        .setStatusBar(this)
                         .setActivityLaunchAnimator(mActivityLaunchAnimator)
                         .setNotificationPresenter(mPresenter)
                         .build();
@@ -1751,7 +1752,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mAmbientIndicationContainer;
     }
 
-    @Override
+    /**
+     * When the keyguard is showing and covered by a "showWhenLocked" activity it
+     * is occluded. This is controlled by {@link com.android.server.policy.PhoneWindowManager}
+     *
+     * @return whether the keyguard is currently occluded
+     */
     public boolean isOccluded() {
         return mIsOccluded;
     }

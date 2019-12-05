@@ -113,6 +113,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final DozeScrimController mDozeScrimController;
     private final ScrimController mScrimController;
     private final Context mContext;
+    private final StatusBar mStatusBar;
     private final CommandQueue mCommandQueue;
 
     private final AccessibilityManager mAccessibilityManager;
@@ -140,12 +141,15 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             NotificationAlertingManager notificationAlertingManager,
             NotificationRowBinderImpl notificationRowBinder,
             KeyguardStateController keyguardStateController,
+            StatusBar statusBar,
             CommandQueue commandQueue) {
         mContext = context;
         mKeyguardStateController = keyguardStateController;
         mNotificationPanel = panel;
         mHeadsUpManager = headsUp;
         mDynamicPrivacyController = dynamicPrivacyController;
+        // TODO: use KeyguardStateController#isOccluded to remove this dependency
+        mStatusBar = statusBar;
         mCommandQueue = commandQueue;
         mAboveShelfObserver = new AboveShelfObserver(stackScroller);
         mActivityLaunchAnimator = activityLaunchAnimator;
@@ -330,7 +334,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     public boolean canHeadsUp(NotificationEntry entry, StatusBarNotification sbn) {
-        if (mShadeController.isOccluded()) {
+        if (mStatusBar.isOccluded()) {
             boolean devicePublic = mLockscreenUserManager.
                     isLockscreenPublicMode(mLockscreenUserManager.getCurrentUserId());
             boolean userPublic = devicePublic
@@ -356,7 +360,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             } else {
                 // we only allow head-up on the lockscreen if it doesn't have a fullscreen intent
                 return !mKeyguardStateController.isShowing()
-                        || mShadeController.isOccluded();
+                        || mStatusBar.isOccluded();
             }
         }
         return true;
