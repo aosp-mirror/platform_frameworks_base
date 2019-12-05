@@ -76,7 +76,6 @@ public class InsetsAnimationControlImplTest {
     @Mock Transaction mMockTransaction;
     @Mock InsetsController mMockController;
     @Mock WindowInsetsAnimationControlListener mMockListener;
-    @Mock SyncRtSurfaceTransactionApplier mMockTransactionApplier;
 
     @BeforeClass
     public static void setupOnce() {
@@ -111,12 +110,12 @@ public class InsetsAnimationControlImplTest {
         navConsumer.setControl(new InsetsSourceControl(ITYPE_NAVIGATION_BAR, mNavLeash,
                 new Point(400, 0)));
 
-        SparseArray<InsetsSourceConsumer> consumers = new SparseArray<>();
-        consumers.put(ITYPE_STATUS_BAR, topConsumer);
-        consumers.put(ITYPE_NAVIGATION_BAR, navConsumer);
-        mController = new InsetsAnimationControlImpl(consumers,
+        SparseArray<InsetsSourceControl> controls = new SparseArray<>();
+        controls.put(ITYPE_STATUS_BAR, topConsumer.getControl());
+        controls.put(ITYPE_NAVIGATION_BAR, navConsumer.getControl());
+        mController = new InsetsAnimationControlImpl(controls,
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
-                () -> mMockTransactionApplier, mMockController, 10 /* durationMs */,
+                mMockController, 10 /* durationMs */,
                 false /* fade */);
     }
 
@@ -137,7 +136,7 @@ public class InsetsAnimationControlImplTest {
         assertEquals(1f, mController.getCurrentAlpha(), 1f - mController.getCurrentAlpha());
 
         ArgumentCaptor<SurfaceParams> captor = ArgumentCaptor.forClass(SurfaceParams.class);
-        verify(mMockTransactionApplier).scheduleApply(captor.capture());
+        verify(mMockController).applySurfaceParams(captor.capture());
         List<SurfaceParams> params = captor.getAllValues();
         assertEquals(2, params.size());
         SurfaceParams first = params.get(0);

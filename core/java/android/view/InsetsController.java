@@ -53,7 +53,7 @@ import java.util.ArrayList;
  * Implements {@link WindowInsetsController} on the client.
  * @hide
  */
-public class InsetsController implements WindowInsetsController {
+public class InsetsController implements WindowInsetsController, InsetsAnimationControlCallbacks {
 
     private static final int ANIMATION_DURATION_SHOW_MS = 275;
     private static final int ANIMATION_DURATION_HIDE_MS = 340;
@@ -185,6 +185,8 @@ public class InsetsController implements WindowInsetsController {
     private int mPendingTypesToShow;
 
     private int mLastLegacySoftInputMode;
+
+    private SyncRtSurfaceTransactionApplier mApplier;
 
     public InsetsController(ViewRootImpl viewRoot) {
         mViewRoot = viewRoot;
@@ -375,9 +377,10 @@ public class InsetsController implements WindowInsetsController {
 
         final ArraySet<Integer> internalTypes = mState.toInternalType(types);
         final SparseArray<InsetsSourceConsumer> consumers = new SparseArray<>();
+        final SparseArray<InsetsSourceControl> controls = new SparseArray<>();
 
-        Pair<Integer, Boolean> typesReadyPair = collectConsumers(
-                fromIme, internalTypes, consumers, listener);
+        Pair<Integer, Boolean> typesReadyPair = collectSourceControls(
+                fromIme, internalTypes, controls, listener);
         int typesReady = typesReadyPair.first;
         boolean isReady = typesReadyPair.second;
         if (!isReady) {
@@ -388,24 +391,23 @@ public class InsetsController implements WindowInsetsController {
         }
 
         // pending types from previous request.
-        typesReady = collectPendingConsumers(typesReady, consumers);
+        typesReady = collectPendingTypes(typesReady);
 
         if (typesReady == 0) {
             listener.onCancelled();
             return;
         }
 
-        final InsetsAnimationControlImpl controller = new InsetsAnimationControlImpl(consumers,
-                frame, mState, listener, typesReady,
-                () -> new SyncRtSurfaceTransactionApplier(mViewRoot.mView), this, durationMs, fade);
+        final InsetsAnimationControlImpl controller = new InsetsAnimationControlImpl(controls,
+                frame, mState, listener, typesReady, this, durationMs, fade);
         mAnimationControls.add(controller);
     }
 
     /**
      * @return Pair of (types ready to animate, is ready to animate).
      */
-    private Pair<Integer, Boolean> collectConsumers(boolean fromIme,
-            ArraySet<Integer> internalTypes, SparseArray<InsetsSourceConsumer> consumers,
+    private Pair<Integer, Boolean> collectSourceControls(boolean fromIme,
+            ArraySet<Integer> internalTypes, SparseArray<InsetsSourceControl> controls,
             WindowInsetsAnimationControlListener listener) {
         int typesReady = 0;
         boolean isReady = true;
@@ -439,22 +441,14 @@ public class InsetsController implements WindowInsetsController {
                 }
                 typesReady |= InsetsState.toPublicType(consumer.getType());
             }
-            consumers.put(consumer.getType(), consumer);
+            controls.put(consumer.getType(), consumer.getControl());
         }
         return new Pair<>(typesReady, isReady);
     }
 
-    private int collectPendingConsumers(@InsetsType int typesReady,
-            SparseArray<InsetsSourceConsumer> consumers) {
-        if (mPendingTypesToShow != 0) {
-            typesReady |= mPendingTypesToShow;
-            final ArraySet<Integer> internalTypes = mState.toInternalType(mPendingTypesToShow);
-            for (int i = internalTypes.size() - 1; i >= 0; i--) {
-                InsetsSourceConsumer consumer = getSourceConsumer(internalTypes.valueAt(i));
-                consumers.put(consumer.getType(), consumer);
-            }
-            mPendingTypesToShow = 0;
-        }
+    private int collectPendingTypes(@InsetsType int typesReady) {
+        typesReady |= mPendingTypesToShow;
+        mPendingTypesToShow = 0;
         return typesReady;
     }
 
@@ -468,6 +462,7 @@ public class InsetsController implements WindowInsetsController {
     }
 
     @VisibleForTesting
+    @Override
     public void notifyFinished(InsetsAnimationControlImpl controller, boolean shown) {
         mAnimationControls.remove(controller);
         if (shown) {
@@ -475,6 +470,17 @@ public class InsetsController implements WindowInsetsController {
         } else {
             hideDirectly(controller.getTypes());
         }
+    }
+
+    @Override
+    public void applySurfaceParams(final SyncRtSurfaceTransactionApplier.SurfaceParams... params) {
+        if (mApplier == null) {
+            if (mViewRoot.mView == null) {
+                throw new IllegalStateException("View of the ViewRootImpl is not initiated.");
+            }
+            mApplier = new SyncRtSurfaceTransactionApplier(mViewRoot.mView);
+        }
+        mApplier.scheduleApply(params);
     }
 
     void notifyControlRevoked(InsetsSourceConsumer consumer) {
@@ -620,6 +626,7 @@ public class InsetsController implements WindowInsetsController {
     }
 
     @VisibleForTesting
+    @Override
     public void dispatchAnimationStarted(InsetsAnimation animation, AnimationBounds bounds) {
         mViewRoot.mView.dispatchWindowInsetsAnimationStarted(animation, bounds);
     }
@@ -630,6 +637,7 @@ public class InsetsController implements WindowInsetsController {
     }
 
     @VisibleForTesting
+    @Override
     public void scheduleApplyChangeInsets() {
         if (!mAnimCallbackScheduled) {
             mViewRoot.mChoreographer.postCallback(Choreographer.CALLBACK_INSETS_ANIMATION,
