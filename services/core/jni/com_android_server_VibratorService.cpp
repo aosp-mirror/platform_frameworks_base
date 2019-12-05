@@ -338,7 +338,7 @@ static jlong vibratorPerformEffect(JNIEnv* env, jclass, jlong effect, jlong stre
     if (auto hal = getHal<aidl::IVibrator>()) {
         int32_t lengthMs;
         sp<AidlVibratorCallback> effectCallback = new AidlVibratorCallback(env, vibration);
-        aidl::Effect effectType(static_cast<aidl::Effect>(strength));
+        aidl::Effect effectType(static_cast<aidl::Effect>(effect));
         aidl::EffectStrength effectStrength(static_cast<aidl::EffectStrength>(strength));
 
         auto status = hal->call(&aidl::IVibrator::perform, effectType, effectStrength, effectCallback, &lengthMs);
