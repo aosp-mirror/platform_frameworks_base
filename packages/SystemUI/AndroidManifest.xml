@@ -288,6 +288,11 @@
             android:exported="false"
             android:permission="com.android.systemui.permission.SELF" />
 
+        <service android:name=".assist.AssistHandleService"
+            android:exported="true"
+            android:enabled="false"
+        />
+
         <!-- started from PhoneWindowManager
              TODO: Should have an android:permission attribute -->
         <service android:name=".screenshot.TakeScreenshotService"
