@@ -62,7 +62,7 @@ public class BubbleExperimentConfig {
     private static final boolean ALLOW_ANY_NOTIF_TO_BUBBLE_DEFAULT = false;
 
     private static final String ALLOW_MESSAGE_NOTIFS_TO_BUBBLE = "allow_message_notifs_to_bubble";
-    private static final boolean ALLOW_MESSAGE_NOTIFS_TO_BUBBLE_DEFAULT = false;
+    private static final boolean ALLOW_MESSAGE_NOTIFS_TO_BUBBLE_DEFAULT = true;
 
     private static final String ALLOW_SHORTCUTS_TO_BUBBLE = "allow_shortcuts_to_bubble";
     private static final boolean ALLOW_SHORTCUT_TO_BUBBLE_DEFAULT = false;
