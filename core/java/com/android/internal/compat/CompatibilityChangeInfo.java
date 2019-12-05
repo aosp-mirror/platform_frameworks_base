@@ -30,6 +30,7 @@ public class CompatibilityChangeInfo implements Parcelable {
     private final @Nullable String mName;
     private final int mEnableAfterTargetSdk;
     private final boolean mDisabled;
+    private final @Nullable String mDescription;
 
     public long getId() {
         return mChangeId;
@@ -48,12 +49,18 @@ public class CompatibilityChangeInfo implements Parcelable {
         return mDisabled;
     }
 
+    public String getDescription()  {
+        return mDescription;
+    }
+
     public CompatibilityChangeInfo(
-            Long changeId, String name, int enableAfterTargetSdk, boolean disabled) {
+            Long changeId, String name, int enableAfterTargetSdk, boolean disabled,
+            String description) {
         this.mChangeId = changeId;
         this.mName = name;
         this.mEnableAfterTargetSdk = enableAfterTargetSdk;
         this.mDisabled = disabled;
+        this.mDescription = description;
     }
 
     private CompatibilityChangeInfo(Parcel in) {
@@ -61,6 +68,7 @@ public class CompatibilityChangeInfo implements Parcelable {
         mName = in.readString();
         mEnableAfterTargetSdk = in.readInt();
         mDisabled = in.readBoolean();
+        mDescription = in.readString();
     }
 
     @Override
@@ -74,6 +82,7 @@ public class CompatibilityChangeInfo implements Parcelable {
         dest.writeString(mName);
         dest.writeInt(mEnableAfterTargetSdk);
         dest.writeBoolean(mDisabled);
+        dest.writeString(mDescription);
     }
 
     public static final Parcelable.Creator<CompatibilityChangeInfo> CREATOR =
