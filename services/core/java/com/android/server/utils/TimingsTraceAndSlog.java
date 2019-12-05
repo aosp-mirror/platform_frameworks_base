@@ -55,7 +55,16 @@ public final class TimingsTraceAndSlog extends TimingsTraceLog {
      * Default constructor using {@code system_server} tags.
      */
     public TimingsTraceAndSlog() {
-        this(SYSTEM_SERVER_TIMING_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
+        this(SYSTEM_SERVER_TIMING_TAG);
+    }
+
+    /**
+     * Custom constructor using {@code system_server} trace tag.
+     *
+     * @param tag {@code logcat} tag
+     */
+    public TimingsTraceAndSlog(@NonNull String tag) {
+        this(tag, Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
     /**
