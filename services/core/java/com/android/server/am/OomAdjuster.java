@@ -376,7 +376,11 @@ public final class OomAdjuster {
                 ConnectionRecord cr = pr.connections.valueAt(i);
                 ProcessRecord service = (cr.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0
                         ? cr.binding.service.isolatedProc : cr.binding.service.app;
-                if (service == null || service == pr || (containsCycle |= service.mReachable)) {
+                if (service == null || service == pr) {
+                    continue;
+                }
+                containsCycle |= service.mReachable;
+                if (service.mReachable) {
                     continue;
                 }
                 if ((cr.flags & (Context.BIND_WAIVE_PRIORITY
@@ -392,6 +396,10 @@ public final class OomAdjuster {
                 ContentProviderConnection cpc = pr.conProviders.get(i);
                 ProcessRecord provider = cpc.provider.proc;
                 if (provider == null || provider == pr || (containsCycle |= provider.mReachable)) {
+                    continue;
+                }
+                containsCycle |= provider.mReachable;
+                if (provider.mReachable) {
                     continue;
                 }
                 queue.offer(provider);
@@ -482,12 +490,15 @@ public final class OomAdjuster {
         // need to reset cycle state before calling computeOomAdjLocked because of service conns
         for (int i = numProc - 1; i >= 0; i--) {
             ProcessRecord app = activeProcesses.get(i);
-            app.containsCycle = false;
             app.mReachable = false;
-            app.setCurRawProcState(PROCESS_STATE_CACHED_EMPTY);
-            app.setCurRawAdj(ProcessList.UNKNOWN_ADJ);
-            app.setCapability = PROCESS_CAPABILITY_NONE;
-            app.resetCachedInfo();
+            // No need to compute again it has been evaluated in previous iteration
+            if (app.adjSeq != mAdjSeq) {
+                app.containsCycle = false;
+                app.setCurRawProcState(PROCESS_STATE_CACHED_EMPTY);
+                app.setCurRawAdj(ProcessList.UNKNOWN_ADJ);
+                app.setCapability = PROCESS_CAPABILITY_NONE;
+                app.resetCachedInfo();
+            }
         }
         for (int i = numProc - 1; i >= 0; i--) {
             ProcessRecord app = activeProcesses.get(i);
