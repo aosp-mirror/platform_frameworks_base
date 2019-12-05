@@ -669,10 +669,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             getDisplayPolicy().layoutWindowLw(w, null, mDisplayFrames);
             w.mLayoutSeq = mLayoutSeq;
 
-            // If this is the first layout, we need to initialize the last inset values as
-            // otherwise we'd immediately cause an unnecessary resize.
+            // If this is the first layout, we need to initialize the last frames and inset values,
+            // as otherwise we'd immediately cause an unnecessary resize.
             if (firstLayout) {
+                w.updateLastFrames();
                 w.updateLastInsetValues();
+                w.updateLocationInParentDisplayIfNeeded();
             }
 
             if (w.mActivityRecord != null) {
