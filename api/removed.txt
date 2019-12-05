@@ -438,7 +438,9 @@ package android.provider {
   public final class MediaStore {
     method @Deprecated @NonNull public static android.net.Uri createPending(@NonNull android.content.Context, @NonNull android.provider.MediaStore.PendingParams);
     method @Deprecated @NonNull public static java.util.Set<java.lang.String> getAllVolumeNames(@NonNull android.content.Context);
+    method @Deprecated public static boolean getIncludePending(@NonNull android.net.Uri);
     method @Deprecated @NonNull public static android.provider.MediaStore.PendingSession openPending(@NonNull android.content.Context, @NonNull android.net.Uri);
+    method @Deprecated @NonNull public static android.net.Uri setIncludeTrashed(@NonNull android.net.Uri);
   }
 
   public static interface MediaStore.Audio.AudioColumns extends android.provider.MediaStore.MediaColumns {
