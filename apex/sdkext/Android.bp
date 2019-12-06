@@ -25,6 +25,11 @@ apex {
     certificate: ":com.android.sdkext.certificate",
 }
 
+sdk {
+    name: "sdkext-sdk",
+    java_libs: [ "framework-sdkext-stubs-systemapi" ],
+}
+
 apex_key {
     name: "com.android.sdkext.key",
     public_key: "com.android.sdkext.avbpubkey",
