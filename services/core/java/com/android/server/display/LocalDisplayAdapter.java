@@ -848,7 +848,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             int[] ports = res.getIntArray(
                     com.android.internal.R.array.config_localPrivateDisplayPorts);
             if (ports != null) {
-                int port = physicalAddress.getPort();
+                int port = Byte.toUnsignedInt(physicalAddress.getPort());
                 for (int p : ports) {
                     if (p == port) {
                         return true;
