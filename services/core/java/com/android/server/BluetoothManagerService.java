@@ -613,22 +613,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     }
 
     public boolean isEnabled() {
-        if ((Binder.getCallingUid() != Process.SYSTEM_UID) && (!checkIfCallerIsForegroundUser())) {
-            Slog.w(TAG, "isEnabled(): not allowed for non-active and non system user");
-            return false;
-        }
-
-        try {
-            mBluetoothLock.readLock().lock();
-            if (mBluetooth != null) {
-                return mBluetooth.isEnabled();
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "isEnabled()", e);
-        } finally {
-            mBluetoothLock.readLock().unlock();
-        }
-        return false;
+        return getState() == BluetoothAdapter.STATE_ON;
     }
 
     public int getState() {
@@ -1766,14 +1751,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
                         //Do enable request
                         try {
-                            if (!mQuietEnable) {
-                                if (!mBluetooth.enable()) {
-                                    Slog.e(TAG, "IBluetooth.enable() returned false");
-                                }
-                            } else {
-                                if (!mBluetooth.enableNoAutoConnect()) {
-                                    Slog.e(TAG, "IBluetooth.enableNoAutoConnect() returned false");
-                                }
+                            if (!mBluetooth.enable(mQuietEnable)) {
+                                Slog.e(TAG, "IBluetooth.enable() returned false");
                             }
                         } catch (RemoteException e) {
                             Slog.e(TAG, "Unable to call enable()", e);
@@ -2048,14 +2027,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             } else if (mBluetooth != null) {
                 //Enable bluetooth
                 try {
-                    if (!mQuietEnable) {
-                        if (!mBluetooth.enable()) {
-                            Slog.e(TAG, "IBluetooth.enable() returned false");
-                        }
-                    } else {
-                        if (!mBluetooth.enableNoAutoConnect()) {
-                            Slog.e(TAG, "IBluetooth.enableNoAutoConnect() returned false");
-                        }
+                    if (!mBluetooth.enable(mQuietEnable)) {
+                        Slog.e(TAG, "IBluetooth.enable() returned false");
                     }
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Unable to call enable()", e);
