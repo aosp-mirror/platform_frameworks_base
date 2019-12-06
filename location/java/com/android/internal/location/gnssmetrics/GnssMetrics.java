@@ -103,10 +103,6 @@ public class GnssMetrics {
         mPositionAccuracyMeterStatistics = new Statistics();
         mTopFourAverageCn0Statistics = new Statistics();
         mTopFourAverageCn0StatisticsL5 = new Statistics();
-        mNumSvStatus = 0;
-        mNumL5SvStatus = 0;
-        mNumSvStatusUsedInFix = 0;
-        mNumL5SvStatusUsedInFix = 0;
         reset();
     }
 
@@ -407,6 +403,11 @@ public class GnssMetrics {
         mPositionAccuracyMeterStatistics.reset();
         mTopFourAverageCn0Statistics.reset();
         resetConstellationTypes();
+        mTopFourAverageCn0StatisticsL5.reset();
+        mNumSvStatus = 0;
+        mNumL5SvStatus = 0;
+        mNumSvStatusUsedInFix = 0;
+        mNumL5SvStatusUsedInFix = 0;
     }
 
     /** Resets {@link #mConstellationTypes} as an all-false boolean array. */
