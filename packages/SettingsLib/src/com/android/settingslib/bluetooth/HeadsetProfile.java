@@ -45,7 +45,7 @@ public class HeadsetProfile implements LocalBluetoothProfile {
 
     static final ParcelUuid[] UUIDS = {
         BluetoothUuid.HSP,
-        BluetoothUuid.Handsfree,
+        BluetoothUuid.HFP,
     };
 
     static final String NAME = "HEADSET";
