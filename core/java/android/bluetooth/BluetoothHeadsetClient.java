@@ -557,7 +557,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * Set priority of the profile
      *
      * <p> The device should already be paired.
-     * Priority can be one of {@link #PRIORITY_ON} or {@link #PRIORITY_OFF},
+     * Priority can be one of {@link #PRIORITY_ON} or {@link #PRIORITY_OFF}
      *
      * @param device Paired bluetooth device
      * @param priority
