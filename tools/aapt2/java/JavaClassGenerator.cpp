@@ -304,9 +304,11 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
     auto documentation_remove_iter = std::remove_if(documentation_attrs.begin(),
                                                     documentation_attrs.end(),
                                                     [&](StyleableAttr entry) -> bool {
-      StringPiece attr_comment_line = entry.symbol.value().attribute->GetComment();
-      return SkipSymbol(entry.symbol) || attr_comment_line.contains("@removed")
-                                      || attr_comment_line.contains("@hide");
+      if (SkipSymbol(entry.symbol)) {
+        return true;
+      }
+      const StringPiece attr_comment_line = entry.symbol.value().attribute->GetComment();
+      return attr_comment_line.contains("@removed") || attr_comment_line.contains("@hide");
     });
     documentation_attrs.erase(documentation_remove_iter, documentation_attrs.end());
 
