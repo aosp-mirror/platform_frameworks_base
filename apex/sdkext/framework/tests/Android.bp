@@ -6,5 +6,6 @@ android_test {
         "android.test.runner",
     ],
     static_libs: [ "framework-sdkext" ],
+    test_suites: [ "general-tests" ],
     platform_apis: true,
 }
