@@ -121,10 +121,12 @@ CountMetricProducer::~CountMetricProducer() {
     VLOG("~CountMetricProducer() called");
 }
 
-void CountMetricProducer::onStateChanged(int atomId, const HashableDimensionKey& primaryKey,
-                                         int oldState, int newState) {
-    VLOG("CountMetric %lld onStateChanged State%d, key %s, %d -> %d", (long long)mMetricId, atomId,
-         primaryKey.toString().c_str(), oldState, newState);
+void CountMetricProducer::onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
+                                         const HashableDimensionKey& primaryKey, int oldState,
+                                         int newState) {
+    VLOG("CountMetric %lld onStateChanged time %lld, State%d, key %s, %d -> %d",
+         (long long)mMetricId, (long long)eventTimeNs, atomId, primaryKey.toString().c_str(),
+         oldState, newState);
 }
 
 void CountMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {

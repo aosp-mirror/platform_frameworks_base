@@ -38,13 +38,15 @@ public:
      * state groups and are responsible for mapping original state values to
      * the correct state group.
      *
+     * [eventTimeNs]: Time of the state change log event.
      * [atomId]: The id of the state atom
      * [primaryKey]: The primary field values of the state atom
      * [oldState]: Previous state value before state change
      * [newState]: Current state value after state change
      */
-    virtual void onStateChanged(int32_t atomId, const HashableDimensionKey& primaryKey,
-                                int oldState, int newState) = 0;
+    virtual void onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
+                                const HashableDimensionKey& primaryKey, int oldState,
+                                int newState) = 0;
 };
 
 }  // namespace statsd
