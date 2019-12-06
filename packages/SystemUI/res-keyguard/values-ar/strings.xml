@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"اضغط على \"القائمة\" لإلغاء التأمين."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"الشبكة مؤمّنة"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"‏ليست هناك شريحة SIM"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"‏ليست هناك شريحة SIM في الجهاز اللوحي."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"‏ليست هناك شريحة SIM في الهاتف."</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"‏أدخل شريحة SIM."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"‏شريحة SIM مفقودة أو غير قابلة للقراءة. أدخل شريحة SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"‏شريحة SIM غير قابلة للاستخدام."</string>
@@ -87,17 +85,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"اكتب رمز رقم التعريف الشخصي المكوّن من ٤ إلى ٨ أرقام."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"‏يجب أن يتضمن رمز PUK‏ ۸ أرقام أو أكثر."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"‏أعد إدخال رمز PUK الصحيح. وستؤدي المحاولات المتكررة إلى إيقاف شريحة SIM نهائيًا."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"لا يتطابق رمز رقم التعريف الشخصي"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"محاولات النقش كثيرة جدًا"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"لقد كتبت رقم التعريف الشخصي بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"لقد كتبت كلمة المرور بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"لقد رسمت نقش فتح القفل بطريقة غير صحيحة <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"أخطأت في محاولة إلغاء قفل الجهاز اللوحي <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> محاولة غير ناجحة أخرى، ستتم إعادة تعيين هذا الجهاز، ومن ثم يتم حذف جميع بياناته."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"أخطأت في محاولة إلغاء قفل الهاتف <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> محاولة غير ناجحة أخرى، ستتم إعادة تعيين هذا الهاتف، ومن ثم يتم حذف جميع بياناته."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"أخطأت في محاولة إلغاء قفل الجهاز اللوحي <xliff:g id="NUMBER">%d</xliff:g> مرة. ستتم إعادة تعيين هذا الجهاز، ومن ثم يتم حذف جميع بياناته."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"أخطأت في محاولة إلغاء قفل الهاتف <xliff:g id="NUMBER">%d</xliff:g> مرة. ستتم إعادة تعيين هذا الهاتف، ومن ثم يتم حذف جميع بياناته."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"أخطأت في محاولة إلغاء قفل الجهاز اللوحي <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> محاولة غير ناجحة أخرى، ستتم إزالة هذا المستخدم، ومن ثم يتم حذف جميع بيانات المستخدم."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"أخطأت في محاولة إلغاء قفل الهاتف <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> محاولة غير ناجحة أخرى، ستتم إزالة هذا المستخدم، ومن ثم يتم حذف جميع بيانات المستخدم."</string>
     <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
     <skip />
     <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
@@ -106,10 +97,6 @@
     <skip />
     <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
     <skip />
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"أخطأت في محاولة إلغاء قفل الجهاز اللوحي <xliff:g id="NUMBER">%d</xliff:g> مرة. ستتم إزالة الملف الشخصي للعمل، ومن ثم يتم حذف جميع بياناته."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"أخطأت في محاولة إلغاء قفل الهاتف <xliff:g id="NUMBER">%d</xliff:g> مرة. ستتم إزالة الملف الشخصي للعمل، ومن ثم يتم حذف جميع بياناته."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"لقد رسمت نقش فتح القفل بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستطالَب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات حساب بريد إلكتروني.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"لقد رسمت نقش فتح القفل بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"‏رمز \"رقم التعريف الشخصي\" لشريحة SIM غير صحيح، ويلزمك الاتصال الآن بمشغّل شبكة الجوّال لإلغاء قفل الجهاز."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="zero">‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح، ولم تتبق لديك أي محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>

@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"আনলক কৰিবলৈ মেনু টিপক।"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"নেটৱর্ক লক কৰা অৱস্থাত আছে"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"কোনো ছিম কাৰ্ড নাই"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"টেবলেটত ছিম কার্ড নাই।"</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"ফ\'নত ছিম কার্ড নাই।"</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"এখন ছিম কাৰ্ড ভৰাওক।"</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"ছিম কাৰ্ডখন নাই বা চিনাক্ত কৰিব নোৱাৰি। এখন ছিম কাৰ্ড ভৰাওক।"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"ব্যৱহাৰৰ অযোগ্য ছিম কাৰ্ড।"</string>
@@ -83,17 +81,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"৪টাৰ পৰা ৮টা সংখ্যাযুক্ত এটা পিন লিখক।"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK ক\'ডটো ৮টা বা তাতকৈ অধিক সংখ্যা থকা হ\'ব লাগিব।"</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"শুদ্ধ PUK ক\'ডটো পুনৰ দিয়ক। বাৰে বাৰে ভুল ক\'ড দিলে ছিমখন স্থায়ীভাৱে অক্ষম হ\'ব।"</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"পিন ক\'ড মিলা নাই"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"বহুতবাৰ ভুলকৈ আর্হি অঁকা হৈছে"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"আপুনি আপোনাৰ পিন <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ লিখিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>ছেকেণ্ডৰ পিছত আকৌ চেষ্টা কৰক।"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"আপুনি আপোনাৰ পাছৱৰ্ড <xliff:g id="NUMBER_0">%1$d</xliff:g>বাৰ ভুলকৈ লিখিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ছেকেণ্ডৰ পাছত আকৌ চেষ্টা কৰক।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"আপুনি আপোনাৰ আনলক আৰ্হি <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ আঁকিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>ছেকেণ্ডৰ পিছত আকৌ চেষ্টা কৰক।"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"আপুনি টেবলেটটো আনলক কৰিবলৈ <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে আৰু <xliff:g id="NUMBER_1">%2$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিলে টেবলেটটো ৰিছেট কৰা হ\'ব, যি কার্যই টেবলেটটোত থকা সকলো ডেটা মচিব।"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"আপুনি ফ\'নটো আনলক কৰিবলৈ <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে আৰু <xliff:g id="NUMBER_1">%2$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিলে ফ\'নটো ৰিছেট কৰা হ\'ব, যি কার্যই ফ\'নটোত থকা সকলো ডেটা মচিব।"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"আপুনি টেবলেটটো আনলক কৰিবলৈ <xliff:g id="NUMBER">%d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে। এই টেবলেটটো ৰিছেট কৰা হ\'ব, যি কার্যই ইয়াৰ সকলো ডেটা মচিব।"</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"আপুনি ফ\'নটো আনলক কৰিবলৈ <xliff:g id="NUMBER">%d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে। এই ফ\'নটো ৰিছেট কৰা হ\'ব, যিয়ে ইয়াৰ সকলো ডেটা মচিব।"</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"আপুনি টেবলেটটো আনলক কৰিবলৈ <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে আৰু <xliff:g id="NUMBER_1">%2$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিলে এই ব্যৱহাৰকাৰীক আঁতৰোৱা হ\'ব, যিয়ে ব্যৱহাৰকাৰীৰ সকলো ডেটা মচিব।"</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"আপুনি ফ\'নটো আনলক কৰিবলৈ <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে। আৰু <xliff:g id="NUMBER_1">%2$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিলে এই ব্যৱহাৰকাৰীক আঁতৰোৱা হ\'ব, যিয়ে ব্যৱহাৰকাৰীৰ সকলো ডেটা মচিব।"</string>
     <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
     <skip />
     <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
@@ -102,10 +93,6 @@
     <skip />
     <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
     <skip />
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"আপুনি টেবলেটটো আনলক কৰিবলৈ <xliff:g id="NUMBER">%d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে। আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলটো আঁতৰোৱা হ\'ব, যি কার্যই প্ৰ\'ফাইলটোৰ সকলো ডেটা মচিব।"</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"আপুনি ফ\'নটো আনলক কৰিবলৈ <xliff:g id="NUMBER">%d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে। আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলটো আঁতৰোৱা হ\'ব, যিয়ে প্ৰ\'ফাইলটোৰ সকলো ডেটা মচিব।"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"আপুনি আপোনাৰ আনলক আৰ্হিটো <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ আঁকিছে। <xliff:g id="NUMBER_1">%2$d</xliff:g>তকৈ বেছি বাৰ ভুল আৰ্হি আঁকিলে আপোনাৰ টেবলেটটো কোনো একাউণ্টৰ জৰিয়তে আনলক কৰিবলৈ কোৱা হ\'ব।\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> ছেকেণ্ডৰ পিছত আকৌ চেষ্টা কৰক।"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"আপুনি আপোনাৰ আনলক আৰ্হিটো <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ আঁকিছে। <xliff:g id="NUMBER_1">%2$d</xliff:g>তকৈ বেছি বাৰ ভুল আৰ্হি আঁকিলে আপোনাৰ ফ\'নটো কোনো একাউণ্টৰ জৰিয়তে আনলক কৰিবলৈ কোৱা হ\'ব।\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> ছেকেণ্ডৰ পিছত আকৌ চেষ্টা কৰক।"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ছিমৰ ভুল পিন ক\'ড, আপোনাৰ ডিভাইচটো আনলক কৰিবলৈ আপুনি এতিয়া আপোনাৰ বাহকৰ সৈতে যোগাযোগ কৰিবই লাগিব।"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="one">ছিমৰ ভুল পিন ক’ড, আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g> বাৰ প্ৰয়াস কৰিব পাৰিব।</item>

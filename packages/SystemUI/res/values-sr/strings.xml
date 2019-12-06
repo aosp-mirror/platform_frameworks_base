@@ -963,6 +963,4 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Навигација система је ажурирана. Да бисте унели измене, идите у Подешавања."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Идите у Подешавања да бисте ажурирали навигацију система"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Стање приправности"</string>
-    <string name="inattentive_sleep_warning_message" product="tv" msgid="6017523991455860482">"Android TV ће се ускоро искључити. Притисните дугме да би остао укључен."</string>
-    <string name="inattentive_sleep_warning_message" product="default" msgid="4866963937818527643">"Уређај ће се ускоро искључити. Притисните да би остао укључен."</string>
 </resources>

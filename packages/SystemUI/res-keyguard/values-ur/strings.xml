@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"غیر مقفل کرنے کیلئے مینو دبائیں۔"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"نیٹ ورک مقفل ہو گیا"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"‏کوئی SIM کارڈ نہیں ہے"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"‏ٹیبلیٹ میں کوئی SIM کارڈ نہیں ہے۔"</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"‏فون میں کوئی SIM کارڈ نہيں ہے۔"</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"‏ایک SIM کارڈ داخل کریں۔"</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"‏SIM کارڈ غائب ہے یا پڑھنے کے قابل نہیں ہے۔ ایک SIM کارڈ داخل کریں۔"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"‏ناقابل استعمال SIM کارڈ۔"</string>
@@ -83,17 +81,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"‏ایسا PIN ٹائپ کریں جو 4 تا 8 اعداد پر مشتمل ہو۔"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"‏PUK کوڈ 8 یا زائد اعداد پر مشتمل ہونا چاہیے۔"</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"‏صحیح PUK کوڈ دوبارہ درج کریں۔ بار بار کی کوششیں SIM کو مستقل طور پر غیر فعال کر دیں گی۔"</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"‏PIN کوڈز مماثل نہیں ہیں"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"پیٹرن کی بہت ساری کوششیں"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"‏آپ نے اپنا PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"آپ نے اپنا پاسورڈ <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"آپ نے ٹیبلیٹ کو غیر مقفل کرنے کیلئے <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے کوشش کی ہے۔ <xliff:g id="NUMBER_1">%2$d</xliff:g> مزید ناکام کوششوں کے بعد، اس ٹیبلیٹ کو دوبارہ ترتیب دے دیا جائے گا، جس سے اس کا سبھی ڈیٹا حذف ہو جائے گا۔"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"آپ نے فون کو غیر مقفل کرنے کیلئے <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے کوشش کی ہے۔ <xliff:g id="NUMBER_1">%2$d</xliff:g> مزید ناکام کوششوں کے بعد، اس فون کو دوبارہ ترتیب دے دیا جائے گا، جس سے اس کا سبھی ڈیٹا حذف ہو جائے گا۔"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"آپ نے ٹیبلیٹ کو غیر مقفل کرنے کیلئے <xliff:g id="NUMBER">%d</xliff:g> بار غلط طریقے سے کوشش کی ہے۔ اس ٹیبلیٹ کو دوبارہ ترتیب دے دیا جائے گا، جس سے اس کا سبھی ڈیٹا حذف ہو جائے گا۔"</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"آپ نے فون کو غیر مقفل کرنے کیلئے <xliff:g id="NUMBER">%d</xliff:g> بار غلط طریقے سے کوشش کی ہے۔ اس فون کو دوبارہ ترتیب دے دیا جائے گا، جس سے اس کا سبھی ڈیٹا حذف ہو جائے گا۔"</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"آپ نے ٹیبلیٹ کو غیر مقفل کرنے کیلئے <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے کوشش کی ہے۔ <xliff:g id="NUMBER_1">%2$d</xliff:g> مزید ناکام کوششوں کے بعد، اس صارف کو ہٹا دیا جائے گا، جس سے صارف کا سبھی ڈیٹا حذف ہو جائے گا۔"</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"آپ نے فون کو غیر مقفل کرنے کیلئے <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے کوشش کی ہے۔ <xliff:g id="NUMBER_1">%2$d</xliff:g> مزید ناکام کوششوں کے بعد، اس صارف کو ہٹا دیا جائے گا، جس سے صارف کا سبھی ڈیٹا حذف ہو جائے گا۔"</string>
     <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
     <skip />
     <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
@@ -102,10 +93,6 @@
     <skip />
     <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
     <skip />
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"آپ نے ٹیبلیٹ کو غیر مقفل کرنے کیلئے <xliff:g id="NUMBER">%d</xliff:g> بار غلط طریقے سے کوشش کی ہے۔ دفتری پروفائل ہٹا دیا جائے گا، جس سے پروفائل کا سبھی ڈیٹا حذف ہو جائے گا۔"</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"آپ نے فون کو غیر مقفل کرنے کیلئے <xliff:g id="NUMBER">%d</xliff:g> بار غلط طریقے سے کوشش کی ہے۔ دفتری پروفائل ہٹا دیا جائے گا، جس سے پروفائل کا سبھی ڈیٹا حذف ہو جائے گا۔"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ <xliff:g id="NUMBER_1">%2$d</xliff:g> مزید ناکام کوششوں کے بعد، آپ سے ایک ای میل اکاؤنٹ استعمال کرکے اپنا ٹیبلیٹ غیر مقفل کرنے کو کہا جائے گا۔\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ <xliff:g id="NUMBER_1">%2$d</xliff:g> مزید ناکام کوششوں کے بعد، آپ سے ایک ای میل اکاؤنٹ استعمال کرکے اپنا فون غیر مقفل کرنے کو کہا جائے گا۔\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"‏غلط SIM PIN کوڈ، اب آپ کو اپنا آلہ غیر مقفل کرنے کیلئے اپنے کیریئر سے رابطہ کرنا ہوگا۔"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="other">‏غلط SIM PIN کوڈ، آپ کے پاس <xliff:g id="NUMBER_1">%d</xliff:g> کوششیں بچی ہیں۔</item>

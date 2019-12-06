@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"กด \"เมนู\" เพื่อปลดล็อก"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"เครือข่ายถูกล็อก"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"ไม่มีซิมการ์ด"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"ไม่มีซิมการ์ดในแท็บเล็ต"</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"ไม่มีซิมการ์ดในโทรศัพท์"</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"ใส่ซิมการ์ด"</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"ไม่มีซิมการ์ดหรือไม่สามารถอ่านได้ โปรดใส่ซิมการ์ด"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"ซิมการ์ดใช้ไม่ได้"</string>
@@ -83,17 +81,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"พิมพ์ PIN ซึ่งเป็นเลข 4-8 หลัก"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"รหัส PUK ต้องเป็นตัวเลขอย่างน้อย 8 หลัก"</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"ใส่รหัส PUK ที่ถูกต้องอีกครั้ง การพยายามซ้ำหลายครั้งจะทำให้ซิมการ์ดถูกปิดใช้งานอย่างถาวร"</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"รหัส PIN ไม่ตรง"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"ลองหลายรูปแบบมากเกินไป"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"คุณพิมพ์ PIN ไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว \n\nโปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%2$d</xliff:g> วินาที"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"คุณพิมพ์รหัสผ่านไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว \n\nโปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%2$d</xliff:g> วินาที"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว \n\nโปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> วินาที"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"คุณปลดล็อกแท็บเล็ตไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากพยายามไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะรีเซ็ตแท็บเล็ตเครื่องนี้ ซึ่งจะเป็นการลบข้อมูลทั้งหมดในเครื่อง"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"คุณปลดล็อกโทรศัพท์ไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากพยายามไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะรีเซ็ตโทรศัพท์เครื่องนี้ ซึ่งจะเป็นการลบข้อมูลทั้งหมดในเครื่อง"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"คุณปลดล็อกแท็บเล็ตไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้ง ระบบจะรีเซ็ตแท็บเล็ตเครื่องนี้ ซึ่งจะเป็นการลบข้อมูลทั้งหมดในเครื่อง"</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"คุณปลดล็อกโทรศัพท์ไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้ง ระบบจะรีเซ็ตโทรศัพท์เครื่องนี้ ซึ่งจะเป็นการลบข้อมูลทั้งหมดในเครื่อง"</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"คุณปลดล็อกแท็บเล็ตไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากพยายามไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะนำผู้ใช้รายนี้ออก ซึ่งจะเป็นการลบข้อมูลทั้งหมดของผู้ใช้"</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"คุณปลดล็อกโทรศัพท์ไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากพยายามไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะนำผู้ใช้รายนี้ออก ซึ่งจะเป็นการลบข้อมูลทั้งหมดของผู้ใช้"</string>
     <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
     <skip />
     <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
@@ -102,10 +93,6 @@
     <skip />
     <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
     <skip />
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"คุณปลดล็อกแท็บเล็ตไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้ง ระบบจะนำโปรไฟล์งานออก ซึ่งจะเป็นการลบข้อมูลโปรไฟล์ทั้งหมด"</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"คุณปลดล็อกโทรศัพท์ไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้ง ระบบจะนำโปรไฟล์งานออก ซึ่งจะเป็นการลบข้อมูลโปรไฟล์ทั้งหมด"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากพยายามไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้บัญชีอีเมล\n\n โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%3$d</xliff:g> วินาที"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้ง หากพยายามไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้บัญชีอีเมล\n\n โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%3$d</xliff:g> วินาที"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"รหัส PIN ของซิมไม่ถูกต้อง ตอนนี้คุณต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์ของคุณ"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="other">รหัส PIN ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง</item>
