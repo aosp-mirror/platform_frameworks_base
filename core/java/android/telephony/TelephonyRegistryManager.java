@@ -463,6 +463,19 @@ public class TelephonyRegistryManager {
     }
 
     /**
+     * Sim activation type: voice
+     * @see #notifyVoiceActivationStateChanged
+     * @hide
+     */
+    public static final int SIM_ACTIVATION_TYPE_VOICE = 0;
+    /**
+     * Sim activation type: data
+     * @see #notifyDataActivationStateChanged
+     * @hide
+     */
+    public static final int SIM_ACTIVATION_TYPE_DATA = 1;
+
+    /**
      * Notify data activation state changed on certain subscription.
      * @see TelephonyManager#getDataActivationState()
      *
@@ -477,7 +490,7 @@ public class TelephonyRegistryManager {
         @SimActivationState int activationState) {
         try {
             sRegistry.notifySimActivationStateChangedForPhoneId(slotIndex, subId,
-                TelephonyManager.SIM_ACTIVATION_TYPE_DATA, activationState);
+                    SIM_ACTIVATION_TYPE_DATA, activationState);
         } catch (RemoteException ex) {
             // system process is dead
         }
@@ -498,7 +511,7 @@ public class TelephonyRegistryManager {
         @SimActivationState int activationState) {
         try {
             sRegistry.notifySimActivationStateChangedForPhoneId(slotIndex, subId,
-                TelephonyManager.SIM_ACTIVATION_TYPE_VOICE, activationState);
+                    SIM_ACTIVATION_TYPE_VOICE, activationState);
         } catch (RemoteException ex) {
             // system process is dead
         }
