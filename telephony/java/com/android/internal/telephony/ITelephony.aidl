@@ -2088,6 +2088,8 @@ interface ITelephony {
 
     boolean isApnMetered(int apnType, int subId);
 
+    boolean isMvnoMatched(int subId, int mvnoType, String mvnoMatchData);
+
     /**
      * Enqueue a pending sms Consumer, which will answer with the user specified selection for an
      * outgoing SmsManager operation.
