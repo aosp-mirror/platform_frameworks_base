@@ -45,6 +45,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.system.ErrnoException;
@@ -97,9 +98,12 @@ public final class PinnerService extends SystemService {
     private static final int KEY_HOME = 1;
     private static final int KEY_ASSISTANT = 2;
 
-    // Pin the camera application.
-    private static boolean PROP_PIN_CAMERA = SystemProperties.getBoolean(
-            "pinner.pin_camera", true);
+    // Pin the camera application. Default to the system property only if the experiment phenotype
+    // property is not set.
+    private static boolean PROP_PIN_CAMERA =
+            DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
+                                    "pin_camera",
+                                    SystemProperties.getBoolean("pinner.pin_camera", true));
     // Pin using pinlist.meta when pinning apps.
     private static boolean PROP_PIN_PINLIST = SystemProperties.getBoolean(
             "pinner.use_pinlist", true);
