@@ -31,7 +31,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.LinkProperties;
-import android.net.NetworkCapabilities;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -260,7 +259,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private final LocalLog mListenLog = new LocalLog(100);
 
-    private PreciseDataConnectionState[] mPreciseDataConnectionState;
+    // Per-phoneMap of APN Type to DataConnectionState
+    private List<Map<String, PreciseDataConnectionState>> mPreciseDataConnectionStates =
+            new ArrayList<Map<String, PreciseDataConnectionState>>();
 
     // Nothing here yet, but putting it here in case we want to add more in the future.
     static final int ENFORCE_COARSE_LOCATION_PERMISSION_MASK = 0;
@@ -415,7 +416,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mCallQuality = copyOf(mCallQuality, mNumPhones);
         mCallNetworkType = copyOf(mCallNetworkType, mNumPhones);
         mCallAttributes = copyOf(mCallAttributes, mNumPhones);
-        mPreciseDataConnectionState = copyOf(mPreciseDataConnectionState, mNumPhones);
         mOutgoingCallEmergencyNumber = copyOf(mOutgoingCallEmergencyNumber, mNumPhones);
         mOutgoingSmsEmergencyNumber = copyOf(mOutgoingSmsEmergencyNumber, mNumPhones);
 
@@ -423,6 +423,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (mNumPhones < oldNumPhones) {
             cutListToSize(mCellInfo, mNumPhones);
             cutListToSize(mImsReasonInfo, mNumPhones);
+            cutListToSize(mPreciseDataConnectionStates, mNumPhones);
             return;
         }
 
@@ -454,7 +455,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mRingingCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
             mForegroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
             mBackgroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
-            mPreciseDataConnectionState[i] = new PreciseDataConnectionState();
+            mPreciseDataConnectionStates.add(new HashMap<String, PreciseDataConnectionState>());
         }
 
         // Note that location can be null for non-phone builds like
@@ -516,7 +517,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mCallQuality = new CallQuality[numPhones];
         mCallNetworkType = new int[numPhones];
         mCallAttributes = new CallAttributes[numPhones];
-        mPreciseDataConnectionState = new PreciseDataConnectionState[numPhones];
+        mPreciseDataConnectionStates = new ArrayList<>();
         mCellInfo = new ArrayList<>();
         mImsReasonInfo = new ArrayList<>();
         mEmergencyNumberList = new HashMap<>();
@@ -549,7 +550,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mRingingCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
             mForegroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
             mBackgroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
-            mPreciseDataConnectionState[i] = new PreciseDataConnectionState();
+            mPreciseDataConnectionStates.add(new HashMap<String, PreciseDataConnectionState>());
         }
 
         // Note that location can be null for non-phone builds like
@@ -922,8 +923,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                     if ((events & PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE) != 0) {
                         try {
-                            r.callback.onPreciseDataConnectionStateChanged(
-                                    mPreciseDataConnectionState[phoneId]);
+                            for (PreciseDataConnectionState pdcs
+                                    : mPreciseDataConnectionStates.get(phoneId).values()) {
+                                r.callback.onPreciseDataConnectionStateChanged(pdcs);
+                            }
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -937,7 +940,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                     if ((events & PhoneStateListener.LISTEN_VOICE_ACTIVATION_STATE) !=0) {
                         try {
-                            r.callback.onVoiceActivationStateChanged(mVoiceActivationState[phoneId]);
+                            r.callback.onVoiceActivationStateChanged(
+                                    mVoiceActivationState[phoneId]);
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -1496,20 +1500,38 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyDataConnectionForSubscriber(int phoneId, int subId, int state,
-                                                  boolean isDataAllowed,
-                                                  String apn, String apnType,
-            LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
-            int networkType, boolean roaming) {
+    /**
+     * Send a notification to registrants that the data connection state has changed.
+     *
+     * @param phoneId the phoneId carrying the data connection
+     * @param subId the subscriptionId for the data connection
+     * @param apnType the APN type that triggered a change in the data connection
+     * @param preciseState a PreciseDataConnectionState that has info about the data connection
+     */
+    public void notifyDataConnectionForSubscriber(
+            int phoneId, int subId, String apnType, PreciseDataConnectionState preciseState) {
         if (!checkNotifyPermission("notifyDataConnection()" )) {
             return;
         }
+
+        String apn = "";
+        int state = TelephonyManager.DATA_UNKNOWN;
+        int networkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        LinkProperties linkProps = null;
+
+        if (preciseState != null) {
+            apn = preciseState.getDataConnectionApn();
+            state = preciseState.getState();
+            networkType = preciseState.getNetworkType();
+            linkProps = preciseState.getDataConnectionLinkProperties();
+        }
         if (VDBG) {
             log("notifyDataConnectionForSubscriber: subId=" + subId
-                + " state=" + state + " isDataAllowed=" + isDataAllowed
-                + "' apn='" + apn + "' apnType=" + apnType + " networkType=" + networkType
-                + " mRecords.size()=" + mRecords.size());
+                    + " state=" + state + "' apn='" + apn
+                    + "' apnType=" + apnType + " networkType=" + networkType
+                    + "' preciseState=" + preciseState);
         }
+
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 // We only call the callback when the change is for default APN type.
@@ -1541,30 +1563,48 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     mDataConnectionState[phoneId] = state;
                     mDataConnectionNetworkType[phoneId] = networkType;
                 }
-                mPreciseDataConnectionState[phoneId] = new PreciseDataConnectionState(
-                        state, networkType,
-                        ApnSetting.getApnTypesBitmaskFromString(apnType), apn,
-                        linkProperties, DataFailCause.NONE);
-                for (Record r : mRecords) {
-                    if (r.matchPhoneStateListenerEvent(
-                            PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)
-                            && idMatch(r.subId, subId, phoneId)) {
-                        try {
-                            r.callback.onPreciseDataConnectionStateChanged(
-                                    mPreciseDataConnectionState[phoneId]);
-                        } catch (RemoteException ex) {
-                            mRemoveList.add(r.binder);
+
+                boolean needsNotify = false;
+                // State has been cleared for this APN Type
+                if (preciseState == null) {
+                    // We try clear the state and check if the state was previously not cleared
+                    needsNotify = mPreciseDataConnectionStates.get(phoneId).remove(apnType) != null;
+                } else {
+                    // We need to check to see if the state actually changed
+                    PreciseDataConnectionState oldPreciseState =
+                            mPreciseDataConnectionStates.get(phoneId).put(apnType, preciseState);
+                    needsNotify = !preciseState.equals(oldPreciseState);
+                }
+
+                if (needsNotify) {
+                    for (Record r : mRecords) {
+                        if (r.matchPhoneStateListenerEvent(
+                                PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)
+                                && idMatch(r.subId, subId, phoneId)) {
+                            try {
+                                r.callback.onPreciseDataConnectionStateChanged(preciseState);
+                            } catch (RemoteException ex) {
+                                mRemoveList.add(r.binder);
+                            }
                         }
                     }
                 }
             }
             handleRemoveListLocked();
         }
-        broadcastDataConnectionStateChanged(state, isDataAllowed, apn, apnType, linkProperties,
-                networkCapabilities, roaming, subId);
+
+        broadcastDataConnectionStateChanged(state, apn, apnType, subId);
     }
 
-    public void notifyDataConnectionFailedForSubscriber(int phoneId, int subId, String apnType) {
+    /**
+     * Stub to satisfy the ITelephonyRegistry aidl interface; do not use this function.
+     * @see #notifyDataConnectionFailedForSubscriber
+     */
+    public void notifyDataConnectionFailed(String apnType) {
+        loge("This function should not be invoked");
+    }
+
+    private void notifyDataConnectionFailedForSubscriber(int phoneId, int subId, String apnType) {
         if (!checkNotifyPermission("notifyDataConnectionFailed()")) {
             return;
         }
@@ -1574,17 +1614,20 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
-                mPreciseDataConnectionState[phoneId] = new PreciseDataConnectionState(
-                        TelephonyManager.DATA_UNKNOWN,TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                        ApnSetting.getApnTypesBitmaskFromString(apnType), null, null,
-                        DataFailCause.NONE);
+                mPreciseDataConnectionStates.get(phoneId).put(
+                        apnType,
+                        new PreciseDataConnectionState(
+                                TelephonyManager.DATA_UNKNOWN,
+                                TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                                ApnSetting.getApnTypesBitmaskFromString(apnType), null, null,
+                                DataFailCause.NONE));
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
                             PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)
                             && idMatch(r.subId, subId, phoneId)) {
                         try {
                             r.callback.onPreciseDataConnectionStateChanged(
-                                    mPreciseDataConnectionState[phoneId]);
+                                    mPreciseDataConnectionStates.get(phoneId).get(apnType));
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
@@ -1772,25 +1815,32 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyPreciseDataConnectionFailed()")) {
             return;
         }
+
+        // precise notify invokes imprecise notify
+        notifyDataConnectionFailedForSubscriber(phoneId, subId, apnType);
+
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
-                mPreciseDataConnectionState[phoneId] = new PreciseDataConnectionState(
-                        TelephonyManager.DATA_UNKNOWN, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                        ApnSetting.getApnTypesBitmaskFromString(apnType), apn, null, failCause);
+                mPreciseDataConnectionStates.get(phoneId).put(
+                        apnType,
+                        new PreciseDataConnectionState(
+                                TelephonyManager.DATA_UNKNOWN,
+                                TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                                ApnSetting.getApnTypesBitmaskFromString(apnType), null, null,
+                                failCause));
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
                             PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)
                             && idMatch(r.subId, subId, phoneId)) {
                         try {
                             r.callback.onPreciseDataConnectionStateChanged(
-                                    mPreciseDataConnectionState[phoneId]);
+                                    mPreciseDataConnectionStates.get(phoneId).get(apnType));
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
                     }
                 }
             }
-
             handleRemoveListLocked();
         }
     }
@@ -2048,7 +2098,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
@@ -2087,7 +2136,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mCallQuality=" + mCallQuality[i]);
                 pw.println("mCallAttributes=" + mCallAttributes[i]);
                 pw.println("mCallNetworkType=" + mCallNetworkType[i]);
-                pw.println("mPreciseDataConnectionState=" + mPreciseDataConnectionState[i]);
+                pw.println("mPreciseDataConnectionStates=" + mPreciseDataConnectionStates.get(i));
                 pw.println("mOutgoingCallEmergencyNumber=" + mOutgoingCallEmergencyNumber[i]);
                 pw.println("mOutgoingSmsEmergencyNumber=" + mOutgoingSmsEmergencyNumber[i]);
                 pw.decreaseIndent();
@@ -2247,29 +2296,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    private void broadcastDataConnectionStateChanged(int state, boolean isDataAllowed, String apn,
-                                                     String apnType, LinkProperties linkProperties,
-                                                     NetworkCapabilities networkCapabilities,
-                                                     boolean roaming, int subId) {
+    private void broadcastDataConnectionStateChanged(int state, String apn,
+                                                     String apnType, int subId) {
         // Note: not reporting to the battery stats service here, because the
         // status bar takes care of that after taking into account all of the
         // required info.
         Intent intent = new Intent(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
         intent.putExtra(TelephonyManager.EXTRA_STATE, dataStateToString(state));
-        if (!isDataAllowed) {
-            intent.putExtra(PhoneConstants.NETWORK_UNAVAILABLE_KEY, true);
-        }
-        if (linkProperties != null) {
-            intent.putExtra(PhoneConstants.DATA_LINK_PROPERTIES_KEY, linkProperties);
-            String iface = linkProperties.getInterfaceName();
-            if (iface != null) {
-                intent.putExtra(PhoneConstants.DATA_IFACE_NAME_KEY, iface);
-            }
-        }
-        if (networkCapabilities != null) {
-            intent.putExtra(PhoneConstants.DATA_NETWORK_CAPABILITIES_KEY, networkCapabilities);
-        }
-        if (roaming) intent.putExtra(PhoneConstants.DATA_NETWORK_ROAMING_KEY, true);
 
         intent.putExtra(PhoneConstants.DATA_APN_KEY, apn);
         intent.putExtra(PhoneConstants.DATA_APN_TYPE_KEY, apnType);
