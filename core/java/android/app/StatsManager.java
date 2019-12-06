@@ -51,12 +51,13 @@ public final class StatsManager {
     private static final String TAG = "StatsManager";
     private static final boolean DEBUG = false;
 
+    private static final Object sLock = new Object();
     private final Context mContext;
 
-    @GuardedBy("this")
+    @GuardedBy("sLock")
     private IStatsManager mService;
 
-    @GuardedBy("this")
+    @GuardedBy("sLock")
     private IStatsCompanionService mStatsCompanion;
 
     /**
@@ -125,7 +126,7 @@ public final class StatsManager {
      */
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public void addConfig(long configKey, byte[] config) throws StatsUnavailableException {
-        synchronized (this) {
+        synchronized (sLock) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 // can throw IllegalArgumentException
@@ -162,7 +163,7 @@ public final class StatsManager {
      */
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public void removeConfig(long configKey) throws StatsUnavailableException {
-        synchronized (this) {
+        synchronized (sLock) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 service.removeConfiguration(configKey, mContext.getOpPackageName());
@@ -223,7 +224,7 @@ public final class StatsManager {
     public void setBroadcastSubscriber(
             PendingIntent pendingIntent, long configKey, long subscriberId)
             throws StatsUnavailableException {
-        synchronized (this) {
+        synchronized (sLock) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (pendingIntent != null) {
@@ -277,7 +278,7 @@ public final class StatsManager {
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public void setFetchReportsOperation(PendingIntent pendingIntent, long configKey)
             throws StatsUnavailableException {
-        synchronized (this) {
+        synchronized (sLock) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (pendingIntent == null) {
@@ -315,7 +316,7 @@ public final class StatsManager {
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public @NonNull long[] setActiveConfigsChangedOperation(@Nullable PendingIntent pendingIntent)
             throws StatsUnavailableException {
-        synchronized (this) {
+        synchronized (sLock) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (pendingIntent == null) {
@@ -363,7 +364,7 @@ public final class StatsManager {
      */
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public byte[] getReports(long configKey) throws StatsUnavailableException {
-        synchronized (this) {
+        synchronized (sLock) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 return service.getData(configKey, mContext.getOpPackageName());
@@ -400,7 +401,7 @@ public final class StatsManager {
      */
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public byte[] getStatsMetadata() throws StatsUnavailableException {
-        synchronized (this) {
+        synchronized (sLock) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 return service.getMetadata(mContext.getOpPackageName());
@@ -435,7 +436,7 @@ public final class StatsManager {
     @RequiresPermission(allOf = {DUMP, PACKAGE_USAGE_STATS})
     public long[] getRegisteredExperimentIds()
             throws StatsUnavailableException {
-        synchronized (this) {
+        synchronized (sLock) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
@@ -472,7 +473,7 @@ public final class StatsManager {
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public void setPullerCallback(int atomTag, IStatsPullerCallback callback)
             throws StatsUnavailableException {
-        synchronized (this) {
+        synchronized (sLock) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (callback == null) {
@@ -515,7 +516,7 @@ public final class StatsManager {
         if (additiveFields == null) {
             additiveFields = new int[0];
         }
-        synchronized (this) {
+        synchronized (sLock) {
             IStatsCompanionService service = getIStatsCompanionServiceLocked();
             PullAtomCallbackInternal rec =
                     new PullAtomCallbackInternal(atomTag, callback, executor);
@@ -649,13 +650,13 @@ public final class StatsManager {
     private class StatsdDeathRecipient implements IBinder.DeathRecipient {
         @Override
         public void binderDied() {
-            synchronized (this) {
+            synchronized (sLock) {
                 mService = null;
             }
         }
     }
 
-    @GuardedBy("this")
+    @GuardedBy("sLock")
     private IStatsManager getIStatsManagerLocked() throws StatsUnavailableException {
         if (mService != null) {
             return mService;
@@ -672,7 +673,7 @@ public final class StatsManager {
         return mService;
     }
 
-    @GuardedBy("this")
+    @GuardedBy("sLock")
     private IStatsCompanionService getIStatsCompanionServiceLocked() {
         if (mStatsCompanion != null) {
             return mStatsCompanion;
