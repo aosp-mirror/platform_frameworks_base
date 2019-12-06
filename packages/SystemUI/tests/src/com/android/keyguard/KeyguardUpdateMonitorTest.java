@@ -34,12 +34,16 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
@@ -517,6 +521,52 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         mKeyguardUpdateMonitor.handleUserRemoved(user);
         assertThat(mKeyguardUpdateMonitor.isTrustUsuallyManaged(user)).isFalse();
+    }
+
+    @Test
+    public void testSecondaryLockscreenRequirement() {
+        int user = KeyguardUpdateMonitor.getCurrentUser();
+        String packageName = "fake.test.package";
+        String cls = "FakeService";
+        ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.packageName = packageName;
+        serviceInfo.name = cls;
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.serviceInfo = serviceInfo;
+        when(mPackageManager.resolveService(any(Intent.class), eq(0))).thenReturn(resolveInfo);
+        when(mDevicePolicyManager.isSecondaryLockscreenEnabled(eq(user))).thenReturn(true, false);
+
+        // Initially null.
+        assertThat(mKeyguardUpdateMonitor.getSecondaryLockscreenRequirement(user)).isNull();
+
+        // Set non-null after DPM change.
+        setBroadcastReceiverPendingResult(mKeyguardUpdateMonitor.mBroadcastAllReceiver);
+        Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+        mKeyguardUpdateMonitor.mBroadcastAllReceiver.onReceive(getContext(), intent);
+        mTestableLooper.processAllMessages();
+
+        Intent storedIntent = mKeyguardUpdateMonitor.getSecondaryLockscreenRequirement(user);
+        assertThat(storedIntent.getComponent().getClassName()).isEqualTo(cls);
+        assertThat(storedIntent.getComponent().getPackageName()).isEqualTo(packageName);
+
+        // Back to null after another DPM change.
+        mKeyguardUpdateMonitor.mBroadcastAllReceiver.onReceive(getContext(), intent);
+        mTestableLooper.processAllMessages();
+        assertThat(mKeyguardUpdateMonitor.getSecondaryLockscreenRequirement(user)).isNull();
+    }
+
+    private void setBroadcastReceiverPendingResult(BroadcastReceiver receiver) {
+        BroadcastReceiver.PendingResult pendingResult =
+                new BroadcastReceiver.PendingResult(Activity.RESULT_OK,
+                        "resultData",
+                        /* resultExtras= */ null,
+                        BroadcastReceiver.PendingResult.TYPE_UNREGISTERED,
+                        /* ordered= */ true,
+                        /* sticky= */ false,
+                        /* token= */ null,
+                        UserHandle.myUserId(),
+                        /* flags= */ 0);
+        receiver.setPendingResult(pendingResult);
     }
 
     private Intent putPhoneInfo(Intent intent, Bundle data, Boolean simInited) {

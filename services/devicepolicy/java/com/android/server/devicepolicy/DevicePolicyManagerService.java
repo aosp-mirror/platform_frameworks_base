@@ -370,6 +370,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private static final String TAG_PROTECTED_PACKAGES = "protected-packages";
 
+    private static final String TAG_SECONDARY_LOCK_SCREEN = "secondary-lock-screen";
+
     private static final int REQUEST_EXPIRE_PASSWORD = 5571;
 
     private static final long MS_PER_DAY = TimeUnit.DAYS.toMillis(1);
@@ -770,6 +772,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         long mLastNetworkLogsRetrievalTime = -1;
 
         boolean mCurrentInputMethodSet = false;
+
+        boolean mSecondaryLockscreenEnabled = false;
 
         // TODO(b/35385311): Keep track of metadata in TrustedCertificateStore instead.
         Set<String> mOwnerInstalledCaCerts = new ArraySet<>();
@@ -3322,6 +3326,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 out.endTag(null, TAG_LOCK_TASK_FEATURES);
             }
 
+            if (policy.mSecondaryLockscreenEnabled) {
+                out.startTag(null, TAG_SECONDARY_LOCK_SCREEN);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(true));
+                out.endTag(null, TAG_SECONDARY_LOCK_SCREEN);
+            }
+
             if (policy.mStatusBarDisabled) {
                 out.startTag(null, TAG_STATUS_BAR);
                 out.attribute(null, ATTR_DISABLED, Boolean.toString(policy.mStatusBarDisabled));
@@ -3570,6 +3580,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     policy.mLockTaskPackages.add(parser.getAttributeValue(null, "name"));
                 } else if (TAG_LOCK_TASK_FEATURES.equals(tag)) {
                     policy.mLockTaskFeatures = Integer.parseInt(
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_SECONDARY_LOCK_SCREEN.equals(tag)) {
+                    policy.mSecondaryLockscreenEnabled = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_STATUS_BAR.equals(tag)) {
                     policy.mStatusBarDisabled = Boolean.parseBoolean(
@@ -8601,6 +8614,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // Clear delegations.
         policy.mDelegationMap.clear();
         policy.mStatusBarDisabled = false;
+        policy.mSecondaryLockscreenEnabled = false;
         policy.mUserProvisioningState = DevicePolicyManager.STATE_USER_UNMANAGED;
         policy.mAffiliationIds.clear();
         policy.mLockTaskPackages.clear();
@@ -11150,6 +11164,33 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             ActiveAdmin admin = getProfileOwnerAdminLocked(userId);
             return (admin != null) ? admin.disableBluetoothContactSharing : false;
+        }
+    }
+
+    @Override
+    public void setSecondaryLockscreenEnabled(ComponentName who, boolean enabled) {
+        enforceCanSetSecondaryLockscreenEnabled(who);
+        synchronized (getLockObject()) {
+            final int userId = mInjector.userHandleGetCallingUserId();
+            DevicePolicyData policy = getUserData(userId);
+            policy.mSecondaryLockscreenEnabled = enabled;
+            saveSettingsLocked(userId);
+        }
+    }
+
+    @Override
+    public boolean isSecondaryLockscreenEnabled(int userId) {
+        synchronized (getLockObject()) {
+            return getUserData(userId).mSecondaryLockscreenEnabled;
+        }
+    }
+
+    private void enforceCanSetSecondaryLockscreenEnabled(ComponentName who) {
+        enforceProfileOrDeviceOwner(who);
+        final int userId = mInjector.userHandleGetCallingUserId();
+        if (isManagedProfile(userId)) {
+            throw new SecurityException(
+                    "User " + userId + " is not allowed to call setSecondaryLockscreenEnabled");
         }
     }
 

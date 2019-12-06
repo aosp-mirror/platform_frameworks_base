@@ -2384,6 +2384,13 @@ public class DevicePolicyManager {
     public static final int MAX_PASSWORD_LENGTH = 16;
 
     /**
+     * Service Action: Service implemented by a device owner or profile owner to provide a
+     * secondary lockscreen.
+     */
+    public static final String ACTION_BIND_SECONDARY_LOCKSCREEN_SERVICE =
+            "android.app.action.BIND_SECONDARY_LOCKSCREEN_SERVICE";
+
+    /**
      * Return true if the given administrator component is currently active (enabled) in the system.
      *
      * @param admin The administrator component to check for.
@@ -8390,6 +8397,52 @@ public class DevicePolicyManager {
         }
 
         return null;
+    }
+
+    /**
+     * Called by device owner or profile owner to set whether a secondary lockscreen needs to be
+     * shown.
+     *
+     * <p>The secondary lockscreen will by displayed after the primary keyguard security screen
+     * requirements are met. To provide the lockscreen content the DO/PO will need to provide a
+     * service handling the {@link #ACTION_BIND_SECONDARY_LOCKSCREEN_SERVICE} intent action,
+     * extending the {@link DevicePolicyKeyguardService} class.
+     *
+     * <p>Relevant interactions on the secondary lockscreen should be communicated back to the
+     * keyguard via {@link IKeyguardCallback}, such as when the screen is ready to be dismissed.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param enabled Whether or not the lockscreen needs to be shown.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @see #isSecondaryLockscreenEnabled
+     **/
+    public void setSecondaryLockscreenEnabled(@NonNull ComponentName admin, boolean enabled) {
+        throwIfParentInstance("setSecondaryLockscreenEnabled");
+        if (mService != null) {
+            try {
+                mService.setSecondaryLockscreenEnabled(admin, enabled);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns whether the secondary lock screen needs to be shown.
+     * @see #setSecondaryLockscreenEnabled
+     * @hide
+     */
+    @SystemApi
+    public boolean isSecondaryLockscreenEnabled(int userId) {
+        throwIfParentInstance("isSecondaryLockscreenEnabled");
+        if (mService != null) {
+            try {
+                return mService.isSecondaryLockscreenEnabled(userId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 
     /**

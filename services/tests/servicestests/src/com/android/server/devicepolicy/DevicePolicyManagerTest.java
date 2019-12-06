@@ -4189,6 +4189,52 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 () -> dpm.setLockTaskFeatures(admin1, flags));
     }
 
+    public void testSecondaryLockscreen_profileOwner() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+
+        // Initial state is disabled.
+        assertFalse(dpm.isSecondaryLockscreenEnabled(DpmMockContext.CALLER_USER_HANDLE));
+
+        // Profile owner can set enabled state.
+        setAsProfileOwner(admin1);
+        dpm.setSecondaryLockscreenEnabled(admin1, true);
+        assertTrue(dpm.isSecondaryLockscreenEnabled(DpmMockContext.CALLER_USER_HANDLE));
+
+        // Managed profile managed by different package is unaffiliated - cannot set enabled.
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 20456);
+        final ComponentName adminDifferentPackage =
+                new ComponentName("another.package", "whatever.class");
+        addManagedProfile(adminDifferentPackage, managedProfileAdminUid, admin2);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setSecondaryLockscreenEnabled(adminDifferentPackage, false));
+    }
+
+    public void testSecondaryLockscreen_deviceOwner() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+
+        // Initial state is disabled.
+        assertFalse(dpm.isSecondaryLockscreenEnabled(UserHandle.USER_SYSTEM));
+
+        // Device owners can set enabled state.
+        setupDeviceOwner();
+        dpm.setSecondaryLockscreenEnabled(admin1, true);
+        assertTrue(dpm.isSecondaryLockscreenEnabled(UserHandle.USER_SYSTEM));
+    }
+
+    public void testSecondaryLockscreen_nonOwner() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+
+        // Initial state is disabled.
+        assertFalse(dpm.isSecondaryLockscreenEnabled(DpmMockContext.CALLER_USER_HANDLE));
+
+        // Non-DO/PO cannot set enabled state.
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setSecondaryLockscreenEnabled(admin1, true));
+        assertFalse(dpm.isSecondaryLockscreenEnabled(DpmMockContext.CALLER_USER_HANDLE));
+    }
+
     public void testIsDeviceManaged() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
