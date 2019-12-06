@@ -27,6 +27,10 @@ namespace android {
 namespace os {
 namespace statsd {
 
+/**
+ * This class is NOT thread safe.
+ * It should only be used while StatsLogProcessor's lock is held.
+ */
 class StateManager : public virtual RefBase {
 public:
     StateManager(){};
@@ -56,13 +60,10 @@ public:
                        FieldValue* output) const;
 
     inline int getStateTrackersCount() const {
-        std::lock_guard<std::mutex> lock(mMutex);
         return mStateTrackers.size();
     }
 
     inline int getListenersCount(int32_t atomId) const {
-        std::lock_guard<std::mutex> lock(mMutex);
-
         auto it = mStateTrackers.find(atomId);
         if (it != mStateTrackers.end()) {
             return it->second->getListenersCount();
@@ -71,10 +72,10 @@ public:
     }
 
 private:
-  mutable std::mutex mMutex;
+    mutable std::mutex mMutex;
 
-  // Maps state atom ids to StateTrackers
-  std::unordered_map<int32_t, sp<StateTracker>> mStateTrackers;
+    // Maps state atom ids to StateTrackers
+    std::unordered_map<int32_t, sp<StateTracker>> mStateTrackers;
 };
 
 }  // namespace statsd
