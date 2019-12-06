@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+#include <dlfcn.h>
+#include <pthread.h>
+
+#include <chrono>
+#include <thread>
+
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 
@@ -25,11 +31,16 @@
 #include <sensorservicehidl/SensorManager.h>
 
 #include <bionic/malloc.h>
+#include <bionic/reserved_signals.h>
 
+#include <android-base/properties.h>
 #include <cutils/properties.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
 #include <utils/AndroidThreads.h>
+
+using android::base::GetIntProperty;
+using namespace std::chrono_literals;
 
 namespace android {
 
@@ -68,7 +79,50 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
 
 static void android_server_SystemServer_initZygoteChildHeapProfiling(JNIEnv* /* env */,
                                                                      jobject /* clazz */) {
-   android_mallopt(M_INIT_ZYGOTE_CHILD_PROFILING, nullptr, 0);
+    android_mallopt(M_INIT_ZYGOTE_CHILD_PROFILING, nullptr, 0);
+}
+
+static int get_current_max_fd() {
+    // Not actually guaranteed to be the max, but close enough for our purposes.
+    int fd = open("/dev/null", O_RDONLY | O_CLOEXEC);
+    LOG_ALWAYS_FATAL_IF(fd == -1, "failed to open /dev/null: %s", strerror(errno));
+    close(fd);
+    return fd;
+}
+
+static const char kFdLeakEnableThresholdProperty[] = "persist.sys.debug.fdtrack_enable_threshold";
+static const char kFdLeakAbortThresholdProperty[] = "persist.sys.debug.fdtrack_abort_threshold";
+static const char kFdLeakCheckIntervalProperty[] = "persist.sys.debug.fdtrack_interval";
+
+static void android_server_SystemServer_spawnFdLeakCheckThread(JNIEnv*, jobject) {
+    std::thread([]() {
+        pthread_setname_np(pthread_self(), "FdLeakCheckThread");
+        bool loaded = false;
+        while (true) {
+            const int enable_threshold = GetIntProperty(kFdLeakEnableThresholdProperty, 1024);
+            const int abort_threshold = GetIntProperty(kFdLeakAbortThresholdProperty, 2048);
+            const int check_interval = GetIntProperty(kFdLeakCheckIntervalProperty, 120);
+            int max_fd = get_current_max_fd();
+            if (max_fd > enable_threshold && !loaded) {
+                loaded = true;
+                ALOGE("fd count above threshold of %d, starting fd backtraces", enable_threshold);
+                if (dlopen("libfdtrack.so", RTLD_GLOBAL) == nullptr) {
+                    ALOGE("failed to load libfdtrack.so: %s", dlerror());
+                }
+            } else if (max_fd > abort_threshold) {
+                raise(BIONIC_SIGNAL_FDTRACK);
+
+                // Wait for a bit to allow fdtrack to dump backtraces to logcat.
+                std::this_thread::sleep_for(5s);
+
+                LOG_ALWAYS_FATAL(
+                    "b/140703823: aborting due to fd leak: check logs for fd "
+                    "backtraces");
+            }
+
+            std::this_thread::sleep_for(std::chrono::seconds(check_interval));
+        }
+    }).detach();
 }
 
 /*
@@ -80,6 +134,9 @@ static const JNINativeMethod gMethods[] = {
     { "startHidlServices", "()V", (void*) android_server_SystemServer_startHidlServices },
     { "initZygoteChildHeapProfiling", "()V",
       (void*) android_server_SystemServer_initZygoteChildHeapProfiling },
+    { "spawnFdLeakCheckThread", "()V",
+      (void*) android_server_SystemServer_spawnFdLeakCheckThread },
+
 };
 
 int register_android_server_SystemServer(JNIEnv* env)
