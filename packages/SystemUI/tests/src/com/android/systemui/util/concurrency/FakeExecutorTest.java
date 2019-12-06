@@ -325,36 +325,6 @@ public class FakeExecutorTest extends SysuiTestCase {
         assertEquals(1, runnable.mRunCount);
     }
 
-    /**
-     * Test removing everything
-     */
-    @Test
-    public void testRemoval_all() {
-        FakeSystemClock clock = new FakeSystemClock();
-        clock.setAutoIncrement(false);
-        FakeExecutor fakeExecutor = new FakeExecutor(clock);
-        RunnableImpl runnable = new RunnableImpl();
-
-        // Nothing to remove.
-        assertEquals(0, runnable.mRunCount);
-        assertEquals(0, fakeExecutor.numPending());
-
-        // Two pending items that have not yet run.
-        fakeExecutor.executeDelayed(runnable, 100);
-        fakeExecutor.executeDelayed(runnable, 200);
-        assertEquals(2, fakeExecutor.numPending());
-        assertEquals(0, runnable.mRunCount);
-
-        // Remove the items.
-        fakeExecutor.removeAll();
-
-        // Nothing to run
-        fakeExecutor.advanceClockToLast();
-        assertEquals(0, fakeExecutor.runAllReady());
-        assertEquals(0, fakeExecutor.numPending());
-        assertEquals(0, runnable.mRunCount);
-    }
-
     private static class RunnableImpl implements Runnable {
         int mRunCount;
 
