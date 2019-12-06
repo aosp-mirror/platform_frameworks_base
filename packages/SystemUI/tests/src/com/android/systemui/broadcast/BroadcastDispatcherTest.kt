@@ -93,7 +93,7 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         // These should be valid filters
         `when`(intentFilter.countActions()).thenReturn(1)
         `when`(intentFilterOther.countActions()).thenReturn(1)
-        `when`(mockContext.user).thenReturn(user0)
+        setUserMock(mockContext, user0)
     }
 
     @Test
@@ -140,6 +140,18 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         verify(mockUBRUser1, never()).unregisterReceiver(broadcastReceiver)
     }
 
+    @Test
+    fun testRegisterCurrentAsActualUser() {
+        setUserMock(mockContext, user1)
+        broadcastDispatcher.registerReceiver(broadcastReceiver, intentFilter, mockHandler,
+                UserHandle.CURRENT)
+
+        testableLooper.processAllMessages()
+
+        verify(mockUBRUser1).registerReceiver(capture(argumentCaptor))
+        assertSame(broadcastReceiver, argumentCaptor.value.receiver)
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun testFilterMustContainActions() {
         val testFilter = IntentFilter()
@@ -184,6 +196,11 @@ class BroadcastDispatcherTest : SysuiTestCase() {
             priority = IntentFilter.SYSTEM_HIGH_PRIORITY
         }
         broadcastDispatcher.registerReceiver(broadcastReceiver, testFilter)
+    }
+
+    private fun setUserMock(mockContext: Context, user: UserHandle) {
+        `when`(mockContext.user).thenReturn(user)
+        `when`(mockContext.userId).thenReturn(user.identifier)
     }
 
     private class TestBroadcastDispatcher(
