@@ -6671,6 +6671,14 @@ package android.os.connectivity {
 
 }
 
+package android.os.ext {
+
+  public class SdkExtensions {
+    method public static int getExtensionVersion(int);
+  }
+
+}
+
 package android.os.image {
 
   public class DynamicSystemClient {
