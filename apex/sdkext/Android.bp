@@ -15,7 +15,9 @@
 apex {
     name: "com.android.sdkext",
     manifest: "manifest.json",
+    binaries: [ "derive_sdk" ],
     java_libs: [ "framework-sdkext" ],
+    prebuilts: [ "com.android.sdkext.ldconfig" ],
     key: "com.android.sdkext.key",
     certificate: ":com.android.sdkext.certificate",
 }
@@ -29,4 +31,11 @@ apex_key {
 android_app_certificate {
     name: "com.android.sdkext.certificate",
     certificate: "com.android.sdkext",
+}
+
+prebuilt_etc {
+    name: "com.android.sdkext.ldconfig",
+    src: "ld.config.txt",
+    filename: "ld.config.txt",
+    installable: false,
 }
