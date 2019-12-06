@@ -16,213 +16,112 @@
 
 #define LOG_TAG "MediaMetricsJNI"
 
+#include <binder/Parcel.h>
 #include <jni.h>
+#include <media/MediaAnalyticsItem.h>
 #include <nativehelper/JNIHelp.h>
 
 #include "android_media_MediaMetricsJNI.h"
 #include "android_os_Parcel.h"
-#include <media/MediaAnalyticsItem.h>
-#include <binder/Parcel.h>
-
 
 // This source file is compiled and linked into:
 // core/jni/ (libandroid_runtime.so)
 
 namespace android {
 
+namespace {
+struct BundleHelper {
+    BundleHelper(JNIEnv* _env, jobject _bundle)
+        : env(_env)
+        , clazzBundle(env->FindClass("android/os/PersistableBundle"))
+        , putIntID(env->GetMethodID(clazzBundle, "putInt", "(Ljava/lang/String;I)V"))
+        , putLongID(env->GetMethodID(clazzBundle, "putLong", "(Ljava/lang/String;J)V"))
+        , putDoubleID(env->GetMethodID(clazzBundle, "putDouble", "(Ljava/lang/String;D)V"))
+        , putStringID(env->GetMethodID(clazzBundle,
+                      "putString", "(Ljava/lang/String;Ljava/lang/String;)V"))
+        , constructID(env->GetMethodID(clazzBundle, "<init>", "()V"))
+        , bundle(_bundle == nullptr ? env->NewObject(clazzBundle, constructID) : _bundle)
+        { }
+
+    JNIEnv* const env;
+    const jclass clazzBundle;
+    const jmethodID putIntID;
+    const jmethodID putLongID;
+    const jmethodID putDoubleID;
+    const jmethodID putStringID;
+    const jmethodID constructID;
+    jobject const bundle;
+
+    // We use templated put to access MediaAnalyticsItem based on data type not type enum.
+    // See std::variant and std::visit.
+    template<typename T>
+    void put(jstring keyName, const T& value) = delete;
+
+    template<>
+    void put(jstring keyName, const int32_t& value) {
+        env->CallVoidMethod(bundle, putIntID, keyName, (jint)value);
+    }
+
+    template<>
+    void put(jstring keyName, const int64_t& value) {
+        env->CallVoidMethod(bundle, putLongID, keyName, (jlong)value);
+    }
+
+    template<>
+    void put(jstring keyName, const double& value) {
+        env->CallVoidMethod(bundle, putDoubleID, keyName, (jdouble)value);
+    }
+
+    template<>
+    void put(jstring keyName, const char * const& value) {
+        env->CallVoidMethod(bundle, putStringID, keyName, env->NewStringUTF(value));
+    }
+
+    template<>
+    void put(jstring keyName, char * const& value) {
+        env->CallVoidMethod(bundle, putStringID, keyName, env->NewStringUTF(value));
+    }
+
+    template<>
+    void put(jstring keyName, const std::pair<int64_t, int64_t>& value) {
+        ; // rate is currently ignored
+    }
+
+    // We allow both jstring and non-jstring variants.
+    template<typename T>
+    void put(const char *keyName, const T& value) {
+        put(env->NewStringUTF(keyName), value);
+    }
+};
+} // namespace
+
 // place the attributes into a java PersistableBundle object
-jobject MediaMetricsJNI::writeMetricsToBundle(JNIEnv* env, MediaAnalyticsItem *item, jobject mybundle) {
+jobject MediaMetricsJNI::writeMetricsToBundle(
+        JNIEnv* env, MediaAnalyticsItem *item, jobject bundle)
+{
+    BundleHelper bh(env, bundle);
 
-    jclass clazzBundle = env->FindClass("android/os/PersistableBundle");
-    if (clazzBundle==NULL) {
-        ALOGE("can't find android/os/PersistableBundle");
-        return NULL;
-    }
-    // sometimes the caller provides one for us to fill
-    if (mybundle == NULL) {
-        // create the bundle
-        jmethodID constructID = env->GetMethodID(clazzBundle, "<init>", "()V");
-        mybundle = env->NewObject(clazzBundle, constructID);
-        if (mybundle == NULL) {
-            return NULL;
-        }
+    if (bh.bundle == nullptr) {
+        ALOGE("%s: unable to create Bundle", __func__);
+        return nullptr;
     }
 
-    // grab methods that we can invoke
-    jmethodID setIntID = env->GetMethodID(clazzBundle, "putInt", "(Ljava/lang/String;I)V");
-    jmethodID setLongID = env->GetMethodID(clazzBundle, "putLong", "(Ljava/lang/String;J)V");
-    jmethodID setDoubleID = env->GetMethodID(clazzBundle, "putDouble", "(Ljava/lang/String;D)V");
-    jmethodID setStringID = env->GetMethodID(clazzBundle, "putString", "(Ljava/lang/String;Ljava/lang/String;)V");
-
-    // env, class, method, {parms}
-    //env->CallVoidMethod(env, mybundle, setIntID, jstr, jint);
-
-    // iterate through my attributes
-    // -- get name, get type, get value
-    // -- insert appropriately into the bundle
-    for (size_t i = 0 ; i < item->mPropCount; i++ ) {
-            MediaAnalyticsItem::Prop *prop = &item->mProps[i];
-            // build the key parameter from prop->mName
-            jstring keyName = env->NewStringUTF(prop->mName);
-            // invoke the appropriate method to insert
-            switch (prop->mType) {
-                case MediaAnalyticsItem::kTypeInt32:
-                    env->CallVoidMethod(mybundle, setIntID,
-                                        keyName, (jint) prop->u.int32Value);
-                    break;
-                case MediaAnalyticsItem::kTypeInt64:
-                    env->CallVoidMethod(mybundle, setLongID,
-                                        keyName, (jlong) prop->u.int64Value);
-                    break;
-                case MediaAnalyticsItem::kTypeDouble:
-                    env->CallVoidMethod(mybundle, setDoubleID,
-                                        keyName, (jdouble) prop->u.doubleValue);
-                    break;
-                case MediaAnalyticsItem::kTypeCString:
-                    env->CallVoidMethod(mybundle, setStringID, keyName,
-                                        env->NewStringUTF(prop->u.CStringValue));
-                    break;
-                default:
-                        ALOGE("to_String bad item type: %d for %s",
-                              prop->mType, prop->mName);
-                        break;
-            }
+    bh.put("__key", item->getKey().c_str());
+    if (item->getPid() != -1) {
+        bh.put("__pid", (int32_t)item->getPid());
     }
-
-    return mybundle;
-}
-
-// convert the specified batch  metrics attributes to a persistent bundle.
-// The encoding of the byte array is specified in
-//     frameworks/av/media/libmediametrics/MediaAnalyticsItem.cpp
-//
-// type encodings; matches frameworks/av/media/libmediametrics/MediaAnalyticsItem.cpp
-enum { kInt32 = 0, kInt64, kDouble, kRate, kCString};
-
-jobject MediaMetricsJNI::writeAttributesToBundle(JNIEnv* env, jobject mybundle, char *buffer, size_t length) {
-    ALOGV("writeAttributes()");
-
-    if (buffer == NULL || length <= 0) {
-        ALOGW("bad parameters to writeAttributesToBundle()");
-        return NULL;
+    if (item->getTimestamp() > 0) {
+        bh.put("__timestamp", (int64_t)item->getTimestamp());
     }
-
-    jclass clazzBundle = env->FindClass("android/os/PersistableBundle");
-    if (clazzBundle==NULL) {
-        ALOGE("can't find android/os/PersistableBundle");
-        return NULL;
+    if (item->getUid() != -1) {
+        bh.put("__uid", (int32_t)item->getUid());
     }
-    // sometimes the caller provides one for us to fill
-    if (mybundle == NULL) {
-        // create the bundle
-        jmethodID constructID = env->GetMethodID(clazzBundle, "<init>", "()V");
-        mybundle = env->NewObject(clazzBundle, constructID);
-        if (mybundle == NULL) {
-            ALOGD("unable to create mybundle");
-            return NULL;
-        }
+    for (const auto &prop : *item) {
+        const char *name = prop.getName();
+        if (name == nullptr) continue;
+        prop.visit([&] (auto &value) { bh.put(name, value); });
     }
-
-    int left = length;
-    char *buf = buffer;
-
-    // grab methods that we can invoke
-    jmethodID setIntID = env->GetMethodID(clazzBundle, "putInt", "(Ljava/lang/String;I)V");
-    jmethodID setLongID = env->GetMethodID(clazzBundle, "putLong", "(Ljava/lang/String;J)V");
-    jmethodID setDoubleID = env->GetMethodID(clazzBundle, "putDouble", "(Ljava/lang/String;D)V");
-    jmethodID setStringID = env->GetMethodID(clazzBundle, "putString", "(Ljava/lang/String;Ljava/lang/String;)V");
-
-
-#define _EXTRACT(size, val) \
-    { if ((size) > left) goto badness; memcpy(&val, buf, (size)); buf += (size); left -= (size);}
-#define _SKIP(size) \
-    { if ((size) > left) goto badness; buf += (size); left -= (size);}
-
-    int32_t bufsize;
-    _EXTRACT(sizeof(int32_t), bufsize);
-    if (bufsize != length) {
-        goto badness;
-    }
-    int32_t proto;
-    _EXTRACT(sizeof(int32_t), proto);
-    if (proto != 0) {
-        ALOGE("unsupported wire protocol %d", proto);
-        goto badness;
-    }
-
-    int32_t count;
-    _EXTRACT(sizeof(int32_t), count);
-
-    // iterate through my attributes
-    // -- get name, get type, get value, insert into bundle appropriately.
-    for (int i = 0 ; i < count; i++ ) {
-            // prop name len (int16)
-            int16_t keylen;
-            _EXTRACT(sizeof(int16_t), keylen);
-            if (keylen <= 0) goto badness;
-            // prop name itself
-            char *key = buf;
-            jstring keyName = env->NewStringUTF(buf);
-            _SKIP(keylen);
-
-            // prop type (int8_t)
-            int8_t attrType;
-            _EXTRACT(sizeof(int8_t), attrType);
-
-	    int16_t attrSize;
-            _EXTRACT(sizeof(int16_t), attrSize);
-
-            switch (attrType) {
-                case kInt32:
-                    {
-                        int32_t i32;
-                        _EXTRACT(sizeof(int32_t), i32);
-                        env->CallVoidMethod(mybundle, setIntID,
-                                            keyName, (jint) i32);
-                        break;
-                    }
-                case kInt64:
-                    {
-                        int64_t i64;
-                        _EXTRACT(sizeof(int64_t), i64);
-                        env->CallVoidMethod(mybundle, setLongID,
-                                            keyName, (jlong) i64);
-                        break;
-                    }
-                case kDouble:
-                    {
-                        double d64;
-                        _EXTRACT(sizeof(double), d64);
-                        env->CallVoidMethod(mybundle, setDoubleID,
-                                            keyName, (jdouble) d64);
-                        break;
-                    }
-                case kCString:
-                    {
-                        jstring value = env->NewStringUTF(buf);
-                        env->CallVoidMethod(mybundle, setStringID,
-                                            keyName, value);
-                        _SKIP(attrSize);
-                        break;
-                    }
-                default:
-                        ALOGW("ignoring Attribute '%s' unknown type: %d",
-                              key, attrType);
-			_SKIP(attrSize);
-                        break;
-            }
-    }
-
-    // should have consumed it all
-    if (left != 0) {
-        ALOGW("did not consume entire buffer; left(%d) != 0", left);
-	goto badness;
-    }
-
-    return mybundle;
-
-  badness:
-    return NULL;
+    return bh.bundle;
 }
 
 // Helper function to convert a native PersistableBundle to a Java
