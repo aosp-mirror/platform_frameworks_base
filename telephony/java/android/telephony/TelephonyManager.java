@@ -4583,17 +4583,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Sim activation type: voice
-     * @hide
-     */
-    public static final int SIM_ACTIVATION_TYPE_VOICE = 0;
-    /**
-     * Sim activation type: data
-     * @hide
-     */
-    public static final int SIM_ACTIVATION_TYPE_DATA = 1;
-
-    /**
      * Initial SIM activation state, unknown. Not set by any carrier apps.
      * @hide
      */
