@@ -33,6 +33,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import java.io.FileDescriptor;
 import java.util.List;
 
 /**
@@ -708,6 +709,9 @@ public final class Tuner implements AutoCloseable  {
         private native int nativeStopDvr();
         private native int nativeFlushDvr();
         private native int nativeClose();
+        private native void nativeSetFileDescriptor(FileDescriptor fd);
+        private native int nativeRead(int size);
+        private native int nativeRead(byte[] bytes, int offset, int size);
 
         private Dvr() {}
 
@@ -779,6 +783,31 @@ public final class Tuner implements AutoCloseable  {
          */
         public int close() {
             return nativeClose();
+        }
+
+        /**
+         * Sets file descriptor to read/write data.
+         */
+        public void setFileDescriptor(FileDescriptor fd) {
+            nativeSetFileDescriptor(fd);
+        }
+
+        /**
+         * Reads data from the file for DVR playback.
+         */
+        public int read(int size) {
+            return nativeRead(size);
+        }
+
+        /**
+         * Reads data from the buffer for DVR playback.
+         */
+        public int read(@NonNull byte[] bytes, int offset, int size) {
+            if (size + offset > bytes.length) {
+                throw new ArrayIndexOutOfBoundsException(
+                        "Array length=" + bytes.length + ", offset=" + offset + ", size=" + size);
+            }
+            return nativeRead(bytes, offset, size);
         }
     }
 
