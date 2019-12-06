@@ -20,6 +20,7 @@ apex {
     prebuilts: [
       "com.android.sdkext.ldconfig",
       "cur_sdkinfo",
+      "derive_sdk.rc",
     ],
     key: "com.android.sdkext.key",
     certificate: ":com.android.sdkext.certificate",
