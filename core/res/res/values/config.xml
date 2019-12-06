@@ -3695,6 +3695,8 @@
          instead of 'Emergency calls only' when SIM is unready. -->
     <string-array translatable="false" name="config_display_no_service_when_sim_unready">
         <item>"DE"</item>
+        <item>"GB"</item>
+        <item>"JP"</item>
     </string-array>
 
     <!-- Class names of device specific services inheriting com.android.server.SystemService. The
