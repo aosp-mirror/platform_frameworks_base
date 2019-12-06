@@ -5831,6 +5831,8 @@ message PermissionGrantRequestResultReported {
         IGNORED_RESTRICTED_PERMISSION = 9;
         // one time permission was granted by user action
         USER_GRANTED_ONE_TIME = 10;
+        // user ignored request by leaving the request screen without choosing any option
+        USER_IGNORED = 11;
     }
     // The result of the permission grant
     optional Result result = 6;
