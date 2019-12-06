@@ -4557,7 +4557,7 @@ package android.net.ipsec.ike {
     method @NonNull public java.util.List<android.net.LinkAddress> getInternalAddresses();
     method @NonNull public java.util.List<java.net.InetAddress> getInternalDhcpServers();
     method @NonNull public java.util.List<java.net.InetAddress> getInternalDnsServers();
-    method @NonNull public java.util.List<android.net.LinkAddress> getInternalSubnets();
+    method @NonNull public java.util.List<android.net.IpPrefix> getInternalSubnets();
     method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getOutboundTrafficSelectors();
   }
 
@@ -4729,12 +4729,10 @@ package android.net.ipsec.ike {
     ctor public TunnelModeChildSessionParams.Builder();
     method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
     method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalAddressRequest(int);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalAddressRequest(@NonNull java.net.InetAddress, int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalAddressRequest(@NonNull java.net.Inet4Address);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalAddressRequest(@NonNull java.net.Inet6Address, int);
     method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalDhcpServerRequest(int);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalDhcpServerRequest(@NonNull java.net.InetAddress);
     method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalDnsServerRequest(int);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalDnsServerRequest(@NonNull java.net.InetAddress);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalSubnetRequest(int);
     method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addOutboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
     method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addSaProposal(@NonNull android.net.ipsec.ike.ChildSaProposal);
     method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams build();
@@ -4758,9 +4756,6 @@ package android.net.ipsec.ike {
   public static interface TunnelModeChildSessionParams.ConfigRequestIpv4Netmask extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
   }
 
-  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4Subnet extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
-  }
-
   public static interface TunnelModeChildSessionParams.ConfigRequestIpv6Address extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
     method @Nullable public java.net.Inet6Address getAddress();
     method public int getPrefixLength();
@@ -4768,9 +4763,6 @@ package android.net.ipsec.ike {
 
   public static interface TunnelModeChildSessionParams.ConfigRequestIpv6DnsServer extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
     method @Nullable public java.net.Inet6Address getAddress();
-  }
-
-  public static interface TunnelModeChildSessionParams.ConfigRequestIpv6Subnet extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
   }
 
 }
