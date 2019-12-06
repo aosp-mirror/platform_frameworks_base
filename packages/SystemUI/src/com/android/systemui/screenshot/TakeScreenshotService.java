@@ -42,14 +42,11 @@ public class TakeScreenshotService extends Service {
         @Override
         public void handleMessage(Message msg) {
             final Messenger callback = msg.replyTo;
-            Consumer<Uri> finisher = new Consumer<Uri>() {
-                @Override
-                public void accept(Uri uri) {
-                    Message reply = Message.obtain(null, 1, uri);
-                    try {
-                        callback.send(reply);
-                    } catch (RemoteException e) {
-                    }
+            Consumer<Uri> finisher = uri -> {
+                Message reply = Message.obtain(null, 1, uri);
+                try {
+                    callback.send(reply);
+                } catch (RemoteException e) {
                 }
             };
 
