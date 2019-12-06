@@ -112,7 +112,7 @@ message Atom {
         TouchEventReported touch_event_reported = 34;
         WakeupAlarmOccurred wakeup_alarm_occurred = 35;
         KernelWakeupReported kernel_wakeup_reported = 36;
-        WifiLockStateChanged wifi_lock_state_changed = 37;
+        WifiLockStateChanged wifi_lock_state_changed = 37 [(log_from_module) = "wifi"];
         WifiSignalStrengthChanged wifi_signal_strength_changed = 38;
         WifiScanStateChanged wifi_scan_state_changed = 39;
         PhoneSignalStrengthChanged phone_signal_strength_changed = 40;
