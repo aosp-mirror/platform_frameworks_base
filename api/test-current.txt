@@ -2455,7 +2455,7 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA) public static void deleteContributedMedia(android.content.Context, String, android.os.UserHandle) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA) public static long getContributedMediaSize(android.content.Context, String, android.os.UserHandle) throws java.io.IOException;
     method @NonNull public static java.io.File getVolumePath(@NonNull String) throws java.io.FileNotFoundException;
-    method @NonNull public static java.util.Collection<java.io.File> getVolumeScanPaths(@NonNull String) throws java.io.FileNotFoundException;
+    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE) public static java.util.Collection<java.io.File> getVolumeScanPaths(@NonNull String) throws java.io.FileNotFoundException;
     method public static android.net.Uri scanFile(android.content.Context, java.io.File);
     method public static android.net.Uri scanFileFromShell(android.content.Context, java.io.File);
     method public static void scanVolume(android.content.Context, java.io.File);

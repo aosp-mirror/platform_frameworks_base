@@ -27,6 +27,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
@@ -62,6 +63,7 @@ import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
+import android.os.storage.VolumeRecord;
 import android.service.media.CameraPrewarmService;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -3603,6 +3605,43 @@ public final class MediaStore {
     }
 
     /**
+     * Return list of all specific volume names that have recently been part of
+     * {@link #VOLUME_EXTERNAL}.
+     * <p>
+     * This includes both currently mounted volumes <em>and</em> recently
+     * mounted (but currently unmounted) volumes. Any indexed metadata for these
+     * volumes is preserved to optimize the speed of remounting at a later time.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE)
+    public static @NonNull Set<String> getRecentExternalVolumeNames(@NonNull Context context) {
+        final StorageManager sm = context.getSystemService(StorageManager.class);
+
+        // We always have primary storage
+        final Set<String> volumeNames = new ArraySet<>();
+        volumeNames.add(VOLUME_EXTERNAL_PRIMARY);
+
+        final long lastWeek = System.currentTimeMillis() - DateUtils.WEEK_IN_MILLIS;
+        for (VolumeRecord rec : sm.getVolumeRecords()) {
+            // Skip volumes without valid UUIDs
+            if (TextUtils.isEmpty(rec.fsUuid)) continue;
+
+            final VolumeInfo vi = sm.findVolumeByUuid(rec.fsUuid);
+            if (vi != null && vi.isVisibleForUser(UserHandle.myUserId())
+                    && vi.isMountedReadable()) {
+                // We're mounted right now
+                volumeNames.add(rec.getNormalizedFsUuid());
+            } else if (rec.lastSeenMillis > 0 && rec.lastSeenMillis < lastWeek) {
+                // We're not mounted right now, but we've been seen recently
+                volumeNames.add(rec.getNormalizedFsUuid());
+            }
+        }
+        return volumeNames;
+    }
+
+    /**
      * Return the volume name that the given {@link Uri} references.
      */
     public static @NonNull String getVolumeName(@NonNull Uri uri) {
@@ -3701,6 +3740,8 @@ public final class MediaStore {
      * @hide
      */
     @TestApi
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE)
     public static @NonNull Collection<File> getVolumeScanPaths(@NonNull String volumeName)
             throws FileNotFoundException {
         if (TextUtils.isEmpty(volumeName)) {
