@@ -40,8 +40,8 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
     private final CachedBluetoothDeviceManager mDeviceManager;
 
     static final ParcelUuid[] SRC_UUIDS = {
-        BluetoothUuid.AudioSource,
-        BluetoothUuid.AdvAudioDist,
+        BluetoothUuid.A2DP_SOURCE,
+        BluetoothUuid.ADV_AUDIO_DIST,
     };
 
     static final String NAME = "A2DPSink";

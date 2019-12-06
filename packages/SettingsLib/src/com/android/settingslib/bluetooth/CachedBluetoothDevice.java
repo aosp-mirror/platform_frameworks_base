@@ -35,6 +35,7 @@ import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;
 
@@ -685,9 +686,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         ParcelUuid[] uuids = mDevice.getUuids();
 
         long timeout = MAX_UUID_DELAY_FOR_AUTO_CONNECT;
-        if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.Hogp)) {
+        if (ArrayUtils.contains(uuids, BluetoothUuid.HOGP)) {
             timeout = MAX_HOGP_DELAY_FOR_AUTO_CONNECT;
-        } else if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.HearingAid)) {
+        } else if (ArrayUtils.contains(uuids, BluetoothUuid.HEARING_AID)) {
             timeout = MAX_HEARING_AIDS_DELAY_FOR_AUTO_CONNECT;
         }
 

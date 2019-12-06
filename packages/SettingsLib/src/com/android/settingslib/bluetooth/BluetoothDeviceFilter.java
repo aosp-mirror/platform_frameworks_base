@@ -22,6 +22,8 @@ import android.bluetooth.BluetoothUuid;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+import com.android.internal.util.ArrayUtils;
+
 /**
  * BluetoothDeviceFilter contains a static method that returns a
  * Filter object that returns whether or not the BluetoothDevice
@@ -130,7 +132,7 @@ public final class BluetoothDeviceFilter {
         @Override
         boolean matches(ParcelUuid[] uuids, BluetoothClass btClass) {
             if (uuids != null) {
-                if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.ObexObjectPush)) {
+                if (ArrayUtils.contains(uuids, BluetoothUuid.OBEX_OBJECT_PUSH)) {
                     return true;
                 }
             }
@@ -144,7 +146,7 @@ public final class BluetoothDeviceFilter {
         @Override
         boolean matches(ParcelUuid[] uuids, BluetoothClass btClass) {
             if (uuids != null) {
-                if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.PANU)) {
+                if (ArrayUtils.contains(uuids, BluetoothUuid.PANU)) {
                     return true;
                 }
             }
@@ -158,7 +160,7 @@ public final class BluetoothDeviceFilter {
         @Override
         boolean matches(ParcelUuid[] uuids, BluetoothClass btClass) {
             if (uuids != null) {
-                if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.NAP)) {
+                if (ArrayUtils.contains(uuids, BluetoothUuid.NAP)) {
                     return true;
                 }
             }
