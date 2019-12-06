@@ -699,6 +699,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
             if (mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
                     && (canLaunchInActivityView(mContext, entry) || wasAdjusted)) {
+                if (wasAdjusted && !previouslyUserCreated) {
+                    // Gotta treat the auto-bubbled / whitelisted packaged bubbles as usercreated
+                    mUserCreatedBubbles.add(entry.getKey());
+                }
                 updateBubble(entry);
             }
         }
@@ -715,6 +719,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 // It was previously a bubble but no longer a bubble -- lets remove it
                 removeBubble(entry.getKey(), DISMISS_NO_LONGER_BUBBLE);
             } else if (shouldBubble) {
+                if (wasAdjusted && !previouslyUserCreated) {
+                    // Gotta treat the auto-bubbled / whitelisted packaged bubbles as usercreated
+                    mUserCreatedBubbles.add(entry.getKey());
+                }
                 updateBubble(entry);
             }
         }
