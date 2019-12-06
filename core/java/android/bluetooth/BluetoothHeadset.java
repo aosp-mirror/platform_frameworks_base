@@ -559,7 +559,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      *
      * <p> The device should already be paired.
      * Priority can be one of {@link BluetoothProfile#PRIORITY_ON} or
-     * {@link BluetoothProfile#PRIORITY_OFF},
+     * {@link BluetoothProfile#PRIORITY_OFF}
      *
      * @param device Paired bluetooth device
      * @param priority
@@ -1133,8 +1133,9 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * is active.
      * @hide
      */
+    @SystemApi
+    @Nullable
     @RequiresPermission(android.Manifest.permission.BLUETOOTH)
-    @UnsupportedAppUsage
     public BluetoothDevice getActiveDevice() {
         if (VDBG) {
             Log.d(TAG, "getActiveDevice");
