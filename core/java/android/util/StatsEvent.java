@@ -177,7 +177,7 @@ public final class StatsEvent implements Parcelable {
      * @hide
      **/
     @VisibleForTesting
-    public static final int ERROR_ATTRIBUTION_UIDS_TAGS_SIZES_NOT_EQUAL = 0x400;
+    public static final int ERROR_ATTRIBUTION_UIDS_TAGS_SIZES_NOT_EQUAL = 0x1000;
 
     // Size limits.
 
@@ -628,9 +628,9 @@ public final class StatsEvent implements Parcelable {
             if (0 == mErrorMask) {
                 mBuffer.putByte(POS_NUM_ELEMENTS, (byte) mNumElements);
             } else {
-                mBuffer.putByte(0, TYPE_ERRORS);
-                mBuffer.putByte(POS_NUM_ELEMENTS, (byte) 3);
+                mPos += mBuffer.putByte(mPos, TYPE_ERRORS);
                 mPos += mBuffer.putInt(mPos, mErrorMask);
+                mBuffer.putByte(POS_NUM_ELEMENTS, (byte) 3);
                 size = mPos;
             }
 
