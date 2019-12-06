@@ -1275,7 +1275,7 @@ Status StatsService::sendAppBreadcrumbAtom(int32_t label, int32_t state) {
     // Permission check not necessary as it's meant for applications to write to
     // statsd.
     android::util::stats_write(util::APP_BREADCRUMB_REPORTED,
-                               IPCThreadState::self()->getCallingUid(), label,
+                               (int32_t) IPCThreadState::self()->getCallingUid(), label,
                                state);
     return Status::ok();
 }

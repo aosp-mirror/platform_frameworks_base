@@ -20,6 +20,7 @@ import android.annotation.BytesLong;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.CurrentTimeSecondsLong;
 import android.annotation.DurationMillisLong;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -78,6 +79,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -205,8 +208,10 @@ public final class MediaStore {
     public static final String PARAM_DELETE_DATA = "deletedata";
 
     /** {@hide} */
+    @Deprecated
     public static final String PARAM_INCLUDE_PENDING = "includePending";
     /** {@hide} */
+    @Deprecated
     public static final String PARAM_INCLUDE_TRASHED = "includeTrashed";
     /** {@hide} */
     public static final String PARAM_PROGRESS = "progress";
@@ -559,6 +564,101 @@ public final class MediaStore {
     public static final String UNKNOWN_STRING = "<unknown>";
 
     /**
+     * Specify a {@link Uri} that is "related" to the current operation being
+     * performed.
+     * <p>
+     * This is typically used to allow an operation that may normally be
+     * rejected, such as making a copy of a pre-existing image located under a
+     * {@link MediaColumns#RELATIVE_PATH} where new images are not allowed.
+     * <p>
+     * It's strongly recommended that when making a copy of pre-existing content
+     * that you define the "original document ID" GUID as defined by the <em>XMP
+     * Media Management</em> standard.
+     * <p>
+     * This key can be placed in a {@link Bundle} of extras and passed to
+     * {@link ContentResolver#insert}.
+     */
+    public static final String QUERY_ARG_RELATED_URI = "android:query-arg-related-uri";
+
+    /**
+     * Specify how {@link MediaColumns#IS_PENDING} items should be filtered when
+     * performing a {@link MediaStore} operation.
+     * <p>
+     * This key can be placed in a {@link Bundle} of extras and passed to
+     * {@link ContentResolver#query}, {@link ContentResolver#update}, or
+     * {@link ContentResolver#delete}.
+     * <p>
+     * By default, pending items are filtered away from operations.
+     */
+    @Match
+    public static final String QUERY_ARG_MATCH_PENDING = "android:query-arg-match-pending";
+
+    /**
+     * Specify how {@link MediaColumns#IS_TRASHED} items should be filtered when
+     * performing a {@link MediaStore} operation.
+     * <p>
+     * This key can be placed in a {@link Bundle} of extras and passed to
+     * {@link ContentResolver#query}, {@link ContentResolver#update}, or
+     * {@link ContentResolver#delete}.
+     * <p>
+     * By default, trashed items are filtered away from operations.
+     */
+    @Match
+    public static final String QUERY_ARG_MATCH_TRASHED = "android:query-arg-match-trashed";
+
+    /**
+     * Specify how {@link MediaColumns#IS_FAVORITE} items should be filtered
+     * when performing a {@link MediaStore} operation.
+     * <p>
+     * This key can be placed in a {@link Bundle} of extras and passed to
+     * {@link ContentResolver#query}, {@link ContentResolver#update}, or
+     * {@link ContentResolver#delete}.
+     * <p>
+     * By default, favorite items are <em>not</em> filtered away from
+     * operations.
+     */
+    @Match
+    public static final String QUERY_ARG_MATCH_FAVORITE = "android:query-arg-match-favorite";
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "MATCH_" }, value = {
+            MATCH_DEFAULT,
+            MATCH_INCLUDE,
+            MATCH_EXCLUDE,
+            MATCH_ONLY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Match {}
+
+    /**
+     * Value indicating that the default matching behavior should be used, as
+     * defined by the key documentation.
+     */
+    public static final int MATCH_DEFAULT = 0;
+
+    /**
+     * Value indicating that operations should include items matching the
+     * criteria defined by this key.
+     * <p>
+     * Note that items <em>not</em> matching the criteria <em>may</em> also be
+     * included depending on the default behavior documented by the key. If you
+     * want to operate exclusively on matching items, use {@link #MATCH_ONLY}.
+     */
+    public static final int MATCH_INCLUDE = 1;
+
+    /**
+     * Value indicating that operations should exclude items matching the
+     * criteria defined by this key.
+     */
+    public static final int MATCH_EXCLUDE = 2;
+
+    /**
+     * Value indicating that operations should only operate on items explicitly
+     * matching the criteria defined by this key.
+     */
+    public static final int MATCH_ONLY = 3;
+
+    /**
      * Update the given {@link Uri} to also include any pending media items from
      * calls such as
      * {@link ContentResolver#query(Uri, String[], Bundle, CancellationSignal)}.
@@ -566,12 +666,16 @@ public final class MediaStore {
      *
      * @see MediaColumns#IS_PENDING
      * @see MediaStore#getIncludePending(Uri)
+     * @deprecated consider migrating to {@link #QUERY_ARG_MATCH_PENDING} which
+     *             is more expressive.
      */
+    @Deprecated
     public static @NonNull Uri setIncludePending(@NonNull Uri uri) {
         return setIncludePending(uri.buildUpon()).build();
     }
 
     /** @hide */
+    @Deprecated
     public static @NonNull Uri.Builder setIncludePending(@NonNull Uri.Builder uriBuilder) {
         return uriBuilder.appendQueryParameter(PARAM_INCLUDE_PENDING, "1");
     }
@@ -582,7 +686,11 @@ public final class MediaStore {
      *
      * @see MediaColumns#IS_PENDING
      * @see MediaStore#setIncludePending(Uri)
+     * @deprecated consider migrating to {@link #QUERY_ARG_MATCH_PENDING} which
+     *             is more expressive.
+     * @removed
      */
+    @Deprecated
     public static boolean getIncludePending(@NonNull Uri uri) {
         return parseBoolean(uri.getQueryParameter(MediaStore.PARAM_INCLUDE_PENDING));
     }
@@ -597,7 +705,11 @@ public final class MediaStore {
      * @see MediaStore#setIncludeTrashed(Uri)
      * @see MediaStore#trash(Context, Uri)
      * @see MediaStore#untrash(Context, Uri)
+     * @deprecated consider migrating to {@link #QUERY_ARG_MATCH_TRASHED} which
+     *             is more expressive.
+     * @removed
      */
+    @Deprecated
     public static @NonNull Uri setIncludeTrashed(@NonNull Uri uri) {
         return uri.buildUpon().appendQueryParameter(PARAM_INCLUDE_TRASHED, "1").build();
     }
@@ -1000,7 +1112,7 @@ public final class MediaStore {
          * the field to {@code 0}, or until they expire as defined by
          * {@link #DATE_EXPIRES}.
          *
-         * @see MediaStore#setIncludePending(Uri)
+         * @see MediaStore#QUERY_ARG_MATCH_PENDING
          */
         @Column(Cursor.FIELD_TYPE_INTEGER)
         public static final String IS_PENDING = "is_pending";
@@ -1011,8 +1123,7 @@ public final class MediaStore {
          * Trashed items are retained until they expire as defined by
          * {@link #DATE_EXPIRES}.
          *
-         * @see MediaColumns#IS_TRASHED
-         * @see MediaStore#setIncludeTrashed(Uri)
+         * @see MediaStore#QUERY_ARG_MATCH_TRASHED
          * @see MediaStore#trash(Context, Uri)
          * @see MediaStore#untrash(Context, Uri)
          */
@@ -1186,6 +1297,8 @@ public final class MediaStore {
         /**
          * Flag indicating if the media item has been marked as being a
          * "favorite" by the user.
+         *
+         * @see MediaStore#QUERY_ARG_MATCH_FAVORITE
          */
         @Column(Cursor.FIELD_TYPE_INTEGER)
         public static final String IS_FAVORITE = "is_favorite";

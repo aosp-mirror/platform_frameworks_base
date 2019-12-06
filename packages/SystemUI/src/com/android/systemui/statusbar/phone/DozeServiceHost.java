@@ -88,10 +88,9 @@ public final class DozeServiceHost implements DozeHost {
     private final PulseExpansionHandler mPulseExpansionHandler;
     private final StatusBarWindowController mStatusBarWindowController;
     private final NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
-    private final StatusBarWindowViewController mStatusBarWindowViewController;
+    private StatusBarWindowViewController mStatusBarWindowViewController;
     private final LockscreenLockIconController mLockscreenLockIconController;
     private NotificationIconAreaController mNotificationIconAreaController;
-    private StatusBarWindowView mStatusBarWindow;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private NotificationPanelView mNotificationPanel;
     private View mAmbientIndicationContainer;
@@ -112,7 +111,6 @@ public final class DozeServiceHost implements DozeHost {
             PulseExpansionHandler pulseExpansionHandler,
             StatusBarWindowController statusBarWindowController,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
-            StatusBarWindowViewController statusBarWindowViewController,
             LockscreenLockIconController lockscreenLockIconController) {
         super();
         mDozeLog = dozeLog;
@@ -132,7 +130,6 @@ public final class DozeServiceHost implements DozeHost {
         mPulseExpansionHandler = pulseExpansionHandler;
         mStatusBarWindowController = statusBarWindowController;
         mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
-        mStatusBarWindowViewController = statusBarWindowViewController;
         mLockscreenLockIconController = lockscreenLockIconController;
     }
 
@@ -143,14 +140,14 @@ public final class DozeServiceHost implements DozeHost {
      */
     public void initialize(StatusBar statusBar,
             NotificationIconAreaController notificationIconAreaController,
-            StatusBarWindowView statusBarWindow,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            StatusBarWindowViewController statusBarWindowViewController,
             NotificationPanelView notificationPanel, View ambientIndicationContainer) {
         mStatusBar = statusBar;
         mNotificationIconAreaController = notificationIconAreaController;
-        mStatusBarWindow = statusBarWindow;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mNotificationPanel = notificationPanel;
+        mStatusBarWindowViewController = statusBarWindowViewController;
         mAmbientIndicationContainer = ambientIndicationContainer;
         mBiometricUnlockController = mBiometricUnlockControllerLazy.get();
     }

@@ -21,6 +21,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.google.android.icing.proto.DocumentProto;
 import com.google.android.icing.proto.PropertyProto;
+import com.google.android.icing.proto.SearchResultProto;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -115,8 +116,9 @@ public class FakeIcingTest {
 
     private static List<String> queryGetUris(FakeIcing icing, String term) {
         List<String> uris = new ArrayList<>();
-        for (DocumentProto result : icing.query(term)) {
-            uris.add(result.getUri());
+        SearchResultProto results = icing.query(term);
+        for (SearchResultProto.ResultProto result : results.getResultsList()) {
+            uris.add(result.getDocument().getUri());
         }
         return uris;
     }

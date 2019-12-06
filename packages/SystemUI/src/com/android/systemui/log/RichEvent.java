@@ -23,21 +23,23 @@ package com.android.systemui.log;
  * Events are stored in {@link SysuiLog} and can be printed in a dumpsys.
  */
 public abstract class RichEvent extends Event {
-    private int mType;
+    private final int mType;
+    private final String mReason;
 
     /**
-     * Initializes a rich event that includes an event type that matches with an index in the array
+     * Create a rich event that includes an event type that matches with an index in the array
      * getEventLabels().
      */
-    public RichEvent init(@Event.Level int logLevel, int type, String reason) {
+    public RichEvent(@Event.Level int logLevel, int type, String reason) {
+        super(logLevel, null);
         final int numEvents = getEventLabels().length;
         if (type < 0 || type >= numEvents) {
             throw new IllegalArgumentException("Unsupported event type. Events only supported"
                     + " from 0 to " + (numEvents - 1) + ", but given type=" + type);
         }
         mType = type;
-        super.init(logLevel, getEventLabels()[mType] + " " + reason);
-        return this;
+        mReason = reason;
+        mMessage = getEventLabels()[mType] + " " + mReason;
     }
 
     /**
@@ -47,43 +49,25 @@ public abstract class RichEvent extends Event {
      */
     public abstract String[] getEventLabels();
 
-    @Override
-    public void recycle() {
-        super.recycle();
-        mType = -1;
-    }
-
     public int getType() {
         return mType;
+    }
+
+    public String getReason() {
+        return mReason;
     }
 
     /**
      * Builder to build a RichEvent.
      * @param <B> Log specific builder that is extending this builder
-     * @param <E> Type of event we'll be building
      */
-    public abstract static class Builder<B extends Builder<B, E>, E extends RichEvent> {
+    public abstract static class Builder<B extends Builder<B>> {
         public static final int UNINITIALIZED = -1;
 
-        public final SysuiLog mLog;
         private B mBuilder = getBuilder();
-        protected int mType;
+        protected int mType = UNINITIALIZED;
         protected String mReason;
-        protected @Level int mLogLevel;
-
-        public Builder(SysuiLog sysuiLog) {
-            mLog = sysuiLog;
-            reset();
-        }
-
-        /**
-         * Reset this builder's parameters so it can be reused to build another RichEvent.
-         */
-        public void reset() {
-            mType = UNINITIALIZED;
-            mReason = null;
-            mLogLevel = VERBOSE;
-        }
+        protected @Level int mLogLevel = VERBOSE;
 
         /**
          * Get the log-specific builder.
@@ -91,9 +75,9 @@ public abstract class RichEvent extends Event {
         public abstract B getBuilder();
 
         /**
-         * Build the log-specific event given an event to populate.
+         * Build the log-specific event.
          */
-        public abstract E build(E e);
+        public abstract RichEvent build();
 
         /**
          * Optional - set the log level. Defaults to DEBUG.

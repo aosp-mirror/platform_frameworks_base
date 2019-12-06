@@ -139,6 +139,8 @@ import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TimeDetector;
+import android.app.timezonedetector.ManualTimeZoneSuggestion;
+import android.app.timezonedetector.TimeZoneDetector;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.compat.annotation.ChangeId;
@@ -1962,6 +1964,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return mContext.getSystemService(TimeDetector.class);
         }
 
+        TimeZoneDetector getTimeZoneDetector() {
+            return mContext.getSystemService(TimeZoneDetector.class);
+        }
+
         ConnectivityManager getConnectivityManager() {
             return mContext.getSystemService(ConnectivityManager.class);
         }
@@ -2748,6 +2754,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
 
+        // Code for handling failure from getActiveAdminWithPolicyForUidLocked to find an admin
+        // that satisfies the required policy.
+        // Throws a security exception with the right error message.
         if (who != null) {
             final int userId = UserHandle.getUserId(callingUid);
             final DevicePolicyData policy = getUserData(userId);
@@ -2762,6 +2771,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
                 throw new SecurityException("Admin " + admin.info.getComponent()
                         + " does not own the profile");
+            }
+            if (reqPolicy == DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER) {
+                throw new SecurityException("Admin " + admin.info.getComponent()
+                        + " is not the profile owner on organization-owned device");
             }
             if (DA_DISALLOWED_POLICIES.contains(reqPolicy) && !isDeviceOwner && !isProfileOwner) {
                 throw new SecurityException("Admin " + admin.info.getComponent()
@@ -2869,12 +2882,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         ensureLocked();
         final boolean ownsDevice = isDeviceOwner(admin.info.getComponent(), userId);
         final boolean ownsProfile = isProfileOwner(admin.info.getComponent(), userId);
+        final boolean ownsProfileOnOrganizationOwnedDevice =
+                    isProfileOwnerOfOrganizationOwnedDevice(admin.info.getComponent(), userId);
 
         if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
             return ownsDevice;
+        } else if (reqPolicy == DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER) {
+            return ownsDevice || ownsProfileOnOrganizationOwnedDevice;
         } else if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
             // DO always has the PO power.
-            return ownsDevice || ownsProfile;
+            return ownsDevice || ownsProfileOnOrganizationOwnedDevice || ownsProfile;
         } else {
             boolean allowedToUsePolicy = ownsDevice || ownsProfile
                     || !DA_DISALLOWED_POLICIES.contains(reqPolicy)
@@ -5574,6 +5591,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private void enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(ComponentName who) {
+        synchronized (getLockObject()) {
+            getActiveAdminForCallerLocked(
+                    who, DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER);
+        }
+    }
+
     private void enforceProfileOwnerOfOrganizationOwnedDevice(ActiveAdmin admin) {
         if (!isProfileOwnerOfOrganizationOwnedDevice(admin)) {
             throw new SecurityException(String.format("Provided admin %s is either not a profile "
@@ -8071,21 +8095,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
 
-        final int adminUserId = admin.getUserHandle().getIdentifier();
+        return isProfileOwnerOfOrganizationOwnedDevice(
+                admin.info.getComponent(), admin.getUserHandle().getIdentifier());
+    }
 
-        if (!isProfileOwner(admin.info.getComponent(), adminUserId)) {
-            Slog.w(LOG_TAG, String.format("%s is not profile owner of user %d",
-                    admin.info.getComponent(), adminUserId));
-            return false;
-        }
-
-        if (!canProfileOwnerAccessDeviceIds(adminUserId)) {
-            Slog.w(LOG_TAG, String.format("Profile owner of user %d does not own the device.",
-                    adminUserId));
-            return false;
-        }
-
-        return true;
+    private boolean isProfileOwnerOfOrganizationOwnedDevice(ComponentName who, int userId) {
+        return isProfileOwner(who, userId) && canProfileOwnerAccessDeviceIds(userId);
     }
 
     @Override
@@ -11123,8 +11138,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) == 1) {
             return false;
         }
+        ManualTimeZoneSuggestion manualTimeZoneSuggestion =
+                TimeZoneDetector.createManualTimeZoneSuggestion(
+                        timeZone, "DevicePolicyManagerService: setTimeZone");
         mInjector.binderWithCleanCallingIdentity(() ->
-            mInjector.getAlarmManager().setTimeZone(timeZone));
+                mInjector.getTimeZoneDetector().suggestManualTimeZone(manualTimeZoneSuggestion));
         return true;
     }
 
@@ -12377,7 +12395,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public String getWifiMacAddress(ComponentName admin) {
         // Make sure caller has DO.
-        enforceDeviceOwner(admin);
+        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(admin);
 
         final long ident = mInjector.binderClearCallingIdentity();
         try {

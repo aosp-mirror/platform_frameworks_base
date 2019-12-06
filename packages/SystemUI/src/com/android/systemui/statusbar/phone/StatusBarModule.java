@@ -77,6 +77,7 @@ import com.android.systemui.volume.VolumeComponent;
 import java.util.Optional;
 
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import dagger.Lazy;
@@ -143,7 +144,6 @@ public class StatusBarModule {
             NotificationListener notificationListener,
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
-            StatusBarWindowViewController statusBarWindowViewController,
             LockscreenLockIconController lockscreenLockIconController,
             DozeParameters dozeParameters,
             ScrimController scrimController,
@@ -157,6 +157,7 @@ public class StatusBarModule {
             VolumeComponent volumeComponent,
             CommandQueue commandQueue,
             Optional<Recents> recentsOptional,
+            Provider<StatusBarComponent.Builder> statusBarComponentBuilder,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
@@ -217,7 +218,6 @@ public class StatusBarModule {
                 notificationListener,
                 configurationController,
                 statusBarWindowController,
-                statusBarWindowViewController,
                 lockscreenLockIconController,
                 dozeParameters,
                 scrimController,
@@ -231,6 +231,7 @@ public class StatusBarModule {
                 volumeComponent,
                 commandQueue,
                 recentsOptional,
+                statusBarComponentBuilder,
                 pluginManager,
                 remoteInputUriController,
                 dividerOptional,

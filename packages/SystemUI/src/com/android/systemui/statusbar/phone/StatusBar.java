@@ -237,9 +237,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Named;
+import javax.inject.Provider;
 
 import dagger.Lazy;
-import dagger.Subcomponent;
 
 public class StatusBar extends SystemUI implements DemoMode,
         ActivityStarter, KeyguardStateController.Callback,
@@ -377,9 +377,10 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final FalsingManager mFalsingManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final ConfigurationController mConfigurationController;
-    private final StatusBarWindowViewController mStatusBarWindowViewController;
+    protected StatusBarWindowViewController mStatusBarWindowViewController;
     private final DozeParameters mDozeParameters;
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
+    private final Provider<StatusBarComponent.Builder> mStatusBarComponentBuilder;
     private final PluginManager mPluginManager;
     private final RemoteInputUriController mRemoteInputUriController;
     private final Optional<Divider> mDividerOptional;
@@ -583,6 +584,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                     }
                 }
 
+                // TODO: (b/145659174) remove when moving to NewNotifPipeline. Replaced by
+                //  KeyguardCoordinator
                 @Override
                 public void onStrongAuthStateChanged(int userId) {
                     super.onStrongAuthStateChanged(userId);
@@ -659,7 +662,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             NotificationListener notificationListener,
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
-            StatusBarWindowViewController statusBarWindowViewController,
             LockscreenLockIconController lockscreenLockIconController,
             DozeParameters dozeParameters,
             ScrimController scrimController,
@@ -673,6 +675,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             VolumeComponent volumeComponent,
             CommandQueue commandQueue,
             Optional<Recents> recentsOptional,
+            Provider<StatusBarComponent.Builder> statusBarComponentBuilder,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
@@ -732,7 +735,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationListener = notificationListener;
         mConfigurationController = configurationController;
         mStatusBarWindowController = statusBarWindowController;
-        mStatusBarWindowViewController = statusBarWindowViewController;
         mLockscreenLockIconController = lockscreenLockIconController;
         mDozeServiceHost = dozeServiceHost;
         mPowerManager = powerManager;
@@ -746,6 +748,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mVolumeComponent = volumeComponent;
         mCommandQueue = commandQueue;
         mRecentsOptional = recentsOptional;
+        mStatusBarComponentBuilder = statusBarComponentBuilder;
         mPluginManager = pluginManager;
         mRemoteInputUriController = remoteInputUriController;
         mDividerOptional = dividerOptional;
@@ -895,7 +898,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mKeyguardUpdateMonitor.registerCallback(mUpdateCallback);
         mDozeServiceHost.initialize(this, mNotificationIconAreaController,
-                mStatusBarWindow, mStatusBarKeyguardViewManager,
+                mStatusBarKeyguardViewManager,
+                mStatusBarWindowViewController,
                 mNotificationPanel, mAmbientIndicationContainer);
 
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
@@ -962,7 +966,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateResources();
         updateTheme();
 
-        inflateStatusBarWindow(context);
+        inflateStatusBarWindow();
         mStatusBarWindowViewController.setService(this);
         mStatusBarWindow.setOnTouchListener(getStatusBarWindowTouchListener());
 
@@ -1233,7 +1237,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
                 mScrimController, mActivityLaunchAnimator, mDynamicPrivacyController,
-                mNotificationAlertingManager, rowBinder, mKeyguardStateController, mCommandQueue);
+                mNotificationAlertingManager, rowBinder, mKeyguardStateController,
+                this /* statusBar */, mCommandQueue);
 
         mNotificationListController =
                 new NotificationListController(
@@ -1246,7 +1251,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mNotificationActivityStarter =
                 mStatusBarNotificationActivityStarterBuilder
-                        .setShadeController(this)
+                        .setStatusBar(this)
                         .setActivityLaunchAnimator(mActivityLaunchAnimator)
                         .setNotificationPresenter(mPresenter)
                         .build();
@@ -1380,8 +1385,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mNotificationPanel);
     }
 
-    protected void inflateStatusBarWindow(Context context) {
+    private void inflateStatusBarWindow() {
         mStatusBarWindow = mSuperStatusBarViewFactory.getStatusBarWindowView();
+        StatusBarComponent statusBarComponent = mStatusBarComponentBuilder.get()
+                .statusBarWindowView(mStatusBarWindow).build();
+        mStatusBarWindowViewController = statusBarComponent.getStatusBarWindowViewController();
         mStatusBarWindowViewController.setupExpandedStatusBar();
     }
 
@@ -1751,7 +1759,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mAmbientIndicationContainer;
     }
 
-    @Override
+    /**
+     * When the keyguard is showing and covered by a "showWhenLocked" activity it
+     * is occluded. This is controlled by {@link com.android.server.policy.PhoneWindowManager}
+     *
+     * @return whether the keyguard is currently occluded
+     */
     public boolean isOccluded() {
         return mIsOccluded;
     }
@@ -4389,11 +4402,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public NotificationGutsManager getGutsManager() {
         return mGutsManager;
-    }
-
-    @Subcomponent
-    public interface StatusBarInjector {
-        void createStatusBar(StatusBar statusbar);
     }
 
     boolean isTransientShown() {

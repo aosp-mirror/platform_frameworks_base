@@ -387,6 +387,7 @@ interface IActivityManager {
     void requestInteractiveBugReport();
     void requestFullBugReport();
     void requestRemoteBugReport();
+    boolean launchBugReportHandlerApp();
 
     @UnsupportedAppUsage
     Intent getIntentForIntentSender(in IIntentSender sender);

@@ -2337,9 +2337,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.setLastReportedMergedConfiguration(mergedConfiguration);
 
-            // Update the last frames and inset values here because the values are sent back to the
-            // client. The last values represent the last client state.
-            win.updateLastFrames();
+            // Update the last inset values here because the values are sent back to the client.
+            // The last inset values represent the last client state
             win.updateLastInsetValues();
 
             win.getCompatFrame(outFrame);
@@ -7399,6 +7398,27 @@ public class WindowManagerService extends IWindowManager.Stub
         public @Nullable KeyInterceptionInfo getKeyInterceptionInfoFromToken(IBinder inputToken) {
             return mKeyInterceptionInfoForToken.get(inputToken);
         }
+
+        @Override
+        public void setAccessibilityIdToSurfaceMetadata(
+                IBinder windowToken, int accessibilityWindowId) {
+            synchronized (mGlobalLock) {
+                final WindowState state = mWindowMap.get(windowToken);
+                if (state == null) {
+                    Slog.w(TAG, "Cannot find window which accessibility connection is added to");
+                    return;
+                }
+                try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
+                    t.setMetadata(
+                            state.mSurfaceControl,
+                            SurfaceControl.METADATA_ACCESSIBILITY_ID,
+                            accessibilityWindowId);
+                    t.apply();
+                } finally {
+                    SurfaceControl.closeTransaction();
+                }
+            }
+        }
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {
@@ -7613,12 +7633,15 @@ public class WindowManagerService extends IWindowManager.Stub
             // it as if the host window was tapped.
             touchedWindow = mEmbeddedWindowController.getHostWindow(touchedToken);
         }
-        if (touchedWindow == null || !touchedWindow.canReceiveKeys()) {
+
+        if (touchedWindow == null || !touchedWindow.canReceiveKeys(true /* fromUserTouch */)) {
+            // If the window that received the input event cannot receive keys, don't move the
+            // display it's on to the top since that window won't be able to get focus anyway.
             return;
         }
 
-        handleTaskFocusChange(touchedWindow.getTask());
         handleDisplayFocusChange(touchedWindow);
+        handleTaskFocusChange(touchedWindow.getTask());
     }
 
     private void handleTaskFocusChange(Task task) {
@@ -7643,12 +7666,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private void handleDisplayFocusChange(WindowState window) {
         final DisplayContent displayContent = window.getDisplayContent();
         if (displayContent == null) {
-            return;
-        }
-
-        if (!window.canReceiveKeys()) {
-            // If the window that received the input event cannot receive keys, don't move the
-            // display it's on to the top since that window won't be able to get focus anyway.
             return;
         }
 

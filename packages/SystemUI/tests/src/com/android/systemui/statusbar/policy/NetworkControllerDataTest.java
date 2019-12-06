@@ -500,7 +500,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     public void testUpdateDataNetworkName() {
         setupDefaultSignal();
         String newDataName = "TestDataName";
-        when(mServiceState.getDataOperatorAlphaShort()).thenReturn(newDataName);
+        when(mServiceState.getOperatorAlphaShort()).thenReturn(newDataName);
         updateServiceState();
         assertDataNetworkNameEquals(newDataName);
     }

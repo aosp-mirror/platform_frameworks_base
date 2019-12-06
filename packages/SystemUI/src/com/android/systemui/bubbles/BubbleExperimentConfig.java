@@ -21,7 +21,6 @@ import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
 
-import static com.android.systemui.bubbles.BubbleController.canLaunchIntentInActivityView;
 import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_EXPERIMENTS;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
@@ -62,7 +61,7 @@ public class BubbleExperimentConfig {
     private static final boolean ALLOW_ANY_NOTIF_TO_BUBBLE_DEFAULT = false;
 
     private static final String ALLOW_MESSAGE_NOTIFS_TO_BUBBLE = "allow_message_notifs_to_bubble";
-    private static final boolean ALLOW_MESSAGE_NOTIFS_TO_BUBBLE_DEFAULT = false;
+    private static final boolean ALLOW_MESSAGE_NOTIFS_TO_BUBBLE_DEFAULT = true;
 
     private static final String ALLOW_SHORTCUTS_TO_BUBBLE = "allow_shortcuts_to_bubble";
     private static final boolean ALLOW_SHORTCUT_TO_BUBBLE_DEFAULT = false;
@@ -107,8 +106,10 @@ public class BubbleExperimentConfig {
      * If {@link #allowAnyNotifToBubble(Context)} is true, this method creates and adds
      * {@link android.app.Notification.BubbleMetadata} to the notification entry as long as
      * the notification has necessary info for BubbleMetadata.
+     *
+     * @return whether an adjustment was made.
      */
-    static void adjustForExperiments(Context context, NotificationEntry entry,
+    static boolean adjustForExperiments(Context context, NotificationEntry entry,
             boolean previouslyUserCreated) {
         Notification.BubbleMetadata metadata = null;
         boolean addedMetadata = false;
@@ -176,7 +177,9 @@ public class BubbleExperimentConfig {
                 Log.d(TAG, "Setting FLAG_BUBBLE for: " + entry.getKey());
             }
             entry.setFlagBubble(true);
+            return true;
         }
+        return addedMetadata;
     }
 
     static Notification.BubbleMetadata createFromNotif(Context context, NotificationEntry entry) {
@@ -193,7 +196,7 @@ public class BubbleExperimentConfig {
                     ? notification.getLargeIcon()
                     : notification.getSmallIcon();
         }
-        if (canLaunchIntentInActivityView(context, entry, intent)) {
+        if (intent != null) {
             return new Notification.BubbleMetadata.Builder()
                     .setDesiredHeight(BUBBLE_HEIGHT)
                     .setIcon(icon)

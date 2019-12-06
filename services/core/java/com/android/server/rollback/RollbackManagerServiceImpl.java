@@ -57,6 +57,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
+import com.android.server.PackageWatchdog;
 import com.android.server.Watchdog;
 import com.android.server.pm.Installer;
 
@@ -1200,6 +1201,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             for (Rollback rollback : mRollbacks) {
                 rollback.dump(ipw);
             }
+            ipw.println();
+            PackageWatchdog.getInstance(mContext).dump(ipw);
         }
     }
 

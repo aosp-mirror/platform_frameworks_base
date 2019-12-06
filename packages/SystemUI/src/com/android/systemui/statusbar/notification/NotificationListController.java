@@ -64,6 +64,8 @@ public class NotificationListController {
         }
     };
 
+    // TODO: (b/145659174) remove after moving to NewNotifPipeline. Replaced by
+    //  DeviceProvisionedCoordinator
     private final DeviceProvisionedListener mDeviceProvisionedListener =
             new DeviceProvisionedListener() {
                 @Override

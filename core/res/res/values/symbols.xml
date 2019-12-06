@@ -3751,6 +3751,10 @@
 
   <java-symbol type="bool" name="config_showBuiltinWirelessChargingAnim" />
 
+  <!-- For bug report handler -->
+  <java-symbol type="bool" name="config_bugReportHandlerEnabled" />
+  <java-symbol type="string" name="config_defaultBugReportHandlerApp" />
+
   <java-symbol type="string" name="usb_device_resolve_prompt_warn" />
 
   <!-- For Accessibility system actions -->

@@ -16,7 +16,6 @@
 package android.provider;
 
 import android.annotation.IntDef;
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.WorkerThread;
 import android.content.Context;
@@ -155,12 +154,7 @@ public class BlockedNumberContract {
     /** The authority for the blocked number provider */
     public static final String AUTHORITY = "com.android.blockednumber";
 
-    /**
-     * A content:// style uri to the authority for the blocked number provider
-     * @hide
-     */
-    @NonNull
-    @SystemApi
+    /** A content:// style uri to the authority for the blocked number provider */
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
     private static final String LOG_TAG = BlockedNumberContract.class.getSimpleName();

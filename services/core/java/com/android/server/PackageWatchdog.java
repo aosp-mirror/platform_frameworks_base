@@ -42,6 +42,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
@@ -817,6 +818,21 @@ public class PackageWatchdog {
         }
     }
 
+    /** Dump status of every observer in mAllObservers. */
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("Package Watchdog status");
+        pw.increaseIndent();
+        synchronized (mLock) {
+            for (String observerName : mAllObservers.keySet()) {
+                pw.println("Observer name: " + observerName);
+                pw.increaseIndent();
+                ObserverInternal observerInternal = mAllObservers.get(observerName);
+                observerInternal.dump(pw);
+                pw.decreaseIndent();
+            }
+        }
+    }
+
     /**
      * Represents an observer monitoring a set of packages along with the failure thresholds for
      * each package.
@@ -958,6 +974,22 @@ public class PackageWatchdog {
                 return null;
             }
             return new ObserverInternal(observerName, packages);
+        }
+
+        /** Dumps information about this observer and the packages it watches. */
+        public void dump(IndentingPrintWriter pw) {
+            boolean isPersistent = registeredObserver != null && registeredObserver.isPersistent();
+            pw.println("Persistent: " + isPersistent);
+            for (String packageName : packages.keySet()) {
+                MonitoredPackage p = packages.get(packageName);
+                pw.println(packageName +  ": ");
+                pw.increaseIndent();
+                pw.println("# Failures: " + p.mFailureHistory.size());
+                pw.println("Monitoring duration remaining: " + p.mDurationMs + "ms");
+                pw.println("Explicit health check duration: " + p.mHealthCheckDurationMs + "ms");
+                pw.println("Health check state: " + p.toString(p.mHealthCheckState));
+                pw.decreaseIndent();
+            }
         }
     }
 

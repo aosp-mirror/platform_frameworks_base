@@ -3427,7 +3427,6 @@ public abstract class Context {
             //@hide: TIME_DETECTOR_SERVICE,
             //@hide: TIME_ZONE_DETECTOR_SERVICE,
             PERMISSION_SERVICE,
-            INCREMENTAL_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -4968,6 +4967,13 @@ public abstract class Context {
      */
     @SystemApi
     public static final String APP_INTEGRITY_SERVICE = "app_integrity";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.content.pm.DataLoaderManager}.
+     * @hide
+     */
+    public static final String DATA_LOADER_MANAGER_SERVICE = "dataloadermanager";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an

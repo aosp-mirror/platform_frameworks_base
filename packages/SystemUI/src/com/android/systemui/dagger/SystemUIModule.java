@@ -35,7 +35,9 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.NotifL
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarComponent;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.util.concurrency.ConcurrencyModule;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.util.time.SystemClockImpl;
@@ -52,7 +54,9 @@ import dagger.Provides;
  * implementation.
  */
 @Module(includes = {AssistModule.class,
-                    PeopleHubModule.class})
+                    ConcurrencyModule.class,
+                    PeopleHubModule.class},
+        subcomponents = {StatusBarComponent.class})
 public abstract class SystemUIModule {
 
     @Binds

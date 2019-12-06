@@ -149,5 +149,7 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(
                 Global.POWER_BUTTON_VERY_LONG_PRESS, new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(Global.NOTIFICATION_BUBBLES, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.CUSTOM_BUGREPORT_HANDLER_APP, ANY_STRING_VALIDATOR);
+        VALIDATORS.put(Global.CUSTOM_BUGREPORT_HANDLER_USER, ANY_INTEGER_VALIDATOR);
     }
 }

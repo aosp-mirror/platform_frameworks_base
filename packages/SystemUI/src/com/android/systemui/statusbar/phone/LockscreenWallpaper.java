@@ -134,6 +134,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         if (fd != null) {
             try {
                 BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.HARDWARE;
                 return LoaderResult.success(BitmapFactory.decodeFileDescriptor(
                         fd.getFileDescriptor(), null, options));
             } catch (OutOfMemoryError e) {

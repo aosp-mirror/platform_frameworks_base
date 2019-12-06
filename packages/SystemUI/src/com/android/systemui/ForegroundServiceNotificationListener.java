@@ -52,6 +52,9 @@ public class ForegroundServiceNotificationListener {
             NotifCollection notifCollection) {
         mContext = context;
         mForegroundServiceController = foregroundServiceController;
+
+        // TODO: (b/145659174) remove mEntryManager when moving to NewNotifPipeline. Replaced by
+        //  ForegroundCoordinator
         mEntryManager = notificationEntryManager;
         mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
@@ -171,8 +174,8 @@ public class ForegroundServiceNotificationListener {
                 true /* create if not found */);
     }
 
-    // TODO: remove this when fully migrated to the NewNotifPipeline (work done in
-    //  ForegroundCoordinator)
+    // TODO: (b/145659174) remove when moving to NewNotifPipeline. Replaced by
+    //  ForegroundCoordinator
     private void tagForeground(NotificationEntry entry) {
         final StatusBarNotification sbn = entry.getSbn();
         ArraySet<Integer> activeOps = mForegroundServiceController.getAppOps(

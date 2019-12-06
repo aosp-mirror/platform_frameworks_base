@@ -36,13 +36,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
-import android.testing.TestableLooper.RunWithLooper;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
@@ -52,6 +48,8 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -69,7 +67,6 @@ import java.util.Set;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper
 public class TileQueryHelperTest extends SysuiTestCase {
     private static final String CURRENT_TILES = "wifi,dnd,nfc";
     private static final String ONLY_STOCK_TILES = "wifi,dnd";
@@ -98,14 +95,13 @@ public class TileQueryHelperTest extends SysuiTestCase {
     private ArgumentCaptor<List<TileQueryHelper.TileInfo>> mCaptor;
 
     private QSTile.State mState;
-    private TestableLooper mBGLooper;
     private TileQueryHelper mTileQueryHelper;
-    private Handler mMainHandler;
+    private FakeExecutor mMainExecutor;
+    private FakeExecutor mBgExecutor;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mBGLooper = TestableLooper.get(this);
         mContext.setMockPackageManager(mPackageManager);
 
         mState = new QSTile.State();
@@ -123,9 +119,11 @@ public class TileQueryHelperTest extends SysuiTestCase {
                 }
         ).when(mQSTileHost).createTile(anyString());
 
-        mMainHandler = new Handler(Looper.getMainLooper());
-        mTileQueryHelper = new TileQueryHelper(mContext, mMainHandler,
-                new Handler(mBGLooper.getLooper()));
+        FakeSystemClock clock = new FakeSystemClock();
+        clock.setAutoIncrement(false);
+        mMainExecutor = new FakeExecutor(clock);
+        mBgExecutor = new FakeExecutor(clock);
+        mTileQueryHelper = new TileQueryHelper(mContext, mMainExecutor, mBgExecutor);
         mTileQueryHelper.setListener(mListener);
     }
 
@@ -138,8 +136,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
     public void testIsFinished_trueAfterQuerying() {
         mTileQueryHelper.queryTiles(mQSTileHost);
 
-        mBGLooper.processAllMessages();
-        waitForIdleSync(mMainHandler);
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
 
         assertTrue(mTileQueryHelper.isFinished());
     }
@@ -148,8 +145,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
     public void testQueryTiles_callsListenerTwice() {
         mTileQueryHelper.queryTiles(mQSTileHost);
 
-        mBGLooper.processAllMessages();
-        waitForIdleSync(mMainHandler);
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
 
         verify(mListener, times(2)).onTilesChanged(any());
     }
@@ -163,8 +159,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
 
         mTileQueryHelper.queryTiles(mQSTileHost);
 
-        mBGLooper.processAllMessages();
-        waitForIdleSync(mMainHandler);
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
 
         assertTrue(mTileQueryHelper.isFinished());
     }
@@ -178,8 +173,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
 
         mTileQueryHelper.queryTiles(mQSTileHost);
 
-        mBGLooper.processAllMessages();
-        waitForIdleSync(mMainHandler);
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
 
         verify(mListener, atLeastOnce()).onTilesChanged(mCaptor.capture());
         List<String> specs = new ArrayList<>();
@@ -199,8 +193,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
 
         mTileQueryHelper.queryTiles(mQSTileHost);
 
-        mBGLooper.processAllMessages();
-        waitForIdleSync(mMainHandler);
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
 
         verify(mListener, atLeastOnce()).onTilesChanged(mCaptor.capture());
         List<String> specs = new ArrayList<>();
@@ -220,8 +213,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
 
         mTileQueryHelper.queryTiles(mQSTileHost);
 
-        mBGLooper.processAllMessages();
-        waitForIdleSync(mMainHandler);
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
 
         verify(mListener, atLeastOnce()).onTilesChanged(mCaptor.capture());
         List<String> specs = new ArrayList<>();
@@ -251,8 +243,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
                 "");
 
         mTileQueryHelper.queryTiles(mQSTileHost);
-        mBGLooper.processAllMessages();
-        waitForIdleSync(mMainHandler);
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
 
         verify(mListener, atLeastOnce()).onTilesChanged(mCaptor.capture());
         List<TileQueryHelper.TileInfo> tileInfos = mCaptor.getValue();

@@ -550,4 +550,10 @@ public abstract class WindowManagerInternal {
      * the next time the activities are opened.
      */
     public abstract void clearSnapshotCache();
+
+    /**
+     * Assigns accessibility ID a window surface as a layer metadata.
+     */
+    public abstract void setAccessibilityIdToSurfaceMetadata(
+            IBinder windowToken, int accessibilityWindowId);
 }

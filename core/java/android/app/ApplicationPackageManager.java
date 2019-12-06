@@ -39,6 +39,7 @@ import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.InstallSourceInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
@@ -2085,6 +2086,21 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    @NonNull
+    public InstallSourceInfo getInstallSourceInfo(String packageName) throws NameNotFoundException {
+        final InstallSourceInfo installSourceInfo;
+        try {
+            installSourceInfo = mPM.getInstallSourceInfo(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        if (installSourceInfo == null) {
+            throw new NameNotFoundException(packageName);
+        }
+        return installSourceInfo;
+    }
+
+    @Override
     public int getMoveStatus(int moveId) {
         try {
             return mPM.getMoveStatus(moveId);
@@ -2782,7 +2798,7 @@ public class ApplicationPackageManager extends PackageManager {
     public Drawable loadUnbadgedItemIcon(@NonNull PackageItemInfo itemInfo,
             @Nullable ApplicationInfo appInfo) {
         if (itemInfo.showUserIcon != UserHandle.USER_NULL) {
-            // Indicates itemInfo is for a different user (e.g. a profile's parent), so use a 
+            // Indicates itemInfo is for a different user (e.g. a profile's parent), so use a
             // generic user icon (users generally lack permission to view each other's actual icons)
             int targetUserId = itemInfo.showUserIcon;
             return UserIcons.getDefaultUserIcon(

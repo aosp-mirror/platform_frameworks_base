@@ -4488,6 +4488,7 @@ package android.net {
   public class Network implements android.os.Parcelable {
     ctor public Network(@NonNull android.net.Network);
     method @NonNull public android.net.Network getPrivateDnsBypassingCopy();
+    field public final int netId;
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
@@ -6830,7 +6831,6 @@ package android.printservice.recommendation {
 package android.provider {
 
   public class BlockedNumberContract {
-    field @NonNull public static final android.net.Uri AUTHORITY_URI;
     field public static final String METHOD_NOTIFY_EMERGENCY_CONTACT = "notify_emergency_contact";
     field public static final String METHOD_SHOULD_SYSTEM_BLOCK_NUMBER = "should_system_block_number";
     field public static final String RES_BLOCK_STATUS = "block_status";
@@ -7078,6 +7078,8 @@ package android.provider {
     field public static final String DEVICE_DEMO_MODE = "device_demo_mode";
     field public static final String DEVICE_PROVISIONING_MOBILE_DATA_ENABLED = "device_provisioning_mobile_data";
     field public static final String EUICC_PROVISIONED = "euicc_provisioned";
+    field public static final String EUICC_SUPPORTED_COUNTRIES = "euicc_supported_countries";
+    field public static final String EUICC_UNSUPPORTED_COUNTRIES = "euicc_unsupported_countries";
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT = "install_carrier_app_notification_persistent";
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS = "install_carrier_app_notification_sleep_millis";
     field public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";

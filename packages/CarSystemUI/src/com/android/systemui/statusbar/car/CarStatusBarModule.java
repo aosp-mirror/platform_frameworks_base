@@ -78,11 +78,11 @@ import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.StatusBarComponent;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
-import com.android.systemui.statusbar.phone.StatusBarWindowViewController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -96,6 +96,7 @@ import com.android.systemui.volume.VolumeComponent;
 import java.util.Optional;
 
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import dagger.Lazy;
@@ -162,7 +163,6 @@ public class CarStatusBarModule {
             NotificationListener notificationListener,
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
-            StatusBarWindowViewController statusBarWindowViewController,
             LockscreenLockIconController lockscreenLockIconController,
             DozeParameters dozeParameters,
             ScrimController scrimController,
@@ -175,6 +175,7 @@ public class CarStatusBarModule {
             VolumeComponent volumeComponent,
             CommandQueue commandQueue,
             Optional<Recents> recentsOptional,
+            Provider<StatusBarComponent.Builder> statusBarComponentBuilder,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
@@ -239,7 +240,6 @@ public class CarStatusBarModule {
                 notificationListener,
                 configurationController,
                 statusBarWindowController,
-                statusBarWindowViewController,
                 lockscreenLockIconController,
                 dozeParameters,
                 scrimController,
@@ -252,6 +252,7 @@ public class CarStatusBarModule {
                 volumeComponent,
                 commandQueue,
                 recentsOptional,
+                statusBarComponentBuilder,
                 pluginManager,
                 remoteInputUriController,
                 dividerOptional,

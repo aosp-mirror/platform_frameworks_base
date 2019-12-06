@@ -8782,6 +8782,22 @@ public final class Settings {
         public static final String BUGREPORT_IN_POWER_MENU = "bugreport_in_power_menu";
 
         /**
+         * The package name for the custom bugreport handler app. This app must be whitelisted.
+         * This is currently used only by Power Menu short press.
+         *
+         * @hide
+         */
+        public static final String CUSTOM_BUGREPORT_HANDLER_APP = "custom_bugreport_handler_app";
+
+        /**
+         * The user id for the custom bugreport handler app. This is currently used only by Power
+         * Menu short press.
+         *
+         * @hide
+         */
+        public static final String CUSTOM_BUGREPORT_HANDLER_USER = "custom_bugreport_handler_user";
+
+        /**
          * Whether ADB is enabled.
          */
         public static final String ADB_ENABLED = "adb_enabled";
@@ -8918,12 +8934,31 @@ public final class Settings {
          * List of ISO country codes in which eUICC UI is shown. Country codes should be separated
          * by comma.
          *
-         * <p>Used to hide eUICC UI from users who are currently in countries no carriers support
-         * eUICC.
+         * Note: if {@link #EUICC_SUPPORTED_COUNTRIES} is empty, then {@link
+         * #EUICC_UNSUPPORTED_COUNTRIES} is used.
+         *
+         * <p>Used to hide eUICC UI from users who are currently in countries where no carriers
+         * support eUICC.
+         *
          * @hide
          */
-        //TODO(b/77914569) Changes this to System Api.
+        @SystemApi
         public static final String EUICC_SUPPORTED_COUNTRIES = "euicc_supported_countries";
+
+        /**
+         * List of ISO country codes in which eUICC UI is not shown. Country codes should be
+         * separated by comma.
+         *
+         * Note: if {@link #EUICC_SUPPORTED_COUNTRIES} is empty, then {@link
+         * #EUICC_UNSUPPORTED_COUNTRIES} is used.
+         *
+         * <p>Used to hide eUICC UI from users who are currently in countries where no carriers
+         * support eUICC.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final String EUICC_UNSUPPORTED_COUNTRIES = "euicc_unsupported_countries";
 
         /**
          * Whether any activity can be resized. When this is true, any

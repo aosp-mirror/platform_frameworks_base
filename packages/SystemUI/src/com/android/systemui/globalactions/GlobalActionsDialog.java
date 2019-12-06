@@ -669,7 +669,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         // Take an "interactive" bugreport.
                         MetricsLogger.action(mContext,
                                 MetricsEvent.ACTION_BUGREPORT_FROM_POWER_MENU_INTERACTIVE);
-                        ActivityManager.getService().requestInteractiveBugReport();
+                        if (!ActivityManager.getService().launchBugReportHandlerApp()) {
+                            Log.w(TAG, "Bugreport handler could not be launched");
+                            ActivityManager.getService().requestInteractiveBugReport();
+                        }
                     } catch (RemoteException e) {
                     }
                 }

@@ -20,7 +20,6 @@ import android.os.Build;
 import android.os.SystemProperties;
 import android.util.Log;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
@@ -40,25 +39,22 @@ import java.util.Locale;
  * To manually view the logs via adb:
  *      adb shell dumpsys activity service com.android.systemui/.SystemUIService \
  *      dependency DumpController <SysuiLogId>
- *
- * Logs can be disabled by setting the following SystemProperty and then restarting the device:
- *      adb shell setprop persist.sysui.log.enabled.<id> true/false && adb reboot
- *
- * @param <E> Type of event we'll be logging
  */
-public class SysuiLog<E extends Event> implements Dumpable {
+public class SysuiLog implements Dumpable {
     public static final SimpleDateFormat DATE_FORMAT =
             new SimpleDateFormat("MM-dd HH:mm:ss", Locale.US);
 
-    protected final Object mDataLock = new Object();
+    private final Object mDataLock = new Object();
     private final String mId;
     private final int mMaxLogs;
-    protected boolean mEnabled;
+    private boolean mEnabled;
 
-    @VisibleForTesting protected ArrayDeque<E> mTimeline;
+    @VisibleForTesting protected ArrayDeque<Event> mTimeline;
 
     /**
      * Creates a SysuiLog
+     * To enable or disable logs, set the system property and then restart the device:
+     *      adb shell setprop sysui.log.enabled.<id> true/false && adb reboot
      * @param dumpController where to register this logger's dumpsys
      * @param id user-readable tag for this logger
      * @param maxDebugLogs maximum number of logs to retain when {@link sDebuggable} is true
@@ -78,20 +74,23 @@ public class SysuiLog<E extends Event> implements Dumpable {
         dumpController.registerDumpable(mId, this);
     }
 
+    public SysuiLog(DumpController dumpController, String id) {
+        this(dumpController, id, DEFAULT_MAX_DEBUG_LOGS, DEFAULT_MAX_LOGS);
+    }
+
     /**
      * Logs an event to the timeline which can be printed by the dumpsys.
      * May also log to logcat if enabled.
-     * @return the last event that was discarded from the Timeline (can be recycled)
+     * @return true if event was logged, else false
      */
-    public E log(E event) {
+    public boolean log(Event event) {
         if (!mEnabled) {
-            return null;
+            return false;
         }
 
-        E recycledEvent = null;
         synchronized (mDataLock) {
             if (mTimeline.size() >= mMaxLogs) {
-                recycledEvent = mTimeline.removeFirst();
+                mTimeline.removeFirst();
             }
 
             mTimeline.add(event);
@@ -117,18 +116,13 @@ public class SysuiLog<E extends Event> implements Dumpable {
                     break;
             }
         }
-
-        if (recycledEvent != null) {
-            recycledEvent.recycle();
-        }
-
-        return recycledEvent;
+        return true;
     }
 
     /**
      * @return user-readable string of the given event with timestamp
      */
-    private String eventToTimestampedString(Event event) {
+    public String eventToTimestampedString(Event event) {
         StringBuilder sb = new StringBuilder();
         sb.append(SysuiLog.DATE_FORMAT.format(event.getTimestamp()));
         sb.append(" ");
@@ -143,7 +137,9 @@ public class SysuiLog<E extends Event> implements Dumpable {
         return event.getMessage();
     }
 
-    @GuardedBy("mDataLock")
+    /**
+     * only call on this method if you have the mDataLock
+     */
     private void dumpTimelineLocked(PrintWriter pw) {
         pw.println("\tTimeline:");
 
@@ -166,7 +162,7 @@ public class SysuiLog<E extends Event> implements Dumpable {
     }
 
     private static boolean sDebuggable = Build.IS_DEBUGGABLE;
-    private static final String SYSPROP_ENABLED_PREFIX = "persist.sysui.log.enabled.";
+    private static final String SYSPROP_ENABLED_PREFIX = "sysui.log.enabled.";
     private static final boolean LOG_TO_LOGCAT_ENABLED = sDebuggable;
     private static final boolean DEFAULT_ENABLED = sDebuggable;
     private static final int DEFAULT_MAX_DEBUG_LOGS = 100;

@@ -203,8 +203,11 @@ public final class PowerManagerService extends SystemService
     // System Property indicating that retail demo mode is currently enabled.
     private static final String SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED = "sys.retaildemo.enabled";
 
-    // Possible reasons for shutting down or reboot for use in REBOOT_PROPERTY(sys.boot.reason)
-    // which is set by bootstat
+    // System property for last reboot reason
+    private static final String SYSTEM_PROPERTY_REBOOT_REASON = "sys.boot.reason";
+
+    // Possible reasons for shutting down or reboot for use in
+    // SYSTEM_PROPERTY_REBOOT_REASON(sys.boot.reason) which is set by bootstat
     private static final String REASON_SHUTDOWN = "shutdown";
     private static final String REASON_REBOOT = "reboot";
     private static final String REASON_USERREQUESTED = "shutdown,userrequested";
@@ -225,9 +228,6 @@ public final class PowerManagerService extends SystemService
     private static final int HALT_MODE_REBOOT = 1;
     private static final int HALT_MODE_REBOOT_SAFE_MODE = 2;
 
-    // property for last reboot reason
-    private static final String REBOOT_PROPERTY = "sys.boot.reason";
-
     private final Context mContext;
     private final ServiceThread mHandlerThread;
     private final PowerManagerHandler mHandler;
@@ -240,6 +240,7 @@ public final class PowerManagerService extends SystemService
     private final BinderService mBinderService;
     private final LocalService mLocalService;
     private final NativeWrapper mNativeWrapper;
+    private final SystemPropertiesWrapper mSystemProperties;
     private final Injector mInjector;
 
     private LightsManager mLightsManager;
@@ -756,6 +757,20 @@ public final class PowerManagerService extends SystemService
         InattentiveSleepWarningController createInattentiveSleepWarningController() {
             return new InattentiveSleepWarningController();
         }
+
+        public SystemPropertiesWrapper createSystemPropertiesWrapper() {
+            return new SystemPropertiesWrapper() {
+                @Override
+                public String get(String key, String def) {
+                    return SystemProperties.get(key, def);
+                }
+
+                @Override
+                public void set(String key, String val) {
+                    SystemProperties.set(key, val);
+                }
+            };
+        }
     }
 
     final Constants mConstants;
@@ -781,6 +796,7 @@ public final class PowerManagerService extends SystemService
         mBinderService = new BinderService();
         mLocalService = new LocalService();
         mNativeWrapper = injector.createNativeWrapper();
+        mSystemProperties = injector.createSystemPropertiesWrapper();
         mInjector = injector;
 
         mHandlerThread = new ServiceThread(TAG,
@@ -816,7 +832,7 @@ public final class PowerManagerService extends SystemService
             mHalInteractiveModeEnabled = true;
 
             mWakefulness = WAKEFULNESS_AWAKE;
-            sQuiescent = SystemProperties.get(SYSTEM_PROPERTY_QUIESCENT, "0").equals("1");
+            sQuiescent = mSystemProperties.get(SYSTEM_PROPERTY_QUIESCENT, "0").equals("1");
 
             mNativeWrapper.nativeInit(this);
             mNativeWrapper.nativeSetAutoSuspend(false);
@@ -1067,8 +1083,9 @@ public final class PowerManagerService extends SystemService
         }
 
         final String retailDemoValue = UserManager.isDeviceInDemoMode(mContext) ? "1" : "0";
-        if (!retailDemoValue.equals(SystemProperties.get(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED))) {
-            SystemProperties.set(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, retailDemoValue);
+        if (!retailDemoValue.equals(
+                mSystemProperties.get(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, null))) {
+            mSystemProperties.set(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, retailDemoValue);
         }
 
         mScreenBrightnessModeSetting = Settings.System.getIntForUser(resolver,
@@ -4820,7 +4837,7 @@ public final class PowerManagerService extends SystemService
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                return getLastShutdownReasonInternal(REBOOT_PROPERTY);
+                return getLastShutdownReasonInternal();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -5054,12 +5071,8 @@ public final class PowerManagerService extends SystemService
     }
 
     @VisibleForTesting
-    // lastRebootReasonProperty argument to permit testing
-    int getLastShutdownReasonInternal(String lastRebootReasonProperty) {
-        String line = SystemProperties.get(lastRebootReasonProperty);
-        if (line == null) {
-            return PowerManager.SHUTDOWN_REASON_UNKNOWN;
-        }
+    int getLastShutdownReasonInternal() {
+        String line = mSystemProperties.get(SYSTEM_PROPERTY_REBOOT_REASON, null);
         switch (line) {
             case REASON_SHUTDOWN:
                 return PowerManager.SHUTDOWN_REASON_SHUTDOWN;

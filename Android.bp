@@ -803,10 +803,9 @@ filegroup {
 }
 
 filegroup {
-    name: "incremental_data_loader_aidl",
+    name: "dataloader_aidl",
     srcs: [
-        "core/java/android/service/incremental/IIncrementalDataLoaderStatusListener.aidl",
-        "core/java/android/service/incremental/IIncrementalDataLoaderService.aidl",
+        "core/java/android/content/pm/IDataLoaderStatusListener.aidl",
     ],
     path: "core/java",
 }
@@ -815,7 +814,27 @@ aidl_interface {
     name: "libincremental_aidl",
     srcs: [
         ":incremental_aidl",
-        ":incremental_data_loader_aidl",
+    ],
+    imports: [
+        "libdataloader_aidl",
+    ],
+    backend: {
+        java: {
+            sdk_version: "28",
+        },
+        cpp: {
+            enabled: true,
+        },
+        ndk: {
+            enabled: true,
+        },
+    },
+}
+
+aidl_interface {
+    name: "libdataloader_aidl",
+    srcs: [
+        ":dataloader_aidl",
     ],
     backend: {
         java: {
@@ -1675,6 +1694,7 @@ filegroup {
     srcs: [
         ":framework-annotations",
 	"core/java/android/os/HandlerExecutor.java",
+        "core/java/android/util/BackupUtils.java",
         "core/java/android/util/KeyValueListParser.java",
         "core/java/android/util/LocalLog.java",
         "core/java/android/util/Rational.java",

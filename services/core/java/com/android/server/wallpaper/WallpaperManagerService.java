@@ -104,6 +104,7 @@ import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.WindowManagerInternal;
 
 import libcore.io.IoUtils;
@@ -1785,25 +1786,26 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     @Override
     public void onUnlockUser(final int userId) {
-        synchronized (mLock) {
-            if (mCurrentUserId == userId) {
-                if (mWaitingForUnlock) {
-                    // the desired wallpaper is not direct-boot aware, load it now
-                    final WallpaperData systemWallpaper =
-                            getWallpaperSafeLocked(userId, FLAG_SYSTEM);
-                    switchWallpaper(systemWallpaper, null);
-                    notifyCallbacksLocked(systemWallpaper);
-                }
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
+        t.traceBegin("on-unlock-user-" + userId);
+        try {
+            synchronized (mLock) {
+                if (mCurrentUserId == userId) {
+                    if (mWaitingForUnlock) {
+                        // the desired wallpaper is not direct-boot aware, load it now
+                        final WallpaperData systemWallpaper =
+                                getWallpaperSafeLocked(userId, FLAG_SYSTEM);
+                        switchWallpaper(systemWallpaper, null);
+                        notifyCallbacksLocked(systemWallpaper);
+                    }
 
-                // Make sure that the SELinux labeling of all the relevant files is correct.
-                // This corrects for mislabeling bugs that might have arisen from move-to
-                // operations involving the wallpaper files.  This isn't timing-critical,
-                // so we do it in the background to avoid holding up the user unlock operation.
-                if (!mUserRestorecon.get(userId)) {
-                    mUserRestorecon.put(userId, true);
-                    Runnable relabeler = new Runnable() {
-                        @Override
-                        public void run() {
+                    // Make sure that the SELinux labeling of all the relevant files is correct.
+                    // This corrects for mislabeling bugs that might have arisen from move-to
+                    // operations involving the wallpaper files.  This isn't timing-critical,
+                    // so we do it in the background to avoid holding up the user unlock operation.
+                    if (!mUserRestorecon.get(userId)) {
+                        mUserRestorecon.put(userId, true);
+                        Runnable relabeler = () -> {
                             final File wallpaperDir = getWallpaperDir(userId);
                             for (String filename : sPerUserFiles) {
                                 File f = new File(wallpaperDir, filename);
@@ -1811,11 +1813,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                     SELinux.restorecon(f);
                                 }
                             }
-                        }
-                    };
-                    BackgroundThread.getHandler().post(relabeler);
+                        };
+                        BackgroundThread.getHandler().post(relabeler);
+                    }
                 }
             }
+        } finally {
+            t.traceEnd();
         }
     }
 
@@ -1833,31 +1837,37 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     void switchUser(int userId, IRemoteCallback reply) {
-        final WallpaperData systemWallpaper;
-        final WallpaperData lockWallpaper;
-        synchronized (mLock) {
-            if (mCurrentUserId == userId) {
-                return;
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
+        t.traceBegin("switch-user-" + userId);
+        try {
+            final WallpaperData systemWallpaper;
+            final WallpaperData lockWallpaper;
+            synchronized (mLock) {
+                if (mCurrentUserId == userId) {
+                    return;
+                }
+                mCurrentUserId = userId;
+                systemWallpaper = getWallpaperSafeLocked(userId, FLAG_SYSTEM);
+                final WallpaperData tmpLockWallpaper = mLockWallpaperMap.get(userId);
+                lockWallpaper = tmpLockWallpaper == null ? systemWallpaper : tmpLockWallpaper;
+                // Not started watching yet, in case wallpaper data was loaded for other reasons.
+                if (systemWallpaper.wallpaperObserver == null) {
+                    systemWallpaper.wallpaperObserver = new WallpaperObserver(systemWallpaper);
+                    systemWallpaper.wallpaperObserver.startWatching();
+                }
+                switchWallpaper(systemWallpaper, reply);
             }
-            mCurrentUserId = userId;
-            systemWallpaper = getWallpaperSafeLocked(userId, FLAG_SYSTEM);
-            final WallpaperData tmpLockWallpaper = mLockWallpaperMap.get(userId);
-            lockWallpaper = tmpLockWallpaper == null ? systemWallpaper : tmpLockWallpaper;
-            // Not started watching yet, in case wallpaper data was loaded for other reasons.
-            if (systemWallpaper.wallpaperObserver == null) {
-                systemWallpaper.wallpaperObserver = new WallpaperObserver(systemWallpaper);
-                systemWallpaper.wallpaperObserver.startWatching();
-            }
-            switchWallpaper(systemWallpaper, reply);
-        }
 
-        // Offload color extraction to another thread since switchUser will be called
-        // from the main thread.
-        FgThread.getHandler().post(() -> {
-            notifyWallpaperColorsChanged(systemWallpaper, FLAG_SYSTEM);
-            notifyWallpaperColorsChanged(lockWallpaper, FLAG_LOCK);
-            notifyWallpaperColorsChanged(mFallbackWallpaper, FLAG_SYSTEM);
-        });
+            // Offload color extraction to another thread since switchUser will be called
+            // from the main thread.
+            FgThread.getHandler().post(() -> {
+                notifyWallpaperColorsChanged(systemWallpaper, FLAG_SYSTEM);
+                notifyWallpaperColorsChanged(lockWallpaper, FLAG_LOCK);
+                notifyWallpaperColorsChanged(mFallbackWallpaper, FLAG_SYSTEM);
+            });
+        } finally {
+            t.traceEnd();
+        }
     }
 
     void switchWallpaper(WallpaperData wallpaper, IRemoteCallback reply) {

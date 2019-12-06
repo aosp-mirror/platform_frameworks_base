@@ -2256,7 +2256,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        if (mRootActivityContainer.getTopResumedActivity() == this) {
+        if (mRootActivityContainer.getTopResumedActivity() == this
+                && getDisplayContent().mFocusedApp == this) {
             if (DEBUG_FOCUS) {
                 Slog.d(TAG_FOCUS, "moveActivityStackToFront: already on top, activity=" + this);
             }

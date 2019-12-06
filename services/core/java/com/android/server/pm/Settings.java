@@ -4257,14 +4257,6 @@ public final class Settings {
         return userState.isMatch(componentInfo, flags);
     }
 
-    String getInstallerPackageNameLPr(String packageName) {
-        final PackageSetting pkg = mPackages.get(packageName);
-        if (pkg == null) {
-            throw new IllegalArgumentException("Unknown package: " + packageName);
-        }
-        return pkg.installSource.installerPackageName;
-    }
-
     boolean isOrphaned(String packageName) {
         final PackageSetting pkg = mPackages.get(packageName);
         if (pkg == null) {
