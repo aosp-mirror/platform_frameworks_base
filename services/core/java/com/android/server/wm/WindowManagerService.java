@@ -1721,7 +1721,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        return mAtmService.mRootActivityContainer.getActivityDisplayOrCreate(displayId);
+        return mAtmService.mRootActivityContainer.getDisplayContentOrCreate(displayId);
     }
 
     private boolean doesAddToastWindowRequireToken(String packageName, int callingUid,

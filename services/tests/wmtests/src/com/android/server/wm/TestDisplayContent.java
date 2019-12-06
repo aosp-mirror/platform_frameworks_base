@@ -35,11 +35,11 @@ import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 
-class TestActivityDisplay extends ActivityDisplay {
+class TestDisplayContent extends DisplayContent {
     private final ActivityStackSupervisor mSupervisor;
 
-    private TestActivityDisplay(ActivityStackSupervisor supervisor, Display display) {
-        super(supervisor.mService.mRootActivityContainer, display);
+    private TestDisplayContent(ActivityStackSupervisor supervisor, Display display) {
+        super(display, supervisor.mService.mRootActivityContainer);
         // Normally this comes from display-properties as exposed by WM. Without that, just
         // hard-code to FULLSCREEN for tests.
         setWindowingMode(WINDOWING_MODE_FULLSCREEN);
@@ -140,13 +140,13 @@ class TestActivityDisplay extends ActivityDisplay {
             mInfo.logicalDensityDpi = dpi;
             return this;
         }
-        TestActivityDisplay build() {
+        TestDisplayContent build() {
             final int displayId = SystemServicesTestRule.sNextDisplayId++;
             final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                     mInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
-            final TestActivityDisplay newDisplay;
+            final TestDisplayContent newDisplay;
             synchronized (mService.mGlobalLock) {
-                newDisplay = new TestActivityDisplay(mService.mStackSupervisor, display);
+                newDisplay = new TestDisplayContent(mService.mStackSupervisor, display);
                 mService.mRootActivityContainer.addChild(newDisplay, mPosition);
             }
             // disable the normal system decorations

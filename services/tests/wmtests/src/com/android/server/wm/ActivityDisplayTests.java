@@ -47,7 +47,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Tests for the {@link ActivityDisplay} class.
+ * Tests for the {@link DisplayContent} class.
  *
  * Build/Install/Run:
  *  atest WmTests:ActivityDisplayTests
@@ -55,12 +55,13 @@ import org.junit.runner.RunWith;
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
+// TODO(b/144248496): Merge to DisplayContentTests
 public class ActivityDisplayTests extends ActivityTestsBase {
 
     @Test
     public void testLastFocusedStackIsUpdatedWhenMovingStack() {
         // Create a stack at bottom.
-        final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
+        final DisplayContent display = mRootActivityContainer.getDefaultDisplay();
         final ActivityStack stack =
                 new StackBuilder(mRootActivityContainer).setOnTop(!ON_TOP).build();
         final ActivityStack prevFocusedStack = display.getFocusedStack();
@@ -103,13 +104,13 @@ public class ActivityDisplayTests extends ActivityTestsBase {
     }
 
     /**
-     * Test {@link ActivityDisplay#mPreferredTopFocusableStack} will be cleared when the stack is
+     * Test {@link DisplayContent#mPreferredTopFocusableStack} will be cleared when the stack is
      * removed or moved to back, and the focused stack will be according to z-order.
      */
     @Test
     public void testStackShouldNotBeFocusedAfterMovingToBackOrRemoving() {
         // Create a display which only contains 2 stacks.
-        final ActivityDisplay display = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
+        final DisplayContent display = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
         final ActivityStack stack1 = createFullscreenStackWithSimpleActivityAt(display);
         final ActivityStack stack2 = createFullscreenStackWithSimpleActivityAt(display);
 
@@ -128,13 +129,13 @@ public class ActivityDisplayTests extends ActivityTestsBase {
     }
 
     /**
-     * Verifies {@link ActivityDisplay#remove} should not resume home stack on the removing display.
+     * Verifies {@link DisplayContent#remove} should not resume home stack on the removing display.
      */
     @Test
     public void testNotResumeHomeStackOnRemovingDisplay() {
         // Create a display which supports system decoration and allows reparenting stacks to
         // another display when the display is removed.
-        final ActivityDisplay display = new TestActivityDisplay.Builder(
+        final DisplayContent display = new TestDisplayContent.Builder(
                 mService, 1000, 1500).setSystemDecorations(true).build();
         doReturn(false).when(display).shouldDestroyContentOnRemove();
 
@@ -154,7 +155,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         verify(homeStack, never()).resumeTopActivityUncheckedLocked(any(), any());
     }
 
-    private ActivityStack createFullscreenStackWithSimpleActivityAt(ActivityDisplay display) {
+    private ActivityStack createFullscreenStackWithSimpleActivityAt(DisplayContent display) {
         final ActivityStack fullscreenStack = display.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, ON_TOP);
         final Task fullscreenTask = new TaskBuilder(mService.mStackSupervisor)
@@ -168,7 +169,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
      */
     @Test
     public void testTopRunningActivity() {
-        final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
+        final DisplayContent display = mRootActivityContainer.getDefaultDisplay();
         final KeyguardController keyguard = mSupervisor.getKeyguardController();
         final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
         final ActivityRecord activity = stack.getTopNonFinishingActivity();
@@ -208,7 +209,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         assertTopRunningActivity(showWhenLockedActivity, display);
     }
 
-    private static void assertTopRunningActivity(ActivityRecord top, ActivityDisplay display) {
+    private static void assertTopRunningActivity(ActivityRecord top, DisplayContent display) {
         assertEquals(top, display.topRunningActivity());
         assertEquals(top, display.topRunningActivity(true /* considerKeyguardState */));
     }
@@ -218,7 +219,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
      */
     @Test
     public void testAlwaysOnTopStackLocation() {
-        final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
+        final DisplayContent display = mRootActivityContainer.getDefaultDisplay();
         final ActivityStack alwaysOnTopStack = display.createStack(WINDOWING_MODE_FREEFORM,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true)
@@ -283,7 +284,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
     }
 
     private void removeStackTests(Runnable runnable) {
-        final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
+        final DisplayContent display = mRootActivityContainer.getDefaultDisplay();
         final ActivityStack stack1 = display.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
         final ActivityStack stack2 = display.createStack(WINDOWING_MODE_FULLSCREEN,

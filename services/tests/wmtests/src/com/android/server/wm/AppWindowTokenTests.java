@@ -181,7 +181,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testLandscapeSeascapeRotationByPolicy() {
-        // This instance has been spied in {@link TestActivityDisplay}.
+        // This instance has been spied in {@link TestDisplayContent}.
         final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
 
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(

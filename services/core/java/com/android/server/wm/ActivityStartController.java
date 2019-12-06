@@ -180,8 +180,8 @@ public class ActivityStartController {
         }
         options.setLaunchDisplayId(displayId);
 
-        final ActivityDisplay display =
-                mService.mRootActivityContainer.getActivityDisplay(displayId);
+        final DisplayContent display =
+                mService.mRootActivityContainer.getDisplayContent(displayId);
         // The home activity will be started later, defer resuming to avoid unneccerary operations
         // (e.g. start home recursively) when creating home stack.
         mSupervisor.beginDeferResume();

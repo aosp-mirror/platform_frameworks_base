@@ -53,14 +53,14 @@ import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallback
  * cleanup. See {@link com.android.server.wm.RecentsAnimationController}.
  */
 class RecentsAnimation implements RecentsAnimationCallbacks,
-        ActivityDisplay.OnStackOrderChangedListener {
+        DisplayContent.OnStackOrderChangedListener {
     private static final String TAG = RecentsAnimation.class.getSimpleName();
 
     private final ActivityTaskManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
     private final ActivityStartController mActivityStartController;
     private final WindowManagerService mWindowManager;
-    private final ActivityDisplay mDefaultDisplay;
+    private final DisplayContent mDefaultDisplay;
     private final Intent mTargetIntent;
     private final ComponentName mRecentsComponent;
     private final int mRecentsUid;
@@ -180,7 +180,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         ActivityRecord targetActivity = getTargetActivity(targetStack);
         final boolean hasExistingActivity = targetActivity != null;
         if (hasExistingActivity) {
-            final ActivityDisplay display = targetActivity.getDisplay();
+            final DisplayContent display = targetActivity.getDisplay();
             mRestoreTargetBehindStack = display.getStackAbove(targetStack);
             if (mRestoreTargetBehindStack == null) {
                 notifyAnimationCancelBeforeStart(recentsAnimationRunner);
@@ -250,7 +250,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             mWindowManager.cancelRecentsAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION,
                     "startRecentsActivity");
             mWindowManager.initializeRecentsAnimation(mTargetActivityType, recentsAnimationRunner,
-                    this, mDefaultDisplay.mDisplayId,
+                    this, mDefaultDisplay.getDisplayId(),
                     mStackSupervisor.mRecentTasks.getRecentTaskIds(), targetActivity);
 
             // If we updated the launch-behind state, update the visibility of the activities after
@@ -351,7 +351,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         }
                     } else if (reorderMode == REORDER_MOVE_TO_ORIGINAL_POSITION){
                         // Restore the target stack to its previous position
-                        final ActivityDisplay display = targetActivity.getDisplay();
+                        final DisplayContent display = targetActivity.getDisplay();
                         display.moveStackBehindStack(targetStack, mRestoreTargetBehindStack);
                         if (WM_DEBUG_RECENTS_ANIMATIONS.isLogToAny()) {
                             final ActivityStack aboveTargetStack =

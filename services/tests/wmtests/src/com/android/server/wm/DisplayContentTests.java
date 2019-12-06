@@ -768,9 +768,8 @@ public class DisplayContentTests extends WindowTestsBase {
 
         activity.setRequestedOrientation(newOrientation);
 
-        // TODO(display-merge): Remove cast
-        verify((ActivityDisplay) dc, never()).updateDisplayOverrideConfigurationLocked(any(),
-                eq(activity), anyBoolean(), same(null));
+        verify(dc, never()).updateDisplayOverrideConfigurationLocked(any(), eq(activity),
+                anyBoolean(), same(null));
         assertEquals(dc.getDisplayRotation().getUserRotation(), dc.getRotation());
     }
 
@@ -964,7 +963,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 invocation -> {
                     continued[0] = true;
                     return true;
-                }).when((ActivityDisplay) dc).updateDisplayOverrideConfigurationLocked();
+                }).when(dc).updateDisplayOverrideConfigurationLocked();
         final boolean[] called = new boolean[1];
         mWm.mDisplayRotationController =
                 new IDisplayWindowRotationController.Stub() {

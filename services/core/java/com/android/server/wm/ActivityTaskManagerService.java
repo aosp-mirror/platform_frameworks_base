@@ -2038,7 +2038,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public int getActivityDisplayId(IBinder activityToken) throws RemoteException {
+    public int getDisplayId(IBinder activityToken) throws RemoteException {
         synchronized (mGlobalLock) {
             final ActivityStack stack = ActivityRecord.getStackLocked(activityToken);
             if (stack != null && stack.mDisplayId != INVALID_DISPLAY) {
@@ -4691,7 +4691,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "registerRemoteAnimations");
         definition.setCallingPidUid(Binder.getCallingPid(), Binder.getCallingUid());
         synchronized (mGlobalLock) {
-            final ActivityDisplay display = mRootActivityContainer.getActivityDisplay(displayId);
+            final DisplayContent display = mRootActivityContainer.getDisplayContent(displayId);
             if (display == null) {
                 Slog.e(TAG, "Couldn't find display with id: " + displayId);
                 return;
@@ -4899,8 +4899,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "setDisplayToSingleTaskInstance");
         final long origId = Binder.clearCallingIdentity();
         try {
-            final ActivityDisplay display =
-                    mRootActivityContainer.getActivityDisplayOrCreate(displayId);
+            final DisplayContent display =
+                    mRootActivityContainer.getDisplayContentOrCreate(displayId);
             if (display != null) {
                 display.setDisplayToSingleTaskInstance();
             }
@@ -5198,8 +5198,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     int updateGlobalConfigurationLocked(@NonNull Configuration values, boolean initLocale,
             boolean persistent, int userId, boolean deferResume) {
 
-        final ActivityDisplay defaultDisplay =
-                mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY);
+        final DisplayContent defaultDisplay =
+                mRootActivityContainer.getDisplayContent(DEFAULT_DISPLAY);
 
         mTempConfig.setTo(getGlobalConfiguration());
         final int changes = mTempConfig.updateFrom(values);
@@ -6205,12 +6205,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 // We might change the visibilities here, so prepare an empty app transition which
                 // might be overridden later if we actually change visibilities.
-                final ActivityDisplay activityDisplay =
-                        mRootActivityContainer.getActivityDisplay(displayId);
-                if (activityDisplay == null) {
+                final DisplayContent displayContent =
+                        mRootActivityContainer.getDisplayContent(displayId);
+                if (displayContent == null) {
                     return;
                 }
-                final DisplayContent dc = activityDisplay.mDisplayContent;
+                final DisplayContent dc = displayContent.mDisplayContent;
                 final boolean wasTransitionSet =
                         dc.mAppTransition.getAppTransition() != TRANSIT_NONE;
                 if (!wasTransitionSet) {
@@ -6557,9 +6557,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 return;
             }
             synchronized (mGlobalLock) {
-                final ActivityDisplay activityDisplay =
-                        mRootActivityContainer.getActivityDisplay(displayId);
-                if (activityDisplay == null) {
+                final DisplayContent displayContent =
+                        mRootActivityContainer.getDisplayContent(displayId);
+                if (displayContent == null) {
                     // Call might come when display is not yet added or has been removed.
                     if (DEBUG_CONFIGURATION) {
                         Slog.w(TAG, "Trying to update display configuration for non-existing "
@@ -6576,7 +6576,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return;
                 }
                 process.mIsImeProcess = true;
-                process.registerDisplayConfigurationListenerLocked(activityDisplay);
+                process.registerDisplayConfigurationListenerLocked(displayContent);
             }
         }
 

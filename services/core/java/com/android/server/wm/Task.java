@@ -135,7 +135,6 @@ import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
@@ -1583,8 +1582,8 @@ class Task extends WindowContainer<WindowContainer> {
         if (!inPinnedWindowingMode() && mStack != null) {
             final int defaultMinSizeDp =
                     mAtmService.mRootActivityContainer.mDefaultMinSizeOfResizeableTaskDp;
-            final ActivityDisplay display =
-                    mAtmService.mRootActivityContainer.getActivityDisplay(mStack.mDisplayId);
+            final DisplayContent display =
+                    mAtmService.mRootActivityContainer.getDisplayContent(mStack.mDisplayId);
             final float density =
                     (float) display.getConfiguration().densityDpi / DisplayMetrics.DENSITY_DEFAULT;
             final int defaultMinSize = (int) (defaultMinSizeDp * density);
@@ -1995,7 +1994,7 @@ class Task extends WindowContainer<WindowContainer> {
                     ((float) newParentConfig.densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
             final Rect parentBounds =
                     new Rect(newParentConfig.windowConfiguration.getBounds());
-            final ActivityDisplay display = mStack.getDisplay();
+            final DisplayContent display = mStack.getDisplay();
             if (display != null && display.mDisplayContent != null) {
                 // If a freeform window moves below system bar, there is no way to move it again
                 // by touch. Because its caption is covered by system bar. So we exclude them
@@ -2188,7 +2187,7 @@ class Task extends WindowContainer<WindowContainer> {
         final ActivityStack prevStack = getTaskStack();
         final boolean wasTopFocusedStack =
                 mAtmService.mRootActivityContainer.isTopDisplayFocusedStack(prevStack);
-        final ActivityDisplay prevStackDisplay = prevStack.getDisplay();
+        final DisplayContent prevStackDisplay = prevStack.getDisplay();
 
         position = stack.findPositionForTask(this, position, showForAllUsers());
 

@@ -575,14 +575,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return true;
         }
 
-        final ActivityDisplay display = activity.getDisplay();
+        final DisplayContent display = activity.getDisplay();
         if (display == null) {
             // No need to update if the activity hasn't attach to any display.
             return false;
         }
 
         boolean canUpdate = false;
-        final ActivityDisplay topDisplay =
+        final DisplayContent topDisplay =
                 mPreQTopResumedActivity != null ? mPreQTopResumedActivity.getDisplay() : null;
         // Update the topmost activity if current top activity is
         // - not on any display OR
@@ -938,15 +938,15 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAtm.mH.sendMessage(m);
     }
 
-    void registerDisplayConfigurationListenerLocked(ActivityDisplay activityDisplay) {
-        if (activityDisplay == null) {
+    void registerDisplayConfigurationListenerLocked(DisplayContent displayContent) {
+        if (displayContent == null) {
             return;
         }
         // A process can only register to one display to listener to the override configuration
         // change. Unregister existing listener if it has one before register the new one.
         unregisterDisplayConfigurationListenerLocked();
-        mDisplayId = activityDisplay.mDisplayId;
-        activityDisplay.registerConfigurationChangeListener(this);
+        mDisplayId = displayContent.mDisplayId;
+        displayContent.registerConfigurationChangeListener(this);
     }
 
     @VisibleForTesting
@@ -954,10 +954,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         if (mDisplayId == INVALID_DISPLAY) {
             return;
         }
-        final ActivityDisplay activityDisplay =
-                mAtm.mRootActivityContainer.getActivityDisplay(mDisplayId);
-        if (activityDisplay != null) {
-            activityDisplay.unregisterConfigurationChangeListener(this);
+        final DisplayContent displayContent =
+                mAtm.mRootActivityContainer.getDisplayContent(mDisplayId);
+        if (displayContent != null) {
+            displayContent.unregisterConfigurationChangeListener(this);
         }
         mDisplayId = INVALID_DISPLAY;
     }
