@@ -862,18 +862,7 @@ public final class BluetoothAdapter {
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean isEnabled() {
-        try {
-            mServiceLock.readLock().lock();
-            if (mService != null) {
-                return mService.isEnabled();
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
-
-        return false;
+        return getState() == BluetoothAdapter.STATE_ON;
     }
 
     /**
