@@ -81,10 +81,10 @@ private:
     std::set<wp<StateListener>> mListeners;
 
     // Reset all state values in map to default state
-    void handleReset();
+    void handleReset(const int64_t eventTimeNs);
 
     // Reset only the state value mapped to primary key to default state
-    void handlePartialReset(const HashableDimensionKey& primaryKey);
+    void handlePartialReset(const int64_t eventTimeNs, const HashableDimensionKey& primaryKey);
 
     // Update the StateMap based on the received state value.
     // Store the old and new states.

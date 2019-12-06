@@ -44,8 +44,8 @@ public:
 
     std::vector<Update> updates;
 
-    void onStateChanged(int atomId, const HashableDimensionKey& primaryKey, int oldState,
-                        int newState) {
+    void onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
+                        const HashableDimensionKey& primaryKey, int oldState, int newState) {
         updates.emplace_back(primaryKey, newState);
     }
 };
