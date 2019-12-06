@@ -8008,17 +8008,25 @@ public class TelephonyManager {
         return Collections.EMPTY_LIST;
     }
 
-    /** @hide */
-    public List<String> getPackagesWithCarrierPrivilegesForAllPhones() {
+    /**
+     * Get the names of packages with carrier privileges for all the active subscriptions.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @NonNull
+    public List<String> getCarrierPrivilegedPackagesForAllActiveSubscriptions() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.getPackagesWithCarrierPrivilegesForAllPhones();
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "getPackagesWithCarrierPrivilegesForAllPhones RemoteException", ex);
+            Rlog.e(TAG, "getCarrierPrivilegedPackagesForAllActiveSubscriptions RemoteException",
+                    ex);
         } catch (NullPointerException ex) {
-            Rlog.e(TAG, "getPackagesWithCarrierPrivilegesForAllPhones NPE", ex);
+            Rlog.e(TAG, "getCarrierPrivilegedPackagesForAllActiveSubscriptions NPE", ex);
         }
         return Collections.EMPTY_LIST;
     }
