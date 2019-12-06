@@ -2634,7 +2634,6 @@ class ActivityStarter {
         return this;
     }
 
-    @VisibleForTesting
     Intent getIntent() {
         return mRequest.intent;
     }
