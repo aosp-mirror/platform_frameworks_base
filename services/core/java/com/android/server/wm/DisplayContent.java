@@ -6523,6 +6523,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             lastReparentedStack.postReparent();
         }
         releaseSelfIfNeeded();
+        mDisplayPolicy.release();
 
         if (!mAllSleepTokens.isEmpty()) {
             mRootWindowContainer.mSleepTokens.removeAll(mAllSleepTokens);
