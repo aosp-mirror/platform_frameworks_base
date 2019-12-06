@@ -16,11 +16,12 @@
 
 package android.app.timedetector;
 
+import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
+import static android.app.timezonedetector.ParcelableTestSupport.roundTripParcelable;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.TimestampedValue;
 
 import org.junit.Test;
@@ -30,53 +31,67 @@ public class PhoneTimeSuggestionTest {
 
     @Test
     public void testEquals() {
-        PhoneTimeSuggestion one = new PhoneTimeSuggestion(PHONE_ID);
-        assertEquals(one, one);
+        PhoneTimeSuggestion.Builder builder1 = new PhoneTimeSuggestion.Builder(PHONE_ID);
+        {
+            PhoneTimeSuggestion one = builder1.build();
+            assertEquals(one, one);
+        }
 
-        PhoneTimeSuggestion two = new PhoneTimeSuggestion(PHONE_ID);
-        assertEquals(one, two);
-        assertEquals(two, one);
+        PhoneTimeSuggestion.Builder builder2 = new PhoneTimeSuggestion.Builder(PHONE_ID);
+        {
+            PhoneTimeSuggestion one = builder1.build();
+            PhoneTimeSuggestion two = builder2.build();
+            assertEquals(one, two);
+            assertEquals(two, one);
+        }
 
-        one.setUtcTime(new TimestampedValue<>(1111L, 2222L));
-        assertEquals(one, one);
+        builder1.setUtcTime(new TimestampedValue<>(1111L, 2222L));
+        {
+            PhoneTimeSuggestion one = builder1.build();
+            assertEquals(one, one);
+        }
 
-        two.setUtcTime(new TimestampedValue<>(1111L, 2222L));
-        assertEquals(one, two);
-        assertEquals(two, one);
+        builder2.setUtcTime(new TimestampedValue<>(1111L, 2222L));
+        {
+            PhoneTimeSuggestion one = builder1.build();
+            PhoneTimeSuggestion two = builder2.build();
+            assertEquals(one, two);
+            assertEquals(two, one);
+        }
 
-        PhoneTimeSuggestion three = new PhoneTimeSuggestion(PHONE_ID + 1);
-        three.setUtcTime(new TimestampedValue<>(1111L, 2222L));
-        assertNotEquals(one, three);
-        assertNotEquals(three, one);
+        PhoneTimeSuggestion.Builder builder3 = new PhoneTimeSuggestion.Builder(PHONE_ID + 1);
+        builder3.setUtcTime(new TimestampedValue<>(1111L, 2222L));
+        {
+            PhoneTimeSuggestion one = builder1.build();
+            PhoneTimeSuggestion three = builder3.build();
+            assertNotEquals(one, three);
+            assertNotEquals(three, one);
+        }
 
         // DebugInfo must not be considered in equals().
-        one.addDebugInfo("Debug info 1");
-        two.addDebugInfo("Debug info 2");
-        assertEquals(one, two);
+        builder1.addDebugInfo("Debug info 1");
+        builder2.addDebugInfo("Debug info 2");
+        {
+            PhoneTimeSuggestion one = builder1.build();
+            PhoneTimeSuggestion two = builder2.build();
+            assertEquals(one, two);
+        }
     }
 
     @Test
     public void testParcelable() {
-        PhoneTimeSuggestion one = new PhoneTimeSuggestion(PHONE_ID);
-        assertEquals(one, roundTripParcelable(one));
+        PhoneTimeSuggestion.Builder builder = new PhoneTimeSuggestion.Builder(PHONE_ID);
+        assertRoundTripParcelable(builder.build());
 
-        one.setUtcTime(new TimestampedValue<>(1111L, 2222L));
-        assertEquals(one, roundTripParcelable(one));
+        builder.setUtcTime(new TimestampedValue<>(1111L, 2222L));
+        assertRoundTripParcelable(builder.build());
 
         // DebugInfo should also be stored (but is not checked by equals()
-        one.addDebugInfo("This is debug info");
-        PhoneTimeSuggestion two = roundTripParcelable(one);
-        assertEquals(one.getDebugInfo(), two.getDebugInfo());
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends Parcelable> T roundTripParcelable(T one) {
-        Parcel parcel = Parcel.obtain();
-        parcel.writeTypedObject(one, 0);
-        parcel.setDataPosition(0);
-
-        T toReturn = (T) parcel.readTypedObject(PhoneTimeSuggestion.CREATOR);
-        parcel.recycle();
-        return toReturn;
+        {
+            PhoneTimeSuggestion suggestion1 = builder.build();
+            builder.addDebugInfo("This is debug info");
+            PhoneTimeSuggestion rtSuggestion1 = roundTripParcelable(suggestion1);
+            assertEquals(suggestion1.getDebugInfo(), rtSuggestion1.getDebugInfo());
+        }
     }
 }
