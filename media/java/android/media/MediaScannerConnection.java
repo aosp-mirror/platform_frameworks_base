@@ -164,7 +164,7 @@ public class MediaScannerConnection implements ServiceConnection {
 
     /**
      * Convenience for constructing a {@link MediaScannerConnection}, calling
-     * {@link #connect} on it, and calling {@link #scanFile} with the given
+     * {@link #connect} on it, and calling {@link #scanFile(String, String)} with the given
      * <var>path</var> and <var>mimeType</var> when the connection is
      * established.
      * @param context The caller's Context, required for establishing a connection to
