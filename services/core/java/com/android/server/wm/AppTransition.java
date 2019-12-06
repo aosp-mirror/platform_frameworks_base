@@ -2142,7 +2142,7 @@ public class AppTransition implements Dump {
         }
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(APP_TRANSITION_STATE, mAppTransitionState);
         proto.write(LAST_USED_APP_TRANSITION, mLastUsedAppTransition);

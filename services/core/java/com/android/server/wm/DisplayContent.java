@@ -2602,7 +2602,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     // TODO(proto-merge): Remove once protos for ActivityDisplay and DisplayContent are merged.
-    public void writeToProtoInner(ProtoOutputStream proto, long fieldId,
+    public void dumpDebugInner(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         // Critical log level logs only visible elements to mitigate performance overheard
         if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
@@ -2610,35 +2610,35 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER, logLevel);
+        super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(ID, mDisplayId);
         for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mTaskStackContainers.getChildAt(stackNdx);
-            stack.writeToProtoInnerStackOnly(proto, STACKS, logLevel);
+            stack.dumpDebugInnerStackOnly(proto, STACKS, logLevel);
         }
-        mDividerControllerLocked.writeToProto(proto, DOCKED_STACK_DIVIDER_CONTROLLER);
-        mPinnedStackControllerLocked.writeToProto(proto, PINNED_STACK_CONTROLLER);
+        mDividerControllerLocked.dumpDebug(proto, DOCKED_STACK_DIVIDER_CONTROLLER);
+        mPinnedStackControllerLocked.dumpDebug(proto, PINNED_STACK_CONTROLLER);
         for (int i = mAboveAppWindowsContainers.getChildCount() - 1; i >= 0; --i) {
             final WindowToken windowToken = mAboveAppWindowsContainers.getChildAt(i);
-            windowToken.writeToProto(proto, ABOVE_APP_WINDOWS, logLevel);
+            windowToken.dumpDebug(proto, ABOVE_APP_WINDOWS, logLevel);
         }
         for (int i = mBelowAppWindowsContainers.getChildCount() - 1; i >= 0; --i) {
             final WindowToken windowToken = mBelowAppWindowsContainers.getChildAt(i);
-            windowToken.writeToProto(proto, BELOW_APP_WINDOWS, logLevel);
+            windowToken.dumpDebug(proto, BELOW_APP_WINDOWS, logLevel);
         }
         for (int i = mImeWindowsContainers.getChildCount() - 1; i >= 0; --i) {
             final WindowToken windowToken = mImeWindowsContainers.getChildAt(i);
-            windowToken.writeToProto(proto, IME_WINDOWS, logLevel);
+            windowToken.dumpDebug(proto, IME_WINDOWS, logLevel);
         }
         proto.write(DPI, mBaseDisplayDensity);
-        mDisplayInfo.writeToProto(proto, DISPLAY_INFO);
+        mDisplayInfo.dumpDebug(proto, DISPLAY_INFO);
         proto.write(ROTATION, getRotation());
         final ScreenRotationAnimation screenRotationAnimation = getRotationAnimation();
         if (screenRotationAnimation != null) {
-            screenRotationAnimation.writeToProto(proto, SCREEN_ROTATION_ANIMATION);
+            screenRotationAnimation.dumpDebug(proto, SCREEN_ROTATION_ANIMATION);
         }
-        mDisplayFrames.writeToProto(proto, DISPLAY_FRAMES);
-        mAppTransition.writeToProto(proto, APP_TRANSITION);
+        mDisplayFrames.dumpDebug(proto, DISPLAY_FRAMES);
+        mAppTransition.dumpDebug(proto, APP_TRANSITION);
         if (mFocusedApp != null) {
             mFocusedApp.writeNameToProto(proto, FOCUSED_APP);
         }

@@ -4407,7 +4407,7 @@ public final class ActiveServices {
         return new ServiceDumper(fd, pw, args, opti, dumpAll, dumpPackage);
     }
 
-    protected void writeToProto(ProtoOutputStream proto, long fieldId) {
+    protected void dumpDebug(ProtoOutputStream proto, long fieldId) {
         synchronized (mAm) {
             final long outterToken = proto.start(fieldId);
             int[] users = mAm.mUserController.getUsers();
@@ -4420,7 +4420,7 @@ public final class ActiveServices {
                 proto.write(ActiveServicesProto.ServicesByUser.USER_ID, user);
                 ArrayMap<ComponentName, ServiceRecord> alls = smap.mServicesByInstanceName;
                 for (int i=0; i<alls.size(); i++) {
-                    alls.valueAt(i).writeToProto(proto,
+                    alls.valueAt(i).dumpDebug(proto,
                             ActiveServicesProto.ServicesByUser.SERVICE_RECORDS);
                 }
                 proto.end(token);

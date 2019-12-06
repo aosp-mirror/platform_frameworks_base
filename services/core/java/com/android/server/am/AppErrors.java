@@ -106,7 +106,7 @@ class AppErrors {
         mPackageWatchdog = watchdog;
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId, String dumpPackage) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId, String dumpPackage) {
         if (mProcessCrashTimes.getMap().isEmpty() && mBadProcesses.getMap().isEmpty()) {
             return;
         }

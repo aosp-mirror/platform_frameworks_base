@@ -156,7 +156,7 @@ public final class UidRecord {
     }
 
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(UidRecordProto.UID, uid);
         proto.write(UidRecordProto.CURRENT, ProcessList.makeProcStateProtoEnum(mCurProcState));

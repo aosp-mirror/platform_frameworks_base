@@ -244,7 +244,7 @@ class ScreenRotationAnimation {
         }
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(STARTED, mStarted);
         proto.write(ANIMATION_RUNNING, mAnimRunning);

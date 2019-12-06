@@ -502,7 +502,7 @@ public class Network implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(NetworkProto.NET_ID, netId);
         proto.end(token);

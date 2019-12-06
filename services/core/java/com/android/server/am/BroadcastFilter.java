@@ -46,9 +46,9 @@ final class BroadcastFilter extends IntentFilter {
         visibleToInstantApp = _visibleToInstantApp;
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
-        super.writeToProto(proto, BroadcastFilterProto.INTENT_FILTER);
+        super.dumpDebug(proto, BroadcastFilterProto.INTENT_FILTER);
         if (requiredPermission != null) {
             proto.write(BroadcastFilterProto.REQUIRED_PERMISSION, requiredPermission);
         }

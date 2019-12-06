@@ -500,13 +500,13 @@ public final class DisplayCutout {
     /**
      * @hide
      */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        mSafeInsets.writeToProto(proto, INSETS);
-        mBounds.getRect(BOUNDS_POSITION_LEFT).writeToProto(proto, BOUND_LEFT);
-        mBounds.getRect(BOUNDS_POSITION_TOP).writeToProto(proto, BOUND_TOP);
-        mBounds.getRect(BOUNDS_POSITION_RIGHT).writeToProto(proto, BOUND_RIGHT);
-        mBounds.getRect(BOUNDS_POSITION_BOTTOM).writeToProto(proto, BOUND_BOTTOM);
+        mSafeInsets.dumpDebug(proto, INSETS);
+        mBounds.getRect(BOUNDS_POSITION_LEFT).dumpDebug(proto, BOUND_LEFT);
+        mBounds.getRect(BOUNDS_POSITION_TOP).dumpDebug(proto, BOUND_TOP);
+        mBounds.getRect(BOUNDS_POSITION_RIGHT).dumpDebug(proto, BOUND_RIGHT);
+        mBounds.getRect(BOUNDS_POSITION_BOTTOM).dumpDebug(proto, BOUND_BOTTOM);
         proto.end(token);
     }
 

@@ -5639,14 +5639,14 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         return shouldSleepActivities() || mService.mShuttingDown;
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId,
+    public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         final long token = proto.start(fieldId);
-        writeToProtoInnerStackOnly(proto, STACK, logLevel);
+        dumpDebugInnerStackOnly(proto, STACK, logLevel);
         proto.write(com.android.server.am.ActivityStackProto.ID, mStackId);
         for (int taskNdx = getChildCount() - 1; taskNdx >= 0; --taskNdx) {
             final Task task = getChildAt(taskNdx);
-            task.writeToProto(proto, com.android.server.am.ActivityStackProto.TASKS, logLevel);
+            task.dumpDebug(proto, com.android.server.am.ActivityStackProto.TASKS, logLevel);
         }
         if (mResumedActivity != null) {
             mResumedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
@@ -5654,7 +5654,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         proto.write(DISPLAY_ID, mDisplayId);
         if (!matchParentBounds()) {
             final Rect bounds = getRequestedOverrideBounds();
-            bounds.writeToProto(proto, com.android.server.am.ActivityStackProto.BOUNDS);
+            bounds.dumpDebug(proto, com.android.server.am.ActivityStackProto.BOUNDS);
         }
 
         // TODO: Remove, no longer needed with windowingMode.
@@ -5663,26 +5663,26 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
     }
 
     // TODO(proto-merge): Remove once protos for ActivityStack and TaskStack are merged.
-    void writeToProtoInnerStackOnly(ProtoOutputStream proto, long fieldId,
+    void dumpDebugInnerStackOnly(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
             return;
         }
 
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER, logLevel);
+        super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(StackProto.ID, mStackId);
         for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; taskNdx--) {
-            mChildren.get(taskNdx).writeToProtoInnerTaskOnly(proto, StackProto.TASKS, logLevel);
+            mChildren.get(taskNdx).dumpDebugInnerTaskOnly(proto, StackProto.TASKS, logLevel);
         }
         proto.write(FILLS_PARENT, matchParentBounds());
-        getRawBounds().writeToProto(proto, StackProto.BOUNDS);
+        getRawBounds().dumpDebug(proto, StackProto.BOUNDS);
         proto.write(DEFER_REMOVAL, mDeferRemoval);
         proto.write(MINIMIZE_AMOUNT, mMinimizeAmount);
         proto.write(ADJUSTED_FOR_IME, mAdjustedForIme);
         proto.write(ADJUST_IME_AMOUNT, mAdjustImeAmount);
         proto.write(ADJUST_DIVIDER_AMOUNT, mAdjustDividerAmount);
-        mAdjustedBounds.writeToProto(proto, ADJUSTED_BOUNDS);
+        mAdjustedBounds.dumpDebug(proto, ADJUSTED_BOUNDS);
         proto.write(ANIMATING_BOUNDS, mBoundsAnimating);
         proto.end(token);
     }

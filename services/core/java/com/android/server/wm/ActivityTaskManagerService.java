@@ -6917,7 +6917,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 // The output proto of "activity --proto activities"
                 // is ActivityManagerServiceDumpActivitiesProto
-                mRootActivityContainer.writeToProto(proto,
+                mRootActivityContainer.dumpDebug(proto,
                         ActivityManagerServiceDumpActivitiesProto.ACTIVITY_STACK_SUPERVISOR,
                         WindowTraceLogLevel.ALL);
             }
@@ -7098,7 +7098,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 int wakeFullness, boolean testPssMode) {
             synchronized (mGlobalLock) {
                 if (dumpPackage == null) {
-                    getGlobalConfiguration().writeToProto(proto, GLOBAL_CONFIGURATION);
+                    getGlobalConfiguration().dumpDebug(proto, GLOBAL_CONFIGURATION);
                     proto.write(CONFIG_WILL_CHANGE, getTopDisplayFocusedStack().mConfigWillChange);
                     writeSleepStateToProto(proto, wakeFullness, testPssMode);
                     if (mRunningVoice != null) {
@@ -7106,11 +7106,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                                 ActivityManagerServiceDumpProcessesProto.RUNNING_VOICE);
                         proto.write(ActivityManagerServiceDumpProcessesProto.Voice.SESSION,
                                 mRunningVoice.toString());
-                        mVoiceWakeLock.writeToProto(
+                        mVoiceWakeLock.dumpDebug(
                                 proto, ActivityManagerServiceDumpProcessesProto.Voice.WAKELOCK);
                         proto.end(vrToken);
                     }
-                    mVrController.writeToProto(proto,
+                    mVrController.dumpDebug(proto,
                             ActivityManagerServiceDumpProcessesProto.VR_CONTROLLER);
                     if (mController != null) {
                         final long token = proto.start(CONTROLLER);
@@ -7118,25 +7118,25 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         proto.write(IS_A_MONKEY, mControllerIsAMonkey);
                         proto.end(token);
                     }
-                    mStackSupervisor.mGoingToSleepWakeLock.writeToProto(proto, GOING_TO_SLEEP);
-                    mStackSupervisor.mLaunchingActivityWakeLock.writeToProto(proto,
+                    mStackSupervisor.mGoingToSleepWakeLock.dumpDebug(proto, GOING_TO_SLEEP);
+                    mStackSupervisor.mLaunchingActivityWakeLock.dumpDebug(proto,
                             LAUNCHING_ACTIVITY);
                 }
 
                 if (mHomeProcess != null && (dumpPackage == null
                         || mHomeProcess.mPkgList.contains(dumpPackage))) {
-                    mHomeProcess.writeToProto(proto, HOME_PROC);
+                    mHomeProcess.dumpDebug(proto, HOME_PROC);
                 }
 
                 if (mPreviousProcess != null && (dumpPackage == null
                         || mPreviousProcess.mPkgList.contains(dumpPackage))) {
-                    mPreviousProcess.writeToProto(proto, PREVIOUS_PROC);
+                    mPreviousProcess.dumpDebug(proto, PREVIOUS_PROC);
                     proto.write(PREVIOUS_PROC_VISIBLE_TIME_MS, mPreviousProcessVisibleTime);
                 }
 
                 if (mHeavyWeightProcess != null && (dumpPackage == null
                         || mHeavyWeightProcess.mPkgList.contains(dumpPackage))) {
-                    mHeavyWeightProcess.writeToProto(proto, HEAVY_WEIGHT_PROC);
+                    mHeavyWeightProcess.dumpDebug(proto, HEAVY_WEIGHT_PROC);
                 }
 
                 for (Map.Entry<String, Integer> entry
@@ -7152,7 +7152,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
 
                 if (mCurAppTimeTracker != null) {
-                    mCurAppTimeTracker.writeToProto(proto, CURRENT_TRACKER, true);
+                    mCurAppTimeTracker.dumpDebug(proto, CURRENT_TRACKER, true);
                 }
 
             }

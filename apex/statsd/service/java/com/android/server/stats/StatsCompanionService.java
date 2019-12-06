@@ -1810,7 +1810,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
                 wallClockNanos);
         ProtoOutputStream proto = new ProtoOutputStream();
-        powerProfile.writeToProto(proto);
+        powerProfile.dumpDebug(proto);
         proto.flush();
         e.writeStorage(proto.getBytes());
         pulledData.add(e);

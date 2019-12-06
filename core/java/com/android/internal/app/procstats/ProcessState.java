@@ -1341,7 +1341,7 @@ public final class ProcessState {
         return sb.toString();
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId,
+    public void dumpDebug(ProtoOutputStream proto, long fieldId,
             String procName, int uid, long now) {
         final long token = proto.start(fieldId);
         proto.write(ProcessStatsProto.PROCESS, procName);

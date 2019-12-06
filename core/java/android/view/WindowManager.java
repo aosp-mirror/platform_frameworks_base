@@ -3259,7 +3259,7 @@ public interface WindowManager extends ViewManager {
         /**
          * @hide
          */
-        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
             proto.write(TYPE, type);
             proto.write(X, x);

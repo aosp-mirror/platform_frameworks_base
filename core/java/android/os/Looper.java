@@ -415,12 +415,12 @@ public final class Looper {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long looperToken = proto.start(fieldId);
         proto.write(LooperProto.THREAD_NAME, mThread.getName());
         proto.write(LooperProto.THREAD_ID, mThread.getId());
         if (mQueue != null) {
-            mQueue.writeToProto(proto, LooperProto.QUEUE);
+            mQueue.dumpDebug(proto, LooperProto.QUEUE);
         }
         proto.end(looperToken);
     }

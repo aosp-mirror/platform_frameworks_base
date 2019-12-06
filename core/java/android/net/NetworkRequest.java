@@ -485,13 +485,13 @@ public class NetworkRequest implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
         proto.write(NetworkRequestProto.TYPE, typeToProtoEnum(type));
         proto.write(NetworkRequestProto.REQUEST_ID, requestId);
         proto.write(NetworkRequestProto.LEGACY_TYPE, legacyType);
-        networkCapabilities.writeToProto(proto, NetworkRequestProto.NETWORK_CAPABILITIES);
+        networkCapabilities.dumpDebug(proto, NetworkRequestProto.NETWORK_CAPABILITIES);
 
         proto.end(token);
     }

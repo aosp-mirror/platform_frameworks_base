@@ -34,7 +34,7 @@ public class NeededUriGrants extends ArrayList<GrantUri> {
         this.flags = flags;
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(NeededUriGrantsProto.TARGET_PACKAGE, targetPkg);
         proto.write(NeededUriGrantsProto.TARGET_UID, targetUid);
@@ -42,7 +42,7 @@ public class NeededUriGrants extends ArrayList<GrantUri> {
 
         final int N = this.size();
         for (int i = 0; i < N; i++) {
-            this.get(i).writeToProto(proto, NeededUriGrantsProto.GRANTS);
+            this.get(i).dumpDebug(proto, NeededUriGrantsProto.GRANTS);
         }
         proto.end(token);
     }

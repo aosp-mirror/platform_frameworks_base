@@ -1364,10 +1364,10 @@ class ActivityDisplay extends DisplayContent {
         }
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId,
+    public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         final long token = proto.start(fieldId);
-        writeToProtoInner(proto, DISPLAY, logLevel);
+        dumpDebugInner(proto, DISPLAY, logLevel);
         proto.write(ID, mDisplayId);
         proto.write(SINGLE_TASK_INSTANCE, mSingleTaskInstance);
         final ActivityStack focusedStack = getFocusedStack();
@@ -1382,7 +1382,7 @@ class ActivityDisplay extends DisplayContent {
         }
         for (int stackNdx = getStackCount() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = getStackAt(stackNdx);
-            stack.writeToProto(proto, STACKS, logLevel);
+            stack.dumpDebug(proto, STACKS, logLevel);
         }
         proto.end(token);
     }

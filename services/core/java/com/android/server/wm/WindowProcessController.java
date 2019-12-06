@@ -1173,9 +1173,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         pw.println(prefix + " mLastReportedConfiguration=" + mLastReportedConfiguration);
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         if (mListener != null) {
-            mListener.writeToProto(proto, fieldId);
+            mListener.dumpDebug(proto, fieldId);
         }
     }
 }

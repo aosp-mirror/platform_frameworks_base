@@ -186,7 +186,7 @@ public class WindowChangeAnimationSpec implements AnimationSpec {
     }
 
     @Override
-    public void writeToProtoInner(ProtoOutputStream proto) {
+    public void dumpDebugInner(ProtoOutputStream proto) {
         final long token = proto.start(WINDOW);
         proto.write(ANIMATION, mAnimation.toString());
         proto.end(token);

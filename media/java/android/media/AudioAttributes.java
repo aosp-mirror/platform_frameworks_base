@@ -1062,7 +1062,7 @@ public final class AudioAttributes implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
         proto.write(AudioAttributesProto.USAGE, mUsage);

@@ -389,7 +389,7 @@ class Dimmer {
         }
 
         @Override
-        public void writeToProtoInner(ProtoOutputStream proto) {
+        public void dumpDebugInner(ProtoOutputStream proto) {
             final long token = proto.start(ALPHA);
             proto.write(FROM, mFromAlpha);
             proto.write(TO, mToAlpha);

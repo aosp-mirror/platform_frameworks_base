@@ -67,7 +67,7 @@ public class GrantUri {
         return result;
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(GrantUriProto.URI, uri.toString());
         proto.write(GrantUriProto.SOURCE_USER_ID, sourceUserId);
