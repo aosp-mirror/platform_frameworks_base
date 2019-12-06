@@ -17,6 +17,7 @@
 package android.permission;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,6 +30,8 @@ import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.Immutable;
@@ -36,6 +39,8 @@ import com.android.internal.annotations.Immutable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * System level service for accessing the permission capabilities of the platform.
@@ -59,6 +64,8 @@ public final class PermissionManager {
 
     private final IPackageManager mPackageManager;
 
+    private final IPermissionManager mPermissionManager;
+
     private List<SplitPermissionInfo> mSplitPermissionInfos;
 
     /**
@@ -67,9 +74,12 @@ public final class PermissionManager {
      * @param context The current context in which to operate.
      * @hide
      */
-    public PermissionManager(@NonNull Context context, IPackageManager packageManager) {
+    public PermissionManager(@NonNull Context context, IPackageManager packageManager)
+            throws ServiceManager.ServiceNotFoundException {
         mContext = context;
         mPackageManager = packageManager;
+        mPermissionManager = IPermissionManager.Stub.asInterface(
+                ServiceManager.getServiceOrThrow("permissionmgr"));
     }
 
     /**
@@ -143,6 +153,48 @@ public final class PermissionManager {
         mSplitPermissionInfos = splitPermissionInfoListToNonParcelableList(parcelableList);
 
         return mSplitPermissionInfos;
+    }
+
+    /**
+     * Grant default permissions to currently active LUI app
+     * @param packageName The package name for the LUI app
+     * @param user The user handle
+     * @param callback The callback provided by caller to be notified when grant completes
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
+    public void grantDefaultPermissionsToLuiApp(
+            @NonNull String packageName, @NonNull UserHandle user,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+        try {
+            mPermissionManager.grantDefaultPermissionsToActiveLuiApp(
+                    packageName, user.getIdentifier());
+            executor.execute(() -> callback.accept(true));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Revoke default permissions to currently active LUI app
+     * @param packageNames The package names for the LUI apps
+     * @param user The user handle
+     * @param callback The callback provided by caller to be notified when grant completes
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
+    public void revokeDefaultPermissionsFromLuiApps(
+            @NonNull String[] packageNames, @NonNull UserHandle user,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+        try {
+            mPermissionManager.revokeDefaultPermissionsFromLuiApps(
+                    packageNames, user.getIdentifier());
+            executor.execute(() -> callback.accept(true));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     private List<SplitPermissionInfo> splitPermissionInfoListToNonParcelableList(
