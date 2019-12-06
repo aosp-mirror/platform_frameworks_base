@@ -2562,6 +2562,12 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
+    @Override
+    protected boolean shouldAddFooterView() {
+        // To accommodate for window insets
+        return true;
+    }
+
     public class ChooserListAdapter extends ResolveListAdapter {
         public static final int TARGET_BAD = -1;
         public static final int TARGET_CALLER = 0;
