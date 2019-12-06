@@ -280,10 +280,11 @@ class WindowToken extends WindowContainer<WindowState> {
         super.dump(pw, prefix, dumpAll);
         pw.print(prefix); pw.print("windows="); pw.println(mChildren);
         pw.print(prefix); pw.print("windowType="); pw.print(windowType);
-                pw.print(" hasVisible="); pw.println(hasVisible);
+                pw.print(" hasVisible="); pw.print(hasVisible);
         if (waitingToShow) {
-            pw.print(prefix); pw.print("waitingToShow="); pw.print(waitingToShow);
+            pw.print(" waitingToShow=true");
         }
+        pw.println();
     }
 
     @Override

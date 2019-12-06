@@ -439,10 +439,6 @@ class WindowStateAnimator {
 
         if (!mWin.mActivityRecord.isAnimating(TRANSITION)) {
             mWin.mActivityRecord.clearAllDrawn();
-        } else {
-            // Currently animating, persist current state of allDrawn until animation
-            // is complete.
-            mWin.mActivityRecord.deferClearAllDrawn = true;
         }
     }
 
