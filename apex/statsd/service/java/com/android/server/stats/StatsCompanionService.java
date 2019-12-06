@@ -2738,6 +2738,30 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    @Override
+    public void unregisterPullAtomCallback(int atomTag) {
+        synchronized (sStatsdLock) {
+            // Always remove the puller in SCS.
+            // If statsd is down, we will not register it when it comes back up.
+            int callingUid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+            PullerKey key = new PullerKey(callingUid, atomTag);
+            mPullers.remove(key);
+
+            if (sStatsd == null) {
+                Slog.w(TAG, "Could not access statsd for registering puller for atom " + atomTag);
+                return;
+            }
+            try {
+                sStatsd.unregisterPullAtomCallback(callingUid, atomTag);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to access statsd to register puller for atom " + atomTag);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+    }
+
     // Statsd related code
 
     /**
