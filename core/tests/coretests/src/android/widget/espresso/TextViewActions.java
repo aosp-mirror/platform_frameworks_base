@@ -358,6 +358,27 @@ public final class TextViewActions {
     }
 
     /**
+     * Returns an action that drags on text from startIndex to endIndex on the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView displayed on screen
+     * <ul>
+     *
+     * @param startIndex The index of the TextView's text to start a drag from
+     * @param endIndex The index of the TextView's text to end the drag at
+     */
+    public static ViewAction dragOnText(int startIndex, int endIndex) {
+        return actionWithAssertions(
+                new DragAction(
+                        DragAction.Drag.TAP,
+                        new TextCoordinates(startIndex),
+                        new TextCoordinates(endIndex),
+                        Press.FINGER,
+                        TextView.class));
+    }
+
+    /**
      * A provider of the x, y coordinates of the handle dragging point.
      */
     private static final class CurrentHandleCoordinates implements CoordinatesProvider {
