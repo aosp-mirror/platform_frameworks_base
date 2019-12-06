@@ -17,6 +17,8 @@
 package com.android.server;
 
 import static android.telephony.TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED;
+import static android.telephony.TelephonyRegistryManager.SIM_ACTIVATION_TYPE_DATA;
+import static android.telephony.TelephonyRegistryManager.SIM_ACTIVATION_TYPE_VOICE;
 
 import static java.util.Arrays.copyOf;
 
@@ -1201,10 +1203,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 switch (activationType) {
-                    case TelephonyManager.SIM_ACTIVATION_TYPE_VOICE:
+                    case SIM_ACTIVATION_TYPE_VOICE:
                         mVoiceActivationState[phoneId] = activationState;
                         break;
-                    case TelephonyManager.SIM_ACTIVATION_TYPE_DATA:
+                    case SIM_ACTIVATION_TYPE_DATA:
                         mDataActivationState[phoneId] = activationState;
                         break;
                     default:
@@ -1217,10 +1219,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                 + " state=" + activationState);
                     }
                     try {
-                        if ((activationType == TelephonyManager.SIM_ACTIVATION_TYPE_VOICE) &&
-                                r.matchPhoneStateListenerEvent(
-                                        PhoneStateListener.LISTEN_VOICE_ACTIVATION_STATE) &&
-                                idMatch(r.subId, subId, phoneId)) {
+                        if ((activationType == SIM_ACTIVATION_TYPE_VOICE)
+                                && r.matchPhoneStateListenerEvent(
+                                        PhoneStateListener.LISTEN_VOICE_ACTIVATION_STATE)
+                                && idMatch(r.subId, subId, phoneId)) {
                             if (DBG) {
                                 log("notifyVoiceActivationStateForPhoneId: callback.onVASC r=" + r
                                         + " subId=" + subId + " phoneId=" + phoneId
@@ -1228,10 +1230,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             }
                             r.callback.onVoiceActivationStateChanged(activationState);
                         }
-                        if ((activationType == TelephonyManager.SIM_ACTIVATION_TYPE_DATA) &&
-                                r.matchPhoneStateListenerEvent(
-                                        PhoneStateListener.LISTEN_DATA_ACTIVATION_STATE) &&
-                                idMatch(r.subId, subId, phoneId)) {
+                        if ((activationType == SIM_ACTIVATION_TYPE_DATA)
+                                && r.matchPhoneStateListenerEvent(
+                                        PhoneStateListener.LISTEN_DATA_ACTIVATION_STATE)
+                                && idMatch(r.subId, subId, phoneId)) {
                             if (DBG) {
                                 log("notifyDataActivationStateForPhoneId: callback.onDASC r=" + r
                                         + " subId=" + subId + " phoneId=" + phoneId
