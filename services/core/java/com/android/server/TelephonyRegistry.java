@@ -72,7 +72,6 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.ITelephonyRegistry;
-import com.android.internal.telephony.PhoneConstantConversions;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyPermissions;
@@ -2215,8 +2214,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
 
         Intent intent = new Intent(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-        intent.putExtra(PhoneConstants.STATE_KEY,
-                PhoneConstantConversions.convertCallState(state).toString());
+        intent.putExtra(TelephonyManager.EXTRA_STATE, callStateToString(state));
 
         // If a valid subId was specified, we should fire off a subId-specific state
         // change intent and include the subId.
@@ -2249,6 +2247,18 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         android.Manifest.permission.READ_CALL_LOG});
     }
 
+    /** Converts TelephonyManager#CALL_STATE_* to TelephonyManager#EXTRA_STATE_*. */
+    private static String callStateToString(int callState) {
+        switch (callState) {
+            case TelephonyManager.CALL_STATE_RINGING:
+                return TelephonyManager.EXTRA_STATE_RINGING;
+            case TelephonyManager.CALL_STATE_OFFHOOK:
+                return TelephonyManager.EXTRA_STATE_OFFHOOK;
+            default:
+                return TelephonyManager.EXTRA_STATE_IDLE;
+        }
+    }
+
     private void broadcastDataConnectionStateChanged(int state, boolean isDataAllowed, String apn,
                                                      String apnType, LinkProperties linkProperties,
                                                      NetworkCapabilities networkCapabilities,
@@ -2257,8 +2267,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // status bar takes care of that after taking into account all of the
         // required info.
         Intent intent = new Intent(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
-        intent.putExtra(PhoneConstants.STATE_KEY,
-                PhoneConstantConversions.convertDataState(state).toString());
+        intent.putExtra(TelephonyManager.EXTRA_STATE, dataStateToString(state));
         if (!isDataAllowed) {
             intent.putExtra(PhoneConstants.NETWORK_UNAVAILABLE_KEY, true);
         }
@@ -2301,7 +2310,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             String apnType, String apn, LinkProperties linkProperties,
             @DataFailureCause int failCause) {
         Intent intent = new Intent(TelephonyManager.ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED);
-        intent.putExtra(PhoneConstants.STATE_KEY, state);
+        intent.putExtra(TelephonyManager.EXTRA_STATE, state);
         intent.putExtra(PhoneConstants.DATA_NETWORK_TYPE_KEY, networkType);
         if (apnType != null) intent.putExtra(PhoneConstants.DATA_APN_TYPE_KEY, apnType);
         if (apn != null) intent.putExtra(PhoneConstants.DATA_APN_KEY, apn);
@@ -2642,11 +2651,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     /**
-     * Convert data state to string
+     * Convert TelephonyManager.DATA_* to string.
      *
      * @return The data state in string format.
      */
-    private String dataStateToString(@TelephonyManager.DataState int state) {
+    private static String dataStateToString(int state) {
         switch (state) {
             case TelephonyManager.DATA_DISCONNECTED: return "DISCONNECTED";
             case TelephonyManager.DATA_CONNECTING: return "CONNECTING";
