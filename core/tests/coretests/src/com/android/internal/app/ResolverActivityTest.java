@@ -116,14 +116,14 @@ public class ResolverActivityTest {
         waitForIdle();
 
         final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
-        final View resolverList = activity.findViewById(R.id.resolver_list);
-        final int initialResolverHeight = resolverList.getHeight();
+        final View viewPager = activity.findViewById(R.id.profile_pager);
+        final int initialResolverHeight = viewPager.getHeight();
 
         activity.runOnUiThread(() -> {
             ResolverDrawerLayout layout = (ResolverDrawerLayout)
                     activity.findViewById(
                             R.id.contentPanel);
-            ((ResolverDrawerLayout.LayoutParams) resolverList.getLayoutParams()).maxHeight
+            ((ResolverDrawerLayout.LayoutParams) viewPager.getLayoutParams()).maxHeight
                 = initialResolverHeight - 1;
             // Force a relayout
             layout.invalidate();
@@ -131,13 +131,13 @@ public class ResolverActivityTest {
         });
         waitForIdle();
         assertThat("Drawer should be capped at maxHeight",
-            resolverList.getHeight() == (initialResolverHeight - 1));
+                viewPager.getHeight() == (initialResolverHeight - 1));
 
         activity.runOnUiThread(() -> {
             ResolverDrawerLayout layout = (ResolverDrawerLayout)
                     activity.findViewById(
                             R.id.contentPanel);
-            ((ResolverDrawerLayout.LayoutParams) resolverList.getLayoutParams()).maxHeight
+            ((ResolverDrawerLayout.LayoutParams) viewPager.getLayoutParams()).maxHeight
                 = initialResolverHeight + 1;
             // Force a relayout
             layout.invalidate();
@@ -145,7 +145,7 @@ public class ResolverActivityTest {
         });
         waitForIdle();
         assertThat("Drawer should not change height if its height is less than maxHeight",
-            resolverList.getHeight() == initialResolverHeight);
+                viewPager.getHeight() == initialResolverHeight);
     }
 
     @Ignore // Failing - b/144929805
@@ -160,11 +160,13 @@ public class ResolverActivityTest {
         waitForIdle();
 
         final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
-        final View resolverList = activity.findViewById(R.id.resolver_list);
+        final View viewPager = activity.findViewById(R.id.profile_pager);
+        final View divider = activity.findViewById(R.id.divider);
         final RelativeLayout profileView =
             (RelativeLayout) activity.findViewById(R.id.profile_button).getParent();
         assertThat("Drawer should show at bottom by default",
-                profileView.getBottom() == resolverList.getTop() && profileView.getTop() > 0);
+                profileView.getBottom() + divider.getHeight() == viewPager.getTop()
+                        && profileView.getTop() > 0);
 
         activity.runOnUiThread(() -> {
             ResolverDrawerLayout layout = (ResolverDrawerLayout)
@@ -174,7 +176,8 @@ public class ResolverActivityTest {
         });
         waitForIdle();
         assertThat("Drawer should show at top with new attribute",
-            profileView.getBottom() == resolverList.getTop() && profileView.getTop() == 0);
+            profileView.getBottom() + divider.getHeight() == viewPager.getTop()
+                    && profileView.getTop() == 0);
     }
 
     @Test
