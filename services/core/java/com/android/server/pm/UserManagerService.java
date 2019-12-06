@@ -2312,14 +2312,14 @@ public class UserManagerService extends IUserManager.Stub {
         return mContext.getResources().getString(com.android.internal.R.string.owner_name);
     }
 
-    private void scheduleWriteUser(UserData UserData) {
+    private void scheduleWriteUser(UserData userData) {
         if (DBG) {
             debug("scheduleWriteUser");
         }
         // No need to wrap it within a lock -- worst case, we'll just post the same message
         // twice.
-        if (!mHandler.hasMessages(WRITE_USER_MSG, UserData)) {
-            Message msg = mHandler.obtainMessage(WRITE_USER_MSG, UserData);
+        if (!mHandler.hasMessages(WRITE_USER_MSG, userData)) {
+            Message msg = mHandler.obtainMessage(WRITE_USER_MSG, userData);
             mHandler.sendMessageDelayed(msg, WRITE_USER_DELAY);
         }
     }
