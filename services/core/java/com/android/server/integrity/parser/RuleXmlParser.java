@@ -41,7 +41,7 @@ public final class RuleXmlParser implements RuleParser {
     private static final String NAMESPACE = "";
     private static final String RULE_LIST_TAG = "RL";
     private static final String RULE_TAG = "R";
-    private static final String OPEN_FORMULA_TAG = "OF";
+    private static final String COMPOUND_FORMULA_TAG = "OF";
     private static final String ATOMIC_FORMULA_TAG = "AF";
     private static final String EFFECT_ATTRIBUTE = "E";
     private static final String KEY_ATTRIBUTE = "K";
@@ -118,8 +118,8 @@ public final class RuleXmlParser implements RuleParser {
 
             if (eventType == XmlPullParser.START_TAG) {
                 switch (nodeName) {
-                    case OPEN_FORMULA_TAG:
-                        formula = parseOpenFormula(parser);
+                    case COMPOUND_FORMULA_TAG:
+                        formula = parseCompoundFormula(parser);
                         break;
                     case ATOMIC_FORMULA_TAG:
                         formula = parseAtomicFormula(parser);
@@ -137,7 +137,7 @@ public final class RuleXmlParser implements RuleParser {
         return new Rule(formula, effect);
     }
 
-    private static Formula parseOpenFormula(XmlPullParser parser)
+    private static Formula parseCompoundFormula(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         int connector =
                 Integer.parseInt(extractAttributeValue(parser, CONNECTOR_ATTRIBUTE).orElse("-1"));
@@ -147,7 +147,8 @@ public final class RuleXmlParser implements RuleParser {
         while ((eventType = parser.next()) != XmlPullParser.END_DOCUMENT) {
             String nodeName = parser.getName();
 
-            if (eventType == XmlPullParser.END_TAG && parser.getName().equals(OPEN_FORMULA_TAG)) {
+            if (eventType == XmlPullParser.END_TAG
+                    && parser.getName().equals(COMPOUND_FORMULA_TAG)) {
                 break;
             }
 
@@ -156,8 +157,8 @@ public final class RuleXmlParser implements RuleParser {
                     case ATOMIC_FORMULA_TAG:
                         formulas.add(parseAtomicFormula(parser));
                         break;
-                    case OPEN_FORMULA_TAG:
-                        formulas.add(parseOpenFormula(parser));
+                    case COMPOUND_FORMULA_TAG:
+                        formulas.add(parseCompoundFormula(parser));
                         break;
                     default:
                         throw new RuntimeException(
