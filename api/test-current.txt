@@ -1796,7 +1796,6 @@ package android.os {
   }
 
   public class DeviceIdleManager {
-    method @RequiresPermission("android.permission.DEVICE_POWER") public int addPowerSaveWhitelistApps(@NonNull java.util.List<java.lang.String>);
     method @NonNull public String[] getSystemPowerWhitelist();
     method @NonNull public String[] getSystemPowerWhitelistExceptIdle();
   }
@@ -2045,6 +2044,8 @@ package android.os {
   }
 
   public class PowerWhitelistManager {
+    method @RequiresPermission("android.permission.DEVICE_POWER") public boolean addToWhitelist(@NonNull String);
+    method @RequiresPermission("android.permission.DEVICE_POWER") public int addToWhitelist(@NonNull java.util.List<java.lang.String>);
     method @RequiresPermission("android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST") public void whitelistAppTemporarily(@NonNull String, long);
     method @RequiresPermission("android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST") public long whitelistAppTemporarilyForEvent(@NonNull String, int, @NonNull String);
     field public static final int EVENT_MMS = 2; // 0x2
