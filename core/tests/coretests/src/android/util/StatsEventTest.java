@@ -53,8 +53,8 @@ public class StatsEventTest {
         final ByteBuffer buffer =
                 ByteBuffer.wrap(statsEvent.getBytes()).order(ByteOrder.LITTLE_ENDIAN);
 
-        assertWithMessage("Root element in buffer is not TYPE_ERRORS")
-                .that(buffer.get()).isEqualTo(StatsEvent.TYPE_ERRORS);
+        assertWithMessage("Root element in buffer is not TYPE_OBJECT")
+                .that(buffer.get()).isEqualTo(StatsEvent.TYPE_OBJECT);
 
         assertWithMessage("Incorrect number of elements in root object")
                 .that(buffer.get()).isEqualTo(3);
@@ -70,6 +70,9 @@ public class StatsEventTest {
 
         assertWithMessage("Incorrect atom id")
                 .that(buffer.getInt()).isEqualTo(expectedAtomId);
+
+        assertWithMessage("Third element is not errors type")
+                .that(buffer.get()).isEqualTo(StatsEvent.TYPE_ERRORS);
 
         final int errorMask = buffer.getInt();
 
