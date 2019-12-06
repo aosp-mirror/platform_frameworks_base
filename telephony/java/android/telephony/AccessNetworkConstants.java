@@ -67,6 +67,22 @@ public final class AccessNetworkConstants {
         }
     }
 
+    /**
+     * Access network type
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"RADIO_ACCESS_NETWORK_TYPE_"},
+            value = {
+                    AccessNetworkType.UNKNOWN,
+                    AccessNetworkType.GERAN,
+                    AccessNetworkType.UTRAN,
+                    AccessNetworkType.EUTRAN,
+                    AccessNetworkType.CDMA2000,
+                    AccessNetworkType.IWLAN,
+                    AccessNetworkType.NGRAN})
+    public @interface RadioAccessNetworkType {}
+
     public static final class AccessNetworkType {
         public static final int UNKNOWN = 0;
         public static final int GERAN = 1;
