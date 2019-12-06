@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- testFromJsonString -->
+    <string name="blacklist_json_string" translatable="false">
+      {
+        \"entries\":[
+          {
+            \"public_key\":\"00fa2c6637c399afa893fe83d85f3569998707d5\",
+            \"status\":\"REVOKED\",
+            \"reason\":\"Key revocation test key\"
+          },
+          {
+            \"public_key\":\"key2\",
+            \"status\":\"REVOKED\"
+          }
+        ]
+      }
+    </string>
+</resources>
