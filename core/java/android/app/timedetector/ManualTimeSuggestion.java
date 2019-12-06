@@ -85,7 +85,8 @@ public final class ManualTimeSuggestion implements Parcelable {
 
     @NonNull
     public List<String> getDebugInfo() {
-        return Collections.unmodifiableList(mDebugInfo);
+        return mDebugInfo == null
+                ? Collections.emptyList() : Collections.unmodifiableList(mDebugInfo);
     }
 
     /**
