@@ -20,17 +20,31 @@ import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_HIDDEN;
+import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.SyncRtSurfaceTransactionApplier.applyParams;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 
 import android.annotation.Nullable;
 import android.app.StatusBarManager;
 import android.util.IntArray;
+import android.util.SparseArray;
+import android.view.InsetsAnimationControlCallbacks;
+import android.view.InsetsAnimationControlImpl;
+import android.view.InsetsController;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
+import android.view.SurfaceControl;
+import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.ViewRootImpl;
+import android.view.WindowInsetsAnimationCallback;
+import android.view.WindowInsetsAnimationControlListener;
+
+import com.android.server.DisplayThread;
 
 /**
  * Policy that implements who gets control over the windows generating insets.
@@ -46,6 +60,8 @@ class InsetsPolicy {
     private WindowState mFocusedWin;
     private BarWindow mStatusBar = new BarWindow(StatusBarManager.WINDOW_STATUS_BAR);
     private BarWindow mNavBar = new BarWindow(StatusBarManager.WINDOW_NAVIGATION_BAR);
+    private boolean mAnimatingShown;
+    private final float[] mTmpFloat9 = new float[9];
 
     InsetsPolicy(InsetsStateController stateController, DisplayContent displayContent) {
         mStateController = stateController;
@@ -91,11 +107,14 @@ class InsetsPolicy {
             changed = true;
         }
         if (changed) {
-            updateBarControlTarget(mFocusedWin);
-            mPolicy.getStatusBarManagerInternal().showTransient(mDisplayContent.getDisplayId(),
-                    mShowingTransientTypes.toArray());
-            mStateController.notifyInsetsChanged();
-            // TODO(b/118118435): Animation
+            startAnimation(mShowingTransientTypes, true, () -> {
+                synchronized (mDisplayContent.mWmService.mGlobalLock) {
+                    mPolicy.getStatusBarManagerInternal().showTransient(
+                            mDisplayContent.getDisplayId(),
+                            mShowingTransientTypes.toArray());
+                    mStateController.notifyInsetsChanged();
+                }
+            });
         }
     }
 
@@ -103,11 +122,13 @@ class InsetsPolicy {
         if (mShowingTransientTypes.size() == 0) {
             return;
         }
-
-        // TODO(b/118118435): Animation
-        mShowingTransientTypes.clear();
-        updateBarControlTarget(mFocusedWin);
-        mStateController.notifyInsetsChanged();
+        startAnimation(mShowingTransientTypes, false, () -> {
+            synchronized (mDisplayContent.mWmService.mGlobalLock) {
+                mShowingTransientTypes.clear();
+                mStateController.notifyInsetsChanged();
+                updateBarControlTarget(mFocusedWin);
+            }
+        });
     }
 
     boolean isTransient(@InternalInsetsType int type) {
@@ -242,6 +263,29 @@ class InsetsPolicy {
         return isDockedStackVisible || isFreeformStackVisible || isResizing;
     }
 
+    private void startAnimation(IntArray internalTypes, boolean show, Runnable callback) {
+        int typesReady = 0;
+        final SparseArray<InsetsSourceControl> controls = new SparseArray<>();
+        updateBarControlTarget(mFocusedWin);
+        for (int i = internalTypes.size() - 1; i >= 0; i--) {
+            InsetsSourceProvider provider =
+                    mStateController.getSourceProvider(internalTypes.get(i));
+            if (provider == null) continue;
+            InsetsSourceControl control = provider.getControl(provider.getControlTarget());
+            if (control == null || control.getLeash() == null) continue;
+            typesReady |= InsetsState.toPublicType(internalTypes.get(i));
+            controls.put(control.getType(), control);
+        }
+        controlAnimationUnchecked(typesReady, controls, show, callback);
+    }
+
+    private void controlAnimationUnchecked(int typesReady,
+            SparseArray<InsetsSourceControl> controls, boolean show, Runnable callback) {
+        InsetsPolicyAnimationControlListener listener =
+                new InsetsPolicyAnimationControlListener(show, callback);
+        listener.mControlCallbacks.controlAnimationUnchecked(typesReady, controls, show);
+    }
+
     private class BarWindow {
 
         private final int mId;
@@ -262,7 +306,103 @@ class InsetsPolicy {
         }
     }
 
-    // TODO(b/118118435): Implement animations for it (with SurfaceAnimator)
+    private class InsetsPolicyAnimationControlListener extends
+            InsetsController.InternalAnimationControlListener {
+        Runnable mFinishCallback;
+        InsetsPolicyAnimationControlCallbacks mControlCallbacks;
+
+        InsetsPolicyAnimationControlListener(boolean show, Runnable finishCallback) {
+            super(show);
+            mFinishCallback = finishCallback;
+            mControlCallbacks = new InsetsPolicyAnimationControlCallbacks(this);
+        }
+
+        @Override
+        protected void onAnimationFinish() {
+            super.onAnimationFinish();
+            mControlCallbacks.mAnimationControl.finish(mAnimatingShown);
+            DisplayThread.getHandler().post(mFinishCallback);
+        }
+
+        private class InsetsPolicyAnimationControlCallbacks implements
+                InsetsAnimationControlCallbacks {
+            private InsetsAnimationControlImpl mAnimationControl = null;
+            private InsetsPolicyAnimationControlListener mListener;
+
+            InsetsPolicyAnimationControlCallbacks(InsetsPolicyAnimationControlListener listener) {
+                super();
+                mListener = listener;
+            }
+
+            private void controlAnimationUnchecked(int typesReady,
+                    SparseArray<InsetsSourceControl> controls, boolean show) {
+                if (typesReady == 0) {
+                    // nothing to animate.
+                    return;
+                }
+                mAnimatingShown = show;
+
+                mAnimationControl = new InsetsAnimationControlImpl(controls,
+                        mFocusedWin.getDisplayContent().getBounds(), getState(),
+                        mListener, typesReady, this, mListener.getDurationMs(),
+                        InsetsController.INTERPOLATOR, true,
+                        show ? LAYOUT_INSETS_DURING_ANIMATION_SHOWN
+                                : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN);
+            }
+
+            /** Called on SurfaceAnimationThread lock without global WM lock held. */
+            @Override
+            public void scheduleApplyChangeInsets() {
+                InsetsState state = getState();
+                if (mAnimationControl.applyChangeInsets(state)) {
+                    mAnimationControl.finish(mAnimatingShown);
+                }
+            }
+
+            @Override
+            public void notifyFinished(InsetsAnimationControlImpl controller, boolean shown) {
+                // Nothing's needed here. Finish steps is handled in the listener
+                // onAnimationFinished callback.
+            }
+
+            /**
+             * This method will return a state with fullscreen frame override. No need to make copy
+             * after getting state from this method.
+             * @return The client insets state with full display frame override.
+             */
+            private InsetsState getState() {
+                // To animate the transient animation correctly, we need to let the state hold
+                // the full display frame.
+                InsetsState overrideState = new InsetsState(mFocusedWin.getRequestedInsetsState(),
+                        true);
+                overrideState.setDisplayFrame(mFocusedWin.getDisplayContent().getBounds());
+                return overrideState;
+            }
+
+            /** Called on SurfaceAnimationThread lock without global WM lock held. */
+            @Override
+            public void applySurfaceParams(
+                    final SyncRtSurfaceTransactionApplier.SurfaceParams... params) {
+                SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                for (int i = params.length - 1; i >= 0; i--) {
+                    SyncRtSurfaceTransactionApplier.SurfaceParams surfaceParams = params[i];
+                    applyParams(t, surfaceParams, mTmpFloat9);
+                }
+                t.apply();
+            }
+
+            /** Called on SurfaceAnimationThread lock without global WM lock held. */
+            @Override
+            public void startAnimation(InsetsAnimationControlImpl controller,
+                    WindowInsetsAnimationControlListener listener, int types,
+                    WindowInsetsAnimationCallback.InsetsAnimation animation,
+                    WindowInsetsAnimationCallback.AnimationBounds bounds,
+                    int layoutDuringAnimation) {
+                SurfaceAnimationThread.getHandler().post(() -> listener.onReady(controller, types));
+            }
+        }
+    }
+
     private class TransientControlTarget implements InsetsControlTarget {
 
         @Override

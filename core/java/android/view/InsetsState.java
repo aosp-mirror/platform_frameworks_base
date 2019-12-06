@@ -21,7 +21,6 @@ import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.ViewRootImpl.sNewInsetsMode;
-import static android.view.WindowInsets.Type.IME;
 import static android.view.WindowInsets.Type.MANDATORY_SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.SIZE;
 import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
@@ -43,7 +42,6 @@ import android.util.ArraySet;
 import android.util.SparseIntArray;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
-import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
 import java.io.PrintWriter;
@@ -366,7 +364,12 @@ public class InsetsState implements Parcelable {
         return result;
     }
 
-    static @Type.InsetsType int toPublicType(@InternalInsetsType int type) {
+    /**
+     * Converting a internal type to the public type.
+     * @param type internal insets type, {@code InternalInsetsType}.
+     * @return public insets type, {@code Type.InsetsType}.
+     */
+    public static @Type.InsetsType int toPublicType(@InternalInsetsType int type) {
         switch (type) {
             case ITYPE_STATUS_BAR:
                 return Type.STATUS_BARS;
@@ -509,6 +512,14 @@ public class InsetsState implements Parcelable {
             final InsetsSource source = in.readParcelable(null /* loader */);
             mSources.put(source.getType(), source);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "InsetsState: {"
+                + "mDisplayFrame=" + mDisplayFrame
+                + ", mSources=" + mSources
+                + "}";
     }
 }
 
