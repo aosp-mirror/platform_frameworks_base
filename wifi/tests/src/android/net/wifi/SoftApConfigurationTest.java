@@ -91,13 +91,13 @@ public class SoftApConfigurationTest {
         SoftApConfiguration original = new SoftApConfiguration.Builder()
                 .setWpa2Passphrase("secretsecret")
                 .setBand(SoftApConfiguration.BAND_ANY)
-                .setChannel(149)
+                .setChannel(149, SoftApConfiguration.BAND_5GHZ)
                 .setHiddenSsid(true)
                 .build();
         assertThat(original.getWpa2Passphrase()).isEqualTo("secretsecret");
         assertThat(original.getSecurityType()).isEqualTo(
                 SoftApConfiguration.SECURITY_TYPE_WPA2_PSK);
-        assertThat(original.getBand()).isEqualTo(SoftApConfiguration.BAND_ANY);
+        assertThat(original.getBand()).isEqualTo(SoftApConfiguration.BAND_5GHZ);
         assertThat(original.getChannel()).isEqualTo(149);
         assertThat(original.isHiddenSsid()).isEqualTo(true);
 

@@ -60,31 +60,76 @@ public final class SoftApConfiguration implements Parcelable {
      * @hide
      */
     @SystemApi
-    public static final int BAND_2GHZ = 0;
+    public static final int BAND_2GHZ = 1 << 0;
 
     /**
      * 5GHz band.
      * @hide
      */
     @SystemApi
-    public static final int BAND_5GHZ = 1;
+    public static final int BAND_5GHZ = 1 << 1;
 
     /**
-     * Device is allowed to choose the optimal band (2Ghz or 5Ghz) based on device capability,
+     * 6GHz band.
+     * @hide
+     */
+    @SystemApi
+    public static final int BAND_6GHZ = 1 << 2;
+
+    /**
+     * Device is allowed to choose the optimal band (2Ghz, 5Ghz, 6Ghz) based on device capability,
      * operating country code and current radio conditions.
      * @hide
      */
     @SystemApi
-    public static final int BAND_ANY = -1;
+    public static final int BAND_ANY = BAND_2GHZ | BAND_5GHZ | BAND_6GHZ;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "BAND_TYPE_" }, value = {
+    @IntDef(flag = true, prefix = { "BAND_TYPE_" }, value = {
             BAND_2GHZ,
             BAND_5GHZ,
-            BAND_ANY,
+            BAND_6GHZ,
     })
     public @interface BandType {}
+
+    private static boolean isBandValid(@BandType int band) {
+        return ((band != 0) && ((band & ~BAND_ANY) == 0));
+    }
+
+    private static final int MIN_CH_2G_BAND = 1;
+    private static final int MAX_CH_2G_BAND = 14;
+    private static final int MIN_CH_5G_BAND = 34;
+    private static final int MAX_CH_5G_BAND = 196;
+    private static final int MIN_CH_6G_BAND = 1;
+    private static final int MAX_CH_6G_BAND = 253;
+
+
+
+    private static boolean isChannelBandPairValid(int channel, @BandType int band) {
+        switch (band) {
+            case BAND_2GHZ:
+                if (channel < MIN_CH_2G_BAND || channel >  MAX_CH_2G_BAND) {
+                    return false;
+                }
+                break;
+
+            case BAND_5GHZ:
+                if (channel < MIN_CH_5G_BAND || channel >  MAX_CH_5G_BAND) {
+                    return false;
+                }
+                break;
+
+            case BAND_6GHZ:
+                if (channel < MIN_CH_6G_BAND || channel >  MAX_CH_6G_BAND) {
+                    return false;
+                }
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }
 
     /**
      * SSID for the AP, or null for a framework-determined SSID.
@@ -439,39 +484,42 @@ public final class SoftApConfiguration implements Parcelable {
          * <p>
          * <li>If not set, defaults to BAND_2GHZ {@link @BandType}.</li>
          *
-         * @param band One of the band types from {@link @BandType}.
+         * @param band One or combination of the band types from {@link @BandType}.
          * @return Builder for chaining.
          */
         @NonNull
         public Builder setBand(@BandType int band) {
-            switch (band) {
-                case BAND_2GHZ:
-                    break;
-                case BAND_5GHZ:
-                    break;
-                case BAND_ANY:
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid band type");
+            if (!isBandValid(band)) {
+                throw new IllegalArgumentException("Invalid band type");
             }
             mBand = band;
+            // Since band preference is specified, no specific channel is selected.
+            mChannel = 0;
             return this;
         }
 
         /**
-         * Specifies the channel for the AP.
+         * Specifies the channel and associated band for the AP.
          *
          * The channel which AP resides on. Valid channels are country dependent.
-         * Use the special channel value 0 to have the framework auto-select a valid channel
-         * from the band configured with {@link #setBand(@BandType int)}.
+         * The default for the channel is a the special value 0 to have the framework
+         * auto-select a valid channel from the band configured with
+         * {@link #setBand(@BandType int)}.
+         * Note, since 6GHz band use the same channel numbering of 2.4GHz and 5GHZ bands,
+         * the caller needs to pass the band containing the selected channel.
          *
          * <p>
          * <li>If not set, defaults to 0.</li>
          * @param channel operating channel of the AP.
+         * @param band containing this channel.
          * @return Builder for chaining.
          */
         @NonNull
-        public Builder setChannel(int channel) {
+        public Builder setChannel(int channel, @BandType int band) {
+            if (!isChannelBandPairValid(channel, band)) {
+                throw new IllegalArgumentException("Invalid band type");
+            }
+            mBand = band;
             mChannel = channel;
             return this;
         }

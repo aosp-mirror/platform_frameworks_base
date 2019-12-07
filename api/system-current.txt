@@ -5495,9 +5495,10 @@ package android.net.wifi {
     method @Nullable public String getWpa2Passphrase();
     method public boolean isHiddenSsid();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int BAND_2GHZ = 0; // 0x0
-    field public static final int BAND_5GHZ = 1; // 0x1
-    field public static final int BAND_ANY = -1; // 0xffffffff
+    field public static final int BAND_2GHZ = 1; // 0x1
+    field public static final int BAND_5GHZ = 2; // 0x2
+    field public static final int BAND_6GHZ = 4; // 0x4
+    field public static final int BAND_ANY = 7; // 0x7
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.SoftApConfiguration> CREATOR;
     field public static final int SECURITY_TYPE_OPEN = 0; // 0x0
     field public static final int SECURITY_TYPE_WPA2_PSK = 1; // 0x1
@@ -5509,7 +5510,7 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.SoftApConfiguration build();
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBand(int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBssid(@Nullable android.net.MacAddress);
-    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setChannel(int);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setChannel(int, int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setHiddenSsid(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setSsid(@Nullable String);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setWpa2Passphrase(@Nullable String);
