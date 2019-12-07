@@ -35,7 +35,6 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -45,6 +44,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 /**
@@ -58,7 +58,7 @@ public class AudioDeviceInventory {
 
     // Actual list of connected devices
     // Key for map created from DeviceInfo.makeDeviceListKey()
-    private final ArrayMap<String, DeviceInfo> mConnectedDevices = new ArrayMap<>();
+    private final LinkedHashMap<String, DeviceInfo> mConnectedDevices = new LinkedHashMap<>();
 
     private @NonNull AudioDeviceBroker mDeviceBroker;
 
@@ -148,8 +148,7 @@ public class AudioDeviceInventory {
      */
     /*package*/ void onRestoreDevices() {
         synchronized (mConnectedDevices) {
-            for (int i = 0; i < mConnectedDevices.size(); i++) {
-                DeviceInfo di = mConnectedDevices.valueAt(i);
+            for (DeviceInfo di : mConnectedDevices.values()) {
                 AudioSystem.setDeviceConnectionState(
                         di.mDeviceType,
                         AudioSystem.DEVICE_STATE_AVAILABLE,
@@ -799,11 +798,10 @@ public class AudioDeviceInventory {
         }
         int delay = 0;
         Set<Integer> devices = new HashSet<>();
-        for (int i = 0; i < mConnectedDevices.size(); i++) {
-            int dev = mConnectedDevices.valueAt(i).mDeviceType;
-            if (((dev & AudioSystem.DEVICE_BIT_IN) == 0)
-                    && BECOMING_NOISY_INTENT_DEVICES_SET.contains(dev)) {
-                devices.add(dev);
+        for (DeviceInfo di : mConnectedDevices.values()) {
+            if (((di.mDeviceType & AudioSystem.DEVICE_BIT_IN) == 0)
+                    && BECOMING_NOISY_INTENT_DEVICES_SET.contains(di.mDeviceType)) {
+                devices.add(di.mDeviceType);
             }
         }
         if (musicDevice == AudioSystem.DEVICE_NONE) {
