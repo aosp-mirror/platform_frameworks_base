@@ -1888,10 +1888,13 @@ public final class Debug
     /**
      * Note: currently only works when the requested pid has the same UID
      * as the caller.
+     *
+     * @return true if the meminfo was read successfully, false if not (i.e., given pid has gone).
+     *
      * @hide
      */
     @UnsupportedAppUsage
-    public static native void getMemoryInfo(int pid, MemoryInfo memoryInfo);
+    public static native boolean getMemoryInfo(int pid, MemoryInfo memoryInfo);
 
     /**
      * Retrieves the PSS memory used by the process as given by the
@@ -1904,6 +1907,8 @@ public final class Debug
      * array of up to 3 entries to also receive (up to 3 values in order): the Uss and SwapPss and
      * Rss (only filled in as of {@link android.os.Build.VERSION_CODES#P}) of the process, and
      * another array to also retrieve the separate memtrack size.
+     *
+     * @return The PSS memory usage, or 0 if failed to retrieve (i.e., given pid has gone).
      * @hide
      */
     public static native long getPss(int pid, long[] outUssSwapPssRss, long[] outMemtrack);
