@@ -21,7 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.NetworkInfo.DetailedState;
-import android.net.NetworkUtils;
+import android.net.shared.Inet4AddressUtils;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -708,7 +708,7 @@ public class WifiInfo implements Parcelable {
     public int getIpAddress() {
         int result = 0;
         if (mIpAddress instanceof Inet4Address) {
-            result = NetworkUtils.inetAddressToInt((Inet4Address)mIpAddress);
+            result = Inet4AddressUtils.inet4AddressToIntHTL((Inet4Address) mIpAddress);
         }
         return result;
     }
