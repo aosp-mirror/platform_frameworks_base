@@ -475,9 +475,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     SystemUiDeviceConfigFlags
                             .SCREENSHOT_NOTIFICATION_SMART_ACTIONS_TIMEOUT_MS,
                     1000);
-            List<Notification.Action> smartActions = buildSmartActions(
-                    GlobalScreenshot.getSmartActions(mScreenshotId, smartActionsFuture,
-                            timeoutMs, mSmartActionsProvider), context);
+            List<Notification.Action> smartActions = GlobalScreenshot.getSmartActions(mScreenshotId,
+                    smartActionsFuture, timeoutMs, mSmartActionsProvider);
+            smartActions = buildSmartActions(smartActions, context);
             for (Notification.Action action : smartActions) {
                 notificationBuilder.addAction(action);
             }
@@ -1082,8 +1082,8 @@ class GlobalScreenshot {
             List<Notification.Action> actions = smartActionsFuture.get(timeoutMs,
                     TimeUnit.MILLISECONDS);
             long waitTimeMs = SystemClock.uptimeMillis() - startTimeMs;
-            Slog.d(TAG, String.format("Wait time for smart actions: %d ms",
-                    waitTimeMs));
+            Slog.d(TAG, String.format("Got %d smart actions. Wait time: %d ms",
+                    actions.size(), waitTimeMs));
             notifyScreenshotOp(screenshotId, smartActionsProvider,
                     ScreenshotNotificationSmartActionsProvider.ScreenshotOp.WAIT_FOR_SMART_ACTIONS,
                     ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus.SUCCESS,
@@ -1091,7 +1091,8 @@ class GlobalScreenshot {
             return actions;
         } catch (Throwable e) {
             long waitTimeMs = SystemClock.uptimeMillis() - startTimeMs;
-            Slog.d(TAG, "Failed to obtain screenshot notification smart actions.", e);
+            Slog.e(TAG, String.format("Error getting smart actions. Wait time: %d ms", waitTimeMs),
+                    e);
             ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus status =
                     (e instanceof TimeoutException)
                             ? ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus.TIMEOUT
@@ -1209,14 +1210,16 @@ class GlobalScreenshot {
     public static class SmartActionsReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            PendingIntent actionIntent = intent.getParcelableExtra(EXTRA_ACTION_INTENT);
+            PendingIntent pendingIntent = intent.getParcelableExtra(EXTRA_ACTION_INTENT);
+            Intent actionIntent = pendingIntent.getIntent();
+            String actionType = intent.getStringExtra(EXTRA_ACTION_TYPE);
+            Slog.d(TAG, "Executing smart action [" + actionType + "]:" + actionIntent);
             ActivityOptions opts = ActivityOptions.makeBasic();
-            context.startActivityAsUser(actionIntent.getIntent(), opts.toBundle(),
+            context.startActivityAsUser(actionIntent, opts.toBundle(),
                     UserHandle.CURRENT);
 
-            Slog.d(TAG, "Screenshot notification smart action is invoked.");
             notifyScreenshotAction(context, intent.getStringExtra(EXTRA_ID),
-                    intent.getStringExtra(EXTRA_ACTION_TYPE),
+                    actionType,
                     true);
         }
     }
