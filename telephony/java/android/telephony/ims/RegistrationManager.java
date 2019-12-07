@@ -110,42 +110,63 @@ public interface RegistrationManager {
             public void onRegistered(int imsRadioTech) {
                 if (mLocalCallback == null) return;
 
-                Binder.withCleanCallingIdentity(() -> mExecutor.execute(() ->
-                        mLocalCallback.onRegistered(getAccessType(imsRadioTech))));
+                long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() ->
+                            mLocalCallback.onRegistered(getAccessType(imsRadioTech)));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
             }
 
             @Override
             public void onRegistering(int imsRadioTech) {
                 if (mLocalCallback == null) return;
 
-                Binder.withCleanCallingIdentity(() -> mExecutor.execute(() ->
-                        mLocalCallback.onRegistering(getAccessType(imsRadioTech))));
+                long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() ->
+                            mLocalCallback.onRegistering(getAccessType(imsRadioTech)));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
             }
 
             @Override
             public void onDeregistered(ImsReasonInfo info) {
                 if (mLocalCallback == null) return;
 
-                Binder.withCleanCallingIdentity(() ->
-                        mExecutor.execute(() -> mLocalCallback.onUnregistered(info)));
+                long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mLocalCallback.onUnregistered(info));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
             }
 
             @Override
             public void onTechnologyChangeFailed(int imsRadioTech, ImsReasonInfo info) {
                 if (mLocalCallback == null) return;
 
-                Binder.withCleanCallingIdentity(() ->
-                        mExecutor.execute(() -> mLocalCallback.onTechnologyChangeFailed(
-                                getAccessType(imsRadioTech), info)));
+                long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mLocalCallback.onTechnologyChangeFailed(
+                            getAccessType(imsRadioTech), info));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
             }
 
             @Override
             public void onSubscriberAssociatedUriChanged(Uri[] uris) {
                 if (mLocalCallback == null) return;
 
-                Binder.withCleanCallingIdentity(() ->
-                        mExecutor.execute(() ->
-                                mLocalCallback.onSubscriberAssociatedUriChanged(uris)));
+                long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mLocalCallback.onSubscriberAssociatedUriChanged(uris));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
             }
 
             private void setExecutor(Executor executor) {

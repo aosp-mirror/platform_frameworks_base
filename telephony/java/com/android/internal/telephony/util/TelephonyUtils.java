@@ -26,6 +26,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 
 import java.io.PrintWriter;
+import java.util.function.Supplier;
 
 /**
  * This class provides various util functions
@@ -70,5 +71,41 @@ public final class TelephonyUtils {
         if (resolveInfo.serviceInfo != null) return resolveInfo.serviceInfo;
         if (resolveInfo.providerInfo != null) return resolveInfo.providerInfo;
         throw new IllegalStateException("Missing ComponentInfo!");
+    }
+
+    /**
+     * Convenience method for running the provided action enclosed in
+     * {@link Binder#clearCallingIdentity}/{@link Binder#restoreCallingIdentity}
+     *
+     * Any exception thrown by the given action will need to be handled by caller.
+     *
+     */
+    public static void runWithCleanCallingIdentity(
+            @NonNull Runnable action) {
+        long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            action.run();
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
+        }
+    }
+
+
+    /**
+     * Convenience method for running the provided action enclosed in
+     * {@link Binder#clearCallingIdentity}/{@link Binder#restoreCallingIdentity} and return
+     * the result.
+     *
+     * Any exception thrown by the given action will need to be handled by caller.
+     *
+     */
+    public static <T> T runWithCleanCallingIdentity(
+            @NonNull Supplier<T> action) {
+        long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            return action.get();
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
+        }
     }
 }
