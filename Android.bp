@@ -253,6 +253,8 @@ filegroup {
         ":libcamera_client_aidl",
         ":libcamera_client_framework_aidl",
         ":libupdate_engine_aidl",
+        // TODO: this needs to be removed when statsd-framework.jar is separated out
+        ":statsd_aidl",
         ":storaged_aidl",
         ":vold_aidl",
 
@@ -408,18 +410,6 @@ filegroup {
     srcs: [
         "core/java/android/os/IIncidentManager.aidl",
         "core/java/android/os/IIncidentReportStatusListener.aidl",
-    ],
-    path: "core/java",
-}
-
-filegroup {
-    name: "statsd_aidl",
-    srcs: [
-        "core/java/android/os/IPullAtomCallback.aidl",
-        "core/java/android/os/IPullAtomResultReceiver.aidl",
-        "core/java/android/os/IStatsCompanionService.aidl",
-        "core/java/android/os/IStatsManager.aidl",
-        "core/java/android/os/IStatsPullerCallback.aidl",
     ],
     path: "core/java",
 }

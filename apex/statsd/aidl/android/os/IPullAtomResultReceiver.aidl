@@ -16,7 +16,7 @@
 
 package android.os;
 
-import android.util.StatsEvent;
+import android.util.StatsEventParcel;
 
 /**
   * Binder interface to pull atoms for the stats service.
@@ -27,6 +27,6 @@ interface IPullAtomResultReceiver {
     /**
      * Indicate that a pull request for an atom is complete.
      */
-     oneway void pullFinished(int atomTag, boolean success, in StatsEvent[] output);
+     oneway void pullFinished(int atomTag, boolean success, in StatsEventParcel[] output);
 
 }

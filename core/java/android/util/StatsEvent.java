@@ -20,8 +20,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.SystemClock;
 
 import com.android.internal.annotations.GuardedBy;
@@ -44,7 +42,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * </pre>
  * @hide
  **/
-public final class StatsEvent implements Parcelable {
+public final class StatsEvent {
     // Type Ids.
     /**
      * @hide
@@ -263,39 +261,6 @@ public final class StatsEvent implements Parcelable {
     public void release() {
         mBuffer.release();
     }
-
-    /**
-     * Boilerplate for Parcel.
-     */
-    public static final @NonNull Parcelable.Creator<StatsEvent> CREATOR =
-            new Parcelable.Creator<StatsEvent>() {
-                public StatsEvent createFromParcel(Parcel in) {
-                    // Purposefully leaving this method not implemented.
-                    throw new RuntimeException("Not implemented");
-                }
-
-                public StatsEvent[] newArray(int size) {
-                    // Purposefully leaving this method not implemented.
-                    throw new RuntimeException("Not implemented");
-                }
-            };
-
-    /**
-     * Boilerplate for Parcel.
-     */
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(mAtomId);
-        out.writeInt(getNumBytes());
-        out.writeByteArray(getBytes());
-    }
-
-    /**
-     * Boilerplate for Parcel.
-     */
-    public int describeContents() {
-        return 0;
-    }
-
 
     /**
      * Builder for constructing a StatsEvent object.
