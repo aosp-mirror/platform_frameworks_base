@@ -70,7 +70,27 @@ interface IUiModeManager {
     boolean isNightModeLocked();
 
     /**
-    * @hide
+    * [De]Activates night mode
     */
     boolean setNightModeActivated(boolean active);
+
+    /**
+    * Returns custom start clock time
+    */
+    long getCustomNightModeStart();
+
+    /**
+    * Sets custom start clock time
+    */
+    void setCustomNightModeStart(long time);
+
+    /**
+    * Returns custom end clock time
+    */
+    long getCustomNightModeEnd();
+
+    /**
+    * Sets custom end clock time
+    */
+    void setCustomNightModeEnd(long time);
 }

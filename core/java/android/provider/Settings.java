@@ -5883,6 +5883,22 @@ public final class Settings {
                 "dark_mode_dialog_seen";
 
         /**
+         * Custom time when Dark theme is scheduled to activate.
+         * Represented as milliseconds from midnight (e.g. 79200000 == 10pm).
+         * @hide
+         */
+        public static final String DARK_THEME_CUSTOM_START_TIME =
+                "dark_theme_custom_start_time";
+
+        /**
+         * Custom time when Dark theme is scheduled to deactivate.
+         * Represented as milliseconds from midnight (e.g. 79200000 == 10pm).
+         * @hide
+         */
+        public static final String DARK_THEME_CUSTOM_END_TIME =
+                "dark_theme_custom_end_time";
+
+        /**
          * Defines value returned by {@link android.service.autofill.UserData#getMaxUserDataSize()}.
          *
          * @hide
@@ -7704,6 +7720,14 @@ public final class Settings {
          * @hide
          */
         public static final String UI_NIGHT_MODE = "ui_night_mode";
+
+        /**
+         * The current night mode that has been overrided by the system.  Owned
+         * and controlled by UiModeManagerService.  Constants are as per
+         * UiModeManager.
+         * @hide
+         */
+        public static final String UI_NIGHT_MODE_OVERRIDE = "ui_night_mode_override";
 
         /**
          * Whether screensavers are enabled.

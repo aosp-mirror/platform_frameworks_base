@@ -2562,4 +2562,10 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     OPEN_SUPPORTED_LINKS = 1824;
+    
+    // OPEN: Settings > Display > Dark theme > Set start time dialog
+    DIALOG_DARK_THEME_SET_START_TIME = 1825;
+
+    // OPEN: Settings > Display > Dark theme > Set end time dialog
+    DIALOG_DARK_THEME_SET_END_TIME = 1826;
 }
