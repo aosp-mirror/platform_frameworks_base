@@ -3236,6 +3236,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         synchronized (mLock) {
             if (mGnssManagerService != null && args.length > 0 && args[0].equals("--gnssmetrics")) {
                 mGnssManagerService.dump(fd, pw, args);
+                return;
             }
 
             ipw.println("Location Manager State:");
