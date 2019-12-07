@@ -23,7 +23,7 @@
 #include <media/AudioResamplerPublic.h>
 #include <media/IMediaHTTPService.h>
 #include <media/MediaPlayerInterface.h>
-#include <media/MediaAnalyticsItem.h>
+#include <media/MediaMetricsItem.h>
 #include <media/stagefright/foundation/ByteUtils.h>  // for FOURCC definition
 #include <stdio.h>
 #include <assert.h>
@@ -682,7 +682,7 @@ android_media_MediaPlayer_native_getMetrics(JNIEnv *env, jobject thiz)
         return (jobject) NULL;
     }
 
-    std::unique_ptr<MediaAnalyticsItem> item(MediaAnalyticsItem::create());
+    std::unique_ptr<mediametrics::Item> item(mediametrics::Item::create());
     item->readFromParcel(p);
     jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item.get(), NULL);
 

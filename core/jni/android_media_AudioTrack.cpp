@@ -1032,7 +1032,7 @@ android_media_AudioTrack_native_getMetrics(JNIEnv *env, jobject thiz)
     }
 
     // get what we have for the metrics from the track
-    MediaAnalyticsItem *item = NULL;
+    mediametrics::Item *item = NULL;
 
     status_t err = lpTrack->getMetrics(item);
     if (err != OK) {

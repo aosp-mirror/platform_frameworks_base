@@ -29,7 +29,7 @@
 #include <gui/Surface.h>
 #include <camera/Camera.h>
 #include <media/mediarecorder.h>
-#include <media/MediaAnalyticsItem.h>
+#include <media/MediaMetricsItem.h>
 #include <media/MicrophoneInfo.h>
 #include <media/stagefright/PersistentSurface.h>
 #include <utils/threads.h>
@@ -694,7 +694,7 @@ android_media_MediaRecorder_native_getMetrics(JNIEnv *env, jobject thiz)
     }
 
     // build and return the Bundle
-    std::unique_ptr<MediaAnalyticsItem> item(MediaAnalyticsItem::create());
+    std::unique_ptr<mediametrics::Item> item(mediametrics::Item::create());
     item->readFromParcel(reply);
     jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item.get(), NULL);
 
