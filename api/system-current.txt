@@ -3879,6 +3879,7 @@ package android.media {
     field public static final int FLAG_BYPASS_INTERRUPTION_POLICY = 64; // 0x40
     field public static final int FLAG_BYPASS_MUTE = 128; // 0x80
     field public static final int FLAG_HW_HOTWORD = 32; // 0x20
+    field @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public static final int USAGE_CALL_ASSISTANT = 17; // 0x11
   }
 
   public static class AudioAttributes.Builder {
