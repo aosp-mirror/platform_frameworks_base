@@ -183,11 +183,9 @@ void ValueMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition
 
 void ValueMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     StatsdStats::getInstance().noteBucketDropped(mMetricId);
-    // We are going to flush the data without doing a pull first so we need to invalidte the data.
-    bool pullNeeded = mIsPulled && mCondition == ConditionState::kTrue;
-    if (pullNeeded) {
-        invalidateCurrentBucket();
-    }
+
+    // The current partial bucket is not flushed and does not require a pull,
+    // so the data is still valid.
     flushIfNeededLocked(dropTimeNs);
     clearPastBucketsLocked(dropTimeNs);
 }
