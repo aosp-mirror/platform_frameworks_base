@@ -17,11 +17,10 @@
 package android.net.wifi.aware;
 
 import android.net.NetworkSpecifier;
+import android.net.wifi.util.HexEncoding;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-
-import libcore.util.HexEncoding;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

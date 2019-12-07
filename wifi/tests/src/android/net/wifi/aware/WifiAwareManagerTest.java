@@ -36,6 +36,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.MacAddress;
 import android.net.wifi.RttManager;
+import android.net.wifi.util.HexEncoding;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -43,8 +44,6 @@ import android.os.Parcel;
 import android.os.test.TestLooper;
 
 import androidx.test.filters.SmallTest;
-
-import libcore.util.HexEncoding;
 
 import org.junit.Before;
 import org.junit.Rule;

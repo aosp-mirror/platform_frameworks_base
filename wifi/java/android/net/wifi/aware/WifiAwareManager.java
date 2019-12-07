@@ -26,6 +26,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
+import android.net.wifi.util.HexEncoding;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,8 +36,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
-
-import libcore.util.HexEncoding;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
