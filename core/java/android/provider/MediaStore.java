@@ -1590,29 +1590,39 @@ public final class MediaStore {
 
             /**
              * Constant for the {@link #MEDIA_TYPE} column indicating that file
-             * is not an audio, image, video or playlist file.
+             * is not an audio, image, video, playlist, or subtitles file.
              */
             public static final int MEDIA_TYPE_NONE = 0;
 
             /**
-             * Constant for the {@link #MEDIA_TYPE} column indicating that file is an image file.
+             * Constant for the {@link #MEDIA_TYPE} column indicating that file
+             * is an image file.
              */
             public static final int MEDIA_TYPE_IMAGE = 1;
 
             /**
-             * Constant for the {@link #MEDIA_TYPE} column indicating that file is an audio file.
+             * Constant for the {@link #MEDIA_TYPE} column indicating that file
+             * is an audio file.
              */
             public static final int MEDIA_TYPE_AUDIO = 2;
 
             /**
-             * Constant for the {@link #MEDIA_TYPE} column indicating that file is a video file.
+             * Constant for the {@link #MEDIA_TYPE} column indicating that file
+             * is a video file.
              */
             public static final int MEDIA_TYPE_VIDEO = 3;
 
             /**
-             * Constant for the {@link #MEDIA_TYPE} column indicating that file is a playlist file.
+             * Constant for the {@link #MEDIA_TYPE} column indicating that file
+             * is a playlist file.
              */
             public static final int MEDIA_TYPE_PLAYLIST = 4;
+
+            /**
+             * Constant for the {@link #MEDIA_TYPE} column indicating that file
+             * is a subtitles or lyrics file.
+             */
+            public static final int MEDIA_TYPE_SUBTITLE = 5;
 
             /**
              * Column indicating if the file is part of Downloads collection.
