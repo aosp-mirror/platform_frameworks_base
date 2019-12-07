@@ -8783,6 +8783,34 @@ package android.telephony {
     field public static final String CELL_BROADCAST_SERVICE_INTERFACE = "android.telephony.CellBroadcastService";
   }
 
+  public abstract class CellIdentity implements android.os.Parcelable {
+    method @NonNull public abstract android.telephony.CellLocation asCellLocation();
+  }
+
+  public final class CellIdentityCdma extends android.telephony.CellIdentity {
+    method @NonNull public android.telephony.cdma.CdmaCellLocation asCellLocation();
+  }
+
+  public final class CellIdentityGsm extends android.telephony.CellIdentity {
+    method @NonNull public android.telephony.gsm.GsmCellLocation asCellLocation();
+  }
+
+  public final class CellIdentityLte extends android.telephony.CellIdentity {
+    method @NonNull public android.telephony.gsm.GsmCellLocation asCellLocation();
+  }
+
+  public final class CellIdentityNr extends android.telephony.CellIdentity {
+    method @NonNull public android.telephony.CellLocation asCellLocation();
+  }
+
+  public final class CellIdentityTdscdma extends android.telephony.CellIdentity {
+    method @NonNull public android.telephony.gsm.GsmCellLocation asCellLocation();
+  }
+
+  public final class CellIdentityWcdma extends android.telephony.CellIdentity {
+    method @NonNull public android.telephony.gsm.GsmCellLocation asCellLocation();
+  }
+
   public final class DataFailCause {
     field public static final int ACCESS_ATTEMPT_ALREADY_IN_PROGRESS = 2219; // 0x8ab
     field public static final int ACCESS_BLOCK = 2087; // 0x827
