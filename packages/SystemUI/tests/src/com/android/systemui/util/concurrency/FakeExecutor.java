@@ -168,11 +168,6 @@ public class FakeExecutor implements DelayableExecutor {
         executeDelayed(command, 0);
     }
 
-    @Override
-    public void removeAll() {
-        mQueuedRunnables.clear();
-    }
-
     /**
      * Run all Executors in a loop until they all report they have no ready work to do.
      *

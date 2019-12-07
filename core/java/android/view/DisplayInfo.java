@@ -651,7 +651,7 @@ public final class DisplayInfo implements Parcelable {
      * @param protoOutputStream Stream to write the Rect object to.
      * @param fieldId           Field Id of the DisplayInfoProto as defined in the parent message
      */
-    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+    public void dumpDebug(ProtoOutputStream protoOutputStream, long fieldId) {
         final long token = protoOutputStream.start(fieldId);
         protoOutputStream.write(LOGICAL_WIDTH, logicalWidth);
         protoOutputStream.write(LOGICAL_HEIGHT, logicalHeight);

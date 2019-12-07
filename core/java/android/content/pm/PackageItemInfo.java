@@ -436,7 +436,7 @@ public class PackageItemInfo {
     /**
      * @hide
      */
-    public void writeToProto(ProtoOutputStream proto, long fieldId, int dumpFlags) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId, int dumpFlags) {
         long token = proto.start(fieldId);
         if (name != null) {
             proto.write(PackageItemInfoProto.NAME, name);

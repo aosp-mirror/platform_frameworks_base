@@ -39,6 +39,12 @@ public interface TimeDetectorStrategy {
 
     /**
      * The interface used by the strategy to interact with the surrounding service.
+     *
+     * <p>Note: Because the system properties-derived value {@link #isAutoTimeDetectionEnabled()}
+     * can be modified independently and from different threads (and processes!). its use is prone
+     * to race conditions. That will be true until the responsibility for setting their values is
+     * moved to {@link TimeDetectorStrategy}. There are similar issues with
+     * {@link #systemClockMillis()} while any process can modify the system clock.
      */
     interface Callback {
 

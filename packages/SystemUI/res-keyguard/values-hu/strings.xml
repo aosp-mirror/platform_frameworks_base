@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"A feloldáshoz nyomja meg a Menü gombot."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Hálózat zárolva"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Nincs SIM-kártya"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"Nincs SIM-kártya a táblagépben."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"Nincs SIM-kártya a telefonban."</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Helyezzen be SIM-kártyát."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"A SIM-kártya hiányzik vagy nem olvasható. Helyezzen be SIM-kártyát."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"A SIM-kártya nem használható."</string>
@@ -83,17 +81,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Írjon be egy 4-8 számjegyű PIN-kódot."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"A PUK-kódnak legalább nyolc számjegyből kell állnia."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Adja meg újra a helyes PUK-kódot. Az ismételt próbálkozásokkal véglegesen letiltja a SIM-kártyát."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"A PIN-kódok nem egyeznek"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Túl sok mintarajzolási próbálkozás"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal helytelenül adta meg a PIN-kódot.\n\nPróbálja újra <xliff:g id="NUMBER_1">%2$d</xliff:g> másodperc múlva."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal helytelenül adta meg a jelszót.\n\nPróbálja újra <xliff:g id="NUMBER_1">%2$d</xliff:g> másodperc múlva."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal rosszul rajzolta le a feloldási mintát.\n\nPróbálja újra <xliff:g id="NUMBER_1">%2$d</xliff:g> másodperc múlva."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal próbálkozott sikertelenül a táblagép zárolásának feloldásával. További <xliff:g id="NUMBER_1">%2$d</xliff:g> sikertelen kísérlet után a rendszer visszaállítja a táblagépet, és ezzel az összes adat törlődik róla."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal próbálkozott sikertelenül a telefon zárolásának feloldásával. További <xliff:g id="NUMBER_1">%2$d</xliff:g> sikertelen kísérlet után a rendszer visszaállítja a telefont, és ezzel az összes adat törlődik róla."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"<xliff:g id="NUMBER">%d</xliff:g> alkalommal próbálkozott sikertelenül a táblagép zárolásának feloldásával. A rendszer visszaállítja a táblagépet, és ezzel a rajta lévő összes adat törlődik."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"<xliff:g id="NUMBER">%d</xliff:g> alkalommal próbálkozott sikertelenül a telefon zárolásának feloldásával. A rendszer visszaállítja a telefont, és ezzel a rajta lévő összes adat törlődik."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal próbálkozott sikertelenül a táblagép zárolásának feloldásával. További <xliff:g id="NUMBER_1">%2$d</xliff:g> sikertelen kísérlet után a rendszer eltávolítja a felhasználót, és ezzel a felhasználó összes adata törlődik majd."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal próbálkozott sikertelenül a telefon zárolásának feloldásával. További <xliff:g id="NUMBER_1">%2$d</xliff:g> sikertelen kísérlet után a rendszer eltávolítja a felhasználót, és ezzel a felhasználó összes adata törlődik majd."</string>
     <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
     <skip />
     <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
@@ -102,10 +93,6 @@
     <skip />
     <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
     <skip />
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"<xliff:g id="NUMBER">%d</xliff:g> alkalommal próbálkozott sikertelenül a táblagép zárolásának feloldásával. A rendszer eltávolítja a munkaprofilt, és ezzel a profil összes adata törlődik."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"<xliff:g id="NUMBER">%d</xliff:g> alkalommal próbálkozott sikertelenül a telefon zárolásának feloldásával. A rendszer eltávolítja a munkaprofilt, és ezzel a profil összes adata törlődik."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%2$d</xliff:g> sikertelen kísérlet után e-mail-fiók használatával kell feloldania táblagépét.\n\nPróbálja újra <xliff:g id="NUMBER_2">%3$d</xliff:g> másodperc múlva."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%2$d</xliff:g> sikertelen kísérlet után e-mail-fiók használatával kell feloldania telefonját.\n\nPróbálja újra <xliff:g id="NUMBER_2">%3$d</xliff:g> másodperc múlva."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Helytelen PIN-kód a SIM-kártyához. Az eszköz feloldása érdekében, kérjük, vegye fel a kapcsolatot szolgáltatójával."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="other">Helytelen PIN-kód a SIM-kártyához. Még <xliff:g id="NUMBER_1">%d</xliff:g> próbálkozása maradt.</item>

@@ -96,7 +96,7 @@ public class ConfigurationTest extends TestCase {
                 .setExtension('u', "nu-latn").build();
         Configuration write = new Configuration();
         write.setLocales(new LocaleList(arabic, urdu, urduExtension));
-        writeToProto(proto, write);
+        dumpDebug(proto, write);
         assertTrue("Failed to write configs to proto.", proto.exists());
 
         final Configuration read = new Configuration();
@@ -148,13 +148,13 @@ public class ConfigurationTest extends TestCase {
         assertEquals(SMALLEST_SCREEN_WIDTH_DP_UNDEFINED, config.smallestScreenWidthDp);
     }
 
-    private void writeToProto(File f, Configuration config) throws Exception {
+    private void dumpDebug(File f, Configuration config) throws Exception {
         final AtomicFile af = new AtomicFile(f);
         FileOutputStream fos = af.startWrite();
         try {
             final ProtoOutputStream protoOut = new ProtoOutputStream(fos);
             final long token = protoOut.start(IntervalStatsProto.CONFIGURATIONS);
-            config.writeToProto(protoOut, IntervalStatsProto.Configuration.CONFIG, false, false);
+            config.dumpDebug(protoOut, IntervalStatsProto.Configuration.CONFIG, false, false);
             protoOut.end(token);
             protoOut.flush();
             af.finishWrite(fos);

@@ -206,7 +206,7 @@ public class BubbleFlyoutView extends FrameLayout {
     void setupFlyoutStartingAsDot(
             CharSequence updateMessage, PointF stackPos, float parentWidth,
             boolean arrowPointingLeft, int dotColor, @Nullable Runnable onLayoutComplete,
-            @Nullable Runnable onHide, float[] dotCenter) {
+            @Nullable Runnable onHide, float[] dotCenter, boolean hideDot) {
         mArrowPointingLeft = arrowPointingLeft;
         mDotColor = dotColor;
         mOnHide = onHide;
@@ -242,12 +242,14 @@ public class BubbleFlyoutView extends FrameLayout {
 
             // Calculate the difference in size between the flyout and the 'dot' so that we can
             // transform into the dot later.
-            mFlyoutToDotWidthDelta = getWidth() - mNewDotSize;
-            mFlyoutToDotHeightDelta = getHeight() - mNewDotSize;
+            final float newDotSize = hideDot ? 0f : mNewDotSize;
+            mFlyoutToDotWidthDelta = getWidth() - newDotSize;
+            mFlyoutToDotHeightDelta = getHeight() - newDotSize;
 
             // Calculate the translation values needed to be in the correct 'new dot' position.
-            final float dotPositionX = stackPos.x + mDotCenter[0] - (mOriginalDotSize / 2f);
-            final float dotPositionY = stackPos.y + mDotCenter[1] - (mOriginalDotSize / 2f);
+            final float adjustmentForScaleAway = hideDot ? 0f : (mOriginalDotSize / 2f);
+            final float dotPositionX = stackPos.x + mDotCenter[0] - adjustmentForScaleAway;
+            final float dotPositionY = stackPos.y + mDotCenter[1] - adjustmentForScaleAway;
 
             final float distanceFromFlyoutLeftToDotCenterX = mRestingTranslationX - dotPositionX;
             final float distanceFromLayoutTopToDotCenterY = restingTranslationY - dotPositionY;
@@ -319,8 +321,7 @@ public class BubbleFlyoutView extends FrameLayout {
         // percentage.
         final float width = getWidth() - (mFlyoutToDotWidthDelta * mPercentTransitionedToDot);
         final float height = getHeight() - (mFlyoutToDotHeightDelta * mPercentTransitionedToDot);
-        final float interpolatedRadius = mNewDotRadius * mPercentTransitionedToDot
-                + mCornerRadius * (1 - mPercentTransitionedToDot);
+        final float interpolatedRadius = getInterpolatedRadius();
 
         // Translate the flyout background towards the collapsed 'dot' state.
         mBgTranslationX = mTranslationXWhenDot * mPercentTransitionedToDot;
@@ -387,8 +388,7 @@ public class BubbleFlyoutView extends FrameLayout {
         if (!mTriangleOutline.isEmpty()) {
             // Draw the rect into the outline as a path so we can merge the triangle path into it.
             final Path rectPath = new Path();
-            final float interpolatedRadius = mNewDotRadius * mPercentTransitionedToDot
-                    + mCornerRadius * (1 - mPercentTransitionedToDot);
+            final float interpolatedRadius = getInterpolatedRadius();
             rectPath.addRoundRect(mBgRect, interpolatedRadius,
                     interpolatedRadius, Path.Direction.CW);
             outline.setConvexPath(rectPath);
@@ -419,5 +419,10 @@ public class BubbleFlyoutView extends FrameLayout {
 
             outline.mPath.transform(outlineMatrix);
         }
+    }
+
+    private float getInterpolatedRadius() {
+        return mNewDotRadius * mPercentTransitionedToDot
+                + mCornerRadius * (1 - mPercentTransitionedToDot);
     }
 }

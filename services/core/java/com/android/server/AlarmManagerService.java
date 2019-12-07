@@ -790,7 +790,7 @@ class AlarmManagerService extends SystemService {
             return b.toString();
         }
 
-        public void writeToProto(ProtoOutputStream proto, long fieldId, long nowElapsed,
+        public void dumpDebug(ProtoOutputStream proto, long fieldId, long nowElapsed,
                 long nowRTC) {
             final long token = proto.start(fieldId);
 
@@ -798,7 +798,7 @@ class AlarmManagerService extends SystemService {
             proto.write(BatchProto.END_REALTIME, end);
             proto.write(BatchProto.FLAGS, flags);
             for (Alarm a : alarms) {
-                a.writeToProto(proto, BatchProto.ALARMS, nowElapsed, nowRTC);
+                a.dumpDebug(proto, BatchProto.ALARMS, nowElapsed, nowRTC);
             }
 
             proto.end(token);
@@ -1320,7 +1320,7 @@ class AlarmManagerService extends SystemService {
                     + "}";
         }
 
-        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
 
             proto.write(InFlightProto.UID, mUid);
@@ -1328,16 +1328,16 @@ class AlarmManagerService extends SystemService {
             proto.write(InFlightProto.WHEN_ELAPSED_MS, mWhenElapsed);
             proto.write(InFlightProto.ALARM_TYPE, mAlarmType);
             if (mPendingIntent != null) {
-                mPendingIntent.writeToProto(proto, InFlightProto.PENDING_INTENT);
+                mPendingIntent.dumpDebug(proto, InFlightProto.PENDING_INTENT);
             }
             if (mBroadcastStats != null) {
-                mBroadcastStats.writeToProto(proto, InFlightProto.BROADCAST_STATS);
+                mBroadcastStats.dumpDebug(proto, InFlightProto.BROADCAST_STATS);
             }
             if (mFilterStats != null) {
-                mFilterStats.writeToProto(proto, InFlightProto.FILTER_STATS);
+                mFilterStats.dumpDebug(proto, InFlightProto.FILTER_STATS);
             }
             if (mWorkSource != null) {
-                mWorkSource.writeToProto(proto, InFlightProto.WORK_SOURCE);
+                mWorkSource.dumpDebug(proto, InFlightProto.WORK_SOURCE);
             }
 
             proto.end(token);
@@ -1387,7 +1387,7 @@ class AlarmManagerService extends SystemService {
                     + "}";
         }
 
-        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
 
             proto.write(FilterStatsProto.TAG, mTag);
@@ -1431,7 +1431,7 @@ class AlarmManagerService extends SystemService {
                     + "}";
         }
 
-        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
 
             proto.write(BroadcastStatsProto.UID, mUid);
@@ -2573,34 +2573,34 @@ class AlarmManagerService extends SystemService {
                 proto.end(aToken);
             }
             for (Batch b : mAlarmBatches) {
-                b.writeToProto(proto, AlarmManagerServiceDumpProto.PENDING_ALARM_BATCHES,
+                b.dumpDebug(proto, AlarmManagerServiceDumpProto.PENDING_ALARM_BATCHES,
                         nowElapsed, nowRTC);
             }
             for (int i = 0; i < mPendingBackgroundAlarms.size(); i++) {
                 final ArrayList<Alarm> blockedAlarms = mPendingBackgroundAlarms.valueAt(i);
                 if (blockedAlarms != null) {
                     for (Alarm a : blockedAlarms) {
-                        a.writeToProto(proto,
+                        a.dumpDebug(proto,
                                 AlarmManagerServiceDumpProto.PENDING_USER_BLOCKED_BACKGROUND_ALARMS,
                                 nowElapsed, nowRTC);
                     }
                 }
             }
             if (mPendingIdleUntil != null) {
-                mPendingIdleUntil.writeToProto(
+                mPendingIdleUntil.dumpDebug(
                         proto, AlarmManagerServiceDumpProto.PENDING_IDLE_UNTIL, nowElapsed, nowRTC);
             }
             for (Alarm a : mPendingWhileIdleAlarms) {
-                a.writeToProto(proto, AlarmManagerServiceDumpProto.PENDING_WHILE_IDLE_ALARMS,
+                a.dumpDebug(proto, AlarmManagerServiceDumpProto.PENDING_WHILE_IDLE_ALARMS,
                         nowElapsed, nowRTC);
             }
             if (mNextWakeFromIdle != null) {
-                mNextWakeFromIdle.writeToProto(proto, AlarmManagerServiceDumpProto.NEXT_WAKE_FROM_IDLE,
+                mNextWakeFromIdle.dumpDebug(proto, AlarmManagerServiceDumpProto.NEXT_WAKE_FROM_IDLE,
                         nowElapsed, nowRTC);
             }
 
             for (Alarm a : mPendingNonWakeupAlarms) {
-                a.writeToProto(proto, AlarmManagerServiceDumpProto.PAST_DUE_NON_WAKEUP_ALARMS,
+                a.dumpDebug(proto, AlarmManagerServiceDumpProto.PAST_DUE_NON_WAKEUP_ALARMS,
                         nowElapsed, nowRTC);
             }
 
@@ -2617,7 +2617,7 @@ class AlarmManagerService extends SystemService {
             proto.write(AlarmManagerServiceDumpProto.LISTENER_FINISH_COUNT, mListenerFinishCount);
 
             for (InFlight f : mInFlight) {
-                f.writeToProto(proto, AlarmManagerServiceDumpProto.OUTSTANDING_DELIVERIES);
+                f.dumpDebug(proto, AlarmManagerServiceDumpProto.OUTSTANDING_DELIVERIES);
             }
 
             for (int i = 0; i < mLastAllowWhileIdleDispatch.size(); ++i) {
@@ -2640,7 +2640,7 @@ class AlarmManagerService extends SystemService {
                 }
             }
 
-            mLog.writeToProto(proto, AlarmManagerServiceDumpProto.RECENT_PROBLEMS);
+            mLog.dumpDebug(proto, AlarmManagerServiceDumpProto.RECENT_PROBLEMS);
 
             final FilterStats[] topFilters = new FilterStats[10];
             final Comparator<FilterStats> comparator = new Comparator<FilterStats>() {
@@ -2687,7 +2687,7 @@ class AlarmManagerService extends SystemService {
                 proto.write(AlarmManagerServiceDumpProto.TopAlarm.UID, fs.mBroadcastStats.mUid);
                 proto.write(AlarmManagerServiceDumpProto.TopAlarm.PACKAGE_NAME,
                         fs.mBroadcastStats.mPackageName);
-                fs.writeToProto(proto, AlarmManagerServiceDumpProto.TopAlarm.FILTER);
+                fs.dumpDebug(proto, AlarmManagerServiceDumpProto.TopAlarm.FILTER);
 
                 proto.end(token);
             }
@@ -2699,7 +2699,7 @@ class AlarmManagerService extends SystemService {
                     final long token = proto.start(AlarmManagerServiceDumpProto.ALARM_STATS);
 
                     BroadcastStats bs = uidStats.valueAt(ip);
-                    bs.writeToProto(proto, AlarmManagerServiceDumpProto.AlarmStat.BROADCAST);
+                    bs.dumpDebug(proto, AlarmManagerServiceDumpProto.AlarmStat.BROADCAST);
 
                     // uidStats is an ArrayMap, which we can't sort.
                     tmpFilters.clear();
@@ -2708,7 +2708,7 @@ class AlarmManagerService extends SystemService {
                     }
                     Collections.sort(tmpFilters, comparator);
                     for (FilterStats fs : tmpFilters) {
-                        fs.writeToProto(proto, AlarmManagerServiceDumpProto.AlarmStat.FILTERS);
+                        fs.dumpDebug(proto, AlarmManagerServiceDumpProto.AlarmStat.FILTERS);
                     }
 
                     proto.end(token);
@@ -3652,7 +3652,7 @@ class AlarmManagerService extends SystemService {
             }
         }
 
-        public void writeToProto(ProtoOutputStream proto, long fieldId, long nowElapsed,
+        public void dumpDebug(ProtoOutputStream proto, long fieldId, long nowElapsed,
                 long nowRTC) {
             final long token = proto.start(fieldId);
 
@@ -3664,10 +3664,10 @@ class AlarmManagerService extends SystemService {
             proto.write(AlarmProto.COUNT, count);
             proto.write(AlarmProto.FLAGS, flags);
             if (alarmClock != null) {
-                alarmClock.writeToProto(proto, AlarmProto.ALARM_CLOCK);
+                alarmClock.dumpDebug(proto, AlarmProto.ALARM_CLOCK);
             }
             if (operation != null) {
-                operation.writeToProto(proto, AlarmProto.OPERATION);
+                operation.dumpDebug(proto, AlarmProto.OPERATION);
             }
             if (listener != null) {
                 proto.write(AlarmProto.LISTENER, listener.asBinder().toString());

@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Paspauskite meniu, jei norite atrakinti."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Tinklas užrakintas"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Nėra SIM kortelės"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"Planšetiniame kompiuteryje nėra SIM kortelės."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"Telefone nėra SIM kortelės."</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Įdėkite SIM kortelę."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"Nėra SIM kortelės arba ji neskaitoma. Įdėkite SIM kortelę."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Negalima naudoti SIM kortelės."</string>
@@ -85,17 +83,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Įveskite PIN kodą, sudarytą iš 4–8 skaičių."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK kodas turėtų būti sudarytas iš 8 ar daugiau skaitmenų."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Pakartotinai įveskite tinkamą PUK kodą. Pakartotinai bandant SIM kortelė bus išjungta visam laikui."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"PIN kodai nesutampa"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Per daug atrakinimo piešinių bandymų"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. netinkamai įvedėte PIN kodą. \n\nBandykite dar kartą po <xliff:g id="NUMBER_1">%2$d</xliff:g> sek."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. netinkamai įvedėte slaptažodį. \n\nBandykite dar kartą po <xliff:g id="NUMBER_1">%2$d</xliff:g> sek."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. netinkamai nupiešėte atrakinimo piešinį. \n\nBandykite dar kartą po <xliff:g id="NUMBER_1">%2$d</xliff:g> sek."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. nesėkmingai bandėte atrakinti planšetinį kompiuterį. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. šis planšetinis kompiuteris bus nustatytas iš naujo ir visi jo duomenys bus ištrinti."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. nesėkmingai bandėte atrakinti telefoną. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. šis telefonas bus nustatytas iš naujo ir visi jo duomenys bus ištrinti."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"<xliff:g id="NUMBER">%d</xliff:g> kart. nesėkmingai bandėte atrakinti planšetinį kompiuterį. Šis planšetinis kompiuteris bus nustatytas iš naujo ir visi jo duomenys bus ištrinti."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"<xliff:g id="NUMBER">%d</xliff:g> kart. nesėkmingai bandėte atrakinti telefoną. Šis telefonas bus nustatytas iš naujo ir visi jo duomenys bus ištrinti."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. nesėkmingai bandėte atrakinti planšetinį kompiuterį. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. šis naudotojas bus pašalintas ir visi naudotojo duomenys bus ištrinti."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. nesėkmingai bandėte atrakinti telefoną. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. šis naudotojas bus pašalintas ir visi naudotojo duomenys bus ištrinti."</string>
     <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
     <skip />
     <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
@@ -104,10 +95,6 @@
     <skip />
     <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
     <skip />
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"<xliff:g id="NUMBER">%d</xliff:g> kart. nesėkmingai bandėte atrakinti planšetinį kompiuterį. Darbo profilis bus pašalintas ir visi profilio duomenys bus ištrinti."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"<xliff:g id="NUMBER">%d</xliff:g> kart. nesėkmingai bandėte atrakinti telefoną. Darbo profilis bus pašalintas ir visi profilio duomenys bus ištrinti."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. netinkamai nupiešėte atrakinimo piešinį. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. būsite paprašyti atrakinti planšetinį kompiuterį naudodami el. pašto paskyrą.\n\n Bandykite dar kartą po <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. netinkamai nupiešėte atrakinimo piešinį. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. būsite paprašyti atrakinti telefoną naudodami el. pašto paskyrą.\n\n Bandykite dar kartą po <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Netinkamas SIM kortelės PIN kodas. Reikės susisiekti su operatoriumi, kad atrakintų įrenginį."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="one">Netinkamas SIM kortelės PIN kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymas.</item>

@@ -2168,7 +2168,7 @@ public final class ProcessStats implements Parcelable {
     /**
      * Writes to ProtoOutputStream.
      */
-    public void writeToProto(ProtoOutputStream proto, long now, int section) {
+    public void dumpDebug(ProtoOutputStream proto, long now, int section) {
         proto.write(ProcessStatsSectionProto.START_REALTIME_MS, mTimePeriodStartRealtime);
         proto.write(ProcessStatsSectionProto.END_REALTIME_MS,
                 mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime);
@@ -2215,7 +2215,7 @@ public final class ProcessStats implements Parcelable {
                 for (int iu = 0; iu < uids.size(); iu++) {
                     final int uid = uids.keyAt(iu);
                     final ProcessState procState = uids.valueAt(iu);
-                    procState.writeToProto(proto, ProcessStatsSectionProto.PROCESS_STATS, procName,
+                    procState.dumpDebug(proto, ProcessStatsSectionProto.PROCESS_STATS, procName,
                             uid, now);
                 }
             }
@@ -2230,7 +2230,7 @@ public final class ProcessStats implements Parcelable {
                     final LongSparseArray<PackageState> vers = uids.valueAt(iu);
                     for (int iv = 0; iv < vers.size(); iv++) {
                         final PackageState pkgState = vers.valueAt(iv);
-                        pkgState.writeToProto(proto, ProcessStatsSectionProto.PACKAGE_STATS, now,
+                        pkgState.dumpDebug(proto, ProcessStatsSectionProto.PACKAGE_STATS, now,
                                 section);
                     }
                 }
@@ -2283,7 +2283,7 @@ public final class ProcessStats implements Parcelable {
         /**
          * Writes the containing stats into proto, with options to choose smaller sections.
          */
-        public void writeToProto(ProtoOutputStream proto, long fieldId, long now, int section) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId, long now, int section) {
             final long token = proto.start(fieldId);
 
             proto.write(ProcessStatsPackageProto.PACKAGE, mPackageName);
@@ -2294,7 +2294,7 @@ public final class ProcessStats implements Parcelable {
                 for (int ip = 0; ip < mProcesses.size(); ip++) {
                     final String procName = mProcesses.keyAt(ip);
                     final ProcessState procState = mProcesses.valueAt(ip);
-                    procState.writeToProto(proto, ProcessStatsPackageProto.PROCESS_STATS, procName,
+                    procState.dumpDebug(proto, ProcessStatsPackageProto.PROCESS_STATS, procName,
                             mUid, now);
                 }
             }
@@ -2302,7 +2302,7 @@ public final class ProcessStats implements Parcelable {
             if ((section & ProcessStats.REPORT_PKG_SVC_STATS) != 0) {
                 for (int is = 0; is < mServices.size(); is++) {
                     final ServiceState serviceState = mServices.valueAt(is);
-                    serviceState.writeToProto(proto, ProcessStatsPackageProto.SERVICE_STATS,
+                    serviceState.dumpDebug(proto, ProcessStatsPackageProto.SERVICE_STATS,
                             now);
                 }
             }
@@ -2310,7 +2310,7 @@ public final class ProcessStats implements Parcelable {
             if ((section & ProcessStats.REPORT_PKG_ASC_STATS) != 0) {
                 for (int ia = 0; ia < mAssociations.size(); ia++) {
                     final AssociationState ascState = mAssociations.valueAt(ia);
-                    ascState.writeToProto(proto, ProcessStatsPackageProto.ASSOCIATION_STATS,
+                    ascState.dumpDebug(proto, ProcessStatsPackageProto.ASSOCIATION_STATS,
                             now);
                 }
             }

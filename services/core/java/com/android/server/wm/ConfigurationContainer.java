@@ -591,7 +591,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * @hide
      */
     @CallSuper
-    protected void writeToProto(ProtoOutputStream proto, long fieldId,
+    protected void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         // Critical log level logs only visible elements to mitigate performance overheard
         if (logLevel != WindowTraceLogLevel.ALL && !mHasOverrideConfiguration) {
@@ -599,11 +599,11 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         }
 
         final long token = proto.start(fieldId);
-        mRequestedOverrideConfiguration.writeToProto(proto, OVERRIDE_CONFIGURATION,
+        mRequestedOverrideConfiguration.dumpDebug(proto, OVERRIDE_CONFIGURATION,
                 logLevel == WindowTraceLogLevel.CRITICAL);
         if (logLevel == WindowTraceLogLevel.ALL) {
-            mFullConfiguration.writeToProto(proto, FULL_CONFIGURATION, false /* critical */);
-            mMergedOverrideConfiguration.writeToProto(proto, MERGED_OVERRIDE_CONFIGURATION,
+            mFullConfiguration.dumpDebug(proto, FULL_CONFIGURATION, false /* critical */);
+            mMergedOverrideConfiguration.dumpDebug(proto, MERGED_OVERRIDE_CONFIGURATION,
                     false /* critical */);
         }
         proto.end(token);

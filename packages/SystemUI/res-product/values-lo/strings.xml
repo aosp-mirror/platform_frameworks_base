@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for global_action_screenshot (2760267567509131654) -->
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"ບໍ່ມີຊິມກາດໃນແທັບເລັດ."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"ບໍ່ມີ SIM card ໃນໂທລະສັບ."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"ລະຫັດ PIN ບໍ່ກົງກັນ"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"ທ່ານພະຍາຍາມປົດລັອກແທັບເລັດບໍ່ຖືກຕ້ອງ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຄັ້ງ. ຫຼັງຈາກລອງບໍ່ສຳເລັດອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ຄັ້ງ, ແທັບເລັດນີ້ຈະຖືກຕັ້ງຄ່າໃໝ່, ເຊິ່ງຈະລຶບທຸກຂໍ້ມູນຂອງມັນ."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"ທ່ານພະຍາຍາມປົດລັອກໂທລະສັບບໍ່ຖືກຕ້ອງ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຄັ້ງ. ຫຼັງຈາກລອງບໍ່ສຳເລັດອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ຄັ້ງ, ໂທລະສັບນີ້ຈະຖືກຕັ້ງຄ່າໃໝ່, ເຊິ່ງຈະລຶບທຸກຂໍ້ມູນຂອງມັນ."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"ທ່ານພະຍາຍາມປົດລັອກແທັບເລັດບໍ່ຖືກຕ້ອງ <xliff:g id="NUMBER">%d</xliff:g> ຄັ້ງ. ແທັບເລັດນີ້ຈະຖືກຕັ້ງຄ່າໃໝ່, ເຊິ່ງຈະລຶບທຸກຂໍ້ມູນຂອງມັນ."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"ທ່ານພະຍາຍາມປົດລັອກໂທລະສັບບໍ່ຖືກຕ້ອງ <xliff:g id="NUMBER">%d</xliff:g> ຄັ້ງ. ໂທລະສັບນີ້ຈະຖືກຕັ້ງຄ່າໃໝ່, ເຊິ່ງຈະລຶບທຸກຂໍ້ມູນຂອງມັນ."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"ທ່ານພະຍາຍາມປົດລັອກແທັບເລັດບໍ່ຖືກຕ້ອງ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຄັ້ງ. ຫຼັງຈາກລອງບໍ່ສຳເລັດອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g>ຄັ້ງ, ຜູ້ໃຊ້ນີ້ຈະຖືກເອົາອອກໄປ, ເຊິ່ງຈະລຶບທຸກຂໍ້ມູນຜູ້ໃຊ້."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"ທ່ານພະຍາຍາມປົດລັອກໂທລະສັບບໍ່ຖືກຕ້ອງ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຄັ້ງ. ຫຼັງຈາກລອງບໍ່ສຳເລັດອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ຄັ້ງ, ຜູ້ໃຊ້ນີ້ຈະຖືກເອົາອອກໄປ, ເຊິ່ງຈະລຶບທຸກຂໍ້ມູນຜູ້ໃຊ້."</string>
+    <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
+    <skip/>
+    <!-- no translation found for cancel (1089011503403416730) -->
+    <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
+    <skip/>
+    <!-- no translation found for accessibility_casting (8708751252897282313) -->
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6114158710353725041) -->
+    <skip/>
+    <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
+    <skip/>
+    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
+    <skip/>
+    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
+    <skip/>
+    <!-- no translation found for reset (8715144064608810383) -->
+    <skip/>
+    <!-- no translation found for notification_channel_alerts (3385787053375150046) -->
+    <skip/>
+    <!-- no translation found for app_info (5153758994129963243) -->
+    <skip/>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="6017523991455860482">"ອຸປະກອນ Android TV ຈະປິດໃນອີກບໍ່ດົນ, ກົດປຸ່ມໃດໜຶ່ງເພື່ອເປີດມັນໄວ້ຕໍ່."</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="4866963937818527643">"ອຸປະກອນຈະປິດໃນອີກບໍ່ດົນ, ກົດເພື່ອເປີດມັນໄວ້ຕໍ່."</string>
+<string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"ທ່ານພະຍາຍາມປົດລັອກແທັບເລັດບໍ່ຖືກຕ້ອງ <xliff:g id="NUMBER">%d</xliff:g> ຄັ້ງ. ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຈະຖືກເອົາອອກໄປ, ເຊິ່ງຈະລຶບທຸກຂໍ້ມູນໂປຣໄຟລ໌."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"ທ່ານພະຍາຍາມປົດລັອກໂທລະສັບບໍ່ຖືກຕ້ອງ <xliff:g id="NUMBER">%d</xliff:g> ຄັ້ງ. ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຈະຖືກເອົາອອກໄປ, ເຊິ່ງຈະລຶບທຸກຂໍ້ມູນໂປຣໄຟລ໌."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກແຕ້ມຜິດອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອ, ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກແທັບເລັດຂອງທ່ານ ດ້ວຍການເຂົ້າສູ່ລະບົບໂດຍໃຊ້ອີເມວຂອງທ່ານ.\n\n ກະລຸນາລອງໃໝ່ອີກຄັ້ງໃນອີກ <xliff:g id="NUMBER_2">%3$d</xliff:g> ວິນາທີ."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອ ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກໂທລະສັບຂອງທ່ານດ້ວຍບັນຊີອີເມວ.\n\n ລອງໃໝ່ອີກຄັ້ງໃນ <xliff:g id="NUMBER_2">%3$d</xliff:g> ວິນາທີ."</string>
+</resources>

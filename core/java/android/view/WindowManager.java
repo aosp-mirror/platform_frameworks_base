@@ -1181,7 +1181,8 @@ public interface WindowManager extends ViewManager {
          * a soft input method, so it will be Z-ordered and positioned
          * independently of any active input method (typically this means it
          * gets Z-ordered on top of the input method, so it can use the full
-         * screen for its content and cover the input method if needed.) */
+         * screen for its content and cover the input method if needed.  You
+         * can use {@link #FLAG_ALT_FOCUSABLE_IM} to modify this behavior. */
         public static final int FLAG_NOT_FOCUSABLE      = 0x00000008;
 
         /** Window flag: this window can never receive touch events. */
@@ -1287,11 +1288,14 @@ public interface WindowManager extends ViewManager {
          * set for you by Window as described in {@link Window#setFlags}.*/
         public static final int FLAG_LAYOUT_INSET_DECOR = 0x00010000;
 
-        /** Window flag: When set, input method can't interact with the focusable window
-         * and can be placed to use more space and cover the input method.
-         * Note: When combined with {@link #FLAG_NOT_FOCUSABLE}, this flag has no
-         * effect since input method cannot interact with windows having {@link #FLAG_NOT_FOCUSABLE}
-         * flag set.
+        /** Window flag: invert the state of {@link #FLAG_NOT_FOCUSABLE} with
+         * respect to how this window interacts with the current method.  That
+         * is, if FLAG_NOT_FOCUSABLE is set and this flag is set, then the
+         * window will behave as if it needs to interact with the input method
+         * and thus be placed behind/away from it; if FLAG_NOT_FOCUSABLE is
+         * not set and this flag is set, then the window will behave as if it
+         * doesn't need to interact with the input method and can be placed
+         * to use more space and cover the input method.
          */
         public static final int FLAG_ALT_FOCUSABLE_IM = 0x00020000;
 
@@ -1989,12 +1993,16 @@ public interface WindowManager extends ViewManager {
          *
          * @param flags The current window manager flags.
          *
-         * @return Returns {@code true} if such a window should be behind/interact
-         * with an input method, (@code false} if not.
+         * @return Returns true if such a window should be behind/interact
+         * with an input method, false if not.
          */
         public static boolean mayUseInputMethod(int flags) {
-            return (flags & FLAG_NOT_FOCUSABLE) != FLAG_NOT_FOCUSABLE
-                    && (flags & FLAG_ALT_FOCUSABLE_IM) != FLAG_ALT_FOCUSABLE_IM;
+            switch (flags&(FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM)) {
+                case 0:
+                case FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM:
+                    return true;
+            }
+            return false;
         }
 
         /**
@@ -3251,7 +3259,7 @@ public interface WindowManager extends ViewManager {
         /**
          * @hide
          */
-        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
             proto.write(TYPE, type);
             proto.write(X, x);

@@ -152,9 +152,9 @@ public class DisplayFrames {
         return mDock.bottom - mCurrent.bottom;
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        mStable.writeToProto(proto, STABLE_BOUNDS);
+        mStable.dumpDebug(proto, STABLE_BOUNDS);
         proto.end(token);
     }
 

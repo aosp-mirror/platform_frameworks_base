@@ -552,7 +552,7 @@ class KeyguardController {
             pw.println(sb.toString());
         }
 
-        void writeToProto(ProtoOutputStream proto, long fieldId) {
+        void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
             proto.write(DISPLAY_ID, mDisplayId);
             proto.write(KEYGUARD_OCCLUDED, mOccluded);
@@ -570,7 +570,7 @@ class KeyguardController {
         pw.println(prefix + "  mVisibilityTransactionDepth=" + mVisibilityTransactionDepth);
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(AOD_SHOWING, mAodShowing);
         proto.write(KEYGUARD_SHOWING, mKeyguardShowing);
@@ -586,7 +586,7 @@ class KeyguardController {
 
     private void writeDisplayStatesToProto(ProtoOutputStream proto, long fieldId) {
         for (int i = 0; i < mDisplayStates.size(); i++) {
-            mDisplayStates.valueAt(i).writeToProto(proto, fieldId);
+            mDisplayStates.valueAt(i).dumpDebug(proto, fieldId);
         }
     }
 }

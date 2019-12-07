@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Pindutin ang Menu upang i-unlock."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Naka-lock ang network"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Walang SIM card"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"Walang SIM card sa tablet."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"Walang SIM card sa telepono."</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Maglagay ng SIM card."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"Wala o hindi nababasa ang SIM card. Maglagay ng SIM card."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Hindi na magagamit na SIM card."</string>
@@ -83,17 +81,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Mag-type ng PIN na 4 hanggang 8 numero."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"Dapat ay 8 numero o higit pa ang PUK code."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Muling ilagay ang tamang PUK code. Permanenteng madi-disable ang SIM dahil sa paulit-ulit na pagsubok."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"Hindi nagtutugma ang mga PIN code"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Masyadong maraming pagsubok sa pattern"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Na-type mo nang mali ang iyong PIN nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%2$d</xliff:g> (na) segundo."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Na-type mo nang hindi tama ang iyong password nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%2$d</xliff:g> (na) segundo."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%2$d</xliff:g> (na) segundo."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"<xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses mo nang sinubukang i-unlock ang tablet gamit ang maling password. Pagkatapos ng <xliff:g id="NUMBER_1">%2$d</xliff:g> pang hindi matagumpay na pagsubok, ire-reset ang tablet na ito, na magiging dahilan upang ma-delete ang lahat ng data nito."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"<xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses mo nang sinubukang i-unlock ang telepono gamit ang maling password. Pagkatapos ng <xliff:g id="NUMBER_1">%2$d</xliff:g> pang hindi matagumpay na pagsubok, ire-reset ang teleponong ito, na magiging dahilan upang ma-delete ang lahat ng data nito."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"<xliff:g id="NUMBER">%d</xliff:g> (na) beses mo nang sinubukang i-unlock ang tablet gamit ang maling password. Ire-reset ang tablet na ito, na magiging dahilan upang ma-delete ang lahat ng data nito."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"<xliff:g id="NUMBER">%d</xliff:g> (na) beses mo nang sinubukang i-unlock ang telepono gamit ang maling password. Ire-reset ang teleponong ito, na magiging dahilan upang ma-delete ang lahat ng data nito."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"<xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses mo nang sinubukang i-unlock ang tablet gamit ang maling password. Pagkatapos ng <xliff:g id="NUMBER_1">%2$d</xliff:g> pang hindi matagumpay na pagsubok, aalisin ang user na ito, na magiging dahilan upang ma-delete ang lahat ng data ng user."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"<xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses mo nang sinubukang i-unlock ang telepono gamit ang maling password. Pagkatapos ng <xliff:g id="NUMBER_1">%2$d</xliff:g> pang hindi matagumpay na pagsubok, aalisin ang user na ito, na magiging dahilan upang ma-delete ang lahat ng data ng user."</string>
     <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
     <skip />
     <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
@@ -102,10 +93,6 @@
     <skip />
     <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
     <skip />
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"<xliff:g id="NUMBER">%d</xliff:g> (na) beses mo nang sinubukang i-unlock ang tablet gamit ang maling password. Aalisin ang profile sa trabaho, na magiging dahilan upang ma-delete ang lahat ng data sa profile."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"<xliff:g id="NUMBER">%d</xliff:g> (na) beses mo nang sinubukang i-unlock ang telepono gamit ang maling password. Aalisin ang profile sa trabaho, na magiging dahilan upang ma-delete ang lahat ng data sa profile."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%2$d</xliff:g> pang hindi matagumpay na pagsubok, hihilingin sa iyong i-unlock ang tablet mo gamit ang isang email account.\n\n Subukang muli sa loob ng <xliff:g id="NUMBER_2">%3$d</xliff:g> (na) segundo."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%2$d</xliff:g> pang hindi matagumpay na pagsubok, hihilingin sa iyong i-unlock ang telepono mo gamit ang isang email account.\n\n Subukang muli sa loob ng <xliff:g id="NUMBER_2">%3$d</xliff:g> (na) segundo."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Mali ang PIN code ng SIM, dapat ka nang makipag-ugnayan sa iyong carrier upang i-unlock ang iyong device."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="one">Mali ang PIN code ng SIM, mayroon kang <xliff:g id="NUMBER_1">%d</xliff:g> natitirang pagsubok.</item>

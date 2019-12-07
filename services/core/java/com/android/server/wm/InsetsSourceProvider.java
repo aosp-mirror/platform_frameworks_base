@@ -293,7 +293,7 @@ class InsetsSourceProvider {
         }
 
         @Override
-        public void writeToProto(ProtoOutputStream proto) {
+        public void dumpDebug(ProtoOutputStream proto) {
         }
     }
 }

@@ -36,6 +36,7 @@ import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.systemui.Dependency;
 import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -168,6 +169,9 @@ public class NavigationBarController implements Callbacks {
             View navigationWindow = navBar.getView().getRootView();
             WindowManagerGlobal.getInstance()
                     .removeView(navigationWindow, true /* immediate */);
+            // Also remove FragmentHostState here in case that onViewDetachedFromWindow has not yet
+            // invoked after display removal.
+            FragmentHostManager.removeAndDestroy(navigationWindow);
             mNavigationBars.remove(displayId);
         }
     }

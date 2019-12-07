@@ -973,7 +973,7 @@ public final class ZenPolicy implements Parcelable {
     /**
      * @hide
      */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
         proto.write(ZenPolicyProto.REMINDERS, getPriorityCategoryReminders());

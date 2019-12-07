@@ -62,11 +62,4 @@ public interface DelayableExecutor extends Executor {
      * @return A Runnable that, when run, removes the supplied argument from the Executor queue.
      */
     Runnable executeAtTime(Runnable r, long uptimeMillis, TimeUnit unit);
-
-    /**
-     * Remove all pending Runnables.
-     *
-     */
-    void removeAll();
-
 }

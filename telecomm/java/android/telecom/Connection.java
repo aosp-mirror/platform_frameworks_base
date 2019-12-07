@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -48,6 +49,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -149,6 +152,32 @@ public abstract class Connection extends Conferenceable {
      * {@link #CAPABILITY_CAN_PULL_CALL} capability bits are set on the connection.
      */
     public static final int STATE_PULLING_CALL = 7;
+
+    /**
+     * Indicates that the network could not perform verification.
+     */
+    public static final int VERIFICATION_STATUS_NOT_VERIFIED = 0;
+
+    /**
+     * Indicates that verification by the network passed.  This indicates there is a high likelihood
+     * that the call originated from a valid source.
+     */
+    public static final int VERIFICATION_STATUS_PASSED = 1;
+
+    /**
+     * Indicates that verification by the network failed.  This indicates there is a high likelihood
+     * that the call did not originate from a valid source.
+     */
+    public static final int VERIFICATION_STATUS_FAILED = 2;
+
+    /**@hide*/
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "VERIFICATION_STATUS_", value = {
+            VERIFICATION_STATUS_NOT_VERIFIED,
+            VERIFICATION_STATUS_PASSED,
+            VERIFICATION_STATUS_FAILED
+    })
+    public @interface VerificationStatus {}
 
     /**
      * Connection can currently be put on hold or unheld. This is distinct from
@@ -1854,6 +1883,12 @@ public abstract class Connection extends Conferenceable {
     private Set<String> mPreviousExtraKeys;
 
     /**
+     * The verification status for an incoming call's phone number.
+     */
+    private @VerificationStatus int mCallerNumberVerificationStatus;
+
+
+    /**
      * Create a new Connection.
      */
     public Connection() {}
@@ -3354,5 +3389,27 @@ public abstract class Connection extends Conferenceable {
     @TestApi
     public void setCallDirection(@Call.Details.CallDirection int callDirection) {
         mCallDirection = callDirection;
+    }
+
+    /**
+     * Gets the verification status for the phone number of an incoming call as identified in
+     * ATIS-1000082.
+     * @return the verification status.
+     */
+    public @VerificationStatus int getCallerNumberVerificationStatus() {
+        return mCallerNumberVerificationStatus;
+    }
+
+    /**
+     * Sets the verification status for the phone number of an incoming call as identified in
+     * ATIS-1000082.
+     * <p>
+     * This property can only be set at the time of creation of a {@link Connection} being returned
+     * by
+     * {@link ConnectionService#onCreateIncomingConnection(PhoneAccountHandle, ConnectionRequest)}.
+     */
+    public void setCallerNumberVerificationStatus(
+            @VerificationStatus int callerNumberVerificationStatus) {
+        mCallerNumberVerificationStatus = callerNumberVerificationStatus;
     }
 }

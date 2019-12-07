@@ -2977,7 +2977,7 @@ public class Notification implements Parcelable
     /**
      * @hide
      */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(NotificationProto.CHANNEL_ID, getChannelId());
         proto.write(NotificationProto.HAS_TICKER_TEXT, this.tickerText != null);
@@ -2993,7 +2993,7 @@ public class Notification implements Parcelable
             proto.write(NotificationProto.VISIBILITY, this.visibility);
         }
         if (publicVersion != null) {
-            publicVersion.writeToProto(proto, NotificationProto.PUBLIC_VERSION);
+            publicVersion.dumpDebug(proto, NotificationProto.PUBLIC_VERSION);
         }
         proto.end(token);
     }

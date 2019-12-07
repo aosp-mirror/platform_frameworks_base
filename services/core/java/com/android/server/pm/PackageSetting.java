@@ -180,7 +180,7 @@ public final class PackageSetting extends PackageSettingBase {
         return childPackageNames != null && !childPackageNames.isEmpty();
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId, List<UserInfo> users) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId, List<UserInfo> users) {
         final long packageToken = proto.start(fieldId);
         proto.write(PackageProto.NAME, (realName != null ? realName : name));
         proto.write(PackageProto.UID, appId);

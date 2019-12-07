@@ -909,8 +909,11 @@ public class Binder implements IBinder {
     }
 
     /**
-     * Handle a call to {@link #shellCommand}.  The default implementation simply prints
-     * an error message.  Override and replace with your own.
+     * Handle a call to {@link #shellCommand}.
+     *
+     * <p>The default implementation performs a caller check to make sure the caller UID is of
+     * SHELL or ROOT, and then call {@link #handleShellCommand}.
+     *
      * <p class="caution">Note: no permission checking is done before calling this method; you must
      * apply any security checks as appropriate for the command being executed.
      * Consider using {@link ShellCommand} to help in the implementation.</p>
@@ -920,6 +923,12 @@ public class Binder implements IBinder {
             @Nullable FileDescriptor err,
             @NonNull String[] args, @Nullable ShellCallback callback,
             @NonNull ResultReceiver resultReceiver) throws RemoteException {
+
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.ROOT_UID && callingUid != Process.SHELL_UID) {
+            resultReceiver.send(-1, null);
+            throw new SecurityException("Shell commands are only callable by ADB");
+        }
 
         // First, convert in, out and err to @NonNull, by redirecting any that's null to /dev/null.
         try {
@@ -961,19 +970,23 @@ public class Binder implements IBinder {
     /**
      * System services can implement this method to implement ADB shell commands.
      *
-     * TODO More Javadoc.
-     * TODO Add a generic way to define subcommands and their permissions.
+     * <p>A system binder service can implement it to handle shell commands on ADB. For example,
+     * the Job Scheduler service implements it to handle <code>adb shell cmd jobscheduler</code>.
      *
-     * @param in standard input.
-     * @param out standard output.
-     * @param err standard error.
+     * <p>Commands are only executable by ADB shell; i.e. only {@link Process#SHELL_UID} and
+     * {@link Process#ROOT_UID} can call them.
+     *
+     * @param in standard input
+     * @param out standard output
+     * @param err standard error
      * @param args arguments passed to the command. Can be empty. The first argument is typically
      *             a subcommand, such as {@code run} for {@code adb shell cmd jobscheduler run}.
+     * @return the status code returned from the <code>cmd</code> command.
      *
      * @hide
      */
-    // @SystemApi TODO Make it a system API.
-    protected int handleShellCommand(@NonNull ParcelFileDescriptor in,
+    @SystemApi
+    public int handleShellCommand(@NonNull ParcelFileDescriptor in,
             @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
             @NonNull String[] args) {
         FileOutputStream ferr = new FileOutputStream(err.getFileDescriptor());

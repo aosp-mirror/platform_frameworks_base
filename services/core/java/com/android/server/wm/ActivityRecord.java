@@ -7313,8 +7313,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Write all fields to an {@code ActivityRecordProto}. This assumes the
      * {@code ActivityRecordProto} is the outer-most proto data.
      */
-    void writeToProto(ProtoOutputStream proto) {
-        writeToProto(proto, APP_WINDOW_TOKEN, WindowTraceLogLevel.ALL);
+    void dumpDebug(ProtoOutputStream proto) {
+        dumpDebug(proto, APP_WINDOW_TOKEN, WindowTraceLogLevel.ALL);
         writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(STATE, mState.toString());
         proto.write(VISIBLE_REQUESTED, mVisibleRequested);
@@ -7326,9 +7326,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(VISIBLE, mVisible);
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        writeToProto(proto);
+        dumpDebug(proto);
         proto.end(token);
     }
 
@@ -7336,7 +7336,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Copied from old AppWindowToken.
      */
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId,
+    public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         // Critical log level logs only visible elements to mitigate performance overheard
         if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
@@ -7345,12 +7345,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final long token = proto.start(fieldId);
         writeNameToProto(proto, NAME);
-        super.writeToProto(proto, WINDOW_TOKEN, logLevel);
+        super.dumpDebug(proto, WINDOW_TOKEN, logLevel);
         proto.write(LAST_SURFACE_SHOWING, mLastSurfaceShowing);
         proto.write(IS_WAITING_FOR_TRANSITION_START, isWaitingForTransitionStart());
         proto.write(IS_ANIMATING, isAnimating());
         if (mThumbnail != null){
-            mThumbnail.writeToProto(proto, THUMBNAIL);
+            mThumbnail.dumpDebug(proto, THUMBNAIL);
         }
         proto.write(FILLS_PARENT, mOccludesParent);
         proto.write(APP_STOPPED, mAppStopped);
@@ -7371,7 +7371,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(VISIBLE_SET_FROM_TRANSFERRED_STARTING_WINDOW,
                 mVisibleSetFromTransferredStartingWindow);
         for (Rect bounds : mFrozenBounds) {
-            bounds.writeToProto(proto, FROZEN_BOUNDS);
+            bounds.dumpDebug(proto, FROZEN_BOUNDS);
         }
         proto.write(com.android.server.wm.AppWindowTokenProto.VISIBLE, mVisible);
         proto.end(token);

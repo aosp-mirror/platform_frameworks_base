@@ -1399,6 +1399,7 @@ package android.bluetooth {
   public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean connect(android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean disconnect(android.bluetooth.BluetoothDevice);
+    method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH) public android.bluetooth.BluetoothDevice getActiveDevice();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setPriority(android.bluetooth.BluetoothDevice, int);
@@ -1431,6 +1432,37 @@ package android.bluetooth {
     field public static final int PAN = 5; // 0x5
     field @Deprecated public static final int PRIORITY_OFF = 0; // 0x0
     field @Deprecated public static final int PRIORITY_ON = 100; // 0x64
+  }
+
+  public final class BluetoothUuid {
+    method public static boolean containsAnyUuid(@Nullable android.os.ParcelUuid[], @Nullable android.os.ParcelUuid[]);
+    method @NonNull public static android.os.ParcelUuid parseUuidFrom(@Nullable byte[]);
+    field @NonNull public static final android.os.ParcelUuid A2DP_SINK;
+    field @NonNull public static final android.os.ParcelUuid A2DP_SOURCE;
+    field @NonNull public static final android.os.ParcelUuid ADV_AUDIO_DIST;
+    field @NonNull public static final android.os.ParcelUuid AVRCP_CONTROLLER;
+    field @NonNull public static final android.os.ParcelUuid AVRCP_TARGET;
+    field @NonNull public static final android.os.ParcelUuid BASE_UUID;
+    field @NonNull public static final android.os.ParcelUuid BNEP;
+    field @NonNull public static final android.os.ParcelUuid HEARING_AID;
+    field @NonNull public static final android.os.ParcelUuid HFP;
+    field @NonNull public static final android.os.ParcelUuid HFP_AG;
+    field @NonNull public static final android.os.ParcelUuid HID;
+    field @NonNull public static final android.os.ParcelUuid HOGP;
+    field @NonNull public static final android.os.ParcelUuid HSP;
+    field @NonNull public static final android.os.ParcelUuid HSP_AG;
+    field @NonNull public static final android.os.ParcelUuid MAP;
+    field @NonNull public static final android.os.ParcelUuid MAS;
+    field @NonNull public static final android.os.ParcelUuid MNS;
+    field @NonNull public static final android.os.ParcelUuid NAP;
+    field @NonNull public static final android.os.ParcelUuid OBEX_OBJECT_PUSH;
+    field @NonNull public static final android.os.ParcelUuid PANU;
+    field @NonNull public static final android.os.ParcelUuid PBAP_PCE;
+    field @NonNull public static final android.os.ParcelUuid PBAP_PSE;
+    field @NonNull public static final android.os.ParcelUuid SAP;
+    field public static final int UUID_BYTES_128_BIT = 16; // 0x10
+    field public static final int UUID_BYTES_16_BIT = 2; // 0x2
+    field public static final int UUID_BYTES_32_BIT = 4; // 0x4
   }
 
 }
@@ -4733,7 +4765,7 @@ package android.net.ipsec.ike {
     method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getOutboundTrafficSelectors();
   }
 
-  public abstract class ChildSessionOptions {
+  public abstract class ChildSessionParams {
   }
 
   public class IkeFqdnIdentification extends android.net.ipsec.ike.IkeIdentification {
@@ -4778,11 +4810,11 @@ package android.net.ipsec.ike {
   }
 
   public final class IkeSession implements java.lang.AutoCloseable {
-    ctor public IkeSession(@NonNull android.content.Context, @NonNull android.net.ipsec.ike.IkeSessionOptions, @NonNull android.net.ipsec.ike.ChildSessionOptions, @NonNull java.util.concurrent.Executor, @NonNull android.net.ipsec.ike.IkeSessionCallback, @NonNull android.net.ipsec.ike.ChildSessionCallback);
+    ctor public IkeSession(@NonNull android.content.Context, @NonNull android.net.ipsec.ike.IkeSessionParams, @NonNull android.net.ipsec.ike.ChildSessionParams, @NonNull java.util.concurrent.Executor, @NonNull android.net.ipsec.ike.IkeSessionCallback, @NonNull android.net.ipsec.ike.ChildSessionCallback);
     method public void close();
     method public void closeChildSession(@NonNull android.net.ipsec.ike.ChildSessionCallback);
     method public void kill();
-    method public void openChildSession(@NonNull android.net.ipsec.ike.ChildSessionOptions, @NonNull android.net.ipsec.ike.ChildSessionCallback);
+    method public void openChildSession(@NonNull android.net.ipsec.ike.ChildSessionParams, @NonNull android.net.ipsec.ike.ChildSessionCallback);
   }
 
   public interface IkeSessionCallback {
@@ -4800,21 +4832,21 @@ package android.net.ipsec.ike {
     field public static final int EXTENSION_TYPE_MOBIKE = 2; // 0x2
   }
 
-  public final class IkeSessionOptions {
+  public final class IkeSessionParams {
   }
 
-  public static final class IkeSessionOptions.Builder {
-    ctor public IkeSessionOptions.Builder();
-    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder addSaProposal(@NonNull android.net.ipsec.ike.IkeSaProposal);
-    method @NonNull public android.net.ipsec.ike.IkeSessionOptions build();
-    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setAuthDigitalSignature(@NonNull java.security.cert.X509Certificate, @NonNull java.security.cert.X509Certificate, @NonNull java.security.PrivateKey);
-    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setAuthDigitalSignature(@NonNull java.security.cert.X509Certificate, @NonNull java.security.cert.X509Certificate, @NonNull java.util.List<java.security.cert.X509Certificate>, @NonNull java.security.PrivateKey);
-    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setAuthEap(@NonNull java.security.cert.X509Certificate, @NonNull android.net.eap.EapSessionConfig);
-    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setAuthPsk(@NonNull byte[]);
-    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setLocalIdentification(@NonNull android.net.ipsec.ike.IkeIdentification);
-    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setRemoteIdentification(@NonNull android.net.ipsec.ike.IkeIdentification);
-    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setServerAddress(@NonNull java.net.InetAddress);
-    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setUdpEncapsulationSocket(@NonNull android.net.IpSecManager.UdpEncapsulationSocket);
+  public static final class IkeSessionParams.Builder {
+    ctor public IkeSessionParams.Builder();
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder addSaProposal(@NonNull android.net.ipsec.ike.IkeSaProposal);
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams build();
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setAuthDigitalSignature(@NonNull java.security.cert.X509Certificate, @NonNull java.security.cert.X509Certificate, @NonNull java.security.PrivateKey);
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setAuthDigitalSignature(@NonNull java.security.cert.X509Certificate, @NonNull java.security.cert.X509Certificate, @NonNull java.util.List<java.security.cert.X509Certificate>, @NonNull java.security.PrivateKey);
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setAuthEap(@NonNull java.security.cert.X509Certificate, @NonNull android.net.eap.EapSessionConfig);
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setAuthPsk(@NonNull byte[]);
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setLocalIdentification(@NonNull android.net.ipsec.ike.IkeIdentification);
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setRemoteIdentification(@NonNull android.net.ipsec.ike.IkeIdentification);
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setServerAddress(@NonNull java.net.InetAddress);
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setUdpEncapsulationSocket(@NonNull android.net.IpSecManager.UdpEncapsulationSocket);
   }
 
   public final class IkeTrafficSelector {
@@ -4851,33 +4883,33 @@ package android.net.ipsec.ike {
     field public static final int PSEUDORANDOM_FUNCTION_HMAC_SHA1 = 2; // 0x2
   }
 
-  public final class TransportModeChildSessionOptions extends android.net.ipsec.ike.ChildSessionOptions {
+  public final class TransportModeChildSessionParams extends android.net.ipsec.ike.ChildSessionParams {
   }
 
-  public static final class TransportModeChildSessionOptions.Builder {
-    ctor public TransportModeChildSessionOptions.Builder();
-    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionOptions.Builder addInboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
-    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionOptions.Builder addOutboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
-    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionOptions.Builder addSaProposal(@NonNull android.net.ipsec.ike.ChildSaProposal);
-    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionOptions build();
+  public static final class TransportModeChildSessionParams.Builder {
+    ctor public TransportModeChildSessionParams.Builder();
+    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionParams.Builder addInboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
+    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionParams.Builder addOutboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
+    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionParams.Builder addSaProposal(@NonNull android.net.ipsec.ike.ChildSaProposal);
+    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionParams build();
   }
 
-  public final class TunnelModeChildSessionOptions extends android.net.ipsec.ike.ChildSessionOptions {
+  public final class TunnelModeChildSessionParams extends android.net.ipsec.ike.ChildSessionParams {
   }
 
-  public static final class TunnelModeChildSessionOptions.Builder {
-    ctor public TunnelModeChildSessionOptions.Builder();
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalAddressRequest(int);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalAddressRequest(@NonNull java.net.InetAddress, int);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalDhcpServerRequest(int);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalDhcpServerRequest(@NonNull java.net.InetAddress);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalDnsServerRequest(int);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalDnsServerRequest(@NonNull java.net.InetAddress);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalSubnetRequest(int);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addOutboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addSaProposal(@NonNull android.net.ipsec.ike.ChildSaProposal);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions build();
+  public static final class TunnelModeChildSessionParams.Builder {
+    ctor public TunnelModeChildSessionParams.Builder();
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalAddressRequest(int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalAddressRequest(@NonNull java.net.InetAddress, int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalDhcpServerRequest(int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalDhcpServerRequest(@NonNull java.net.InetAddress);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalDnsServerRequest(int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalDnsServerRequest(@NonNull java.net.InetAddress);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalSubnetRequest(int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addOutboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addSaProposal(@NonNull android.net.ipsec.ike.ChildSaProposal);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams build();
   }
 
 }
@@ -6043,6 +6075,7 @@ package android.os {
   }
 
   public class Binder implements android.os.IBinder {
+    method public int handleShellCommand(@NonNull android.os.ParcelFileDescriptor, @NonNull android.os.ParcelFileDescriptor, @NonNull android.os.ParcelFileDescriptor, @NonNull String[]);
     method public static void setProxyTransactListener(@Nullable android.os.Binder.ProxyTransactListener);
   }
 
@@ -6347,6 +6380,8 @@ package android.os {
   }
 
   public class PowerWhitelistManager {
+    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public boolean addToWhitelist(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public int addToWhitelist(@NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void whitelistAppTemporarily(@NonNull String, long);
     method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public long whitelistAppTemporarilyForEvent(@NonNull String, int, @NonNull String);
     field public static final int EVENT_MMS = 2; // 0x2
@@ -6718,6 +6753,8 @@ package android.permission {
   public final class PermissionManager {
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public int getRuntimePermissionsVersion();
     method @NonNull public java.util.List<android.permission.PermissionManager.SplitPermissionInfo> getSplitPermissions();
+    method @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS) public void grantDefaultPermissionsToLuiApp(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS) public void revokeDefaultPermissionsFromLuiApps(@NonNull String[], @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public void setRuntimePermissionsVersion(@IntRange(from=0) int);
   }
 
@@ -9391,6 +9428,7 @@ package android.telephony {
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.ImsiEncryptionInfo getCarrierInfoForImsiEncryption(int);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntent(android.content.Intent);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntentAndPhone(android.content.Intent, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<java.lang.String> getCarrierPrivilegedPackagesForAllActiveSubscriptions();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.CarrierRestrictionRules getCarrierRestrictionRules();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMdn();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMdn(int);

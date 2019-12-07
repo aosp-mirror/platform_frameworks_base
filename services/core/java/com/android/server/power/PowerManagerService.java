@@ -4087,20 +4087,20 @@ public final class PowerManagerService extends SystemService
             mBatterySaverStateMachine.dumpProto(proto,
                     PowerManagerServiceDumpProto.BATTERY_SAVER_STATE_MACHINE);
 
-            mHandler.getLooper().writeToProto(proto, PowerManagerServiceDumpProto.LOOPER);
+            mHandler.getLooper().dumpDebug(proto, PowerManagerServiceDumpProto.LOOPER);
 
             for (WakeLock wl : mWakeLocks) {
-                wl.writeToProto(proto, PowerManagerServiceDumpProto.WAKE_LOCKS);
+                wl.dumpDebug(proto, PowerManagerServiceDumpProto.WAKE_LOCKS);
             }
 
             for (SuspendBlocker sb : mSuspendBlockers) {
-                sb.writeToProto(proto, PowerManagerServiceDumpProto.SUSPEND_BLOCKERS);
+                sb.dumpDebug(proto, PowerManagerServiceDumpProto.SUSPEND_BLOCKERS);
             }
             wcd = mWirelessChargerDetector;
         }
 
         if (wcd != null) {
-            wcd.writeToProto(proto, PowerManagerServiceDumpProto.WIRELESS_CHARGER_DETECTOR);
+            wcd.dumpDebug(proto, PowerManagerServiceDumpProto.WIRELESS_CHARGER_DETECTOR);
         }
         proto.flush();
     }
@@ -4331,7 +4331,7 @@ public final class PowerManagerService extends SystemService
             return sb.toString();
         }
 
-        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long wakeLockToken = proto.start(fieldId);
             proto.write(WakeLockProto.LOCK_LEVEL, (mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK));
             proto.write(WakeLockProto.TAG, mTag);
@@ -4352,7 +4352,7 @@ public final class PowerManagerService extends SystemService
             proto.write(WakeLockProto.PID, mOwnerPid);
 
             if (mWorkSource != null) {
-                mWorkSource.writeToProto(proto, WakeLockProto.WORK_SOURCE);
+                mWorkSource.dumpDebug(proto, WakeLockProto.WORK_SOURCE);
             }
             proto.end(wakeLockToken);
         }
@@ -4455,7 +4455,7 @@ public final class PowerManagerService extends SystemService
             }
         }
 
-        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long sbToken = proto.start(fieldId);
             synchronized (this) {
                 proto.write(SuspendBlockerProto.NAME, mName);

@@ -1739,7 +1739,7 @@ public class ZenModeConfig implements Parcelable {
 
         /** @hide */
         // TODO: add configuration activity
-        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
 
             proto.write(ZenRuleProto.ID, id);
@@ -1753,13 +1753,13 @@ public class ZenModeConfig implements Parcelable {
                 proto.write(ZenRuleProto.CONDITION_ID, conditionId.toString());
             }
             if (condition != null) {
-                condition.writeToProto(proto, ZenRuleProto.CONDITION);
+                condition.dumpDebug(proto, ZenRuleProto.CONDITION);
             }
             if (component != null) {
-                component.writeToProto(proto, ZenRuleProto.COMPONENT);
+                component.dumpDebug(proto, ZenRuleProto.COMPONENT);
             }
             if (zenPolicy != null) {
-                zenPolicy.writeToProto(proto, ZenRuleProto.ZEN_POLICY);
+                zenPolicy.dumpDebug(proto, ZenRuleProto.ZEN_POLICY);
             }
             proto.write(ZenRuleProto.MODIFIED, modified);
             proto.end(token);

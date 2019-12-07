@@ -379,18 +379,18 @@ abstract public class ManagedServices {
 
         for (ComponentName cmpt : mEnabledServicesForCurrentProfiles) {
             if (filter != null && !filter.matches(cmpt)) continue;
-            cmpt.writeToProto(proto, ManagedServicesProto.ENABLED);
+            cmpt.dumpDebug(proto, ManagedServicesProto.ENABLED);
         }
 
         synchronized (mMutex) {
             for (ManagedServiceInfo info : mServices) {
                 if (filter != null && !filter.matches(info.component)) continue;
-                info.writeToProto(proto, ManagedServicesProto.LIVE_SERVICES, this);
+                info.dumpDebug(proto, ManagedServicesProto.LIVE_SERVICES, this);
             }
         }
 
         for (ComponentName name : mSnoozingForCurrentProfiles) {
-            name.writeToProto(proto, ManagedServicesProto.SNOOZED);
+            name.dumpDebug(proto, ManagedServicesProto.SNOOZED);
         }
     }
 
@@ -1497,9 +1497,9 @@ abstract public class ManagedServices {
                     .append(']').toString();
         }
 
-        public void writeToProto(ProtoOutputStream proto, long fieldId, ManagedServices host) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId, ManagedServices host) {
             final long token = proto.start(fieldId);
-            component.writeToProto(proto, ManagedServiceInfoProto.COMPONENT);
+            component.dumpDebug(proto, ManagedServiceInfoProto.COMPONENT);
             proto.write(ManagedServiceInfoProto.USER_ID, userid);
             proto.write(ManagedServiceInfoProto.SERVICE, service.getClass().getName());
             proto.write(ManagedServiceInfoProto.IS_SYSTEM, isSystem);

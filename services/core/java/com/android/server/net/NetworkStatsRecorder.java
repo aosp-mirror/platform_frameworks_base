@@ -470,12 +470,12 @@ public class NetworkStatsRecorder {
         }
     }
 
-    public void writeToProtoLocked(ProtoOutputStream proto, long tag) {
+    public void dumpDebugLocked(ProtoOutputStream proto, long tag) {
         final long start = proto.start(tag);
         if (mPending != null) {
             proto.write(NetworkStatsRecorderProto.PENDING_TOTAL_BYTES, mPending.getTotalBytes());
         }
-        getOrLoadCompleteLocked().writeToProto(proto, NetworkStatsRecorderProto.COMPLETE_HISTORY);
+        getOrLoadCompleteLocked().dumpDebug(proto, NetworkStatsRecorderProto.COMPLETE_HISTORY);
         proto.end(start);
     }
 

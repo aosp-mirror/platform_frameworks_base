@@ -29,11 +29,6 @@ public class SdkExtensionsTest extends TestCase {
             SdkExtensions.getExtensionVersion(Build.VERSION_CODES.Q);
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException expected) { }
-
-        try {
-            SdkExtensions.getExtensionVersion(999999);
-            fail("expected IllegalArgumentException");
-        } catch (IllegalArgumentException expected) { }
     }
 
     @SmallTest

@@ -439,7 +439,7 @@ public abstract class AppLaunchEvent implements Parcelable {
             final ProtoOutputStream protoOutputStream =
                     new ProtoOutputStream(INTENT_PROTO_CHUNK_SIZE);
             // Write this data out as the top-most IntentProto (i.e. it is not a sub-object).
-            intent.writeToProto(protoOutputStream);
+            intent.dumpDebug(protoOutputStream);
             final byte[] bytes = protoOutputStream.getBytes();
 
             p.writeByteArray(bytes);

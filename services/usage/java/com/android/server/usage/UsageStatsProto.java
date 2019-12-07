@@ -410,7 +410,7 @@ final class UsageStatsProto {
             final IntervalStats stats, final ConfigurationStats configStats, boolean isActive)
             throws IllegalArgumentException {
         final long token = proto.start(fieldId);
-        configStats.mConfiguration.writeToProto(proto, IntervalStatsProto.Configuration.CONFIG);
+        configStats.mConfiguration.dumpDebug(proto, IntervalStatsProto.Configuration.CONFIG);
         proto.write(IntervalStatsProto.Configuration.LAST_TIME_ACTIVE_MS,
                 configStats.mLastTimeActive - stats.beginTime);
         proto.write(IntervalStatsProto.Configuration.TOTAL_TIME_ACTIVE_MS,
@@ -460,7 +460,7 @@ final class UsageStatsProto {
         switch (event.mEventType) {
             case UsageEvents.Event.CONFIGURATION_CHANGE:
                 if (event.mConfiguration != null) {
-                    event.mConfiguration.writeToProto(proto, IntervalStatsProto.Event.CONFIG);
+                    event.mConfiguration.dumpDebug(proto, IntervalStatsProto.Event.CONFIG);
                 }
                 break;
             case UsageEvents.Event.SHORTCUT_INVOCATION:

@@ -1578,7 +1578,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId,
+    public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         boolean isVisible = isVisible();
         if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible) {
@@ -1586,11 +1586,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, CONFIGURATION_CONTAINER, logLevel);
+        super.dumpDebug(proto, CONFIGURATION_CONTAINER, logLevel);
         proto.write(ORIENTATION, mOrientation);
         proto.write(VISIBLE, isVisible);
         if (mSurfaceAnimator.isAnimating()) {
-            mSurfaceAnimator.writeToProto(proto, SURFACE_ANIMATOR);
+            mSurfaceAnimator.dumpDebug(proto, SURFACE_ANIMATOR);
         }
         proto.end(token);
     }

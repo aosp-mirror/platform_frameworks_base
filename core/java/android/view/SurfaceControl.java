@@ -901,7 +901,7 @@ public final class SurfaceControl implements Parcelable {
      * @param fieldId Field Id of the SurfaceControl as defined in the parent message.
      * @hide
      */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(HASH_CODE, System.identityHashCode(this));
         proto.write(NAME, mName);

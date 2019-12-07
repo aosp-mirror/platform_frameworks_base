@@ -35,6 +35,7 @@ import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_B
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
@@ -2162,12 +2163,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        // Can be an IME target only if:
-        // 1. FLAG_NOT_FOCUSABLE is not set
-        // 2. FLAG_ALT_FOCUSABLE_IM is not set
-        // 3. not a starting window.
-        if (!WindowManager.LayoutParams.mayUseInputMethod(mAttrs.flags)
-                || mAttrs.type == TYPE_APPLICATION_STARTING) {
+        final int fl = mAttrs.flags & (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM);
+        final int type = mAttrs.type;
+
+        // Can only be an IME target if both FLAG_NOT_FOCUSABLE and FLAG_ALT_FOCUSABLE_IM are set or
+        // both are cleared...and not a starting window.
+        if (fl != 0 && fl != (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM)
+                && type != TYPE_APPLICATION_STARTING) {
             return false;
         }
 
@@ -3609,7 +3611,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId,
+    public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         boolean isVisible = isVisible();
         if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible) {
@@ -3617,19 +3619,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER, logLevel);
+        super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(DISPLAY_ID, getDisplayId());
         proto.write(STACK_ID, getStackId());
-        mAttrs.writeToProto(proto, ATTRIBUTES);
-        mGivenContentInsets.writeToProto(proto, GIVEN_CONTENT_INSETS);
-        mWindowFrames.writeToProto(proto, WINDOW_FRAMES);
-        mAttrs.surfaceInsets.writeToProto(proto, SURFACE_INSETS);
-        mSurfacePosition.writeToProto(proto, SURFACE_POSITION);
-        mWinAnimator.writeToProto(proto, ANIMATOR);
+        mAttrs.dumpDebug(proto, ATTRIBUTES);
+        mGivenContentInsets.dumpDebug(proto, GIVEN_CONTENT_INSETS);
+        mWindowFrames.dumpDebug(proto, WINDOW_FRAMES);
+        mAttrs.surfaceInsets.dumpDebug(proto, SURFACE_INSETS);
+        mSurfacePosition.dumpDebug(proto, SURFACE_POSITION);
+        mWinAnimator.dumpDebug(proto, ANIMATOR);
         proto.write(ANIMATING_EXIT, mAnimatingExit);
         for (int i = 0; i < mChildren.size(); i++) {
-            mChildren.get(i).writeToProto(proto, CHILD_WINDOWS, logLevel);
+            mChildren.get(i).dumpDebug(proto, CHILD_WINDOWS, logLevel);
         }
         proto.write(REQUESTED_WIDTH, mRequestedWidth);
         proto.write(REQUESTED_HEIGHT, mRequestedHeight);
@@ -5401,10 +5403,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         @Override
-        public void writeToProtoInner(ProtoOutputStream proto) {
+        public void dumpDebugInner(ProtoOutputStream proto) {
             final long token = proto.start(MOVE);
-            mFrom.writeToProto(proto, FROM);
-            mTo.writeToProto(proto, TO);
+            mFrom.dumpDebug(proto, FROM);
+            mTo.dumpDebug(proto, TO);
             proto.write(DURATION_MS, mDuration);
             proto.end(token);
         }

@@ -2315,7 +2315,7 @@ public final class PowerManager {
         }
 
         /** @hide */
-        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             synchronized (mToken) {
                 final long token = proto.start(fieldId);
                 proto.write(PowerManagerProto.WakeLock.TAG, mTag);
@@ -2323,7 +2323,7 @@ public final class PowerManager {
                 proto.write(PowerManagerProto.WakeLock.HELD, mHeld);
                 proto.write(PowerManagerProto.WakeLock.INTERNAL_COUNT, mInternalCount);
                 if (mWorkSource != null) {
-                    mWorkSource.writeToProto(proto, PowerManagerProto.WakeLock.WORK_SOURCE);
+                    mWorkSource.dumpDebug(proto, PowerManagerProto.WakeLock.WORK_SOURCE);
                 }
                 proto.end(token);
             }

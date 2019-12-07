@@ -37,6 +37,7 @@ android_library {
         "src/**/I*.aidl",
     ],
     resource_dirs: [
+        "res-product",
         "res-keyguard",
         "res",
     ],
@@ -91,6 +92,7 @@ android_library {
     manifest: "tests/AndroidManifest.xml",
     resource_dirs: [
         "tests/res",
+        "res-product",
         "res-keyguard",
         "res",
     ],

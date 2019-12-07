@@ -26,6 +26,8 @@ import android.content.Context;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Interface to access and modify the power save whitelist.
@@ -75,6 +77,31 @@ public class PowerWhitelistManager {
     public PowerWhitelistManager(@NonNull Context context) {
         mContext = context;
         mService = context.getSystemService(DeviceIdleManager.class).getService();
+    }
+
+    /**
+     * Add the specified package to the power save whitelist.
+     *
+     * @return true if the package was successfully added to the whitelist
+     */
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public boolean addToWhitelist(@NonNull String packageName) {
+        return addToWhitelist(Collections.singletonList(packageName)) == 1;
+    }
+
+    /**
+     * Add the specified packages to the power save whitelist.
+     *
+     * @return the number of packages that were successfully added to the whitelist
+     */
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public int addToWhitelist(@NonNull List<String> packageNames) {
+        try {
+            return mService.addPowerSaveWhitelistApps(packageNames);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return 0;
+        }
     }
 
     /**

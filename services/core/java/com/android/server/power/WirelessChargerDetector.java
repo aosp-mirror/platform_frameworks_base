@@ -170,7 +170,7 @@ public class WirelessChargerDetector {
         }
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long wcdToken = proto.start(fieldId);
         synchronized (mLock) {
             proto.write(WirelessChargerDetectorProto.IS_POWERED_WIRELESSLY, mPoweredWirelessly);

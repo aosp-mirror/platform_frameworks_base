@@ -50,9 +50,4 @@ public class ExecutorImpl extends HandlerExecutor implements DelayableExecutor {
 
         return () -> mHandler.removeCallbacksAndMessages(token);
     }
-
-    @Override
-    public void removeAll() {
-        mHandler.removeCallbacksAndMessages(null);
-    }
 }

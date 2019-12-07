@@ -151,6 +151,7 @@ public class ResourceLoaderManager {
     public void onImplUpdate(ResourcesImpl resourcesImpl) {
         synchronized (mLock) {
             this.mResourcesImpl = resourcesImpl;
+            this.mResourcesImpl.getAssets().setResourceLoaderManager(this);
             updateLoaders();
         }
     }

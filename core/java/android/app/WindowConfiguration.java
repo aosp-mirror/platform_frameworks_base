@@ -615,15 +615,15 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * @param fieldId           Field Id of the WindowConfiguration as defined in the parent message
      * @hide
      */
-    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+    public void dumpDebug(ProtoOutputStream protoOutputStream, long fieldId) {
         final long token = protoOutputStream.start(fieldId);
         if (mAppBounds != null) {
-            mAppBounds.writeToProto(protoOutputStream, APP_BOUNDS);
+            mAppBounds.dumpDebug(protoOutputStream, APP_BOUNDS);
         }
         protoOutputStream.write(WINDOWING_MODE, mWindowingMode);
         protoOutputStream.write(ACTIVITY_TYPE, mActivityType);
         if (mBounds != null) {
-            mBounds.writeToProto(protoOutputStream, BOUNDS);
+            mBounds.dumpDebug(protoOutputStream, BOUNDS);
         }
         protoOutputStream.end(token);
     }

@@ -1915,17 +1915,17 @@ public final class BroadcastQueue {
         }
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(BroadcastQueueProto.QUEUE_NAME, mQueueName);
         int N;
         N = mParallelBroadcasts.size();
         for (int i = N - 1; i >= 0; i--) {
-            mParallelBroadcasts.get(i).writeToProto(proto, BroadcastQueueProto.PARALLEL_BROADCASTS);
+            mParallelBroadcasts.get(i).dumpDebug(proto, BroadcastQueueProto.PARALLEL_BROADCASTS);
         }
-        mDispatcher.writeToProto(proto, BroadcastQueueProto.ORDERED_BROADCASTS);
+        mDispatcher.dumpDebug(proto, BroadcastQueueProto.ORDERED_BROADCASTS);
         if (mPendingBroadcast != null) {
-            mPendingBroadcast.writeToProto(proto, BroadcastQueueProto.PENDING_BROADCAST);
+            mPendingBroadcast.dumpDebug(proto, BroadcastQueueProto.PENDING_BROADCAST);
         }
 
         int lastIndex = mHistoryNext;
@@ -1936,7 +1936,7 @@ public final class BroadcastQueue {
             ringIndex = ringAdvance(ringIndex, -1, MAX_BROADCAST_HISTORY);
             BroadcastRecord r = mBroadcastHistory[ringIndex];
             if (r != null) {
-                r.writeToProto(proto, BroadcastQueueProto.HISTORICAL_BROADCASTS);
+                r.dumpDebug(proto, BroadcastQueueProto.HISTORICAL_BROADCASTS);
             }
         } while (ringIndex != lastIndex);
 
@@ -1948,7 +1948,7 @@ public final class BroadcastQueue {
                 continue;
             }
             long summaryToken = proto.start(BroadcastQueueProto.HISTORICAL_BROADCASTS_SUMMARY);
-            intent.writeToProto(proto, BroadcastQueueProto.BroadcastSummary.INTENT,
+            intent.dumpDebug(proto, BroadcastQueueProto.BroadcastSummary.INTENT,
                     false, true, true, false);
             proto.write(BroadcastQueueProto.BroadcastSummary.ENQUEUE_CLOCK_TIME_MS,
                     mSummaryHistoryEnqueueTime[ringIndex]);

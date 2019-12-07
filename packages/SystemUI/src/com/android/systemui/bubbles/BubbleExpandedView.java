@@ -603,7 +603,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 action,
                 mStackView.getNormalizedXPosition(),
                 mStackView.getNormalizedYPosition(),
-                bubble.showInShadeWhenBubble(),
+                bubble.showInShade(),
                 bubble.isOngoing(),
                 false /* isAppForeground (unused) */);
     }

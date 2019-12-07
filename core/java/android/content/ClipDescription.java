@@ -349,7 +349,7 @@ public class ClipDescription implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
         final int size = mMimeTypes.size();
@@ -361,7 +361,7 @@ public class ClipDescription implements Parcelable {
             proto.write(ClipDescriptionProto.LABEL, mLabel.toString());
         }
         if (mExtras != null) {
-            mExtras.writeToProto(proto, ClipDescriptionProto.EXTRAS);
+            mExtras.dumpDebug(proto, ClipDescriptionProto.EXTRAS);
         }
         if (mTimeStamp > 0) {
             proto.write(ClipDescriptionProto.TIMESTAMP_MS, mTimeStamp);

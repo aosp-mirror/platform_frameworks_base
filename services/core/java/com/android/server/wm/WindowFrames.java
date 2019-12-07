@@ -334,19 +334,19 @@ public class WindowFrames {
         return mContentChanged;
     }
 
-    public void writeToProto(@NonNull ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        mParentFrame.writeToProto(proto, PARENT_FRAME);
-        mContentFrame.writeToProto(proto, CONTENT_FRAME);
-        mDisplayFrame.writeToProto(proto, DISPLAY_FRAME);
-        mVisibleFrame.writeToProto(proto, VISIBLE_FRAME);
-        mDecorFrame.writeToProto(proto, DECOR_FRAME);
-        mContainingFrame.writeToProto(proto, CONTAINING_FRAME);
-        mFrame.writeToProto(proto, FRAME);
-        mDisplayCutout.getDisplayCutout().writeToProto(proto, CUTOUT);
-        mContentInsets.writeToProto(proto, CONTENT_INSETS);
-        mVisibleInsets.writeToProto(proto, VISIBLE_INSETS);
-        mStableInsets.writeToProto(proto, STABLE_INSETS);
+        mParentFrame.dumpDebug(proto, PARENT_FRAME);
+        mContentFrame.dumpDebug(proto, CONTENT_FRAME);
+        mDisplayFrame.dumpDebug(proto, DISPLAY_FRAME);
+        mVisibleFrame.dumpDebug(proto, VISIBLE_FRAME);
+        mDecorFrame.dumpDebug(proto, DECOR_FRAME);
+        mContainingFrame.dumpDebug(proto, CONTAINING_FRAME);
+        mFrame.dumpDebug(proto, FRAME);
+        mDisplayCutout.getDisplayCutout().dumpDebug(proto, CUTOUT);
+        mContentInsets.dumpDebug(proto, CONTENT_INSETS);
+        mVisibleInsets.dumpDebug(proto, VISIBLE_INSETS);
+        mStableInsets.dumpDebug(proto, STABLE_INSETS);
 
         proto.end(token);
     }

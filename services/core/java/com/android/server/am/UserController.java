@@ -2100,14 +2100,14 @@ class UserController implements Handler.Callback {
         }
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         synchronized (mLock) {
             long token = proto.start(fieldId);
             for (int i = 0; i < mStartedUsers.size(); i++) {
                 UserState uss = mStartedUsers.valueAt(i);
                 final long uToken = proto.start(UserControllerProto.STARTED_USERS);
                 proto.write(UserControllerProto.User.ID, uss.mHandle.getIdentifier());
-                uss.writeToProto(proto, UserControllerProto.User.STATE);
+                uss.dumpDebug(proto, UserControllerProto.User.STATE);
                 proto.end(uToken);
             }
             for (int i = 0; i < mStartedUserArray.length; i++) {

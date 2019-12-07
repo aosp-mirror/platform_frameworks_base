@@ -149,8 +149,8 @@ public:
         return mConditionSliced;
     };
 
-    void onStateChanged(int atomId, const HashableDimensionKey& primaryKey, int oldState,
-                        int newState){};
+    void onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
+                        const HashableDimensionKey& primaryKey, int oldState, int newState){};
 
     // Output the metrics data to [protoOutput]. All metrics reports end with the same timestamp.
     // This method clears all the past buckets.

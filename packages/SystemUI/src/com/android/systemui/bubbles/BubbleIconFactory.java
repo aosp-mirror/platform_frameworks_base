@@ -16,8 +16,14 @@
 package com.android.systemui.bubbles;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 
 import com.android.launcher3.icons.BaseIconFactory;
+import com.android.launcher3.icons.BitmapInfo;
+import com.android.launcher3.icons.ShadowGenerator;
 import com.android.systemui.R;
 
 /**
@@ -26,13 +32,37 @@ import com.android.systemui.R;
  * so there is no need to manage a pool across multiple threads.
  */
 public class BubbleIconFactory extends BaseIconFactory {
+
     protected BubbleIconFactory(Context context) {
         super(context, context.getResources().getConfiguration().densityDpi,
                 context.getResources().getDimensionPixelSize(R.dimen.individual_bubble_size));
     }
 
-    public int getBadgeSize() {
+    int getBadgeSize() {
         return mContext.getResources().getDimensionPixelSize(
                 com.android.launcher3.icons.R.dimen.profile_badge_size);
     }
+
+    BitmapInfo getBadgedBitmap(Bubble b) {
+        Bitmap userBadgedBitmap = createIconBitmap(
+                b.getUserBadgedAppIcon(), 1f, getBadgeSize());
+
+        Canvas c = new Canvas();
+        ShadowGenerator shadowGenerator = new ShadowGenerator(getBadgeSize());
+        c.setBitmap(userBadgedBitmap);
+        shadowGenerator.recreateIcon(Bitmap.createBitmap(userBadgedBitmap), c);
+        BitmapInfo bitmapInfo = createIconBitmap(userBadgedBitmap);
+        return bitmapInfo;
+    }
+
+    BitmapInfo getBubbleBitmap(Drawable bubble, BitmapInfo badge) {
+        BitmapInfo bubbleIconInfo = createBadgedIconBitmap(bubble,
+                null /* user */,
+                true /* shrinkNonAdaptiveIcons */);
+
+        badgeWithDrawable(bubbleIconInfo.icon,
+                new BitmapDrawable(mContext.getResources(), badge.icon));
+        return bubbleIconInfo;
+    }
+
 }

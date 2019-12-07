@@ -138,7 +138,6 @@ import android.util.RecurrenceRule;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.BroadcastInterceptingContext.FutureIntent;
 import com.android.server.DeviceIdleInternal;
@@ -1484,7 +1483,7 @@ public class NetworkPolicyManagerServiceTest {
         // smoke test to make sure no errors are raised
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
         assertNetworkPolicyEquals(DEFAULT_CYCLE_DAY, mDefaultWarningBytes, mDefaultLimitBytes,
                 true);
@@ -1499,7 +1498,7 @@ public class NetworkPolicyManagerServiceTest {
         bundle.putLong(CarrierConfigManager.KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG, -100);
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
 
         assertNetworkPolicyEquals(DEFAULT_CYCLE_DAY, mDefaultWarningBytes, mDefaultLimitBytes,
@@ -1518,7 +1517,7 @@ public class NetworkPolicyManagerServiceTest {
                 DATA_CYCLE_USE_PLATFORM_DEFAULT);
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
 
         assertNetworkPolicyEquals(DEFAULT_CYCLE_DAY, mDefaultWarningBytes, mDefaultLimitBytes,
@@ -1540,7 +1539,7 @@ public class NetworkPolicyManagerServiceTest {
                 DATA_CYCLE_THRESHOLD_DISABLED);
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
 
         // The policy still shouldn't change, because we don't want to overwrite user settings.
@@ -1557,7 +1556,7 @@ public class NetworkPolicyManagerServiceTest {
         bundle.putLong(CarrierConfigManager.KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG, 9999);
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
 
         assertNetworkPolicyEquals(31, 9999, 9999, true);
@@ -1574,7 +1573,7 @@ public class NetworkPolicyManagerServiceTest {
                 DATA_CYCLE_THRESHOLD_DISABLED);
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
 
         assertNetworkPolicyEquals(31, WARNING_DISABLED, LIMIT_DISABLED, true);
@@ -1591,7 +1590,7 @@ public class NetworkPolicyManagerServiceTest {
                 DATA_CYCLE_THRESHOLD_DISABLED);
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
         assertNetworkPolicyEquals(31, WARNING_DISABLED, LIMIT_DISABLED, true);
 
@@ -1606,7 +1605,7 @@ public class NetworkPolicyManagerServiceTest {
                 DATA_CYCLE_USE_PLATFORM_DEFAULT);
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
 
         assertNetworkPolicyEquals(31, mDefaultWarningBytes, mDefaultLimitBytes,

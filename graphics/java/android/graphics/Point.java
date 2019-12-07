@@ -132,7 +132,7 @@ public class Point implements Parcelable {
      * @param fieldId           Field Id of the Rect as defined in the parent message
      * @hide
      */
-    public void writeToProto(@NonNull ProtoOutputStream protoOutputStream, long fieldId) {
+    public void dumpDebug(@NonNull ProtoOutputStream protoOutputStream, long fieldId) {
         final long token = protoOutputStream.start(fieldId);
         protoOutputStream.write(PointProto.X, x);
         protoOutputStream.write(PointProto.Y, y);

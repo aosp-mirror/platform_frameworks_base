@@ -1404,7 +1404,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      *
      * @param proto The protocol buffer output stream to write to.
      */
-    void writeToProto(ProtoOutputStream proto, long fieldId);
+    void dumpDebug(ProtoOutputStream proto, long fieldId);
 
     /**
      * Returns whether a given window type is considered a top level one.

@@ -4934,7 +4934,7 @@ public final class Settings {
         final int count = mPackages.size();
         for (int i = 0; i < count; i++) {
             final PackageSetting ps = mPackages.valueAt(i);
-            ps.writeToProto(proto, PackageServiceDumpProto.PACKAGES, users);
+            ps.dumpDebug(proto, PackageServiceDumpProto.PACKAGES, users);
         }
     }
 
@@ -5010,7 +5010,7 @@ public final class Settings {
     void dumpSharedUsersProto(ProtoOutputStream proto) {
         final int count = mSharedUsers.size();
         for (int i = 0; i < count; i++) {
-            mSharedUsers.valueAt(i).writeToProto(proto, PackageServiceDumpProto.SHARED_USERS);
+            mSharedUsers.valueAt(i).dumpDebug(proto, PackageServiceDumpProto.SHARED_USERS);
         }
     }
 

@@ -183,7 +183,7 @@ public class BubbleDataTest extends SysuiTestCase {
         // Verify
         verifyUpdateReceived();
         BubbleData.Update update = mUpdateCaptor.getValue();
-        assertThat(update.addedBubble.showFlyoutForBubble()).isFalse();
+        assertThat(update.addedBubble.showFlyout()).isFalse();
     }
 
     @Test
@@ -199,7 +199,7 @@ public class BubbleDataTest extends SysuiTestCase {
         // Verify
         verifyUpdateReceived();
         BubbleData.Update update = mUpdateCaptor.getValue();
-        assertThat(update.addedBubble.showFlyoutForBubble()).isTrue();
+        assertThat(update.addedBubble.showFlyout()).isTrue();
     }
 
     @Test
@@ -218,7 +218,7 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Verify
         BubbleData.Update update = mUpdateCaptor.getValue();
-        assertThat(update.updatedBubble.showFlyoutForBubble()).isFalse();
+        assertThat(update.updatedBubble.showFlyout()).isFalse();
     }
 
     @Test
@@ -239,7 +239,7 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Verify
         BubbleData.Update update = mUpdateCaptor.getValue();
-        assertThat(update.updatedBubble.showFlyoutForBubble()).isTrue();
+        assertThat(update.updatedBubble.showFlyout()).isTrue();
     }
 
     // COLLAPSED / ADD

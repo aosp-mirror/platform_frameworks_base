@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for global_action_screenshot (2760267567509131654) -->
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"ଟାବଲେଟ୍‌ରେ କୌଣସି SIM‍ କାର୍ଡ ନାହିଁ।"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"ଫୋନରେ କୌଣସି SIM କାର୍ଡ ନାହିଁ।"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"PIN କୋଡ୍‍ ମେଳ ହେଉନାହିଁ"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"ଆପଣ ଟାବଲେଟକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଭୁଲ ଭାବେ ପ୍ରୟାସ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ୍‍ ପ୍ରୟାସ ପରେ, ଏହି ଟାବଲେଟଟି ରିସେଟ୍‍ ହୋଇଯିବ, ଯାହାଦ୍ୱାରା ଏହାର ସମସ୍ତ ଡାଟା ଲିଟ୍‍ ହୋଇଯିବ।"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"ଆପଣ ଫୋନକୁ ଅନଲକ୍‍ କରିବାକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଭୁଲ ଭାବେ ପ୍ରୟାସ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ୍‍ ପ୍ରୟାସ ପରେ, ଏହି ଫୋନଟି ରିସେଟ୍‍ ହୋଇଯିବ, ଯାହାଦ୍ୱାରା ଏହାର ସମସ୍ତ ଡାଟା ଲିଟ୍‍ ହୋଇଯିବ।"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"ଆପଣ ଟାବଲେଟକୁ ଅନଲକ୍‍ କରିବାକୁ <xliff:g id="NUMBER">%d</xliff:g> ଥର ଭୁଲ୍‍ ଭାବେ ପ୍ରୟାସ କରିଛନ୍ତି। ଏହି ଟାବଲେଟକୁ ରିସେଟ୍‍ କରାଯିବ, ଯାହାଦ୍ୱାରା ଏହାର ସମସ୍ତ ଡାଟା ଡିଲିଟ୍‍ ହୋଇଯିବ।"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"ଆପଣ ଫୋନଟି ଅନଲକ୍‍ କରିବାକୁ <xliff:g id="NUMBER">%d</xliff:g>ଥର ଭୁଲ୍‍ ଭାବେ ପ୍ରୟାସ କରିଛନ୍ତି। ଏହି ଫୋନ୍‍ ରିସେଟ୍‍ କରାଯିବ, ଯାହା ଦ୍ୱାରା ଏହାର ସମସ୍ତ ଡାଟା ଡିଲିଟ୍‍ ହୋଇଯିବ।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"ଆପଣ ଟାବଲେଟ୍‌ଟିକୁ ଅନଲକ୍‍ କରିବା ପାଇଁ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଥର ଭୁଲ ଭାବେ ଚେଷ୍ଟା କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g> ଟି ଭୁଲ୍‍ ପ୍ରୟାସ ପରେ, ୱାର୍କ ପ୍ରୋଫାଇଲ୍‍କୁ ବାହାର କରିଦିଆଯିବ ଏବଂ ଏହା ଦ୍ୱାରା ସମସ୍ତ ପ୍ରୋଫାଇଲ୍‍ ଡାଟା ଡିଲିଟ୍‍ ହୋଇଯିବ।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"ଆପଣ ଫୋନଟି ଅନଲକ୍‍ କରିବାକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ଭାବେ ପ୍ରୟାସ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ୍‍ ପ୍ରୟାସ ପରେ, ଏହି ୟୁଜରଙ୍କୁ ବାହାର କରିଦିଆଯିବ ଏବଂ ଏହାଦ୍ୱାରା ସମସ୍ତ ୟୁଜର୍‍ ଡାଟା ଡିଲିଟ୍‍ ହୋଇଯିବ।"</string>
+    <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
+    <skip/>
+    <!-- no translation found for cancel (1089011503403416730) -->
+    <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
+    <skip/>
+    <!-- no translation found for accessibility_casting (8708751252897282313) -->
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6114158710353725041) -->
+    <skip/>
+    <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
+    <skip/>
+    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
+    <skip/>
+    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
+    <skip/>
+    <!-- no translation found for notification_bubble_title (8330481035191903164) -->
+    <skip/>
+    <!-- no translation found for notification_channel_summary_bubble (7235935211580860537) -->
+    <skip/>
+    <!-- no translation found for reset (8715144064608810383) -->
+    <skip/>
+    <!-- no translation found for notification_channel_alerts (3385787053375150046) -->
+    <skip/>
+    <!-- no translation found for app_info (5153758994129963243) -->
+    <skip/>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="6017523991455860482">"Android ଟିଭି ଡିଭାଇସ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯିବ; ଏହା ଚାଲୁ ରଖିବା ପାଇଁ ଏକ ବଟନ୍ ଦବାନ୍ତୁ।"</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="4866963937818527643">"ଡିଭାଇସ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯିବ; ଚାଲୁ ରଖିବା ପାଇଁ ଦବାନ୍ତୁ।"</string>
+<string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"ଆପଣ ଟାବଲେଟକୁ ଅନଲକ୍‍ କରିବାକୁ <xliff:g id="NUMBER">%d</xliff:g> ଭୁଲ୍‍ ଭାବେ ପ୍ରୟାସ କରିଛନ୍ତି। କାର୍ଯ୍ୟ ପ୍ରୋଫାଇଲ୍‍ ବାହାର କରିଦିଆଯିବ, ଯାହାଦ୍ୱାରା ସମସ୍ତ ପ୍ରୋଫାଇଲ୍‍ ଡାଟା ଡିଲିଟ୍‍ ହୋଇଯିବ।"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"ଆପଣ ଫୋନଟି ଅନଲକ୍‍ କରିବାକୁ <xliff:g id="NUMBER">%d</xliff:g>ଥର ଭୁଲ୍‍ ଭାବେ ପ୍ରୟାସ କରିଛନ୍ତି। ୱର୍କ ପ୍ରୋଫାଇଲ୍‍ ବାହାର କରିଦିଆଯିବ, ଯାହା ଦ୍ୱାରା ସମସ୍ତ ପ୍ରୋଫାଇଲ୍‍ ଡାଟା ଡିଲିଟ୍‍ ହୋଇଯିବ।"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"ଆପଣଙ୍କ ଅନଲକ୍‍ ପାଟର୍ନକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଥର ଭୁଲ ଭାବେ ଅଙ୍କନ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g> ଟି ଭୁଲ ପ୍ରୟାସ ପରେ ଏକ ଇମେଲ୍‍ ଆକାଉଣ୍ଟ ବ୍ୟବହାର କରି ନିଜ ଟାବଲେଟକୁ ଅନଲକ୍‌ କରିବା ପାଇଁ କୁହାଯିବ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"ଆପଣଙ୍କ ଅନଲକ୍‍ ପାଟର୍ନକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଥର ଭୁଲ ଭାବେ ଅଙ୍କନ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g> ଟି ଭୁଲ ପ୍ରୟାସ ପରେ ଏକ ଇମେଲ୍‍ ଆକାଉଣ୍ଟ ବ୍ୟବହାର କରି ନିଜ ଫୋନକୁ ଅନଲକ୍‌ କରିବା ପାଇଁ କୁହାଯିବ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+</resources>

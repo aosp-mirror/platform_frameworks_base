@@ -639,7 +639,7 @@ public final class ConnectivityController extends StateController implements
         for (int i = 0; i < mAvailableNetworks.size(); i++) {
             Network network = mAvailableNetworks.valueAt(i);
             if (network != null) {
-                network.writeToProto(proto,
+                network.dumpDebug(proto,
                         StateControllerProto.ConnectivityController.AVAILABLE_NETWORKS);
             }
         }
@@ -658,7 +658,7 @@ public final class ConnectivityController extends StateController implements
                         js.getSourceUid());
                 NetworkRequest rn = js.getJob().getRequiredNetwork();
                 if (rn != null) {
-                    rn.writeToProto(proto,
+                    rn.dumpDebug(proto,
                             StateControllerProto.ConnectivityController.TrackedJob
                                     .REQUIRED_NETWORK);
                 }

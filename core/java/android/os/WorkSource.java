@@ -1218,7 +1218,7 @@ public class WorkSource implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long workSourceToken = proto.start(fieldId);
         for (int i = 0; i < mNum; i++) {
             final long contentProto = proto.start(WorkSourceProto.WORK_SOURCE_CONTENTS);

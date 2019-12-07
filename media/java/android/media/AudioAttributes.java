@@ -388,12 +388,21 @@ public final class AudioAttributes implements Parcelable {
      */
     public static final int FLAG_NO_SYSTEM_CAPTURE = 0x1 << 12;
 
+    /**
+     * @hide
+     * Flag requesting private audio capture. When set in audio attributes passed to an
+     * AudioRecord, this prevents a privileged Assistant from capturing audio while this
+     * AudioRecord is active.
+     */
+    public static final int FLAG_CAPTURE_PRIVATE = 0x1 << 13;
+
+
     // Note that even though FLAG_MUTE_HAPTIC is stored as a flag bit, it is not here since
     // it is known as a boolean value outside of AudioAttributes.
     private static final int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO
             | FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY
             | FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY | FLAG_DEEP_BUFFER | FLAG_NO_MEDIA_PROJECTION
-            | FLAG_NO_SYSTEM_CAPTURE;
+            | FLAG_NO_SYSTEM_CAPTURE | FLAG_CAPTURE_PRIVATE;
     private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED |
             FLAG_HW_AV_SYNC | FLAG_LOW_LATENCY;
 
@@ -619,6 +628,12 @@ public final class AudioAttributes implements Parcelable {
             aa.mFlags = mFlags;
             if (mMuteHapticChannels) {
                 aa.mFlags |= FLAG_MUTE_HAPTIC;
+            }
+            // capturing for camcorder of communication is private by default to
+            // reflect legacy behavior
+            if (aa.mSource == MediaRecorder.AudioSource.VOICE_COMMUNICATION
+                    || aa.mSource == MediaRecorder.AudioSource.CAMCORDER) {
+                aa.mFlags |= FLAG_CAPTURE_PRIVATE;
             }
             aa.mTags = (HashSet<String>) mTags.clone();
             aa.mFormattedTags = TextUtils.join(";", mTags);
@@ -1062,7 +1077,7 @@ public final class AudioAttributes implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
         proto.write(AudioAttributesProto.USAGE, mUsage);

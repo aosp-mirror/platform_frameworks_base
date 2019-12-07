@@ -343,6 +343,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private BiometricUnlockController mBiometricUnlockController;
     private final LightBarController mLightBarController;
     private final Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
+    @Nullable
     protected LockscreenWallpaper mLockscreenWallpaper;
     private final AutoHideController mAutoHideController;
     @Nullable
@@ -1059,7 +1060,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         createNavigationBar(result);
 
-        if (ENABLE_LOCKSCREEN_WALLPAPER) {
+        if (ENABLE_LOCKSCREEN_WALLPAPER && mWallpaperSupported) {
             mLockscreenWallpaper = mLockscreenWallpaperLazy.get();
             mLockscreenWallpaper.setHandler(mHandler);
         }
@@ -2807,7 +2808,9 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void setLockscreenUser(int newUserId) {
-        mLockscreenWallpaper.setCurrentUser(newUserId);
+        if (mLockscreenWallpaper != null) {
+            mLockscreenWallpaper.setCurrentUser(newUserId);
+        }
         mScrimController.setCurrentUser(newUserId);
         if (mWallpaperSupported) {
             mWallpaperChangedReceiver.onReceive(mContext, null);

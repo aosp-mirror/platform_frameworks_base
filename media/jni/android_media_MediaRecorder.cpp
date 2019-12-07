@@ -227,6 +227,36 @@ android_media_MediaRecorder_setAudioSource(JNIEnv *env, jobject thiz, jint as)
 }
 
 static void
+android_media_MediaRecorder_setPrivacySensitive(JNIEnv *env, jobject thiz, jboolean privacySensitive)
+{
+    ALOGV("%s(%s)", __func__, privacySensitive ? "true" : "false");
+
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+    process_media_recorder_call(env, mr->setPrivacySensitive(privacySensitive),
+        "java/lang/RuntimeException", "setPrivacySensitive failed.");
+}
+
+static jboolean
+android_media_MediaRecorder_isPrivacySensitive(JNIEnv *env, jobject thiz)
+{
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return false;
+    }
+    bool privacySensitive;
+    process_media_recorder_call(env, mr->isPrivacySensitive(&privacySensitive),
+        "java/lang/RuntimeException", "isPrivacySensitive failed.");
+
+    ALOGV("%s() -> %s", __func__, privacySensitive ? "true" : "false");
+    return privacySensitive;
+}
+
+static void
 android_media_MediaRecorder_setOutputFormat(JNIEnv *env, jobject thiz, jint of)
 {
     ALOGV("setOutputFormat(%d)", of);
@@ -817,6 +847,8 @@ static const JNINativeMethod gMethods[] = {
     {"setCamera",            "(Landroid/hardware/Camera;)V",    (void *)android_media_MediaRecorder_setCamera},
     {"setVideoSource",       "(I)V",                            (void *)android_media_MediaRecorder_setVideoSource},
     {"setAudioSource",       "(I)V",                            (void *)android_media_MediaRecorder_setAudioSource},
+    {"setPrivacySensitive",  "(Z)V",                            (void *)android_media_MediaRecorder_setPrivacySensitive},
+    {"isPrivacySensitive",  "()Z",                             (void *)android_media_MediaRecorder_isPrivacySensitive},
     {"setOutputFormat",      "(I)V",                            (void *)android_media_MediaRecorder_setOutputFormat},
     {"setVideoEncoder",      "(I)V",                            (void *)android_media_MediaRecorder_setVideoEncoder},
     {"setAudioEncoder",      "(I)V",                            (void *)android_media_MediaRecorder_setAudioEncoder},

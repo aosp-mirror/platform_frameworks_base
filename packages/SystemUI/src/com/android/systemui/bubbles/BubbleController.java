@@ -251,15 +251,15 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mZenModeController.addCallback(new ZenModeController.Callback() {
             @Override
             public void onZenChanged(int zen) {
-                if (mStackView != null) {
-                    mStackView.updateDots();
+                for (Bubble b : mBubbleData.getBubbles()) {
+                    b.setShowDot(b.showInShade(), true /* animate */);
                 }
             }
 
             @Override
             public void onConfigChanged(ZenModeConfig config) {
-                if (mStackView != null) {
-                    mStackView.updateDots();
+                for (Bubble b : mBubbleData.getBubbles()) {
+                    b.setShowDot(b.showInShade(), true /* animate */);
                 }
             }
         });
@@ -465,7 +465,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      */
     public boolean isBubbleNotificationSuppressedFromShade(String key) {
         boolean isBubbleAndSuppressed = mBubbleData.hasBubbleWithKey(key)
-                && !mBubbleData.getBubbleWithKey(key).showInShadeWhenBubble();
+                && !mBubbleData.getBubbleWithKey(key).showInShade();
         NotificationEntry entry = mNotificationEntryManager.getActiveNotificationUnfiltered(key);
         String groupKey = entry != null ? entry.getSbn().getGroupKey() : null;
         boolean isSuppressedSummary = mBubbleData.isSummarySuppressed(groupKey);
@@ -630,11 +630,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 Bubble bubble = mBubbleData.getBubbleWithKey(key);
                 boolean bubbleExtended = entry != null && entry.isBubble() && userRemovedNotif;
                 if (bubbleExtended) {
-                    bubble.setShowInShadeWhenBubble(false);
-                    bubble.setShowBubbleDot(false);
-                    if (mStackView != null) {
-                        mStackView.updateDotVisibility(entry.getKey());
-                    }
+                    bubble.setShowInShade(false);
+                    bubble.setShowDot(false /* show */, true /* animate */);
                     mNotificationEntryManager.updateNotifications(
                             "BubbleController.onNotificationRemoveRequested");
                     return true;
@@ -660,11 +657,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 // As far as group manager is concerned, once a child is no longer shown
                 // in the shade, it is essentially removed.
                 mNotificationGroupManager.onEntryRemoved(bubbleChild.getEntry());
-                bubbleChild.setShowInShadeWhenBubble(false);
-                bubbleChild.setShowBubbleDot(false);
-                if (mStackView != null) {
-                    mStackView.updateDotVisibility(bubbleChild.getKey());
-                }
+                bubbleChild.setShowInShade(false);
+                bubbleChild.setShowDot(false /* show */, true /* animate */);
             }
             // And since all children are removed, remove the summary.
             mNotificationGroupManager.onEntryRemoved(summary);
@@ -705,6 +699,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
             if (mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
                     && (canLaunchInActivityView(mContext, entry) || wasAdjusted)) {
+                if (wasAdjusted && !previouslyUserCreated) {
+                    // Gotta treat the auto-bubbled / whitelisted packaged bubbles as usercreated
+                    mUserCreatedBubbles.add(entry.getKey());
+                }
                 updateBubble(entry);
             }
         }
@@ -721,6 +719,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 // It was previously a bubble but no longer a bubble -- lets remove it
                 removeBubble(entry.getKey(), DISMISS_NO_LONGER_BUBBLE);
             } else if (shouldBubble) {
+                if (wasAdjusted && !previouslyUserCreated) {
+                    // Gotta treat the auto-bubbled / whitelisted packaged bubbles as usercreated
+                    mUserCreatedBubbles.add(entry.getKey());
+                }
                 updateBubble(entry);
             }
         }
@@ -767,7 +769,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 // If the bubble is removed for user switching, leave the notification in place.
                 if (reason != DISMISS_USER_CHANGED) {
                     if (!mBubbleData.hasBubbleWithKey(bubble.getKey())
-                            && !bubble.showInShadeWhenBubble()) {
+                            && !bubble.showInShade()) {
                         // The bubble is gone & the notification is gone, time to actually remove it
                         mNotificationEntryManager.performRemoveNotification(
                                 bubble.getEntry().getSbn(), UNDEFINED_DISMISS_REASON);

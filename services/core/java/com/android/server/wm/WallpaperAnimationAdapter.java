@@ -165,10 +165,10 @@ class WallpaperAnimationAdapter implements AnimationAdapter {
     }
 
     @Override
-    public void writeToProto(ProtoOutputStream proto) {
+    public void dumpDebug(ProtoOutputStream proto) {
         final long token = proto.start(REMOTE);
         if (mTarget != null) {
-            mTarget.writeToProto(proto, TARGET);
+            mTarget.dumpDebug(proto, TARGET);
         }
         proto.end(token);
     }

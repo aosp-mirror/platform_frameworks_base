@@ -546,7 +546,7 @@ public class ActivityStartController {
         }
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         for (PendingActivityLaunch activity: mPendingActivityLaunches) {
             activity.r.writeIdentifierToProto(proto, fieldId);
         }

@@ -157,9 +157,14 @@ public class BubbleControllerTest extends SysuiTestCase {
     private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private BubbleData mBubbleData;
 
+    private TestableLooper mTestableLooper;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        mTestableLooper = TestableLooper.get(this);
+
         mContext.addMockSystemService(FaceManager.class, mFaceManager);
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
@@ -262,7 +267,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mRow.getEntry().getKey()));
 
         // Make it look like dismissed notif
-        mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).setShowInShadeWhenBubble(false);
+        mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).setShowInShade(false);
 
         // Now remove the bubble
         mBubbleController.removeBubble(
@@ -346,14 +351,14 @@ public class BubbleControllerTest extends SysuiTestCase {
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow2.getEntry().getKey());
 
         // Last added is the one that is expanded
-        assertEquals(mRow2.getEntry(), stackView.getExpandedBubbleView().getEntry());
+        assertEquals(mRow2.getEntry(), mBubbleData.getSelectedBubble().getEntry());
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow2.getEntry().getKey()));
 
         // Switch which bubble is expanded
         mBubbleController.selectBubble(mRow.getEntry().getKey());
         stackView.setExpandedBubble(mRow.getEntry().getKey());
-        assertEquals(mRow.getEntry(), stackView.getExpandedBubbleView().getEntry());
+        assertEquals(mRow.getEntry(), stackView.getExpandedBubble().getEntry());
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry().getKey()));
 
@@ -377,7 +382,9 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
         assertFalse(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry().getKey()));
-        assertTrue(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showBubbleDot());
+
+        mTestableLooper.processAllMessages();
+        assertTrue(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
 
         // Expand
         mBubbleController.expandStack();
@@ -388,7 +395,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry().getKey()));
         // Notif shouldn't show dot after expansion
-        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showBubbleDot());
+        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
     }
 
     @Test
@@ -401,10 +408,11 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
         assertFalse(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry().getKey()));
-        assertTrue(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showBubbleDot());
+
+        mTestableLooper.processAllMessages();
+        assertTrue(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
 
         // Expand
-        BubbleStackView stackView = mBubbleController.getStackView();
         mBubbleController.expandStack();
         assertTrue(mBubbleController.isStackExpanded());
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().getKey());
@@ -413,7 +421,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry().getKey()));
         // Notif shouldn't show dot after expansion
-        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showBubbleDot());
+        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
 
         // Send update
         mEntryListener.onPreEntryUpdated(mRow.getEntry());
@@ -423,7 +431,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry().getKey()));
         // Notif shouldn't show dot after expansion
-        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showBubbleDot());
+        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
     }
 
     @Test
@@ -443,7 +451,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow2.getEntry().getKey());
 
         // Last added is the one that is expanded
-        assertEquals(mRow2.getEntry(), stackView.getExpandedBubbleView().getEntry());
+        assertEquals(mRow2.getEntry(), stackView.getExpandedBubble().getEntry());
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow2.getEntry().getKey()));
 
@@ -453,7 +461,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow2.getEntry().getKey());
 
         // Make sure first bubble is selected
-        assertEquals(mRow.getEntry(), stackView.getExpandedBubbleView().getEntry());
+        assertEquals(mRow.getEntry(), stackView.getExpandedBubble().getEntry());
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().getKey());
 
         // Dismiss that one
@@ -555,7 +563,9 @@ public class BubbleControllerTest extends SysuiTestCase {
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
         assertFalse(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry().getKey()));
-        assertTrue(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showBubbleDot());
+
+        mTestableLooper.processAllMessages();
+        assertTrue(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
     }
 
     @Test

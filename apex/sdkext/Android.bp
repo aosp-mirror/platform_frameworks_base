@@ -15,7 +15,13 @@
 apex {
     name: "com.android.sdkext",
     manifest: "manifest.json",
+    binaries: [ "derive_sdk" ],
     java_libs: [ "framework-sdkext" ],
+    prebuilts: [
+      "com.android.sdkext.ldconfig",
+      "cur_sdkinfo",
+      "derive_sdk.rc",
+    ],
     key: "com.android.sdkext.key",
     certificate: ":com.android.sdkext.certificate",
 }
@@ -29,4 +35,36 @@ apex_key {
 android_app_certificate {
     name: "com.android.sdkext.certificate",
     certificate: "com.android.sdkext",
+}
+
+prebuilt_etc {
+    name: "com.android.sdkext.ldconfig",
+    src: "ld.config.txt",
+    filename: "ld.config.txt",
+    installable: false,
+}
+
+python_binary_host {
+    name: "gen_sdkinfo",
+    srcs: [
+        "derive_sdk/sdk.proto",
+        "gen_sdkinfo.py",
+    ],
+    proto: {
+        canonical_path_from_root: false,
+    },
+}
+
+gensrcs {
+    name: "cur_sdkinfo_src",
+    srcs: [""],
+    tools: [ "gen_sdkinfo" ],
+    cmd: "$(location) -v 0 -o $(out)",
+}
+
+prebuilt_etc {
+    name: "cur_sdkinfo",
+    src: ":cur_sdkinfo_src",
+    filename: "sdkinfo.binarypb",
+    installable: false,
 }

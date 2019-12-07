@@ -31,7 +31,6 @@ import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
 import androidx.test.runner.lifecycle.Stage
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
-import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -43,7 +42,6 @@ import java.util.concurrent.Executor
 import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
 
-// @Ignore("UiAutomation is crashing with not connected, not sure why")
 @RunWith(Parameterized::class)
 class ResourceLoaderChangesTest : ResourceLoaderTestBase() {
 
@@ -75,7 +73,7 @@ class ResourceLoaderChangesTest : ResourceLoaderTestBase() {
     @Before
     @After
     fun disableOverlay() {
-//        enableOverlay(OVERLAY_PACKAGE, false)
+        enableOverlay(OVERLAY_PACKAGE, false)
     }
 
     @Test
@@ -156,25 +154,32 @@ class ResourceLoaderChangesTest : ResourceLoaderTestBase() {
 
     // All these tests assert for the exact same loaders/values, so extract that logic out
     private fun verifySameBeforeAndAfter(block: () -> Resources) {
-        // TODO(chiuwinson): atest doesn't work with @Ignore, UiAutomation not connected error
-        Assume.assumeFalse(true)
+        fun Resources.resource() = this.getString(android.R.string.cancel)
+        fun Resources.asset() = this.assets.open("Asset.txt").reader().readText()
 
-        val originalValue = resources.getString(android.R.string.cancel)
+        val originalResource = resources.resource()
+        val originalAsset = resources.asset()
 
-        val loader = "stringOne".openLoader()
-        addLoader(loader)
+        val loaderResource = "stringOne".openLoader()
+        val loaderAsset = "assetOne".openLoader(dataType = DataType.ASSET)
+        addLoader(loaderResource)
+        addLoader(loaderAsset)
 
         val oldLoaders = resources.loaders
-        val oldValue = resources.getString(android.R.string.cancel)
+        val oldResource = resources.resource()
+        val oldAsset = resources.asset()
 
-        assertThat(oldValue).isNotEqualTo(originalValue)
+        assertThat(oldResource).isNotEqualTo(originalResource)
+        assertThat(oldAsset).isNotEqualTo(originalAsset)
 
         val newResources = block()
 
         val newLoaders = newResources.loaders
-        val newValue = newResources.getString(android.R.string.cancel)
+        val newResource = newResources.resource()
+        val newAsset = newResources.asset()
 
-        assertThat(newValue).isEqualTo(oldValue)
+        assertThat(newResource).isEqualTo(oldResource)
+        assertThat(newAsset).isEqualTo(oldAsset)
         assertThat(newLoaders).isEqualTo(oldLoaders)
     }
 

@@ -166,12 +166,12 @@ class WindowContainerThumbnail implements Animatable {
      *                message.
      * @hide
      */
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(WIDTH, mWidth);
         proto.write(HEIGHT, mHeight);
         if (mSurfaceAnimator.isAnimating()) {
-            mSurfaceAnimator.writeToProto(proto, SURFACE_ANIMATOR);
+            mSurfaceAnimator.dumpDebug(proto, SURFACE_ANIMATOR);
         }
         proto.end(token);
     }

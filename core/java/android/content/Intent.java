@@ -10293,26 +10293,26 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         // Same input parameters that toString() gives to toShortString().
-        writeToProto(proto, fieldId, true, true, true, false);
+        dumpDebug(proto, fieldId, true, true, true, false);
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto) {
+    public void dumpDebug(ProtoOutputStream proto) {
         // Same input parameters that toString() gives to toShortString().
-        writeToProtoWithoutFieldId(proto, true, true, true, false);
+        dumpDebugWithoutFieldId(proto, true, true, true, false);
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean secure, boolean comp,
+    public void dumpDebug(ProtoOutputStream proto, long fieldId, boolean secure, boolean comp,
             boolean extras, boolean clip) {
         long token = proto.start(fieldId);
-        writeToProtoWithoutFieldId(proto, secure, comp, extras, clip);
+        dumpDebugWithoutFieldId(proto, secure, comp, extras, clip);
         proto.end(token);
     }
 
-    private void writeToProtoWithoutFieldId(ProtoOutputStream proto, boolean secure, boolean comp,
+    private void dumpDebugWithoutFieldId(ProtoOutputStream proto, boolean secure, boolean comp,
             boolean extras, boolean clip) {
         if (mAction != null) {
             proto.write(IntentProto.ACTION, mAction);
@@ -10338,7 +10338,7 @@ public class Intent implements Parcelable, Cloneable {
             proto.write(IntentProto.PACKAGE, mPackage);
         }
         if (comp && mComponent != null) {
-            mComponent.writeToProto(proto, IntentProto.COMPONENT);
+            mComponent.dumpDebug(proto, IntentProto.COMPONENT);
         }
         if (mSourceBounds != null) {
             proto.write(IntentProto.SOURCE_BOUNDS, mSourceBounds.toShortString());

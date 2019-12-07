@@ -177,7 +177,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             }
         }
 
-        public void writeToProto(ProtoOutputStream proto, long fieldId, long now) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId, long now) {
             long token = proto.start(fieldId);
             proto.write(ServiceRecordProto.StartItem.ID, id);
             ProtoUtils.toDuration(proto,
@@ -185,14 +185,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             proto.write(ServiceRecordProto.StartItem.DELIVERY_COUNT, deliveryCount);
             proto.write(ServiceRecordProto.StartItem.DONE_EXECUTING_COUNT, doneExecutingCount);
             if (intent != null) {
-                intent.writeToProto(proto, ServiceRecordProto.StartItem.INTENT, true, true,
+                intent.dumpDebug(proto, ServiceRecordProto.StartItem.INTENT, true, true,
                         true, false);
             }
             if (neededGrants != null) {
-                neededGrants.writeToProto(proto, ServiceRecordProto.StartItem.NEEDED_GRANTS);
+                neededGrants.dumpDebug(proto, ServiceRecordProto.StartItem.NEEDED_GRANTS);
             }
             if (uriPermissions != null) {
-                uriPermissions.writeToProto(proto, ServiceRecordProto.StartItem.URI_PERMISSIONS);
+                uriPermissions.dumpDebug(proto, ServiceRecordProto.StartItem.URI_PERMISSIONS);
             }
             proto.end(token);
         }
@@ -247,7 +247,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(ServiceRecordProto.SHORT_NAME, this.shortInstanceName);
         proto.write(ServiceRecordProto.IS_RUNNING, app != null);
@@ -255,7 +255,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             proto.write(ServiceRecordProto.PID, app.pid);
         }
         if (intent != null) {
-            intent.getIntent().writeToProto(proto, ServiceRecordProto.INTENT, false, true, false,
+            intent.getIntent().dumpDebug(proto, ServiceRecordProto.INTENT, false, true, false,
                     false);
         }
         proto.write(ServiceRecordProto.PACKAGE_NAME, packageName);
@@ -274,17 +274,17 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             proto.end(appInfoToken);
         }
         if (app != null) {
-            app.writeToProto(proto, ServiceRecordProto.APP);
+            app.dumpDebug(proto, ServiceRecordProto.APP);
         }
         if (isolatedProc != null) {
-            isolatedProc.writeToProto(proto, ServiceRecordProto.ISOLATED_PROC);
+            isolatedProc.dumpDebug(proto, ServiceRecordProto.ISOLATED_PROC);
         }
         proto.write(ServiceRecordProto.WHITELIST_MANAGER, whitelistManager);
         proto.write(ServiceRecordProto.DELAYED, delayed);
         if (isForeground || foregroundId != 0) {
             long fgToken = proto.start(ServiceRecordProto.FOREGROUND);
             proto.write(ServiceRecordProto.Foreground.ID, foregroundId);
-            foregroundNoti.writeToProto(proto, ServiceRecordProto.Foreground.NOTIFICATION);
+            foregroundNoti.dumpDebug(proto, ServiceRecordProto.Foreground.NOTIFICATION);
             proto.end(fgToken);
         }
         ProtoUtils.toDuration(proto, ServiceRecordProto.CREATE_REAL_TIME, createRealTime, nowReal);
@@ -327,21 +327,21 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (deliveredStarts.size() > 0) {
             final int N = deliveredStarts.size();
             for (int i = 0; i < N; i++) {
-                deliveredStarts.get(i).writeToProto(proto,
+                deliveredStarts.get(i).dumpDebug(proto,
                         ServiceRecordProto.DELIVERED_STARTS, now);
             }
         }
         if (pendingStarts.size() > 0) {
             final int N = pendingStarts.size();
             for (int i = 0; i < N; i++) {
-                pendingStarts.get(i).writeToProto(proto, ServiceRecordProto.PENDING_STARTS, now);
+                pendingStarts.get(i).dumpDebug(proto, ServiceRecordProto.PENDING_STARTS, now);
             }
         }
         if (bindings.size() > 0) {
             final int N = bindings.size();
             for (int i=0; i<N; i++) {
                 IntentBindRecord b = bindings.valueAt(i);
-                b.writeToProto(proto, ServiceRecordProto.BINDINGS);
+                b.dumpDebug(proto, ServiceRecordProto.BINDINGS);
             }
         }
         if (connections.size() > 0) {
@@ -349,7 +349,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             for (int conni=0; conni<N; conni++) {
                 ArrayList<ConnectionRecord> c = connections.valueAt(conni);
                 for (int i=0; i<c.size(); i++) {
-                    c.get(i).writeToProto(proto, ServiceRecordProto.CONNECTIONS);
+                    c.get(i).dumpDebug(proto, ServiceRecordProto.CONNECTIONS);
                 }
             }
         }

@@ -924,7 +924,7 @@ public class IntentFilter implements Parcelable {
             dest.writeInt(mPort);
         }
 
-        void writeToProto(ProtoOutputStream proto, long fieldId) {
+        void dumpDebug(ProtoOutputStream proto, long fieldId) {
             long token = proto.start(fieldId);
             // The original host information is already contained in host and wild, no output now.
             proto.write(AuthorityEntryProto.HOST, mHost);
@@ -1758,7 +1758,7 @@ public class IntentFilter implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         if (mActions.size() > 0) {
             Iterator<String> it = mActions.iterator();
@@ -1781,19 +1781,19 @@ public class IntentFilter implements Parcelable {
         if (mDataSchemeSpecificParts != null) {
             Iterator<PatternMatcher> it = mDataSchemeSpecificParts.iterator();
             while (it.hasNext()) {
-                it.next().writeToProto(proto, IntentFilterProto.DATA_SCHEME_SPECS);
+                it.next().dumpDebug(proto, IntentFilterProto.DATA_SCHEME_SPECS);
             }
         }
         if (mDataAuthorities != null) {
             Iterator<AuthorityEntry> it = mDataAuthorities.iterator();
             while (it.hasNext()) {
-                it.next().writeToProto(proto, IntentFilterProto.DATA_AUTHORITIES);
+                it.next().dumpDebug(proto, IntentFilterProto.DATA_AUTHORITIES);
             }
         }
         if (mDataPaths != null) {
             Iterator<PatternMatcher> it = mDataPaths.iterator();
             while (it.hasNext()) {
-                it.next().writeToProto(proto, IntentFilterProto.DATA_PATHS);
+                it.next().dumpDebug(proto, IntentFilterProto.DATA_PATHS);
             }
         }
         if (mDataTypes != null) {

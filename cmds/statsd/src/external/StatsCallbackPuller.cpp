@@ -20,7 +20,7 @@
 #include "StatsCallbackPuller.h"
 
 #include <android/os/IPullAtomCallback.h>
-#include <android/util/StatsEvent.h>
+#include <android/util/StatsEventParcel.h>
 
 #include "PullResultReceiver.h"
 #include "StatsPullerManager.h"
@@ -57,13 +57,19 @@ bool StatsCallbackPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
 
     sp<PullResultReceiver> resultReceiver = new PullResultReceiver(
             [cv_mutex, cv, pullFinish, pullSuccess, sharedData](
-                    int32_t atomTag, bool success, const vector<StatsEvent>& output) {
+                    int32_t atomTag, bool success, const vector<StatsEventParcel>& output) {
                 // This is the result of the pull, executing in a statsd binder thread.
                 // The pull could have taken a long time, and we should only modify
                 // data (the output param) if the pointer is in scope and the pull did not time out.
                 {
                     lock_guard<mutex> lk(*cv_mutex);
-                    // TODO: fill the shared vector of LogEvents once StatsEvent is complete.
+                    for (const StatsEventParcel& parcel: output) {
+                        shared_ptr<LogEvent> event =
+                              make_shared<LogEvent>(const_cast<uint8_t*>(parcel.buffer.data()),
+                                                    parcel.buffer.size(),
+                                                    /*uid=*/ -1);
+                        sharedData->push_back(event);
+                    }
                     *pullSuccess = success;
                     *pullFinish = true;
                 }

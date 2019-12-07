@@ -339,7 +339,7 @@ public class BarController {
         throw new IllegalArgumentException("Unknown state " + state);
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(STATE, mState);
         proto.write(TRANSIENT_STATE, mTransientBarState);

@@ -291,7 +291,6 @@ public final class Call {
          */
         public static final int DIRECTION_OUTGOING = 1;
 
-
         /** Call can currently be put on hold or unheld. */
         public static final int CAPABILITY_HOLD = 0x00000001;
 
@@ -571,6 +570,7 @@ public final class Call {
         private final Bundle mIntentExtras;
         private final long mCreationTimeMillis;
         private final @CallDirection int mCallDirection;
+        private final @Connection.VerificationStatus int mCallerNumberVerificationStatus;
 
         /**
          * Whether the supplied capabilities  supports the specified capability.
@@ -880,6 +880,15 @@ public final class Call {
             return mCallDirection;
         }
 
+        /**
+         * Gets the verification status for the phone number of an incoming call as identified in
+         * ATIS-1000082.
+         * @return the verification status.
+         */
+        public @Connection.VerificationStatus int getCallerNumberVerificationStatus() {
+            return mCallerNumberVerificationStatus;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof Details) {
@@ -901,7 +910,9 @@ public final class Call {
                         areBundlesEqual(mExtras, d.mExtras) &&
                         areBundlesEqual(mIntentExtras, d.mIntentExtras) &&
                         Objects.equals(mCreationTimeMillis, d.mCreationTimeMillis) &&
-                        Objects.equals(mCallDirection, d.mCallDirection);
+                        Objects.equals(mCallDirection, d.mCallDirection) &&
+                        Objects.equals(mCallerNumberVerificationStatus,
+                                d.mCallerNumberVerificationStatus);
             }
             return false;
         }
@@ -923,7 +934,8 @@ public final class Call {
                             mExtras,
                             mIntentExtras,
                             mCreationTimeMillis,
-                            mCallDirection);
+                            mCallDirection,
+                            mCallerNumberVerificationStatus);
         }
 
         /** {@hide} */
@@ -944,7 +956,8 @@ public final class Call {
                 Bundle extras,
                 Bundle intentExtras,
                 long creationTimeMillis,
-                int callDirection) {
+                int callDirection,
+                int callerNumberVerificationStatus) {
             mTelecomCallId = telecomCallId;
             mHandle = handle;
             mHandlePresentation = handlePresentation;
@@ -962,6 +975,7 @@ public final class Call {
             mIntentExtras = intentExtras;
             mCreationTimeMillis = creationTimeMillis;
             mCallDirection = callDirection;
+            mCallerNumberVerificationStatus = callerNumberVerificationStatus;
         }
 
         /** {@hide} */
@@ -983,7 +997,8 @@ public final class Call {
                     parcelableCall.getExtras(),
                     parcelableCall.getIntentExtras(),
                     parcelableCall.getCreationTimeMillis(),
-                    parcelableCall.getCallDirection());
+                    parcelableCall.getCallDirection(),
+                    parcelableCall.getCallerNumberVerificationStatus());
         }
 
         @Override

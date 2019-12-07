@@ -968,6 +968,11 @@ class Task extends WindowContainer<WindowContainer> {
         final ActivityStack oldStack = ((ActivityStack) oldParent);
         final ActivityStack newStack = ((ActivityStack) newParent);
 
+        // Task is going to be removed, clean it up before detaching from hierarchy.
+        if (oldParent != null && newParent == null) {
+            cleanUpResourcesForDestroy();
+        }
+
         mStack = newStack;
 
         super.onParentChanged(newParent, oldParent);
@@ -1011,12 +1016,6 @@ class Task extends WindowContainer<WindowContainer> {
             // before we unified Task level. Look into if this can be done in a better place.
             updateOverrideConfigurationFromLaunchBounds();
         }
-
-        // Task is being removed.
-        if (oldParent != null && newParent == null) {
-            cleanUpResourcesForDestroy();
-        }
-
 
         // Update task bounds if needed.
         adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
@@ -2722,21 +2721,21 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     // TODO(proto-merge): Remove once protos for TaskRecord and Task are merged.
-    void writeToProtoInnerTaskOnly(ProtoOutputStream proto, long fieldId,
+    void dumpDebugInnerTaskOnly(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
             return;
         }
 
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER, logLevel);
+        super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(TaskProto.ID, mTaskId);
         forAllActivities((r) -> {
-            r.writeToProto(proto, APP_WINDOW_TOKENS, logLevel);
+            r.dumpDebug(proto, APP_WINDOW_TOKENS, logLevel);
         });
         proto.write(FILLS_PARENT, matchParentBounds());
-        getBounds().writeToProto(proto, TaskProto.BOUNDS);
-        mOverrideDisplayedBounds.writeToProto(proto, DISPLAYED_BOUNDS);
+        getBounds().dumpDebug(proto, TaskProto.BOUNDS);
+        mOverrideDisplayedBounds.dumpDebug(proto, DISPLAYED_BOUNDS);
         if (mSurfaceControl != null) {
             proto.write(SURFACE_WIDTH, mSurfaceControl.getWidth());
             proto.write(SURFACE_HEIGHT, mSurfaceControl.getHeight());
@@ -2931,22 +2930,22 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId,
+    public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
             return;
         }
 
         final long token = proto.start(fieldId);
-        writeToProtoInnerTaskOnly(proto, TASK, logLevel);
+        dumpDebugInnerTaskOnly(proto, TASK, logLevel);
         proto.write(com.android.server.am.TaskRecordProto.ID, mTaskId);
 
         forAllActivities((r) -> {
-            r.writeToProto(proto, ACTIVITIES);
+            r.dumpDebug(proto, ACTIVITIES);
         });
         proto.write(STACK_ID, getStackId());
         if (mLastNonFullscreenBounds != null) {
-            mLastNonFullscreenBounds.writeToProto(proto, LAST_NON_FULLSCREEN_BOUNDS);
+            mLastNonFullscreenBounds.dumpDebug(proto, LAST_NON_FULLSCREEN_BOUNDS);
         }
         if (realActivity != null) {
             proto.write(REAL_ACTIVITY, realActivity.flattenToShortString());
@@ -2961,7 +2960,7 @@ class Task extends WindowContainer<WindowContainer> {
 
         if (!matchParentBounds()) {
             final Rect bounds = getRequestedOverrideBounds();
-            bounds.writeToProto(proto, com.android.server.am.TaskRecordProto.BOUNDS);
+            bounds.dumpDebug(proto, com.android.server.am.TaskRecordProto.BOUNDS);
         }
         proto.write(MIN_WIDTH, mMinWidth);
         proto.write(MIN_HEIGHT, mMinHeight);

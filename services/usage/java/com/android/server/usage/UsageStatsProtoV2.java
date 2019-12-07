@@ -355,7 +355,7 @@ final class UsageStatsProtoV2 {
     private static void writeConfigStats(ProtoOutputStream proto, final long statsBeginTime,
             final ConfigurationStats configStats, boolean isActive)
             throws IllegalArgumentException {
-        configStats.mConfiguration.writeToProto(proto,
+        configStats.mConfiguration.dumpDebug(proto,
                 IntervalStatsObfuscatedProto.Configuration.CONFIG);
         proto.write(IntervalStatsObfuscatedProto.Configuration.LAST_TIME_ACTIVE_MS,
                 configStats.mLastTimeActive - statsBeginTime);
@@ -385,7 +385,7 @@ final class UsageStatsProtoV2 {
         switch (event.mEventType) {
             case UsageEvents.Event.CONFIGURATION_CHANGE:
                 if (event.mConfiguration != null) {
-                    event.mConfiguration.writeToProto(proto, EventObfuscatedProto.CONFIG);
+                    event.mConfiguration.dumpDebug(proto, EventObfuscatedProto.CONFIG);
                 }
                 break;
             case UsageEvents.Event.STANDBY_BUCKET_CHANGED:
@@ -749,7 +749,7 @@ final class UsageStatsProtoV2 {
         switch (event.mEventType) {
             case UsageEvents.Event.CONFIGURATION_CHANGE:
                 if (event.mConfiguration != null) {
-                    event.mConfiguration.writeToProto(proto, PendingEventProto.CONFIG);
+                    event.mConfiguration.dumpDebug(proto, PendingEventProto.CONFIG);
                 }
                 break;
             case UsageEvents.Event.STANDBY_BUCKET_CHANGED:
