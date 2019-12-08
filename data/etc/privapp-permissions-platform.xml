@@ -204,7 +204,7 @@ applications that come with the platform
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.providers.media">
+    <privapp-permissions package="com.android.providers.media.module">
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
