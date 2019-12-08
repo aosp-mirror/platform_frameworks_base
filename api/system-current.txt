@@ -6981,6 +6981,11 @@ package android.provider {
     field public static final int FLAG_REMOVABLE_USB = 524288; // 0x80000
   }
 
+  public final class MediaStore {
+    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE) public static java.util.Set<java.lang.String> getRecentExternalVolumeNames(@NonNull android.content.Context);
+    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE) public static java.util.Collection<java.io.File> getVolumeScanPaths(@NonNull String) throws java.io.FileNotFoundException;
+  }
+
   public abstract class SearchIndexableData {
     ctor public SearchIndexableData();
     ctor public SearchIndexableData(android.content.Context);

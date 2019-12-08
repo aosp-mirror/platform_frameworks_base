@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.RemoteException;
 import android.telephony.ims.RcsContactUceCapability;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
@@ -33,7 +32,7 @@ import android.telephony.ims.stub.RcsPresenceExchangeImplBase;
 import android.telephony.ims.stub.RcsSipOptionsImplBase;
 import android.util.Log;
 
-import com.android.internal.util.FunctionalUtils;
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,6 +42,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 /**
  * Base implementation of the RcsFeature APIs. Any ImsService wishing to support RCS should extend
@@ -150,13 +150,13 @@ public class RcsFeature extends ImsFeature {
 
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
         // the future to return.
-        private void executeMethodAsync(FunctionalUtils.ThrowingRunnable r, String errorLogName)
+        private void executeMethodAsync(Runnable r, String errorLogName)
                 throws RemoteException {
             // call with a clean calling identity on the executor and wait indefinitely for the
             // future to return.
             try {
                 CompletableFuture.runAsync(
-                        () -> Binder.withCleanCallingIdentity(r), mExecutor).join();
+                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
             } catch (CancellationException | CompletionException e) {
                 Log.w(LOG_TAG, "RcsFeatureBinder - " + errorLogName + " exception: "
                         + e.getMessage());
@@ -164,12 +164,12 @@ public class RcsFeature extends ImsFeature {
             }
         }
 
-        private <T> T executeMethodAsyncForResult(FunctionalUtils.ThrowingSupplier<T> r,
+        private <T> T executeMethodAsyncForResult(Supplier<T> r,
                 String errorLogName) throws RemoteException {
             // call with a clean calling identity on the executor and wait indefinitely for the
             // future to return.
             CompletableFuture<T> future = CompletableFuture.supplyAsync(
-                    () -> Binder.withCleanCallingIdentity(r), mExecutor);
+                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor);
             try {
                 return future.get();
             } catch (ExecutionException | InterruptedException e) {
