@@ -4417,4 +4417,18 @@ public class ActivityManager {
             }
         }
     }
+
+    /**
+     * Get packages of bugreport-whitelisted apps to handle a bug report.
+     *
+     * @return packages of bugreport-whitelisted apps to handle a bug report.
+     * @hide
+     */
+    public List<String> getBugreportWhitelistedPackages() {
+        try {
+            return getService().getBugreportWhitelistedPackages();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

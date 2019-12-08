@@ -8392,6 +8392,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         return BugReportHandlerUtil.launchBugReportHandlerApp(mContext);
     }
 
+    /**
+     * Get packages of bugreport-whitelisted apps to handle a bug report.
+     *
+     * @return packages of bugreport-whitelisted apps to handle a bug report.
+     */
+    @Override
+    public List<String> getBugreportWhitelistedPackages() {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_DEBUGGING,
+                "getBugreportWhitelistedPackages");
+        return new ArrayList<>(SystemConfig.getInstance().getBugreportWhitelistedPackages());
+    }
+
     public void registerProcessObserver(IProcessObserver observer) {
         enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
                 "registerProcessObserver()");
