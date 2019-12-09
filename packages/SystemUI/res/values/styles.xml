@@ -15,6 +15,7 @@
 -->
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="BubbleOverflow" parent="@android:style/Theme.NoTitleBar"></style>
 
     <style name="ClearAllButtonDefaultMargins">
         <item name="android:layout_marginStart">0dp</item>

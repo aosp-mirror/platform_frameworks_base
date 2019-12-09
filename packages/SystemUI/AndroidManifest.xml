@@ -325,6 +325,14 @@
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
 
+        <activity
+            android:name=".bubbles.BubbleOverflowActivity"
+            android:theme="@style/BubbleOverflow"
+            android:excludeFromRecents="true"
+            android:documentLaunchMode="always"
+            android:resizeableActivity="true">
+        </activity>
+
         <activity android:name=".tuner.TunerActivity"
                   android:enabled="false"
                   android:icon="@drawable/tuner"
