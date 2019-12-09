@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -40,7 +41,6 @@ import android.net.WifiKey;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
-import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
@@ -473,51 +473,6 @@ public class AccessPointTest {
     }
 
     @Test
-    public void testSummaryString_showsAvaiableViaCarrier() {
-        String carrierName = "Test Carrier";
-        ScanResult result = new ScanResult();
-        result.BSSID = "00:11:22:33:44:55";
-        result.capabilities = "EAP";
-        result.isCarrierAp = true;
-        result.carrierApEapType = WifiEnterpriseConfig.Eap.SIM;
-        result.carrierName = carrierName;
-
-        AccessPoint ap = new AccessPoint(mContext, Collections.singletonList(result));
-        assertThat(ap.getSummary()).isEqualTo(String.format(mContext.getString(
-                R.string.available_via_carrier), carrierName));
-        assertThat(ap.isCarrierAp()).isEqualTo(true);
-        assertThat(ap.getCarrierApEapType()).isEqualTo(WifiEnterpriseConfig.Eap.SIM);
-        assertThat(ap.getCarrierName()).isEqualTo(carrierName);
-    }
-
-    @Test
-    public void testSummaryString_showsConnectedViaCarrier() {
-        int networkId = 123;
-        int rssi = -55;
-        String carrierName = "Test Carrier";
-        WifiConfiguration config = new WifiConfiguration();
-        config.networkId = networkId;
-        WifiInfo wifiInfo = new WifiInfo();
-        wifiInfo.setNetworkId(networkId);
-        wifiInfo.setRssi(rssi);
-
-        NetworkInfo networkInfo =
-                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
-        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, "", "");
-
-        AccessPoint ap = new TestAccessPointBuilder(mContext)
-                .setNetworkInfo(networkInfo)
-                .setNetworkId(networkId)
-                .setRssi(rssi)
-                .setWifiInfo(wifiInfo)
-                .setIsCarrierAp(true)
-                .setCarrierName(carrierName)
-                .build();
-        assertThat(ap.getSummary()).isEqualTo(String.format(mContext.getString(
-                R.string.connected_via_carrier), carrierName));
-    }
-
-    @Test
     public void testSummaryString_showsDisconnected() {
         AccessPoint ap = createAccessPointWithScanResultCache();
         ap.update(new WifiConfiguration());
@@ -578,31 +533,6 @@ public class AccessPointTest {
                 .setWifiInfo(wifiInfo)
                 .build();
         assertThat(ap.getSummary()).isEqualTo("Connected via Test App");
-    }
-
-    @Test
-    public void testSetScanResultWithCarrierInfo() {
-        String ssid = "ssid";
-        AccessPoint ap = new TestAccessPointBuilder(mContext).setSsid(ssid).build();
-        assertThat(ap.isCarrierAp()).isEqualTo(false);
-        assertThat(ap.getCarrierApEapType()).isEqualTo(WifiEnterpriseConfig.Eap.NONE);
-        assertThat(ap.getCarrierName()).isEqualTo(null);
-
-        int carrierApEapType = WifiEnterpriseConfig.Eap.SIM;
-        String carrierName = "Test Carrier";
-        ScanResult scanResult = new ScanResult();
-        scanResult.SSID = ssid;
-        scanResult.BSSID = "00:11:22:33:44:55";
-        scanResult.capabilities = "";
-        scanResult.isCarrierAp = true;
-        scanResult.carrierApEapType = carrierApEapType;
-        scanResult.carrierName = carrierName;
-
-
-        ap.setScanResults(Collections.singletonList(scanResult));
-        assertThat(ap.isCarrierAp()).isEqualTo(true);
-        assertThat(ap.getCarrierApEapType()).isEqualTo(carrierApEapType);
-        assertThat(ap.getCarrierName()).isEqualTo(carrierName);
     }
 
     private ScoredNetwork buildScoredNetworkWithMockBadgeCurve() {
@@ -1435,8 +1365,15 @@ public class AccessPointTest {
      */
     @Test
     public void testOsuAccessPointSummary_showsProvisioningUpdates() {
-        AccessPoint osuAccessPoint = new AccessPoint(mContext, createOsuProvider(),
+        OsuProvider provider = createOsuProvider();
+        Context spyContext = spy(new ContextWrapper(mContext));
+        AccessPoint osuAccessPoint = new AccessPoint(spyContext, provider,
                 mScanResults);
+        Map<OsuProvider, PasspointConfiguration> osuProviderConfigMap = new HashMap<>();
+        osuProviderConfigMap.put(provider, null);
+        when(spyContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mMockWifiManager);
+        when(mMockWifiManager.getMatchingPasspointConfigsForOsuProviders(
+                Collections.singleton(provider))).thenReturn(osuProviderConfigMap);
 
         osuAccessPoint.setListener(mMockAccessPointListener);
 
