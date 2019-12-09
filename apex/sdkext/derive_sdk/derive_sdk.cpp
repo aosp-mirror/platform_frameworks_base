@@ -68,7 +68,7 @@ int main(int, char**) {
     auto itr = std::min_element(versions.begin(), versions.end());
     std::string prop_value = itr == versions.end() ? "0" : std::to_string(*itr);
 
-    if (!android::base::SetProperty("persist.com.android.sdkext.sdk_info", prop_value)) {
+    if (!android::base::SetProperty("ro.build.version.extensions.r", prop_value)) {
         LOG(ERROR) << "failed to set sdk_info prop";
         return EXIT_FAILURE;
     }
