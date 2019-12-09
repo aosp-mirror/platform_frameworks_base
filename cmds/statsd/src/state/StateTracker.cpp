@@ -139,6 +139,13 @@ void StateTracker::handlePartialReset(const int64_t eventTimeNs,
                                       const HashableDimensionKey& primaryKey) {
     VLOG("StateTracker handle partial reset");
     if (mStateMap.find(primaryKey) != mStateMap.end()) {
+        for (auto l : mListeners) {
+            auto sl = l.promote();
+            if (sl != nullptr) {
+                sl->onStateChanged(eventTimeNs, mAtomId, primaryKey,
+                                   mStateMap.find(primaryKey)->second.state, mDefaultState);
+            }
+        }
         mStateMap.erase(primaryKey);
     }
 }
