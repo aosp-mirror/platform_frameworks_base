@@ -12,18 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/matchers/SimpleLogMatchingTracker.h"
 #include "src/metrics/GaugeMetricProducer.h"
-#include "src/stats_log_util.h"
-#include "logd/LogEvent.h"
-#include "metrics_test_helper.h"
-#include "tests/statsd_test_util.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <math.h>
 #include <stdio.h>
+
 #include <vector>
+
+#include "logd/LogEvent.h"
+#include "metrics_test_helper.h"
+#include "src/matchers/SimpleLogMatchingTracker.h"
+#include "src/metrics/MetricProducer.h"
+#include "src/stats_log_util.h"
+#include "tests/statsd_test_util.h"
 
 using namespace testing;
 using android::sp;
@@ -782,6 +785,70 @@ TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput) {
     EXPECT_EQ(4, bucketIt->first.getDimensionKeyInWhat().getValues().begin()->mValue.int_value);
     EXPECT_EQ(5, bucketIt->second.back().mGaugeAtoms[0].mFields->begin()->mValue.int_value);
     EXPECT_EQ(6, bucketIt->second.back().mGaugeAtoms[1].mFields->begin()->mValue.int_value);
+}
+
+/*
+ * Test that BUCKET_TOO_SMALL dump reason is logged when a flushed bucket size
+ * is smaller than the "min_bucket_size_nanos" specified in the metric config.
+ */
+TEST(GaugeMetricProducerTest_BucketDrop, TestBucketDropWhenBucketTooSmall) {
+    GaugeMetric metric;
+    metric.set_id(metricId);
+    metric.set_bucket(FIVE_MINUTES);
+    metric.set_sampling_type(GaugeMetric::FIRST_N_SAMPLES);
+    metric.set_min_bucket_size_nanos(10000000000);  // 10 seconds
+
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard = new EventMatcherWizard({
+        new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // Bucket start.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs);
+                event->write("field1");
+                event->write(10);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
+
+    int triggerId = 5;
+    GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
+                                      logEventMatcherIndex, eventMatcherWizard,
+                                      tagId, triggerId, tagId, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
+
+    LogEvent trigger(triggerId, bucketStartTimeNs + 3);
+    trigger.init();
+    gaugeProducer.onMatchedLogEvent(1 /*log matcher index*/, trigger);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    gaugeProducer.onDumpReport(bucketStartTimeNs + 9000000, true /* include recent buckets */,
+                                true, FAST /* dump_latency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_gauge_metrics());
+    EXPECT_EQ(0, report.gauge_metrics().data_size());
+    EXPECT_EQ(1, report.gauge_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.gauge_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 9000000),
+              report.gauge_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(1, report.gauge_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.gauge_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::BUCKET_TOO_SMALL, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 9000000), dropEvent.drop_time_millis());
 }
 
 }  // namespace statsd

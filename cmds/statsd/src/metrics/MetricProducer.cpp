@@ -19,6 +19,7 @@
 
 #include "MetricProducer.h"
 
+#include "../guardrail/StatsdStats.h"
 #include "state/StateTracker.h"
 
 using android::util::FIELD_COUNT_REPEATED;
@@ -287,6 +288,17 @@ void MetricProducer::getMappedStateValue(const int32_t atomId, const HashableDim
         // set mValue to group_id
         value->mValue.setLong(valueIt->second);
     }
+}
+
+DropEvent MetricProducer::buildDropEvent(const int64_t dropTimeNs, const BucketDropReason reason) {
+    DropEvent event;
+    event.reason = reason;
+    event.dropTimeNs = dropTimeNs;
+    return event;
+}
+
+bool MetricProducer::maxDropEventsReached() {
+    return mCurrentSkippedBucket.dropEvents.size() >= StatsdStats::kMaxLoggedBucketDropEvents;
 }
 
 }  // namespace statsd
