@@ -1584,10 +1584,8 @@ class StorageManagerService extends IStorageManager.Stub
         // Snapshot feature flag used for this boot
         SystemProperties.set(StorageManager.PROP_ISOLATED_STORAGE_SNAPSHOT, Boolean.toString(
                 SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, true)));
-        SystemProperties.set(StorageManager.PROP_FUSE_SNAPSHOT, Boolean.toString(
-                SystemProperties.getBoolean(StorageManager.PROP_FUSE, false)));
 
-        mIsFuseEnabled = SystemProperties.getBoolean(StorageManager.PROP_FUSE_SNAPSHOT, false);
+        mIsFuseEnabled = SystemProperties.getBoolean(StorageManager.PROP_FUSE, false);
         mContext = context;
         mResolver = mContext.getContentResolver();
         mCallbacks = new Callbacks(FgThread.get().getLooper());
@@ -1647,12 +1645,22 @@ class StorageManagerService extends IStorageManager.Stub
      *  and updates PROP_FUSE (reboots if changed).
      */
     private void updateFusePropFromSettings() {
-        Boolean settingsFuseFlag = SystemProperties.getBoolean((FeatureFlagUtils.PERSIST_PREFIX
-                + FeatureFlagUtils.SETTINGS_FUSE_FLAG), false);
-        Slog.d(TAG, "The value of Settings Fuse Flag is " + settingsFuseFlag);
-        if (SystemProperties.getBoolean(StorageManager.PROP_FUSE, false) != settingsFuseFlag) {
+        String settingsFuseFlag = SystemProperties.get(StorageManager.PROP_SETTINGS_FUSE);
+        Slog.d(TAG, "The value of Settings Fuse Flag is "
+                + (settingsFuseFlag == null || settingsFuseFlag.isEmpty()
+                ? "null" : settingsFuseFlag));
+        // Set default value of PROP_SETTINGS_FUSE and PROP_FUSE if it
+        // is unset (neither true nor false, this happens only on the first boot
+        // after wiping data partition).
+        if (settingsFuseFlag == null || settingsFuseFlag.isEmpty()) {
+            SystemProperties.set(StorageManager.PROP_SETTINGS_FUSE, "false");
+            SystemProperties.set(StorageManager.PROP_FUSE, "false");
+            return;
+        }
+
+        if (!SystemProperties.get(StorageManager.PROP_FUSE).equals(settingsFuseFlag)) {
             Slog.d(TAG, "Set persist.sys.fuse to " + settingsFuseFlag);
-            SystemProperties.set(StorageManager.PROP_FUSE, Boolean.toString(settingsFuseFlag));
+            SystemProperties.set(StorageManager.PROP_FUSE, settingsFuseFlag);
             // Perform hard reboot to kick policy into place
             mContext.getSystemService(PowerManager.class).reboot("Reboot device for FUSE system"
                     + "property change to take effect");
