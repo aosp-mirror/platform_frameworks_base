@@ -223,7 +223,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.RoSystemProperties;
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
@@ -1650,10 +1649,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // No need to do a permission check, because the ACTION_CARRIER_CONFIG_CHANGED
             // broadcast is protected and can't be spoofed. Runs on a background handler thread.
 
-            if (!intent.hasExtra(PhoneConstants.SUBSCRIPTION_KEY)) {
+            if (!intent.hasExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX)) {
                 return;
             }
-            final int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY, -1);
+            final int subId = intent.getIntExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, -1);
 
             // Get all of our cross-process communication with telephony out of
             // the way before we acquire internal locks.
