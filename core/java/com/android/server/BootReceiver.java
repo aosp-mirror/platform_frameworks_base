@@ -66,10 +66,15 @@ import org.xmlpull.v1.XmlSerializer;
 public class BootReceiver extends BroadcastReceiver {
     private static final String TAG = "BootReceiver";
 
+    private static final String TAG_TRUNCATED = "[[TRUNCATED]]\n";
+
     // Maximum size of a logged event (files get truncated if they're longer).
     // Give userdebug builds a larger max to capture extra debug, esp. for last_kmsg.
     private static final int LOG_SIZE =
         SystemProperties.getInt("ro.debuggable", 0) == 1 ? 98304 : 65536;
+    private static final int LASTK_LOG_SIZE =
+        SystemProperties.getInt("ro.debuggable", 0) == 1 ? 196608 : 65536;
+    private static final int GMSCORE_LASTK_LOG_SIZE = 196608;
 
     private static final File TOMBSTONE_DIR = new File("/data/tombstones");
     private static final String TAG_TOMBSTONE = "SYSTEM_TOMBSTONE";
@@ -224,12 +229,12 @@ public class BootReceiver extends BroadcastReceiver {
             if (db != null) db.addText("SYSTEM_BOOT", headers);
 
             // Negative sizes mean to take the *tail* of the file (see FileUtils.readTextFile())
-            addFileWithFootersToDropBox(db, timestamps, headers, lastKmsgFooter,
-                    "/proc/last_kmsg", -LOG_SIZE, "SYSTEM_LAST_KMSG");
-            addFileWithFootersToDropBox(db, timestamps, headers, lastKmsgFooter,
-                    "/sys/fs/pstore/console-ramoops", -LOG_SIZE, "SYSTEM_LAST_KMSG");
-            addFileWithFootersToDropBox(db, timestamps, headers, lastKmsgFooter,
-                    "/sys/fs/pstore/console-ramoops-0", -LOG_SIZE, "SYSTEM_LAST_KMSG");
+            addLastkToDropBox(db, timestamps, headers, lastKmsgFooter,
+                    "/proc/last_kmsg", -LASTK_LOG_SIZE, "SYSTEM_LAST_KMSG");
+            addLastkToDropBox(db, timestamps, headers, lastKmsgFooter,
+                    "/sys/fs/pstore/console-ramoops", -LASTK_LOG_SIZE, "SYSTEM_LAST_KMSG");
+            addLastkToDropBox(db, timestamps, headers, lastKmsgFooter,
+                    "/sys/fs/pstore/console-ramoops-0", -LASTK_LOG_SIZE, "SYSTEM_LAST_KMSG");
             addFileToDropBox(db, timestamps, headers, "/cache/recovery/log", -LOG_SIZE,
                     "SYSTEM_RECOVERY_LOG");
             addFileToDropBox(db, timestamps, headers, "/cache/recovery/last_kmsg",
@@ -278,6 +283,23 @@ public class BootReceiver extends BroadcastReceiver {
         sTombstoneObserver.startWatching();
     }
 
+    private static void addLastkToDropBox(
+            DropBoxManager db, HashMap<String, Long> timestamps,
+            String headers, String footers, String filename, int maxSize,
+            String tag) throws IOException {
+        int extraSize = headers.length() + TAG_TRUNCATED.length() + footers.length();
+        // GMSCore will do 2nd truncation to be 192KiB
+        // LASTK_LOG_SIZE + extraSize must be less than GMSCORE_LASTK_LOG_SIZE
+        if (LASTK_LOG_SIZE + extraSize > GMSCORE_LASTK_LOG_SIZE) {
+          if (GMSCORE_LASTK_LOG_SIZE > extraSize) {
+            maxSize = -(GMSCORE_LASTK_LOG_SIZE - extraSize);
+          } else {
+            maxSize = 0;
+          }
+        }
+        addFileWithFootersToDropBox(db, timestamps, headers, footers, filename, maxSize, tag);
+    }
+
     private static void addFileToDropBox(
             DropBoxManager db, HashMap<String, Long> timestamps,
             String headers, String filename, int maxSize, String tag) throws IOException {
@@ -301,7 +323,7 @@ public class BootReceiver extends BroadcastReceiver {
         timestamps.put(filename, fileTime);
 
 
-        String fileContents = FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n");
+        String fileContents = FileUtils.readTextFile(file, maxSize, TAG_TRUNCATED);
         String text = headers + fileContents + footers;
         // Create an additional report for system server native crashes, with a special tag.
         if (tag.equals(TAG_TOMBSTONE) && fileContents.contains(">>> system_server <<<")) {
@@ -345,7 +367,7 @@ public class BootReceiver extends BroadcastReceiver {
 
         timestamps.put(tag, fileTime);
 
-        String log = FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n");
+        String log = FileUtils.readTextFile(file, maxSize, TAG_TRUNCATED);
         StringBuilder sb = new StringBuilder();
         for (String line : log.split("\n")) {
             if (line.contains("audit")) {
@@ -370,7 +392,7 @@ public class BootReceiver extends BroadcastReceiver {
         long fileTime = file.lastModified();
         if (fileTime <= 0) return;  // File does not exist
 
-        String log = FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n");
+        String log = FileUtils.readTextFile(file, maxSize, TAG_TRUNCATED);
         Pattern pattern = Pattern.compile(FS_STAT_PATTERN);
         String lines[] = log.split("\n");
         int lineNumber = 0;
