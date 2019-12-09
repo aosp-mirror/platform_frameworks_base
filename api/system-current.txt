@@ -8429,14 +8429,6 @@ package android.telephony {
     field public static final String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
   }
 
-  public static final class CarrierConfigManager.Wifi {
-    field public static final String KEY_CARRIER_CONNECTION_MANAGER_PACKAGE_STRING = "wifi.carrier_connection_manager_package_string";
-    field public static final String KEY_CARRIER_PROFILES_VERSION_INT = "wifi.carrier_profiles_version_int";
-    field public static final String KEY_NETWORK_PROFILES_STRING_ARRAY = "wifi.network_profiles_string_array";
-    field public static final String KEY_PASSPOINT_PROFILES_STRING_ARRAY = "wifi.passpoint_profiles_string_array";
-    field public static final String KEY_PREFIX = "wifi.";
-  }
-
   public final class CarrierRestrictionRules implements android.os.Parcelable {
     method @NonNull public java.util.List<java.lang.Boolean> areCarrierIdentifiersAllowed(@NonNull java.util.List<android.service.carrier.CarrierIdentifier>);
     method public int describeContents();
