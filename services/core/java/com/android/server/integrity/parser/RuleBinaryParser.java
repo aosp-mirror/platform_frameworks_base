@@ -36,6 +36,7 @@ import android.content.integrity.Rule;
 
 import com.android.server.integrity.model.BitInputStream;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,15 +57,14 @@ public class RuleBinaryParser implements RuleParser {
     @Override
     public List<Rule> parse(InputStream inputStream) throws RuleParseException {
         try {
-            byte[] ruleBytes = new byte[inputStream.available()];
-            inputStream.read(ruleBytes);
-            return parse(ruleBytes);
+            BitInputStream bitInputStream = new BitInputStream(inputStream);
+            return parseRules(bitInputStream);
         } catch (Exception e) {
             throw new RuleParseException(e.getMessage(), e);
         }
     }
 
-    private List<Rule> parseRules(BitInputStream bitInputStream) {
+    private List<Rule> parseRules(BitInputStream bitInputStream) throws IOException {
         List<Rule> parsedRules = new ArrayList<>();
 
         // Read the rule binary file format version.
@@ -79,7 +79,7 @@ public class RuleBinaryParser implements RuleParser {
         return parsedRules;
     }
 
-    private Rule parseRule(BitInputStream bitInputStream) {
+    private Rule parseRule(BitInputStream bitInputStream) throws IOException {
         Formula formula = parseFormula(bitInputStream);
         int effect = bitInputStream.getNext(EFFECT_BITS);
 
@@ -90,7 +90,7 @@ public class RuleBinaryParser implements RuleParser {
         return new Rule(formula, effect);
     }
 
-    private Formula parseFormula(BitInputStream bitInputStream) {
+    private Formula parseFormula(BitInputStream bitInputStream) throws IOException {
         int separator = bitInputStream.getNext(SEPARATOR_BITS);
         switch (separator) {
             case ATOMIC_FORMULA_START:
@@ -105,7 +105,7 @@ public class RuleBinaryParser implements RuleParser {
         }
     }
 
-    private CompoundFormula parseCompoundFormula(BitInputStream bitInputStream) {
+    private CompoundFormula parseCompoundFormula(BitInputStream bitInputStream) throws IOException {
         int connector = bitInputStream.getNext(CONNECTOR_BITS);
         List<Formula> formulas = new ArrayList<>();
 
@@ -118,7 +118,7 @@ public class RuleBinaryParser implements RuleParser {
         return new CompoundFormula(connector, formulas);
     }
 
-    private AtomicFormula parseAtomicFormula(BitInputStream bitInputStream) {
+    private AtomicFormula parseAtomicFormula(BitInputStream bitInputStream) throws IOException {
         int key = bitInputStream.getNext(KEY_BITS);
         int operator = bitInputStream.getNext(OPERATOR_BITS);
 

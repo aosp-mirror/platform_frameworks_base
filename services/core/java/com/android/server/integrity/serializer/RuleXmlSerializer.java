@@ -127,7 +127,7 @@ public class RuleXmlSerializer implements RuleSerializer {
         xmlSerializer.startTag(NAMESPACE, ATOMIC_FORMULA_TAG);
         serializeAttributeValue(
                 KEY_ATTRIBUTE, String.valueOf(atomicFormula.getKey()), xmlSerializer);
-        if (atomicFormula instanceof AtomicFormula.StringAtomicFormula) {
+        if (atomicFormula.getTag() == AtomicFormula.STRING_ATOMIC_FORMULA_TAG) {
             serializeAttributeValue(
                     VALUE_ATTRIBUTE,
                     ((AtomicFormula.StringAtomicFormula) atomicFormula).getValue(),
@@ -137,7 +137,7 @@ public class RuleXmlSerializer implements RuleSerializer {
                     String.valueOf(
                             ((AtomicFormula.StringAtomicFormula) atomicFormula).getIsHashedValue()),
                     xmlSerializer);
-        } else if (atomicFormula instanceof AtomicFormula.IntAtomicFormula) {
+        } else if (atomicFormula.getTag() == AtomicFormula.INT_ATOMIC_FORMULA_TAG) {
             serializeAttributeValue(
                     OPERATOR_ATTRIBUTE,
                     String.valueOf(((AtomicFormula.IntAtomicFormula) atomicFormula).getOperator()),
@@ -146,7 +146,7 @@ public class RuleXmlSerializer implements RuleSerializer {
                     VALUE_ATTRIBUTE,
                     String.valueOf(((AtomicFormula.IntAtomicFormula) atomicFormula).getValue()),
                     xmlSerializer);
-        } else if (atomicFormula instanceof AtomicFormula.BooleanAtomicFormula) {
+        } else if (atomicFormula.getTag() == AtomicFormula.BOOLEAN_ATOMIC_FORMULA_TAG) {
             serializeAttributeValue(
                     VALUE_ATTRIBUTE,
                     String.valueOf(((AtomicFormula.BooleanAtomicFormula) atomicFormula).getValue()),
