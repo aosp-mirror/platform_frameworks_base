@@ -78,7 +78,7 @@ public:
             return;
         }
         if (mIsPulled && mCondition) {
-            pullAndMatchEventsLocked(eventTimeNs, mCondition);
+            pullAndMatchEventsLocked(eventTimeNs);
         }
         flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
     };
@@ -188,11 +188,10 @@ private:
 
     bool hitFullBucketGuardRailLocked(const MetricDimensionKey& newKey);
 
-    void pullAndMatchEventsLocked(const int64_t timestampNs, ConditionState condition);
+    void pullAndMatchEventsLocked(const int64_t timestampNs);
 
     void accumulateEvents(const std::vector<std::shared_ptr<LogEvent>>& allData,
-                          int64_t originalPullTimeNs, int64_t eventElapsedTimeNs,
-                          ConditionState condition);
+                          int64_t originalPullTimeNs, int64_t eventElapsedTimeNs);
 
     ValueBucket buildPartialBucket(int64_t bucketEndTime,
                                    const std::vector<Interval>& intervals);

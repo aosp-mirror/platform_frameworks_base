@@ -159,7 +159,7 @@ ValueMetricProducer::ValueMetricProducer(
 
      // Kicks off the puller immediately if condition is true and diff based.
     if (mIsActive && mIsPulled && mCondition == ConditionState::kTrue && mUseDiff) {
-        pullAndMatchEventsLocked(mCurrentBucketStartTimeNs, mCondition);
+        pullAndMatchEventsLocked(mCurrentBucketStartTimeNs);
     }
     // Now that activations are processed, start the condition timer if needed.
     mConditionTimer.onConditionChanged(mIsActive && mCondition == ConditionState::kTrue,
@@ -216,7 +216,7 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                     invalidateCurrentBucket();
                     break;
                 case NO_TIME_CONSTRAINTS:
-                    pullAndMatchEventsLocked(dumpTimeNs, mCondition);
+                    pullAndMatchEventsLocked(dumpTimeNs);
                     break;
             }
         }
@@ -366,7 +366,7 @@ void ValueMetricProducer::onActiveStateChangedLocked(const int64_t& eventTimeNs)
     // Pull on active state changes.
     if (!isEventTooLate) {
         if (mIsPulled) {
-            pullAndMatchEventsLocked(eventTimeNs, mCondition);
+            pullAndMatchEventsLocked(eventTimeNs);
         }
         // When active state changes from true to false, clear diff base but don't
         // reset other counters as we may accumulate more value in the bucket.
@@ -425,7 +425,7 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
     // called before #onDataPulled.
     if (mIsPulled &&
         (newCondition == ConditionState::kTrue || mCondition == ConditionState::kTrue)) {
-        pullAndMatchEventsLocked(eventTimeNs, newCondition);
+        pullAndMatchEventsLocked(eventTimeNs);
     }
 
     // For metrics that use diff, when condition changes from true to false,
@@ -443,8 +443,7 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
     mConditionTimer.onConditionChanged(mCondition, eventTimeNs);
 }
 
-void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs,
-        ConditionState condition) {
+void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
     vector<std::shared_ptr<LogEvent>> allData;
     if (!mPullerManager->Pull(mPullTagId, &allData)) {
         ALOGE("Stats puller failed for tag: %d at %lld", mPullTagId, (long long)timestampNs);
@@ -452,7 +451,7 @@ void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs,
         return;
     }
 
-    accumulateEvents(allData, timestampNs, timestampNs, condition);
+    accumulateEvents(allData, timestampNs, timestampNs);
 }
 
 int64_t ValueMetricProducer::calcPreviousBucketEndTime(const int64_t currentTimeNs) {
@@ -474,7 +473,7 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
             if (isEventLate) {
                 // If the event is late, we are in the middle of a bucket. Just
                 // process the data without trying to snap the data to the nearest bucket.
-                accumulateEvents(allData, originalPullTimeNs, originalPullTimeNs, mCondition);
+                accumulateEvents(allData, originalPullTimeNs, originalPullTimeNs);
             } else {
                 // For scheduled pulled data, the effective event time is snap to the nearest
                 // bucket end. In the case of waking up from a deep sleep state, we will
@@ -488,7 +487,7 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
                 int64_t bucketEndTime = calcPreviousBucketEndTime(originalPullTimeNs) - 1;
                 StatsdStats::getInstance().noteBucketBoundaryDelayNs(
                         mMetricId, originalPullTimeNs - bucketEndTime);
-                accumulateEvents(allData, originalPullTimeNs, bucketEndTime, mCondition);
+                accumulateEvents(allData, originalPullTimeNs, bucketEndTime);
             }
         }
     }
@@ -499,8 +498,7 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
 }
 
 void ValueMetricProducer::accumulateEvents(const std::vector<std::shared_ptr<LogEvent>>& allData,
-                                           int64_t originalPullTimeNs, int64_t eventElapsedTimeNs,
-                                           ConditionState condition) {
+                                           int64_t originalPullTimeNs, int64_t eventElapsedTimeNs) {
     bool isEventLate = eventElapsedTimeNs < mCurrentBucketStartTimeNs;
     if (isEventLate) {
         VLOG("Skip bucket end pull due to late arrival: %lld vs %lld",
