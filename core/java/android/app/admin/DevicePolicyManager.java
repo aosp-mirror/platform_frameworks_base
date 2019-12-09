@@ -5570,7 +5570,12 @@ public class DevicePolicyManager {
      * device, for this user. After setting this, no applications running as this user will be able
      * to access any cameras on the device.
      * <p>
-     * If the caller is device owner, then the restriction will be applied to all users.
+     * This method can be called on the {@link DevicePolicyManager} instance,
+     * returned by {@link #getParentProfileInstance(ComponentName)}, where the caller must be
+     * the profile owner of an organization-owned managed profile.
+     * <p>
+     * If the caller is device owner or called on the parent instance, then the
+     * restriction will be applied to all users.
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} to be able to call this method; if it has
@@ -5582,10 +5587,9 @@ public class DevicePolicyManager {
      *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA}.
      */
     public void setCameraDisabled(@NonNull ComponentName admin, boolean disabled) {
-        throwIfParentInstance("setCameraDisabled");
         if (mService != null) {
             try {
-                mService.setCameraDisabled(admin, disabled);
+                mService.setCameraDisabled(admin, disabled, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -5595,11 +5599,15 @@ public class DevicePolicyManager {
     /**
      * Determine whether or not the device's cameras have been disabled for this user,
      * either by the calling admin, if specified, or all admins.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance,
+     * returned by {@link #getParentProfileInstance(ComponentName)}, where the caller must be
+     * the profile owner of an organization-owned managed profile.
+     *
      * @param admin The name of the admin component to check, or {@code null} to check whether any admins
      * have disabled the camera
      */
     public boolean getCameraDisabled(@Nullable ComponentName admin) {
-        throwIfParentInstance("getCameraDisabled");
         return getCameraDisabled(admin, myUserId());
     }
 
@@ -5608,7 +5616,7 @@ public class DevicePolicyManager {
     public boolean getCameraDisabled(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getCameraDisabled(admin, userHandle);
+                return mService.getCameraDisabled(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -9359,7 +9367,6 @@ public class DevicePolicyManager {
      * <li>{@link #setPasswordExpirationTimeout}</li>
      * <li>{@link #getPasswordExpiration}</li>
      * <li>{@link #getPasswordMaximumLength}</li>
-     * <li>{@link #getPasswordComplexity}</li>
      * <li>{@link #isActivePasswordSufficient}</li>
      * <li>{@link #getCurrentFailedPasswordAttempts}</li>
      * <li>{@link #getMaximumFailedPasswordsForWipe}</li>
@@ -9373,6 +9380,14 @@ public class DevicePolicyManager {
      * <li>{@link #setTrustAgentConfiguration}</li>
      * <li>{@link #getRequiredStrongAuthTimeout}</li>
      * <li>{@link #setRequiredStrongAuthTimeout}</li>
+     * </ul>
+     * <p>
+     * The following methods are supported for the parent instance but can only be called by the
+     * profile owner of a managed profile that was created during the device provisioning flow:
+     * <ul>
+     * <li>{@link #getPasswordComplexity}</li>
+     * <li>{@link #setCameraDisabled}</li>
+     * <li>{@link #getCameraDisabled}</li>
      * </ul>
      *
      * <p>The following methods can be called by the profile owner of a managed profile
