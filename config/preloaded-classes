@@ -878,7 +878,7 @@ android.content.pm.-$$Lambda$jpya2qgMDDEok2GAoKRDqPM5lIE
 android.content.pm.ActivityInfo$1
 android.content.pm.ActivityInfo$WindowLayout
 android.content.pm.ActivityInfo
-android.content.pm.AndroidHidlUpdater
+android.content.pm.parsing.library.AndroidHidlUpdater
 android.content.pm.ApplicationInfo$1
 android.content.pm.ApplicationInfo
 android.content.pm.BaseParceledListSlice
@@ -922,10 +922,10 @@ android.content.pm.LauncherApps$1
 android.content.pm.LauncherApps
 android.content.pm.ModuleInfo$1
 android.content.pm.ModuleInfo
-android.content.pm.OrgApacheHttpLegacyUpdater
-android.content.pm.PackageBackwardCompatibility$AndroidTestRunnerSplitUpdater
-android.content.pm.PackageBackwardCompatibility$RemoveUnnecessaryAndroidTestBaseLibrary
-android.content.pm.PackageBackwardCompatibility
+android.content.pm.parsing.library.OrgApacheHttpLegacyUpdater
+android.content.pm.parsing.library.PackageBackwardCompatibility$AndroidTestRunnerSplitUpdater
+android.content.pm.parsing.library.PackageBackwardCompatibility$RemoveUnnecessaryAndroidTestBaseLibrary
+android.content.pm.parsing.library.PackageBackwardCompatibility
 android.content.pm.PackageInfo$1
 android.content.pm.PackageInfo
 android.content.pm.PackageInstaller$Session
@@ -960,7 +960,7 @@ android.content.pm.PackageParser$SigningDetails$1
 android.content.pm.PackageParser$SigningDetails
 android.content.pm.PackageParser$SplitNameComparator
 android.content.pm.PackageParser
-android.content.pm.PackageSharedLibraryUpdater
+android.content.pm.parsing.library.PackageSharedLibraryUpdater
 android.content.pm.PackageStats$1
 android.content.pm.PackageStats
 android.content.pm.PackageUserState

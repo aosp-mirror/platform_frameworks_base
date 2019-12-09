@@ -600,6 +600,14 @@ public class ArrayUtils {
         return cur;
     }
 
+    public static @NonNull <T> ArrayList<T> add(@Nullable ArrayList<T> cur, int index, T val) {
+        if (cur == null) {
+            cur = new ArrayList<>();
+        }
+        cur.add(index, val);
+        return cur;
+    }
+
     public static @Nullable <T> ArrayList<T> remove(@Nullable ArrayList<T> cur, T val) {
         if (cur == null) {
             return null;

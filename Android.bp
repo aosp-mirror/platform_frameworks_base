@@ -374,7 +374,7 @@ java_defaults {
 
     exclude_srcs: [
         // See comment on framework-atb-backward-compatibility module below
-        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
+        "core/java/android/content/pm/parsing/library/AndroidTestBaseUpdater.java",
     ],
 
     sdk_version: "core_platform",
@@ -526,7 +526,7 @@ java_library {
     installable: true,
     libs: ["app-compat-annotations"],
     srcs: [
-        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
+        "core/java/android/content/pm/parsing/library/AndroidTestBaseUpdater.java",
     ],
 }
 

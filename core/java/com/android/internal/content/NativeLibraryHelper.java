@@ -28,9 +28,9 @@ import static android.system.OsConstants.S_IXOTH;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.Package;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
+import android.content.pm.parsing.AndroidPackage;
 import android.os.Build;
 import android.os.SELinux;
 import android.system.ErrnoException;
@@ -87,11 +87,12 @@ public class NativeLibraryHelper {
             }
         }
 
-        public static Handle create(Package pkg) throws IOException {
-            return create(pkg.getAllCodePaths(),
-                    (pkg.applicationInfo.flags & ApplicationInfo.FLAG_MULTIARCH) != 0,
-                    (pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS) != 0,
-                    (pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+        public static Handle create(AndroidPackage pkg) throws IOException {
+            return create(
+                    pkg.makeListAllCodePaths(),
+                    (pkg.getFlags() & ApplicationInfo.FLAG_MULTIARCH) != 0,
+                    (pkg.getFlags() & ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS) != 0,
+                    (pkg.getFlags() & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
         }
 
         public static Handle create(PackageLite lite) throws IOException {
@@ -455,7 +456,7 @@ public class NativeLibraryHelper {
      * @param useIsaSubdir Whether or not to set up a sub dir for the ISA.
      * @return ABI code if installation succeeds or error code if installation fails.
      */
-    public static int configureNativeBinariesForSupportedAbi(Package pkg, Handle handle,
+    public static int configureNativeBinariesForSupportedAbi(AndroidPackage pkg, Handle handle,
             File libraryRoot, String[] abiList, boolean useIsaSubdir) {
         // TODO(b/136132412): Implement this.
         return -1;

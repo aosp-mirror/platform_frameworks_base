@@ -588,7 +588,7 @@ public class DexManager {
 
         // We found the package. Now record the usage for all declared ISAs.
         boolean update = false;
-        for (String isa : getAppDexInstructionSets(info)) {
+        for (String isa : getAppDexInstructionSets(info.primaryCpuAbi, info.secondaryCpuAbi)) {
             boolean newUpdate = mPackageDexUsage.record(searchResult.mOwningPackageName,
                     dexPath, userId, isa, isUsedByOtherApps, /*primaryOrSplit*/ false,
                     searchResult.mOwningPackageName,
