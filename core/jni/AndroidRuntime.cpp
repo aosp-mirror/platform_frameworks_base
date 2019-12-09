@@ -648,6 +648,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
     std::string fingerprintBuf;
     char jdwpProviderBuf[sizeof("-XjdwpProvider:") - 1 + PROPERTY_VALUE_MAX];
+    char opaqueJniIds[sizeof("-Xopaque-jni-ids:") - 1 + PROPERTY_VALUE_MAX];
     char bootImageBuf[sizeof("-Ximage:") - 1 + PROPERTY_VALUE_MAX];
 
     // Read if we are using the profile configuration, do this at the start since the last ART args
@@ -837,6 +838,14 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
                          jdwpProviderBuf,
                          "-XjdwpProvider:",
                          "default");
+    }
+
+    // Only pass an explicit opaque-jni-ids to apps forked from zygote
+    if (zygote) {
+      parseRuntimeOption("dalvik.vm.opaque-jni-ids",
+                        opaqueJniIds,
+                        "-Xopaque-jni-ids:",
+                        "swapable");
     }
 
     parseRuntimeOption("dalvik.vm.lockprof.threshold",
