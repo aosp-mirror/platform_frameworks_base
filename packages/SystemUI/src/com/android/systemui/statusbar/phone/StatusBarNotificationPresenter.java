@@ -49,6 +49,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -113,6 +114,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final DozeScrimController mDozeScrimController;
     private final ScrimController mScrimController;
     private final Context mContext;
+    private final KeyguardIndicationController mKeyguardIndicationController;
     private final StatusBar mStatusBar;
     private final CommandQueue mCommandQueue;
 
@@ -141,6 +143,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             NotificationAlertingManager notificationAlertingManager,
             NotificationRowBinderImpl notificationRowBinder,
             KeyguardStateController keyguardStateController,
+            KeyguardIndicationController keyguardIndicationController,
             StatusBar statusBar,
             CommandQueue commandQueue) {
         mContext = context;
@@ -148,6 +151,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mNotificationPanel = panel;
         mHeadsUpManager = headsUp;
         mDynamicPrivacyController = dynamicPrivacyController;
+        mKeyguardIndicationController = keyguardIndicationController;
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
         mStatusBar = statusBar;
         mCommandQueue = commandQueue;
@@ -323,7 +327,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                     mCommandQueue.animateCollapsePanels();
                 } else if (mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED
                         && !isCollapsing()) {
-                    mShadeController.goToKeyguard();
+                    mStatusBarStateController.setState(StatusBarState.KEYGUARD);
                 }
             }
         }
@@ -420,7 +424,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     public void onActivationReset(ActivatableNotificationView view) {
         if (view == mNotificationPanel.getActivatedChild()) {
             mNotificationPanel.setActivatedChild(null);
-            mShadeController.onActivationReset();
+            mKeyguardIndicationController.hideTransientIndication();
         }
     }
 

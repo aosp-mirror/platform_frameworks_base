@@ -41,7 +41,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 
 import org.junit.Before;
@@ -88,7 +88,7 @@ public class SmartReplyControllerTest extends SysuiTestCase {
 
         mRemoteInputManager = new NotificationRemoteInputManager(mContext,
                 mock(NotificationLockscreenUserManager.class), mSmartReplyController,
-                mNotificationEntryManager, () -> mock(ShadeController.class),
+                mNotificationEntryManager, () -> mock(StatusBar.class),
                 mStatusBarStateController,
                 Handler.createAsync(Looper.myLooper()),
                 mRemoteInputUriController);

@@ -100,7 +100,7 @@ public class NotificationFilterTest extends SysuiTestCase {
         when(mEnvironment.isDeviceProvisioned()).thenReturn(true);
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
         mRow = new NotificationTestHelper(getContext(), mDependency).createRow();
-        mNotificationFilter = new NotificationFilter();
+        mNotificationFilter = new NotificationFilter(mock(StatusBarStateController.class));
     }
 
     @Test

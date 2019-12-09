@@ -126,7 +126,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Test
     public void showBouncer_onlyWhenShowing() {
         mStatusBarKeyguardViewManager.hide(0 /* startTime */, 0 /* fadeoutDuration */);
-        mStatusBar.showBouncer(true /* scrimmed */);
+        mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
         verify(mBouncer, never()).show(anyBoolean(), anyBoolean());
         verify(mBouncer, never()).show(anyBoolean());
     }
@@ -135,7 +135,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     public void showBouncer_notWhenBouncerAlreadyShowing() {
         mStatusBarKeyguardViewManager.hide(0 /* startTime */, 0 /* fadeoutDuration */);
         when(mBouncer.isSecure()).thenReturn(true);
-        mStatusBar.showBouncer(true /* scrimmed */);
+        mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
         verify(mBouncer, never()).show(anyBoolean(), anyBoolean());
         verify(mBouncer, never()).show(anyBoolean());
     }

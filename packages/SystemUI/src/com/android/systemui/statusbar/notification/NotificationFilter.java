@@ -27,6 +27,7 @@ import android.service.notification.StatusBarNotification;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -45,6 +46,7 @@ public class NotificationFilter {
 
     private final NotificationGroupManager mGroupManager = Dependency.get(
             NotificationGroupManager.class);
+    private final StatusBarStateController mStatusBarStateController;
 
     private NotificationEntryManager.KeyguardEnvironment mEnvironment;
     private ShadeController mShadeController;
@@ -52,7 +54,9 @@ public class NotificationFilter {
     private NotificationLockscreenUserManager mUserManager;
 
     @Inject
-    public NotificationFilter() {}
+    public NotificationFilter(StatusBarStateController statusBarStateController) {
+        mStatusBarStateController = statusBarStateController;
+    }
 
     private NotificationEntryManager.KeyguardEnvironment getEnvironment() {
         if (mEnvironment == null) {
@@ -104,11 +108,11 @@ public class NotificationFilter {
             return true;
         }
 
-        if (getShadeController().isDozing() && entry.shouldSuppressAmbient()) {
+        if (mStatusBarStateController.isDozing() && entry.shouldSuppressAmbient()) {
             return true;
         }
 
-        if (!getShadeController().isDozing() && entry.shouldSuppressNotificationList()) {
+        if (!mStatusBarStateController.isDozing() && entry.shouldSuppressNotificationList()) {
             return true;
         }
 

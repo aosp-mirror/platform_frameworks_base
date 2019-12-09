@@ -64,6 +64,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     private final ActivityStarter mActivityStarter;
     private final Lazy<ShadeController> mShadeControllerLazy;
     private final Context mContext;
+    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final ActivityIntentHelper mActivityIntentHelper;
     private final NotificationGroupManager mGroupManager;
     private View mPendingWorkRemoteInputView;
@@ -81,9 +82,11 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ActivityStarter activityStarter, Lazy<ShadeController> shadeControllerLazy,
             CommandQueue commandQueue) {
         mContext = context;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mContext.registerReceiverAsUser(mChallengeReceiver, UserHandle.ALL,
                 new IntentFilter(ACTION_DEVICE_LOCKED_CHANGED), null, null);
         mLockscreenUserManager = notificationLockscreenUserManager;
@@ -118,7 +121,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         if (!row.isPinned()) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
         }
-        mShadeControllerLazy.get().showBouncer(true /* scrimmed */);
+        mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
         mPendingRemoteInputView = clicked;
     }
 

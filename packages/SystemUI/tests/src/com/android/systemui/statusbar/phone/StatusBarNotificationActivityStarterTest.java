@@ -98,6 +98,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    @Mock
     private NotificationRemoteInputManager mRemoteInputManager;
     @Mock
     private RemoteInputController mRemoteInputController;
@@ -167,7 +169,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 getContext(), mock(CommandQueue.class), () -> mAssistManager,
                 mEntryManager, mock(HeadsUpManagerPhone.class),
                 mActivityStarter, mStatusBarService,
-                mock(StatusBarStateController.class), mock(KeyguardManager.class),
+                mock(StatusBarStateController.class), mStatusBarKeyguardViewManager,
+                mock(KeyguardManager.class),
                 mock(IDreamManager.class), mRemoteInputManager,
                 mock(StatusBarRemoteInputCallback.class), mock(NotificationGroupManager.class),
                 mock(NotificationLockscreenUserManager.class),
@@ -186,7 +189,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         // set up addAfterKeyguardGoneRunnable to synchronously invoke the Runnable arg
         doAnswer(answerVoid(Runnable::run))
-                .when(mStatusBar).addAfterKeyguardGoneRunnable(any(Runnable.class));
+                .when(mStatusBarKeyguardViewManager)
+                .addAfterKeyguardGoneRunnable(any(Runnable.class));
 
         // set up addPostCollapseAction to synchronously invoke the Runnable arg
         doAnswer(answerVoid(Runnable::run))

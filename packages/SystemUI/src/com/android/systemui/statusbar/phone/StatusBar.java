@@ -1239,6 +1239,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
                 mScrimController, mActivityLaunchAnimator, mDynamicPrivacyController,
                 mNotificationAlertingManager, rowBinder, mKeyguardStateController,
+                mKeyguardIndicationController,
                 this /* statusBar */, mCommandQueue);
 
         mNotificationListController =
@@ -1282,17 +1283,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         mCommandQueue.disable(mDisplayId, state1, state2, false /* animate */);
     }
 
-    @Override
-    public void addAfterKeyguardGoneRunnable(Runnable runnable) {
-        mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
-    }
-
-    @Override
-    public boolean isDozing() {
-        return mDozing;
-    }
-
-    @Override
+    /**
+     * Ask the display to wake up if currently dozing, else do nothing
+     *
+     * @param time when to wake up
+     * @param where the view requesting the wakeup
+     * @param why the reason for the wake up
+     */
     public void wakeUpIfDozing(long time, View where, String why) {
         if (mDozing) {
             mPowerManager.wakeUp(
@@ -1708,7 +1705,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
         mEntryManager.updateNotifications("onHeadsUpStateChanged");
-        if (isDozing() && isHeadsUp) {
+        if (mStatusBarStateController.isDozing() && isHeadsUp) {
             entry.setPulseSuppressed(false);
             mDozeServiceHost.fireNotificationPulse(entry);
             if (mDozeServiceHost.isPulsing()) {
@@ -3453,13 +3450,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void showBouncerIfKeyguard() {
         if ((mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)
                 && !mKeyguardViewMediator.isHiding()) {
-            showBouncer(true /* scrimmed */);
+            mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
         }
-    }
-
-    @Override
-    public void showBouncer(boolean scrimmed) {
-        mStatusBarKeyguardViewManager.showBouncer(scrimmed);
     }
 
     @Override
@@ -3583,10 +3575,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarKeyguardViewManager.isOccluded());
     }
 
-    public void onActivationReset() {
-        mKeyguardIndicationController.hideTransientIndication();
-    }
-
     public void onTrackingStarted() {
         runPostCollapseRunnables();
     }
@@ -3628,7 +3616,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void onTrackingStopped(boolean expand) {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             if (!expand && !mKeyguardStateController.canDismissLockScreen()) {
-                showBouncer(false /* scrimmed */);
+                mStatusBarKeyguardViewManager.showBouncer(false /* scrimmed */);
             }
         }
     }
@@ -3684,15 +3672,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             mNotificationPanel.animateToFullShade(0 /* delay */);
             mStatusBarStateController.setState(StatusBarState.SHADE_LOCKED);
-        }
-    }
-
-    /**
-     * Goes back to the keyguard after hanging around in {@link StatusBarState#SHADE_LOCKED}.
-     */
-    public void goToKeyguard() {
-        if (mState == StatusBarState.SHADE_LOCKED) {
-            mStatusBarStateController.setState(StatusBarState.KEYGUARD);
         }
     }
 
@@ -4019,7 +3998,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean shouldIgnoreTouch() {
-        return isDozing() && mDozeServiceHost.getIgnoreTouchWhilePulsing();
+        return mStatusBarStateController.isDozing()
+                && mDozeServiceHost.getIgnoreTouchWhilePulsing();
     }
 
     // Begin Extra BaseStatusBar methods.

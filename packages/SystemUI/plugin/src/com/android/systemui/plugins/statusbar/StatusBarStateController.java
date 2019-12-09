@@ -34,7 +34,8 @@ public interface StatusBarStateController {
     int getState();
 
     /**
-     * Is device dozing
+     * Is device dozing. Dozing is when the screen is in AOD or asleep given that
+     * {@link com.android.systemui.doze.DozeService} is configured.
      */
     boolean isDozing();
 
