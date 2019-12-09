@@ -5554,10 +5554,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (mLastResumedActivity != null && r.mUserId != mLastResumedActivity.mUserId) {
             mAmInternal.sendForegroundProfileChanged(r.mUserId);
         }
+        final Task prevTask = mLastResumedActivity != null ? mLastResumedActivity.getTask() : null;
+
         updateResumedAppTrace(r);
         mLastResumedActivity = r;
 
         r.getDisplay().setFocusedApp(r, true);
+
+        if (prevTask == null || task != prevTask) {
+            if (prevTask != null) {
+                mTaskChangeNotificationController.notifyTaskFocusChanged(prevTask.mTaskId, false);
+            }
+            mTaskChangeNotificationController.notifyTaskFocusChanged(task.mTaskId, true);
+        }
 
         applyUpdateLockStateLocked(r);
         applyUpdateVrModeLocked(r);

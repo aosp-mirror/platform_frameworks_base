@@ -204,4 +204,12 @@ oneway interface ITaskStackListener {
      * @param frozen if true, Recents Tasks list is currently frozen, false otherwise
      */
     void onRecentTaskListFrozenChanged(boolean frozen);
+
+    /**
+     * Called when a task gets or loses focus.
+     *
+     * @param taskId id of the task.
+     * @param {@code true} if the task got focus, {@code false} if it lost it.
+     */
+    void onTaskFocusChanged(int taskId, boolean focused);
 }

@@ -59,6 +59,7 @@ class TaskChangeNotificationController {
     private static final int NOTIFY_TASK_LIST_UPDATED_LISTENERS_MSG = 24;
     private static final int NOTIFY_SINGLE_TASK_DISPLAY_EMPTY = 25;
     private static final int NOTIFY_TASK_LIST_FROZEN_UNFROZEN_MSG = 26;
+    private static final int NOTIFY_TASK_FOCUS_CHANGED_MSG = 27;
 
     // Delay in notifying task stack change listeners (in millis)
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -179,6 +180,10 @@ class TaskChangeNotificationController {
         l.onRecentTaskListFrozenChanged(m.arg1 != 0);
     };
 
+    private final TaskStackConsumer mNotifyTaskFocusChanged = (l, m) -> {
+        l.onTaskFocusChanged(m.arg1, m.arg2 != 0);
+    };
+
     @FunctionalInterface
     public interface TaskStackConsumer {
         void accept(ITaskStackListener t, Message m) throws RemoteException;
@@ -272,6 +277,9 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_TASK_LIST_FROZEN_UNFROZEN_MSG:
                     forAllRemoteListeners(mNotifyTaskListFrozen, msg);
+                    break;
+                case NOTIFY_TASK_FOCUS_CHANGED_MSG:
+                    forAllRemoteListeners(mNotifyTaskFocusChanged, msg);
                     break;
             }
         }
@@ -563,6 +571,14 @@ class TaskChangeNotificationController {
         final Message msg = mHandler.obtainMessage(NOTIFY_TASK_LIST_FROZEN_UNFROZEN_MSG,
                 frozen ? 1 : 0, 0 /* unused */);
         forAllLocalListeners(mNotifyTaskListFrozen, msg);
+        msg.sendToTarget();
+    }
+
+    /** @see ITaskStackListener#onTaskFocusChanged(int, boolean) */
+    void notifyTaskFocusChanged(int taskId, boolean focused) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_TASK_FOCUS_CHANGED_MSG,
+                taskId, focused ? 1 : 0);
+        forAllLocalListeners(mNotifyTaskFocusChanged, msg);
         msg.sendToTarget();
     }
 }
