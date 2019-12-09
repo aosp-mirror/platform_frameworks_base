@@ -3869,6 +3869,12 @@ public final class Settings {
         public static final String VOLUME_ACCESSIBILITY = "volume_a11y";
 
         /**
+         * @hide
+         * Volume index for virtual assistant.
+         */
+        public static final String VOLUME_ASSISTANT = "volume_assistant";
+
+        /**
          * Master volume (float in the range 0.0f to 1.0f).
          *
          * @hide
@@ -3946,7 +3952,7 @@ public final class Settings {
                 "" /*STREAM_SYSTEM_ENFORCED, no setting for this stream*/,
                 "" /*STREAM_DTMF, no setting for this stream*/,
                 "" /*STREAM_TTS, no setting for this stream*/,
-                VOLUME_ACCESSIBILITY
+                VOLUME_ACCESSIBILITY, VOLUME_ASSISTANT
             };
 
         /**
@@ -4493,6 +4499,7 @@ public final class Settings {
             PUBLIC_SETTINGS.add(VOLUME_ALARM);
             PUBLIC_SETTINGS.add(VOLUME_NOTIFICATION);
             PUBLIC_SETTINGS.add(VOLUME_BLUETOOTH_SCO);
+            PUBLIC_SETTINGS.add(VOLUME_ASSISTANT);
             PUBLIC_SETTINGS.add(RINGTONE);
             PUBLIC_SETTINGS.add(NOTIFICATION_SOUND);
             PUBLIC_SETTINGS.add(ALARM_ALERT);

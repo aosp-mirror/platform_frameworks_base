@@ -374,6 +374,10 @@ public class AudioManager {
     public static final int STREAM_TTS = AudioSystem.STREAM_TTS;
     /** Used to identify the volume of audio streams for accessibility prompts */
     public static final int STREAM_ACCESSIBILITY = AudioSystem.STREAM_ACCESSIBILITY;
+    /** @hide Used to identify the volume of audio streams for virtual assistant */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int STREAM_ASSISTANT = AudioSystem.STREAM_ASSISTANT;
 
     /** Number of audio streams */
     /**

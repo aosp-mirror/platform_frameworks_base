@@ -3970,6 +3970,7 @@ package android.media {
     field public static final int AUDIOFOCUS_FLAG_DELAY_OK = 1; // 0x1
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4
     field public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 2; // 0x2
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int STREAM_ASSISTANT = 11; // 0xb
     field public static final int SUCCESS = 0; // 0x0
   }
 

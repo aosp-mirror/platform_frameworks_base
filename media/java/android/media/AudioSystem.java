@@ -80,6 +80,8 @@ public class AudioSystem
     public static final int STREAM_TTS = 9;
     /** Used to identify the volume of audio streams for accessibility prompts */
     public static final int STREAM_ACCESSIBILITY = 10;
+    /** Used to identify the volume of audio streams for virtual assistant */
+    public static final int STREAM_ASSISTANT = 11;
     /**
      * @deprecated Use {@link #numStreamTypes() instead}
      */
@@ -92,7 +94,7 @@ public class AudioSystem
     private static native int native_get_FCC_8();
 
     // Expose only the getter method publicly so we can change it in the future
-    private static final int NUM_STREAM_TYPES = 11;
+    private static final int NUM_STREAM_TYPES = 12;
     @UnsupportedAppUsage
     public static final int getNumStreamTypes() { return NUM_STREAM_TYPES; }
 
@@ -107,7 +109,8 @@ public class AudioSystem
         "STREAM_SYSTEM_ENFORCED",
         "STREAM_DTMF",
         "STREAM_TTS",
-        "STREAM_ACCESSIBILITY"
+        "STREAM_ACCESSIBILITY",
+        "STREAM_ASSISTANT"
     };
 
     /*
@@ -1265,6 +1268,7 @@ public class AudioSystem
         5, // STREAM_DTMF
         5, // STREAM_TTS
         5, // STREAM_ACCESSIBILITY
+        5, // STREAM_ASSISTANT
     };
 
     public static String streamToString(int stream) {
