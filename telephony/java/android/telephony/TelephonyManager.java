@@ -38,6 +38,9 @@ import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -140,6 +143,14 @@ import java.util.regex.Pattern;
 @SystemService(Context.TELEPHONY_SERVICE)
 public class TelephonyManager {
     private static final String TAG = "TelephonyManager";
+
+    /**
+     * To expand the error codes for {@link TelephonyManager#updateAvailableNetworks} and
+     * {@link TelephonyManager#setPreferredOpportunisticDataSubscription}.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    public static final long CALLBACK_ON_MORE_ERROR_CODE_CHANGE = 130595455L;
 
     /**
      * The key to use when placing the result of {@link #requestModemActivityInfo(ResultReceiver)}
@@ -11208,7 +11219,9 @@ public class TelephonyManager {
     @IntDef(prefix = {"SET_OPPORTUNISTIC_SUB"}, value = {
             SET_OPPORTUNISTIC_SUB_SUCCESS,
             SET_OPPORTUNISTIC_SUB_VALIDATION_FAILED,
-            SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION})
+            SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION,
+            SET_OPPORTUNISTIC_SUB_NO_OPPORTUNISTIC_SUB_AVAILABLE,
+            SET_OPPORTUNISTIC_SUB_REMOTE_SERVICE_EXCEPTION})
     public @interface SetOpportunisticSubscriptionResult {}
 
     /**
@@ -11226,6 +11239,16 @@ public class TelephonyManager {
      */
     public static final int SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION = 2;
 
+    /**
+     * The subscription is not valid. It must be an opportunistic subscription.
+     */
+    public static final int SET_OPPORTUNISTIC_SUB_NO_OPPORTUNISTIC_SUB_AVAILABLE = 3;
+
+    /**
+     * Subscription service happened remote exception.
+     */
+    public static final int SET_OPPORTUNISTIC_SUB_REMOTE_SERVICE_EXCEPTION = 4;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"UPDATE_AVAILABLE_NETWORKS"}, value = {
@@ -11233,7 +11256,13 @@ public class TelephonyManager {
             UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE,
             UPDATE_AVAILABLE_NETWORKS_ABORTED,
             UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS,
-            UPDATE_AVAILABLE_NETWORKS_NO_CARRIER_PRIVILEGE})
+            UPDATE_AVAILABLE_NETWORKS_NO_CARRIER_PRIVILEGE,
+            UPDATE_AVAILABLE_NETWORKS_DISABLE_MODEM_FAIL,
+            UPDATE_AVAILABLE_NETWORKS_ENABLE_MODEM_FAIL,
+            UPDATE_AVAILABLE_NETWORKS_MULTIPLE_NETWORKS_NOT_SUPPORTED,
+            UPDATE_AVAILABLE_NETWORKS_NO_OPPORTUNISTIC_SUB_AVAILABLE,
+            UPDATE_AVAILABLE_NETWORKS_REMOTE_SERVICE_EXCEPTION,
+            UPDATE_AVAILABLE_NETWORKS_SERVICE_IS_DISABLED})
     public @interface UpdateAvailableNetworksResult {}
 
     /**
@@ -11260,6 +11289,36 @@ public class TelephonyManager {
      * No carrier privilege.
      */
     public static final int UPDATE_AVAILABLE_NETWORKS_NO_CARRIER_PRIVILEGE = 4;
+
+    /**
+     * Disable modem fail.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_DISABLE_MODEM_FAIL = 5;
+
+    /**
+     * Enable modem fail.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_ENABLE_MODEM_FAIL = 6;
+
+    /**
+     * Carrier app does not support multiple available networks.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_MULTIPLE_NETWORKS_NOT_SUPPORTED = 7;
+
+    /**
+     * The subscription is not valid. It must be an opportunistic subscription.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_NO_OPPORTUNISTIC_SUB_AVAILABLE = 8;
+
+    /**
+     * There is no OpportunisticNetworkService.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_REMOTE_SERVICE_EXCEPTION = 9;
+
+    /**
+     * OpportunisticNetworkService is disabled.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_SERVICE_IS_DISABLED = 10;
 
     /**
      * Set preferred opportunistic data subscription id.
@@ -11293,7 +11352,11 @@ public class TelephonyManager {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     executor.execute(() -> {
-                        callback.accept(SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION);
+                        if (Compatibility.isChangeEnabled(CALLBACK_ON_MORE_ERROR_CODE_CHANGE)) {
+                            callback.accept(SET_OPPORTUNISTIC_SUB_REMOTE_SERVICE_EXCEPTION);
+                        } else {
+                            callback.accept(SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION);
+                        }
                     });
                 } finally {
                     Binder.restoreCallingIdentity(identity);
@@ -11387,9 +11450,12 @@ public class TelephonyManager {
                 if (iOpportunisticNetworkService == null) {
                     final long identity = Binder.clearCallingIdentity();
                     try {
-                        /* Todo<b/130595455> passing unknown due to lack of good error codes */
                         executor.execute(() -> {
-                            callback.accept(UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE);
+                            if (Compatibility.isChangeEnabled(CALLBACK_ON_MORE_ERROR_CODE_CHANGE)) {
+                                callback.accept(UPDATE_AVAILABLE_NETWORKS_REMOTE_SERVICE_EXCEPTION);
+                            } else {
+                                callback.accept(UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE);
+                            }
                         });
                     } finally {
                         Binder.restoreCallingIdentity(identity);
