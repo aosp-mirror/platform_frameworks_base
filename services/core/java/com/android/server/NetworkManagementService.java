@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.OBSERVE_NETWORK_POLICY;
 import static android.Manifest.permission.SHUTDOWN;
@@ -737,7 +738,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     //
     @Override
     public String[] listInterfaces() {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        // TODO: Remove CONNECTIVITY_INTERNAL after bluetooth tethering has no longer called these
+        //  APIs.
+        NetworkStack.checkNetworkStackPermissionOr(mContext, CONNECTIVITY_INTERNAL);
         try {
             return mNetdService.interfaceGetList();
         } catch (RemoteException | ServiceSpecificException e) {
@@ -787,7 +790,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public InterfaceConfiguration getInterfaceConfig(String iface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        // TODO: Remove CONNECTIVITY_INTERNAL after bluetooth tethering has no longer called these
+        //  APIs.
+        NetworkStack.checkNetworkStackPermissionOr(mContext, CONNECTIVITY_INTERNAL);
         final InterfaceConfigurationParcel result;
         try {
             result = mNetdService.interfaceGetCfg(iface);
@@ -805,7 +810,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void setInterfaceConfig(String iface, InterfaceConfiguration cfg) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        // TODO: Remove CONNECTIVITY_INTERNAL after bluetooth tethering has no longer called these
+        //  APIs.
+        NetworkStack.checkNetworkStackPermissionOr(mContext, CONNECTIVITY_INTERNAL);
         LinkAddress linkAddr = cfg.getLinkAddress();
         if (linkAddr == null || linkAddr.getAddress() == null) {
             throw new IllegalStateException("Null LinkAddress given");
