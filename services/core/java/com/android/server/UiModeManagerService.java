@@ -866,14 +866,13 @@ final class UiModeManagerService extends SystemService {
         if (!mHoldingConfiguration) {
             mConfiguration.uiMode = uiMode;
         }
-        // load splash screen instead of screenshot
-        mWindowManager.clearSnapshotCache();
     }
 
     private void sendConfigurationLocked() {
         if (mSetUiMode != mConfiguration.uiMode) {
             mSetUiMode = mConfiguration.uiMode;
-
+            // load splash screen instead of screenshot
+            mWindowManager.clearSnapshotCache();
             try {
                 ActivityTaskManager.getService().updateConfiguration(mConfiguration);
             } catch (RemoteException e) {
