@@ -7243,6 +7243,10 @@ package android.provider {
     field public static final String SUB_ID = "sub_id";
   }
 
+  public static final class Telephony.SimInfo {
+    field @NonNull public static final android.net.Uri CONTENT_URI;
+  }
+
   public static final class Telephony.Sms.Intents {
     field public static final String ACTION_SMS_EMERGENCY_CB_RECEIVED = "android.provider.action.SMS_EMERGENCY_CB_RECEIVED";
   }
