@@ -23,7 +23,6 @@ import static android.provider.Settings.Global.LOCATION_IGNORE_SETTINGS_PACKAGE_
 import static android.provider.Settings.Global.LOCATION_LAST_LOCATION_MAX_AGE_MILLIS;
 import static android.provider.Settings.Secure.LOCATION_MODE;
 import static android.provider.Settings.Secure.LOCATION_MODE_OFF;
-import static android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -89,7 +88,6 @@ public class LocationSettingsStore {
     private final Context mContext;
 
     private final IntegerSecureSetting mLocationMode;
-    private final StringListCachedSecureSetting mLocationProvidersAllowed;
     private final LongGlobalSetting mBackgroundThrottleIntervalMs;
     private final StringListCachedSecureSetting mLocationPackageBlacklist;
     private final StringListCachedSecureSetting mLocationPackageWhitelist;
@@ -101,8 +99,6 @@ public class LocationSettingsStore {
         mContext = context;
 
         mLocationMode = new IntegerSecureSetting(context, LOCATION_MODE, handler);
-        mLocationProvidersAllowed = new StringListCachedSecureSetting(context,
-                LOCATION_PROVIDERS_ALLOWED, handler);
         mBackgroundThrottleIntervalMs = new LongGlobalSetting(context,
                 LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS, handler);
         mLocationPackageBlacklist = new StringListCachedSecureSetting(context,
@@ -136,28 +132,6 @@ public class LocationSettingsStore {
      */
     public void removeOnLocationEnabledChangedListener(UserSettingChangedListener listener) {
         mLocationMode.addListener(listener);
-    }
-
-    /**
-     * Retrieve the currently allowed location providers.
-     */
-    public List<String> getLocationProvidersAllowed(int userId) {
-        return mLocationProvidersAllowed.getValueForUser(userId);
-    }
-
-    /**
-     * Add a listener for changes to the currently allowed location providers.
-     */
-    public void addOnLocationProvidersAllowedChangedListener(UserSettingChangedListener listener) {
-        mLocationProvidersAllowed.addListener(listener);
-    }
-
-    /**
-     * Remove a listener for changes to the currently allowed location providers.
-     */
-    public void removeOnLocationProvidersAllowedChangedListener(
-            UserSettingChangedListener listener) {
-        mLocationProvidersAllowed.removeListener(listener);
     }
 
     /**
@@ -279,9 +253,6 @@ public class LocationSettingsStore {
 
         ipw.print("Location Enabled: ");
         ipw.println(isLocationEnabled(userId));
-
-        ipw.print("Location Providers Allowed: ");
-        ipw.println(getLocationProvidersAllowed(userId));
 
         List<String> locationPackageBlacklist = mLocationPackageBlacklist.getValueForUser(userId);
         if (!locationPackageBlacklist.isEmpty()) {
