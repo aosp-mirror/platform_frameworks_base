@@ -1646,7 +1646,7 @@ public final class ViewRootImpl implements ViewParent,
                 mBlastSurfaceControl, width, height);
 
         }
-        mBlastBufferQueue.update(mSurfaceControl, width, height);
+        mBlastBufferQueue.update(mBlastSurfaceControl, width, height);
 
         mTransaction.show(mBlastSurfaceControl)
             .reparent(mBlastSurfaceControl, mSurfaceControl)
