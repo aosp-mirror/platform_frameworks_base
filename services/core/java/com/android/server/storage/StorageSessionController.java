@@ -105,13 +105,7 @@ public final class StorageSessionController {
                     vol.getPath().getPath(), vol.getInternalPath().getPath());
         }
 
-        // At boot, a volume can be mounted before user is unlocked, in that case, we create it
-        // above and save it so that we can restart all sessions when the user is unlocked
-        if (mExternalStorageServiceComponent != null) {
-            connection.startSession(sessionId);
-        } else {
-            Slog.i(TAG, "Controller not initialised, session not started " + sessionId);
-        }
+        connection.startSession(sessionId);
     }
 
     /**
@@ -178,25 +172,9 @@ public final class StorageSessionController {
      * a session will be ignored.
      */
     public void onUnlockUser(int userId) throws ExternalStorageServiceException {
-        if (!shouldHandle(null)) {
-            return;
-        }
-
         Slog.i(TAG, "On user unlock " + userId);
-        if (userId == 0) {
+        if (shouldHandle(null) && userId == 0) {
             initExternalStorageServiceComponent();
-        }
-
-        StorageUserConnection connection = null;
-        synchronized (mLock) {
-            connection = mConnections.get(userId);
-        }
-
-        if (connection != null) {
-            Slog.i(TAG, "Restarting all sessions for user: " + userId);
-            connection.startAllSessions();
-        } else {
-            Slog.w(TAG, "No connection found for user: " + userId);
         }
     }
 
