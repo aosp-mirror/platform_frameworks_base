@@ -90,6 +90,17 @@ final class TunerConstants {
     public static final int FRONTEND_SETTINGS_ISDBS3 = 8;
     public static final int FRONTEND_SETTINGS_ISDBT = 9;
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FILTER_SETTINGS_TS, FILTER_SETTINGS_MMTP, FILTER_SETTINGS_IP, FILTER_SETTINGS_TLV,
+            FILTER_SETTINGS_ALP})
+    public @interface FilterSettingsType {}
+
+    public static final int FILTER_SETTINGS_TS = Constants.DemuxFilterMainType.TS;
+    public static final int FILTER_SETTINGS_MMTP = Constants.DemuxFilterMainType.MMTP;
+    public static final int FILTER_SETTINGS_IP = Constants.DemuxFilterMainType.IP;
+    public static final int FILTER_SETTINGS_TLV = Constants.DemuxFilterMainType.TLV;
+    public static final int FILTER_SETTINGS_ALP = Constants.DemuxFilterMainType.ALP;
+
     private TunerConstants() {
     }
 }
