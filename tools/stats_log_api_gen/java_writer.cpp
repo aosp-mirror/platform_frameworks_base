@@ -83,7 +83,7 @@ static int write_java_methods(
         // Print method body.
         string indent("");
         if (DEFAULT_MODULE_NAME != moduleName) {
-            fprintf(out, "        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {\n");
+            fprintf(out, "        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {\n");
             indent = "    ";
         }
 
@@ -116,16 +116,19 @@ static int write_java_methods(
                 fprintf(out, "%s        builder.writeString(arg%d);\n", indent.c_str(), argIndex);
                 break;
             case JAVA_TYPE_BYTE_ARRAY:
-                fprintf(out, "%s        builder.writeByteArray(arg%d);\n",
-                        indent.c_str(), argIndex);
+                fprintf(out, "%s        builder.writeByteArray(null == arg%d ? new byte[0] : arg%d);\n",
+                        indent.c_str(), argIndex, argIndex);
                 break;
             case JAVA_TYPE_ATTRIBUTION_CHAIN:
             {
                 const char* uidName = attributionDecl.fields.front().name.c_str();
                 const char* tagName = attributionDecl.fields.back().name.c_str();
 
-                fprintf(out, "%s        builder.writeAttributionChain(%s, %s);\n",
-                        indent.c_str(), uidName, tagName);
+                fprintf(out, "%s        builder.writeAttributionChain(\n", indent.c_str());
+                fprintf(out, "%s                null == %s ? new int[0] : %s,\n",
+                        indent.c_str(), uidName, uidName);
+                fprintf(out, "%s                null == %s ? new String[0] : %s);\n",
+                        indent.c_str(), tagName, tagName);
                 break;
             }
             case JAVA_TYPE_KEY_VALUE_PAIR:
