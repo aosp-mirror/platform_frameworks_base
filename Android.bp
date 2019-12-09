@@ -1684,7 +1684,8 @@ filegroup {
     name: "framework-wifi-service-shared-srcs",
     srcs: [
         ":framework-annotations",
-	"core/java/android/os/HandlerExecutor.java",
+        "core/java/android/net/InterfaceConfiguration.java",
+        "core/java/android/os/HandlerExecutor.java",
         "core/java/android/util/BackupUtils.java",
         "core/java/android/util/LocalLog.java",
         "core/java/android/util/Rational.java",
