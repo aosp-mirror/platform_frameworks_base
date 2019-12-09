@@ -82,6 +82,7 @@ import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -153,6 +154,8 @@ public class BubbleControllerTest extends SysuiTestCase {
     private Resources mResources;
     @Mock
     private Lazy<ShadeController> mShadeController;
+    @Mock
+    private RemoteInputUriController mRemoteInputUriController;
 
     private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private BubbleData mBubbleData;
@@ -212,7 +215,8 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mZenModeController,
                 mLockscreenUserManager,
                 mNotificationGroupManager,
-                mNotificationEntryManager);
+                mNotificationEntryManager,
+                mRemoteInputUriController);
         mBubbleController.setBubbleStateChangeListener(mBubbleStateChangeListener);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
@@ -708,11 +712,13 @@ public class BubbleControllerTest extends SysuiTestCase {
                 ZenModeController zenModeController,
                 NotificationLockscreenUserManager lockscreenUserManager,
                 NotificationGroupManager groupManager,
-                NotificationEntryManager entryManager) {
+                NotificationEntryManager entryManager,
+                RemoteInputUriController remoteInputUriController) {
             super(context,
                     statusBarWindowController, statusBarStateController, shadeController,
                     data, Runnable::run, configurationController, interruptionStateProvider,
-                    zenModeController, lockscreenUserManager, groupManager, entryManager);
+                    zenModeController, lockscreenUserManager, groupManager, entryManager,
+                    remoteInputUriController);
         }
     }
 
