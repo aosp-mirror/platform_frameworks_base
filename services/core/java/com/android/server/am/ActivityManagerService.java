@@ -271,8 +271,8 @@ import android.os.WorkSource;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.provider.DeviceConfig.Properties;
+import android.provider.Settings;
 import android.server.ServerProtoEnums;
 import android.sysprop.VoldProperties;
 import android.text.TextUtils;
@@ -8254,6 +8254,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             mProcessObservers.unregister(observer);
         }
+    }
+
+    private boolean isActiveInstrumentation(int uid) {
+        synchronized (ActivityManagerService.this) {
+            for (int i = mActiveInstrumentation.size() - 1; i >= 0; i--) {
+                final ActiveInstrumentation instrumentation = mActiveInstrumentation.get(i);
+                for (int j = instrumentation.mRunningProcesses.size() - 1; j >= 0; j--) {
+                    final ProcessRecord process = instrumentation.mRunningProcesses.get(j);
+                    if (process.uid == uid) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -18506,6 +18521,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void unregisterProcessObserver(IProcessObserver processObserver) {
             ActivityManagerService.this.unregisterProcessObserver(processObserver);
+        }
+
+        @Override
+        public boolean isActiveInstrumentation(int uid) {
+            return ActivityManagerService.this.isActiveInstrumentation(uid);
         }
     }
 
