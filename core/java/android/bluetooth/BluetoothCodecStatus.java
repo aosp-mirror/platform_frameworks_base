@@ -17,7 +17,7 @@
 package android.bluetooth;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -32,6 +32,7 @@ import java.util.Objects;
  *
  * {@hide}
  */
+@SystemApi
 public final class BluetoothCodecStatus implements Parcelable {
     /**
      * Extra for the codec configuration intents of the individual profiles.
@@ -39,17 +40,16 @@ public final class BluetoothCodecStatus implements Parcelable {
      * This extra represents the current codec status of the A2DP
      * profile.
      */
-    @UnsupportedAppUsage
     public static final String EXTRA_CODEC_STATUS =
-            "android.bluetooth.codec.extra.CODEC_STATUS";
+            "android.bluetooth.extra.CODEC_STATUS";
 
     private final @Nullable BluetoothCodecConfig mCodecConfig;
     private final BluetoothCodecConfig[] mCodecsLocalCapabilities;
     private final BluetoothCodecConfig[] mCodecsSelectableCapabilities;
 
-    public BluetoothCodecStatus(BluetoothCodecConfig codecConfig,
-            BluetoothCodecConfig[] codecsLocalCapabilities,
-            BluetoothCodecConfig[] codecsSelectableCapabilities) {
+    public BluetoothCodecStatus(@Nullable BluetoothCodecConfig codecConfig,
+            @Nullable BluetoothCodecConfig[] codecsLocalCapabilities,
+            @Nullable BluetoothCodecConfig[] codecsSelectableCapabilities) {
         mCodecConfig = codecConfig;
         mCodecsLocalCapabilities = codecsLocalCapabilities;
         mCodecsSelectableCapabilities = codecsSelectableCapabilities;
@@ -74,6 +74,7 @@ public final class BluetoothCodecStatus implements Parcelable {
      * @param c1 the first array of capabilities to compare
      * @param c2 the second array of capabilities to compare
      * @return true if both arrays contain same capabilities
+     * @hide
      */
     public static boolean sameCapabilities(BluetoothCodecConfig[] c1,
                                            BluetoothCodecConfig[] c2) {
@@ -95,6 +96,7 @@ public final class BluetoothCodecStatus implements Parcelable {
      *
      * @param codecConfig the codec config to compare against
      * @return true if the codec config matches, otherwise false
+     * @hide
      */
     public boolean isCodecConfigSelectable(BluetoothCodecConfig codecConfig) {
         if (codecConfig == null || !codecConfig.hasSingleSampleRate()
@@ -125,7 +127,12 @@ public final class BluetoothCodecStatus implements Parcelable {
         return false;
     }
 
-
+    /**
+     * Returns a hash based on the codec config and local capabilities
+     *
+     * @return a hash based on the config values
+     * @hide
+     */
     @Override
     public int hashCode() {
         return Objects.hash(mCodecConfig, mCodecsLocalCapabilities,
@@ -140,6 +147,12 @@ public final class BluetoothCodecStatus implements Parcelable {
                 + "}";
     }
 
+    /**
+     * Always returns 0
+     *
+     * @return 0
+     * @hide
+     */
     @Override
     public int describeContents() {
         return 0;
@@ -165,6 +178,14 @@ public final class BluetoothCodecStatus implements Parcelable {
                 }
             };
 
+    /**
+     * Flattens the object to a parcel
+     *
+     * @param out The Parcel in which the object should be written.
+     * @param flags Additional flags about how the object should be written.
+     *
+     * @hide
+     */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeTypedObject(mCodecConfig, 0);
@@ -177,7 +198,6 @@ public final class BluetoothCodecStatus implements Parcelable {
      *
      * @return the current codec configuration
      */
-    @UnsupportedAppUsage
     public @Nullable BluetoothCodecConfig getCodecConfig() {
         return mCodecConfig;
     }
@@ -187,8 +207,7 @@ public final class BluetoothCodecStatus implements Parcelable {
      *
      * @return an array with the codecs local capabilities
      */
-    @UnsupportedAppUsage
-    public BluetoothCodecConfig[] getCodecsLocalCapabilities() {
+    public @Nullable BluetoothCodecConfig[] getCodecsLocalCapabilities() {
         return mCodecsLocalCapabilities;
     }
 
@@ -197,8 +216,7 @@ public final class BluetoothCodecStatus implements Parcelable {
      *
      * @return an array with the codecs selectable capabilities
      */
-    @UnsupportedAppUsage
-    public BluetoothCodecConfig[] getCodecsSelectableCapabilities() {
+    public @Nullable BluetoothCodecConfig[] getCodecsSelectableCapabilities() {
         return mCodecsSelectableCapabilities;
     }
 }
