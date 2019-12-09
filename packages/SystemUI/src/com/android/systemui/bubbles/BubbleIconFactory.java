@@ -65,9 +65,9 @@ public class BubbleIconFactory extends BaseIconFactory {
      * Returns a {@link BitmapInfo} for the app-badge that is shown on top of each bubble. This
      * will include the workprofile indicator on the badge if appropriate.
      */
-    BitmapInfo getBadgeBitmap(Bubble b) {
+    BitmapInfo getBadgeBitmap(Drawable userBadgedAppIcon) {
         Bitmap userBadgedBitmap = createIconBitmap(
-                b.getUserBadgedAppIcon(), 1f, getBadgeSize());
+                userBadgedAppIcon, 1f, getBadgeSize());
 
         Canvas c = new Canvas();
         ShadowGenerator shadowGenerator = new ShadowGenerator(getBadgeSize());

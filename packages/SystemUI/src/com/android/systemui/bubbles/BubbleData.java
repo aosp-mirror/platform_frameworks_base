@@ -33,6 +33,7 @@ import android.util.Pair;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController.DismissReason;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -48,7 +49,6 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import com.android.systemui.R;
 
 /**
  * Keeps track of active bubbles.
@@ -180,28 +180,44 @@ public class BubbleData {
         dispatchPendingChanges();
     }
 
-    void notificationEntryUpdated(NotificationEntry entry, boolean suppressFlyout,
-            boolean showInShade) {
+    /**
+     * Constructs a new bubble or returns an existing one. Does not add new bubbles to
+     * bubble data, must go through {@link #notificationEntryUpdated(Bubble, boolean, boolean)}
+     * for that.
+     */
+    Bubble getOrCreateBubble(NotificationEntry entry) {
+        Bubble bubble = getBubbleWithKey(entry.getKey());
+        if (bubble == null) {
+            bubble = new Bubble(entry);
+        } else {
+            bubble.setEntry(entry);
+        }
+        return bubble;
+    }
+
+    /**
+     * When this method is called it is expected that all info in the bubble has completed loading.
+     * @see Bubble#inflate(BubbleViewInfoTask.Callback, Context,
+     * BubbleStackView, BubbleIconFactory).
+     */
+    void notificationEntryUpdated(Bubble bubble, boolean suppressFlyout, boolean showInShade) {
         if (DEBUG_BUBBLE_DATA) {
-            Log.d(TAG, "notificationEntryUpdated: " + entry);
+            Log.d(TAG, "notificationEntryUpdated: " + bubble);
         }
 
-        Bubble bubble = getBubbleWithKey(entry.getKey());
-        suppressFlyout |= !shouldShowFlyout(entry);
+        Bubble prevBubble = getBubbleWithKey(bubble.getKey());
+        suppressFlyout |= !shouldShowFlyout(bubble.getEntry());
 
-        if (bubble == null) {
+        if (prevBubble == null) {
             // Create a new bubble
-            bubble = new Bubble(mContext, entry);
             bubble.setSuppressFlyout(suppressFlyout);
             doAdd(bubble);
             trim();
         } else {
             // Updates an existing bubble
-            bubble.updateEntry(entry);
             bubble.setSuppressFlyout(suppressFlyout);
             doUpdate(bubble);
         }
-
         if (bubble.shouldAutoExpand()) {
             setSelectedBubbleInternal(bubble);
             if (!mExpanded) {
@@ -214,6 +230,7 @@ public class BubbleData {
         bubble.setShowInShade(!isBubbleExpandedAndSelected && showInShade);
         bubble.setShowDot(!isBubbleExpandedAndSelected /* show */, true /* animate */);
         dispatchPendingChanges();
+
     }
 
     public void notificationEntryRemoved(NotificationEntry entry, @DismissReason int reason) {

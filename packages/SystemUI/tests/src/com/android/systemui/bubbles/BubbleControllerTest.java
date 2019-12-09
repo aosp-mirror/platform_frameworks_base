@@ -45,9 +45,7 @@ import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.drawable.Icon;
 import android.hardware.face.FaceManager;
 import android.service.notification.ZenModeConfig;
 import android.testing.AndroidTestingRunner;
@@ -57,7 +55,6 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -731,6 +728,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                     data, Runnable::run, configurationController, interruptionStateProvider,
                     zenModeController, lockscreenUserManager, groupManager, entryManager,
                     remoteInputUriController);
+            setInflateSynchronously(true);
         }
     }
 
@@ -743,17 +741,6 @@ public class BubbleControllerTest extends SysuiTestCase {
             super(context, filter, controller, batteryController);
             mUseHeadsUp = true;
         }
-    }
-
-    /**
-     * @return basic {@link android.app.Notification.BubbleMetadata.Builder}
-     */
-    private Notification.BubbleMetadata.Builder getBuilder() {
-        Intent target = new Intent(mContext, BubblesTestActivity.class);
-        PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0, target, 0);
-        return new Notification.BubbleMetadata.Builder()
-                .setIntent(bubbleIntent)
-                .setIcon(Icon.createWithResource(mContext, R.drawable.android));
     }
 
     /**

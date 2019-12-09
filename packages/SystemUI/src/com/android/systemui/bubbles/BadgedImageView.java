@@ -17,18 +17,14 @@ package com.android.systemui.bubbles;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.PathParser;
 import android.widget.ImageView;
 
-import com.android.internal.graphics.ColorUtils;
-import com.android.launcher3.icons.BitmapInfo;
 import com.android.launcher3.icons.DotRenderer;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -43,9 +39,9 @@ import com.android.systemui.R;
 public class BadgedImageView extends ImageView {
 
     /** Same value as Launcher3 dot code */
-    private static final float WHITE_SCRIM_ALPHA = 0.54f;
+    public static final float WHITE_SCRIM_ALPHA = 0.54f;
     /** Same as value in Launcher3 IconShape */
-    private static final int DEFAULT_PATH_SIZE = 100;
+    public static final int DEFAULT_PATH_SIZE = 100;
 
     static final int DOT_STATE_DEFAULT = 0;
     static final int DOT_STATE_SUPPRESSED_FOR_FLYOUT = 1;
@@ -55,7 +51,6 @@ public class BadgedImageView extends ImageView {
     private int mCurrentDotState = DOT_STATE_SUPPRESSED_FOR_FLYOUT;
 
     private Bubble mBubble;
-    private BubbleIconFactory mBubbleIconFactory;
 
     private int mIconBitmapSize;
     private DotRenderer mDotRenderer;
@@ -89,6 +84,18 @@ public class BadgedImageView extends ImageView {
         Path iconPath = PathParser.createPathFromPathData(
                 getResources().getString(com.android.internal.R.string.config_icon_mask));
         mDotRenderer = new DotRenderer(mIconBitmapSize, iconPath, DEFAULT_PATH_SIZE);
+    }
+
+    /**
+     * Updates the view with provided info.
+     */
+    public void update(Bubble bubble, Bitmap bubbleImage, int dotColor, Path dotPath) {
+        mBubble = bubble;
+        setImageBitmap(bubbleImage);
+        setDotState(DOT_STATE_SUPPRESSED_FOR_FLYOUT);
+        mDotColor = dotColor;
+        drawDot(dotPath);
+        animateDot();
     }
 
     @Override
@@ -137,14 +144,6 @@ public class BadgedImageView extends ImageView {
     }
 
     /**
-     * The colour to use for the dot.
-     */
-    void setDotColor(int color) {
-        mDotColor = ColorUtils.setAlphaComponent(color, 255 /* alpha */);
-        invalidate();
-    }
-
-    /**
      * @param iconPath The new icon path to use when calculating dot position.
      */
     void drawDot(Path iconPath) {
@@ -184,39 +183,11 @@ public class BadgedImageView extends ImageView {
     }
 
     /**
-     * Populates this view with a bubble.
-     * <p>
-     * This should only be called when a new bubble is being set on the view, updates to the
-     * current bubble should use {@link #update(Bubble)}.
-     *
-     * @param bubble the bubble to display in this view.
-     */
-    public void setBubble(Bubble bubble) {
-        mBubble = bubble;
-    }
-
-    /**
-     * @param factory Factory for creating normalized bubble icons.
-     */
-    public void setBubbleIconFactory(BubbleIconFactory factory) {
-        mBubbleIconFactory = factory;
-    }
-
-    /**
      * The key for the {@link Bubble} associated with this view, if one exists.
      */
     @Nullable
     public String getKey() {
         return (mBubble != null) ? mBubble.getKey() : null;
-    }
-
-    /**
-     * Updates the UI based on the bubble, updates badge and animates messages as needed.
-     */
-    public void update(Bubble bubble) {
-        mBubble = bubble;
-        setDotState(DOT_STATE_SUPPRESSED_FOR_FLYOUT);
-        updateViews();
     }
 
     int getDotColor() {
@@ -273,35 +244,5 @@ public class BadgedImageView extends ImageView {
                         after.run();
                     }
                 }).start();
-    }
-
-    void updateViews() {
-        if (mBubble == null || mBubbleIconFactory == null) {
-            return;
-        }
-
-        Drawable bubbleDrawable = mBubbleIconFactory.getBubbleDrawable(mBubble, mContext);
-        BitmapInfo badgeBitmapInfo = mBubbleIconFactory.getBadgeBitmap(mBubble);
-        BitmapInfo bubbleBitmapInfo = mBubbleIconFactory.getBubbleBitmap(bubbleDrawable,
-                badgeBitmapInfo);
-        setImageBitmap(bubbleBitmapInfo.icon);
-
-        // Update badge.
-        mDotColor = ColorUtils.blendARGB(badgeBitmapInfo.color, Color.WHITE, WHITE_SCRIM_ALPHA);
-        setDotColor(mDotColor);
-
-        // Update dot.
-        Path iconPath = PathParser.createPathFromPathData(
-                getResources().getString(com.android.internal.R.string.config_icon_mask));
-        Matrix matrix = new Matrix();
-        float scale = mBubbleIconFactory.getNormalizer().getScale(bubbleDrawable,
-                null /* outBounds */, null /* path */, null /* outMaskShape */);
-        float radius = BadgedImageView.DEFAULT_PATH_SIZE / 2f;
-        matrix.setScale(scale /* x scale */, scale /* y scale */, radius /* pivot x */,
-                radius /* pivot y */);
-        iconPath.transform(matrix);
-        drawDot(iconPath);
-
-        animateDot();
     }
 }
