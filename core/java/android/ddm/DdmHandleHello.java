@@ -126,10 +126,9 @@ public class DdmHandleHello extends ChunkHandler {
         String vmVersion = System.getProperty("java.vm.version", "?");
         String vmIdent = vmName + " v" + vmVersion;
 
-        //String appName = android.app.ActivityThread.currentPackageName();
-        //if (appName == null)
-        //    appName = "unknown";
-        String appName = DdmHandleAppName.getAppName();
+        DdmHandleAppName.Names names = DdmHandleAppName.getNames();
+        String appName = names.getAppName();
+        String pkgName = names.getPkgName();
 
         VMRuntime vmRuntime = VMRuntime.getRuntime();
         String instructionSetDescription =
@@ -142,12 +141,13 @@ public class DdmHandleHello extends ChunkHandler {
             + (vmRuntime.isCheckJniEnabled() ? "true" : "false");
         boolean isNativeDebuggable = vmRuntime.isNativeDebuggable();
 
-        ByteBuffer out = ByteBuffer.allocate(28
+        ByteBuffer out = ByteBuffer.allocate(32
                             + vmIdent.length() * 2
                             + appName.length() * 2
                             + instructionSetDescription.length() * 2
                             + vmFlags.length() * 2
-                            + 1);
+                            + 1
+                            + pkgName.length() * 2);
         out.order(ChunkHandler.CHUNK_ORDER);
         out.putInt(CLIENT_PROTOCOL_VERSION);
         out.putInt(android.os.Process.myPid());
@@ -161,6 +161,8 @@ public class DdmHandleHello extends ChunkHandler {
         out.putInt(vmFlags.length());
         putString(out, vmFlags);
         out.put((byte)(isNativeDebuggable ? 1 : 0));
+        out.putInt(pkgName.length());
+        putString(out, pkgName);
 
         Chunk reply = new Chunk(CHUNK_HELO, out);
 
