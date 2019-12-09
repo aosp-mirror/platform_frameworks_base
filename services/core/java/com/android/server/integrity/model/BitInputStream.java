@@ -16,15 +16,29 @@
 
 package com.android.server.integrity.model;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /** A wrapper class for reading a stream of bits. */
 public class BitInputStream {
 
-    private byte[] mRuleBytes;
     private long mBitPointer;
+    private boolean mReadFromStream;
+
+    private byte[] mRuleBytes;
+    private InputStream mRuleInputStream;
+
+    private byte mCurrentRuleByte;
 
     public BitInputStream(byte[] ruleBytes) {
         this.mRuleBytes = ruleBytes;
         this.mBitPointer = 0;
+        this.mReadFromStream = false;
+    }
+
+    public BitInputStream(InputStream ruleInputStream) {
+        this.mRuleInputStream = ruleInputStream;
+        this.mReadFromStream = true;
     }
 
     /**
@@ -33,34 +47,43 @@ public class BitInputStream {
      * @param numOfBits The number of bits to read.
      * @return The value read from the stream.
      */
-    public int getNext(int numOfBits) {
+    public int getNext(int numOfBits) throws IOException {
         int component = 0;
         int count = 0;
 
-        int idx = (int) (mBitPointer / 8);
-        int offset = 7 - (int) (mBitPointer % 8);
-
         while (count++ < numOfBits) {
-            if (idx >= mRuleBytes.length) {
-                throw new IllegalArgumentException(String.format("Invalid byte index: %d", idx));
+            if (mBitPointer % 8 == 0) {
+                mCurrentRuleByte = getNextByte();
             }
+            int offset = 7 - (int) (mBitPointer % 8);
 
             component <<= 1;
-            component |= (mRuleBytes[idx] >>> offset) & 1;
+            component |= (mCurrentRuleByte >>> offset) & 1;
 
-            offset--;
-            if (offset == -1) {
-                idx++;
-                offset = 7;
-            }
+            mBitPointer++;
         }
 
-        mBitPointer += numOfBits;
         return component;
     }
 
     /** Check if there are bits left in the stream. */
-    public boolean hasNext() {
-        return mBitPointer / 8 < mRuleBytes.length;
+    public boolean hasNext() throws IOException {
+        if (mReadFromStream) {
+            return mRuleInputStream.available() > 0;
+        } else {
+            return mBitPointer / 8 < mRuleBytes.length;
+        }
+    }
+
+    private byte getNextByte() throws IOException {
+        if (mReadFromStream) {
+            return (byte) mRuleInputStream.read();
+        } else {
+            int idx = (int) (mBitPointer / 8);
+            if (idx >= mRuleBytes.length) {
+                throw new IllegalArgumentException(String.format("Invalid byte index: %d", idx));
+            }
+            return mRuleBytes[idx];
+        }
     }
 }
