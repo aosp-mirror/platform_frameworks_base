@@ -43,7 +43,7 @@ interface ILockSettings {
     long getLong(in String key, in long defaultValue, in int userId);
     @UnsupportedAppUsage
     String getString(in String key, in String defaultValue, in int userId);
-    boolean setLockCredential(in LockscreenCredential credential, in LockscreenCredential savedCredential, int userId, boolean allowUntrustedChange);
+    boolean setLockCredential(in LockscreenCredential credential, in LockscreenCredential savedCredential, int userId);
     void resetKeyStore(int userId);
     VerifyCredentialResponse checkCredential(in LockscreenCredential credential, int userId,
             in ICheckCredentialProgressCallback progressCallback);
