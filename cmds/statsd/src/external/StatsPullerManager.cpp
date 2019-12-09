@@ -281,6 +281,9 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {{.atomTag = android::util::VMS_CLIENT_STATS},
          {.additiveFields = {5, 6, 7, 8, 9, 10},
           .puller = new CarStatsPuller(android::util::VMS_CLIENT_STATS)}},
+        // NotiifcationRemoteViews.
+        {{.atomTag = android::util::NOTIFICATION_REMOTE_VIEWS},
+         {.puller = new StatsCompanionServicePuller(android::util::NOTIFICATION_REMOTE_VIEWS)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
