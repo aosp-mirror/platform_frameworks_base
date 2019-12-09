@@ -16,9 +16,11 @@
 
 package android.service.controls;
 
+import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -36,25 +38,38 @@ import java.lang.annotation.RetentionPolicy;
  */
 public abstract class ControlAction implements Parcelable {
 
+    private static final String KEY_TEMPLATE_ID = "key_template_id";
+    private static final String KEY_CHALLENGE_VALUE = "key_challenge_value";
+
+    public static final ControlAction UNKNOWN_ACTION = new ControlAction() {
+
+        @Override
+        public int getActionType() {
+            return TYPE_UNKNOWN;
+        }
+    };
+
     /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
+            TYPE_UNKNOWN,
             TYPE_BOOLEAN,
             TYPE_FLOAT
     })
     public @interface ActionType {};
 
+    public static final @ActionType int TYPE_UNKNOWN = 0;
     /**
      * The identifier of {@link BooleanAction}.
      */
-    public static final @ActionType int TYPE_BOOLEAN = 0;
+    public static final @ActionType int TYPE_BOOLEAN = 1;
 
     /**
      * The identifier of {@link FloatAction}.
      */
-    public static final @ActionType int TYPE_FLOAT = 1;
+    public static final @ActionType int TYPE_FLOAT = 2;
 
     /**
      * @hide
@@ -120,13 +135,9 @@ public abstract class ControlAction implements Parcelable {
     /**
      * @hide
      */
-    ControlAction(Parcel in) {
-        mTemplateId = in.readString();
-        if (in.readByte() == 1) {
-            mChallengeValue = in.readString();
-        } else {
-            mChallengeValue = null;
-        }
+    ControlAction(Bundle b) {
+        mTemplateId = b.getString(KEY_TEMPLATE_ID);
+        mChallengeValue = b.getString(KEY_CHALLENGE_VALUE);
     }
 
     /**
@@ -151,15 +162,24 @@ public abstract class ControlAction implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public final void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(getActionType());
-        dest.writeString(mTemplateId);
-        if (mChallengeValue != null) {
-            dest.writeByte((byte) 1);
-            dest.writeString(mChallengeValue);
-        } else {
-            dest.writeByte((byte) 0);
-        }
+        dest.writeBundle(getDataBundle());
+    }
+
+    /**
+     * Obtain a {@link Bundle} describing this object populated with data.
+     *
+     * Implementations in subclasses should populate the {@link Bundle} returned by
+     * {@link ControlAction}.
+     * @return a {@link Bundle} containing the data that represents this object.
+     */
+    @CallSuper
+    protected Bundle getDataBundle() {
+        Bundle b = new Bundle();
+        b.putString(KEY_TEMPLATE_ID, mTemplateId);
+        b.putString(KEY_CHALLENGE_VALUE, mChallengeValue);
+        return b;
     }
 
     public static final @NonNull Creator<ControlAction> CREATOR = new Creator<ControlAction>() {
@@ -175,6 +195,7 @@ public abstract class ControlAction implements Parcelable {
         }
     };
 
+
     private static ControlAction createActionFromType(@ActionType int type, Parcel source) {
         switch(type) {
             case TYPE_BOOLEAN:
@@ -182,7 +203,8 @@ public abstract class ControlAction implements Parcelable {
             case TYPE_FLOAT:
                 return FloatAction.CREATOR.createFromParcel(source);
             default:
-                return null;
+                source.readBundle();
+                return UNKNOWN_ACTION;
         }
     }
 

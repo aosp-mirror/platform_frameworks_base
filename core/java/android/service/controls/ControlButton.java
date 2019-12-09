@@ -29,29 +29,29 @@ import com.android.internal.util.Preconditions;
  */
 public class ControlButton implements Parcelable {
 
-    private final boolean mActive;
+    private final boolean mChecked;
     private final @NonNull Icon mIcon;
     private final @NonNull CharSequence mContentDescription;
 
     /**
-     * @param active true if the button should be rendered as active.
+     * @param checked true if the button should be rendered as active.
      * @param icon icon to display in the button.
      * @param contentDescription content description for the button.
      */
-    public ControlButton(boolean active, @NonNull Icon icon,
+    public ControlButton(boolean checked, @NonNull Icon icon,
             @NonNull CharSequence contentDescription) {
         Preconditions.checkNotNull(icon);
         Preconditions.checkNotNull(contentDescription);
-        mActive = active;
+        mChecked = checked;
         mIcon = icon;
         mContentDescription = contentDescription;
     }
 
     /**
-     * Whether the button should be rendered in its active state.
+     * Whether the button should be rendered in a checked state.
      */
-    public boolean isActive() {
-        return mActive;
+    public boolean isChecked() {
+        return mChecked;
     }
 
     /**
@@ -78,13 +78,13 @@ public class ControlButton implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByte(mActive ? (byte) 1 : (byte) 0);
+        dest.writeByte(mChecked ? (byte) 1 : (byte) 0);
         mIcon.writeToParcel(dest, flags);
         dest.writeCharSequence(mContentDescription);
     }
 
     ControlButton(Parcel in) {
-        mActive = in.readByte() != 0;
+        mChecked = in.readByte() != 0;
         mIcon = Icon.CREATOR.createFromParcel(in);
         mContentDescription = in.readCharSequence();
     }

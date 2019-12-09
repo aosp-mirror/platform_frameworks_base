@@ -18,6 +18,7 @@ package android.service.controls;
 
 import android.annotation.NonNull;
 import android.graphics.drawable.Icon;
+import android.os.Bundle;
 import android.os.Parcel;
 
 import com.android.internal.util.Preconditions;
@@ -27,6 +28,9 @@ import com.android.internal.util.Preconditions;
  * @hide
  */
 public final class ThumbnailTemplate extends ControlTemplate {
+
+    private static final String KEY_ICON = "key_icon";
+    private static final String KEY_CONTENT_DESCRIPTION = "key_content_description";
 
     private final @NonNull Icon mThumbnail;
     private final @NonNull CharSequence mContentDescription;
@@ -45,10 +49,10 @@ public final class ThumbnailTemplate extends ControlTemplate {
         mContentDescription = contentDescription;
     }
 
-    ThumbnailTemplate(Parcel in) {
-        super(in);
-        mThumbnail = Icon.CREATOR.createFromParcel(in);
-        mContentDescription = in.readCharSequence();
+    ThumbnailTemplate(Bundle b) {
+        super(b);
+        mThumbnail = b.getParcelable(KEY_ICON);
+        mContentDescription = b.getCharSequence(KEY_CONTENT_DESCRIPTION, "");
     }
 
     /**
@@ -74,17 +78,19 @@ public final class ThumbnailTemplate extends ControlTemplate {
     public int getTemplateType() {
         return TYPE_THUMBNAIL;
     }
+
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        mThumbnail.writeToParcel(dest, flags);
-        dest.writeCharSequence(mContentDescription);
+    protected Bundle getDataBundle() {
+        Bundle b = super.getDataBundle();
+        b.putObject(KEY_ICON, mThumbnail);
+        b.putObject(KEY_CONTENT_DESCRIPTION, mContentDescription);
+        return b;
     }
 
     public static final Creator<ThumbnailTemplate> CREATOR = new Creator<ThumbnailTemplate>() {
         @Override
         public ThumbnailTemplate createFromParcel(Parcel source) {
-            return new ThumbnailTemplate(source);
+            return new ThumbnailTemplate(source.readBundle());
         }
 
         @Override
