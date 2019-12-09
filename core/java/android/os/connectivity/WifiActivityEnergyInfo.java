@@ -19,8 +19,12 @@ package android.os.connectivity;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.app.ActivityThread;
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.os.PowerProfile;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -72,7 +76,6 @@ public final class WifiActivityEnergyInfo implements Parcelable {
      * @param scanDurationMillis Cumulative milliseconds when radio is awake due to scan.
      * @param idleDurationMillis Cumulative milliseconds when radio is awake but not transmitting or
      *                       receiving.
-     * @param energyUsedMicroJoules Cumulative energy consumed by Wifi, in microjoules.
      */
     public WifiActivityEnergyInfo(
             long timeSinceBootMillis,
@@ -80,14 +83,33 @@ public final class WifiActivityEnergyInfo implements Parcelable {
             long txDurationMillis,
             long rxDurationMillis,
             long scanDurationMillis,
-            long idleDurationMillis,
-            long energyUsedMicroJoules) {
+            long idleDurationMillis) {
         mTimeSinceBootMillis = timeSinceBootMillis;
         mStackState = stackState;
         mControllerTxDurationMillis = txDurationMillis;
         mControllerRxDurationMillis = rxDurationMillis;
         mControllerScanDurationMillis = scanDurationMillis;
         mControllerIdleDurationMillis = idleDurationMillis;
+
+        final Context context = ActivityThread.currentActivityThread().getSystemContext();
+        if (context == null) {
+            mControllerEnergyUsedMicroJoules = 0L;
+            return;
+        }
+        // Calculate energy used using PowerProfile.
+        PowerProfile powerProfile = new PowerProfile(context);
+        final double rxIdleCurrent = powerProfile.getAveragePower(
+                PowerProfile.POWER_WIFI_CONTROLLER_IDLE);
+        final double rxCurrent = powerProfile.getAveragePower(
+                PowerProfile.POWER_WIFI_CONTROLLER_RX);
+        final double txCurrent = powerProfile.getAveragePower(
+                PowerProfile.POWER_WIFI_CONTROLLER_TX);
+        final double voltage = powerProfile.getAveragePower(
+                PowerProfile.POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE) / 1000.0;
+        final long energyUsedMicroJoules = (long) ((mControllerTxDurationMillis * txCurrent
+                + mControllerRxDurationMillis * rxCurrent
+                + mControllerIdleDurationMillis * rxIdleCurrent)
+                * voltage);
         mControllerEnergyUsedMicroJoules = energyUsedMicroJoules;
     }
 
@@ -113,9 +135,8 @@ public final class WifiActivityEnergyInfo implements Parcelable {
             long rxTime = in.readLong();
             long scanTime = in.readLong();
             long idleTime = in.readLong();
-            long energyUsed = in.readLong();
             return new WifiActivityEnergyInfo(timestamp, stackState,
-                    txTime, rxTime, scanTime, idleTime, energyUsed);
+                    txTime, rxTime, scanTime, idleTime);
         }
         public WifiActivityEnergyInfo[] newArray(int size) {
             return new WifiActivityEnergyInfo[size];
@@ -130,7 +151,6 @@ public final class WifiActivityEnergyInfo implements Parcelable {
         out.writeLong(mControllerRxDurationMillis);
         out.writeLong(mControllerScanDurationMillis);
         out.writeLong(mControllerIdleDurationMillis);
-        out.writeLong(mControllerEnergyUsedMicroJoules);
     }
 
     @Override

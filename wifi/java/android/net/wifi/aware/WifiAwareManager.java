@@ -19,6 +19,7 @@ package android.net.wifi.aware;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
@@ -390,6 +391,17 @@ public class WifiAwareManager {
         try {
             mService.sendMessage(clientId, sessionId, peerHandle.peerId, message, messageId,
                     retryCount);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
+    public void requestMacAddresses(int uid, List<Integer> peerIds,
+            IWifiAwareMacAddressProvider callback) {
+        try {
+            mService.requestMacAddresses(uid, peerIds, callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

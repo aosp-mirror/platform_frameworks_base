@@ -1680,16 +1680,13 @@ filegroup {
 }
 
 filegroup {
-    name: "framework-wifistack-shared-srcs",
+    name: "framework-wifi-service-shared-srcs",
     srcs: [
         ":framework-annotations",
 	"core/java/android/os/HandlerExecutor.java",
         "core/java/android/util/BackupUtils.java",
-        "core/java/android/util/KeyValueListParser.java",
         "core/java/android/util/LocalLog.java",
         "core/java/android/util/Rational.java",
-        "core/java/android/util/proto/ProtoStream.java",
-        "core/java/android/util/proto/ProtoOutputStream.java",
         "core/java/com/android/internal/util/FastXmlSerializer.java",
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IState.java",

@@ -24,6 +24,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -1112,6 +1113,82 @@ public class UserManager {
      */
     public static final String KEY_RESTRICTIONS_PENDING = "restrictions_pending";
 
+    /**
+     * List of key values that can be passed into the various user restriction related methods
+     * in {@link UserManager} & {@link DevicePolicyManager}.
+     * Note: This is slightly different from the real set of user restrictions listed in {@link
+     * com.android.server.pm.UserRestrictionsUtils#USER_RESTRICTIONS}. For example
+     * {@link #KEY_RESTRICTIONS_PENDING} is not a real user restriction, but is a a legitimate
+     * value that can be passed into {@link #hasUserRestriction(String)}.
+     * @hide
+     */
+    @StringDef(value = {
+            DISALLOW_MODIFY_ACCOUNTS,
+            DISALLOW_CONFIG_WIFI,
+            DISALLOW_CONFIG_LOCALE,
+            DISALLOW_INSTALL_APPS,
+            DISALLOW_UNINSTALL_APPS,
+            DISALLOW_SHARE_LOCATION,
+            DISALLOW_AIRPLANE_MODE,
+            DISALLOW_CONFIG_BRIGHTNESS,
+            DISALLOW_AMBIENT_DISPLAY,
+            DISALLOW_CONFIG_SCREEN_TIMEOUT,
+            DISALLOW_INSTALL_UNKNOWN_SOURCES,
+            DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY,
+            DISALLOW_CONFIG_BLUETOOTH,
+            DISALLOW_BLUETOOTH,
+            DISALLOW_BLUETOOTH_SHARING,
+            DISALLOW_USB_FILE_TRANSFER,
+            DISALLOW_CONFIG_CREDENTIALS,
+            DISALLOW_REMOVE_USER,
+            DISALLOW_REMOVE_MANAGED_PROFILE,
+            DISALLOW_DEBUGGING_FEATURES,
+            DISALLOW_CONFIG_VPN,
+            DISALLOW_CONFIG_LOCATION,
+            DISALLOW_CONFIG_DATE_TIME,
+            DISALLOW_CONFIG_TETHERING,
+            DISALLOW_NETWORK_RESET,
+            DISALLOW_FACTORY_RESET,
+            DISALLOW_ADD_USER,
+            DISALLOW_ADD_MANAGED_PROFILE,
+            ENSURE_VERIFY_APPS,
+            DISALLOW_CONFIG_CELL_BROADCASTS,
+            DISALLOW_CONFIG_MOBILE_NETWORKS,
+            DISALLOW_APPS_CONTROL,
+            DISALLOW_MOUNT_PHYSICAL_MEDIA,
+            DISALLOW_UNMUTE_MICROPHONE,
+            DISALLOW_ADJUST_VOLUME,
+            DISALLOW_OUTGOING_CALLS,
+            DISALLOW_SMS,
+            DISALLOW_FUN,
+            DISALLOW_CREATE_WINDOWS,
+            DISALLOW_SYSTEM_ERROR_DIALOGS,
+            DISALLOW_CROSS_PROFILE_COPY_PASTE,
+            DISALLOW_OUTGOING_BEAM,
+            DISALLOW_WALLPAPER,
+            DISALLOW_SET_WALLPAPER,
+            DISALLOW_SAFE_BOOT,
+            DISALLOW_RECORD_AUDIO,
+            DISALLOW_RUN_IN_BACKGROUND,
+            DISALLOW_CAMERA,
+            DISALLOW_UNMUTE_DEVICE,
+            DISALLOW_DATA_ROAMING,
+            DISALLOW_SET_USER_ICON,
+            DISALLOW_OEM_UNLOCK,
+            DISALLOW_UNIFIED_PASSWORD,
+            ALLOW_PARENT_PROFILE_APP_LINKING,
+            DISALLOW_AUTOFILL,
+            DISALLOW_CONTENT_CAPTURE,
+            DISALLOW_CONTENT_SUGGESTIONS,
+            DISALLOW_USER_SWITCH,
+            DISALLOW_SHARE_INTO_MANAGED_PROFILE,
+            DISALLOW_PRINTING,
+            DISALLOW_CONFIG_PRIVATE_DNS,
+            KEY_RESTRICTIONS_PENDING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UserRestrictionKey {}
+
     private static final String ACTION_CREATE_USER = "android.os.action.CREATE_USER";
 
     /**
@@ -2026,7 +2103,8 @@ public class UserManager {
     @SystemApi
     @UserRestrictionSource
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    public int getUserRestrictionSource(String restrictionKey, UserHandle userHandle) {
+    public int getUserRestrictionSource(@UserRestrictionKey String restrictionKey,
+            UserHandle userHandle) {
         try {
             return mService.getUserRestrictionSource(restrictionKey, userHandle.getIdentifier());
         } catch (RemoteException re) {
@@ -2045,7 +2123,7 @@ public class UserManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public List<EnforcingUser> getUserRestrictionSources(
-            String restrictionKey, UserHandle userHandle) {
+            @UserRestrictionKey String restrictionKey, UserHandle userHandle) {
         try {
             return mService.getUserRestrictionSources(restrictionKey, userHandle.getIdentifier());
         } catch (RemoteException re) {
@@ -2091,7 +2169,8 @@ public class UserManager {
      * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
      */
     @UnsupportedAppUsage
-    public boolean hasBaseUserRestriction(String restrictionKey, UserHandle userHandle) {
+    public boolean hasBaseUserRestriction(@UserRestrictionKey String restrictionKey,
+            UserHandle userHandle) {
         try {
             return mService.hasBaseUserRestriction(restrictionKey, userHandle.getIdentifier());
         } catch (RemoteException re) {
@@ -2162,7 +2241,7 @@ public class UserManager {
      * @param restrictionKey The string key representing the restriction.
      * @return {@code true} if the current user has the given restriction, {@code false} otherwise.
      */
-    public boolean hasUserRestriction(String restrictionKey) {
+    public boolean hasUserRestriction(@UserRestrictionKey String restrictionKey) {
         return hasUserRestrictionForUser(restrictionKey, Process.myUserHandle());
     }
 
@@ -2174,7 +2253,8 @@ public class UserManager {
      * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
      */
     @UnsupportedAppUsage
-    public boolean hasUserRestriction(String restrictionKey, UserHandle userHandle) {
+    public boolean hasUserRestriction(@UserRestrictionKey String restrictionKey,
+            UserHandle userHandle) {
         return hasUserRestrictionForUser(restrictionKey, userHandle);
     }
 
@@ -2194,7 +2274,7 @@ public class UserManager {
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
-    public boolean hasUserRestrictionForUser(@NonNull String restrictionKey,
+    public boolean hasUserRestrictionForUser(@NonNull @UserRestrictionKey String restrictionKey,
             @NonNull UserHandle userHandle) {
         try {
             return mService.hasUserRestriction(restrictionKey, userHandle.getIdentifier());
@@ -2207,7 +2287,7 @@ public class UserManager {
      * @hide
      * Returns whether any user on the device has the given user restriction set.
      */
-    public boolean hasUserRestrictionOnAnyUser(String restrictionKey) {
+    public boolean hasUserRestrictionOnAnyUser(@UserRestrictionKey String restrictionKey) {
         try {
             return mService.hasUserRestrictionOnAnyUser(restrictionKey);
         } catch (RemoteException re) {

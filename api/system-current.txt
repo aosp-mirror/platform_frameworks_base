@@ -6624,7 +6624,7 @@ package android.os.connectivity {
   }
 
   public final class WifiActivityEnergyInfo implements android.os.Parcelable {
-    ctor public WifiActivityEnergyInfo(long, int, long, long, long, long, long);
+    ctor public WifiActivityEnergyInfo(long, int, long, long, long, long);
     method public int describeContents();
     method public long getControllerEnergyUsedMicroJoules();
     method public long getControllerIdleDurationMillis();
