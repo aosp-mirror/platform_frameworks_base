@@ -308,6 +308,17 @@ public class CollectionUtils {
     }
 
     /**
+     * @see #add(List, Object)
+     */
+    public static @NonNull <K, V> Map<K, V> add(@Nullable Map<K, V> map, K key, V value) {
+        if (map == null || map == Collections.emptyMap()) {
+            map = new ArrayMap<>();
+        }
+        map.put(key, value);
+        return map;
+    }
+
+    /**
      * Similar to {@link List#remove}, but with support for list values of {@code null} and
      * {@link Collections#emptyList}
      */
