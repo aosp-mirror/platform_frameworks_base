@@ -4116,6 +4116,13 @@ class StorageManagerService extends IStorageManager.Stub
             }
         }
 
+        @Override
+        public void resetUser(int userId) {
+            // TODO(b/145931219): ideally, we only reset storage for the user in question,
+            // but for now, reset everything.
+            mHandler.obtainMessage(H_RESET).sendToTarget();
+        }
+
         public boolean hasExternalStorage(int uid, String packageName) {
             // No need to check for system uid. This avoids a deadlock between
             // PackageManagerService and AppOpsService.

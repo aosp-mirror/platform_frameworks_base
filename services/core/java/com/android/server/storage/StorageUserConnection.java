@@ -34,6 +34,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
+import android.os.storage.StorageManagerInternal;
 import android.service.storage.ExternalStorageService;
 import android.service.storage.IExternalStorageService;
 import android.text.TextUtils;
@@ -41,6 +42,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+import com.android.server.LocalServices;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -73,42 +75,25 @@ public final class StorageUserConnection {
     }
 
     /**
-     * Creates and stores a storage {@link Session}.
+     * Creates and starts a storage {@link Session}.
      *
      * They must also be cleaned up with {@link #removeSession}.
      *
      * @throws IllegalArgumentException if a {@code Session} with {@code sessionId} already exists
      */
-    public void createSession(String sessionId, ParcelFileDescriptor pfd, String upperPath,
-            String lowerPath) {
+    public void startSession(String sessionId, ParcelFileDescriptor pfd, String upperPath,
+            String lowerPath) throws ExternalStorageServiceException {
         Preconditions.checkNotNull(sessionId);
         Preconditions.checkNotNull(pfd);
         Preconditions.checkNotNull(upperPath);
         Preconditions.checkNotNull(lowerPath);
 
-        synchronized (mLock) {
-            Preconditions.checkArgument(!mSessions.containsKey(sessionId));
-            mSessions.put(sessionId, new Session(sessionId, pfd, upperPath, lowerPath));
-        }
-    }
-
-    /**
-     * Starts an already created storage {@link Session} for {@code sessionId}.
-     *
-     * It is safe to call this multiple times, however if the session is already started,
-     * subsequent calls will be ignored.
-     *
-     * @throws ExternalStorageServiceException if the session failed to start
-     **/
-    public void startSession(String sessionId) throws ExternalStorageServiceException {
-        Session session;
-        synchronized (mLock) {
-            session = mSessions.get(sessionId);
-        }
-
         prepareRemote();
         synchronized (mLock) {
-            mActiveConnection.startSessionLocked(session);
+            Preconditions.checkArgument(!mSessions.containsKey(sessionId));
+            Session session = new Session(sessionId, upperPath, lowerPath);
+            mSessions.put(sessionId, session);
+            mActiveConnection.startSessionLocked(session, pfd);
         }
     }
 
@@ -121,15 +106,9 @@ public final class StorageUserConnection {
      **/
     public Session removeSession(String sessionId) {
         synchronized (mLock) {
-            Session session = mSessions.remove(sessionId);
-            if (session != null) {
-                session.close();
-                return session;
-            }
-            return null;
+            return mSessions.remove(sessionId);
         }
     }
-
 
     /**
      * Removes a session and waits for exit
@@ -150,33 +129,20 @@ public final class StorageUserConnection {
         }
     }
 
-    /** Starts all available sessions for a user without blocking. Any failures will be ignored. */
-    public void startAllSessions() {
+    /** Restarts all available sessions for a user without blocking.
+     *
+     * Any failures will be ignored.
+     **/
+    public void resetUserSessions() {
         synchronized (mLock) {
             if (mSessions.isEmpty()) {
-                // No point bringing up the remote if we don't have any sessions to start
+                // Nothing to reset if we have no sessions to restart; we typically
+                // hit this path if the user was consciously shut down.
                 return;
             }
         }
-
-        try {
-            prepareRemote();
-        } catch (ExternalStorageServiceException e) {
-            Slog.e(TAG, "Failed to start all sessions for user: " + mUserId, e);
-            return;
-        }
-
-        synchronized (mLock) {
-            Slog.i(TAG, "Starting " + mSessions.size() + " sessions for user: " + mUserId + "...");
-            for (Session session : mSessions.values()) {
-                try {
-                    mActiveConnection.startSessionLocked(session);
-                } catch (IllegalStateException | ExternalStorageServiceException e) {
-                    // TODO: Don't crash process? We could get into process crash loop
-                    Slog.e(TAG, "Failed to start " + session, e);
-                }
-            }
-        }
+        StorageManagerInternal sm = LocalServices.getService(StorageManagerInternal.class);
+        sm.resetUser(mUserId);
     }
 
     /**
@@ -184,21 +150,8 @@ public final class StorageUserConnection {
      */
     public void removeAllSessions() {
         synchronized (mLock) {
-            closeAllSessions();
             Slog.i(TAG, "Removing  " + mSessions.size() + " sessions for user: " + mUserId + "...");
             mSessions.clear();
-        }
-    }
-
-    /**
-     * Closes all sessions, but doesn't remove them or unbind the service.
-     */
-    public void closeAllSessions() {
-        synchronized (mLock) {
-            Slog.i(TAG, "Closing " + mSessions.size() + " sessions for user: " + mUserId + "...");
-            for (Session session : mSessions.values()) {
-                session.close();
-            }
         }
     }
 
@@ -299,26 +252,37 @@ public final class StorageUserConnection {
             return true;
         }
 
-        public void startSessionLocked(Session session) throws ExternalStorageServiceException {
+        public void startSessionLocked(Session session, ParcelFileDescriptor fd)
+                throws ExternalStorageServiceException {
             if (!isActiveLocked(session)) {
+                try {
+                    fd.close();
+                } catch (IOException e) {
+                    // ignore
+                }
                 return;
             }
 
             CountDownLatch latch = new CountDownLatch(1);
-            try (ParcelFileDescriptor dupedPfd = session.pfd.dup()) {
+            try {
                 mRemote.startSession(session.sessionId,
                         FLAG_SESSION_TYPE_FUSE | FLAG_SESSION_ATTRIBUTE_INDEXABLE,
-                        dupedPfd, session.upperPath, session.lowerPath, new RemoteCallback(result ->
+                        fd, session.upperPath, session.lowerPath, new RemoteCallback(result ->
                                 setResultLocked(latch, result)));
                 waitForLatch(latch, "start_session " + session);
                 maybeThrowExceptionLocked();
             } catch (Exception e) {
                 throw new ExternalStorageServiceException("Failed to start session: " + session, e);
+            } finally {
+                try {
+                    fd.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
             }
         }
 
         public void endSessionLocked(Session session) throws ExternalStorageServiceException {
-            session.close();
             if (!isActiveLocked(session)) {
                 // Nothing to end, not started yet
                 return;
@@ -420,7 +384,7 @@ public final class StorageUserConnection {
                         // will be called for any required mounts.
                         // Notify StorageManagerService so it can restart all necessary sessions
                         close();
-                        new Thread(StorageUserConnection.this::startAllSessions).start();
+                        resetUserSessions();
                     }
                 };
             }
@@ -441,26 +405,15 @@ public final class StorageUserConnection {
         }
     }
 
-    private static final class Session implements AutoCloseable {
+    private static final class Session {
         public final String sessionId;
-        public final ParcelFileDescriptor pfd;
         public final String lowerPath;
         public final String upperPath;
 
-        Session(String sessionId, ParcelFileDescriptor pfd, String upperPath, String lowerPath) {
+        Session(String sessionId, String upperPath, String lowerPath) {
             this.sessionId = sessionId;
-            this.pfd = pfd;
             this.upperPath = upperPath;
             this.lowerPath = lowerPath;
-        }
-
-        @Override
-        public void close() {
-            try {
-                pfd.close();
-            } catch (IOException e) {
-                Slog.i(TAG, "Failed to close session: " + this);
-            }
         }
 
         @Override

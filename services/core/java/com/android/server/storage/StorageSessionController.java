@@ -100,12 +100,10 @@ public final class StorageSessionController {
                 connection = new StorageUserConnection(mContext, userId, this);
                 mConnections.put(userId, connection);
             }
-            Slog.i(TAG, "Creating session with id: " + sessionId);
-            connection.createSession(sessionId, new ParcelFileDescriptor(deviceFd),
+            Slog.i(TAG, "Creating and starting session with id: " + sessionId);
+            connection.startSession(sessionId, new ParcelFileDescriptor(deviceFd),
                     vol.getPath().getPath(), vol.getInternalPath().getPath());
         }
-
-        connection.startSession(sessionId);
     }
 
     /**
@@ -196,7 +194,7 @@ public final class StorageSessionController {
         }
 
         if (connection != null) {
-            Slog.i(TAG, "Closing all sessions for user: " + userId);
+            Slog.i(TAG, "Removing all sessions for user: " + userId);
             connection.removeAllSessions();
         } else {
             Slog.w(TAG, "No connection found for user: " + userId);
