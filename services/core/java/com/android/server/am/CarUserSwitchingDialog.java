@@ -32,6 +32,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.UserManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,8 +82,15 @@ final class CarUserSwitchingDialog extends UserSwitchingDialog {
                     .setImageDrawable(drawable);
         }
 
-        ((TextView) view.findViewById(R.id.user_loading))
-                .setText(res.getString(R.string.car_loading_profile));
+        TextView msgView = view.findViewById(R.id.user_loading);
+        // TODO: use developer settings instead
+        if (Build.IS_DEBUGGABLE) {
+            // TODO: use specific string
+            msgView.setText(res.getString(R.string.car_loading_profile) + " user\n(from "
+                    + mOldUser.id + " to " + mNewUser.id + ")");
+        } else {
+            msgView.setText(res.getString(R.string.car_loading_profile));
+        }
         setView(view);
     }
 
