@@ -479,7 +479,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAutoExpand_FailsNotForeground() {
+    public void testAutoExpand_fails_noFlag() {
         assertFalse(mBubbleController.isStackExpanded());
         setMetadataFlags(mRow.getEntry(),
                 Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE, false /* enableFlag */);
@@ -498,7 +498,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAutoExpand_SucceedsForeground() {
+    public void testAutoExpand_succeeds_withFlag() {
         setMetadataFlags(mRow.getEntry(),
                 Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE, true /* enableFlag */);
 
@@ -516,23 +516,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSuppressNotif_FailsNotForeground() {
-        setMetadataFlags(mRow.getEntry(),
-                Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION, false /* enableFlag */);
-
-        // Add the suppress notif bubble
-        mEntryListener.onPendingEntryAdded(mRow.getEntry());
-        mBubbleController.updateBubble(mRow.getEntry());
-
-        // Should not be suppressed because we weren't forground
-        assertFalse(mBubbleController.isBubbleNotificationSuppressedFromShade(
-                mRow.getEntry().getKey()));
-        // # of bubbles should change
-        verify(mBubbleStateChangeListener).onHasBubblesChanged(true /* hasBubbles */);
-    }
-
-    @Test
-    public void testSuppressNotif_SucceedsForeground() {
+    public void testSuppressNotif_onInitialNotif() {
         setMetadataFlags(mRow.getEntry(),
                 Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION, true /* enableFlag */);
 
@@ -543,10 +527,40 @@ public class BubbleControllerTest extends SysuiTestCase {
         // Notif should be suppressed because we were foreground
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry().getKey()));
+        // Dot + flyout is hidden because notif is suppressed
+        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
+        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showFlyout());
 
         // # of bubbles should change
         verify(mBubbleStateChangeListener).onHasBubblesChanged(true /* hasBubbles */);
     }
+
+    @Test
+    public void testSuppressNotif_onUpdateNotif() {
+        mBubbleController.updateBubble(mRow.getEntry());
+
+        // Should not be suppressed
+        assertFalse(mBubbleController.isBubbleNotificationSuppressedFromShade(
+                mRow.getEntry().getKey()));
+        // Should show dot
+        assertTrue(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
+
+        // Update to suppress notif
+        setMetadataFlags(mRow.getEntry(),
+                Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION, true /* enableFlag */);
+        mBubbleController.updateBubble(mRow.getEntry());
+
+        // Notif should be suppressed
+        assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
+                mRow.getEntry().getKey()));
+        // Dot + flyout is hidden because notif is suppressed
+        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
+        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showFlyout());
+
+        // # of bubbles should change
+        verify(mBubbleStateChangeListener).onHasBubblesChanged(true /* hasBubbles */);
+    }
+
 
     @Test
     public void testExpandStackAndSelectBubble_removedFirst() {
