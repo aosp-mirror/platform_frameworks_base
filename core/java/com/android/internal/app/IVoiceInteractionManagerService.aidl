@@ -26,6 +26,7 @@ import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
+import android.hardware.soundtrigger.ModelParams;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
@@ -91,6 +92,49 @@ interface IVoiceInteractionManagerService {
      */
     int stopRecognition(in IVoiceInteractionService service, int keyphraseId,
             in IRecognitionStatusCallback callback);
+    /**
+     * Set a model specific ModelParams with the given value. This
+     * parameter will keep its value for the duration the model is loaded regardless of starting and
+     * stopping recognition. Once the model is unloaded, the value will be lost.
+     * queryParameter should be checked first before calling this method.
+     *
+     * @param service The current VoiceInteractionService.
+     * @param keyphraseId The unique identifier for the keyphrase.
+     * @param modelParam   ModelParams
+     * @param value        Value to set
+     * @return - {@link SoundTrigger#STATUS_OK} in case of success
+     *         - {@link SoundTrigger#STATUS_NO_INIT} if the native service cannot be reached
+     *         - {@link SoundTrigger#STATUS_BAD_VALUE} invalid input parameter
+     *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence or
+     *           if API is not supported by HAL
+     */
+    int setParameter(in IVoiceInteractionService service, int keyphraseId,
+            in ModelParams modelParam, int value);
+    /**
+     * Get a model specific ModelParams. This parameter will keep its value
+     * for the duration the model is loaded regardless of starting and stopping recognition.
+     * Once the model is unloaded, the value will be lost. If the value is not set, a default
+     * value is returned. See ModelParams for parameter default values.
+     * queryParameter should be checked first before calling this method.
+     *
+     * @param service The current VoiceInteractionService.
+     * @param keyphraseId The unique identifier for the keyphrase.
+     * @param modelParam   ModelParams
+     * @return value of parameter
+     */
+    int getParameter(in IVoiceInteractionService service, int keyphraseId,
+            in ModelParams modelParam);
+    /**
+     * Determine if parameter control is supported for the given model handle.
+     * This method should be checked prior to calling setParameter or getParameter.
+     *
+     * @param service The current VoiceInteractionService.
+     * @param keyphraseId The unique identifier for the keyphrase.
+     * @param modelParam ModelParams
+     * @return supported range of parameter, null if not supported
+     */
+    @nullable SoundTrigger.ModelParamRange queryParameter(in IVoiceInteractionService service,
+            int keyphraseId, in ModelParams modelParam);
 
     /**
      * @return the component name for the currently active voice interaction service

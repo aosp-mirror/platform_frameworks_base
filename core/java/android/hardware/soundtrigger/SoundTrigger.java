@@ -588,19 +588,19 @@ public class SoundTrigger {
         }
     }
 
-    /*****************************************************************************
+    /**
      * A ModelParamRange is a representation of supported parameter range for a
      * given loaded model.
-     ****************************************************************************/
+     */
     public static final class ModelParamRange implements Parcelable {
 
         /**
-         * start of supported range inclusive
+         * The inclusive start of supported range.
          */
         public final int start;
 
         /**
-         * end of supported range inclusive
+         * The inclusive end of supported range.
          */
         public final int end;
 
@@ -609,29 +609,63 @@ public class SoundTrigger {
             this.end = end;
         }
 
+        /** @hide */
         private ModelParamRange(@NonNull Parcel in) {
             this.start = in.readInt();
             this.end = in.readInt();
         }
 
         @NonNull
-        public static final Creator<ModelParamRange> CREATOR = new Creator<ModelParamRange>() {
-            @Override
-            @NonNull
-            public ModelParamRange createFromParcel(@NonNull Parcel in) {
-                return new ModelParamRange(in);
-            }
+        public static final Creator<ModelParamRange> CREATOR =
+                new Creator<ModelParamRange>() {
+                    @Override
+                    @NonNull
+                    public ModelParamRange createFromParcel(@NonNull Parcel in) {
+                        return new ModelParamRange(in);
+                    }
 
-            @Override
-            @NonNull
-            public ModelParamRange[] newArray(int size) {
-                return new ModelParamRange[size];
-            }
-        };
+                    @Override
+                    @NonNull
+                    public ModelParamRange[] newArray(int size) {
+                        return new ModelParamRange[size];
+                    }
+                };
 
+        /** @hide */
         @Override
         public int describeContents() {
             return 0;
+        }
+
+        /** @hide */
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (start);
+            result = prime * result + (end);
+            return result;
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            ModelParamRange other = (ModelParamRange) obj;
+            if (start != other.start) {
+                return false;
+            }
+            if (end != other.end) {
+                return false;
+            }
+            return true;
         }
 
         @Override

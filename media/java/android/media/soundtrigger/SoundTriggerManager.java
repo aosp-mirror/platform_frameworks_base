@@ -428,8 +428,7 @@ public final class SoundTriggerManager {
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     public int setParameter(@Nullable UUID soundModelId,
-            @ModelParams int modelParam, int value)
-            throws UnsupportedOperationException, IllegalArgumentException {
+            @ModelParams int modelParam, int value) {
         try {
             return mSoundTriggerService.setParameter(new ParcelUuid(soundModelId), modelParam,
                     value);
@@ -449,15 +448,10 @@ public final class SoundTriggerManager {
      * @param soundModelId UUID of model to get parameter
      * @param modelParam   {@link ModelParams}
      * @return value of parameter
-     * @throws UnsupportedOperationException if hal or model do not support this API.
-     *         {@link SoundTriggerManager#queryParameter} should be checked first.
-     * @throws IllegalArgumentException if invalid model handle or parameter is passed.
-     *         {@link SoundTriggerManager#queryParameter} should be checked first.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     public int getParameter(@NonNull UUID soundModelId,
-            @ModelParams int modelParam)
-            throws UnsupportedOperationException, IllegalArgumentException {
+            @ModelParams int modelParam) {
         try {
             return mSoundTriggerService.getParameter(new ParcelUuid(soundModelId), modelParam);
         } catch (RemoteException e) {
@@ -479,8 +473,7 @@ public final class SoundTriggerManager {
     public ModelParamRange queryParameter(@Nullable UUID soundModelId,
             @ModelParams int modelParam) {
         try {
-            return mSoundTriggerService.queryParameter(new ParcelUuid(soundModelId),
-                    modelParam);
+            return mSoundTriggerService.queryParameter(new ParcelUuid(soundModelId), modelParam);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
