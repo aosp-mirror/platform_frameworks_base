@@ -712,6 +712,8 @@ public final class Tuner implements AutoCloseable  {
         private native void nativeSetFileDescriptor(FileDescriptor fd);
         private native int nativeRead(int size);
         private native int nativeRead(byte[] bytes, int offset, int size);
+        private native int nativeWrite(int size);
+        private native int nativeWrite(byte[] bytes, int offset, int size);
 
         private Dvr() {}
 
@@ -808,6 +810,20 @@ public final class Tuner implements AutoCloseable  {
                         "Array length=" + bytes.length + ", offset=" + offset + ", size=" + size);
             }
             return nativeRead(bytes, offset, size);
+        }
+
+        /**
+         * Writes recording data to file.
+         */
+        public int write(int size) {
+            return nativeWrite(size);
+        }
+
+        /**
+         * Writes recording data to buffer.
+         */
+        public int write(@NonNull byte[] bytes, int offset, int size) {
+            return nativeWrite(bytes, offset, size);
         }
     }
 
