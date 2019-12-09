@@ -7107,7 +7107,7 @@ message TextSelectionEvent {
     // Event type of this event.
     optional android.stats.textclassifier.EventType event_type = 2;
 
-    // Name of the model that is involved in this event.
+    // Name of the annotator model that is involved in this event.
     optional string model_name = 3;
 
     // Type of widget that was involved in triggering this event.
@@ -7147,7 +7147,7 @@ message TextLinkifyEvent {
     // Event type of this event.
     optional android.stats.textclassifier.EventType event_type = 2;
 
-    // Name of the model that is involved in this event.
+    // Name of the annotator model that is involved in this event.
     optional string model_name = 3;
 
     // Type of widget that was involved in triggering this event.
@@ -7187,7 +7187,7 @@ message ConversationActionsEvent {
     // Event type of this event.
     optional android.stats.textclassifier.EventType event_type = 2;
 
-    // Name of the model that is involved in this event.
+    // Name of the actions model that is involved in this event.
     optional string model_name = 3;
 
     // Type of widget that was involved in triggering this event.
@@ -7207,6 +7207,9 @@ message ConversationActionsEvent {
 
     // Name of source package.
     optional string package_name = 9;
+
+    // Name of the annotator model that is involved in this event.
+    optional string annotator_model_name = 10;
 }
 
 /**
@@ -7221,7 +7224,7 @@ message LanguageDetectionEvent {
     // Event type of this event.
     optional android.stats.textclassifier.EventType event_type = 2;
 
-    // Name of the model that is involved in this event.
+    // Name of the language detection model that is involved in this event.
     optional string model_name = 3;
 
     // Type of widget that was involved in triggering this event.
