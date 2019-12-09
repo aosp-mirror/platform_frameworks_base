@@ -309,6 +309,7 @@ public class PackageInstallerSessionTest {
                 actual.getStagedSessionErrorMessage());
         assertEquals(expected.isPrepared(), actual.isPrepared());
         assertEquals(expected.isCommitted(), actual.isCommitted());
+        assertEquals(expected.createdMillis, actual.createdMillis);
         assertEquals(expected.isSealed(), actual.isSealed());
         assertEquals(expected.isMultiPackage(), actual.isMultiPackage());
         assertEquals(expected.hasParentSessionId(), actual.hasParentSessionId());

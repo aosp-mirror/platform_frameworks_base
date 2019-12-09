@@ -2092,6 +2092,9 @@ public class PackageInstaller {
         public boolean isCommitted;
 
         /** {@hide} */
+        public long createdMillis;
+
+        /** {@hide} */
         public long updatedMillis;
 
         /** {@hide} */
@@ -2141,6 +2144,7 @@ public class PackageInstaller {
             mStagedSessionErrorMessage = source.readString();
             isCommitted = source.readBoolean();
             rollbackDataPolicy = source.readInt();
+            createdMillis = source.readLong();
         }
 
         /**
@@ -2583,6 +2587,13 @@ public class PackageInstaller {
         }
 
         /**
+         * The timestamp of the initial creation of the session.
+         */
+        public long getCreatedMillis() {
+            return createdMillis;
+        }
+
+        /**
          * The timestamp of the last update that occurred to the session, including changing of
          * states in case of staged sessions.
          */
@@ -2631,6 +2642,7 @@ public class PackageInstaller {
             dest.writeString(mStagedSessionErrorMessage);
             dest.writeBoolean(isCommitted);
             dest.writeInt(rollbackDataPolicy);
+            dest.writeLong(createdMillis);
         }
 
         public static final Parcelable.Creator<SessionInfo>
