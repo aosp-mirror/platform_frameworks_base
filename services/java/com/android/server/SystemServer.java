@@ -448,10 +448,6 @@ public final class SystemServer {
             // Mmmmmm... more memory!
             VMRuntime.getRuntime().clearGrowthLimit();
 
-            // The system server has to run all of the time, so it needs to be
-            // as efficient as possible with its memory usage.
-            VMRuntime.getRuntime().setTargetHeapUtilization(0.8f);
-
             // Some devices rely on runtime fingerprint generation, so make sure
             // we've defined it before booting further.
             Build.ensureFingerprintProperty();
