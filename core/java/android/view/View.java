@@ -7146,10 +7146,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mFrameMetricsObservers = new ArrayList<>();
                 }
 
-                FrameMetricsObserver fmo = new FrameMetricsObserver(window,
-                        handler.getLooper(), listener);
+                FrameMetricsObserver fmo = new FrameMetricsObserver(window, handler, listener);
                 mFrameMetricsObservers.add(fmo);
-                mAttachInfo.mThreadedRenderer.addFrameMetricsObserver(fmo);
+                mAttachInfo.mThreadedRenderer.addObserver(fmo.getRendererObserver());
             } else {
                 Log.w(VIEW_LOG_TAG, "View not hardware-accelerated. Unable to observe frame stats");
             }
@@ -7158,8 +7157,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mFrameMetricsObservers = new ArrayList<>();
             }
 
-            FrameMetricsObserver fmo = new FrameMetricsObserver(window,
-                    handler.getLooper(), listener);
+            FrameMetricsObserver fmo = new FrameMetricsObserver(window, handler, listener);
             mFrameMetricsObservers.add(fmo);
         }
     }
@@ -7181,7 +7179,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mFrameMetricsObservers != null) {
             mFrameMetricsObservers.remove(fmo);
             if (renderer != null) {
-                renderer.removeFrameMetricsObserver(fmo);
+                renderer.removeObserver(fmo.getRendererObserver());
             }
         }
     }
@@ -7191,7 +7189,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             ThreadedRenderer renderer = getThreadedRenderer();
             if (renderer != null) {
                 for (FrameMetricsObserver fmo : mFrameMetricsObservers) {
-                    renderer.addFrameMetricsObserver(fmo);
+                    renderer.addObserver(fmo.getRendererObserver());
                 }
             } else {
                 Log.w(VIEW_LOG_TAG, "View not hardware-accelerated. Unable to observe frame stats");
