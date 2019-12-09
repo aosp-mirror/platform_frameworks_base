@@ -236,7 +236,7 @@ public class UsageStatsDatabase {
                         return false;
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Slog.e(TAG, "Failed to check-in", e);
                 return false;
             }
@@ -744,7 +744,7 @@ public class UsageStatsDatabase {
                 IntervalStats stats = new IntervalStats();
                 readLocked(f, stats);
                 return stats;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Slog.e(TAG, "Failed to read usage stats file", e);
             }
         }
@@ -862,7 +862,7 @@ public class UsageStatsDatabase {
                     if (beginTime < stats.endTime) {
                         combiner.combine(stats, false, results);
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     Slog.e(TAG, "Failed to read usage stats file", e);
                     // We continue so that we return results that are not
                     // corrupt.
@@ -1009,7 +1009,8 @@ public class UsageStatsDatabase {
         }
     }
 
-    private void writeLocked(AtomicFile file, IntervalStats stats) throws IOException {
+    private void writeLocked(AtomicFile file, IntervalStats stats)
+            throws IOException, RuntimeException {
         if (mCurrentVersion <= 3) {
             Slog.wtf(TAG, "Attempting to write UsageStats as XML with version " + mCurrentVersion);
             return;
@@ -1018,7 +1019,7 @@ public class UsageStatsDatabase {
     }
 
     private static void writeLocked(AtomicFile file, IntervalStats stats, int version,
-            PackagesTokenData packagesTokenData) throws IOException {
+            PackagesTokenData packagesTokenData) throws IOException, RuntimeException {
         FileOutputStream fos = file.startWrite();
         try {
             writeLocked(fos, stats, version, packagesTokenData);
@@ -1031,7 +1032,7 @@ public class UsageStatsDatabase {
     }
 
     private static void writeLocked(OutputStream out, IntervalStats stats, int version,
-            PackagesTokenData packagesTokenData) throws IOException {
+            PackagesTokenData packagesTokenData) throws RuntimeException {
         switch (version) {
             case 1:
             case 2:
@@ -1041,7 +1042,7 @@ public class UsageStatsDatabase {
             case 4:
                 try {
                     UsageStatsProto.write(out, stats);
-                } catch (IOException | IllegalArgumentException e) {
+                } catch (Exception e) {
                     Slog.e(TAG, "Unable to write interval stats to proto.", e);
                 }
                 break;
@@ -1049,7 +1050,7 @@ public class UsageStatsDatabase {
                 stats.obfuscateData(packagesTokenData);
                 try {
                     UsageStatsProtoV2.write(out, stats);
-                } catch (IOException | IllegalArgumentException e) {
+                } catch (Exception e) {
                     Slog.e(TAG, "Unable to write interval stats to proto.", e);
                 }
                 break;
@@ -1060,7 +1061,8 @@ public class UsageStatsDatabase {
         }
     }
 
-    private void readLocked(AtomicFile file, IntervalStats statsOut) throws IOException {
+    private void readLocked(AtomicFile file, IntervalStats statsOut)
+            throws IOException, RuntimeException {
         if (mCurrentVersion <= 3) {
             Slog.wtf(TAG, "Reading UsageStats as XML; current database version: "
                     + mCurrentVersion);
@@ -1072,7 +1074,7 @@ public class UsageStatsDatabase {
      * Returns {@code true} if any stats were omitted while reading, {@code false} otherwise.
      */
     private static boolean readLocked(AtomicFile file, IntervalStats statsOut, int version,
-            PackagesTokenData packagesTokenData) throws IOException {
+            PackagesTokenData packagesTokenData) throws IOException, RuntimeException {
         boolean dataOmitted = false;
         try {
             FileInputStream in = file.openRead();
@@ -1098,7 +1100,7 @@ public class UsageStatsDatabase {
      * Returns {@code true} if any stats were omitted while reading, {@code false} otherwise.
      */
     private static boolean readLocked(InputStream in, IntervalStats statsOut, int version,
-            PackagesTokenData packagesTokenData) throws IOException {
+            PackagesTokenData packagesTokenData) throws RuntimeException {
         boolean dataOmitted = false;
         switch (version) {
             case 1:
@@ -1114,14 +1116,14 @@ public class UsageStatsDatabase {
             case 4:
                 try {
                     UsageStatsProto.read(in, statsOut);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     Slog.e(TAG, "Unable to read interval stats from proto.", e);
                 }
                 break;
             case 5:
                 try {
                     UsageStatsProtoV2.read(in, statsOut);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     Slog.e(TAG, "Unable to read interval stats from proto.", e);
                 }
                 dataOmitted = statsOut.deobfuscateData(packagesTokenData);
@@ -1145,7 +1147,7 @@ public class UsageStatsDatabase {
 
         try (FileInputStream in = new AtomicFile(mPackageMappingsFile).openRead()) {
             UsageStatsProtoV2.readObfuscatedData(in, mPackagesTokenData);
-        } catch (IOException e) {
+        } catch (Exception e) {
             Slog.e(TAG, "Failed to read the obfuscated packages mapping file.", e);
             return;
         }
@@ -1174,7 +1176,7 @@ public class UsageStatsDatabase {
             UsageStatsProtoV2.writeObfuscatedData(fos, mPackagesTokenData);
             file.finishWrite(fos);
             fos = null;
-        } catch (IOException | IllegalArgumentException e) {
+        } catch (Exception e) {
             Slog.e(TAG, "Unable to write obfuscated data to proto.", e);
         } finally {
             file.failWrite(fos);
@@ -1414,8 +1416,8 @@ public class UsageStatsDatabase {
         try {
             stats.beginTime = in.readLong();
             readLocked(in, stats, version, mPackagesTokenData);
-        } catch (IOException ioe) {
-            Slog.d(TAG, "DeSerializing IntervalStats Failed", ioe);
+        } catch (Exception e) {
+            Slog.d(TAG, "DeSerializing IntervalStats Failed", e);
             stats = null;
         }
         return stats;

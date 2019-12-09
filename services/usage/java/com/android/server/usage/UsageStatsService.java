@@ -653,18 +653,20 @@ public class UsageStatsService extends SystemService implements
         }
         Arrays.sort(pendingEventsFiles);
 
-        for (int i = 0; i < pendingEventsFiles.length; i++) {
+        final int numFiles = pendingEventsFiles.length;
+        for (int i = 0; i < numFiles; i++) {
             final AtomicFile af = new AtomicFile(pendingEventsFiles[i]);
+            final LinkedList<Event> tmpEvents = new LinkedList<>();
             try {
                 try (FileInputStream in = af.openRead()) {
-                    UsageStatsProtoV2.readPendingEvents(in, pendingEvents);
+                    UsageStatsProtoV2.readPendingEvents(in, tmpEvents);
                 }
-            } catch (IOException e) {
-                // Even if one file read fails, exit here to keep all events in order on disk -
-                // they will be read and processed the next time user is unlocked.
+                // only add to the pending events if the read was successful
+                pendingEvents.addAll(tmpEvents);
+            } catch (Exception e) {
+                // Most likely trying to read a corrupted file - log the failure and continue
+                // reading the other pending event files.
                 Slog.e(TAG, "Could not read " + pendingEventsFiles[i] + " for user " + userId);
-                pendingEvents.clear();
-                return;
             }
         }
     }
@@ -691,7 +693,7 @@ public class UsageStatsService extends SystemService implements
             af.finishWrite(fos);
             fos = null;
             pendingEvents.clear();
-        } catch (IOException | IllegalArgumentException e) {
+        } catch (Exception e) {
             Slog.e(TAG, "Failed to write " + pendingEventsFile.getAbsolutePath()
                     + " for user " + userId);
         } finally {
