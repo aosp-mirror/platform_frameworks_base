@@ -2379,25 +2379,6 @@ public class WifiManager {
     }
 
     /**
-     * Return the record of {@link WifiActivityEnergyInfo} object that
-     * has the activity and energy info. This can be used to ascertain what
-     * the controller has been up to, since the last sample.
-     *
-     * @return a record with {@link WifiActivityEnergyInfo} or null if
-     * report is unavailable or unsupported
-     * @hide
-     */
-    public WifiActivityEnergyInfo getControllerActivityEnergyInfo() {
-        try {
-            synchronized(this) {
-                return mService.reportActivityInfo();
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Interface for Wi-Fi activity energy info listener. Should be implemented by applications and
      * set when calling {@link WifiManager#getWifiActivityEnergyInfoAsync}.
      *

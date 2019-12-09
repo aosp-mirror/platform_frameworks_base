@@ -44,7 +44,6 @@ import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Messenger;
 import android.os.ResultReceiver;
 import android.os.WorkSource;
-import android.os.connectivity.WifiActivityEnergyInfo;
 
 /**
  * Interface that allows controlling and querying Wi-Fi connectivity.
@@ -54,8 +53,6 @@ import android.os.connectivity.WifiActivityEnergyInfo;
 interface IWifiManager
 {
     long getSupportedFeatures();
-
-    WifiActivityEnergyInfo reportActivityInfo();
 
     oneway void getWifiActivityEnergyInfoAsync(in IOnWifiActivityEnergyInfoListener listener);
 
