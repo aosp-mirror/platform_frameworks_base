@@ -139,7 +139,7 @@ public class AppOpsManager {
     @GuardedBy("sLock")
     private static @Nullable AppOpsCollector sNotedAppOpsCollector;
 
-    static IBinder sToken;
+    static IBinder sClientId;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -6487,22 +6487,28 @@ public class AppOpsManager {
         }
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * @deprecated Use own local {@link android.os.Binder#Binder()}
+     *
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Create own "
+            + "local {@link android.os.Binder}")
     public static IBinder getToken(IAppOpsService service) {
-        synchronized (AppOpsManager.class) {
-            if (sToken != null) {
-                return sToken;
-            }
-            try {
-                sToken = service.getToken(new Binder());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-            return sToken;
-        }
+        return getClientId();
     }
 
+    /** @hide */
+    public static IBinder getClientId() {
+        synchronized (AppOpsManager.class) {
+            if (sClientId == null) {
+                sClientId = new Binder();
+            }
+
+            return sClientId;
+        }
+    }
 
     /**
      * @deprecated use {@link #startOp(String, int, String, String, String)} instead
@@ -6559,7 +6565,7 @@ public class AppOpsManager {
      * the package is not in the passed in UID.
      */
     public int startOp(@NonNull String op, int uid, @Nullable String packageName,
-            @NonNull String featureId, @Nullable String message) {
+            @Nullable String featureId, @Nullable String message) {
         return startOp(strOpToOp(op), uid, packageName, false, featureId, message);
     }
 
@@ -6583,7 +6589,7 @@ public class AppOpsManager {
      * @hide
      */
     public int startOp(int op, int uid, @Nullable String packageName, boolean startIfModeDefault,
-            @NonNull String featureId, @Nullable String message) {
+            @Nullable String featureId, @Nullable String message) {
         final int mode = startOpNoThrow(op, uid, packageName, startIfModeDefault, featureId,
                 message);
         if (mode == MODE_ERRORED) {
@@ -6659,7 +6665,7 @@ public class AppOpsManager {
     public int startOpNoThrow(int op, int uid, @NonNull String packageName,
             boolean startIfModeDefault, @Nullable String featureId, @Nullable String message) {
         try {
-            int mode = mService.startOperation(getToken(mService), op, uid, packageName,
+            int mode = mService.startOperation(getClientId(), op, uid, packageName,
                     featureId, startIfModeDefault);
             if (mode == MODE_ALLOWED) {
                 markAppOpNoted(uid, packageName, op, featureId, message);
@@ -6719,7 +6725,7 @@ public class AppOpsManager {
     public void finishOp(int op, int uid, @NonNull String packageName,
             @Nullable String featureId) {
         try {
-            mService.finishOperation(getToken(mService), op, uid, packageName, featureId);
+            mService.finishOperation(getClientId(), op, uid, packageName, featureId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

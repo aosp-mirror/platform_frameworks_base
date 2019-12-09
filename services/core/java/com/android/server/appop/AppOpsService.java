@@ -22,6 +22,7 @@ import static android.app.AppOpsManager.OpEventProxyInfo;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_COARSE_LOCATION;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
+import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
@@ -367,8 +368,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         public long pendingStateCommitTime;
         public int capability;
         public int pendingCapability;
-        // For all features combined
-        public int startNesting;
 
         public ArrayMap<String, Ops> pkgOps;
         public SparseIntArray opModes;
@@ -476,10 +475,46 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    /** A in progress startOp->finishOp event */
+    private static final class InProgressStartOpEvent implements IBinder.DeathRecipient {
+        /** Time of startOp event */
+        final long startTime;
+
+        /** Id of the client that started the event */
+        final @NonNull IBinder clientId;
+
+        /** To call when client dies */
+        final @NonNull Runnable onDeath;
+
+        /** uidstate used when calling startOp */
+        final @AppOpsManager.UidState int uidState;
+
+        /** How many times the op was started but not finished yet */
+        int numUnfinishedStarts;
+
+        private InProgressStartOpEvent(long startTime, @NonNull IBinder clientId,
+                @NonNull Runnable onDeath, int uidState) throws RemoteException {
+            this.startTime = startTime;
+            this.clientId = clientId;
+            this.onDeath = onDeath;
+            this.uidState = uidState;
+
+            clientId.linkToDeath(this, 0);
+        }
+
+        /** Clean up event */
+        public void finish() {
+            clientId.unlinkToDeath(this, 0);
+        }
+
+        @Override
+        public void binderDied() {
+            onDeath.run();
+        }
+    }
+
     private final class FeatureOp {
         public final @NonNull Op parent;
-
-        public boolean running;
 
         /**
          * Last successful accesses (noteOp + finished startOp) for each uidState/opFlag combination
@@ -497,8 +532,13 @@ public class AppOpsService extends IAppOpsService.Stub {
         @GuardedBy("AppOpsService.this")
         private @Nullable LongSparseArray<AppOpsManager.NoteOpEvent> mRejectEvents;
 
-        public int startNesting;
-        public long startRealtime;
+        /**
+         * Currently in progress startOp events
+         *
+         * <p>Key is clientId
+         */
+        @GuardedBy("AppOpsService.this")
+        private @Nullable ArrayMap<IBinder, InProgressStartOpEvent> mInProgressEvents;
 
         FeatureOp(@NonNull Op parent) {
             this.parent = parent;
@@ -578,16 +618,132 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         /**
          * Update state when start was called
+         *
+         * @param clientId Id of the startOp caller
+         * @param uidState UID state of the app startOp is called for
          */
-        public void started(long i, int i2, int i3) {
-            // TODO moltmann: Not implemented yet. startOp/finishOp events will not be tracked
+        public void started(@NonNull IBinder clientId, @AppOpsManager.UidState int uidState)
+                throws RemoteException {
+            if (!parent.isRunning()) {
+                scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
+                        parent.packageName, true);
+            }
+
+            if (mInProgressEvents == null) {
+                mInProgressEvents = new ArrayMap<>(1);
+            }
+
+
+            InProgressStartOpEvent event = mInProgressEvents.get(clientId);
+            if (event == null) {
+                event = new InProgressStartOpEvent(System.currentTimeMillis(), clientId, () -> {
+                    // In the case the client dies without calling finish first
+                    synchronized (AppOpsService.this) {
+                        if (mInProgressEvents == null) {
+                            return;
+                        }
+
+                        InProgressStartOpEvent deadEvent = mInProgressEvents.get(clientId);
+                        if (deadEvent != null) {
+                            deadEvent.numUnfinishedStarts = 1;
+                        }
+
+                        finished(clientId);
+                    }
+                }, uidState);
+                mInProgressEvents.put(clientId, event);
+            } else {
+                if (uidState != event.uidState) {
+                    onUidStateChanged(uidState);
+                }
+            }
+
+            event.numUnfinishedStarts++;
+
+            // startOp events don't support proxy, hence use flags==SELF
+            mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid, parent.packageName,
+                    uidState, OP_FLAG_SELF);
         }
 
         /**
          * Update state when finishOp was called
+         *
+         * @param clientId Id of the finishOp caller
          */
-        public void finished(long i, long i2, int i3, int i4) {
-            // TODO moltmann: Not implemented yet. startOp/finishOp events will not be tracked
+        public void finished(@NonNull IBinder clientId) {
+            finished(clientId, true);
+        }
+
+        private void finished(@NonNull IBinder clientId, boolean triggerCallbackIfNeeded) {
+            if (mInProgressEvents == null) {
+                Slog.wtf(TAG, "No ops running");
+                return;
+            }
+
+            int indexOfToken = mInProgressEvents.indexOfKey(clientId);
+            if (indexOfToken < 0) {
+                Slog.wtf(TAG, "No op running for the client");
+                return;
+            }
+
+            InProgressStartOpEvent event = mInProgressEvents.valueAt(indexOfToken);
+            event.numUnfinishedStarts--;
+            if (event.numUnfinishedStarts == 0) {
+                event.finish();
+                mInProgressEvents.removeAt(indexOfToken);
+
+                if (mAccessEvents == null) {
+                    mAccessEvents = new LongSparseArray<>(1);
+                }
+
+                // startOp events don't support proxy, hence use flags==SELF
+                NoteOpEvent finishedEvent = new NoteOpEvent(event.startTime,
+                        System.currentTimeMillis() - event.startTime, null);
+                mAccessEvents.put(makeKey(event.uidState, OP_FLAG_SELF), finishedEvent);
+
+                mHistoricalRegistry.increaseOpAccessDuration(parent.op, parent.uid,
+                        parent.packageName, event.uidState, AppOpsManager.OP_FLAG_SELF,
+                        finishedEvent.duration);
+
+                if (mInProgressEvents.isEmpty()) {
+                    mInProgressEvents = null;
+
+                    // TODO moltmann: Also callback for single feature activity changes
+                    if (triggerCallbackIfNeeded && !parent.isRunning()) {
+                        scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
+                                parent.packageName, false);
+                    }
+                }
+            }
+        }
+
+        /**
+         * Notify that the state of the uid changed
+         *
+         * @param newState The new state
+         */
+        public void onUidStateChanged(@AppOpsManager.UidState int newState) {
+            if (mInProgressEvents == null) {
+                return;
+            }
+
+            int numInProgressEvents = mInProgressEvents.size();
+            for (int i = 0; i < numInProgressEvents; i++) {
+                InProgressStartOpEvent event = mInProgressEvents.valueAt(i);
+
+                if (event.uidState != newState) {
+                    try {
+                        finished(event.clientId, false);
+                        started(event.clientId, newState);
+                    } catch (RemoteException e) {
+                        if (DEBUG) Slog.e(TAG, "Cannot switch to new uidState " + newState);
+                    }
+                }
+            }
+        }
+
+        public boolean isRunning() {
+            return mInProgressEvents != null;
         }
 
         boolean hasAnyTime() {
@@ -601,14 +757,30 @@ public class AppOpsService extends IAppOpsService.Stub {
                 accessEvents = mAccessEvents.clone();
             }
 
+            // Add in progress events as access events
+            if (mInProgressEvents != null) {
+                long now = System.currentTimeMillis();
+                int numInProgressEvents = mInProgressEvents.size();
+
+                if (accessEvents == null) {
+                    accessEvents = new LongSparseArray<>(numInProgressEvents);
+                }
+
+                for (int i = 0; i < numInProgressEvents; i++) {
+                    InProgressStartOpEvent event = mInProgressEvents.valueAt(i);
+
+                    // startOp events don't support proxy
+                    accessEvents.append(makeKey(event.uidState, OP_FLAG_SELF),
+                            new NoteOpEvent(event.startTime, now - event.startTime, null));
+                }
+            }
+
             LongSparseArray<NoteOpEvent> rejectEvents = null;
             if (mRejectEvents != null) {
                 rejectEvents = mRejectEvents.clone();
             }
 
-            // TODO moltmann: Add entries for startOp/finishOp events
-
-            return new OpFeatureEntry(parent.op, running, accessEvents, rejectEvents);
+            return new OpFeatureEntry(parent.op, isRunning(), accessEvents, rejectEvents);
         }
     }
 
@@ -685,6 +857,17 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
 
             return new OpEntry(op, mode, featureEntries);
+        }
+
+        boolean isRunning() {
+            final int numFeatures = mFeatures.size();
+            for (int i = 0; i < numFeatures; i++) {
+                if (mFeatures.valueAt(i).isRunning()) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
@@ -832,53 +1015,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         @Override
         public void binderDied() {
             stopWatchingNoted(mCallback);
-        }
-    }
-
-    final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<>();
-
-    final class ClientState extends Binder implements DeathRecipient {
-        final ArrayList<Pair<Op, String>> mStartedOps = new ArrayList<>();
-        final IBinder mAppToken;
-        final int mPid;
-
-        ClientState(IBinder appToken) {
-            mAppToken = appToken;
-            mPid = Binder.getCallingPid();
-            // Watch only for remote processes dying
-            if (!(appToken instanceof Binder)) {
-                try {
-                    mAppToken.linkToDeath(this, 0);
-                } catch (RemoteException e) {
-                    /* do nothing */
-                }
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "ClientState{" +
-                    "mAppToken=" + mAppToken +
-                    ", " + "pid=" + mPid +
-                    '}';
-        }
-
-        @Override
-        public void binderDied() {
-            synchronized (AppOpsService.this) {
-                for (int i=mStartedOps.size()-1; i>=0; i--) {
-                    final Pair<Op, String> startedOp = mStartedOps.get(i);
-                    final Op op = startedOp.first;
-                    final String featureId = startedOp.second;
-
-                    finishOperationLocked(op, featureId, /*finishNested*/ true);
-                    if (op.mFeatures.get(featureId).startNesting <= 0) {
-                        scheduleOpActiveChangedIfNeededLocked(op.op, op.uidState.uid,
-                                op.packageName, false);
-                    }
-                }
-                mClients.remove(mAppToken);
-            }
         }
     }
 
@@ -1044,43 +1180,19 @@ public class AppOpsService extends IAppOpsService.Stub {
                 mUidStates.remove(uid);
             }
 
-            // Finish ops other packages started on behalf of the package.
-            final int clientCount = mClients.size();
-            for (int i = 0; i < clientCount; i++) {
-                final ClientState client = mClients.valueAt(i);
-                if (client.mStartedOps == null) {
-                    continue;
-                }
-                final int startedOpCount = client.mStartedOps.size();
-                for (int j = startedOpCount - 1; j >= 0; j--) {
-                    final Pair<Op, String> startedOp = client.mStartedOps.get(j);
-                    final Op op = startedOp.first;
-                    final String featureId = startedOp.second;
-
-                    if (uid == op.uidState.uid && packageName.equals(op.packageName)) {
-                        finishOperationLocked(op, featureId, /*finishNested*/ true);
-                        client.mStartedOps.remove(j);
-                        if (op.mFeatures.get(featureId).startNesting <= 0) {
-                            scheduleOpActiveChangedIfNeededLocked(op.op,
-                                    uid, packageName, false);
-                        }
-                    }
-                }
-            }
-
             if (ops != null) {
                 scheduleFastWriteLocked();
 
-                final int opCount = ops.size();
-                for (int opNum = 0; opNum < opCount; opNum++) {
+                final int numOps = ops.size();
+                for (int opNum = 0; opNum < numOps; opNum++) {
                     final Op op = ops.valueAt(opNum);
 
                     final int numFeatures = op.mFeatures.size();
                     for (int featureNum = 0; featureNum < numFeatures; featureNum++) {
-                        if (op.mFeatures.valueAt(featureNum).running) {
-                            scheduleOpActiveChangedIfNeededLocked(
-                                    op.op, op.uidState.uid, op.packageName, false);
-                            break;
+                        FeatureOp featureOp = op.mFeatures.valueAt(featureNum);
+
+                        while (featureOp.mInProgressEvents != null) {
+                            featureOp.mInProgressEvents.valueAt(0).onDeath.run();
                         }
                     }
                 }
@@ -1132,35 +1244,21 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                     uidState.pendingStateCommitTime = SystemClock.elapsedRealtime() + settleTime;
                 }
-                if (uidState.startNesting != 0) {
-                    // There is some actively running operation...  need to find it
-                    // and appropriately update its state.
-                    final long now = System.currentTimeMillis();
-                    final long nowElapsed = SystemClock.elapsedRealtime();
-                    for (int i = uidState.pkgOps.size() - 1; i >= 0; i--) {
-                        final Ops ops = uidState.pkgOps.valueAt(i);
-                        for (int j = ops.size() - 1; j >= 0; j--) {
-                            final Op op = ops.valueAt(j);
+
+                if (uidState.pkgOps != null) {
+                    int numPkgs = uidState.pkgOps.size();
+                    for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
+                        Ops ops = uidState.pkgOps.valueAt(pkgNum);
+
+                        int numOps = ops.size();
+                        for (int opNum = 0; opNum < numOps; opNum++) {
+                            Op op = ops.valueAt(opNum);
 
                             int numFeatures = op.mFeatures.size();
-                            for (int featureNum = 0; featureNum < numFeatures;
-                                    featureNum++) {
-                                final FeatureOp featureOp = op.mFeatures.valueAt(
-                                        featureNum);
-                                if (featureOp.startNesting > 0) {
-                                    final long duration = SystemClock.elapsedRealtime()
-                                            - featureOp.startRealtime;
-                                    // We don't support proxy long running ops (start/stop)
-                                    mHistoricalRegistry.increaseOpAccessDuration(op.op,
-                                            op.uidState.uid, op.packageName, oldPendingState,
-                                            AppOpsManager.OP_FLAG_SELF, duration);
-                                    // Finish the op in the old state
-                                    featureOp.finished(now, duration, oldPendingState,
-                                            AppOpsManager.OP_FLAG_SELF);
-                                    // Start the op in the new state
-                                    featureOp.startRealtime = nowElapsed;
-                                    featureOp.started(now, newState, AppOpsManager.OP_FLAG_SELF);
-                                }
+                            for (int featureNum = 0; featureNum < numFeatures; featureNum++) {
+                                FeatureOp featureOp = op.mFeatures.valueAt(featureNum);
+
+                                featureOp.onUidStateChanged(newState);
                             }
                         }
                     }
@@ -1240,8 +1338,6 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private static @NonNull OpEntry getOpEntryForResult(@NonNull Op op, long elapsedNow) {
-        // TODO moltmann: Track startOp/finishOp events
-
         return op.createEntryLocked();
     }
 
@@ -1975,18 +2071,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    @Override
-    public IBinder getToken(IBinder clientToken) {
-        synchronized (this) {
-            ClientState cs = mClients.get(clientToken);
-            if (cs == null) {
-                cs = new ClientState(clientToken);
-                mClients.put(clientToken, cs);
-            }
-            return cs;
-        }
-    }
-
     public CheckOpsDelegate getAppOpsServiceDelegate() {
         synchronized (this) {
             return mCheckOpsDelegate;
@@ -2227,8 +2311,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return AppOpsManager.MODE_IGNORED;
             }
             final UidState uidState = ops.uidState;
-            if (featureOp.running) {
-                // TODO moltmann: Add error message for mixing startOp with noteOp
+            if (featureOp.isRunning()) {
+                Slog.w(TAG, "Noting op not finished: uid " + uid + " pkg " + packageName + " code "
+                        + code + " startTime of in progress event="
+                        + featureOp.mInProgressEvents.valueAt(0).startTime);
             }
 
             final int switchCode = AppOpsManager.opToSwitch(code);
@@ -2499,7 +2585,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
-    public int startOperation(IBinder token, int code, int uid, String packageName,
+    public int startOperation(IBinder clientId, int code, int uid, String packageName,
             String featureId, boolean startIfModeDefault) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
@@ -2507,7 +2593,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (resolvedPackageName == null) {
             return  AppOpsManager.MODE_IGNORED;
         }
-        ClientState client = (ClientState)token;
 
         boolean isPrivileged;
         try {
@@ -2563,29 +2648,19 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             if (DEBUG) Slog.d(TAG, "startOperation: allowing code " + code + " uid " + uid
                     + " package " + resolvedPackageName);
-            if (featureOp.startNesting == 0) {
-                featureOp.startRealtime = SystemClock.elapsedRealtime();
-                // We don't support proxy long running ops (start/stop)
-                featureOp.started(System.currentTimeMillis(), uidState.state,
-                        AppOpsManager.OP_FLAG_SELF);
-                mHistoricalRegistry.incrementOpAccessedCount(opCode, uid, packageName,
-                        uidState.state, AppOpsManager.OP_FLAG_SELF);
 
-                // TODO moltmann: call back when a feature became inactive
-                if (uidState.startNesting == 0) {
-                    scheduleOpActiveChangedIfNeededLocked(code, uid, packageName, true);
-                }
+            try {
+                featureOp.started(clientId, uidState.state);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
             }
-            featureOp.startNesting++;
-            uidState.startNesting++;
-            client.mStartedOps.add(new Pair<>(op, featureId));
         }
 
         return AppOpsManager.MODE_ALLOWED;
     }
 
     @Override
-    public void finishOperation(IBinder token, int code, int uid, String packageName,
+    public void finishOperation(IBinder clientId, int code, int uid, String packageName,
             String featureId) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
@@ -2593,10 +2668,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (resolvedPackageName == null) {
             return;
         }
-        if (!(token instanceof ClientState)) {
-            return;
-        }
-        ClientState client = (ClientState) token;
 
         boolean isPrivileged;
         try {
@@ -2616,36 +2687,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return;
             }
 
-            if (client.mStartedOps.remove(new Pair<>(op, featureId))) {
-                finishOperationLocked(op, featureId, /*finishNested*/ false);
-
-                // TODO moltmann: call back when a feature became inactive
-                if (op.uidState.startNesting <= 0) {
-                    scheduleOpActiveChangedIfNeededLocked(code, uid, packageName, false);
-                }
-
-                return;
+            try {
+                featureOp.finished(clientId);
+            } catch (IllegalStateException e) {
+                Slog.e(TAG, "Operation not started: uid=" + uid + " pkg="
+                        + packageName + " op=" + AppOpsManager.opToName(code), e);
             }
         }
-
-        // We finish ops when packages get removed to guarantee no dangling
-        // started ops. However, some part of the system may asynchronously
-        // finish ops for an already gone package. Hence, finishing an op
-        // for a non existing package is fine and we don't log as a wtf.
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            if (LocalServices.getService(PackageManagerInternal.class).getPackageUid(
-                    resolvedPackageName, 0, UserHandle.getUserId(uid)) < 0) {
-                Slog.i(TAG, "Finishing op=" + AppOpsManager.opToName(code)
-                        + " for non-existing package=" + resolvedPackageName
-                        + " in uid=" + uid);
-                return;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-        Slog.wtf(TAG, "Operation not started: uid=" + uid + " pkg="
-                + packageName + " op=" + AppOpsManager.opToName(code));
     }
 
     private void scheduleOpActiveChangedIfNeededLocked(int code, int uid, String packageName,
@@ -2764,33 +2812,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         return permInfo.getProtection() == PROTECTION_DANGEROUS;
-    }
-
-    void finishOperationLocked(@NonNull Op op, @Nullable String featureId, boolean finishNested) {
-        final FeatureOp featureOp = op.mFeatures.get(featureId);
-        final int opCode = featureOp.parent.op;
-        final int uid = featureOp.parent.uidState.uid;
-        if (featureOp.startNesting <= 1 || finishNested) {
-            if (featureOp.startNesting == 1 || finishNested) {
-                // We don't support proxy long running ops (start/stop)
-                final long duration = SystemClock.elapsedRealtime() - featureOp.startRealtime;
-                featureOp.finished(System.currentTimeMillis(), duration, op.uidState.state,
-                        AppOpsManager.OP_FLAG_SELF);
-                mHistoricalRegistry.increaseOpAccessDuration(opCode, uid, op.packageName,
-                        op.uidState.state, AppOpsManager.OP_FLAG_SELF, duration);
-            } else {
-                final OpFeatureEntry entry = op.createSingleFeatureEntryLocked(
-                        featureId).getFeatures().get(featureId);
-                // TODO moltmann: Warn about nesting under-run
-            }
-            if (featureOp.startNesting >= 1) {
-                op.uidState.startNesting -= featureOp.startNesting;
-            }
-            featureOp.startNesting = 0;
-        } else {
-            featureOp.startNesting--;
-            op.uidState.startNesting--;
-        }
     }
 
     private void verifyIncomingUid(int uid) {
@@ -3501,17 +3522,22 @@ public class AppOpsService extends IAppOpsService.Stub {
                                             uidState, flags);
                                     final long accessDuration = feature.getLastDuration(uidState,
                                             uidState, flags);
-                                    final String proxyPkg = feature.getLastProxyPackageName(
-                                            uidState, uidState, flags);
-                                    final String proxyFeatureId = feature.getLastProxyFeatureId(
-                                            uidState, uidState, flags);
-                                    final int proxyUid = feature.getLastProxyUid(uidState, uidState,
-                                            flags);
                                     // Proxy information for rejections is not backed up
+                                    final OpEventProxyInfo proxy = feature.getLastProxyInfo(
+                                            uidState, uidState, flags);
 
                                     if (accessTime <= 0 && rejectTime <= 0 && accessDuration <= 0
-                                            && proxyPkg == null && proxyUid < 0) {
+                                            && proxy == null) {
                                         continue;
+                                    }
+
+                                    String proxyPkg = null;
+                                    String proxyFeatureId = null;
+                                    int proxyUid = Process.INVALID_UID;
+                                    if (proxy != null) {
+                                        proxyPkg = proxy.getPackageName();
+                                        proxyFeatureId = proxy.getFeatureId();
+                                        proxyUid = proxy.getUid();
                                     }
 
                                     out.startTag(null, "st");
@@ -3580,10 +3606,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         Shell(IAppOpsService iface, AppOpsService internal) {
             mInterface = iface;
             mInternal = internal;
-            try {
-                mToken = mInterface.getToken(sBinder);
-            } catch (RemoteException e) {
-            }
+            mToken = AppOpsManager.getClientId();
         }
 
         @Override
@@ -4102,9 +4125,16 @@ public class AppOpsService extends IAppOpsService.Stub {
             final long accessTime = entry.getLastAccessTime(uidState, uidState, flags);
             final long rejectTime = entry.getLastRejectTime(uidState, uidState, flags);
             final long accessDuration = entry.getLastDuration(uidState, uidState, flags);
-            final String proxyPkg = entry.getLastProxyPackageName(uidState, uidState, flags);
-            final String proxyFeatureId = entry.getLastProxyFeatureId(uidState, uidState, flags);
-            final int proxyUid = entry.getLastProxyUid(uidState, uidState, flags);
+            final OpEventProxyInfo proxy = entry.getLastProxyInfo(uidState, uidState, flags);
+
+            String proxyPkg = null;
+            String proxyFeatureId = null;
+            int proxyUid = Process.INVALID_UID;
+            if (proxy != null) {
+                proxyPkg = proxy.getPackageName();
+                proxyFeatureId = proxy.getFeatureId();
+                proxyUid = proxy.getUid();
+            }
 
             if (accessTime > 0) {
                 pw.print(prefix);
@@ -4157,14 +4187,25 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         final FeatureOp featureOp = op.mFeatures.get(featureId);
-        if (featureOp.running) {
+        if (featureOp.isRunning()) {
+            long earliestStartTime = Long.MAX_VALUE;
+            long maxNumStarts = 0;
+            int numInProgressEvents = featureOp.mInProgressEvents.size();
+            for (int i = 0; i < numInProgressEvents; i++) {
+                InProgressStartOpEvent event = featureOp.mInProgressEvents.valueAt(i);
+
+                earliestStartTime = Math.min(earliestStartTime, event.startTime);
+                maxNumStarts = Math.max(maxNumStarts, event.numUnfinishedStarts);
+            }
+
             pw.print(prefix + "Running start at: ");
-            TimeUtils.formatDuration(nowElapsed - featureOp.startRealtime, pw);
+            TimeUtils.formatDuration(nowElapsed - earliestStartTime, pw);
             pw.println();
-        }
-        if (featureOp.startNesting != 0) {
-            pw.print(prefix + "startNesting=");
-            pw.println(featureOp.startNesting);
+
+            if (maxNumStarts > 1) {
+                pw.print(prefix + "startNesting=");
+                pw.println(maxNumStarts);
+            }
         }
     }
 
@@ -4412,44 +4453,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     pw.println(cb);
                 }
             }
-            if (mClients.size() > 0 && dumpMode < 0 && !dumpWatchers && !dumpHistory) {
-                needSep = true;
-                boolean printedHeader = false;
-                for (int i=0; i<mClients.size(); i++) {
-                    boolean printedClient = false;
-                    ClientState cs = mClients.valueAt(i);
-                    if (cs.mStartedOps.size() > 0) {
-                        boolean printedStarted = false;
-                        for (int j=0; j<cs.mStartedOps.size(); j++) {
-                            final Pair<Op, String> startedOp = cs.mStartedOps.get(j);
-                            final Op op = startedOp.first;
-                            if (dumpOp >= 0 && op.op != dumpOp) {
-                                continue;
-                            }
-                            if (dumpPackage != null && !dumpPackage.equals(op.packageName)) {
-                                continue;
-                            }
-                            if (!printedHeader) {
-                                pw.println("  Clients:");
-                                printedHeader = true;
-                            }
-                            if (!printedClient) {
-                                pw.print("    "); pw.print(mClients.keyAt(i)); pw.println(":");
-                                pw.print("      "); pw.println(cs);
-                                printedClient = true;
-                            }
-                            if (!printedStarted) {
-                                pw.println("      Started ops:");
-                                printedStarted = true;
-                            }
-                            pw.print("        "); pw.print("uid="); pw.print(op.uidState.uid);
-                            pw.print(" pkg="); pw.print(op.packageName);
-                            pw.print(" featureId="); pw.print(startedOp.second);
-                            pw.print(" op="); pw.println(AppOpsManager.opToName(op.op));
-                        }
-                    }
-                }
-            }
             if (mAudioRestrictionManager.hasActiveRestrictions() && dumpOp < 0
                     && dumpPackage != null && dumpMode < 0 && !dumpWatchers && !dumpWatchers) {
                 needSep = mAudioRestrictionManager.dump(pw) | needSep ;
@@ -4524,10 +4527,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     pw.print("    pendingStateCommitTime=");
                     TimeUtils.formatDuration(uidState.pendingStateCommitTime, nowElapsed, pw);
                     pw.println();
-                }
-                if (uidState.startNesting != 0) {
-                    pw.print("    startNesting=");
-                    pw.println(uidState.startNesting);
                 }
                 if (uidState.foregroundOps != null && (dumpMode < 0
                         || dumpMode == AppOpsManager.MODE_FOREGROUND)) {
@@ -4802,17 +4801,18 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         // TODO moltmann: Allow to check for feature op activeness
         synchronized (AppOpsService.this) {
-            for (int i = mClients.size() - 1; i >= 0; i--) {
-                final ClientState client = mClients.valueAt(i);
-                for (int j = client.mStartedOps.size() - 1; j >= 0; j--) {
-                    final Pair<Op, String> startedOp = client.mStartedOps.get(j);
-                    if (startedOp.first.op == code && startedOp.first.uidState.uid == uid) {
-                        return true;
-                    }
-                }
+            Ops pkgOps = getOpsRawLocked(uid, resolvedPackageName, false, false);
+            if (pkgOps == null) {
+                return false;
             }
+
+            Op op = pkgOps.get(code);
+            if (op == null) {
+                return false;
+            }
+
+            return op.isRunning();
         }
-        return false;
     }
 
     @Override
