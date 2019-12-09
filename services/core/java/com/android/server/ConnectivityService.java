@@ -5959,7 +5959,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // the change we're processing can't affect any requests, it can only affect the listens
             // on this network. We might have been called by rematchNetworkAndRequests when a
             // network changed foreground state.
-            processListenRequests(nai, true);
+            processListenRequests(nai);
         } else {
             // If the requestable capabilities have changed or the score changed, we can't have been
             // called by rematchNetworkAndRequests, so it's safe to start a rematch.
@@ -6267,14 +6267,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         updateAllVpnsCapabilities();
     }
 
-    private void processListenRequests(@NonNull NetworkAgentInfo nai, boolean capabilitiesChanged) {
+    private void processListenRequests(@NonNull final NetworkAgentInfo nai) {
         // For consistency with previous behaviour, send onLost callbacks before onAvailable.
         processNewlyLostListenRequests(nai);
-
-        if (capabilitiesChanged) {
-            notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
-        }
-
+        notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
         processNewlySatisfiedListenRequests(nai);
     }
 
