@@ -35,6 +35,7 @@ import android.view.ViewStub;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.dagger.qualifiers.MainResources;
@@ -135,8 +136,9 @@ public class FullscreenUserSwitcher {
                 /* isAddUser= */ false,
                 /* isForeground= */ true);
 
-        // If the initial user has trusted device, display the unlock dialog on the keyguard.
-        if (hasTrustedDevice(initialUser)) {
+        // If the initial user has screen lock and trusted device, display the unlock dialog on the
+        // keyguard.
+        if (hasScreenLock(initialUser) && hasTrustedDevice(initialUser)) {
             mUnlockDialogHelper.showUnlockDialogAfterDelay(initialUser,
                     mOnHideListener);
         } else {
@@ -178,7 +180,7 @@ public class FullscreenUserSwitcher {
      */
     private void onUserSelected(UserGridRecyclerView.UserRecord record) {
         mSelectedUser = record;
-        if (hasTrustedDevice(record.mInfo.id)) {
+        if (hasScreenLock(record.mInfo.id) && hasTrustedDevice(record.mInfo.id)) {
             mUnlockDialogHelper.showUnlockDialog(record.mInfo.id, mOnHideListener);
             return;
         }
@@ -214,6 +216,12 @@ public class FullscreenUserSwitcher {
                     }
                 });
 
+    }
+
+    private boolean hasScreenLock(int uid) {
+        LockPatternUtils lockPatternUtils = new LockPatternUtils(mContext);
+        return lockPatternUtils.getCredentialTypeForUser(uid)
+                != LockPatternUtils.CREDENTIAL_TYPE_NONE;
     }
 
     private boolean hasTrustedDevice(int uid) {
