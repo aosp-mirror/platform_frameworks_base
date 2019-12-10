@@ -13016,9 +13016,9 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getFeatureState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getRegistrationState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getVoWiFiRoamingModeSetting();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAvailable(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCapable(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void isSupported(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAvailable(int, int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCapable(int, int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void isSupported(int, int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>) throws android.telephony.ims.ImsException;
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsMmTelManager.RegistrationCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setAdvancedCallingSettingEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setRttCapabilitySetting(boolean);
@@ -13282,13 +13282,13 @@ package android.telephony.ims {
   public class ProvisioningManager {
     method @NonNull public static android.telephony.ims.ProvisioningManager createForSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public int getProvisioningIntValue(int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean getProvisioningStatusForCapability(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean getProvisioningStatusForCapability(int, int);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public String getProvisioningStringValue(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean getRcsProvisioningStatusForCapability(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyRcsAutoConfigurationReceived(@NonNull byte[], boolean);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerProvisioningChangedCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ProvisioningManager.Callback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningIntValue(int, int);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setProvisioningStatusForCapability(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setProvisioningStatusForCapability(int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningStringValue(int, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setRcsProvisioningStatusForCapability(int, boolean);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterProvisioningChangedCallback(@NonNull android.telephony.ims.ProvisioningManager.Callback);
@@ -13452,8 +13452,8 @@ package android.telephony.ims {
 package android.telephony.ims.feature {
 
   public final class CapabilityChangeRequest implements android.os.Parcelable {
-    method public void addCapabilitiesToDisableForTech(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int);
-    method public void addCapabilitiesToEnableForTech(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int);
+    method public void addCapabilitiesToDisableForTech(int, int);
+    method public void addCapabilitiesToEnableForTech(int, int);
     method public int describeContents();
     method public java.util.List<android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair> getCapabilitiesToDisable();
     method public java.util.List<android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair> getCapabilitiesToEnable();
@@ -13462,8 +13462,8 @@ package android.telephony.ims.feature {
   }
 
   public static class CapabilityChangeRequest.CapabilityPair {
-    ctor public CapabilityChangeRequest.CapabilityPair(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int);
-    method @android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability public int getCapability();
+    ctor public CapabilityChangeRequest.CapabilityPair(int, int);
+    method public int getCapability();
     method public int getRadioTech();
   }
 
@@ -13508,10 +13508,10 @@ package android.telephony.ims.feature {
     method public final void notifyVoiceMessageCountUpdate(int);
     method public void onFeatureReady();
     method public void onFeatureRemoved();
-    method public boolean queryCapabilityConfiguration(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int);
+    method public boolean queryCapabilityConfiguration(int, int);
     method @NonNull public final android.telephony.ims.feature.MmTelFeature.MmTelCapabilities queryCapabilityStatus();
     method public void setUiTtyMode(int, @Nullable android.os.Message);
-    method @android.telephony.ims.feature.MmTelFeature.ProcessCallResult public int shouldProcessCall(@NonNull String[]);
+    method public int shouldProcessCall(@NonNull String[]);
     field public static final String EXTRA_IS_UNKNOWN_CALL = "android.telephony.ims.feature.extra.IS_UNKNOWN_CALL";
     field public static final String EXTRA_IS_USSD = "android.telephony.ims.feature.extra.IS_USSD";
     field public static final int PROCESS_CALL_CSFB = 1; // 0x1
@@ -13521,16 +13521,10 @@ package android.telephony.ims.feature {
   public static class MmTelFeature.MmTelCapabilities extends android.telephony.ims.feature.ImsFeature.Capabilities {
     ctor public MmTelFeature.MmTelCapabilities();
     ctor @Deprecated public MmTelFeature.MmTelCapabilities(android.telephony.ims.feature.ImsFeature.Capabilities);
-    ctor public MmTelFeature.MmTelCapabilities(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);
-    method public final void addCapabilities(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);
-    method public final boolean isCapable(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);
-    method public final void removeCapabilities(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int);
-  }
-
-  @IntDef(flag=true, value={android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE, android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO, android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT, android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface MmTelFeature.MmTelCapabilities.MmTelCapability {
-  }
-
-  @IntDef(flag=true, value={android.telephony.ims.feature.MmTelFeature.PROCESS_CALL_IMS, android.telephony.ims.feature.MmTelFeature.PROCESS_CALL_CSFB}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface MmTelFeature.ProcessCallResult {
+    ctor public MmTelFeature.MmTelCapabilities(int);
+    method public final void addCapabilities(int);
+    method public final boolean isCapable(int);
+    method public final void removeCapabilities(int);
   }
 
   public class RcsFeature extends android.telephony.ims.feature.ImsFeature {
