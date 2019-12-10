@@ -18,7 +18,7 @@ package android.content.res;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.text.TextUtils;
 
 import java.util.Arrays;

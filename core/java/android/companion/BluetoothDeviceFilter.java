@@ -25,8 +25,8 @@ import static android.companion.BluetoothDeviceFilterUtils.patternToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.bluetooth.BluetoothDevice;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.provider.OneTimeUseBuilder;
