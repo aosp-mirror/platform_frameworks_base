@@ -19,7 +19,7 @@ package android.graphics.pdf;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Matrix;
@@ -29,7 +29,9 @@ import android.os.ParcelFileDescriptor;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
+
 import com.android.internal.util.Preconditions;
+
 import dalvik.system.CloseGuard;
 
 import libcore.io.IoUtils;

@@ -16,8 +16,7 @@
 
 package android.media;
 
-import android.annotation.UnsupportedAppUsage;
-import android.media.AudioSystem;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * The AudioDevicePort is a specialized type of AudioPort
