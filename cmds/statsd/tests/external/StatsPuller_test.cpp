@@ -35,6 +35,7 @@ using std::vector;
 using std::this_thread::sleep_for;
 using testing::Contains;
 
+namespace {
 // cooldown time 1sec.
 int pullTagId = 10014;
 
@@ -76,7 +77,9 @@ public:
     }
 };
 
-TEST_F(StatsPullerTest, PullSucces) {
+}  // Anonymous namespace.
+
+TEST_F(StatsPullerTest, PullSuccess) {
     pullData.push_back(createSimpleEvent(1111L, 33));
 
     pullSuccess = true;

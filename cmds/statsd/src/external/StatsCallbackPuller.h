@@ -27,11 +27,17 @@ namespace statsd {
 
 class StatsCallbackPuller : public StatsPuller {
 public:
-    explicit StatsCallbackPuller(int tagId, const sp<IPullAtomCallback>& callback);
+    explicit StatsCallbackPuller(int tagId, const sp<IPullAtomCallback>& callback,
+                                 int64_t timeoutNs);
 
 private:
     bool PullInternal(vector<std::shared_ptr<LogEvent> >* data) override;
     const sp<IPullAtomCallback> mCallback;
+    const int64_t mTimeoutNs;
+
+    FRIEND_TEST(StatsCallbackPullerTest, PullFail);
+    FRIEND_TEST(StatsCallbackPullerTest, PullSuccess);
+    FRIEND_TEST(StatsCallbackPullerTest, PullTimeout);
 };
 
 }  // namespace statsd

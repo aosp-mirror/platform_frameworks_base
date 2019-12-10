@@ -497,10 +497,11 @@ void StatsPullerManager::RegisterPullAtomCallback(const int uid, const int32_t a
     VLOG("RegisterPullerCallback: adding puller for tag %d", atomTag);
     // TODO: linkToDeath with the callback so that we can remove it and delete the puller.
     StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/true);
-    kAllPullAtomInfo[{.atomTag = atomTag}] = {.additiveFields = additiveFields,
-                                              .coolDownNs = coolDownNs,
-                                              .puller = new StatsCallbackPuller(atomTag, callback),
-                                              .pullTimeoutNs = timeoutNs,
+    kAllPullAtomInfo[{.atomTag = atomTag}] = {
+            .additiveFields = additiveFields,
+            .coolDownNs = coolDownNs,
+            .puller = new StatsCallbackPuller(atomTag, callback, timeoutNs),
+            .pullTimeoutNs = timeoutNs,
     };
 }
 
