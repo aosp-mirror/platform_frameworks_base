@@ -148,6 +148,13 @@ public class UpdateEngine {
          * <p>See {@link UpdateEngine#allocateSpace}.
          */
         public static final int NOT_ENOUGH_SPACE = 60;
+
+        /**
+         * Error code: the device is corrupted and no further updates may be applied.
+         *
+         * <p>See {@link UpdateEngine#cleanupAppliedPayload}.
+         */
+        public static final int DEVICE_CORRUPTED = 61;
     }
 
     /**
@@ -519,6 +526,42 @@ public class UpdateEngine {
             result.mErrorCode = e.errorCode;
             result.mFreeSpaceRequired = 0;
             return result;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Cleanup files used by the previous update and free up space after the
+     * device has been booted successfully into the new build.
+     *
+     * <p>In particular, this function waits until delta files for snapshots for
+     * Virtual A/B update are merged to OS partitions, then delete these delta
+     * files.
+     *
+     * <p>This function is synchronous and may take a non-trivial amount of
+     * time. Callers should call this function in a background thread.
+     *
+     * <p>This function does not delete payload binaries downloaded for a
+     * non-streaming OTA update.
+     *
+     * @return One of the following:
+     * <ul>
+     * <li>{@link ErrorCodeConstants#SUCCESS} if execution is successful.</li>
+     * <li>{@link ErrorCodeConstants#ERROR} if a transient error has occurred.
+     * The device should be able to recover after a reboot. The function should
+     * be retried after the reboot.</li>
+     * <li>{@link ErrorCodeConstants#DEVICE_CORRUPTED} if a permanent error is
+     * encountered. Device is corrupted, and future updates must not be applied.
+     * The device cannot recover without flashing and factory resets.
+     * </ul>
+     *
+     * @throws ServiceSpecificException if other transient errors has occurred.
+     * A reboot may or may not help resolving the issue.
+     */
+    public int cleanupAppliedPayload() {
+        try {
+            return mUpdateEngine.cleanupSuccessfulUpdate();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

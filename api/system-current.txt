@@ -6088,6 +6088,7 @@ package android.os {
     method public boolean bind(android.os.UpdateEngineCallback, android.os.Handler);
     method public boolean bind(android.os.UpdateEngineCallback);
     method public void cancel();
+    method public int cleanupAppliedPayload();
     method public void resetStatus();
     method public void resume();
     method public void suspend();
@@ -6102,6 +6103,7 @@ package android.os {
 
   public static final class UpdateEngine.ErrorCodeConstants {
     ctor public UpdateEngine.ErrorCodeConstants();
+    field public static final int DEVICE_CORRUPTED = 61; // 0x3d
     field public static final int DOWNLOAD_PAYLOAD_VERIFICATION_ERROR = 12; // 0xc
     field public static final int DOWNLOAD_TRANSFER_ERROR = 9; // 0x9
     field public static final int ERROR = 1; // 0x1
