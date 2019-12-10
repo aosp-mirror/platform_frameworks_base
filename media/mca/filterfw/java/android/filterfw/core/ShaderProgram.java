@@ -17,12 +17,7 @@
 
 package android.filterfw.core;
 
-import android.annotation.UnsupportedAppUsage;
-import android.filterfw.core.Frame;
-import android.filterfw.core.NativeAllocatorTag;
-import android.filterfw.core.Program;
-import android.filterfw.core.StopWatchMap;
-import android.filterfw.core.VertexFrame;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.filterfw.geometry.Quad;
 import android.opengl.GLES20;
 

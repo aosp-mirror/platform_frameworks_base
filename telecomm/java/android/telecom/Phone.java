@@ -17,8 +17,8 @@
 package android.telecom;
 
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
 import android.bluetooth.BluetoothDevice;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.ArrayMap;

@@ -17,7 +17,7 @@
 
 package com.google.android.mms;
 
-import dalvik.annotation.compat.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * A generic exception that is thrown by the Mms client.
