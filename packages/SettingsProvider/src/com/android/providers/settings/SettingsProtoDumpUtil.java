@@ -641,6 +641,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
                 GlobalSettingsProto.Euicc.FACTORY_RESET_TIMEOUT_MILLIS);
+        dumpSetting(s, p,
+                Settings.Global.EUICC_UNSUPPORTED_COUNTRIES,
+                GlobalSettingsProto.Euicc.UNSUPPORTED_COUNTRIES);
         p.end(euiccToken);
 
         dumpSetting(s, p,
