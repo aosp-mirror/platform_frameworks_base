@@ -1125,8 +1125,11 @@ public final class UsageStatsManager {
 
     /**
      * Inform usage stats that the carrier privileged apps access rules have changed.
+     * <p> The caller must have {@link android.Manifest.permission#BIND_CARRIER_SERVICES} </p>
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BIND_CARRIER_SERVICES)
     public void onCarrierPrivilegedAppsChanged() {
         try {
             mService.onCarrierPrivilegedAppsChanged();
