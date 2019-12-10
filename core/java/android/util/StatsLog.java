@@ -248,12 +248,15 @@ public final class StatsLog extends StatsLogInternal {
 
     /**
      * Write an event to stats log using the raw format encapsulated in StatsEvent.
+     * After writing to stats log, release() is called on the StatsEvent object.
+     * No further action should be taken on the StatsEvent object following this call.
      *
      * @param statsEvent    The StatsEvent object containing the encoded buffer of data to write.
      * @hide
      */
     public static void write(@NonNull final StatsEvent statsEvent) {
         writeImpl(statsEvent.getBytes(), statsEvent.getNumBytes(), statsEvent.getAtomId());
+        statsEvent.release();
     }
 
     private static void enforceDumpCallingPermission(Context context) {
