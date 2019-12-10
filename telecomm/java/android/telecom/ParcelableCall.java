@@ -16,21 +16,20 @@
 
 package android.telecom;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.telecom.Call.Details.CallDirection;
 
+import com.android.internal.telecom.IVideoProvider;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.android.internal.telecom.IVideoProvider;
 
 /**
  * Information about a call that is used between InCallService and Telecom.

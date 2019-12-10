@@ -17,11 +17,10 @@
 
 package com.google.android.mms.pdu;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.text.TextUtils;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
