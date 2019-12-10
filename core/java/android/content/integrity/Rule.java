@@ -42,6 +42,7 @@ import java.util.Objects;
 @VisibleForTesting
 public final class Rule implements Parcelable {
 
+    /** @hide */
     @IntDef(
             value = {
                 DENY,
