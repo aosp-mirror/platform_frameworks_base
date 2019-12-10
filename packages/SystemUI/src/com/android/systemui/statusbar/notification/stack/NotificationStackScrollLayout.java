@@ -5519,7 +5519,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         if (viewsToRemove.isEmpty()) {
             if (closeShade) {
-                mStatusBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+                mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
             }
             return;
         }
@@ -5581,7 +5581,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     setDismissAllInProgress(false);
                     onAnimationComplete.run();
                 });
-                mStatusBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+                mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
             } else {
                 setDismissAllInProgress(false);
                 onAnimationComplete.run();

@@ -115,7 +115,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationAlertingManager.class),
                 mock(NotificationRowBinderImpl.class), mock(KeyguardStateController.class),
                 mock(KeyguardIndicationController.class),
-                mStatusBar, mCommandQueue);
+                mStatusBar, mock(ShadeControllerImpl.class), mCommandQueue);
     }
 
     @Test

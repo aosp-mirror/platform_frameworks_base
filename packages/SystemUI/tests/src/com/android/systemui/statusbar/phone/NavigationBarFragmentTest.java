@@ -254,6 +254,7 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
                 mDivider,
                 Optional.of(mRecents),
                 () -> mock(StatusBar.class),
+                mock(ShadeController.class),
                 mHandler);
     }
 

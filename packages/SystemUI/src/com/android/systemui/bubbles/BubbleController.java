@@ -109,8 +109,6 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import dagger.Lazy;
-
 /**
  * Bubbles are a special type of content that can "float" on top of other apps or System UI.
  * Bubbles can be expanded to show more content.
@@ -147,7 +145,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private BubbleExpandListener mExpandListener;
     @Nullable private BubbleStackView.SurfaceSynchronizer mSurfaceSynchronizer;
     private final NotificationGroupManager mNotificationGroupManager;
-    private final Lazy<ShadeController> mShadeController;
+    private final ShadeController mShadeController;
     private final RemoteInputUriController mRemoteInputUriController;
     private Handler mHandler = new Handler() {};
 
@@ -243,7 +241,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     public BubbleController(Context context,
             StatusBarWindowController statusBarWindowController,
             StatusBarStateController statusBarStateController,
-            Lazy<ShadeController> shadeController,
+            ShadeController shadeController,
             BubbleData data,
             ConfigurationController configurationController,
             NotificationInterruptionStateProvider interruptionStateProvider,
@@ -261,7 +259,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     public BubbleController(Context context,
             StatusBarWindowController statusBarWindowController,
             StatusBarStateController statusBarStateController,
-            Lazy<ShadeController> shadeController,
+            ShadeController shadeController,
             BubbleData data,
             @Nullable BubbleStackView.SurfaceSynchronizer synchronizer,
             ConfigurationController configurationController,
@@ -272,6 +270,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             NotificationEntryManager entryManager,
             RemoteInputUriController remoteInputUriController) {
         mContext = context;
+        mShadeController = shadeController;
         mNotificationInterruptionStateProvider = interruptionStateProvider;
         mNotifUserManager = notifUserManager;
         mZenModeController = zenModeController;
@@ -319,7 +318,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     }
                 });
 
-        mShadeController = shadeController;
         mStatusBarWindowController = statusBarWindowController;
         mStatusBarStateListener = new StatusBarStateListener();
         statusBarStateController.addCallback(mStatusBarStateListener);
@@ -579,7 +577,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         if (DEBUG_EXPERIMENTS || DEBUG_BUBBLE_CONTROLLER) {
             Log.d(TAG, "onUserCreatedBubble: " + entry.getKey());
         }
-        mShadeController.get().collapsePanel(true);
+        mShadeController.collapsePanel(true);
         entry.setFlagBubble(true);
         updateBubble(entry, true /* suppressFlyout */, false /* showInShade */);
         mUserCreatedBubbles.add(entry.getKey());

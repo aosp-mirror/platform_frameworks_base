@@ -68,15 +68,14 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         mDependency.injectTestDependency(FalsingManager.class, mFalsingManager);
         mDependency.injectTestDependency(KeyguardUpdateMonitor.class, mUpdateMonitor);
-        mDependency.injectTestDependency(StatusBarWindowController.class,
-                mStatusBarWindowController);
 
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
 
         TestableLooper.get(this).runWithLooper(() -> {
             mViewMediator = new KeyguardViewMediator(
                     mContext, mFalsingManager, mLockPatternUtils, mBroadcastDispatcher,
-                    () -> mStatusBarKeyguardViewManager, mDismissCallbackRegistry);
+                    mStatusBarWindowController, () -> mStatusBarKeyguardViewManager,
+                    mDismissCallbackRegistry);
         });
     }
 

@@ -210,8 +210,7 @@ public class KeyguardViewMediator extends SystemUI {
     private AlarmManager mAlarmManager;
     private AudioManager mAudioManager;
     private StatusBarManager mStatusBarManager;
-    private final StatusBarWindowController mStatusBarWindowController =
-            Dependency.get(StatusBarWindowController.class);
+    private final StatusBarWindowController mStatusBarWindowController;
     private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
 
     private boolean mSystemReady;
@@ -688,12 +687,14 @@ public class KeyguardViewMediator extends SystemUI {
             FalsingManager falsingManager,
             LockPatternUtils lockPatternUtils,
             BroadcastDispatcher broadcastDispatcher,
+            StatusBarWindowController statusBarWindowController,
             Lazy<StatusBarKeyguardViewManager> statusBarKeyguardViewManagerLazy,
             DismissCallbackRegistry dismissCallbackRegistry) {
         super(context);
         mFalsingManager = falsingManager;
         mLockPatternUtils = lockPatternUtils;
         mBroadcastDispatcher = broadcastDispatcher;
+        mStatusBarWindowController = statusBarWindowController;
         mStatusBarKeyguardViewManagerLazy = statusBarKeyguardViewManagerLazy;
         mDismissCallbackRegistry = dismissCallbackRegistry;
     }

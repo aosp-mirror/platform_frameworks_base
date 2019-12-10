@@ -57,12 +57,9 @@ import java.io.PrintWriter;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
-
 /**
  * Controller for {@link StatusBarWindowView}.
  */
-//@Singleton
 public class StatusBarWindowViewController {
     private final InjectionInflationController mInjectionInflationController;
     private final NotificationWakeUpCoordinator mCoordinator;
@@ -80,7 +77,7 @@ public class StatusBarWindowViewController {
     private final DozeParameters mDozeParameters;
     private final CommandQueue mCommandQueue;
     private final StatusBarWindowView mView;
-    private final Lazy<ShadeController> mShadeControllerLazy;
+    private final ShadeController mShadeController;
 
     private GestureDetector mGestureDetector;
     private View mBrightnessMirror;
@@ -114,7 +111,7 @@ public class StatusBarWindowViewController {
             DozeLog dozeLog,
             DozeParameters dozeParameters,
             CommandQueue commandQueue,
-            Lazy<ShadeController> shadeControllerLazy,
+            ShadeController shadeController,
             DockManager dockManager,
             StatusBarWindowView statusBarWindowView) {
         mInjectionInflationController = injectionInflationController;
@@ -133,7 +130,7 @@ public class StatusBarWindowViewController {
         mDozeParameters = dozeParameters;
         mCommandQueue = commandQueue;
         mView = statusBarWindowView;
-        mShadeControllerLazy = shadeControllerLazy;
+        mShadeController = shadeController;
         mDockManager = dockManager;
 
         // This view is not part of the newly inflated expanded status bar.
@@ -153,7 +150,7 @@ public class StatusBarWindowViewController {
                 mBypassController,
                 mFalsingManager,
                 mPluginManager,
-                mShadeControllerLazy.get(),
+                mShadeController,
                 mNotificationLockscreenUserManager,
                 mNotificationEntryManager,
                 mKeyguardStateController,

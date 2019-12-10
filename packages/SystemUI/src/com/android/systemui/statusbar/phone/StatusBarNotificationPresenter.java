@@ -88,7 +88,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
     private static final String TAG = "StatusBarNotificationPresenter";
 
-    private final ShadeController mShadeController = Dependency.get(ShadeController.class);
     private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
     private final KeyguardStateController mKeyguardStateController;
     private final NotificationViewHierarchyManager mViewHierarchyManager =
@@ -116,6 +115,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final Context mContext;
     private final KeyguardIndicationController mKeyguardIndicationController;
     private final StatusBar mStatusBar;
+    private final ShadeController mShadeController;
     private final CommandQueue mCommandQueue;
 
     private final AccessibilityManager mAccessibilityManager;
@@ -145,6 +145,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             KeyguardStateController keyguardStateController,
             KeyguardIndicationController keyguardIndicationController,
             StatusBar statusBar,
+            ShadeController shadeController,
             CommandQueue commandQueue) {
         mContext = context;
         mKeyguardStateController = keyguardStateController;
@@ -154,6 +155,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mKeyguardIndicationController = keyguardIndicationController;
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
         mStatusBar = statusBar;
+        mShadeController = shadeController;
         mCommandQueue = commandQueue;
         mAboveShelfObserver = new AboveShelfObserver(stackScroller);
         mActivityLaunchAnimator = activityLaunchAnimator;
@@ -387,7 +389,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         }
         updateNotificationViews();
         mMediaManager.clearCurrentMediaNotification();
-        mShadeController.setLockscreenUser(newUserId);
+        mStatusBar.setLockscreenUser(newUserId);
         updateMediaMetaData(true, false);
     }
 
