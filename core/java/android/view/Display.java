@@ -1525,5 +1525,14 @@ public final class Display {
         public int describeContents() {
             return 0;
         }
+
+        @Override
+        public String toString() {
+            return "HdrCapabilities{"
+                    + "mSupportedHdrTypes=" + Arrays.toString(mSupportedHdrTypes)
+                    + ", mMaxLuminance=" + mMaxLuminance
+                    + ", mMaxAverageLuminance=" + mMaxAverageLuminance
+                    + ", mMinLuminance=" + mMinLuminance + '}';
+        }
     }
 }
