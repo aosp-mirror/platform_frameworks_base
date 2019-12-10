@@ -6723,12 +6723,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // be optimized to only do the processing needed.
         final long now = SystemClock.elapsedRealtime();
         final NetworkAgentInfo oldDefaultNetwork = getDefaultNetwork();
-
         final NetworkReassignment changes = computeNetworkReassignment();
+        applyNetworkReassignment(changes, oldDefaultNetwork, now);
+    }
 
-        // Now that the entire rematch is computed, update the lists of satisfied requests in
-        // the network agents. This is necessary because some code later depends on this state
-        // to be correct, most prominently computing the linger status.
+    private void applyNetworkReassignment(@NonNull final NetworkReassignment changes,
+            @Nullable final NetworkAgentInfo oldDefaultNetwork, final long now) {
+        // First, update the lists of satisfied requests in the network agents. This is necessary
+        // because some code later depends on this state to be correct, most prominently computing
+        // the linger status.
         for (final NetworkReassignment.RequestReassignment event :
                 changes.getRequestReassignments()) {
             // The rematch is seeded with an entry for each request, and requests that don't
