@@ -33,6 +33,8 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.car.CarDeviceProvisionedController;
+import com.android.systemui.car.CarDeviceProvisionedListener;
 import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.CommandQueue;
@@ -53,7 +55,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
 
     private final CarNavigationBarController mCarNavigationBarController;
     private final WindowManager mWindowManager;
-    private final DeviceProvisionedController mDeviceProvisionedController;
+    private final CarDeviceProvisionedController mCarDeviceProvisionedController;
     private final CommandQueue mCommandQueue;
     private final Lazy<FacetButtonTaskStackListener> mFacetButtonTaskStackListenerLazy;
     private final Handler mMainHandler;
@@ -82,6 +84,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     // To be attached to the navigation bars such that they can close the notification panel if
     // it's open.
     private boolean mDeviceIsSetUpForUser = true;
+    private boolean mIsUserSetupInProgress = false;
 
     @Inject
     public CarNavigationBar(Context context,
@@ -98,7 +101,8 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         super(context);
         mCarNavigationBarController = carNavigationBarController;
         mWindowManager = windowManager;
-        mDeviceProvisionedController = deviceProvisionedController;
+        mCarDeviceProvisionedController = (CarDeviceProvisionedController)
+                deviceProvisionedController;
         mCommandQueue = commandQueue;
         mFacetButtonTaskStackListenerLazy = facetButtonTaskStackListenerLazy;
         mMainHandler = mainHandler;
@@ -129,9 +133,15 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             ex.rethrowFromSystemServer();
         }
 
-        mDeviceIsSetUpForUser = mDeviceProvisionedController.isCurrentUserSetup();
-        mDeviceProvisionedController.addCallback(
-                new DeviceProvisionedController.DeviceProvisionedListener() {
+        mDeviceIsSetUpForUser = mCarDeviceProvisionedController.isCurrentUserSetup();
+        mIsUserSetupInProgress = mCarDeviceProvisionedController.isCurrentUserSetupInProgress();
+        mCarDeviceProvisionedController.addCallback(
+                new CarDeviceProvisionedListener() {
+                    @Override
+                    public void onUserSetupInProgressChanged() {
+                        mMainHandler.post(() -> restartNavBarsIfNecessary());
+                    }
+
                     @Override
                     public void onUserSetupChanged() {
                         mMainHandler.post(() -> restartNavBarsIfNecessary());
@@ -152,9 +162,13 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     }
 
     private void restartNavBarsIfNecessary() {
-        boolean currentUserSetup = mDeviceProvisionedController.isCurrentUserSetup();
-        if (mDeviceIsSetUpForUser != currentUserSetup) {
+        boolean currentUserSetup = mCarDeviceProvisionedController.isCurrentUserSetup();
+        boolean currentUserSetupInProgress = mCarDeviceProvisionedController
+                .isCurrentUserSetupInProgress();
+        if (mIsUserSetupInProgress != currentUserSetupInProgress
+                || mDeviceIsSetUpForUser != currentUserSetup) {
             mDeviceIsSetUpForUser = currentUserSetup;
+            mIsUserSetupInProgress = currentUserSetupInProgress;
             restartNavBars();
         }
     }
@@ -193,8 +207,12 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         // If the UI was rebuilt (day/night change) while the keyguard was up we need to
         // correctly respect that state.
         if (mKeyguardStateControllerLazy.get().isShowing()) {
-            mCarNavigationBarController.showAllKeyguardButtons(mDeviceIsSetUpForUser);
+            mCarNavigationBarController.showAllKeyguardButtons(isDeviceSetupForUser());
         }
+    }
+
+    private boolean isDeviceSetupForUser() {
+        return mDeviceIsSetUpForUser && !mIsUserSetupInProgress;
     }
 
     private void createNavigationBar(RegisterStatusBarResult result) {
@@ -225,22 +243,22 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     }
 
     private void buildNavBarContent() {
-        mTopNavigationBarView = mCarNavigationBarController.getTopBar(mDeviceIsSetUpForUser);
+        mTopNavigationBarView = mCarNavigationBarController.getTopBar(isDeviceSetupForUser());
         if (mTopNavigationBarView != null) {
             mTopNavigationBarWindow.addView(mTopNavigationBarView);
         }
 
-        mBottomNavigationBarView = mCarNavigationBarController.getBottomBar(mDeviceIsSetUpForUser);
+        mBottomNavigationBarView = mCarNavigationBarController.getBottomBar(isDeviceSetupForUser());
         if (mBottomNavigationBarView != null) {
             mBottomNavigationBarWindow.addView(mBottomNavigationBarView);
         }
 
-        mLeftNavigationBarView = mCarNavigationBarController.getLeftBar(mDeviceIsSetUpForUser);
+        mLeftNavigationBarView = mCarNavigationBarController.getLeftBar(isDeviceSetupForUser());
         if (mLeftNavigationBarView != null) {
             mLeftNavigationBarWindow.addView(mLeftNavigationBarView);
         }
 
-        mRightNavigationBarView = mCarNavigationBarController.getRightBar(mDeviceIsSetUpForUser);
+        mRightNavigationBarView = mCarNavigationBarController.getRightBar(isDeviceSetupForUser());
         if (mRightNavigationBarView != null) {
             mRightNavigationBarWindow.addView(mRightNavigationBarView);
         }

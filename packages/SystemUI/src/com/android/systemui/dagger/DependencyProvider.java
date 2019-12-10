@@ -35,7 +35,6 @@ import android.view.LayoutInflater;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.BgHandler;
 import com.android.systemui.dagger.qualifiers.BgLooper;
 import com.android.systemui.dagger.qualifiers.MainHandler;
@@ -54,8 +53,6 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DataSaverController;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.util.leak.LeakDetector;
 
@@ -221,13 +218,6 @@ public class DependencyProvider {
     @Provides
     public DevicePolicyManagerWrapper provideDevicePolicyManagerWrapper() {
         return DevicePolicyManagerWrapper.getInstance();
-    }
-
-    @Singleton
-    @Provides
-    public DeviceProvisionedController provideDeviceProvisionedController(Context context,
-            @MainHandler Handler mainHandler, BroadcastDispatcher broadcastDispatcher) {
-        return new DeviceProvisionedControllerImpl(context, mainHandler, broadcastDispatcher);
     }
 
     /** */

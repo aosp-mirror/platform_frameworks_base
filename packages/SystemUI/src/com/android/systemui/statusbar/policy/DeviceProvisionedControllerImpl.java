@@ -40,7 +40,7 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
         DeviceProvisionedController {
 
     protected static final String TAG = DeviceProvisionedControllerImpl.class.getSimpleName();
-    private final ArrayList<DeviceProvisionedListener> mListeners = new ArrayList<>();
+    protected final ArrayList<DeviceProvisionedListener> mListeners = new ArrayList<>();
     private final ContentResolver mContentResolver;
     private final Context mContext;
     private final Uri mDeviceProvisionedUri;
@@ -104,7 +104,7 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
         }
     }
 
-    private void startListening(int user) {
+    protected void startListening(int user) {
         mContentResolver.registerContentObserver(mDeviceProvisionedUri, true,
                 mSettingsObserver, 0);
         mContentResolver.registerContentObserver(mUserSetupUri, true,
@@ -112,7 +112,7 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
         startTracking();
     }
 
-    private void stopListening() {
+    protected void stopListening() {
         stopTracking();
         mContentResolver.unregisterContentObserver(mSettingsObserver);
     }
