@@ -20,8 +20,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.android.collect.Sets;
-
 import java.util.HashSet;
 
 /**
@@ -32,7 +30,7 @@ import java.util.HashSet;
 public class InterfaceConfiguration implements Parcelable {
     private String mHwAddr;
     private LinkAddress mAddr;
-    private HashSet<String> mFlags = Sets.newHashSet();
+    private HashSet<String> mFlags = new HashSet<>();
 
     // Must be kept in sync with constant in INetd.aidl
     private static final String FLAG_UP = "up";
