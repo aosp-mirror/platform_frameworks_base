@@ -66,7 +66,8 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
     private static final long SYSTEM_CLOCK_PARANOIA_THRESHOLD_MILLIS = 2 * 1000;
 
     // A log for changes made to the system clock and why.
-    @NonNull private final LocalLog mTimeChangesLog = new LocalLog(30);
+    @NonNull
+    private final LocalLog mTimeChangesLog = new LocalLog(30, false /* useLocalTimestamps */);
 
     // @NonNull after initialize()
     private Callback mCallback;

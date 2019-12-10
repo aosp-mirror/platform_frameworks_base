@@ -172,7 +172,7 @@ public class TimeZoneDetectorStrategy {
      * (for use during debugging).
      */
     @NonNull
-    private final LocalLog mTimeZoneChangesLog = new LocalLog(30);
+    private final LocalLog mTimeZoneChangesLog = new LocalLog(30, false /* useLocalTimestamps */);
 
     /**
      * A mapping from phoneId to a linked list of phone time zone suggestions (the head being the
