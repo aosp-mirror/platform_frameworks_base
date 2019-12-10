@@ -17,8 +17,8 @@
 package android.preference;
 
 import android.annotation.ArrayRes;
-import android.annotation.UnsupportedAppUsage;
 import android.app.AlertDialog.Builder;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;

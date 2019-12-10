@@ -16,7 +16,8 @@
 
 package android.os;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
+
 import libcore.util.NativeAllocationRegistry;
 
 /** @hide */

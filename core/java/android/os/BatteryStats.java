@@ -19,9 +19,9 @@ package android.os;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.job.JobParameters;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.server.ServerProtoEnums;
