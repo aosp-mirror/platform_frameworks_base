@@ -70,6 +70,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -1040,6 +1041,13 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         private boolean mVoiceButtonDown = false;
         private boolean mVoiceButtonHandled = false;
+
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+                String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+            (new MediaShellCommand()).exec(this, in, out, err, args, callback,
+                    resultReceiver);
+        }
 
         @Override
         public ISession createSession(String packageName, ISessionCallback cb, String tag,
