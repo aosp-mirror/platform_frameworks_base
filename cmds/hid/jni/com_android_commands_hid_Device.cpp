@@ -21,10 +21,11 @@
 #include <linux/uhid.h>
 
 #include <fcntl.h>
+#include <inttypes.h>
+#include <unistd.h>
 #include <cstdio>
 #include <cstring>
 #include <memory>
-#include <unistd.h>
 
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
@@ -32,6 +33,8 @@
 #include <nativehelper/ScopedUtfChars.h>
 #include <android/looper.h>
 #include <android/log.h>
+
+#include <android-base/stringprintf.h>
 
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 #define  LOGW(...)  __android_log_print(ANDROID_LOG_WARN,LOG_TAG,__VA_ARGS__)
@@ -59,6 +62,14 @@ static void checkAndClearException(JNIEnv* env, const char* methodName) {
         LOGE("An exception was thrown by callback '%s'.", methodName);
         env->ExceptionClear();
     }
+}
+
+static std::string toString(const std::vector<uint8_t>& data) {
+    std::string s = "";
+    for (uint8_t b : data) {
+        s += android::base::StringPrintf("%x ", b);
+    }
+    return s;
 }
 
 DeviceCallback::DeviceCallback(JNIEnv* env, jobject callback) :
@@ -208,13 +219,31 @@ int Device::handleEvents(int events) {
         return 0;
     }
 
-    if (ev.type == UHID_OPEN) {
-        mDeviceCallback->onDeviceOpen();
-    } else if (ev.type == UHID_GET_REPORT) {
-        mDeviceCallback->onDeviceGetReport(ev.u.get_report.id, ev.u.get_report.rnum);
-    } else if (ev.type == UHID_SET_REPORT) {
-        LOGE("UHID_SET_REPORT is currently not supported");
-        return 0;
+    switch (ev.type) {
+        case UHID_OPEN: {
+            mDeviceCallback->onDeviceOpen();
+            break;
+        }
+        case UHID_GET_REPORT: {
+            mDeviceCallback->onDeviceGetReport(ev.u.get_report.id, ev.u.get_report.rnum);
+            break;
+        }
+        case UHID_SET_REPORT: {
+            const struct uhid_set_report_req& set_report = ev.u.set_report;
+            if (set_report.size > UHID_DATA_MAX) {
+                LOGE("SET_REPORT contains too much data: size = %" PRIu16, set_report.size);
+                return 0;
+            }
+
+            std::vector<uint8_t> data(set_report.data, set_report.data + set_report.size);
+            LOGI("Received SET_REPORT: id=%" PRIu32 " rnum=%" PRIu8 " data=%s", set_report.id,
+                 set_report.rnum, toString(data).c_str());
+            break;
+        }
+        default: {
+            LOGI("Unhandled event type: %" PRIu32, ev.type);
+            break;
+        }
     }
 
     return 1;
