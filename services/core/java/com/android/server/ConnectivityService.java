@@ -6733,15 +6733,37 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @NonNull
     private NetworkReassignment computeNetworkReassignment() {
         ensureRunningOnConnectivityServiceThread();
-        final NetworkAgentInfo[] nais = mNetworkAgentInfos.values().toArray(
-                new NetworkAgentInfo[mNetworkAgentInfos.size()]);
-        // Rematch higher scoring networks first to prevent requests first matching a lower
-        // scoring network and then a higher scoring network, which could produce multiple
-        // callbacks.
-        Arrays.sort(nais);
-        final NetworkReassignment changes = computeInitialReassignment();
-        for (final NetworkAgentInfo nai : nais) {
-            rematchNetworkAndRequests(changes, nai);
+        final NetworkReassignment changes = new NetworkReassignment();
+
+        // Gather the list of all relevant agents and sort them by score.
+        final ArrayList<NetworkAgentInfo> nais = new ArrayList<>();
+        for (final NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+            if (!nai.everConnected) continue;
+            nais.add(nai);
+            changes.addRematchedNetwork(new NetworkReassignment.NetworkBgStatePair(nai,
+                    nai.isBackgroundNetwork()));
+        }
+        Collections.sort(nais);
+
+        for (final NetworkRequestInfo nri : mNetworkRequests.values()) {
+            if (nri.request.isListen()) continue;
+            // Find the top scoring network satisfying this request.
+            NetworkAgentInfo bestNetwork = null;
+            for (final NetworkAgentInfo nai : nais) {
+                if (!nai.satisfies(nri.request)) continue;
+                bestNetwork = nai;
+                // As the nais are sorted by score, this is the top-scoring network that can
+                // satisfy this request. The best network for this request has been found,
+                // go process the next NRI
+                break;
+            }
+            // If no NAI satisfies this request, bestNetwork is still null. That's fine : it
+            // means no network can satisfy the request. If nri.mSatisfier is not null, it just
+            // means the network that used to satisfy the request stopped satisfying it.
+            if (nri.mSatisfier != bestNetwork) {
+                changes.addRequestReassignment(new NetworkReassignment.RequestReassignment(
+                        nri, nri.mSatisfier, bestNetwork));
+            }
         }
         return changes;
     }
@@ -6751,11 +6773,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * being disconnected.
      */
     private void rematchAllNetworksAndRequests() {
-        // TODO: This may be slow, and should be optimized. Unfortunately at this moment the
-        // processing is network-major instead of request-major (the code iterates through all
-        // networks, then for each it iterates for all requests), which is a problem for re-scoring
-        // requests. Once the code has switched to a request-major iteration style, this can
-        // be optimized to only do the processing needed.
+        // TODO: This may be slow, and should be optimized.
         final long now = SystemClock.elapsedRealtime();
         final NetworkAgentInfo oldDefaultNetwork = getDefaultNetwork();
         final NetworkReassignment changes = computeNetworkReassignment();
