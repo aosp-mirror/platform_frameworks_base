@@ -25,8 +25,6 @@ import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.Annotation.ApnType;
