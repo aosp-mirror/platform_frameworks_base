@@ -17,9 +17,11 @@
 package android.util;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.SystemClock;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -33,10 +35,22 @@ public final class LocalLog {
     private final Deque<String> mLog;
     private final int mMaxLines;
 
+    /**
+     * {@code true} to use log timestamps expressed in local date/time, {@code false} to use log
+     * timestamped expressed with the elapsed realtime clock and UTC system clock. {@code false} is
+     * useful when logging behavior that modifies device time zone or system clock.
+     */
+    private final boolean mUseLocalTimestamps;
+
     @UnsupportedAppUsage
     public LocalLog(int maxLines) {
+        this(maxLines, true /* useLocalTimestamps */);
+    }
+
+    public LocalLog(int maxLines, boolean useLocalTimestamps) {
         mMaxLines = Math.max(0, maxLines);
         mLog = new ArrayDeque<>(mMaxLines);
+        mUseLocalTimestamps = useLocalTimestamps;
     }
 
     @UnsupportedAppUsage
@@ -44,7 +58,14 @@ public final class LocalLog {
         if (mMaxLines <= 0) {
             return;
         }
-        append(String.format("%s - %s", LocalDateTime.now(), msg));
+        final String logLine;
+        if (mUseLocalTimestamps) {
+            logLine = String.format("%s - %s", LocalDateTime.now(), msg);
+        } else {
+            logLine = String.format(
+                    "%s / %s - %s", SystemClock.elapsedRealtime(), Instant.now(), msg);
+        }
+        append(logLine);
     }
 
     private synchronized void append(String logLine) {
