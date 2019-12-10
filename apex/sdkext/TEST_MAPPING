@@ -1,7 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "framework-sdkext-tests"
+      "name": "CtsSdkExtTestCases"
     }
   ]
 }
