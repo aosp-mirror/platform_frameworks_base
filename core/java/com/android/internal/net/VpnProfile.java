@@ -16,10 +16,9 @@
 
 package com.android.internal.net;
 
-import android.annotation.UnsupportedAppUsage;
-import android.os.Build;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.ProxyInfo;
-import android.net.Uri;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;

@@ -16,9 +16,10 @@
 
 package com.android.internal.util;
 
+import android.compat.annotation.UnsupportedAppUsage;
+
 import org.xmlpull.v1.XmlSerializer;
 
-import android.annotation.UnsupportedAppUsage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
