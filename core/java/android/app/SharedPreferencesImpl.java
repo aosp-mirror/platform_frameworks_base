@@ -17,10 +17,10 @@
 package android.app;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.FileUtils;

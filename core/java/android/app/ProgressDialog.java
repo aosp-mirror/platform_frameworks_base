@@ -16,9 +16,7 @@
 
 package android.app;
 
-import com.android.internal.R;
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -33,6 +31,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.android.internal.R;
 
 import java.text.NumberFormat;
 
