@@ -16,8 +16,8 @@
 
 package android.content;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.SearchManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
