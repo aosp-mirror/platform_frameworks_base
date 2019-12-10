@@ -18,7 +18,7 @@ package android.widget;
 
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;

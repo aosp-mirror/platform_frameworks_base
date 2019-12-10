@@ -16,7 +16,7 @@
 
 package com.android.internal.os;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.FileUtils;
 import android.util.Log;
