@@ -1594,9 +1594,25 @@ package android.content {
     field public static final String EXTRA_REMOTE_CALLBACK = "android.intent.extra.REMOTE_CALLBACK";
     field public static final String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
     field public static final String EXTRA_ROLE_NAME = "android.intent.extra.ROLE_NAME";
+    field @Deprecated public static final String EXTRA_SIM_LOCKED_REASON = "reason";
+    field @Deprecated public static final String EXTRA_SIM_STATE = "ss";
     field public static final String EXTRA_UNKNOWN_INSTANT_APP = "android.intent.extra.UNKNOWN_INSTANT_APP";
     field public static final String EXTRA_VERIFICATION_BUNDLE = "android.intent.extra.VERIFICATION_BUNDLE";
     field public static final String METADATA_SETUP_VERSION = "android.SETUP_VERSION";
+    field @Deprecated public static final String SIM_ABSENT_ON_PERM_DISABLED = "PERM_DISABLED";
+    field @Deprecated public static final String SIM_LOCKED_NETWORK = "NETWORK";
+    field @Deprecated public static final String SIM_LOCKED_ON_PIN = "PIN";
+    field @Deprecated public static final String SIM_LOCKED_ON_PUK = "PUK";
+    field @Deprecated public static final String SIM_STATE_ABSENT = "ABSENT";
+    field @Deprecated public static final String SIM_STATE_CARD_IO_ERROR = "CARD_IO_ERROR";
+    field @Deprecated public static final String SIM_STATE_CARD_RESTRICTED = "CARD_RESTRICTED";
+    field @Deprecated public static final String SIM_STATE_IMSI = "IMSI";
+    field @Deprecated public static final String SIM_STATE_LOADED = "LOADED";
+    field @Deprecated public static final String SIM_STATE_LOCKED = "LOCKED";
+    field @Deprecated public static final String SIM_STATE_NOT_READY = "NOT_READY";
+    field @Deprecated public static final String SIM_STATE_PRESENT = "PRESENT";
+    field @Deprecated public static final String SIM_STATE_READY = "READY";
+    field @Deprecated public static final String SIM_STATE_UNKNOWN = "UNKNOWN";
   }
 
   public class IntentFilter implements android.os.Parcelable {
