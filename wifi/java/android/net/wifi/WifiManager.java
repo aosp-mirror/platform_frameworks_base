@@ -2156,8 +2156,6 @@ public class WifiManager {
     /** @hide */
     public static final long WIFI_FEATURE_INFRA            = 0x0001L;  // Basic infrastructure mode
     /** @hide */
-    public static final long WIFI_FEATURE_INFRA_5G         = 0x0002L;  // Support for 5 GHz Band
-    /** @hide */
     public static final long WIFI_FEATURE_PASSPOINT        = 0x0004L;  // Support for GAS/ANQP
     /** @hide */
     public static final long WIFI_FEATURE_P2P              = 0x0008L;  // Wifi-Direct
@@ -2227,8 +2225,6 @@ public class WifiManager {
     public static final long WIFI_FEATURE_MBO              = 0x800000000L; // MBO Support
     /** @hide */
     public static final long WIFI_FEATURE_OCE              = 0x1000000000L; // OCE Support
-    /** @hide */
-    public static final long WIFI_FEATURE_INFRA_6G         = 0x2000000000L; // Support 6 GHz band
 
     private long getSupportedFeatures() {
         try {
@@ -2242,22 +2238,7 @@ public class WifiManager {
         return (getSupportedFeatures() & feature) == feature;
     }
 
-    /**
-     * @return true if this adapter supports 5 GHz band
-     */
-    public boolean is5GHzBandSupported() {
-        return isFeatureSupported(WIFI_FEATURE_INFRA_5G);
-    }
-
-    /**
-     * @return true if the device supports operating in the 6 GHz band and Wi-Fi is enabled,
-     *         false otherwise.
-     */
-    public boolean is6GHzBandSupported() {
-        return isFeatureSupported(WIFI_FEATURE_INFRA_6G);
-    }
-
-    /**
+   /**
      * @return true if this adapter supports Passpoint
      * @hide
      */
@@ -2376,6 +2357,30 @@ public class WifiManager {
     @SystemApi
     public boolean isApMacRandomizationSupported() {
         return isFeatureSupported(WIFI_FEATURE_AP_RAND_MAC);
+    }
+
+    /**
+     * Check if the chipset supports 5GHz band.
+     * @return {@code true} if supported, {@code false} otherwise.
+     */
+    public boolean is5GHzBandSupported() {
+        try {
+            return mService.is5GHzBandSupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Check if the chipset supports 6GHz band.
+     * @return {@code true} if supported, {@code false} otherwise.
+     */
+    public boolean is6GHzBandSupported() {
+        try {
+            return mService.is6GHzBandSupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2586,21 +2591,6 @@ public class WifiManager {
     public String getCountryCode() {
         try {
             return mService.getCountryCode();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Check if the chipset supports dual frequency band (2.4 GHz and 5 GHz).
-     * No permissions are required to call this method.
-     * @return {@code true} if supported, {@code false} otherwise.
-     * @hide
-     */
-    @SystemApi
-    public boolean isDualBandSupported() {
-        try {
-            return mService.isDualBandSupported();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

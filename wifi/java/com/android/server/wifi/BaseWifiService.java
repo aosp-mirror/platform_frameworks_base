@@ -28,7 +28,6 @@ import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.IOnWifiActivityEnergyInfoListener;
 import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.IScanResultsCallback;
-import android.net.wifi.IScanResultsListener;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ISuggestionConnectionStatusListener;
 import android.net.wifi.ITrafficStateCallback;
@@ -227,8 +226,19 @@ public class BaseWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    /** @deprecated use {@link #is5GHzBandSupported} instead */
+    @Deprecated
     public boolean isDualBandSupported() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean is5GHzBandSupported() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean is6GHzBandSupported() {
         throw new UnsupportedOperationException();
     }
 

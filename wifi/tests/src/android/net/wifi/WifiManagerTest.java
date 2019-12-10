@@ -1696,8 +1696,6 @@ public class WifiManagerTest {
         assertTrue(mWifiManager.isPasspointSupported());
         assertTrue(mWifiManager.isP2pSupported());
         assertFalse(mWifiManager.isPortableHotspotSupported());
-        assertFalse(mWifiManager.is5GHzBandSupported());
-        assertFalse(mWifiManager.is6GHzBandSupported());
         assertFalse(mWifiManager.isDeviceToDeviceRttSupported());
         assertFalse(mWifiManager.isDeviceToApRttSupported());
         assertFalse(mWifiManager.isPreferredNetworkOffloadSupported());
@@ -1782,13 +1780,23 @@ public class WifiManagerTest {
     }
 
     /**
-     * Test behavior of {@link WifiManager#isDualBandSupported()}
+     * Test behavior of {@link WifiManager#is5GHzBandSupported()}
      */
     @Test
-    public void testIsDualBandSupported() throws Exception {
-        when(mWifiService.isDualBandSupported()).thenReturn(true);
-        assertTrue(mWifiManager.isDualBandSupported());
-        verify(mWifiService).isDualBandSupported();
+    public void testIs5GHzBandSupported() throws Exception {
+        when(mWifiService.is5GHzBandSupported()).thenReturn(true);
+        assertTrue(mWifiManager.is5GHzBandSupported());
+        verify(mWifiService).is5GHzBandSupported();
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#is6GHzBandSupported()}
+     */
+    @Test
+    public void testIs6GHzBandSupported() throws Exception {
+        when(mWifiService.is6GHzBandSupported()).thenReturn(true);
+        assertTrue(mWifiManager.is6GHzBandSupported());
+        verify(mWifiService).is6GHzBandSupported();
     }
 
     /**
