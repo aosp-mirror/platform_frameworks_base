@@ -46,7 +46,7 @@ private const val MSG_ADD_RECEIVER = 0
 private const val MSG_REMOVE_RECEIVER = 1
 private const val MSG_REMOVE_RECEIVER_FOR_USER = 2
 private const val TAG = "BroadcastDispatcher"
-private const val DEBUG = false
+private const val DEBUG = true
 
 /**
  * SystemUI master Broadcast Dispatcher.
@@ -147,7 +147,13 @@ open class BroadcastDispatcher @Inject constructor (
             when (msg.what) {
                 MSG_ADD_RECEIVER -> {
                     val data = msg.obj as ReceiverData
-                    val userId = data.user.identifier
+                    // If the receiver asked to be registered under the current user, we register
+                    // under the actual current user.
+                    val userId = if (data.user.identifier == UserHandle.USER_CURRENT) {
+                        context.userId
+                    } else {
+                        data.user.identifier
+                    }
                     if (userId < UserHandle.USER_ALL) {
                         if (DEBUG) Log.w(TAG, "Register receiver for invalid user: $userId")
                         return
