@@ -194,6 +194,7 @@ import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkDiagnostics;
 import com.android.server.connectivity.NetworkNotificationManager;
 import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
+import com.android.server.connectivity.NetworkRanker;
 import com.android.server.connectivity.PermissionMonitor;
 import com.android.server.connectivity.ProxyTracker;
 import com.android.server.connectivity.Vpn;
@@ -579,6 +580,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     final ConnectivityDiagnosticsHandler mConnectivityDiagnosticsHandler;
 
     private final DnsManager mDnsManager;
+    private final NetworkRanker mNetworkRanker;
 
     private boolean mSystemReady;
     private Intent mInitialBroadcast;
@@ -958,6 +960,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mMetricsLog = logger;
         mDefaultRequest = createDefaultInternetRequestForTransport(-1, NetworkRequest.Type.REQUEST);
+        mNetworkRanker = new NetworkRanker();
         NetworkRequestInfo defaultNRI = new NetworkRequestInfo(null, mDefaultRequest, new Binder());
         mNetworkRequests.put(mDefaultRequest, defaultNRI);
         mNetworkRequestInfoLogs.log("REGISTER " + defaultNRI);
@@ -6660,24 +6663,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             changes.addRematchedNetwork(new NetworkReassignment.NetworkBgStatePair(nai,
                     nai.isBackgroundNetwork()));
         }
-        Collections.sort(nais);
 
         for (final NetworkRequestInfo nri : mNetworkRequests.values()) {
             if (nri.request.isListen()) continue;
-            // Find the top scoring network satisfying this request.
-            NetworkAgentInfo bestNetwork = null;
-            for (final NetworkAgentInfo nai : nais) {
-                if (!nai.satisfies(nri.request)) continue;
-                bestNetwork = nai;
-                // As the nais are sorted by score, this is the top-scoring network that can
-                // satisfy this request. The best network for this request has been found,
-                // go process the next NRI
-                break;
-            }
-            // If no NAI satisfies this request, bestNetwork is still null. That's fine : it
-            // means no network can satisfy the request. If nri.mSatisfier is not null, it just
-            // means the network that used to satisfy the request stopped satisfying it.
-            if (nri.mSatisfier != bestNetwork) {
+            final NetworkAgentInfo bestNetwork = mNetworkRanker.getBestNetwork(nri.request, nais);
+            if (bestNetwork != nri.mSatisfier) {
+                // bestNetwork may be null if no network can satisfy this request.
                 changes.addRequestReassignment(new NetworkReassignment.RequestReassignment(
                         nri, nri.mSatisfier, bestNetwork));
             }
