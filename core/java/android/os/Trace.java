@@ -21,6 +21,7 @@ import android.annotation.UnsupportedAppUsage;
 
 import com.android.internal.os.Zygote;
 
+import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
 /**
@@ -107,12 +108,15 @@ public final class Trace {
     private static final int MAX_SECTION_NAME_LEN = 127;
 
     // Must be volatile to avoid word tearing.
+    // This is only kept in case any apps get this by reflection but do not
+    // check the return value for null.
     @UnsupportedAppUsage
     private static volatile long sEnabledTags = TRACE_TAG_NOT_READY;
 
     private static int sZygoteDebugFlags = 0;
 
     @UnsupportedAppUsage
+    @CriticalNative
     private static native long nativeGetEnabledTags();
     private static native void nativeSetAppTracingAllowed(boolean allowed);
     private static native void nativeSetTracingEnabled(boolean allowed);
@@ -128,44 +132,7 @@ public final class Trace {
     @FastNative
     private static native void nativeAsyncTraceEnd(long tag, String name, int cookie);
 
-    static {
-        // We configure two separate change callbacks, one in Trace.cpp and one here.  The
-        // native callback reads the tags from the system property, and this callback
-        // reads the value that the native code retrieved.  It's essential that the native
-        // callback executes first.
-        //
-        // The system provides ordering through a priority level.  Callbacks made through
-        // SystemProperties.addChangeCallback currently have a negative priority, while
-        // our native code is using a priority of zero.
-        SystemProperties.addChangeCallback(() -> {
-            cacheEnabledTags();
-            if ((sZygoteDebugFlags & Zygote.DEBUG_JAVA_DEBUGGABLE) != 0) {
-                traceCounter(TRACE_TAG_ALWAYS, "java_debuggable", 1);
-            }
-        });
-    }
-
     private Trace() {
-    }
-
-    /**
-     * Caches a copy of the enabled-tag bits.  The "master" copy is held by the native code,
-     * and comes from the PROPERTY_TRACE_TAG_ENABLEFLAGS property.
-     * <p>
-     * If the native code hasn't yet read the property, we will cause it to do one-time
-     * initialization.  We don't want to do this during class init, because this class is
-     * preloaded, so all apps would be stuck with whatever the zygote saw.  (The zygote
-     * doesn't see the system-property update broadcasts.)
-     * <p>
-     * We want to defer initialization until the first use by an app, post-zygote.
-     * <p>
-     * We're okay if multiple threads call here simultaneously -- the native state is
-     * synchronized, and sEnabledTags is volatile (prevents word tearing).
-     */
-    private static long cacheEnabledTags() {
-        long tags = nativeGetEnabledTags();
-        sEnabledTags = tags;
-        return tags;
     }
 
     /**
@@ -178,10 +145,7 @@ public final class Trace {
      */
     @UnsupportedAppUsage
     public static boolean isTagEnabled(long traceTag) {
-        long tags = sEnabledTags;
-        if (tags == TRACE_TAG_NOT_READY) {
-            tags = cacheEnabledTags();
-        }
+        long tags = nativeGetEnabledTags();
         return (tags & traceTag) != 0;
     }
 
@@ -210,10 +174,6 @@ public final class Trace {
     @UnsupportedAppUsage
     public static void setAppTracingAllowed(boolean allowed) {
         nativeSetAppTracingAllowed(allowed);
-
-        // Setting whether app tracing is allowed may change the tags, so we update the cached
-        // tags here.
-        cacheEnabledTags();
     }
 
     /**
@@ -227,10 +187,6 @@ public final class Trace {
     public static void setTracingEnabled(boolean enabled, int debugFlags) {
         nativeSetTracingEnabled(enabled);
         sZygoteDebugFlags = debugFlags;
-
-        // Setting whether tracing is enabled may change the tags, so we update the cached tags
-        // here.
-        cacheEnabledTags();
     }
 
     /**
