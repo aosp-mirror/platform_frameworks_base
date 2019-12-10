@@ -224,7 +224,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mSecureCameraLaunched;
     @VisibleForTesting
     protected boolean mTelephonyCapable;
-    protected boolean mPulsing;
 
     // Device provisioning state
     private boolean mDeviceProvisioned;
@@ -2334,7 +2333,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         callback.onClockVisibilityChanged();
         callback.onKeyguardVisibilityChangedRaw(mKeyguardIsVisible);
         callback.onTelephonyCapable(mTelephonyCapable);
-        callback.onPulsing(mPulsing);
         for (Entry<Integer, SimData> data : mSimDatas.entrySet()) {
             final SimData state = data.getValue();
             callback.onSimStateChanged(state.subId, state.slotId, state.simState);
@@ -2677,16 +2675,5 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             pw.println("    enabledByUser=" + mFaceSettingEnabledForUser.get(userId));
             pw.println("    mSecureCameraLaunched=" + mSecureCameraLaunched);
         }
-    }
-
-    public boolean setPulsing(boolean pulsing) {
-        mPulsing = pulsing;
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onPulsing(mPulsing);
-            }
-        }
-        return mPulsing;
     }
 }
