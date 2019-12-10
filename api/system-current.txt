@@ -8238,6 +8238,7 @@ package android.telephony {
     field public static final int UE_SECURITY_CAPABILITIES_MISMATCH = 2185; // 0x889
     field public static final int UMTS_HANDOVER_TO_IWLAN = 2199; // 0x897
     field public static final int UMTS_REACTIVATION_REQ = 39; // 0x27
+    field public static final int UNACCEPTABLE_NETWORK_PARAMETER = 65538; // 0x10002
     field public static final int UNACCEPTABLE_NON_EPS_AUTHENTICATION = 2187; // 0x88b
     field public static final int UNKNOWN = 65536; // 0x10000
     field public static final int UNKNOWN_INFO_ELEMENT = 99; // 0x63
