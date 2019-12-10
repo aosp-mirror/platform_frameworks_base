@@ -229,8 +229,8 @@ public class UsageStatsDatabase {
             }
 
             try {
-                IntervalStats stats = new IntervalStats();
                 for (int i = start; i < fileCount - 1; i++) {
+                    final IntervalStats stats = new IntervalStats();
                     readLocked(files.valueAt(i), stats);
                     if (!checkinAction.checkin(stats)) {
                         return false;
@@ -848,10 +848,10 @@ public class UsageStatsDatabase {
                 }
             }
 
-            final IntervalStats stats = new IntervalStats();
             final ArrayList<T> results = new ArrayList<>();
             for (int i = startIndex; i <= endIndex; i++) {
                 final AtomicFile f = intervalStats.valueAt(i);
+                final IntervalStats stats = new IntervalStats();
 
                 if (DEBUG) {
                     Slog.d(TAG, "Reading stat file " + f.getBaseFile().getAbsolutePath());
@@ -1061,6 +1061,11 @@ public class UsageStatsDatabase {
         }
     }
 
+    /**
+     * Note: the data read from the given file will add to the IntervalStats object passed into this
+     * method. It is up to the caller to ensure that this is the desired behavior - if not, the
+     * caller should ensure that the data in the reused object is being cleared.
+     */
     private void readLocked(AtomicFile file, IntervalStats statsOut)
             throws IOException, RuntimeException {
         if (mCurrentVersion <= 3) {
@@ -1072,6 +1077,10 @@ public class UsageStatsDatabase {
 
     /**
      * Returns {@code true} if any stats were omitted while reading, {@code false} otherwise.
+     * <p/>
+     * Note: the data read from the given file will add to the IntervalStats object passed into this
+     * method. It is up to the caller to ensure that this is the desired behavior - if not, the
+     * caller should ensure that the data in the reused object is being cleared.
      */
     private static boolean readLocked(AtomicFile file, IntervalStats statsOut, int version,
             PackagesTokenData packagesTokenData) throws IOException, RuntimeException {
@@ -1098,6 +1107,10 @@ public class UsageStatsDatabase {
 
     /**
      * Returns {@code true} if any stats were omitted while reading, {@code false} otherwise.
+     * <p/>
+     * Note: the data read from the given file will add to the IntervalStats object passed into this
+     * method. It is up to the caller to ensure that this is the desired behavior - if not, the
+     * caller should ensure that the data in the reused object is being cleared.
      */
     private static boolean readLocked(InputStream in, IntervalStats statsOut, int version,
             PackagesTokenData packagesTokenData) throws RuntimeException {
