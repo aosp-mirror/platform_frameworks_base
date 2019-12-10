@@ -27,7 +27,6 @@ oneway interface IOverviewProxy {
 
     void onInitialize(in Bundle params) = 12;
 
-
     /**
      * @deprecated
      */

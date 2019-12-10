@@ -85,6 +85,8 @@ public class QuickStepContract {
     // The notification panel is expanded and interactive (either locked or unlocked), and the
     // quick settings is not expanded
     public static final int SYSUI_STATE_QUICK_SETTINGS_EXPANDED = 1 << 11;
+    // Winscope tracing is enabled
+    public static final int SYSUI_STATE_TRACING_ENABLED = 1 << 12;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -98,7 +100,8 @@ public class QuickStepContract {
             SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED,
             SYSUI_STATE_OVERVIEW_DISABLED,
             SYSUI_STATE_HOME_DISABLED,
-            SYSUI_STATE_SEARCH_DISABLED
+            SYSUI_STATE_SEARCH_DISABLED,
+            SYSUI_STATE_TRACING_ENABLED
     })
     public @interface SystemUiStateFlags {}
 
@@ -117,6 +120,7 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_BOUNCER_SHOWING) != 0 ? "bouncer_visible" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0 ? "a11y_click" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0 ? "a11y_long_click" : "");
+        str.add((flags & SYSUI_STATE_TRACING_ENABLED) != 0 ? "tracing" : "");
         return str.toString();
     }
 
