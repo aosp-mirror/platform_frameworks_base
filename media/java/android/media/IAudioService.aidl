@@ -18,6 +18,7 @@ package android.media;
 
 import android.bluetooth.BluetoothDevice;
 import android.media.AudioAttributes;
+import android.media.AudioDeviceAddress;
 import android.media.AudioFocusInfo;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
@@ -264,6 +265,12 @@ interface IAudioService {
     boolean hasHapticChannels(in Uri uri);
 
     boolean isCallScreeningModeSupported();
+
+    int setPreferredDeviceForStrategy(in int strategy, in AudioDeviceAddress device);
+
+    int removePreferredDeviceForStrategy(in int strategy);
+
+    AudioDeviceAddress getPreferredDeviceForStrategy(in int strategy);
 
     // WARNING: read warning at top of file, new methods that need to be used by native
     // code via IAudioManager.h need to be added to the top section.

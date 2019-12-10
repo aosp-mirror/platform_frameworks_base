@@ -78,6 +78,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -1533,6 +1534,76 @@ public class AudioManager {
     @AudioAttributes.CapturePolicy
     public int getAllowedCapturePolicy() {
         return mCapturePolicy;
+    }
+
+    //====================================================================
+    // Audio Product Strategy routing
+
+    /**
+     * @hide
+     * Set the preferred device for a given strategy, i.e. the audio routing to be used by
+     * this audio strategy. Note that the device may not be available at the time the preferred
+     * device is set, but it will be used once made available.
+     * <p>Use {@link #removePreferredDeviceForStrategy(AudioProductStrategy)} to cancel setting
+     * this preference for this strategy.</p>
+     * @param strategy the audio strategy whose routing will be affected
+     * @param device the audio device to route to when available
+     * @return true if the operation was successful, false otherwise
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public boolean setPreferredDeviceForStrategy(@NonNull AudioProductStrategy strategy,
+            @NonNull AudioDeviceAddress device) {
+        Objects.requireNonNull(strategy);
+        Objects.requireNonNull(device);
+        try {
+            final int status =
+                    getService().setPreferredDeviceForStrategy(strategy.getId(), device);
+            return status == AudioSystem.SUCCESS;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Removes the preferred audio device previously set with
+     * {@link #setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceAddress)}.
+     * @param strategy the audio strategy whose routing will be affected
+     * @return true if the operation was successful, false otherwise (invalid strategy, or no
+     *     device set for example)
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public boolean removePreferredDeviceForStrategy(@NonNull AudioProductStrategy strategy) {
+        Objects.requireNonNull(strategy);
+        try {
+            final int status =
+                    getService().removePreferredDeviceForStrategy(strategy.getId());
+            return status == AudioSystem.SUCCESS;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Return the preferred device for an audio strategy, previously set with
+     * {@link #setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceAddress)}
+     * @param strategy the strategy to query
+     * @return the preferred device for that strategy, or null if none was ever set or if the
+     *    strategy is invalid
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public @Nullable AudioDeviceAddress getPreferredDeviceForStrategy(
+            @NonNull AudioProductStrategy strategy) {
+        Objects.requireNonNull(strategy);
+        try {
+            return getService().getPreferredDeviceForStrategy(strategy.getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     //====================================================================
@@ -4962,6 +5033,14 @@ public class AudioManager {
      */
     public static final int GET_DEVICES_OUTPUTS   = 0x0002;
 
+    /** @hide */
+    @IntDef(flag = true, prefix = "GET_DEVICES", value = {
+            GET_DEVICES_INPUTS,
+            GET_DEVICES_OUTPUTS }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioDeviceRole {}
+
     /**
      * Specifies to the {@link AudioManager#getDevices(int)} method to include both
      * source and sink devices.
@@ -4994,7 +5073,7 @@ public class AudioManager {
      * @see #GET_DEVICES_ALL
      * @return A (possibly zero-length) array of AudioDeviceInfo objects.
      */
-    public AudioDeviceInfo[] getDevices(int flags) {
+    public AudioDeviceInfo[] getDevices(@AudioDeviceRole int flags) {
         return getDevicesStatic(flags);
     }
 
