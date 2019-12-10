@@ -57,6 +57,7 @@ import android.net.NetworkPolicyManager;
 import android.net.NetworkStats;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
+import android.net.TetherConfigParcel;
 import android.net.TetherStatsParcel;
 import android.net.UidRange;
 import android.net.UidRangeParcel;
@@ -1016,7 +1017,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         // an odd number of addrs will fail
         try {
-            mNetdService.tetherStartWithConfiguration(usingLegacyDnsProxy, dhcpRange);
+            final TetherConfigParcel config = new TetherConfigParcel();
+            config.usingLegacyDnsProxy = usingLegacyDnsProxy;
+            config.dhcpRanges = dhcpRange;
+            mNetdService.tetherStartWithConfiguration(config);
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
