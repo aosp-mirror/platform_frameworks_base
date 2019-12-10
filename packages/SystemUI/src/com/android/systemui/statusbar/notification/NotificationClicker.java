@@ -26,6 +26,8 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.StatusBar;
 
+import java.util.Optional;
+
 /**
  * Click handler for generic clicks on notifications. Clicks on specific areas (expansion caret,
  * app ops icon, etc) are handled elsewhere.
@@ -33,11 +35,11 @@ import com.android.systemui.statusbar.phone.StatusBar;
 public final class NotificationClicker implements View.OnClickListener {
     private static final String TAG = "NotificationClicker";
 
-    private final StatusBar mStatusBar;
+    private final Optional<StatusBar> mStatusBar;
     private final BubbleController mBubbleController;
     private final NotificationActivityStarter mNotificationActivityStarter;
 
-    public NotificationClicker(StatusBar statusBar,
+    public NotificationClicker(Optional<StatusBar> statusBar,
             BubbleController bubbleController,
             NotificationActivityStarter notificationActivityStarter) {
         mStatusBar = statusBar;
@@ -52,7 +54,8 @@ public final class NotificationClicker implements View.OnClickListener {
             return;
         }
 
-        mStatusBar.wakeUpIfDozing(SystemClock.uptimeMillis(), v, "NOTIFICATION_CLICK");
+        mStatusBar.ifPresent(statusBar -> statusBar.wakeUpIfDozing(
+                SystemClock.uptimeMillis(), v, "NOTIFICATION_CLICK"));
 
         final ExpandableNotificationRow row = (ExpandableNotificationRow) v;
         final StatusBarNotification sbn = row.getEntry().getSbn();
