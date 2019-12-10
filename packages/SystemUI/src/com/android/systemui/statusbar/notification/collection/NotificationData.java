@@ -201,6 +201,9 @@ public class NotificationData {
             removed = mEntries.remove(key);
         }
         if (removed == null) return null;
+        // NEM may pass us a null ranking map if removing a lifetime-extended notification,
+        // so use the most recent ranking
+        if (ranking == null) ranking = mRankingMap;
         mGroupManager.onEntryRemoved(removed);
         updateRankingAndSort(ranking);
         return removed;
