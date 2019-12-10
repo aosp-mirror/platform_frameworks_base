@@ -2875,6 +2875,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final PlatformCompat platformCompat = (PlatformCompat)
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
         String toggleValue = getNextArgRequired();
+        if (toggleValue.equals("reset-all")) {
+            final String packageName = getNextArgRequired();
+            pw.println("Reset all changes for " + packageName + " to default value.");
+            platformCompat.clearOverrides(packageName);
+            return 0;
+        }
         long changeId;
         String changeIdString = getNextArgRequired();
         try {
@@ -3233,9 +3239,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      without restarting any processes.");
             pw.println("  write");
             pw.println("      Write all pending state to storage.");
-            pw.println("  compat enable|disable|reset <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
-            pw.println("      Toggles a change either by id or by name for <PACKAGE_NAME>.");
-            pw.println("      It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
+            pw.println("  compat [COMMAND] [...]: sub-commands for toggling app-compat changes.");
+            pw.println("         enable|disable|reset <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
+            pw.println("            Toggles a change either by id or by name for <PACKAGE_NAME>.");
+            pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
+            pw.println("         reset-all <PACKAGE_NAME>");
+            pw.println("            Removes all existing overrides for all changes for ");
+            pw.println("            <PACKAGE_NAME> (back to default behaviour).");
+            pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }
