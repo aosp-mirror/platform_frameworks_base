@@ -47,7 +47,8 @@ public class SysuiLog implements Dumpable {
     private final Object mDataLock = new Object();
     private final String mId;
     private final int mMaxLogs;
-    private boolean mEnabled;
+    protected boolean mEnabled;
+    protected boolean mLogToLogcatEnabled;
 
     @VisibleForTesting protected ArrayDeque<Event> mTimeline;
 
@@ -62,14 +63,18 @@ public class SysuiLog implements Dumpable {
      */
     public SysuiLog(DumpController dumpController, String id, int maxDebugLogs, int maxLogs) {
         this(dumpController, id, sDebuggable ? maxDebugLogs : maxLogs,
-                SystemProperties.getBoolean(SYSPROP_ENABLED_PREFIX + id, DEFAULT_ENABLED));
+                SystemProperties.getBoolean(SYSPROP_ENABLED_PREFIX + id, DEFAULT_ENABLED),
+                SystemProperties.getBoolean(SYSPROP_LOGCAT_ENABLED_PREFIX + id,
+                        DEFAULT_LOGCAT_ENABLED));
     }
 
     @VisibleForTesting
-    protected SysuiLog(DumpController dumpController, String id, int maxLogs, boolean enabled) {
+    protected SysuiLog(DumpController dumpController, String id, int maxLogs, boolean enabled,
+            boolean logcatEnabled) {
         mId = id;
         mMaxLogs = maxLogs;
         mEnabled = enabled;
+        mLogToLogcatEnabled = logcatEnabled;
         mTimeline = mEnabled ? new ArrayDeque<>(mMaxLogs) : null;
         dumpController.registerDumpable(mId, this);
     }
@@ -96,7 +101,7 @@ public class SysuiLog implements Dumpable {
             mTimeline.add(event);
         }
 
-        if (LOG_TO_LOGCAT_ENABLED) {
+        if (mLogToLogcatEnabled) {
             final String strEvent = eventToString(event);
             switch (event.getLogLevel()) {
                 case Event.VERBOSE:
@@ -162,9 +167,10 @@ public class SysuiLog implements Dumpable {
     }
 
     private static boolean sDebuggable = Build.IS_DEBUGGABLE;
-    private static final String SYSPROP_ENABLED_PREFIX = "sysui.log.enabled.";
-    private static final boolean LOG_TO_LOGCAT_ENABLED = sDebuggable;
+    private static final String SYSPROP_ENABLED_PREFIX = "persist.sysui.log.enabled.";
+    private static final String SYSPROP_LOGCAT_ENABLED_PREFIX = "persist.sysui.log.enabled.logcat.";
     private static final boolean DEFAULT_ENABLED = sDebuggable;
+    private static final boolean DEFAULT_LOGCAT_ENABLED = false;
     private static final int DEFAULT_MAX_DEBUG_LOGS = 100;
     private static final int DEFAULT_MAX_LOGS = 50;
 }

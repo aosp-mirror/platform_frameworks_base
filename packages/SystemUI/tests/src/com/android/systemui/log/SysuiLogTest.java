@@ -48,7 +48,7 @@ public class SysuiLogTest extends SysuiTestCase {
 
     @Test
     public void testLogDisabled_noLogsWritten() {
-        mSysuiLog = new SysuiLog(mDumpController, TEST_ID, MAX_LOGS, false);
+        mSysuiLog = new SysuiLog(mDumpController, TEST_ID, MAX_LOGS, false, false);
         assertEquals(mSysuiLog.mTimeline, null);
 
         mSysuiLog.log(new Event("msg"));
@@ -57,7 +57,7 @@ public class SysuiLogTest extends SysuiTestCase {
 
     @Test
     public void testLogEnabled_logWritten() {
-        mSysuiLog = new SysuiLog(mDumpController, TEST_ID, MAX_LOGS, true);
+        mSysuiLog = new SysuiLog(mDumpController, TEST_ID, MAX_LOGS, true, false);
         assertEquals(mSysuiLog.mTimeline.size(), 0);
 
         mSysuiLog.log(new Event("msg"));
@@ -66,7 +66,7 @@ public class SysuiLogTest extends SysuiTestCase {
 
     @Test
     public void testMaxLogs() {
-        mSysuiLog = new SysuiLog(mDumpController, TEST_ID, MAX_LOGS, true);
+        mSysuiLog = new SysuiLog(mDumpController, TEST_ID, MAX_LOGS, true, false);
         assertEquals(mSysuiLog.mTimeline.size(), 0);
 
         final String msg = "msg";
