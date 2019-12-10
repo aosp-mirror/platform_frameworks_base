@@ -32,6 +32,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -657,8 +658,9 @@ public class ResolverActivity extends Activity implements
     private void setAlwaysButtonEnabled(boolean hasValidSelection, int checkedPos,
             boolean filtered) {
         boolean enabled = false;
+        ResolveInfo ri = null;
         if (hasValidSelection) {
-            ResolveInfo ri = mAdapter.resolveInfoForPosition(checkedPos, filtered);
+            ri = mAdapter.resolveInfoForPosition(checkedPos, filtered);
             if (ri == null) {
                 Log.e(TAG, "Invalid position supplied to setAlwaysButtonEnabled");
                 return;
@@ -675,6 +677,24 @@ public class ResolverActivity extends Activity implements
                 mAlwaysButton.setText(getResources()
                         .getString(R.string.activity_resolver_use_always));
             }
+        }
+
+        ActivityInfo activityInfo = ri.activityInfo;
+
+        boolean hasRecordPermission =
+                PermissionChecker.checkPermissionForPreflight(
+                        getApplicationContext(),
+                        android.Manifest.permission.RECORD_AUDIO, -1,
+                        activityInfo.applicationInfo.uid,
+                        activityInfo.packageName)
+                        == android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+        if (!hasRecordPermission) {
+            // OK, we know the record permission, is this a capture device
+            boolean hasAudioCapture =
+                    getIntent().getBooleanExtra(
+                            ResolverActivity.EXTRA_IS_AUDIO_CAPTURE_DEVICE, false);
+            enabled = !hasAudioCapture;
         }
         mAlwaysButton.setEnabled(enabled);
     }
@@ -1048,7 +1068,6 @@ public class ResolverActivity extends Activity implements
         Intent startIntent = getIntent();
         boolean isAudioCaptureDevice =
                 startIntent.getBooleanExtra(EXTRA_IS_AUDIO_CAPTURE_DEVICE, false);
-
         return new ResolverListAdapter(context, payloadIntents, initialIntents, rList,
                 filterLastUsed, createListController(), useLayoutForBrowsables, this,
                 isAudioCaptureDevice);
