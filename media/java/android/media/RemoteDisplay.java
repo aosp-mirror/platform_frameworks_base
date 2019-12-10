@@ -16,11 +16,11 @@
 
 package android.media;
 
-import dalvik.system.CloseGuard;
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.view.Surface;
+
+import dalvik.system.CloseGuard;
 
 /**
  * Listens for Wifi remote display connections managed by the media server.
