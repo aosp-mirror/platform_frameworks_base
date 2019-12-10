@@ -19,6 +19,8 @@
 
 #include <jni.h>
 
+#include <android-base/unique_fd.h>
+
 namespace android {
 namespace uhid {
 
@@ -39,10 +41,10 @@ private:
 
 class Device {
 public:
-    static Device* open(int32_t id, const char* name, int32_t vid, int32_t pid,
-            std::vector<uint8_t> descriptor, std::unique_ptr<DeviceCallback> callback);
+    static std::unique_ptr<Device> open(int32_t id, const char* name, int32_t vid, int32_t pid,
+                                        const std::vector<uint8_t>& descriptor,
+                                        std::unique_ptr<DeviceCallback> callback);
 
-    Device(int32_t id, int fd, std::unique_ptr<DeviceCallback> callback);
     ~Device();
 
     void sendReport(const std::vector<uint8_t>& report) const;
@@ -52,8 +54,9 @@ public:
     int handleEvents(int events);
 
 private:
+    Device(int32_t id, android::base::unique_fd fd, std::unique_ptr<DeviceCallback> callback);
     int32_t mId;
-    int mFd;
+    android::base::unique_fd mFd;
     std::unique_ptr<DeviceCallback> mDeviceCallback;
 };
 

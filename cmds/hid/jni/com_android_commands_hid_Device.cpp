@@ -96,17 +96,17 @@ JNIEnv* DeviceCallback::getJNIEnv() {
     return env;
 }
 
-Device* Device::open(int32_t id, const char* name, int32_t vid, int32_t pid,
-        std::vector<uint8_t> descriptor, std::unique_ptr<DeviceCallback> callback) {
-
+std::unique_ptr<Device> Device::open(int32_t id, const char* name, int32_t vid, int32_t pid,
+                                     const std::vector<uint8_t>& descriptor,
+                                     std::unique_ptr<DeviceCallback> callback) {
     size_t size = descriptor.size();
     if (size > HID_MAX_DESCRIPTOR_SIZE) {
         LOGE("Received invalid hid report with descriptor size %zu, skipping", size);
         return nullptr;
     }
 
-    int fd = ::open(UHID_PATH, O_RDWR | O_CLOEXEC);
-    if (fd < 0) {
+    android::base::unique_fd fd(::open(UHID_PATH, O_RDWR | O_CLOEXEC));
+    if (!fd.ok()) {
         LOGE("Failed to open uhid: %s", strerror(errno));
         return nullptr;
     }
@@ -114,8 +114,7 @@ Device* Device::open(int32_t id, const char* name, int32_t vid, int32_t pid,
     struct uhid_event ev = {};
     ev.type = UHID_CREATE2;
     strlcpy(reinterpret_cast<char*>(ev.u.create2.name), name, sizeof(ev.u.create2.name));
-    memcpy(&ev.u.create2.rd_data, descriptor.data(),
-            size * sizeof(ev.u.create2.rd_data[0]));
+    memcpy(&ev.u.create2.rd_data, descriptor.data(), size * sizeof(ev.u.create2.rd_data[0]));
     ev.u.create2.rd_size = size;
     ev.u.create2.bus = BUS_BLUETOOTH;
     ev.u.create2.vendor = vid;
@@ -126,7 +125,6 @@ Device* Device::open(int32_t id, const char* name, int32_t vid, int32_t pid,
     errno = 0;
     ssize_t ret = TEMP_FAILURE_RETRY(::write(fd, &ev, sizeof(ev)));
     if (ret < 0 || ret != sizeof(ev)) {
-        ::close(fd);
         LOGE("Failed to create uhid node: %s", strerror(errno));
         return nullptr;
     }
@@ -134,21 +132,21 @@ Device* Device::open(int32_t id, const char* name, int32_t vid, int32_t pid,
     // Wait for the device to actually be created.
     ret = TEMP_FAILURE_RETRY(::read(fd, &ev, sizeof(ev)));
     if (ret < 0 || ev.type != UHID_START) {
-        ::close(fd);
         LOGE("uhid node failed to start: %s", strerror(errno));
         return nullptr;
     }
-    return new Device(id, fd, std::move(callback));
+    // using 'new' to access non-public constructor
+    return std::unique_ptr<Device>(new Device(id, std::move(fd), std::move(callback)));
 }
 
-Device::Device(int32_t id, int fd, std::unique_ptr<DeviceCallback> callback) :
-            mId(id), mFd(fd), mDeviceCallback(std::move(callback)) {
+Device::Device(int32_t id, android::base::unique_fd fd, std::unique_ptr<DeviceCallback> callback)
+      : mId(id), mFd(std::move(fd)), mDeviceCallback(std::move(callback)) {
     ALooper* aLooper = ALooper_forThread();
     if (aLooper == NULL) {
         LOGE("Could not get ALooper, ALooper_forThread returned NULL");
         aLooper = ALooper_prepare(ALOOPER_PREPARE_ALLOW_NON_CALLBACKS);
     }
-    ALooper_addFd(aLooper, fd, 0, ALOOPER_EVENT_INPUT, handleLooperEvents,
+    ALooper_addFd(aLooper, mFd, 0, ALOOPER_EVENT_INPUT, handleLooperEvents,
                   reinterpret_cast<void*>(this));
 }
 
@@ -162,8 +160,6 @@ Device::~Device() {
     struct uhid_event ev = {};
     ev.type = UHID_DESTROY;
     TEMP_FAILURE_RETRY(::write(mFd, &ev, sizeof(ev)));
-    ::close(mFd);
-    mFd = -1;
 }
 
 void Device::sendReport(const std::vector<uint8_t>& report) const {
@@ -250,9 +246,10 @@ static jlong openDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, jint i
 
     std::unique_ptr<uhid::DeviceCallback> cb(new uhid::DeviceCallback(env, callback));
 
-    uhid::Device* d = uhid::Device::open(
-            id, reinterpret_cast<const char*>(name.c_str()), vid, pid, desc, std::move(cb));
-    return reinterpret_cast<jlong>(d);
+    std::unique_ptr<uhid::Device> d =
+            uhid::Device::open(id, reinterpret_cast<const char*>(name.c_str()), vid, pid, desc,
+                               std::move(cb));
+    return reinterpret_cast<jlong>(d.release());
 }
 
 static void sendReport(JNIEnv* env, jclass /* clazz */, jlong ptr, jbyteArray rawReport) {
