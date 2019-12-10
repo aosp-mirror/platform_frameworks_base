@@ -8524,7 +8524,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return null;
         }
-
         synchronized (getLockObject()) {
             return mOwners.getProfileOwnerComponent(userHandle);
         }
@@ -8817,6 +8816,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!(isCallerWithSystemUid() || callingUid == Process.ROOT_UID)) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
         }
+    }
+
+    private void enforceAcrossUsersPermissions() {
+        if (isCallerWithSystemUid() || mInjector.binderGetCallingUid() == Process.ROOT_UID) {
+            return;
+        }
+        if (mContext.checkCallingPermission(permission.INTERACT_ACROSS_PROFILES)
+                == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        if (mContext.checkCallingPermission(permission.INTERACT_ACROSS_USERS)
+                == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        if (mContext.checkCallingPermission(permission.INTERACT_ACROSS_USERS_FULL)
+                == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        throw new SecurityException("Calling user does not have INTERACT_ACROSS_PROFILES or"
+                + "INTERACT_ACROSS_USERS or INTERACT_ACROSS_USERS_FULL permissions");
     }
 
     private void enforceFullCrossUsersPermission(int userHandle) {
@@ -14492,6 +14511,51 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final ActiveAdmin admin = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             return admin.mCrossProfilePackages;
+        }
+    }
+
+    @Override
+    public List<String> getAllCrossProfilePackages() {
+        if (!mHasFeature) {
+            return Collections.emptyList();
+        }
+        enforceAcrossUsersPermissions();
+
+        synchronized (getLockObject()) {
+            final List<ActiveAdmin> admins = getProfileOwnerAdminsForCurrentProfileGroup();
+            final List<String> packages = getCrossProfilePackagesForAdmins(admins);
+
+            packages.addAll(getDefaultCrossProfilePackages());
+
+            return packages;
+        }
+    }
+
+    private List<String> getCrossProfilePackagesForAdmins(List<ActiveAdmin> admins) {
+        final List<String> packages = new ArrayList<>();
+        for (int i = 0; i < admins.size(); i++) {
+            packages.addAll(admins.get(i).mCrossProfilePackages);
+        }
+        return packages;
+    }
+
+    private List<String> getDefaultCrossProfilePackages() {
+        return Arrays.asList(mContext.getResources()
+                .getStringArray(R.array.cross_profile_apps));
+    }
+
+    private List<ActiveAdmin> getProfileOwnerAdminsForCurrentProfileGroup() {
+        synchronized (getLockObject()) {
+            final List<ActiveAdmin> admins = new ArrayList<>();
+            int[] users = mUserManager.getProfileIdsWithDisabled(UserHandle.getCallingUserId());
+            for (int i = 0; i < users.length; i++) {
+                final ComponentName componentName = getProfileOwner(users[i]);
+                if (componentName != null) {
+                    admins.add(getActiveAdminForCallerLocked(
+                            componentName, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER));
+                }
+            }
+            return admins;
         }
     }
 

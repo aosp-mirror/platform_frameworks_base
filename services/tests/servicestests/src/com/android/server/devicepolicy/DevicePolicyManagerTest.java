@@ -104,6 +104,7 @@ import com.android.server.devicepolicy.DevicePolicyManagerService.RestrictionsLi
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.mockito.Mockito;
+import org.mockito.internal.util.collections.Sets;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
@@ -5540,6 +5541,57 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         initializeDpms();
 
         assertEquals(packages, dpm.getCrossProfilePackages(admin1));
+    }
+
+    public void testGetAllCrossProfilePackages_notSet_returnsEmpty() throws Exception {
+        addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
+
+        setCrossProfileAppsList();
+
+        assertTrue(dpm.getAllCrossProfilePackages().isEmpty());
+    }
+
+    public void testGetAllCrossProfilePackages_notSet_dpmsReinitialized_returnsEmpty()
+            throws Exception {
+        addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
+
+        setCrossProfileAppsList();
+        initializeDpms();
+
+        assertTrue(dpm.getAllCrossProfilePackages().isEmpty());
+    }
+
+    public void testGetAllCrossProfilePackages_whenSet_returnsCombinedSet() throws Exception {
+        addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
+        final Set<String> packages = Sets.newSet("TEST_PACKAGE", "TEST_COMMON_PACKAGE");
+
+        dpm.setCrossProfilePackages(admin1, packages);
+        setCrossProfileAppsList("TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE");
+
+        assertEquals(Sets.newSet(
+                        "TEST_PACKAGE", "TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE"),
+                dpm.getAllCrossProfilePackages());
+
+    }
+
+    public void testGetAllCrossProfilePackages_whenSet_dpmsReinitialized_returnsCombinedSet()
+            throws Exception {
+        addManagedProfile(admin1, mServiceContext.binder.callingUid, admin1);
+        final Set<String> packages = Sets.newSet("TEST_PACKAGE", "TEST_COMMON_PACKAGE");
+
+        dpm.setCrossProfilePackages(admin1, packages);
+        setCrossProfileAppsList("TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE");
+        initializeDpms();
+
+        assertEquals(Sets.newSet(
+                "TEST_PACKAGE", "TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE"),
+                dpm.getAllCrossProfilePackages());
+    }
+
+    private void setCrossProfileAppsList(String... packages) {
+        when(mContext.getResources()
+                .getStringArray(eq(R.array.cross_profile_apps)))
+                .thenReturn(packages);
     }
 
     // admin1 is the outgoing DPC, adminAnotherPakcage is the incoming one.
