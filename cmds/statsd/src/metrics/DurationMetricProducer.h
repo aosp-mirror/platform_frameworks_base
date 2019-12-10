@@ -59,8 +59,8 @@ protected:
 
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const MetricDimensionKey& eventKey,
-            const ConditionKey& conditionKeys, bool condition,
-            const LogEvent& event) override;
+            const ConditionKey& conditionKeys, bool condition, const LogEvent& event,
+            const std::map<int, HashableDimensionKey>& statePrimaryKeys) override;
 
 private:
     void handleStartEvent(const MetricDimensionKey& eventKey, const ConditionKey& conditionKeys,

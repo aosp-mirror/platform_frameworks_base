@@ -152,6 +152,10 @@ bool LessThan(const vector<FieldValue>& s1, const vector<FieldValue>& s2) {
     return false;
 }
 
+bool HashableDimensionKey::operator!=(const HashableDimensionKey& that) const {
+    return !((*this) == that);
+}
+
 bool HashableDimensionKey::operator==(const HashableDimensionKey& that) const {
     if (mValues.size() != that.getValues().size()) {
         return false;

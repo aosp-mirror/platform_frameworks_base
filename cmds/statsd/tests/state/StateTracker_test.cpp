@@ -146,6 +146,7 @@ TEST(StateListenerTest, TestStateListenerWeakPointer) {
 TEST(StateManagerTest, TestStateManagerGetInstance) {
     sp<TestStateListener> listener1 = new TestStateListener();
     StateManager& mgr = StateManager::getInstance();
+    mgr.clear();
 
     mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener1);
     EXPECT_EQ(1, mgr.getStateTrackersCount());
