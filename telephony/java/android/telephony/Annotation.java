@@ -463,9 +463,7 @@ public class Annotation {
             DataFailCause.UNKNOWN,
             DataFailCause.RADIO_NOT_AVAILABLE,
             DataFailCause.UNACCEPTABLE_NETWORK_PARAMETER,
-            DataFailCause.CONNECTION_TO_DATACONNECTIONAC_BROKEN,
             DataFailCause.LOST_CONNECTION,
-            DataFailCause.RESET_BY_FRAMEWORK
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DataFailureCause {
