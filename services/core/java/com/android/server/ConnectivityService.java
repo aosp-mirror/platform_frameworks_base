@@ -6709,10 +6709,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // the linger status.
         for (final NetworkReassignment.RequestReassignment event :
                 changes.getRequestReassignments()) {
-            // The rematch is seeded with an entry for each request, and requests that don't
-            // change satisfiers have the same network as old and new.
-            // TODO : remove these entries when they are not needed any more.
-            if (event.mOldNetwork == event.mNewNetwork) continue;
             updateSatisfiersForRematchRequest(event.mRequest, event.mOldNetwork,
                     event.mNewNetwork, now);
         }
@@ -6741,8 +6737,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // before LegacyTypeTracker sends legacy broadcasts
         for (final NetworkReassignment.RequestReassignment event :
                 changes.getRequestReassignments()) {
-            if (event.mOldNetwork == event.mNewNetwork) continue;
-
             // Tell NetworkProviders about the new score, so they can stop
             // trying to connect if they know they cannot match it.
             // TODO - this could get expensive if there are a lot of outstanding requests for this
