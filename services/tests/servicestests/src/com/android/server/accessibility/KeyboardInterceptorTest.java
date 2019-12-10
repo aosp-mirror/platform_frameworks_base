@@ -33,6 +33,7 @@ import android.view.KeyEvent;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.policy.WindowManagerPolicy;
 
 import org.hamcrest.Description;

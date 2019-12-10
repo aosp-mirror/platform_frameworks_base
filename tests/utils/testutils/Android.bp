@@ -22,6 +22,7 @@ java_library {
     static_libs: [
         "junit",
         "hamcrest-library",
+        "androidx.test.runner",
     ],
 
     libs: [

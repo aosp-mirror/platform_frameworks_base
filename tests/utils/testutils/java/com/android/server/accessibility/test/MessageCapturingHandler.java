@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.accessibility;
+package com.android.server.accessibility.test;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -31,7 +31,7 @@ import java.util.List;
  * at their target.
  */
 public class MessageCapturingHandler extends Handler {
-    List<Pair<Message, Long>> timedMessages = new ArrayList<>();
+    public List<Pair<Message, Long>> timedMessages = new ArrayList<>();
 
     Handler.Callback mCallback;
 

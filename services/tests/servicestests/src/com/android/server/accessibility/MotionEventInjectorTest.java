@@ -54,6 +54,7 @@ import android.view.accessibility.AccessibilityEvent;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.accessibility.utils.MotionEventMatcher;
 
 import org.hamcrest.Description;

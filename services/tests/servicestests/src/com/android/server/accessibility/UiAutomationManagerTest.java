@@ -37,6 +37,7 @@ import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
