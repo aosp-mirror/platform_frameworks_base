@@ -15,6 +15,7 @@
  */
 package com.android.internal.telephony;
 
+import android.content.Intent;
 import android.telephony.TelephonyManager;
 
 import dalvik.annotation.compat.UnsupportedAppUsage;
@@ -25,37 +26,38 @@ import dalvik.annotation.compat.UnsupportedAppUsage;
 public class IccCardConstants {
 
     /* The extra data for broadcasting intent INTENT_ICC_STATE_CHANGE */
-    public static final String INTENT_KEY_ICC_STATE = "ss";
+    public static final String INTENT_KEY_ICC_STATE = Intent.EXTRA_SIM_STATE;
     /* UNKNOWN means the ICC state is unknown */
-    public static final String INTENT_VALUE_ICC_UNKNOWN = "UNKNOWN";
+    public static final String INTENT_VALUE_ICC_UNKNOWN = Intent.SIM_STATE_UNKNOWN;
     /* NOT_READY means the ICC interface is not ready (eg, radio is off or powering on) */
-    public static final String INTENT_VALUE_ICC_NOT_READY = "NOT_READY";
+    public static final String INTENT_VALUE_ICC_NOT_READY = Intent.SIM_STATE_NOT_READY;
     /* ABSENT means ICC is missing */
-    public static final String INTENT_VALUE_ICC_ABSENT = "ABSENT";
+    public static final String INTENT_VALUE_ICC_ABSENT = Intent.SIM_STATE_ABSENT;
     /* PRESENT means ICC is present */
-    public static final String INTENT_VALUE_ICC_PRESENT = "PRESENT";
+    public static final String INTENT_VALUE_ICC_PRESENT = Intent.SIM_STATE_PRESENT;
     /* CARD_IO_ERROR means for three consecutive times there was SIM IO error */
-    static public final String INTENT_VALUE_ICC_CARD_IO_ERROR = "CARD_IO_ERROR";
+    static public final String INTENT_VALUE_ICC_CARD_IO_ERROR = Intent.SIM_STATE_CARD_IO_ERROR;
     /* CARD_RESTRICTED means card is present but not usable due to carrier restrictions */
-    static public final String INTENT_VALUE_ICC_CARD_RESTRICTED = "CARD_RESTRICTED";
+    static public final String INTENT_VALUE_ICC_CARD_RESTRICTED = Intent.SIM_STATE_CARD_RESTRICTED;
     /* LOCKED means ICC is locked by pin or by network */
-    public static final String INTENT_VALUE_ICC_LOCKED = "LOCKED";
+    public static final String INTENT_VALUE_ICC_LOCKED = Intent.SIM_STATE_LOCKED;
     /* READY means ICC is ready to access */
-    public static final String INTENT_VALUE_ICC_READY = "READY";
+    public static final String INTENT_VALUE_ICC_READY = Intent.SIM_STATE_READY;
     /* IMSI means ICC IMSI is ready in property */
-    public static final String INTENT_VALUE_ICC_IMSI = "IMSI";
+    public static final String INTENT_VALUE_ICC_IMSI = Intent.SIM_STATE_IMSI;
     /* LOADED means all ICC records, including IMSI, are loaded */
-    public static final String INTENT_VALUE_ICC_LOADED = "LOADED";
+    public static final String INTENT_VALUE_ICC_LOADED = Intent.SIM_STATE_LOADED;
     /* The extra data for broadcasting intent INTENT_ICC_STATE_CHANGE */
-    public static final String INTENT_KEY_LOCKED_REASON = "reason";
+    public static final String INTENT_KEY_LOCKED_REASON = Intent.EXTRA_SIM_LOCKED_REASON;
     /* PIN means ICC is locked on PIN1 */
-    public static final String INTENT_VALUE_LOCKED_ON_PIN = "PIN";
+    public static final String INTENT_VALUE_LOCKED_ON_PIN = Intent.SIM_LOCKED_ON_PIN;
     /* PUK means ICC is locked on PUK1 */
-    public static final String INTENT_VALUE_LOCKED_ON_PUK = "PUK";
+    public static final String INTENT_VALUE_LOCKED_ON_PUK = Intent.SIM_LOCKED_ON_PUK;
     /* NETWORK means ICC is locked on NETWORK PERSONALIZATION */
-    public static final String INTENT_VALUE_LOCKED_NETWORK = "NETWORK";
+    public static final String INTENT_VALUE_LOCKED_NETWORK = Intent.SIM_LOCKED_NETWORK;
     /* PERM_DISABLED means ICC is permanently disabled due to puk fails */
-    public static final String INTENT_VALUE_ABSENT_ON_PERM_DISABLED = "PERM_DISABLED";
+    public static final String INTENT_VALUE_ABSENT_ON_PERM_DISABLED =
+            Intent.SIM_ABSENT_ON_PERM_DISABLED;
 
     /**
      * This is combination of IccCardStatus.CardState and IccCardApplicationStatus.AppState
