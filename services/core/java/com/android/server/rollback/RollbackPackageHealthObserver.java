@@ -150,9 +150,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
         PackageInstaller packageInstaller = mContext.getPackageManager().getPackageInstaller();
         String moduleMetadataPackageName = getModuleMetadataPackageName();
-        VersionedPackage newModuleMetadataPackage = getModuleMetadataPackage();
 
-        if (getAvailableRollback(newModuleMetadataPackage) != null) {
+        if (!rollbackManager.getAvailableRollbacks().isEmpty()) {
             scheduleCheckAndMitigateNativeCrashes();
         }
 
