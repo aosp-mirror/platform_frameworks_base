@@ -16,7 +16,7 @@
 
 package com.android.server.net;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.RouteInfo;

@@ -16,10 +16,9 @@
 
 package com.android.server;
 
-import android.os.SystemClock;
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.ConditionVariable;
+import android.os.SystemClock;
 
 /**
  * Utility class that you can call on with a timeout, and get called back

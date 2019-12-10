@@ -18,7 +18,7 @@ package android.graphics;
 
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * A color filter that can be used to tint the source pixels using a single
