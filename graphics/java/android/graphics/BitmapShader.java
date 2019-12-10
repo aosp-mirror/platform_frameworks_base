@@ -17,7 +17,7 @@
 package android.graphics;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Shader used to draw a bitmap as a texture. The bitmap can be repeated or

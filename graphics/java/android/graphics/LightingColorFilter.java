@@ -22,7 +22,7 @@
 package android.graphics;
 
 import android.annotation.ColorInt;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * A color filter that can be used to simulate simple lighting effects.
