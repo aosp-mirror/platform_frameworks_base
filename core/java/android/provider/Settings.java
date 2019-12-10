@@ -8410,6 +8410,12 @@ public final class Settings {
         public static final String TAP_GESTURE = "tap_gesture";
 
         /**
+         * Controls whether the people strip is enabled.
+         * @hide
+         */
+        public static final String PEOPLE_STRIP = "people_strip";
+
+        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *
