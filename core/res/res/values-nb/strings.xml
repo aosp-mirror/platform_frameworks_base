@@ -853,7 +853,7 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2373955520011165432">"Du har gjort feil <xliff:g id="NUMBER">%d</xliff:g> ganger i forsøk på å låse opp TV-en. TV-en blir nå tilbakestilt til fabrikkstandard."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"Du har foretatt <xliff:g id="NUMBER">%d</xliff:g> mislykkede opplåsinger av telefonen. Telefonen blir nå tilbakestilt til fabrikkinnstillingene."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"Prøv igjen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
-    <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Glemt mønsteret?"</string>
+    <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Har du glemt mønsteret?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Opplåsing av konto"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"For mange forsøk på tegning av mønster"</string>
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Logg på med Google-kontoen din for å låse opp."</string>
