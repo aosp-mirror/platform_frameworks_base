@@ -162,6 +162,14 @@ Device::~Device() {
     TEMP_FAILURE_RETRY(::write(mFd, &ev, sizeof(ev)));
 }
 
+// Send event over the fd.
+static void writeEvent(int fd, struct uhid_event& ev, const char* messageType) {
+    ssize_t ret = TEMP_FAILURE_RETRY(::write(fd, &ev, sizeof(ev)));
+    if (ret < 0 || ret != sizeof(ev)) {
+        LOGE("Failed to send uhid_event %s: %s", messageType, strerror(errno));
+    }
+}
+
 void Device::sendReport(const std::vector<uint8_t>& report) const {
     if (report.size() > UHID_DATA_MAX) {
         LOGE("Received invalid report of size %zu, skipping", report.size());
@@ -172,10 +180,7 @@ void Device::sendReport(const std::vector<uint8_t>& report) const {
     ev.type = UHID_INPUT2;
     ev.u.input2.size = report.size();
     memcpy(&ev.u.input2.data, report.data(), report.size() * sizeof(ev.u.input2.data[0]));
-    ssize_t ret = TEMP_FAILURE_RETRY(::write(mFd, &ev, sizeof(ev)));
-    if (ret < 0 || ret != sizeof(ev)) {
-        LOGE("Failed to send hid event: %s", strerror(errno));
-    }
+    writeEvent(mFd, ev, "UHID_INPUT2");
 }
 
 void Device::sendGetFeatureReportReply(uint32_t id, const std::vector<uint8_t>& report) const {
@@ -186,10 +191,7 @@ void Device::sendGetFeatureReportReply(uint32_t id, const std::vector<uint8_t>& 
     ev.u.get_report_reply.size = report.size();
     memcpy(&ev.u.get_report_reply.data, report.data(),
             report.size() * sizeof(ev.u.get_report_reply.data[0]));
-    ssize_t ret = TEMP_FAILURE_RETRY(::write(mFd, &ev, sizeof(ev)));
-    if (ret < 0 || ret != sizeof(ev)) {
-        LOGE("Failed to send hid event (UHID_GET_REPORT_REPLY): %s", strerror(errno));
-    }
+    writeEvent(mFd, ev, "UHID_GET_REPORT_REPLY");
 }
 
 int Device::handleEvents(int events) {
