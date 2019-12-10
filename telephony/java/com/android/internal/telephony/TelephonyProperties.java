@@ -16,7 +16,7 @@
 
 package com.android.internal.telephony;
 
-import dalvik.annotation.compat.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Contains a list of string constants used to get or set telephone properties
