@@ -189,10 +189,6 @@ public class PhoneConstants {
 
     public static final String SLOT_KEY  = "slot";
 
-    /** Fired when a subscriptions phone state changes. */
-    public static final String ACTION_SUBSCRIPTION_PHONE_STATE_CHANGED =
-        "android.intent.action.SUBSCRIPTION_PHONE_STATE";
-
     // FIXME: This is used to pass a subId via intents, we need to look at its usage, which is
     // FIXME: extensive, and see if this should be an array of all active subId's or ...?
     /**
