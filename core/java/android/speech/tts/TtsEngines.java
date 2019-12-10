@@ -18,7 +18,7 @@ package android.speech.tts;
 import static android.provider.Settings.Secure.getString;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
