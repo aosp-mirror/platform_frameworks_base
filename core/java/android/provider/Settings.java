@@ -13639,13 +13639,6 @@ public final class Settings {
         public static final String KERNEL_CPU_THREAD_READER = "kernel_cpu_thread_reader";
 
         /**
-         * Default user id to boot into. They map to user ids, for example, 10, 11, 12.
-         *
-         * @hide
-         */
-        public static final String DEFAULT_USER_ID_TO_BOOT_INTO = "default_boot_into_user_id";
-
-        /**
          * Persistent user id that is last logged in to.
          *
          * They map to user ids, for example, 10, 11, 12.
