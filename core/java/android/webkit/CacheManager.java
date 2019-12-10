@@ -17,7 +17,7 @@
 package android.webkit;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.io.File;
 import java.io.IOException;

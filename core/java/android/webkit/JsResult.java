@@ -17,7 +17,7 @@
 package android.webkit;
 
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * An instance of this class is passed as a parameter in various {@link WebChromeClient} action

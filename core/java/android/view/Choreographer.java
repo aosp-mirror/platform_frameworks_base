@@ -16,12 +16,11 @@
 
 package android.view;
 
-import static android.view.DisplayEventReceiver.CONFIG_CHANGED_EVENT_SUPPRESS;
 import static android.view.DisplayEventReceiver.VSYNC_SOURCE_APP;
 import static android.view.DisplayEventReceiver.VSYNC_SOURCE_SURFACE_FLINGER;
 
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.FrameInfo;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Build;

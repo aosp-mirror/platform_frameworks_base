@@ -18,8 +18,8 @@ package android.view.textservice;
 
 import android.annotation.NonNull;
 import android.annotation.SystemService;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
