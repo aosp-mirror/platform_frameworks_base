@@ -37,8 +37,9 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.UserInfo;
+import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.parsing.PackageImpl;
 import android.os.Looper;
 import android.os.SystemProperties;
 import android.os.UserManager;
@@ -250,10 +251,14 @@ public class UserSystemPackageInstallerTest {
         final Set<String> userWhitelist = new ArraySet<>();
         userWhitelist.add(packageName1);
 
-        final PackageParser.Package pkg1 = new PackageParser.Package(packageName1);
-        final PackageParser.Package pkg2 = new PackageParser.Package(packageName2);
-        final PackageParser.Package pkg3 = new PackageParser.Package(packageName3);
-        final PackageParser.Package pkg4 = new PackageParser.Package(packageName4);
+        final AndroidPackage pkg1 = PackageImpl.forParsing(packageName1)
+                .hideAsParsed().hideAsFinal();
+        final AndroidPackage pkg2 = PackageImpl.forParsing(packageName2)
+                .hideAsParsed().hideAsFinal();
+        final AndroidPackage pkg3 = PackageImpl.forParsing(packageName3)
+                .hideAsParsed().hideAsFinal();
+        final AndroidPackage pkg4 = PackageImpl.forParsing(packageName4)
+                .hideAsParsed().hideAsFinal();
 
         // No implicit whitelist, so only install pkg1.
         boolean implicit = false;

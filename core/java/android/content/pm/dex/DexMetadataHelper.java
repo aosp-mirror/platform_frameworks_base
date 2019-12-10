@@ -22,6 +22,7 @@ import static android.content.pm.PackageParser.APK_FILE_EXTENSION;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
+import android.content.pm.parsing.AndroidPackage;
 import android.util.ArrayMap;
 import android.util.jar.StrictJarFile;
 
@@ -86,8 +87,8 @@ public class DexMetadataHelper {
      *
      * NOTE: involves I/O checks.
      */
-    public static Map<String, String> getPackageDexMetadata(PackageParser.Package pkg) {
-        return buildPackageApkToDexMetadataMap(pkg.getAllCodePaths());
+    public static Map<String, String> getPackageDexMetadata(AndroidPackage pkg) {
+        return buildPackageApkToDexMetadataMap(pkg.makeListAllCodePaths());
     }
 
     /**
@@ -160,7 +161,7 @@ public class DexMetadataHelper {
      *
      * @throws PackageParserException in case of errors.
      */
-    public static void validatePackageDexMetadata(PackageParser.Package pkg)
+    public static void validatePackageDexMetadata(AndroidPackage pkg)
             throws PackageParserException {
         Collection<String> apkToDexMetadataList = getPackageDexMetadata(pkg).values();
         for (String dexMetadata : apkToDexMetadataList) {

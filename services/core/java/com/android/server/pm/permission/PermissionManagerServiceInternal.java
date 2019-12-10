@@ -21,8 +21,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
+import android.content.pm.parsing.AndroidPackage;
 import android.permission.PermissionManagerInternal;
 
 import java.util.ArrayList;
@@ -175,16 +175,14 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
 
     public abstract void systemReady();
 
-    public abstract boolean isPermissionsReviewRequired(@NonNull PackageParser.Package pkg,
+    public abstract boolean isPermissionsReviewRequired(@NonNull AndroidPackage pkg,
             @UserIdInt int userId);
 
-    public abstract void grantRuntimePermissionsGrantedToDisabledPackage(
-            @NonNull PackageParser.Package pkg, int callingUid);
     public abstract void grantRequestedRuntimePermissions(
-            @NonNull PackageParser.Package pkg, @NonNull int[] userIds,
+            @NonNull AndroidPackage pkg, @NonNull int[] userIds,
             @NonNull String[] grantedPermissions, int callingUid);
     public abstract void setWhitelistedRestrictedPermissions(
-            @NonNull PackageParser.Package pkg, @NonNull int[] userIds,
+            @NonNull AndroidPackage pkg, @NonNull int[] userIds,
             @NonNull List<String> permissions, int callingUid,
             @PackageManager.PermissionWhitelistFlags int whitelistFlags);
     /** Sets the whitelisted, restricted permissions for the given package. */
@@ -206,7 +204,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param callback Callback to call after permission changes
      */
     public abstract void updatePermissions(@NonNull String packageName,
-            @Nullable PackageParser.Package pkg);
+            @Nullable AndroidPackage pkg);
 
     /**
      * Update all permissions for all apps.
@@ -226,7 +224,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * Resets any user permission state changes (eg. permissions and flags) of all
      * packages installed for the given user.
      *
-     * @see #resetRuntimePermissions(android.content.pm.PackageParser.Package, int)
+     * @see #resetRuntimePermissions(AndroidPackage, int)
      */
     public abstract void resetAllRuntimePermissions(@UserIdInt int userId);
 
@@ -234,7 +232,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * Resets any user permission state changes (eg. permissions and flags) of the
      * specified package for the given user.
      */
-    public abstract void resetRuntimePermissions(@NonNull PackageParser.Package pkg,
+    public abstract void resetRuntimePermissions(@NonNull AndroidPackage pkg,
             @UserIdInt int userId);
 
     /**
@@ -247,8 +245,8 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param allPackageNames All packages
      */
     public abstract void revokeRuntimePermissionsIfGroupChanged(
-            @NonNull PackageParser.Package newPackage,
-            @NonNull PackageParser.Package oldPackage,
+            @NonNull AndroidPackage newPackage,
+            @NonNull AndroidPackage oldPackage,
             @NonNull ArrayList<String> allPackageNames);
 
     /**
@@ -257,9 +255,9 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * NOTE: argument {@code groupTEMP} is temporary until mPermissionGroups is moved to
      * the permission settings.
      */
-    public abstract void addAllPermissions(@NonNull PackageParser.Package pkg, boolean chatty);
-    public abstract void addAllPermissionGroups(@NonNull PackageParser.Package pkg, boolean chatty);
-    public abstract void removeAllPermissions(@NonNull PackageParser.Package pkg, boolean chatty);
+    public abstract void addAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
+    public abstract void addAllPermissionGroups(@NonNull AndroidPackage pkg, boolean chatty);
+    public abstract void removeAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
 
     /** Retrieve the packages that have requested the given app op permission */
     public abstract @Nullable String[] getAppOpPermissionPackages(

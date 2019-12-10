@@ -58,7 +58,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry.EditedSuggestionInfo;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 
@@ -116,7 +116,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     private final NotificationEntryManager mEntryManager;
     private final Handler mMainHandler;
 
-    private final Lazy<ShadeController> mShadeController;
+    private final Lazy<StatusBar> mStatusBarLazy;
 
     protected final Context mContext;
     private final UserManager mUserManager;
@@ -136,7 +136,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         @Override
         public boolean onClickHandler(
                 View view, PendingIntent pendingIntent, RemoteViews.RemoteResponse response) {
-            mShadeController.get().wakeUpIfDozing(SystemClock.uptimeMillis(), view,
+            mStatusBarLazy.get().wakeUpIfDozing(SystemClock.uptimeMillis(), view,
                     "NOTIFICATION_CLICK");
 
             if (handleRemoteInput(view, pendingIntent)) {
@@ -261,7 +261,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationEntryManager notificationEntryManager,
-            Lazy<ShadeController> shadeController,
+            Lazy<StatusBar> statusBarLazy,
             StatusBarStateController statusBarStateController,
             @MainHandler Handler mainHandler,
             RemoteInputUriController remoteInputUriController) {
@@ -269,7 +269,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         mLockscreenUserManager = lockscreenUserManager;
         mSmartReplyController = smartReplyController;
         mEntryManager = notificationEntryManager;
-        mShadeController = shadeController;
+        mStatusBarLazy = statusBarLazy;
         mMainHandler = mainHandler;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));

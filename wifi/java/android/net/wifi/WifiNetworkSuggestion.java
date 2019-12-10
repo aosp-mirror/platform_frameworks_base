@@ -23,12 +23,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.app.ActivityThread;
 import android.net.MacAddress;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Process;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
@@ -46,7 +44,6 @@ import java.util.Objects;
  * {@link WifiManager#addNetworkSuggestions(List)}.
  */
 public final class WifiNetworkSuggestion implements Parcelable {
-
     /**
      * Builder used to create {@link WifiNetworkSuggestion} objects.
      */
@@ -563,9 +560,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                     mPasspointConfiguration,
                     mIsAppInteractionRequired,
                     mIsUserInteractionRequired,
-                    mIsUserAllowed,
-                    Process.myUid(),
-                    ActivityThread.currentApplication().getApplicationContext().getOpPackageName());
+                    mIsUserAllowed);
         }
     }
 
@@ -592,19 +587,6 @@ public final class WifiNetworkSuggestion implements Parcelable {
      * @hide
      */
     public final boolean isUserInteractionRequired;
-
-    /**
-     * The UID of the process initializing this network suggestion.
-     * @hide
-     */
-    public final int suggestorUid;
-
-    /**
-     * The package name of the process initializing this network suggestion.
-     * @hide
-     */
-    public final String suggestorPackageName;
-
     /**
      * Whether app share credential with the user, allow user use provided credential to
      * connect network manually.
@@ -619,8 +601,6 @@ public final class WifiNetworkSuggestion implements Parcelable {
         this.isAppInteractionRequired = false;
         this.isUserInteractionRequired = false;
         this.isUserAllowedToManuallyConnect = true;
-        this.suggestorUid = -1;
-        this.suggestorPackageName = null;
     }
 
     /** @hide */
@@ -628,18 +608,14 @@ public final class WifiNetworkSuggestion implements Parcelable {
                                  @Nullable PasspointConfiguration passpointConfiguration,
                                  boolean isAppInteractionRequired,
                                  boolean isUserInteractionRequired,
-                                 boolean isUserAllowedToManuallyConnect,
-                                 int suggestorUid, @NonNull String suggestorPackageName) {
+                                 boolean isUserAllowedToManuallyConnect) {
         checkNotNull(networkConfiguration);
-        checkNotNull(suggestorPackageName);
         this.wifiConfiguration = networkConfiguration;
         this.passpointConfiguration = passpointConfiguration;
 
         this.isAppInteractionRequired = isAppInteractionRequired;
         this.isUserInteractionRequired = isUserInteractionRequired;
         this.isUserAllowedToManuallyConnect = isUserAllowedToManuallyConnect;
-        this.suggestorUid = suggestorUid;
-        this.suggestorPackageName = suggestorPackageName;
     }
 
     public static final @NonNull Creator<WifiNetworkSuggestion> CREATOR =
@@ -651,9 +627,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                             in.readParcelable(null), // PasspointConfiguration
                             in.readBoolean(), // isAppInteractionRequired
                             in.readBoolean(), // isUserInteractionRequired
-                            in.readBoolean(), // isSharedCredentialWithUser
-                            in.readInt(), // suggestorUid
-                            in.readString() // suggestorPackageName
+                            in.readBoolean()  // isSharedCredentialWithUser
                     );
                 }
 
@@ -675,15 +649,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
         dest.writeBoolean(isAppInteractionRequired);
         dest.writeBoolean(isUserInteractionRequired);
         dest.writeBoolean(isUserAllowedToManuallyConnect);
-        dest.writeInt(suggestorUid);
-        dest.writeString(suggestorPackageName);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(wifiConfiguration.SSID, wifiConfiguration.BSSID,
-                wifiConfiguration.allowedKeyManagement, wifiConfiguration.FQDN,
-                suggestorUid, suggestorPackageName);
+                wifiConfiguration.allowedKeyManagement, wifiConfiguration.FQDN);
     }
 
     /**
@@ -706,23 +677,19 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 && TextUtils.equals(this.wifiConfiguration.BSSID, lhs.wifiConfiguration.BSSID)
                 && Objects.equals(this.wifiConfiguration.allowedKeyManagement,
                 lhs.wifiConfiguration.allowedKeyManagement)
-                && TextUtils.equals(this.wifiConfiguration.FQDN, lhs.wifiConfiguration.FQDN)
-                && this.suggestorUid == lhs.suggestorUid
-                && TextUtils.equals(this.suggestorPackageName, lhs.suggestorPackageName);
+                && TextUtils.equals(this.wifiConfiguration.FQDN, lhs.wifiConfiguration.FQDN);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("WifiNetworkSuggestion [")
-                .append(", SSID=").append(wifiConfiguration.SSID)
+        StringBuilder sb = new StringBuilder("WifiNetworkSuggestion[ ")
+                .append("SSID=").append(wifiConfiguration.SSID)
                 .append(", BSSID=").append(wifiConfiguration.BSSID)
                 .append(", FQDN=").append(wifiConfiguration.FQDN)
                 .append(", isAppInteractionRequired=").append(isAppInteractionRequired)
                 .append(", isUserInteractionRequired=").append(isUserInteractionRequired)
                 .append(", isUserAllowedToManuallyConnect=").append(isUserAllowedToManuallyConnect)
-                .append(", suggestorUid=").append(suggestorUid)
-                .append(", suggestorPackageName=").append(suggestorPackageName)
-                .append("]");
+                .append(" ]");
         return sb.toString();
     }
 }

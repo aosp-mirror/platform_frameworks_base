@@ -112,7 +112,7 @@ message Atom {
         TouchEventReported touch_event_reported = 34;
         WakeupAlarmOccurred wakeup_alarm_occurred = 35;
         KernelWakeupReported kernel_wakeup_reported = 36;
-        WifiLockStateChanged wifi_lock_state_changed = 37;
+        WifiLockStateChanged wifi_lock_state_changed = 37 [(log_from_module) = "wifi"];
         WifiSignalStrengthChanged wifi_signal_strength_changed = 38;
         WifiScanStateChanged wifi_scan_state_changed = 39;
         PhoneSignalStrengthChanged phone_signal_strength_changed = 40;
@@ -356,7 +356,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10065
+    // Next: 10067
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -423,6 +423,7 @@ message Atom {
         SurfaceflingerStatsLayerInfo surfaceflinger_stats_layer_info = 10063;
         ProcessMemorySnapshot process_memory_snapshot = 10064;
         VmsClientStats vms_client_stats = 10065;
+        NotificationRemoteViews notification_remote_views = 10066;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -1742,6 +1743,19 @@ message WatchdogRollbackOccurred {
     optional string package_name = 2;
 
     optional int32 package_version_code = 3;
+
+    enum RollbackReasonType {
+        REASON_UNKNOWN = 0;
+        REASON_NATIVE_CRASH = 1;
+        REASON_EXPLICIT_HEALTH_CHECK = 2;
+        REASON_APP_CRASH = 3;
+        REASON_APP_NOT_RESPONDING = 4;
+    }
+    optional RollbackReasonType rollback_reason = 4;
+
+    // Set by RollbackPackageHealthObserver to be the package that is failing when a rollback
+    // is initiated. Empty if the package is unknown.
+    optional string failing_package_name = 5;
 }
 
 /**
@@ -4947,6 +4961,24 @@ message ProcStatsPkgProc {
     optional ProcessStatsSectionProto proc_stats_section = 1;
 }
 
+// Next Tag: 2
+message PackageRemoteViewInfoProto {
+    optional string package_name = 1;
+    // add per-package additional info here (like channels)
+}
+
+// Next Tag: 2
+message NotificationRemoteViewsProto {
+    repeated PackageRemoteViewInfoProto package_remote_view_info = 1;
+}
+
+/**
+ * Pulled from NotificationManagerService.java
+ */
+message NotificationRemoteViews {
+    optional NotificationRemoteViewsProto notification_remote_views = 1;
+}
+
 message PowerProfileProto {
     optional double cpu_suspend = 1;
 
@@ -5960,6 +5992,8 @@ message PermissionGrantRequestResultReported {
         IGNORED_RESTRICTED_PERMISSION = 9;
         // one time permission was granted by user action
         USER_GRANTED_ONE_TIME = 10;
+        // user ignored request by leaving the request screen without choosing any option
+        USER_IGNORED = 11;
     }
     // The result of the permission grant
     optional Result result = 6;

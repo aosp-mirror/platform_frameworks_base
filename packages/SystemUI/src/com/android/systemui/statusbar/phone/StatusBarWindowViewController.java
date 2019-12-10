@@ -263,7 +263,7 @@ public class StatusBarWindowViewController {
                 if (isDown) {
                     mStackScrollLayout.closeControlsIfOutsideTouch(ev);
                 }
-                if (mService.isDozing()) {
+                if (mStatusBarStateController.isDozing()) {
                     mService.mDozeScrimController.extendPulse();
                 }
                 // In case we start outside of the view bounds (below the status bar), we need to
@@ -284,7 +284,8 @@ public class StatusBarWindowViewController {
 
             @Override
             public boolean shouldInterceptTouchEvent(MotionEvent ev) {
-                if (mService.isDozing() && !mService.isPulsing() && !mDockManager.isDocked()) {
+                if (mStatusBarStateController.isDozing() && !mService.isPulsing()
+                        && !mDockManager.isDocked()) {
                     // Capture all touch events in always-on.
                     return true;
                 }
@@ -292,7 +293,7 @@ public class StatusBarWindowViewController {
                 if (notificationPanelView.isFullyExpanded()
                         && mDragDownHelper.isDragDownEnabled()
                         && !mService.isBouncerShowing()
-                        && !mService.isDozing()) {
+                        && !mStatusBarStateController.isDozing()) {
                     intercept = mDragDownHelper.onInterceptTouchEvent(ev);
                 }
 
@@ -312,7 +313,7 @@ public class StatusBarWindowViewController {
             @Override
             public boolean handleTouchEvent(MotionEvent ev) {
                 boolean handled = false;
-                if (mService.isDozing()) {
+                if (mStatusBarStateController.isDozing()) {
                     handled = !mService.isPulsing();
                 }
                 if ((mDragDownHelper.isDragDownEnabled() && !handled)
@@ -358,7 +359,7 @@ public class StatusBarWindowViewController {
                         break;
                     case KeyEvent.KEYCODE_VOLUME_DOWN:
                     case KeyEvent.KEYCODE_VOLUME_UP:
-                        if (mService.isDozing()) {
+                        if (mStatusBarStateController.isDozing()) {
                             MediaSessionLegacyHelper.getHelper(mView.getContext())
                                     .sendVolumeKeyEvent(
                                             event, AudioManager.USE_DEFAULT_STREAM_TYPE, true);

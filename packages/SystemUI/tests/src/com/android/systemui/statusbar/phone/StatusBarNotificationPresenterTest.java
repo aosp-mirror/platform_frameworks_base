@@ -39,6 +39,7 @@ import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -113,6 +114,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(ActivityLaunchAnimator.class), mock(DynamicPrivacyController.class),
                 mock(NotificationAlertingManager.class),
                 mock(NotificationRowBinderImpl.class), mock(KeyguardStateController.class),
+                mock(KeyguardIndicationController.class),
                 mStatusBar, mCommandQueue);
     }
 

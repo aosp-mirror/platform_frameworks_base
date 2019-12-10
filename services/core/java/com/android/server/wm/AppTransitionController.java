@@ -389,7 +389,6 @@ public class AppTransitionController {
             // this guy's animations regardless of whether it's
             // gotten drawn.
             wtoken.allDrawn = true;
-            wtoken.deferClearAllDrawn = false;
             // Ensure that apps that are mid-starting are also scheduled to have their
             // starting windows removed after the animation is complete
             if (wtoken.startingWindow != null && !wtoken.startingWindow.mAnimatingExit) {

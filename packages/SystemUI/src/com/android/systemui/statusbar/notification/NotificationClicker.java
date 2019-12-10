@@ -24,7 +24,7 @@ import android.view.View;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 /**
  * Click handler for generic clicks on notifications. Clicks on specific areas (expansion caret,
@@ -33,14 +33,14 @@ import com.android.systemui.statusbar.phone.ShadeController;
 public final class NotificationClicker implements View.OnClickListener {
     private static final String TAG = "NotificationClicker";
 
-    private final ShadeController mShadeController;
+    private final StatusBar mStatusBar;
     private final BubbleController mBubbleController;
     private final NotificationActivityStarter mNotificationActivityStarter;
 
-    public NotificationClicker(ShadeController shadeController,
+    public NotificationClicker(StatusBar statusBar,
             BubbleController bubbleController,
             NotificationActivityStarter notificationActivityStarter) {
-        mShadeController = shadeController;
+        mStatusBar = statusBar;
         mBubbleController = bubbleController;
         mNotificationActivityStarter = notificationActivityStarter;
     }
@@ -52,7 +52,7 @@ public final class NotificationClicker implements View.OnClickListener {
             return;
         }
 
-        mShadeController.wakeUpIfDozing(SystemClock.uptimeMillis(), v, "NOTIFICATION_CLICK");
+        mStatusBar.wakeUpIfDozing(SystemClock.uptimeMillis(), v, "NOTIFICATION_CLICK");
 
         final ExpandableNotificationRow row = (ExpandableNotificationRow) v;
         final StatusBarNotification sbn = row.getEntry().getSbn();

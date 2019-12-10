@@ -68,7 +68,7 @@ public class ApexManagerTest {
     @Before
     public void setUp() throws RemoteException {
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
-        mApexManager = new ApexManager.ApexManagerImpl(mContext, mApexService);
+        mApexManager = new ApexManager.ApexManagerImpl(mApexService);
     }
 
     @Test

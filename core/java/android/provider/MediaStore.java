@@ -159,6 +159,8 @@ public final class MediaStore {
     public static final String SCAN_FILE_CALL = "scan_file";
     /** {@hide} */
     public static final String SCAN_VOLUME_CALL = "scan_volume";
+    /** {@hide} */
+    public static final String SUICIDE_CALL = "suicide";
 
     /**
      * Extra used with {@link #SCAN_FILE_CALL} or {@link #SCAN_VOLUME_CALL} to indicate that
@@ -3976,6 +3978,16 @@ public final class MediaStore {
             client.call(WAIT_FOR_IDLE_CALL, null, null);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** @hide */
+    public static void suicide(Context context) {
+        final ContentResolver resolver = context.getContentResolver();
+        try (ContentProviderClient client = resolver
+                .acquireUnstableContentProviderClient(AUTHORITY)) {
+            client.call(SUICIDE_CALL, null, null);
+        } catch (Exception ignored) {
         }
     }
 

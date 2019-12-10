@@ -171,6 +171,7 @@ import android.os.IDeviceIdleController;
 import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -291,6 +292,9 @@ public class NotificationManagerService extends SystemService {
     static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
     public static final boolean ENABLE_CHILD_NOTIFICATIONS
             = SystemProperties.getBoolean("debug.child_notifs", true);
+
+    // pullStats report request: undecorated remote view stats
+    public static final int REPORT_REMOTE_VIEWS = 0x01;
 
     static final boolean DEBUG_INTERRUPTIVENESS = SystemProperties.getBoolean(
             "debug.notification.interruptiveness", false);
@@ -4080,6 +4084,8 @@ public class NotificationManagerService extends SystemService {
             try {
                 if (filter.stats) {
                     dumpJson(pw, filter);
+                } else if (filter.rvStats) {
+                    dumpRemoteViewStats(pw, filter);
                 } else if (filter.proto) {
                     dumpProto(fd, filter);
                 } else if (filter.criticalPriority) {
@@ -4556,6 +4562,49 @@ public class NotificationManagerService extends SystemService {
             new NotificationShellCmd(NotificationManagerService.this)
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
+
+        /**
+         * Get stats committed after startNs
+         *
+         * @param startNs Report stats committed after this time in nanoseconds.
+         * @param report  Indicatess which section to include in the stats.
+         * @param doAgg   Whether to aggregate the stats or keep them separated.
+         * @param out   List of protos of individual commits or one representing the
+         *                aggregate.
+         * @return the report time in nanoseconds, or 0 on error.
+         */
+        @Override
+        public long pullStats(long startNs, int report, boolean doAgg,
+                List<ParcelFileDescriptor> out) {
+            checkCallerIsSystemOrShell();
+            long startMs = TimeUnit.MILLISECONDS.convert(startNs, TimeUnit.NANOSECONDS);
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                switch (report) {
+                    case REPORT_REMOTE_VIEWS:
+                        Slog.e(TAG, "pullStats REPORT_REMOTE_VIEWS from: "
+                                + startMs + "  wtih " + doAgg);
+                        PulledStats stats = mUsageStats.remoteViewStats(startMs, doAgg);
+                        if (stats != null) {
+                            out.add(stats.toParcelFileDescriptor(report));
+                            Slog.e(TAG, "exiting pullStats with: " + out.size());
+                            long endNs = TimeUnit.NANOSECONDS
+                                    .convert(stats.endTimeMs(), TimeUnit.MILLISECONDS);
+                            return endNs;
+                        }
+                        Slog.e(TAG, "null stats for: " + report);
+                }
+            } catch (IOException e) {
+
+                Slog.e(TAG, "exiting pullStats: on error", e);
+                return 0;
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            Slog.e(TAG, "exiting pullStats: bad request");
+            return 0;
+        }
     };
 
     @VisibleForTesting
@@ -4771,6 +4820,15 @@ public class NotificationManagerService extends SystemService {
             e.printStackTrace();
         }
         pw.println(dump);
+    }
+
+    private void dumpRemoteViewStats(PrintWriter pw, @NonNull DumpFilter filter) {
+        PulledStats stats = mUsageStats.remoteViewStats(filter.since, true);
+        if (stats == null) {
+            pw.println("no remote view stats reported.");
+            return;
+        }
+        stats.dump(REPORT_REMOTE_VIEWS, pw, filter);
     }
 
     private void dumpProto(FileDescriptor fd, @NonNull DumpFilter filter) {
@@ -9084,6 +9142,7 @@ public class NotificationManagerService extends SystemService {
         public boolean zen;
         public long since;
         public boolean stats;
+        public boolean rvStats;
         public boolean redact = true;
         public boolean proto = false;
         public boolean criticalPriority = false;
@@ -9113,6 +9172,14 @@ public class NotificationManagerService extends SystemService {
                     filter.zen = true;
                 } else if ("--stats".equals(a)) {
                     filter.stats = true;
+                    if (ai < args.length-1) {
+                        ai++;
+                        filter.since = Long.parseLong(args[ai]);
+                    } else {
+                        filter.since = 0;
+                    }
+                } else if ("--remote-view-stats".equals(a)) {
+                    filter.rvStats = true;
                     if (ai < args.length-1) {
                         ai++;
                         filter.since = Long.parseLong(args[ai]);

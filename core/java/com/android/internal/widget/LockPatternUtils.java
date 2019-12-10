@@ -636,35 +636,16 @@ public class LockPatternUtils {
      *
      * @param newCredential The new credential to save
      * @param savedCredential The current credential
-     * @param userId the user whose lockscreen credential is to be changed
+     * @param userHandle the user whose lockscreen credential is to be changed
      *
      * @return whether this method saved the new password successfully or not. This flow will fail
      * and return false if the given credential is wrong.
      * @throws RuntimeException if password change encountered an unrecoverable error.
+     * @throws UnsupportedOperationException secure lockscreen is not supported on this device.
+     * @throws IllegalArgumentException if new credential is too short.
      */
     public boolean setLockCredential(@NonNull LockscreenCredential newCredential,
-            @NonNull LockscreenCredential savedCredential, int userId) {
-        return setLockCredential(newCredential, savedCredential, userId, false);
-    }
-
-    /**
-     * Save a new lockscreen credential.
-     * <p> This method will fail (returning {@code false}) if the previously saved pattern provided
-     * is incorrect and allowUntrustedChange is false, or if the lockscreen verification is still
-     * being throttled.
-     * @param newCredential The new credential to save
-     * @param savedCredential The current credential
-     * @param userHandle the user whose lockscreen credential is to be changed
-     * @param allowUntrustedChange whether we want to allow saving a new pattern if the existing
-     * credentialt being provided is incorrect.
-     *
-     * @return whether this method saved the new password successfully or not. This flow will fail
-     * and return false if the given credential is wrong and allowUntrustedChange is false.
-     * @throws RuntimeException if password change encountered an unrecoverable error.
-     */
-    public boolean setLockCredential(@NonNull LockscreenCredential newCredential,
-            @NonNull LockscreenCredential savedCredential, int userHandle,
-            boolean allowUntrustedChange) {
+            @NonNull LockscreenCredential savedCredential, int userHandle) {
         if (!hasSecureLockScreen()) {
             throw new UnsupportedOperationException(
                     "This operation requires the lock screen feature.");
@@ -672,8 +653,7 @@ public class LockPatternUtils {
         newCredential.checkLength();
 
         try {
-            if (!getLockSettings().setLockCredential(
-                    newCredential, savedCredential, userHandle, allowUntrustedChange)) {
+            if (!getLockSettings().setLockCredential(newCredential, savedCredential, userHandle)) {
                 return false;
             }
         } catch (RemoteException e) {

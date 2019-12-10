@@ -620,10 +620,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // TODO: Make this final
     int mTargetSdk;
 
-    // Set to true when this app creates a surface while in the middle of an animation. In that
-    // case do not clear allDrawn until the animation completes.
-    boolean deferClearAllDrawn;
-
     // Is this window's surface needed?  This is almost like visible, except
     // it will sometimes be true a little earlier: when the activity record has
     // been shown, but is still waiting for its app transition to execute
@@ -771,10 +767,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pw.print(" primaryColor=");
                         pw.println(Integer.toHexString(taskDescription.getPrimaryColor()));
                         pw.print(prefix + " backgroundColor=");
-                        pw.println(Integer.toHexString(taskDescription.getBackgroundColor()));
-                        pw.print(prefix + " statusBarColor=");
-                        pw.println(Integer.toHexString(taskDescription.getStatusBarColor()));
-                        pw.print(prefix + " navigationBarColor=");
+                        pw.print(Integer.toHexString(taskDescription.getBackgroundColor()));
+                        pw.print(" statusBarColor=");
+                        pw.print(Integer.toHexString(taskDescription.getStatusBarColor()));
+                        pw.print(" navigationBarColor=");
                         pw.println(Integer.toHexString(taskDescription.getNavigationBarColor()));
             }
         }
@@ -847,14 +843,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.println(requestedVrComponent);
         }
         super.dump(pw, prefix, dumpAll);
-        pw.print(" visible="); pw.print(mVisible);
-        if (appToken != null) {
-            pw.println(prefix + "app=true mVoiceInteraction=" + mVoiceInteraction);
+        if (mVoiceInteraction) {
+            pw.println(prefix + "mVoiceInteraction=true");
         }
-        pw.print(prefix); pw.print(" mOccludesParent="); pw.print(mOccludesParent);
+        pw.print(prefix); pw.print("mOccludesParent="); pw.print(mOccludesParent);
         pw.print(" mOrientation="); pw.println(mOrientation);
         pw.println(prefix + "mVisibleRequested=" + mVisibleRequested
-                + " mClientVisible=" + mClientVisible
+                + " mVisible=" + mVisible + " mClientVisible=" + mClientVisible
                 + ((mDeferHidingClient) ? " mDeferHidingClient=" + mDeferHidingClient : "")
                 + " reportedDrawn=" + reportedDrawn + " reportedVisible=" + reportedVisible);
         if (paused) {
@@ -901,7 +896,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.println(prefix + "mRemovingFromDisplay=" + mRemovingFromDisplay);
         }
         if (lastVisibleTime != 0 || nowVisible) {
-            pw.print(prefix); pw.print(" nowVisible="); pw.print(nowVisible);
+            pw.print(prefix); pw.print("nowVisible="); pw.print(nowVisible);
                     pw.print(" lastVisibleTime=");
                     if (lastVisibleTime == 0) pw.print("0");
                     else TimeUtils.formatDuration(lastVisibleTime, now, pw);
@@ -3235,7 +3230,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // to move that animation to the new one.
                 if (fromActivity.allDrawn) {
                     allDrawn = true;
-                    deferClearAllDrawn = fromActivity.deferClearAllDrawn;
                 }
                 if (fromActivity.firstWindowDrawn) {
                     firstWindowDrawn = true;
@@ -3719,7 +3713,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void clearAllDrawn() {
         allDrawn = false;
-        deferClearAllDrawn = false;
     }
 
     /**

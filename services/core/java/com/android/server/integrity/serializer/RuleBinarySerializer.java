@@ -127,7 +127,7 @@ public class RuleBinarySerializer implements RuleSerializer {
 
         bitOutputStream.setNext(SEPARATOR_BITS, ATOMIC_FORMULA_START);
         bitOutputStream.setNext(KEY_BITS, atomicFormula.getKey());
-        if (atomicFormula instanceof AtomicFormula.StringAtomicFormula) {
+        if (atomicFormula.getTag() == AtomicFormula.STRING_ATOMIC_FORMULA_TAG) {
             AtomicFormula.StringAtomicFormula stringAtomicFormula =
                     (AtomicFormula.StringAtomicFormula) atomicFormula;
             bitOutputStream.setNext(OPERATOR_BITS, AtomicFormula.EQ);
@@ -135,7 +135,7 @@ public class RuleBinarySerializer implements RuleSerializer {
                     stringAtomicFormula.getValue(),
                     stringAtomicFormula.getIsHashedValue(),
                     bitOutputStream);
-        } else if (atomicFormula instanceof AtomicFormula.IntAtomicFormula) {
+        } else if (atomicFormula.getTag() == AtomicFormula.INT_ATOMIC_FORMULA_TAG) {
             AtomicFormula.IntAtomicFormula intAtomicFormula =
                     (AtomicFormula.IntAtomicFormula) atomicFormula;
             bitOutputStream.setNext(OPERATOR_BITS, intAtomicFormula.getOperator());
@@ -143,7 +143,7 @@ public class RuleBinarySerializer implements RuleSerializer {
                     String.valueOf(intAtomicFormula.getValue()),
                     /* isHashedValue= */ false,
                     bitOutputStream);
-        } else if (atomicFormula instanceof AtomicFormula.BooleanAtomicFormula) {
+        } else if (atomicFormula.getTag() == AtomicFormula.BOOLEAN_ATOMIC_FORMULA_TAG) {
             AtomicFormula.BooleanAtomicFormula booleanAtomicFormula =
                     (AtomicFormula.BooleanAtomicFormula) atomicFormula;
             bitOutputStream.setNext(OPERATOR_BITS, AtomicFormula.EQ);

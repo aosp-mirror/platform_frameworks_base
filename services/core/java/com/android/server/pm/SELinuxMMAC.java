@@ -21,6 +21,7 @@ import android.compat.annotation.EnabledAfter;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.Signature;
+import android.content.pm.parsing.AndroidPackage;
 import android.os.Environment;
 import android.util.Slog;
 import android.util.Xml;
@@ -336,7 +337,7 @@ public final class SELinuxMMAC {
         }
     }
 
-    private static int getTargetSdkVersionForSeInfo(PackageParser.Package pkg,
+    private static int getTargetSdkVersionForSeInfo(AndroidPackage pkg,
             SharedUserSetting sharedUserSetting, PlatformCompat compatibility) {
         // Apps which share a sharedUserId must be placed in the same selinux domain. If this
         // package is the first app installed as this shared user, set seInfoTargetSdkVersion to its
@@ -349,11 +350,11 @@ public final class SELinuxMMAC {
         if ((sharedUserSetting != null) && (sharedUserSetting.packages.size() != 0)) {
             return sharedUserSetting.seInfoTargetSdkVersion;
         }
-        if (compatibility.isChangeEnabled(SELINUX_LATEST_CHANGES, pkg.applicationInfo)) {
+        if (compatibility.isChangeEnabled(SELINUX_LATEST_CHANGES, pkg.toAppInfoWithoutState())) {
             return android.os.Build.VERSION_CODES.R;
         }
 
-        return pkg.applicationInfo.targetSdkVersion;
+        return pkg.getTargetSdkVersion();
     }
 
     /**
@@ -367,7 +368,7 @@ public final class SELinuxMMAC {
      * @param compatibility     the PlatformCompat service to ask about state of compat changes.
      * @return String representing the resulting seinfo.
      */
-    public static String getSeInfo(PackageParser.Package pkg, SharedUserSetting sharedUserSetting,
+    public static String getSeInfo(AndroidPackage pkg, SharedUserSetting sharedUserSetting,
             PlatformCompat compatibility) {
         final int targetSdkVersion = getTargetSdkVersionForSeInfo(pkg, sharedUserSetting,
                 compatibility);
@@ -391,7 +392,7 @@ public final class SELinuxMMAC {
      *        MINIMUM_TARGETSDKVERSION.
      * @return String representing the resulting seinfo.
      */
-    public static String getSeInfo(PackageParser.Package pkg, boolean isPrivileged,
+    public static String getSeInfo(AndroidPackage pkg, boolean isPrivileged,
             int targetSdkVersion) {
         String seInfo = null;
         synchronized (sPolicies) {
@@ -420,8 +421,8 @@ public final class SELinuxMMAC {
         seInfo += TARGETSDKVERSION_STR + targetSdkVersion;
 
         if (DEBUG_POLICY_INSTALL) {
-            Slog.i(TAG, "package (" + pkg.packageName + ") labeled with " +
-                    "seinfo=" + seInfo);
+            Slog.i(TAG, "package (" + pkg.getPackageName() + ") labeled with "
+                    + "seinfo=" + seInfo);
         }
         return seInfo;
     }
@@ -430,7 +431,7 @@ public final class SELinuxMMAC {
 /**
  * Holds valid policy representations of individual stanzas from a mac_permissions.xml
  * file. Each instance can further be used to assign seinfo values to apks using the
- * {@link Policy#getMatchedSeinfo} method. To create an instance of this use the
+ * {@link Policy#getMatchedSeInfo(AndroidPackage)} method. To create an instance of this use the
  * {@link PolicyBuilder} pattern class, where each instance is validated against a set
  * of invariants before being built and returned. Each instance can be guaranteed to
  * hold one valid policy stanza as outlined in the system/sepolicy/mac_permissions.xml
@@ -557,21 +558,21 @@ final class Policy {
      * @return A string representing the seinfo matched during policy lookup.
      *         A value of null can also be returned if no match occured.
      */
-    public String getMatchedSeInfo(PackageParser.Package pkg) {
+    public String getMatchedSeInfo(AndroidPackage pkg) {
         // Check for exact signature matches across all certs.
         Signature[] certs = mCerts.toArray(new Signature[0]);
-        if (pkg.mSigningDetails != SigningDetails.UNKNOWN
-                && !Signature.areExactMatch(certs, pkg.mSigningDetails.signatures)) {
+        if (pkg.getSigningDetails() != SigningDetails.UNKNOWN
+                && !Signature.areExactMatch(certs, pkg.getSigningDetails().signatures)) {
 
             // certs aren't exact match, but the package may have rotated from the known system cert
-            if (certs.length > 1 || !pkg.mSigningDetails.hasCertificate(certs[0])) {
+            if (certs.length > 1 || !pkg.getSigningDetails().hasCertificate(certs[0])) {
                 return null;
             }
         }
 
         // Check for inner package name matches given that the
         // signature checks already passed.
-        String seinfoValue = mPkgMap.get(pkg.packageName);
+        String seinfoValue = mPkgMap.get(pkg.getPackageName());
         if (seinfoValue != null) {
             return seinfoValue;
         }

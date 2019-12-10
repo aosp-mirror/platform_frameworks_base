@@ -185,7 +185,8 @@ public class PackageInstaller {
      * {@link #STATUS_FAILURE}, {@link #STATUS_FAILURE_ABORTED},
      * {@link #STATUS_FAILURE_BLOCKED}, {@link #STATUS_FAILURE_CONFLICT},
      * {@link #STATUS_FAILURE_INCOMPATIBLE}, {@link #STATUS_FAILURE_INVALID},
-     * {@link #STATUS_FAILURE_STORAGE}.
+     * {@link #STATUS_FAILURE_STORAGE}, {@link #STATUS_FAILURE_NAME_NOT_FOUND},
+     * {@link #STATUS_FAILURE_ILLEGAL_STATE} or {@link #STATUS_FAILURE_SECURITY}.
      * <p>
      * More information about a status may be available through additional
      * extras; see the individual status documentation for details.
@@ -1130,9 +1131,14 @@ public class PackageInstaller {
          *
          * @param packageName The package of the new owner. Needs to hold the INSTALL_PACKAGES
          *                    permission.
-         * @param statusReceiver Called when the state of the session changes. Intents sent to this
-         *                       receiver contain {@link #EXTRA_STATUS}. Refer to the individual
-         *                       transfer status codes on how to handle them.
+         * @param statusReceiver Called when the state of the session changes. Intents sent to
+         *                       this receiver contain {@link #EXTRA_STATUS}. Possible statuses:
+         *                       {@link #STATUS_FAILURE_NAME_NOT_FOUND},
+         *                       {@link #STATUS_FAILURE_ILLEGAL_STATE},
+         *                       {@link #STATUS_FAILURE_SECURITY},
+         *                       {@link #STATUS_FAILURE}.
+         *                       Refer to the individual transfer status codes on how to handle
+         *                       them.
          *
          * @throws PackageManager.NameNotFoundException if the new owner could not be found.
          * @throws SecurityException if called after the session has been committed or abandoned.

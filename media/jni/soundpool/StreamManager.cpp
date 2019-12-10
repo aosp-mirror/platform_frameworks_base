@@ -38,7 +38,7 @@ static constexpr bool kStealActiveStream_OldestFirst = true;
 // kPlayOnCallingThread = true prior to R.
 // Changing to false means calls to play() are almost instantaneous instead of taking around
 // ~10ms to launch the AudioTrack. It is perhaps 100x faster.
-static constexpr bool kPlayOnCallingThread = true;
+static constexpr bool kPlayOnCallingThread = false;
 
 // Amount of time for a StreamManager thread to wait before closing.
 static constexpr int64_t kWaitTimeBeforeCloseNs = 9 * NANOS_PER_SECOND;
@@ -170,7 +170,6 @@ int32_t StreamManager::queueForPlay(const std::shared_ptr<Sound> &sound,
                     if (stream->getSoundID() == soundID) {
                         ALOGV("%s: found soundID %d in restart queue", __func__, soundID);
                         newStream = stream;
-                        fromAvailableQueue = false;
                         break;
                     } else if (newStream == nullptr) {
                         ALOGV("%s: found stream in restart queue", __func__);

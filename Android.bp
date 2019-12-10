@@ -374,7 +374,7 @@ java_defaults {
 
     exclude_srcs: [
         // See comment on framework-atb-backward-compatibility module below
-        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
+        "core/java/android/content/pm/parsing/library/AndroidTestBaseUpdater.java",
     ],
 
     sdk_version: "core_platform",
@@ -526,7 +526,7 @@ java_library {
     installable: true,
     libs: ["app-compat-annotations"],
     srcs: [
-        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
+        "core/java/android/content/pm/parsing/library/AndroidTestBaseUpdater.java",
     ],
 }
 
@@ -1680,16 +1680,13 @@ filegroup {
 }
 
 filegroup {
-    name: "framework-wifistack-shared-srcs",
+    name: "framework-wifi-service-shared-srcs",
     srcs: [
         ":framework-annotations",
 	"core/java/android/os/HandlerExecutor.java",
         "core/java/android/util/BackupUtils.java",
-        "core/java/android/util/KeyValueListParser.java",
         "core/java/android/util/LocalLog.java",
         "core/java/android/util/Rational.java",
-        "core/java/android/util/proto/ProtoStream.java",
-        "core/java/android/util/proto/ProtoOutputStream.java",
         "core/java/com/android/internal/util/FastXmlSerializer.java",
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IState.java",

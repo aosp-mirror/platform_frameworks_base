@@ -110,6 +110,7 @@ public class BubbleStackView extends FrameLayout {
     /** How long to wait, in milliseconds, before hiding the flyout. */
     @VisibleForTesting
     static final int FLYOUT_HIDE_AFTER = 5000;
+    private BubbleController.BubbleScreenshotListener mBubbleScreenshotListener;
 
     /**
      * Interface to synchronize {@link View} state and the screen.
@@ -163,6 +164,7 @@ public class BubbleStackView extends FrameLayout {
     private ExpandedAnimationController mExpandedAnimationController;
 
     private FrameLayout mExpandedViewContainer;
+    @Nullable private BubbleMenuView mBubbleMenuView;
 
     private BubbleFlyoutView mFlyout;
     /** Runnable that fades out the flyout and then sets it to GONE. */
@@ -194,6 +196,7 @@ public class BubbleStackView extends FrameLayout {
     private int mPointerHeight;
     private int mStatusBarHeight;
     private int mImeOffset;
+    private int mBubbleMenuOffset = 252;
     private BubbleIconFactory mBubbleIconFactory;
     private Bubble mExpandedBubble;
     private boolean mIsExpanded;
@@ -492,6 +495,9 @@ public class BubbleStackView extends FrameLayout {
             mDesaturateAndDarkenPaint.setColorFilter(new ColorMatrixColorFilter(animatedMatrix));
             mDesaturateAndDarkenTargetView.setLayerPaint(mDesaturateAndDarkenPaint);
         });
+
+        mInflater.inflate(R.layout.bubble_menu_view, this);
+        mBubbleMenuView = findViewById(R.id.bubble_menu_container);
     }
 
     private void setUpFlyout() {
@@ -683,6 +689,13 @@ public class BubbleStackView extends FrameLayout {
     }
 
     /**
+     * Sets the screenshot listener.
+     */
+    public void setBubbleScreenshotListener(BubbleController.BubbleScreenshotListener listener) {
+        mBubbleScreenshotListener = listener;
+    }
+
+    /**
      * Whether the stack of bubbles is expanded or not.
      */
     public boolean isExpanded() {
@@ -870,6 +883,12 @@ public class BubbleStackView extends FrameLayout {
     public View getTargetView(MotionEvent event) {
         float x = event.getRawX();
         float y = event.getRawY();
+        if (mBubbleMenuView.isShowing()) {
+            if (isIntersecting(mBubbleMenuView.getMenuView(), x, y)) {
+                return mBubbleMenuView;
+            }
+            return null;
+        }
         if (mIsExpanded) {
             if (isIntersecting(mBubbleContainer, x, y)) {
                 // Could be tapping or dragging a bubble while expanded
@@ -1074,6 +1093,7 @@ public class BubbleStackView extends FrameLayout {
             return;
         }
 
+        hideBubbleMenu();
         mStackAnimationController.cancelStackPositionAnimations();
         mBubbleContainer.setActiveController(mStackAnimationController);
         hideFlyoutImmediate();
@@ -1473,6 +1493,11 @@ public class BubbleStackView extends FrameLayout {
 
     @Override
     public void getBoundsOnScreen(Rect outRect) {
+        // If the bubble menu is open, the entire screen should capture touch events.
+        if (mBubbleMenuView.isShowing()) {
+            outRect.set(0, 0, getWidth(), getHeight());
+            return;
+        }
         if (!mIsExpanded) {
             if (mBubbleContainer.getChildCount() > 0) {
                 mBubbleContainer.getChildAt(0).getBoundsOnScreen(outRect);
@@ -1699,5 +1724,44 @@ public class BubbleStackView extends FrameLayout {
             }
         }
         return bubbles;
+    }
+
+    /**
+     * Show the bubble menu, positioned relative to the stack.
+     */
+    public void showBubbleMenu() {
+        PointF currentPos = mStackAnimationController.getStackPosition();
+        float yPos = currentPos.y;
+        float xPos = currentPos.x;
+        if (mStackAnimationController.isStackOnLeftSide()) {
+            xPos += mBubbleSize;
+        } else {
+            //TODO: Use the width of the menu instead of this fixed offset. Offset used for now
+            // because menu width isn't correct the first time the menu is shown.
+            xPos -= mBubbleMenuOffset;
+        }
+
+        mBubbleMenuView.show(xPos, yPos);
+    }
+
+    /**
+     * Hide the bubble menu.
+     */
+    public void hideBubbleMenu() {
+        mBubbleMenuView.hide();
+    }
+
+    /**
+     * Determines whether the bubble menu is currently showing.
+     */
+    public boolean isShowingBubbleMenu() {
+        return mBubbleMenuView.isShowing();
+    }
+
+    /**
+     * Take a screenshot and send it to the specified bubble.
+     */
+    public void sendScreenshotToBubble(Bubble bubble) {
+        mBubbleScreenshotListener.onBubbleScreenshot(bubble);
     }
 }

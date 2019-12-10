@@ -6254,6 +6254,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         // send up app name; do this *before* waiting for debugger
         Process.setArgV0(data.processName);
         android.ddm.DdmHandleAppName.setAppName(data.processName,
+                                                data.appInfo.packageName,
                                                 UserHandle.myUserId());
         VMRuntime.setProcessPackageName(data.appInfo.packageName);
 

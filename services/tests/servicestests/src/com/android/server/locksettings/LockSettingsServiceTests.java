@@ -93,7 +93,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         initializeStorageWithCredential(PRIMARY_USER_ID, newPassword("password"), sid);
 
         assertFalse(mService.setLockCredential(newPassword("newpwd"), newPassword("badpwd"),
-                    PRIMARY_USER_ID, false));
+                    PRIMARY_USER_ID));
         assertVerifyCredentials(PRIMARY_USER_ID, newPassword("password"), sid);
     }
 
@@ -101,7 +101,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     public void testClearPasswordPrimaryUser() throws RemoteException {
         initializeStorageWithCredential(PRIMARY_USER_ID, newPassword("password"), 1234);
         assertTrue(mService.setLockCredential(nonePassword(), newPassword("password"),
-                PRIMARY_USER_ID, false));
+                PRIMARY_USER_ID));
         assertEquals(CREDENTIAL_TYPE_NONE, mService.getCredentialType(PRIMARY_USER_ID));
         assertEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
     }
@@ -111,7 +111,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         final LockscreenCredential firstUnifiedPassword = newPassword("pwd-1");
         final LockscreenCredential secondUnifiedPassword = newPassword("pwd-2");
         assertTrue(mService.setLockCredential(firstUnifiedPassword,
-                nonePassword(), PRIMARY_USER_ID, false));
+                nonePassword(), PRIMARY_USER_ID));
         mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
         final long primarySid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
         final long profileSid = mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID);
@@ -146,15 +146,14 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         mStorageManager.setIgnoreBadUnlock(true);
         // Change primary password and verify that profile SID remains
         assertTrue(mService.setLockCredential(
-                secondUnifiedPassword, firstUnifiedPassword, PRIMARY_USER_ID, false));
+                secondUnifiedPassword, firstUnifiedPassword, PRIMARY_USER_ID));
         mStorageManager.setIgnoreBadUnlock(false);
         assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
         assertNull(mGateKeeperService.getAuthToken(TURNED_OFF_PROFILE_USER_ID));
 
         // Clear unified challenge
         assertTrue(mService.setLockCredential(nonePassword(),
-                secondUnifiedPassword, PRIMARY_USER_ID,
-                false));
+                secondUnifiedPassword, PRIMARY_USER_ID));
         assertEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
         assertEquals(0, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
         assertEquals(0, mGateKeeperService.getSecureUserId(TURNED_OFF_PROFILE_USER_ID));
@@ -166,7 +165,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         final LockscreenCredential profilePassword = newPassword("profile");
         assertTrue(mService.setLockCredential(primaryPassword,
                 nonePassword(),
-                PRIMARY_USER_ID, false));
+                PRIMARY_USER_ID));
         /* Currently in LockSettingsService.setLockCredential, unlockUser() is called with the new
          * credential as part of verifyCredential() before the new credential is committed in
          * StorageManager. So we relax the check in our mock StorageManager to allow that.
@@ -174,7 +173,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         mStorageManager.setIgnoreBadUnlock(true);
         assertTrue(mService.setLockCredential(profilePassword,
                 nonePassword(),
-                MANAGED_PROFILE_USER_ID, false));
+                MANAGED_PROFILE_USER_ID));
         mStorageManager.setIgnoreBadUnlock(false);
 
         final long primarySid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
@@ -201,7 +200,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         // Change primary credential and make sure we don't affect profile
         mStorageManager.setIgnoreBadUnlock(true);
         assertTrue(mService.setLockCredential(
-                newPassword("pwd"), primaryPassword, PRIMARY_USER_ID, false));
+                newPassword("pwd"), primaryPassword, PRIMARY_USER_ID));
         mStorageManager.setIgnoreBadUnlock(false);
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 profilePassword, 0, MANAGED_PROFILE_USER_ID)
@@ -214,8 +213,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         assertTrue(mService.setLockCredential(
                 newPassword("password"),
                 nonePassword(),
-                PRIMARY_USER_ID,
-                false));
+                PRIMARY_USER_ID));
 
         verify(mRecoverableKeyStoreManager)
                 .lockScreenSecretChanged(CREDENTIAL_TYPE_PASSWORD, "password".getBytes(),
@@ -228,8 +226,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         assertTrue(mService.setLockCredential(
                 newPattern("12345"),
                 nonePassword(),
-                MANAGED_PROFILE_USER_ID,
-                false));
+                MANAGED_PROFILE_USER_ID));
 
         verify(mRecoverableKeyStoreManager)
                 .lockScreenSecretChanged(CREDENTIAL_TYPE_PATTERN, "12345".getBytes(),
@@ -247,8 +244,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         assertTrue(mService.setLockCredential(
                 newPassword("newPassword"),
                 newPattern("12345"),
-                MANAGED_PROFILE_USER_ID,
-                false));
+                MANAGED_PROFILE_USER_ID));
 
         verify(mRecoverableKeyStoreManager)
                 .lockScreenSecretChanged(CREDENTIAL_TYPE_PASSWORD, "newPassword".getBytes(),
@@ -263,8 +259,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         assertTrue(mService.setLockCredential(
                 newPattern("12345"),
                 nonePassword(),
-                PRIMARY_USER_ID,
-                false));
+                PRIMARY_USER_ID));
 
         verify(mRecoverableKeyStoreManager, never())
                 .lockScreenSecretChanged(
@@ -284,8 +279,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         assertTrue(mService.setLockCredential(
                 newCredential,
                 oldCredential,
-                PRIMARY_USER_ID,
-                false));
+                PRIMARY_USER_ID));
 
         verify(mRecoverableKeyStoreManager)
                 .lockScreenSecretChanged(CREDENTIAL_TYPE_PASSWORD, newCredential.getCredential(),
@@ -305,8 +299,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         assertTrue(mService.setLockCredential(
                 nonePassword(),
                 newPassword("oldPassword"),
-                PRIMARY_USER_ID,
-                false));
+                PRIMARY_USER_ID));
 
         verify(mRecoverableKeyStoreManager)
                 .lockScreenSecretChanged(CREDENTIAL_TYPE_NONE, null, PRIMARY_USER_ID);
@@ -322,7 +315,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
                 1234);
         mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
 
-        mService.setLockCredential(nonePassword(), newPattern("123654"), PRIMARY_USER_ID, false);
+        mService.setLockCredential(nonePassword(), newPattern("123654"), PRIMARY_USER_ID);
 
         // Verify fingerprint is removed
         verify(mFingerprintManager).remove(any(), eq(PRIMARY_USER_ID), any());
@@ -343,8 +336,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         assertTrue(mService.setLockCredential(
                 profilePassword,
                 nonePassword(),
-                MANAGED_PROFILE_USER_ID,
-                false));
+                MANAGED_PROFILE_USER_ID));
 
         verify(mRecoverableKeyStoreManager)
                 .lockScreenSecretChanged(CREDENTIAL_TYPE_PASSWORD, profilePassword.getCredential(),
@@ -390,8 +382,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         assertTrue(mService.setLockCredential(
                 pattern,
                 nonePassword(),
-                MANAGED_PROFILE_USER_ID,
-                false));
+                MANAGED_PROFILE_USER_ID));
         reset(mRecoverableKeyStoreManager);
 
         mService.verifyCredential(pattern, 1, MANAGED_PROFILE_USER_ID);
@@ -426,7 +417,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
 
     private void testCreateCredential(int userId, LockscreenCredential credential)
             throws RemoteException {
-        assertTrue(mService.setLockCredential(credential, nonePassword(), userId, false));
+        assertTrue(mService.setLockCredential(credential, nonePassword(), userId));
         assertVerifyCredentials(userId, credential, -1);
     }
 
@@ -435,7 +426,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         mHasSecureLockScreen = false;
 
         try {
-            mService.setLockCredential(credential, null, userId, false);
+            mService.setLockCredential(credential, null, userId);
             fail("An exception should have been thrown.");
         } catch (UnsupportedOperationException e) {
             // Success - the exception was expected.
@@ -448,7 +439,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
             LockscreenCredential oldCredential) throws RemoteException {
         final long sid = 1234;
         initializeStorageWithCredential(userId, oldCredential, sid);
-        assertTrue(mService.setLockCredential(newCredential, oldCredential, userId, false));
+        assertTrue(mService.setLockCredential(newCredential, oldCredential, userId));
         assertVerifyCredentials(userId, newCredential, sid);
     }
 

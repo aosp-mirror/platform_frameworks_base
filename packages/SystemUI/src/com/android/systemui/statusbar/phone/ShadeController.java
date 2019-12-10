@@ -14,11 +14,9 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.annotation.NonNull;
 import android.view.View;
 
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 
 /**
  * {@link ShadeController} is an abstraction of the work that used to be hard-coded in
@@ -28,14 +26,6 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
  * {@link com.android.systemui.keyguard.KeyguardViewMediator} and others.
  */
 public interface ShadeController {
-
-    /**
-     * Shows the keyguard bouncer - the password challenge on the lock screen
-     *
-     * @param scrimmed true when the bouncer should show scrimmed, false when the user will be
-     * dragging it and translation should be deferred {@see KeyguardBouncer#show(boolean, boolean)}
-     */
-    void showBouncer(boolean scrimmed);
 
     /**
      * Make our window larger and the panel expanded
@@ -71,33 +61,11 @@ public interface ShadeController {
     void addPostCollapseAction(Runnable action);
 
     /**
-     * Ask shade controller to set the state to {@link StatusBarState#KEYGUARD}, but only from
-     * {@link StatusBarState#SHADE_LOCKED}
-     */
-    void goToKeyguard();
-
-    /**
      * Notify the shade controller that the current user changed
      *
      * @param newUserId userId of the new user
      */
     void setLockscreenUser(int newUserId);
-
-    /**
-     * Dozing is when the screen is in AOD or asleep
-     *
-     * @return true if we are dozing
-     */
-    boolean isDozing();
-
-    /**
-     * Ask the display to wake up if currently dozing, else do nothing
-     *
-     * @param time when to wake up
-     * @param view the view requesting the wakeup
-     * @param why the reason for the wake up
-     */
-    void wakeUpIfDozing(long time, View view, @NonNull String why);
 
     /**
      * If secure with redaction: Show bouncer, go to unlocked shade.
@@ -107,11 +75,6 @@ public interface ShadeController {
      * @param startingChild The view to expand after going to the shade.
      */
     void goToLockedShade(View startingChild);
-
-    /**
-     * Adds a {@param runnable} to be executed after Keyguard is gone.
-     */
-    void addAfterKeyguardGoneRunnable(Runnable runnable);
 
     /**
      * Close the shade if it was open
@@ -127,16 +90,4 @@ public interface ShadeController {
      * @param animate
      */
     void collapsePanel(boolean animate);
-
-    /**
-     * Callback to tell the shade controller that an activity launch animation was canceled
-     */
-    void onLaunchAnimationCancelled();
-
-    /**
-     * Callback to notify the shade controller that a {@link ActivatableNotificationView} has become
-     * inactive
-     */
-    void onActivationReset();
-
 }

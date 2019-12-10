@@ -136,8 +136,13 @@ public class SyntheticPasswordManager {
         "android-synthetic-password-personalization-context".getBytes();
 
     static class AuthenticationResult {
-        public AuthenticationToken authToken;
-        public VerifyCredentialResponse gkResponse;
+        // Non-null if password/token passes verification, null otherwise
+        @Nullable public AuthenticationToken authToken;
+        // OK:    password / token passes verification, user has a lockscreen
+        // null:  user does not have a lockscreen (but password / token passes verification)
+        // ERROR: password / token fails verification
+        // RETRY: password / token verification is throttled at the moment.
+        @Nullable public VerifyCredentialResponse gkResponse;
     }
 
     /**
