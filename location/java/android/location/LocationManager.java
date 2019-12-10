@@ -1838,12 +1838,9 @@ public class LocationManager {
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public @Nullable GpsStatus getGpsStatus(@Nullable GpsStatus status) {
-        UnsupportedOperationException ex = new UnsupportedOperationException(
-                "GpsStatus APIs not supported in S and above, use GnssStatus APIs instead");
         if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.R) {
-            throw ex;
-        } else {
-            Log.w(TAG, ex);
+            throw new UnsupportedOperationException(
+                    "GpsStatus APIs not supported in S and above, use GnssStatus APIs instead");
         }
 
         GnssStatus gnssStatus = mGnssStatusListenerManager.getGnssStatus();
