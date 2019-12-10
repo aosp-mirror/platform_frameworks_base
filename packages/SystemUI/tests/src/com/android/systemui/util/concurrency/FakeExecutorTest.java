@@ -49,7 +49,6 @@ public class FakeExecutorTest extends SysuiTestCase {
     @Test
     public void testNoDelay() {
         FakeSystemClock clock = new FakeSystemClock();
-        clock.setAutoIncrement(false);
         FakeExecutor fakeExecutor = new FakeExecutor(clock);
         RunnableImpl runnable = new RunnableImpl();
 
@@ -99,7 +98,6 @@ public class FakeExecutorTest extends SysuiTestCase {
     @Test
     public void testDelayed() {
         FakeSystemClock clock = new FakeSystemClock();
-        clock.setAutoIncrement(false);
         FakeExecutor fakeExecutor = new FakeExecutor(clock);
         RunnableImpl runnable = new RunnableImpl();
 
@@ -134,7 +132,6 @@ public class FakeExecutorTest extends SysuiTestCase {
     @Test
     public void testDelayed_AdvanceAndRun() {
         FakeSystemClock clock = new FakeSystemClock();
-        clock.setAutoIncrement(false);
         FakeExecutor fakeExecutor = new FakeExecutor(clock);
         RunnableImpl runnable = new RunnableImpl();
 
@@ -181,7 +178,6 @@ public class FakeExecutorTest extends SysuiTestCase {
     @Test
     public void testExecutionOrder() {
         FakeSystemClock clock = new FakeSystemClock();
-        clock.setAutoIncrement(false);
         FakeExecutor fakeExecutor = new FakeExecutor(clock);
         RunnableImpl runnableA = new RunnableImpl();
         RunnableImpl runnableB = new RunnableImpl();
@@ -251,7 +247,6 @@ public class FakeExecutorTest extends SysuiTestCase {
     @Test
     public void testRemoval_single() {
         FakeSystemClock clock = new FakeSystemClock();
-        clock.setAutoIncrement(false);
         FakeExecutor fakeExecutor = new FakeExecutor(clock);
         RunnableImpl runnable = new RunnableImpl();
         Runnable removeFunction;
@@ -291,7 +286,6 @@ public class FakeExecutorTest extends SysuiTestCase {
     @Test
     public void testRemoval_multi() {
         FakeSystemClock clock = new FakeSystemClock();
-        clock.setAutoIncrement(false);
         FakeExecutor fakeExecutor = new FakeExecutor(clock);
         List<Runnable> removeFunctions = new ArrayList<>();
         RunnableImpl runnable = new RunnableImpl();

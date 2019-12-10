@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FakeSystemClock implements SystemClock {
-    private boolean mAutoIncrement = true;
-
     private long mUptimeMillis;
     private long mElapsedRealtime;
     private long mElapsedRealtimeNanos;
@@ -34,54 +32,36 @@ public class FakeSystemClock implements SystemClock {
     @Override
     public long uptimeMillis() {
         long value = mUptimeMillis;
-        if (mAutoIncrement) {
-            setUptimeMillis(mUptimeMillis + 1);
-        }
         return value;
     }
 
     @Override
     public long elapsedRealtime() {
         long value = mElapsedRealtime;
-        if (mAutoIncrement) {
-            setElapsedRealtime(mElapsedRealtime + 1);
-        }
         return value;
     }
 
     @Override
     public long elapsedRealtimeNanos() {
         long value = mElapsedRealtimeNanos;
-        if (mAutoIncrement) {
-            setElapsedRealtimeNanos(mElapsedRealtimeNanos + 1);
-        }
         return value;
     }
 
     @Override
     public long currentThreadTimeMillis() {
         long value = mCurrentThreadTimeMillis;
-        if (mAutoIncrement) {
-            setCurrentThreadTimeMillis(mCurrentThreadTimeMillis + 1);
-        }
         return value;
     }
 
     @Override
     public long currentThreadTimeMicro() {
         long value = mCurrentThreadTimeMicro;
-        if (mAutoIncrement) {
-            setCurrentThreadTimeMicro(mCurrentThreadTimeMicro + 1);
-        }
         return value;
     }
 
     @Override
     public long currentTimeMicro() {
         long value = mCurrentTimeMicro;
-        if (mAutoIncrement) {
-            setCurrentTimeMicro(mCurrentTimeMicro + 1);
-        }
         return value;
     }
 
@@ -125,11 +105,6 @@ public class FakeSystemClock implements SystemClock {
         for (ClockTickListener listener : mListeners) {
             listener.onCurrentTimeMicro(mCurrentTimeMicro);
         }
-    }
-
-    /** If true, each call to get____ will be one higher than the previous call to that method. */
-    public void setAutoIncrement(boolean autoIncrement) {
-        mAutoIncrement = autoIncrement;
     }
 
     public void addListener(ClockTickListener listener) {
