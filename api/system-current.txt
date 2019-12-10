@@ -6082,6 +6082,7 @@ package android.os {
 
   public class UpdateEngine {
     ctor public UpdateEngine();
+    method @NonNull public android.os.UpdateEngine.AllocateSpaceResult allocateSpace(@NonNull String, @NonNull String[]);
     method public void applyPayload(String, long, long, String[]);
     method public void applyPayload(@NonNull android.os.ParcelFileDescriptor, long, long, @NonNull String[]);
     method public boolean bind(android.os.UpdateEngineCallback, android.os.Handler);
@@ -6094,6 +6095,11 @@ package android.os {
     method public boolean verifyPayloadMetadata(String);
   }
 
+  public static final class UpdateEngine.AllocateSpaceResult {
+    method public int errorCode();
+    method public long freeSpaceRequired();
+  }
+
   public static final class UpdateEngine.ErrorCodeConstants {
     ctor public UpdateEngine.ErrorCodeConstants();
     field public static final int DOWNLOAD_PAYLOAD_VERIFICATION_ERROR = 12; // 0xc
@@ -6102,6 +6108,7 @@ package android.os {
     field public static final int FILESYSTEM_COPIER_ERROR = 4; // 0x4
     field public static final int INSTALL_DEVICE_OPEN_ERROR = 7; // 0x7
     field public static final int KERNEL_DEVICE_OPEN_ERROR = 8; // 0x8
+    field public static final int NOT_ENOUGH_SPACE = 60; // 0x3c
     field public static final int PAYLOAD_HASH_MISMATCH_ERROR = 10; // 0xa
     field public static final int PAYLOAD_MISMATCHED_TYPE_ERROR = 6; // 0x6
     field public static final int PAYLOAD_SIZE_MISMATCH_ERROR = 11; // 0xb

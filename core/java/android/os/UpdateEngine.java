@@ -140,6 +140,14 @@ public class UpdateEngine {
          * {@code SWITCH_SLOT_ON_REBOOT=0}. See {@link #applyPayload}.
          */
         public static final int UPDATED_BUT_NOT_ACTIVE = 52;
+
+        /**
+         * Error code: there is not enough space on the device to apply the update. User should
+         * be prompted to free up space and re-try the update.
+         *
+         * <p>See {@link UpdateEngine#allocateSpace}.
+         */
+        public static final int NOT_ENOUGH_SPACE = 60;
     }
 
     /**
@@ -415,6 +423,102 @@ public class UpdateEngine {
     public boolean verifyPayloadMetadata(String payloadMetadataFilename) {
         try {
             return mUpdateEngine.verifyPayloadApplicable(payloadMetadataFilename);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return value of {@link #allocateSpace.}
+     */
+    public static final class AllocateSpaceResult {
+        private int mErrorCode = ErrorCodeConstants.SUCCESS;
+        private long mFreeSpaceRequired = 0;
+        private AllocateSpaceResult() {}
+        /**
+         * Error code.
+         *
+         * @return The following error codes:
+         * <ul>
+         * <li>{@link ErrorCodeConstants#SUCCESS} if space has been allocated
+         *         successfully.</li>
+         * <li>{@link ErrorCodeConstants#NOT_ENOUGH_SPACE} if insufficient
+         *         space.</li>
+         * <li>Other {@link ErrorCodeConstants} for other errors.</li>
+         * </ul>
+         */
+        public int errorCode() {
+            return mErrorCode;
+        }
+
+        /**
+         * Estimated total space that needs to be available on the userdata partition to apply the
+         * payload (in bytes).
+         *
+         * <p>
+         * Note that in practice, more space needs to be made available before applying the payload
+         * to keep the device working.
+         *
+         * @return The following values:
+         * <ul>
+         * <li>zero if {@link #errorCode} returns {@link ErrorCodeConstants#SUCCESS}</li>
+         * <li>non-zero if {@link #errorCode} returns {@link ErrorCodeConstants#NOT_ENOUGH_SPACE}.
+         * Value is the estimated total space required on userdata partition.</li>
+         * </ul>
+         * @throws IllegalStateException if {@link #errorCode} is not one of the above.
+         *
+         */
+        public long freeSpaceRequired() {
+            if (mErrorCode == ErrorCodeConstants.SUCCESS) {
+                return 0;
+            }
+            if (mErrorCode == ErrorCodeConstants.NOT_ENOUGH_SPACE) {
+                return mFreeSpaceRequired;
+            }
+            throw new IllegalStateException(String.format(
+                    "freeSpaceRequired() is not available when error code is %d", mErrorCode));
+        }
+    }
+
+    /**
+     * Initialize partitions for a payload associated with the given payload
+     * metadata {@code payloadMetadataFilename} by preallocating required space.
+     *
+     * <p>This function should be called after payload has been verified after
+     * {@link #verifyPayloadMetadata}. This function does not verify whether
+     * the given payload is applicable or not.
+     *
+     * <p>Implementation of {@code allocateSpace} uses
+     * {@code headerKeyValuePairs} to determine whether space has been allocated
+     * for a different or same payload previously. If space has been allocated
+     * for a different payload before, space will be reallocated for the given
+     * payload. If space has been allocated for the same payload, no actions to
+     * storage devices are taken.
+     *
+     * <p>This function is synchronous and may take a non-trivial amount of
+     * time. Callers should call this function in a background thread.
+     *
+     * @param payloadMetadataFilename See {@link #verifyPayloadMetadata}.
+     * @param headerKeyValuePairs See {@link #applyPayload}.
+     * @return See {@link AllocateSpaceResult}.
+     */
+    @NonNull
+    public AllocateSpaceResult allocateSpace(
+                @NonNull String payloadMetadataFilename,
+                @NonNull String[] headerKeyValuePairs) {
+        AllocateSpaceResult result = new AllocateSpaceResult();
+        try {
+            result.mFreeSpaceRequired = mUpdateEngine.allocateSpaceForPayload(
+                    payloadMetadataFilename,
+                    headerKeyValuePairs);
+            result.mErrorCode = result.mFreeSpaceRequired == 0
+                    ? ErrorCodeConstants.SUCCESS
+                    : ErrorCodeConstants.NOT_ENOUGH_SPACE;
+            return result;
+        } catch (ServiceSpecificException e) {
+            result.mErrorCode = e.errorCode;
+            result.mFreeSpaceRequired = 0;
+            return result;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
