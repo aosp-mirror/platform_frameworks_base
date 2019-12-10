@@ -113,8 +113,8 @@ message Atom {
         WakeupAlarmOccurred wakeup_alarm_occurred = 35;
         KernelWakeupReported kernel_wakeup_reported = 36;
         WifiLockStateChanged wifi_lock_state_changed = 37 [(log_from_module) = "wifi"];
-        WifiSignalStrengthChanged wifi_signal_strength_changed = 38;
-        WifiScanStateChanged wifi_scan_state_changed = 39;
+        WifiSignalStrengthChanged wifi_signal_strength_changed = 38 [(log_from_module) = "wifi"];
+        WifiScanStateChanged wifi_scan_state_changed = 39 [(log_from_module) = "wifi"];
         PhoneSignalStrengthChanged phone_signal_strength_changed = 40;
         SettingChanged setting_changed = 41;
         ActivityForegroundStateChanged activity_foreground_state_changed = 42;
@@ -128,7 +128,7 @@ message Atom {
         AppStartFullyDrawn app_start_fully_drawn = 50;
         LmkKillOccurred lmk_kill_occurred = 51;
         PictureInPictureStateChanged picture_in_picture_state_changed = 52;
-        WifiMulticastLockStateChanged wifi_multicast_lock_state_changed = 53;
+        WifiMulticastLockStateChanged wifi_multicast_lock_state_changed = 53 [(log_from_module) = "wifi"];
         LmkStateChanged lmk_state_changed = 54;
         AppStartMemoryStateCaptured app_start_memory_state_captured = 55;
         ShutdownSequenceReported shutdown_sequence_reported = 56;
