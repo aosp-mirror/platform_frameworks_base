@@ -16,7 +16,7 @@
 
 package android.os.storage;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Environment;
 import android.os.Parcel;

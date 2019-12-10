@@ -17,7 +17,7 @@
 package android.preference;
 
 import android.annotation.StringRes;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;

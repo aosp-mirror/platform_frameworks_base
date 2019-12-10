@@ -964,6 +964,7 @@ java_library {
         "core/java/android/os/RemoteException.java",
         "core/java/android/util/AndroidException.java",
     ],
+    libs: [ "unsupportedappusage" ],
 
     dxflags: ["--core-library"],
     installable: false,

@@ -20,8 +20,8 @@ import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.io.PrintWriter;
 
