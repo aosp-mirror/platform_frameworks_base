@@ -13,7 +13,7 @@ android_test {
     ],
 
     static_libs: [
-        "frameworks-base-testutils",
+        "frameworks-base-testutils-minus-mockito",
         "services.core",
         "androidx.test.runner",
         "androidx.test.rules",
