@@ -6063,6 +6063,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void registerRemoteAnimations(RemoteAnimationDefinition definition) {
         mRemoteAnimationDefinition = definition;
+        if (definition != null) {
+            definition.linkToDeath(this::unregisterRemoteAnimations);
+        }
+    }
+
+    void unregisterRemoteAnimations() {
+        mRemoteAnimationDefinition = null;
     }
 
     RemoteAnimationDefinition getRemoteAnimationDefinition() {

@@ -4683,6 +4683,24 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
+    public void unregisterRemoteAnimations(IBinder token) {
+        mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
+                "unregisterRemoteAnimations");
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                return;
+            }
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                r.unregisterRemoteAnimations();
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
+    @Override
     public void registerRemoteAnimationForNextActivityStart(String packageName,
             RemoteAnimationAdapter adapter) {
         mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
