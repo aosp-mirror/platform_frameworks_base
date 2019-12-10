@@ -22,7 +22,7 @@ import static android.view.WindowManagerPolicyConstants.APPLICATION_PANEL_SUBLAY
 
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.BlendMode;

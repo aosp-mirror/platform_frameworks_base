@@ -17,7 +17,7 @@
 package android.widget;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.view.View;

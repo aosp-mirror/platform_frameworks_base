@@ -32,7 +32,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;

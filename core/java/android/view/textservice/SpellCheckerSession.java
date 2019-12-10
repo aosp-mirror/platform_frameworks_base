@@ -16,7 +16,7 @@
 
 package android.view.textservice;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
