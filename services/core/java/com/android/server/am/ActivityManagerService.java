@@ -8919,6 +8919,26 @@ public class ActivityManagerService extends IActivityManager.Stub
         return killed;
     }
 
+    /**
+     * Similar to {@link #killPids} but killing will be delayed until the device is idle
+     * and the given process is imperceptible.
+     */
+    @Override
+    public void killProcessesWhenImperceptible(int[] pids, String reason) {
+        if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.FORCE_STOP_PACKAGES);
+        }
+        int callerUid = Binder.getCallingUid();
+        long iden = Binder.clearCallingIdentity();
+        try {
+            mProcessList.killProcessesWhenImperceptible(pids, reason, callerUid);
+        } finally {
+            Binder.restoreCallingIdentity(iden);
+        }
+    }
+
     @Override
     public void hang(final IBinder who, boolean allowRestart) {
         if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
@@ -9685,7 +9705,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Utility function for addErrorToDropBox and handleStrictModeViolation's logging
      * to append various headers to the dropbox log text.
      */
-    private void appendDropBoxProcessHeaders(ProcessRecord process, String processName,
+    void appendDropBoxProcessHeaders(ProcessRecord process, String processName,
             StringBuilder sb) {
         // Watchdog thread ends up invoking this function (with
         // a null ProcessRecord) to add the stack file to dropbox.

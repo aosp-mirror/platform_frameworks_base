@@ -58,9 +58,12 @@ import android.app.ApplicationExitInfo;
 import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
+import android.app.IUidObserver;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -72,10 +75,12 @@ import android.os.AppZygote;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.DropBoxManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.StrictMode;
@@ -658,6 +663,11 @@ public final class ProcessList {
         }
     }
 
+    /**
+     * A runner to handle the imperceptible killings.
+     */
+    ImperceptibleKillRunner mImperceptibleKillRunner;
+
     ////////////////////  END FIELDS  ////////////////////
 
     ProcessList() {
@@ -737,6 +747,7 @@ public final class ProcessList {
                         EVENT_INPUT, this::handleZygoteMessages);
             }
             mAppExitInfoTracker.init(mService, sKillThread.getLooper());
+            mImperceptibleKillRunner = new ImperceptibleKillRunner(sKillThread.getLooper());
         }
     }
 
@@ -3684,5 +3695,294 @@ public final class ProcessList {
 
         mAppExitInfoTracker.scheduleNoteAppKill(pid, uid, reason, subReason, msg);
     }
+
+    /**
+     * Schedule to kill the given pids when the device is idle
+     */
+    void killProcessesWhenImperceptible(int[] pids, String reason, int requester) {
+        if (ArrayUtils.isEmpty(pids)) {
+            return;
+        }
+
+        synchronized (mService) {
+            ProcessRecord app;
+            for (int i = 0; i < pids.length; i++) {
+                synchronized (mService.mPidsSelfLocked) {
+                    app = mService.mPidsSelfLocked.get(pids[i]);
+                }
+                if (app != null) {
+                    mImperceptibleKillRunner.enqueueLocked(app, reason, requester);
+                }
+            }
+        }
+    }
+
+    private final class ImperceptibleKillRunner extends IUidObserver.Stub {
+        private static final String EXTRA_PID = "pid";
+        private static final String EXTRA_UID = "uid";
+        private static final String EXTRA_TIMESTAMP = "timestamp";
+        private static final String EXTRA_REASON = "reason";
+        private static final String EXTRA_REQUESTER = "requester";
+
+        private static final String DROPBOX_TAG_IMPERCEPTIBLE_KILL = "imperceptible_app_kill";
+
+        // uid -> killing information mapping
+        private SparseArray<List<Bundle>> mWorkItems = new SparseArray<List<Bundle>>();
+
+        // The last time the various processes have been killed by us.
+        private ProcessMap<Long> mLastProcessKillTimes = new ProcessMap<>();
+
+        // Device idle or not.
+        private volatile boolean mIdle;
+        private boolean mUidObserverEnabled;
+        private Handler mHandler;
+        private IdlenessReceiver mReceiver;
+
+        private final class H extends Handler {
+            static final int MSG_DEVICE_IDLE = 0;
+            static final int MSG_UID_GONE = 1;
+            static final int MSG_UID_STATE_CHANGED = 2;
+
+            H(Looper looper) {
+                super(looper);
+            }
+
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_DEVICE_IDLE:
+                        handleDeviceIdle();
+                        break;
+                    case MSG_UID_GONE:
+                        handleUidGone(msg.arg1 /* uid */);
+                        break;
+                    case MSG_UID_STATE_CHANGED:
+                        handleUidStateChanged(msg.arg1 /* uid */, msg.arg2 /* procState */);
+                        break;
+                }
+            }
+        }
+
+        private final class IdlenessReceiver extends BroadcastReceiver {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final PowerManager pm = mService.mContext.getSystemService(PowerManager.class);
+                switch (intent.getAction()) {
+                    case PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED:
+                        notifyDeviceIdleness(pm.isLightDeviceIdleMode());
+                        break;
+                    case PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED:
+                        notifyDeviceIdleness(pm.isDeviceIdleMode());
+                        break;
+                }
+            }
+        }
+
+        ImperceptibleKillRunner(Looper looper) {
+            mHandler = new H(looper);
+        }
+
+        @GuardedBy("mService")
+        boolean enqueueLocked(ProcessRecord app, String reason, int requester) {
+            // Throttle the killing request for potential bad app to avoid cpu thrashing
+            Long last = app.isolated ? null : mLastProcessKillTimes.get(app.processName, app.uid);
+            if (last != null && SystemClock.uptimeMillis() < last + MIN_CRASH_INTERVAL) {
+                return false;
+            }
+
+            final Bundle bundle = new Bundle();
+            bundle.putInt(EXTRA_PID, app.pid);
+            bundle.putInt(EXTRA_UID, app.uid);
+            // Since the pid could be reused, let's get the actual start time of each process
+            bundle.putLong(EXTRA_TIMESTAMP, app.startTime);
+            bundle.putString(EXTRA_REASON, reason);
+            bundle.putInt(EXTRA_REQUESTER, requester);
+            List<Bundle> list = mWorkItems.get(app.uid);
+            if (list == null) {
+                list = new ArrayList<Bundle>();
+                mWorkItems.put(app.uid, list);
+            }
+            list.add(bundle);
+            if (mReceiver == null) {
+                mReceiver = new IdlenessReceiver();
+                IntentFilter filter = new IntentFilter(
+                        PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
+                filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+                mService.mContext.registerReceiver(mReceiver, filter);
+            }
+            return true;
+        }
+
+        void notifyDeviceIdleness(boolean idle) {
+            // No lock is held regarding mIdle, this function is the only updater and caller
+            // won't re-entry.
+            boolean diff = mIdle != idle;
+            mIdle = idle;
+            if (diff && idle) {
+                synchronized (this) {
+                    if (mWorkItems.size() > 0) {
+                        mHandler.sendEmptyMessage(H.MSG_DEVICE_IDLE);
+                    }
+                }
+            }
+        }
+
+        private void handleDeviceIdle() {
+            final DropBoxManager dbox = mService.mContext.getSystemService(DropBoxManager.class);
+            final boolean logToDropbox = dbox != null
+                    && dbox.isTagEnabled(DROPBOX_TAG_IMPERCEPTIBLE_KILL);
+
+            synchronized (mService) {
+                final int size = mWorkItems.size();
+                for (int i = size - 1; mIdle && i >= 0; i--) {
+                    List<Bundle> list = mWorkItems.valueAt(i);
+                    final int len = list.size();
+                    for (int j = len - 1; mIdle && j >= 0; j--) {
+                        Bundle bundle = list.get(j);
+                        if (killProcessLocked(
+                                bundle.getInt(EXTRA_PID),
+                                bundle.getInt(EXTRA_UID),
+                                bundle.getLong(EXTRA_TIMESTAMP),
+                                bundle.getString(EXTRA_REASON),
+                                bundle.getInt(EXTRA_REQUESTER),
+                                dbox, logToDropbox)) {
+                            list.remove(j);
+                        }
+                    }
+                    if (list.size() == 0) {
+                        mWorkItems.removeAt(i);
+                    }
+                }
+                registerUidObserverIfNecessaryLocked();
+            }
+        }
+
+        @GuardedBy("mService")
+        private void registerUidObserverIfNecessaryLocked() {
+            // If there are still works remaining, register UID observer
+            if (!mUidObserverEnabled && mWorkItems.size() > 0) {
+                mUidObserverEnabled = true;
+                mService.registerUidObserver(this,
+                        ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_GONE,
+                        ActivityManager.PROCESS_STATE_UNKNOWN, "android");
+            } else if (mUidObserverEnabled && mWorkItems.size() == 0) {
+                mUidObserverEnabled = false;
+                mService.unregisterUidObserver(this);
+            }
+        }
+
+        /**
+         * Kill the given processes, if they are not exempted.
+         *
+         * @return True if the process is killed, or it's gone already, or we are not allowed to
+         *         kill it (one of the packages in this process is being exempted).
+         */
+        @GuardedBy("mService")
+        private boolean killProcessLocked(final int pid, final int uid, final long timestamp,
+                final String reason, final int requester, final DropBoxManager dbox,
+                final boolean logToDropbox) {
+            ProcessRecord app = null;
+            synchronized (mService.mPidsSelfLocked) {
+                app = mService.mPidsSelfLocked.get(pid);
+            }
+
+            if (app == null || app.pid != pid || app.uid != uid || app.startTime != timestamp) {
+                // This process record has been reused for another process, meaning the old process
+                // has been gone.
+                return true;
+            }
+
+            final int pkgSize = app.pkgList.size();
+            for (int ip = 0; ip < pkgSize; ip++) {
+                if (mService.mConstants.IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.contains(
+                        app.pkgList.keyAt(ip))) {
+                    // One of the packages in this process is exempted
+                    return true;
+                }
+            }
+
+            if (mService.mConstants.IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES.contains(
+                    app.getReportedProcState())) {
+                // We need to reschedule it.
+                return false;
+            }
+
+            app.kill(reason, ApplicationExitInfo.REASON_OTHER, true);
+
+            if (!app.isolated) {
+                mLastProcessKillTimes.put(app.processName, app.uid, SystemClock.uptimeMillis());
+            }
+
+            if (logToDropbox) {
+                final long now = SystemClock.elapsedRealtime();
+                final StringBuilder sb = new StringBuilder();
+                mService.appendDropBoxProcessHeaders(app, app.processName, sb);
+                sb.append("Reason: " + reason).append("\n");
+                sb.append("Requester UID: " + requester).append("\n");
+                dbox.addText(DROPBOX_TAG_IMPERCEPTIBLE_KILL, sb.toString());
+            }
+            return true;
+        }
+
+        private void handleUidStateChanged(int uid, int procState) {
+            final DropBoxManager dbox = mService.mContext.getSystemService(DropBoxManager.class);
+            final boolean logToDropbox = dbox != null
+                    && dbox.isTagEnabled(DROPBOX_TAG_IMPERCEPTIBLE_KILL);
+            synchronized (mService) {
+                if (mIdle && !mService.mConstants
+                        .IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES.contains(procState)) {
+                    List<Bundle> list = mWorkItems.get(uid);
+                    if (list != null) {
+                        final int len = list.size();
+                        for (int j = len - 1; mIdle && j >= 0; j--) {
+                            Bundle bundle = list.get(j);
+                            if (killProcessLocked(
+                                    bundle.getInt(EXTRA_PID),
+                                    bundle.getInt(EXTRA_UID),
+                                    bundle.getLong(EXTRA_TIMESTAMP),
+                                    bundle.getString(EXTRA_REASON),
+                                    bundle.getInt(EXTRA_REQUESTER),
+                                    dbox, logToDropbox)) {
+                                list.remove(j);
+                            }
+                        }
+                        if (list.size() == 0) {
+                            mWorkItems.remove(uid);
+                        }
+                        registerUidObserverIfNecessaryLocked();
+                    }
+                }
+            }
+        }
+
+        private void handleUidGone(int uid) {
+            synchronized (mService) {
+                mWorkItems.remove(uid);
+                registerUidObserverIfNecessaryLocked();
+            }
+        }
+
+        @Override
+        public void onUidGone(int uid, boolean disabled) {
+            mHandler.obtainMessage(H.MSG_UID_GONE, uid, 0).sendToTarget();
+        }
+
+        @Override
+        public void onUidActive(int uid) {
+        }
+
+        @Override
+        public void onUidIdle(int uid, boolean disabled) {
+        }
+
+        @Override
+        public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
+            mHandler.obtainMessage(H.MSG_UID_STATE_CHANGED, uid, procState).sendToTarget();
+        }
+
+        @Override
+        public void onUidCachedChanged(int uid, boolean cached) {
+        }
+    };
 }
 

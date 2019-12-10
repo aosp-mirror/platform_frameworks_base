@@ -30,10 +30,14 @@ import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Settings constants that can modify the activity manager's behavior.
@@ -65,6 +69,10 @@ final class ActivityManagerConstants extends ContentObserver {
             = "service_usage_interaction_time";
     private static final String KEY_USAGE_STATS_INTERACTION_INTERVAL
             = "usage_stats_interaction_interval";
+    private static final String KEY_IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES =
+            "imperceptible_kill_exempt_packages";
+    private static final String KEY_IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES =
+            "imperceptible_kill_exempt_proc_states";
     static final String KEY_SERVICE_RESTART_DURATION = "service_restart_duration";
     static final String KEY_SERVICE_RESET_RUN_DURATION = "service_reset_run_duration";
     static final String KEY_SERVICE_RESTART_DURATION_FACTOR = "service_restart_duration_factor";
@@ -282,6 +290,19 @@ final class ActivityManagerConstants extends ContentObserver {
     // memory trimming.
     public int CUR_TRIM_CACHED_PROCESSES;
 
+    /**
+     * Packages that can't be killed even if it's requested to be killed on imperceptible.
+     */
+    public ArraySet<String> IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES = new ArraySet<String>();
+
+    /**
+     * Proc State that can't be killed even if it's requested to be killed on imperceptible.
+     */
+    public ArraySet<Integer> IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES = new ArraySet<Integer>();
+
+    private List<String> mDefaultImperceptibleKillExemptPackages;
+    private List<Integer> mDefaultImperceptibleKillExemptProcStates;
+
     @SuppressWarnings("unused")
     private static final int OOMADJ_UPDATE_POLICY_SLOW = 0;
     private static final int OOMADJ_UPDATE_POLICY_QUICK = 1;
@@ -332,6 +353,10 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_OOMADJ_UPDATE_POLICY:
                                 updateOomAdjUpdatePolicy();
                                 break;
+                            case KEY_IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES:
+                            case KEY_IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES:
+                                updateImperceptibleKillExemptions();
+                                break;
                             default:
                                 break;
                         }
@@ -350,6 +375,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 MIN_AUTOMATIC_HEAP_DUMP_PSS_THRESHOLD_BYTES,
                 context.getResources().getInteger(
                         com.android.internal.R.integer.config_debugSystemServerPssThresholdBytes));
+        mDefaultImperceptibleKillExemptPackages = Arrays.asList(
+                context.getResources().getStringArray(
+                com.android.internal.R.array.config_defaultImperceptibleKillingExemptionPkgs));
+        mDefaultImperceptibleKillExemptProcStates = Arrays.stream(
+                context.getResources().getIntArray(
+                com.android.internal.R.array.config_defaultImperceptibleKillingExemptionProcStates))
+                .boxed().collect(Collectors.toList());
     }
 
     public void start(ContentResolver resolver) {
@@ -371,6 +403,7 @@ final class ActivityManagerConstants extends ContentObserver {
         updateActivityStartsLoggingEnabled();
         updateBackgroundActivityStarts();
         updateOomAdjUpdatePolicy();
+        updateImperceptibleKillExemptions();
     }
 
     public void setOverrideMaxCachedProcesses(int value) {
@@ -497,6 +530,29 @@ final class ActivityManagerConstants extends ContentObserver {
                 == OOMADJ_UPDATE_POLICY_QUICK;
     }
 
+    private void updateImperceptibleKillExemptions() {
+        IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.clear();
+        IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.addAll(mDefaultImperceptibleKillExemptPackages);
+        String val = DeviceConfig.getString(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES, null);
+        if (!TextUtils.isEmpty(val)) {
+            IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.addAll(Arrays.asList(val.split(",")));
+        }
+
+        IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES.clear();
+        IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES.addAll(mDefaultImperceptibleKillExemptProcStates);
+        val = DeviceConfig.getString(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES, null);
+        if (!TextUtils.isEmpty(val)) {
+            Arrays.asList(val.split(",")).stream().forEach((v) -> {
+                try {
+                    IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES.add(Integer.parseInt(v));
+                } catch (NumberFormatException e) {
+                }
+            });
+        }
+    }
+
     private void updateEnableAutomaticSystemServerHeapDumps() {
         if (!mSystemServerAutomaticHeapDumpEnabled) {
             Slog.wtf(TAG,
@@ -603,6 +659,10 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(MEMORY_INFO_THROTTLE_TIME);
         pw.print("  "); pw.print(KEY_TOP_TO_FGS_GRACE_DURATION); pw.print("=");
         pw.println(TOP_TO_FGS_GRACE_DURATION);
+        pw.print("  "); pw.print(KEY_IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES); pw.print("=");
+        pw.println(Arrays.toString(IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES.toArray()));
+        pw.print("  "); pw.print(KEY_IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES); pw.print("=");
+        pw.println(Arrays.toString(IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.toArray()));
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
