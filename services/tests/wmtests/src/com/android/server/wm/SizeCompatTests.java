@@ -265,7 +265,8 @@ public class SizeCompatTests extends ActivityTestsBase {
         setUpApp(new TestActivityDisplay.Builder(mService, 1000, 2500).build());
 
         prepareUnresizable(1.4f /* maxAspect */, SCREEN_ORIENTATION_LANDSCAPE);
-        assertTrue(mActivity.inSizeCompatMode());
+        // The display aspect ratio 2.5 > 1.4 (max of activity), so the size is fitted.
+        assertFalse(mActivity.inSizeCompatMode());
 
         final Rect originalBounds = new Rect(mActivity.getBounds());
         final Rect originalAppBounds = new Rect(mActivity.getWindowConfiguration().getAppBounds());

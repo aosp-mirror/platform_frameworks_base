@@ -6145,10 +6145,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mCompatDisplayInsets == null || !shouldUseSizeCompatMode()) {
             return false;
         }
-        final Configuration resolvedConfig = getResolvedOverrideConfiguration();
-        final Rect resolvedAppBounds = resolvedConfig.windowConfiguration.getAppBounds();
-        if (resolvedAppBounds == null) {
-            // The override configuration has not been resolved yet.
+        final Rect appBounds = getConfiguration().windowConfiguration.getAppBounds();
+        if (appBounds == null) {
+            // The app bounds hasn't been computed yet.
             return false;
         }
 
@@ -6156,13 +6155,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Although colorMode, screenLayout, smallestScreenWidthDp are also fixed, generally these
         // fields should be changed with density and bounds, so here only compares the most
         // significant field.
-        if (parentConfig.densityDpi != resolvedConfig.densityDpi) {
+        if (parentConfig.densityDpi != getConfiguration().densityDpi) {
             return true;
         }
 
         final Rect parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
-        final int appWidth = resolvedAppBounds.width();
-        final int appHeight = resolvedAppBounds.height();
+        final int appWidth = appBounds.width();
+        final int appHeight = appBounds.height();
         final int parentAppWidth = parentAppBounds.width();
         final int parentAppHeight = parentAppBounds.height();
         if (parentAppWidth == appWidth && parentAppHeight == appHeight) {
@@ -6181,7 +6180,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // The rest of the condition is that only one side is smaller than the parent, but it still
         // needs to exclude the cases where the size is limited by the fixed aspect ratio.
         if (info.maxAspectRatio > 0) {
-            final float aspectRatio = Math.max(appWidth, appHeight) / Math.min(appWidth, appHeight);
+            final float aspectRatio =
+                    (float) Math.max(appWidth, appHeight) / Math.min(appWidth, appHeight);
             if (aspectRatio >= info.maxAspectRatio) {
                 // The current size has reached the max aspect ratio.
                 return false;
