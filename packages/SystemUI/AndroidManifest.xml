@@ -72,7 +72,7 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.OVERRIDE_WIFI_CONFIG" />
     <uses-permission android:name="android.permission.MANAGE_NETWORK_POLICY" />
-    <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
+    <uses-permission android:name="android.permission.OBSERVE_NETWORK_POLICY" />
     <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
     <uses-permission android:name="android.permission.TETHER_PRIVILEGED" />
     <uses-permission android:name="android.permission.READ_NETWORK_USAGE_HISTORY" />
