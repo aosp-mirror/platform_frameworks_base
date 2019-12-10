@@ -196,6 +196,16 @@ ProtectedMember: android.service.contentcapture.ContentCaptureService#dump(java.
 ProtectedMember: android.service.notification.NotificationAssistantService#attachBaseContext(android.content.Context):
     
 
+PublicTypedef: android.content.integrity.AtomicFormula.Key: Don't expose @IntDef: @Key must be hidden.
+
+PublicTypedef: android.content.integrity.AtomicFormula.Operator: Don't expose @IntDef: @Operator must be hidden.
+
+PublicTypedef: android.content.integrity.CompoundFormula.Connector: Don't expose @IntDef: @Connector must be hidden.
+
+PublicTypedef: android.content.integrity.Formula.Tag: Don't expose @IntDef: @Tag must be hidden.
+
+PublicTypedef: android.content.integrity.Rule.Effect: Don't expose @IntDef: @Effect must be hidden.
+
 
 SamShouldBeLast: android.accounts.AccountManager#addAccount(String, String, String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
     

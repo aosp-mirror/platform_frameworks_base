@@ -2426,6 +2426,12 @@ ProtectedMember: android.view.View#resetResolvedDrawables():
 ProtectedMember: android.view.ViewGroup#resetResolvedDrawables():
     
 
+PublicTypedef: android.os.HwParcel.Status: Don't expose @IntDef: @Status must be hidden.
+
+PublicTypedef: android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability: Don't expose @IntDef: @MmTelCapability must be hidden.
+
+PublicTypedef: android.telephony.ims.feature.MmTelFeature.ProcessCallResult: Don't expose @IntDef: @ProcessCallResult must be hidden.
+
 
 RawAidl: android.telephony.mbms.vendor.MbmsDownloadServiceBase:
     
