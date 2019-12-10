@@ -17,6 +17,8 @@
 package android.os;
 
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
+import static android.os.BatteryStatsManager.NUM_WIFI_STATES;
+import static android.os.BatteryStatsManager.NUM_WIFI_SUPPL_STATES;
 
 import android.annotation.IntDef;
 import android.annotation.UnsupportedAppUsage;
@@ -24,6 +26,8 @@ import android.app.ActivityManager;
 import android.app.job.JobParameters;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.os.BatteryStatsManager.WifiState;
+import android.os.BatteryStatsManager.WifiSupplState;
 import android.server.ServerProtoEnums;
 import android.service.batterystats.BatteryStatsServiceDumpHistoryProto;
 import android.service.batterystats.BatteryStatsServiceDumpProto;
@@ -2458,41 +2462,6 @@ public abstract class BatteryStats implements Parcelable {
      */
     public abstract Timer getPhoneDataConnectionTimer(int dataType);
 
-    public static final int WIFI_SUPPL_STATE_INVALID = 0;
-    public static final int WIFI_SUPPL_STATE_DISCONNECTED = 1;
-    public static final int WIFI_SUPPL_STATE_INTERFACE_DISABLED = 2;
-    public static final int WIFI_SUPPL_STATE_INACTIVE = 3;
-    public static final int WIFI_SUPPL_STATE_SCANNING = 4;
-    public static final int WIFI_SUPPL_STATE_AUTHENTICATING = 5;
-    public static final int WIFI_SUPPL_STATE_ASSOCIATING = 6;
-    public static final int WIFI_SUPPL_STATE_ASSOCIATED = 7;
-    public static final int WIFI_SUPPL_STATE_FOUR_WAY_HANDSHAKE = 8;
-    public static final int WIFI_SUPPL_STATE_GROUP_HANDSHAKE = 9;
-    public static final int WIFI_SUPPL_STATE_COMPLETED = 10;
-    public static final int WIFI_SUPPL_STATE_DORMANT = 11;
-    public static final int WIFI_SUPPL_STATE_UNINITIALIZED = 12;
-
-    public static final int NUM_WIFI_SUPPL_STATES = WIFI_SUPPL_STATE_UNINITIALIZED+1;
-
-    /** @hide */
-    @IntDef(flag = true, prefix = { "WIFI_SUPPL_STATE_" }, value = {
-            WIFI_SUPPL_STATE_INVALID,
-            WIFI_SUPPL_STATE_DISCONNECTED,
-            WIFI_SUPPL_STATE_INTERFACE_DISABLED,
-            WIFI_SUPPL_STATE_INACTIVE,
-            WIFI_SUPPL_STATE_SCANNING,
-            WIFI_SUPPL_STATE_AUTHENTICATING,
-            WIFI_SUPPL_STATE_ASSOCIATING,
-            WIFI_SUPPL_STATE_ASSOCIATED,
-            WIFI_SUPPL_STATE_FOUR_WAY_HANDSHAKE,
-            WIFI_SUPPL_STATE_GROUP_HANDSHAKE,
-            WIFI_SUPPL_STATE_COMPLETED,
-            WIFI_SUPPL_STATE_DORMANT,
-            WIFI_SUPPL_STATE_UNINITIALIZED,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface WifiSupplState {}
-
     static final String[] WIFI_SUPPL_STATE_NAMES = {
         "invalid", "disconn", "disabled", "inactive", "scanning",
         "authenticating", "associating", "associated", "4-way-handshake",
@@ -2634,31 +2603,6 @@ public abstract class BatteryStats implements Parcelable {
      */
     @UnsupportedAppUsage
     public abstract long getGlobalWifiRunningTime(long elapsedRealtimeUs, int which);
-
-    public static final int WIFI_STATE_OFF = 0;
-    public static final int WIFI_STATE_OFF_SCANNING = 1;
-    public static final int WIFI_STATE_ON_NO_NETWORKS = 2;
-    public static final int WIFI_STATE_ON_DISCONNECTED = 3;
-    public static final int WIFI_STATE_ON_CONNECTED_STA = 4;
-    public static final int WIFI_STATE_ON_CONNECTED_P2P = 5;
-    public static final int WIFI_STATE_ON_CONNECTED_STA_P2P = 6;
-    public static final int WIFI_STATE_SOFT_AP = 7;
-
-    public static final int NUM_WIFI_STATES = WIFI_STATE_SOFT_AP + 1;
-
-    /** @hide */
-    @IntDef(flag = true, prefix = { "WIFI_STATE_" }, value = {
-            WIFI_STATE_OFF,
-            WIFI_STATE_OFF_SCANNING,
-            WIFI_STATE_ON_NO_NETWORKS,
-            WIFI_STATE_ON_DISCONNECTED,
-            WIFI_STATE_ON_CONNECTED_STA,
-            WIFI_STATE_ON_CONNECTED_P2P,
-            WIFI_STATE_ON_CONNECTED_STA_P2P,
-            WIFI_STATE_SOFT_AP
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface WifiState {}
 
     static final String[] WIFI_STATE_NAMES = {
         "off", "scanning", "no_net", "disconn",

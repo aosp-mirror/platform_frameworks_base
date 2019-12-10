@@ -6203,6 +6203,27 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiScanStoppedFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiState(int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiSupplicantStateChanged(int, boolean);
+    field public static final int WIFI_STATE_OFF = 0; // 0x0
+    field public static final int WIFI_STATE_OFF_SCANNING = 1; // 0x1
+    field public static final int WIFI_STATE_ON_CONNECTED_P2P = 5; // 0x5
+    field public static final int WIFI_STATE_ON_CONNECTED_STA = 4; // 0x4
+    field public static final int WIFI_STATE_ON_CONNECTED_STA_P2P = 6; // 0x6
+    field public static final int WIFI_STATE_ON_DISCONNECTED = 3; // 0x3
+    field public static final int WIFI_STATE_ON_NO_NETWORKS = 2; // 0x2
+    field public static final int WIFI_STATE_SOFT_AP = 7; // 0x7
+    field public static final int WIFI_SUPPL_STATE_ASSOCIATED = 7; // 0x7
+    field public static final int WIFI_SUPPL_STATE_ASSOCIATING = 6; // 0x6
+    field public static final int WIFI_SUPPL_STATE_AUTHENTICATING = 5; // 0x5
+    field public static final int WIFI_SUPPL_STATE_COMPLETED = 10; // 0xa
+    field public static final int WIFI_SUPPL_STATE_DISCONNECTED = 1; // 0x1
+    field public static final int WIFI_SUPPL_STATE_DORMANT = 11; // 0xb
+    field public static final int WIFI_SUPPL_STATE_FOUR_WAY_HANDSHAKE = 8; // 0x8
+    field public static final int WIFI_SUPPL_STATE_GROUP_HANDSHAKE = 9; // 0x9
+    field public static final int WIFI_SUPPL_STATE_INACTIVE = 3; // 0x3
+    field public static final int WIFI_SUPPL_STATE_INTERFACE_DISABLED = 2; // 0x2
+    field public static final int WIFI_SUPPL_STATE_INVALID = 0; // 0x0
+    field public static final int WIFI_SUPPL_STATE_SCANNING = 4; // 0x4
+    field public static final int WIFI_SUPPL_STATE_UNINITIALIZED = 12; // 0xc
   }
 
   public class Binder implements android.os.IBinder {

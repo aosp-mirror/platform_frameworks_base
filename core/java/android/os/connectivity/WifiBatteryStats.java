@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.BatteryStats;
+import android.os.BatteryStatsManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -46,9 +47,9 @@ public final class WifiBatteryStats implements Parcelable {
     private long mEnergyConsumedMaMillis = 0;
     private long mNumAppScanRequest = 0;
     private long[] mTimeInStateMillis =
-        new long[BatteryStats.NUM_WIFI_STATES];
+        new long[BatteryStatsManager.NUM_WIFI_STATES];
     private long[] mTimeInSupplicantStateMillis =
-        new long[BatteryStats.NUM_WIFI_SUPPL_STATES];
+        new long[BatteryStatsManager.NUM_WIFI_SUPPL_STATES];
     private long[] mTimeInRxSignalStrengthLevelMillis =
         new long[BatteryStats.NUM_WIFI_SIGNAL_STRENGTH_BINS];
     private long mMonitoredRailChargeConsumedMaMillis = 0;
@@ -369,7 +370,7 @@ public final class WifiBatteryStats implements Parcelable {
     /** @hide */
     public void setTimeInStateMillis(long[] t) {
         mTimeInStateMillis = Arrays.copyOfRange(t, 0,
-                Math.min(t.length, BatteryStats.NUM_WIFI_STATES));
+                Math.min(t.length, BatteryStatsManager.NUM_WIFI_STATES));
         return;
     }
 
@@ -383,7 +384,7 @@ public final class WifiBatteryStats implements Parcelable {
     /** @hide */
     public void setTimeInSupplicantStateMillis(long[] t) {
         mTimeInSupplicantStateMillis = Arrays.copyOfRange(
-                t, 0, Math.min(t.length, BatteryStats.NUM_WIFI_SUPPL_STATES));
+                t, 0, Math.min(t.length, BatteryStatsManager.NUM_WIFI_SUPPL_STATES));
         return;
     }
 
