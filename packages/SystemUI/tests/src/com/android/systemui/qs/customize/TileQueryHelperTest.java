@@ -120,7 +120,6 @@ public class TileQueryHelperTest extends SysuiTestCase {
         ).when(mQSTileHost).createTile(anyString());
 
         FakeSystemClock clock = new FakeSystemClock();
-        clock.setAutoIncrement(false);
         mMainExecutor = new FakeExecutor(clock);
         mBgExecutor = new FakeExecutor(clock);
         mTileQueryHelper = new TileQueryHelper(mContext, mMainExecutor, mBgExecutor);
