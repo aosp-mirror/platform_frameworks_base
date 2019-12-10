@@ -6533,7 +6533,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (mCompatDisplayInsets != null) {
             // The override changes can only be obtained from display, because we don't have the
             // difference of full configuration in each hierarchy.
-            final int displayChanges = display.getLastOverrideConfigurationChanges();
+            final int displayChanges = display.getCurrentOverrideConfigurationChanges();
             final int orientationChanges = CONFIG_WINDOW_CONFIGURATION
                     | CONFIG_SCREEN_SIZE | CONFIG_ORIENTATION;
             final boolean hasNonOrienSizeChanged = hasResizeChange(displayChanges)

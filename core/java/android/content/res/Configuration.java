@@ -452,6 +452,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if ((diff & ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE) != 0) {
             list.add("CONFIG_SMALLEST_SCREEN_SIZE");
         }
+        if ((diff & ActivityInfo.CONFIG_DENSITY) != 0) {
+            list.add("CONFIG_DENSITY");
+        }
         if ((diff & ActivityInfo.CONFIG_LAYOUT_DIRECTION) != 0) {
             list.add("CONFIG_LAYOUT_DIRECTION");
         }
@@ -460,6 +463,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         if ((diff & ActivityInfo.CONFIG_ASSETS_PATHS) != 0) {
             list.add("CONFIG_ASSETS_PATHS");
+        }
+        if ((diff & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0) {
+            list.add("CONFIG_WINDOW_CONFIGURATION");
         }
         StringBuilder builder = new StringBuilder("{");
         for (int i = 0, n = list.size(); i < n; i++) {

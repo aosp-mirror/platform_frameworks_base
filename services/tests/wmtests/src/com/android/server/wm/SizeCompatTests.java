@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
@@ -27,7 +26,7 @@ import static android.view.Surface.ROTATION_90;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 
@@ -36,7 +35,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -54,7 +52,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for Size Compatibility mode.
@@ -317,37 +314,35 @@ public class SizeCompatTests extends ActivityTestsBase {
     @Test
     public void testResetNonVisibleActivity() {
         setUpApp(new TestActivityDisplay.Builder(mService, 1000, 2500).build());
-        final ActivityDisplay display = mStack.getDisplay();
-        spyOn(display);
-
         prepareUnresizable(1.5f, SCREEN_ORIENTATION_UNSPECIFIED);
+        final ActivityDisplay display = mStack.getDisplay();
+        // Resize the display so the activity is in size compatibility mode.
+        resizeDisplay(display, 900, 1800);
+
         mActivity.setState(STOPPED, "testSizeCompatMode");
         mActivity.mVisibleRequested = false;
         mActivity.app.setReportedProcState(ActivityManager.PROCESS_STATE_CACHED_ACTIVITY);
-        // Make the parent bounds to be different so the activity is in size compatibility mode.
-        mTask.getWindowConfiguration().setAppBounds(new Rect(0, 0, 600, 1200));
 
         // Simulate the display changes orientation.
-        when(display.getLastOverrideConfigurationChanges()).thenReturn(
-                ActivityInfo.CONFIG_SCREEN_SIZE | CONFIG_ORIENTATION
-                        | ActivityInfo.CONFIG_WINDOW_CONFIGURATION);
-        mActivity.onConfigurationChanged(mTask.getConfiguration());
-        when(display.getLastOverrideConfigurationChanges()).thenCallRealMethod();
-        // The override configuration should not change so it is still in size compatibility mode.
+        final Configuration c = new Configuration();
+        display.getDisplayRotation().setRotation(ROTATION_90);
+        display.computeScreenConfiguration(c);
+        display.onRequestedOverrideConfigurationChanged(c);
+        // Size compatibility mode is able to handle orientation change so the process shouldn't be
+        // restarted and the override configuration won't be cleared.
+        verify(mActivity, never()).restartProcessIfVisible();
         assertTrue(mActivity.inSizeCompatMode());
 
         // Change display density
-        final DisplayContent displayContent = mStack.getDisplay().mDisplayContent;
-        displayContent.mBaseDisplayDensity = (int) (0.7f * displayContent.mBaseDisplayDensity);
-        final Configuration c = new Configuration();
-        displayContent.computeScreenConfiguration(c);
+        display.mBaseDisplayDensity = (int) (0.7f * display.mBaseDisplayDensity);
+        display.computeScreenConfiguration(c);
         mService.mAmInternal = mock(ActivityManagerInternal.class);
-        mStack.getDisplay().onRequestedOverrideConfigurationChanged(c);
+        display.onRequestedOverrideConfigurationChanged(c);
 
         // The override configuration should be reset and the activity's process will be killed.
         assertFalse(mActivity.inSizeCompatMode());
         verify(mActivity).restartProcessIfVisible();
-        mLockRule.runWithScissors(mService.mH, () -> { }, TimeUnit.SECONDS.toMillis(3));
+        waitHandlerIdle(mService.mH);
         verify(mService.mAmInternal).killProcess(
                 eq(mActivity.app.mName), eq(mActivity.app.mUid), anyString());
     }
@@ -362,7 +357,6 @@ public class SizeCompatTests extends ActivityTestsBase {
         ActivityRecord activity = mActivity;
         activity.setState(ActivityStack.ActivityState.RESUMED, "testHandleActivitySizeCompatMode");
         prepareUnresizable(-1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
-        ensureActivityConfiguration();
         assertFalse(mActivity.inSizeCompatMode());
 
         final ArrayList<IBinder> compatTokens = new ArrayList<>();
