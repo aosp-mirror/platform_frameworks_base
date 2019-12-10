@@ -8592,9 +8592,6 @@ package android.os {
     field public static final int STATUS_SUCCESS = 0; // 0x0
   }
 
-  @IntDef(prefix={"STATUS_"}, value={android.os.HwParcel.STATUS_SUCCESS}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface HwParcel.Status {
-  }
-
   public interface IHwBinder {
     method public boolean linkToDeath(android.os.IHwBinder.DeathRecipient, long);
     method public android.os.IHwInterface queryLocalInterface(String);
