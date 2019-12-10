@@ -203,7 +203,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // An activity can be launched on default display.
         assertTrue(activity.canBeLaunchedOnDisplay(DEFAULT_DISPLAY));
         // An activity cannot be launched on a non-existent display.
-        assertFalse(activity.canBeLaunchedOnDisplay(DEFAULT_DISPLAY + 1));
+        assertFalse(activity.canBeLaunchedOnDisplay(Integer.MAX_VALUE));
     }
 
     @Test
