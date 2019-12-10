@@ -1,0 +1,15 @@
+{
+  "presubmit": [
+    // nextgen test only runs during postsubmit.
+    {
+      "name": "ApkVerityTest",
+      "keywords": ["nextgen"]
+    }
+  ],
+  "postsubmit": [
+    // TODO: move to presubmit once it's confirmed stable.
+    {
+      "name": "ApkVerityTest"
+    }
+  ]
+}
