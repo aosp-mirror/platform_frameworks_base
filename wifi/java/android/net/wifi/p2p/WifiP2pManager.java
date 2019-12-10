@@ -44,15 +44,15 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.util.CloseGuard;
 import android.util.Log;
 
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
-import dalvik.system.CloseGuard;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.Reference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -869,7 +869,7 @@ public class WifiP2pManager {
         private final Object mListenerMapLock = new Object();
         private int mListenerKey = 0;
 
-        private final CloseGuard mCloseGuard = CloseGuard.get();
+        private final CloseGuard mCloseGuard = new CloseGuard();
 
         /**
          * Close the current P2P connection and indicate to the P2P service that connections
@@ -888,6 +888,7 @@ public class WifiP2pManager {
 
             mAsyncChannel.disconnect();
             mCloseGuard.close();
+            Reference.reachabilityFence(this);
         }
 
         /** @hide */

@@ -51,16 +51,16 @@ import android.os.RemoteException;
 import android.os.WorkSource;
 import android.os.connectivity.WifiActivityEnergyInfo;
 import android.text.TextUtils;
+import android.util.CloseGuard;
 import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
-import dalvik.system.CloseGuard;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -3574,7 +3574,7 @@ public class WifiManager {
      */
     public class LocalOnlyHotspotReservation implements AutoCloseable {
 
-        private final CloseGuard mCloseGuard = CloseGuard.get();
+        private final CloseGuard mCloseGuard = new CloseGuard();
         private final WifiConfiguration mConfig;
         private boolean mClosed = false;
 
@@ -3601,6 +3601,8 @@ public class WifiManager {
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to stop Local Only Hotspot.");
+            } finally {
+                Reference.reachabilityFence(this);
             }
         }
 
@@ -3725,7 +3727,7 @@ public class WifiManager {
      * @hide
      */
     public class LocalOnlyHotspotSubscription implements AutoCloseable {
-        private final CloseGuard mCloseGuard = CloseGuard.get();
+        private final CloseGuard mCloseGuard = new CloseGuard();
 
         /** @hide */
         @VisibleForTesting
@@ -3740,6 +3742,8 @@ public class WifiManager {
                 mCloseGuard.close();
             } catch (Exception e) {
                 Log.e(TAG, "Failed to unregister LocalOnlyHotspotObserver.");
+            } finally {
+                Reference.reachabilityFence(this);
             }
         }
 
