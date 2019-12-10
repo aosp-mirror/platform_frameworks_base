@@ -16,7 +16,11 @@
   -->
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
-       android:shape="rectangle">
-    <corners android:radius="24dp"/>
-    <solid android:color="@color/tv_audio_recording_bar_chip_background"/>
+    android:shape="rectangle">
+
+  <corners
+      android:bottomRightRadius="8dp"
+      android:topRightRadius="8dp" />
+  <solid android:color="@color/tv_audio_recording_indicator_background" />
+
 </shape>
