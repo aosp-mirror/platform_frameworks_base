@@ -513,6 +513,11 @@ public class AndroidFuture<T> extends CompletableFuture<T> implements Parcelable
             try {
                 result = get();
             } catch (Exception t) {
+                // Exceptions coming out of get() are wrapped in ExecutionException, which is not
+                // handled by Parcel.
+                if (t instanceof ExecutionException && t.getCause() instanceof Exception) {
+                    t = (Exception) t.getCause();
+                }
                 dest.writeBoolean(true);
                 dest.writeException(t);
                 return;
