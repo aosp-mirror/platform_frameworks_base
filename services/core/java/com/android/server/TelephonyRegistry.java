@@ -358,7 +358,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
                         SubscriptionManager.getDefaultSubscriptionId());
                 int newDefaultPhoneId = intent.getIntExtra(
-                        PhoneConstants.PHONE_KEY,
+                        SubscriptionManager.EXTRA_SLOT_INDEX,
                         SubscriptionManager.getPhoneId(newDefaultSubId));
                 if (DBG) {
                     log("onReceive:current mDefaultSubId=" + mDefaultSubId
