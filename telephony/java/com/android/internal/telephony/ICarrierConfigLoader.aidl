@@ -30,7 +30,7 @@ interface ICarrierConfigLoader {
     PersistableBundle getConfigForSubIdWithFeature(int subId, String callingPackage,
             String callingFeatureId);
 
-    void overrideConfig(int subId, in PersistableBundle overrides);
+    void overrideConfig(int subId, in PersistableBundle overrides, boolean persistent);
 
     void notifyConfigChangedForSubId(int subId);
 
