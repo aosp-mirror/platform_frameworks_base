@@ -19,7 +19,7 @@ package android.content;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;

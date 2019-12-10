@@ -17,7 +17,7 @@ package android.content.res;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.om.OverlayableInfo;
 import android.content.res.loader.ResourcesProvider;
 import android.text.TextUtils;

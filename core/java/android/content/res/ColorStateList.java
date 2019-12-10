@@ -19,9 +19,18 @@ package android.content.res;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.Resources.Theme;
 import android.graphics.Color;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.util.MathUtils;
+import android.util.SparseArray;
+import android.util.StateSet;
+import android.util.Xml;
 
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
@@ -29,16 +38,6 @@ import com.android.internal.util.GrowingArrayUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
-import android.annotation.UnsupportedAppUsage;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.util.MathUtils;
-import android.util.SparseArray;
-import android.util.StateSet;
-import android.util.Xml;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;

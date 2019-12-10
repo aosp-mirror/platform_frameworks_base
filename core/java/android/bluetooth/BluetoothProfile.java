@@ -22,7 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

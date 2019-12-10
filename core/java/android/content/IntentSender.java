@@ -16,14 +16,14 @@
 
 package android.content;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AndroidException;
 

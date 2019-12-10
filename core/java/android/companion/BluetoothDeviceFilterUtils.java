@@ -21,9 +21,9 @@ import static android.text.TextUtils.firstNotEmpty;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.ScanFilter;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.wifi.ScanResult;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
