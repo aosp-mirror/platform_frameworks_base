@@ -16,7 +16,10 @@
 
 package android.bluetooth;
 
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -54,6 +57,7 @@ import java.util.List;
  *
  * @hide
  */
+@SystemApi
 public class BluetoothPbap implements BluetoothProfile {
 
     private static final String TAG = "BluetoothPbap";
@@ -75,7 +79,11 @@ public class BluetoothPbap implements BluetoothProfile {
      *  {@link BluetoothProfile#STATE_DISCONNECTING}.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
      * receive.
+     *
+     * @hide
      */
+    @SuppressLint("ActionValue")
+    @SystemApi
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
@@ -85,33 +93,16 @@ public class BluetoothPbap implements BluetoothProfile {
     private ServiceListener mServiceListener;
     private BluetoothAdapter mAdapter;
 
+    /** @hide */
     public static final int RESULT_FAILURE = 0;
+    /** @hide */
     public static final int RESULT_SUCCESS = 1;
-    /** Connection canceled before completion. */
-    public static final int RESULT_CANCELED = 2;
-
     /**
-     * An interface for notifying Bluetooth PCE IPC clients when they have
-     * been connected to the BluetoothPbap service.
+     * Connection canceled before completion.
+     *
+     * @hide
      */
-    public interface ServiceListener {
-        /**
-         * Called to notify the client when this proxy object has been
-         * connected to the BluetoothPbap service. Clients must wait for
-         * this callback before making IPC calls on the BluetoothPbap
-         * service.
-         */
-        public void onServiceConnected(BluetoothPbap proxy);
-
-        /**
-         * Called to notify the client that this proxy object has been
-         * disconnected from the BluetoothPbap service. Clients must not
-         * make IPC calls on the BluetoothPbap service after this callback.
-         * This callback will currently only occur if the application hosting
-         * the BluetoothPbap service, but may be called more often in future.
-         */
-        public void onServiceDisconnected();
-    }
+    public static final int RESULT_CANCELED = 2;
 
     private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
             new IBluetoothStateChangeCallback.Stub() {
@@ -127,6 +118,8 @@ public class BluetoothPbap implements BluetoothProfile {
 
     /**
      * Create a BluetoothPbap proxy object.
+     *
+     * @hide
      */
     public BluetoothPbap(Context context, ServiceListener l) {
         mContext = context;
@@ -181,6 +174,7 @@ public class BluetoothPbap implements BluetoothProfile {
         }
     }
 
+    /** @hide */
     protected void finalize() throws Throwable {
         try {
             close();
@@ -194,6 +188,8 @@ public class BluetoothPbap implements BluetoothProfile {
      * Other public functions of BluetoothPbap will return default error
      * results once close() has been called. Multiple invocations of close()
      * are ok.
+     *
+     * @hide
      */
     public synchronized void close() {
         IBluetoothManager mgr = mAdapter.getBluetoothManager();
@@ -210,6 +206,8 @@ public class BluetoothPbap implements BluetoothProfile {
 
     /**
      * {@inheritDoc}
+     *
+     * @hide
      */
     @Override
     public List<BluetoothDevice> getConnectedDevices() {
@@ -229,17 +227,22 @@ public class BluetoothPbap implements BluetoothProfile {
 
     /**
      * {@inheritDoc}
+     *
+     * @hide
      */
+    @SystemApi
     @Override
-    public int getConnectionState(BluetoothDevice device) {
+    public int getConnectionState(@Nullable BluetoothDevice device) {
         log("getConnectionState: device=" + device);
-        final IBluetoothPbap service = mService;
-        if (service == null) {
-            Log.w(TAG, "Proxy not attached to service");
-            return BluetoothProfile.STATE_DISCONNECTED;
-        }
         try {
-            return service.getConnectionState(device);
+            final IBluetoothPbap service = mService;
+            if (service != null && isEnabled() && isValidDevice(device)) {
+                return service.getConnectionState(device);
+            }
+            if (service == null) {
+                Log.w(TAG, "Proxy not attached to service");
+            }
+            return BluetoothProfile.STATE_DISCONNECTED;
         } catch (RemoteException e) {
             Log.e(TAG, e.toString());
         }
@@ -248,6 +251,8 @@ public class BluetoothPbap implements BluetoothProfile {
 
     /**
      * {@inheritDoc}
+     *
+     * @hide
      */
     @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
@@ -266,22 +271,12 @@ public class BluetoothPbap implements BluetoothProfile {
     }
 
     /**
-     * Returns true if the specified Bluetooth device is connected (does not
-     * include connecting). Returns false if not connected, or if this proxy
-     * object is not currently connected to the Pbap service.
-     */
-    // TODO: This is currently being used by SettingsLib and internal app.
-    public boolean isConnected(BluetoothDevice device) {
-        return getConnectionState(device) == BluetoothAdapter.STATE_CONNECTED;
-    }
-
-    /**
      * Disconnects the current Pbap client (PCE). Currently this call blocks,
      * it may soon be made asynchronous. Returns false if this proxy object is
      * not currently connected to the Pbap service.
+     *
+     * @hide
      */
-    // TODO: This is currently being used by SettingsLib and will be used in the future.
-    // TODO: Must specify target device. Implement this in the service.
     @UnsupportedAppUsage
     public boolean disconnect(BluetoothDevice device) {
         log("disconnect()");
@@ -304,7 +299,7 @@ public class BluetoothPbap implements BluetoothProfile {
             log("Proxy object connected");
             mService = IBluetoothPbap.Stub.asInterface(service);
             if (mServiceListener != null) {
-                mServiceListener.onServiceConnected(BluetoothPbap.this);
+                mServiceListener.onServiceConnected(BluetoothProfile.PBAP, BluetoothPbap.this);
             }
         }
 
@@ -312,10 +307,22 @@ public class BluetoothPbap implements BluetoothProfile {
             log("Proxy object disconnected");
             doUnbind();
             if (mServiceListener != null) {
-                mServiceListener.onServiceDisconnected();
+                mServiceListener.onServiceDisconnected(BluetoothProfile.PBAP);
             }
         }
     };
+
+    private boolean isEnabled() {
+        if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;
+        return false;
+    }
+
+    private boolean isValidDevice(BluetoothDevice device) {
+        if (device == null) return false;
+
+        if (BluetoothAdapter.checkBluetoothAddress(device.getAddress())) return true;
+        return false;
+    }
 
     private static void log(String msg) {
         if (DBG) {
