@@ -186,7 +186,7 @@ interface IWifiManager
 
     byte[] retrieveSoftApBackupData();
 
-    void restoreSoftApBackupData(in byte[] data);
+    SoftApConfiguration restoreSoftApBackupData(in byte[] data);
 
     void restoreSupplicantBackupData(in byte[] supplicantData, in byte[] ipConfigData);
 
