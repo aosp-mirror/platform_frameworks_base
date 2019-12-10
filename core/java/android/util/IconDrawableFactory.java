@@ -15,8 +15,8 @@
  */
 package android.util;
 
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageItemInfo;

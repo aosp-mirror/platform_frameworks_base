@@ -16,12 +16,11 @@
 
 package android.telephony;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.text.TextUtils;
-import android.util.Log;
-
-import android.annotation.UnsupportedAppUsage;
 import android.util.Base64;
+import android.util.Log;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

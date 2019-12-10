@@ -20,7 +20,7 @@ import android.annotation.Nullable;
 import android.annotation.RawRes;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;

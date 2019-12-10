@@ -14,7 +14,7 @@
 
 package android.util;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Path;
 
 import dalvik.annotation.optimization.FastNative;

@@ -18,7 +18,7 @@ package android.text;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
