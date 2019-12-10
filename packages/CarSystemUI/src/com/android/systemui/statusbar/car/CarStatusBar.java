@@ -72,6 +72,7 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.car.SUWProgressController;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -155,7 +156,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private CarFacetButtonController mCarFacetButtonController;
     private ActivityManagerWrapper mActivityManagerWrapper;
     private DeviceProvisionedController mDeviceProvisionedController;
+    private SUWProgressController mSUWProgressController;
     private boolean mDeviceIsSetUpForUser = true;
+    private boolean mIsUserSetupInProgress = false;
     private HvacController mHvacController;
     private DrivingStateHelper mDrivingStateHelper;
     private PowerManagerHelper mPowerManagerHelper;
@@ -273,7 +276,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         // get the provisioned state before calling the parent class since it's that flow that
         // builds the nav bar
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
+        mSUWProgressController = new SUWProgressController(mContext);
         mDeviceIsSetUpForUser = mDeviceProvisionedController.isCurrentUserSetup();
+        mIsUserSetupInProgress = mSUWProgressController.isCurrentUserSetupInProgress();
 
         // Keyboard related setup, before nav bars are created.
         mHideNavBarForKeyboard = mContext.getResources().getBoolean(
@@ -326,6 +331,13 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
         mHvacController.connectToCarService();
 
+        mSUWProgressController.addCallback(
+                new SUWProgressController.SUWProgressListener() {
+                    @Override
+                    public void onUserSetupInProgressChanged() {
+                        mHandler.post(() -> restartNavBarsIfNecessary());
+                    }
+                });
         mDeviceProvisionedController.addCallback(
                 new DeviceProvisionedController.DeviceProvisionedListener() {
                     @Override
@@ -335,6 +347,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
                     @Override
                     public void onUserSwitched() {
+                        mSUWProgressController.onUserSwitched();
                         mHandler.post(() -> restartNavBarsIfNecessary());
                     }
                 });
@@ -365,14 +378,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                         Log.wtf(TAG, " mVolumeChangeCallback failed to connect to car ", e);
                     }
                 });
-    }
-
-    private void restartNavBarsIfNecessary() {
-        boolean currentUserSetup = mDeviceProvisionedController.isCurrentUserSetup();
-        if (mDeviceIsSetUpForUser != currentUserSetup) {
-            mDeviceIsSetUpForUser = currentUserSetup;
-            restartNavBars();
-        }
     }
 
     @Override
@@ -422,6 +427,17 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     private void unregisterBootCompletedListener() {
         mContext.unregisterReceiver(mBootCompletedReceiver);
+    }
+
+    private void restartNavBarsIfNecessary() {
+        boolean currentUserSetup = mDeviceProvisionedController.isCurrentUserSetup();
+        boolean currentUserSetupInProgress = mSUWProgressController.isCurrentUserSetupInProgress();
+        if (mIsUserSetupInProgress != currentUserSetupInProgress
+                || mDeviceIsSetUpForUser != currentUserSetup) {
+            mDeviceIsSetUpForUser = currentUserSetup;
+            mIsUserSetupInProgress = currentUserSetupInProgress;
+            restartNavBars();
+        }
     }
 
     /**
@@ -592,7 +608,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 new HandleBarCloseNotificationGestureListener());
 
         mTopNavBarNotificationTouchListener = (v, event) -> {
-            if (!mDeviceIsSetUpForUser) {
+            if (!mDeviceIsSetUpForUser || mIsUserSetupInProgress) {
                 return true;
             }
             boolean consumed = openGestureDetector.onTouchEvent(event);
@@ -932,22 +948,24 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     }
 
     private void buildNavBarContent() {
+        boolean shouldBuildNavBarContent = mDeviceIsSetUpForUser && !mIsUserSetupInProgress;
+
         // Always build top bar.
-        buildTopBar((mDeviceIsSetUpForUser) ? R.layout.car_top_navigation_bar :
+        buildTopBar(shouldBuildNavBarContent ? R.layout.car_top_navigation_bar :
                 R.layout.car_top_navigation_bar_unprovisioned);
 
         if (mShowBottom) {
-            buildBottomBar((mDeviceIsSetUpForUser) ? R.layout.car_navigation_bar :
+            buildBottomBar(shouldBuildNavBarContent ? R.layout.car_navigation_bar :
                     R.layout.car_navigation_bar_unprovisioned);
         }
 
         if (mShowLeft) {
-            buildLeft((mDeviceIsSetUpForUser) ? R.layout.car_left_navigation_bar :
+            buildLeft(shouldBuildNavBarContent ? R.layout.car_left_navigation_bar :
                     R.layout.car_left_navigation_bar_unprovisioned);
         }
 
         if (mShowRight) {
-            buildRight((mDeviceIsSetUpForUser) ? R.layout.car_right_navigation_bar :
+            buildRight(shouldBuildNavBarContent ? R.layout.car_right_navigation_bar :
                     R.layout.car_right_navigation_bar_unprovisioned);
         }
     }
@@ -1570,8 +1588,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
         @Override
         protected void setHeadsUpVisible() {
-            // if the Notifications panel is showing don't show the Heads up
-            if (!mEnableHeadsUpNotificationWhenNotificationShadeOpen && mPanelExpanded) {
+            // if the Notifications panel is showing or SUW for user is in progress then don't show
+            // heads up notifications
+            if ((!mEnableHeadsUpNotificationWhenNotificationShadeOpen && mPanelExpanded)
+                    || !mDeviceIsSetUpForUser || mIsUserSetupInProgress) {
                 return;
             }
 
