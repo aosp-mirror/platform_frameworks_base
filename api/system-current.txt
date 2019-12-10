@@ -4532,6 +4532,9 @@ package android.net.ipsec.ike {
   }
 
   public abstract class ChildSessionParams {
+    method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getLocalTrafficSelectors();
+    method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getRemoteTrafficSelectors();
+    method @NonNull public java.util.List<android.net.ipsec.ike.ChildSaProposal> getSaProposals();
   }
 
   public class IkeFqdnIdentification extends android.net.ipsec.ike.IkeIdentification {
@@ -4599,6 +4602,13 @@ package android.net.ipsec.ike {
   }
 
   public final class IkeSessionParams {
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig getLocalAuthConfig();
+    method @NonNull public android.net.ipsec.ike.IkeIdentification getLocalIdentification();
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig getRemoteAuthConfig();
+    method @NonNull public android.net.ipsec.ike.IkeIdentification getRemoteIdentification();
+    method @NonNull public java.util.List<android.net.ipsec.ike.IkeSaProposal> getSaProposals();
+    method @NonNull public java.net.InetAddress getServerAddress();
+    method @NonNull public android.net.IpSecManager.UdpEncapsulationSocket getUdpEncapsulationSocket();
   }
 
   public static final class IkeSessionParams.Builder {
@@ -4613,6 +4623,27 @@ package android.net.ipsec.ike {
     method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setRemoteIdentification(@NonNull android.net.ipsec.ike.IkeIdentification);
     method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setServerAddress(@NonNull java.net.InetAddress);
     method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setUdpEncapsulationSocket(@NonNull android.net.IpSecManager.UdpEncapsulationSocket);
+  }
+
+  public abstract static class IkeSessionParams.IkeAuthConfig {
+  }
+
+  public static class IkeSessionParams.IkeAuthDigitalSignLocalConfig extends android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig {
+    method @NonNull public java.security.cert.X509Certificate getClientEndCertificate();
+    method @NonNull public java.util.List<java.security.cert.X509Certificate> getIntermediateCertificates();
+    method @NonNull public java.security.PrivateKey getPrivateKey();
+  }
+
+  public static class IkeSessionParams.IkeAuthDigitalSignRemoteConfig extends android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig {
+    method @NonNull public java.security.cert.X509Certificate getRemoteCaCert();
+  }
+
+  public static class IkeSessionParams.IkeAuthEapConfig extends android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig {
+    method @NonNull public android.net.eap.EapSessionConfig getEapConfig();
+  }
+
+  public static class IkeSessionParams.IkeAuthPskConfig extends android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig {
+    method @NonNull public byte[] getPsk();
   }
 
   public final class IkeTrafficSelector {
@@ -4661,6 +4692,7 @@ package android.net.ipsec.ike {
   }
 
   public final class TunnelModeChildSessionParams extends android.net.ipsec.ike.ChildSessionParams {
+    method @NonNull public java.util.List<android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest> getConfigurationRequests();
   }
 
   public static final class TunnelModeChildSessionParams.Builder {
@@ -4676,6 +4708,39 @@ package android.net.ipsec.ike {
     method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addOutboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
     method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addSaProposal(@NonNull android.net.ipsec.ike.ChildSaProposal);
     method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams build();
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequest {
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4Address extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
+    method @Nullable public java.net.Inet4Address getAddress();
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4DhcpServer extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
+    method @Nullable public java.net.Inet4Address getAddress();
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4DnsServer extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
+    method @Nullable public java.net.Inet4Address getAddress();
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4Netmask extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4Subnet extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv6Address extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
+    method @Nullable public java.net.Inet6Address getAddress();
+    method public int getPrefixLength();
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv6DnsServer extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
+    method @Nullable public java.net.Inet6Address getAddress();
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv6Subnet extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
   }
 
 }
