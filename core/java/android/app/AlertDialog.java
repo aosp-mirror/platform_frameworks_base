@@ -21,7 +21,7 @@ import android.annotation.AttrRes;
 import android.annotation.DrawableRes;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.ResourceId;

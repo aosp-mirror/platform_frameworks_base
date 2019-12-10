@@ -17,7 +17,7 @@
 package android.app.backup;
 
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.ParcelFileDescriptor;
 
 import java.io.FileDescriptor;
