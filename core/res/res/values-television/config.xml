@@ -42,8 +42,4 @@
 
     <!-- Allow SystemUI to show the shutdown dialog -->
     <bool name="config_showSysuiShutdown">true</bool>
-
-    <!-- The time in milliseconds of prolonged user inactivity after which device goes to sleep,
-         even if wakelocks are held. On TVs, this defaults to 4 hours. -->
-    <integer name="config_attentiveTimeout">14400000</integer>
 </resources>
