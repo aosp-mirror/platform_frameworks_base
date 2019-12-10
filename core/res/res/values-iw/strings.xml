@@ -550,7 +550,7 @@
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"פעולת טביעת האצבע בוטלה בידי המשתמש."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"יותר מדי ניסיונות. נסה שוב מאוחר יותר."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"יותר מדי ניסיונות. חיישן טביעות האצבע הושבת."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"נסה שוב."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"כדאי לנסות שוב."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"לא נרשמו טביעות אצבע."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"במכשיר זה אין חיישן טביעות אצבע."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"אצבע <xliff:g id="FINGERID">%d</xliff:g>"</string>
@@ -821,8 +821,8 @@
     <string name="lockscreen_emergency_call" msgid="7500692654885445299">"חירום"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"חזרה לשיחה"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"נכון!"</string>
-    <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"נסה שוב"</string>
-    <string name="lockscreen_password_wrong" msgid="8605355913868947490">"נסה שוב"</string>
+    <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"כדאי לנסות שוב"</string>
+    <string name="lockscreen_password_wrong" msgid="8605355913868947490">"כדאי לנסות שוב"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"בטל את הנעילה לכל התכונות והנתונים"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"חרגת ממספר הניסיונות המרבי של זיהוי פנים"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"‏אין כרטיס SIM"</string>
