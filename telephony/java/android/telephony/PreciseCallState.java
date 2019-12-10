@@ -19,14 +19,12 @@ package android.telephony;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Annotation.DisconnectCauses;
 import android.telephony.Annotation.PreciseCallStates;
 import android.telephony.Annotation.PreciseDisconnectCauses;
-import android.telephony.DisconnectCause;
-import android.telephony.PreciseDisconnectCause;
 
 import java.util.Objects;
 

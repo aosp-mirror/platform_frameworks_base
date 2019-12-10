@@ -15,7 +15,7 @@
  */
 package com.android.internal.telephony;
 
-import dalvik.annotation.compat.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * @hide

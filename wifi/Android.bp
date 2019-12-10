@@ -57,6 +57,7 @@ java_library {
     libs: [
         // TODO(b/140299412) should be framework-system-stubs once we fix all @hide dependencies
         "framework-minus-apex",
+        "unsupportedappusage",
     ],
     srcs: [
         ":framework-wifi-updatable-sources",

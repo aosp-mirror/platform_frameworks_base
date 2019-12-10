@@ -16,9 +16,8 @@
 
 package com.android.internal.telephony;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.sysprop.TelephonyProperties;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.util.Optional;
 

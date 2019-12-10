@@ -16,7 +16,7 @@
 
 package android.net.wifi.p2p.nsd;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import android.os.Parcel;

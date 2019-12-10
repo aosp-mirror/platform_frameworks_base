@@ -16,7 +16,7 @@
 
 package com.android.internal.telephony.cdma.sms;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;

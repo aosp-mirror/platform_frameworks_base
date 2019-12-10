@@ -16,9 +16,7 @@
 
 package android.telephony;
 
-import android.annotation.UnsupportedAppUsage;
-import android.hardware.radio.V1_0.RadioTechnology;
-import android.hardware.radio.V1_4.CellInfo.Info;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;

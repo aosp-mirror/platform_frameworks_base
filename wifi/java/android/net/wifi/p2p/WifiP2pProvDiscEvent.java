@@ -16,7 +16,7 @@
 
 package android.net.wifi.p2p;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * A class representing a Wi-Fi p2p provisional discovery request/response
