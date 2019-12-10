@@ -38,6 +38,7 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 @VisibleForTesting
 public interface Formula {
+    /** @hide */
     @IntDef(
             value = {
                     COMPOUND_FORMULA_TAG,

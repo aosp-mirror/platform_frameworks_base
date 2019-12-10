@@ -1670,7 +1670,7 @@ package android.content.integrity {
   }
 
   public abstract class AtomicFormula implements android.content.integrity.Formula {
-    ctor public AtomicFormula(@android.content.integrity.AtomicFormula.Key int);
+    ctor public AtomicFormula(int);
     method public int getKey();
     field public static final int APP_CERTIFICATE = 1; // 0x1
     field public static final int EQ = 0; // 0x0
@@ -1686,7 +1686,7 @@ package android.content.integrity {
   }
 
   public static final class AtomicFormula.BooleanAtomicFormula extends android.content.integrity.AtomicFormula implements android.os.Parcelable {
-    ctor public AtomicFormula.BooleanAtomicFormula(@android.content.integrity.AtomicFormula.Key int, boolean);
+    ctor public AtomicFormula.BooleanAtomicFormula(int, boolean);
     method public int describeContents();
     method public int getTag();
     method public boolean getValue();
@@ -1696,7 +1696,7 @@ package android.content.integrity {
   }
 
   public static final class AtomicFormula.IntAtomicFormula extends android.content.integrity.AtomicFormula implements android.os.Parcelable {
-    ctor public AtomicFormula.IntAtomicFormula(@android.content.integrity.AtomicFormula.Key int, @android.content.integrity.AtomicFormula.Operator int, int);
+    ctor public AtomicFormula.IntAtomicFormula(int, int, int);
     method public int describeContents();
     method public int getOperator();
     method public int getTag();
@@ -1706,14 +1706,8 @@ package android.content.integrity {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.integrity.AtomicFormula.IntAtomicFormula> CREATOR;
   }
 
-  @IntDef({android.content.integrity.AtomicFormula.PACKAGE_NAME, android.content.integrity.AtomicFormula.APP_CERTIFICATE, android.content.integrity.AtomicFormula.INSTALLER_NAME, android.content.integrity.AtomicFormula.INSTALLER_CERTIFICATE, android.content.integrity.AtomicFormula.VERSION_CODE, android.content.integrity.AtomicFormula.PRE_INSTALLED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface AtomicFormula.Key {
-  }
-
-  @IntDef({android.content.integrity.AtomicFormula.EQ, android.content.integrity.AtomicFormula.LT, android.content.integrity.AtomicFormula.LE, android.content.integrity.AtomicFormula.GT, android.content.integrity.AtomicFormula.GE}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface AtomicFormula.Operator {
-  }
-
   public static final class AtomicFormula.StringAtomicFormula extends android.content.integrity.AtomicFormula implements android.os.Parcelable {
-    ctor public AtomicFormula.StringAtomicFormula(@android.content.integrity.AtomicFormula.Key int, @NonNull String, boolean);
+    ctor public AtomicFormula.StringAtomicFormula(int, @NonNull String, boolean);
     method public int describeContents();
     method public boolean getIsHashedValue();
     method public int getTag();
@@ -1724,9 +1718,9 @@ package android.content.integrity {
   }
 
   public final class CompoundFormula implements android.content.integrity.Formula android.os.Parcelable {
-    ctor public CompoundFormula(@android.content.integrity.CompoundFormula.Connector int, @NonNull java.util.List<android.content.integrity.Formula>);
+    ctor public CompoundFormula(int, @NonNull java.util.List<android.content.integrity.Formula>);
     method public int describeContents();
-    method @android.content.integrity.CompoundFormula.Connector public int getConnector();
+    method public int getConnector();
     method @NonNull public java.util.List<android.content.integrity.Formula> getFormulas();
     method public int getTag();
     method public boolean isSatisfied(@NonNull android.content.integrity.AppInstallMetadata);
@@ -1737,11 +1731,8 @@ package android.content.integrity {
     field public static final int OR = 1; // 0x1
   }
 
-  @IntDef({android.content.integrity.CompoundFormula.AND, android.content.integrity.CompoundFormula.OR, android.content.integrity.CompoundFormula.NOT}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface CompoundFormula.Connector {
-  }
-
   public interface Formula {
-    method @android.content.integrity.Formula.Tag public int getTag();
+    method public int getTag();
     method public boolean isSatisfied(@NonNull android.content.integrity.AppInstallMetadata);
     method @NonNull public static android.content.integrity.Formula readFromParcel(@NonNull android.os.Parcel);
     method public static void writeToParcel(@NonNull android.content.integrity.Formula, @NonNull android.os.Parcel, int);
@@ -1751,21 +1742,15 @@ package android.content.integrity {
     field public static final int STRING_ATOMIC_FORMULA_TAG = 1; // 0x1
   }
 
-  @IntDef({android.content.integrity.Formula.COMPOUND_FORMULA_TAG, android.content.integrity.Formula.STRING_ATOMIC_FORMULA_TAG, android.content.integrity.Formula.INT_ATOMIC_FORMULA_TAG, android.content.integrity.Formula.BOOLEAN_ATOMIC_FORMULA_TAG}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface Formula.Tag {
-  }
-
   public final class Rule implements android.os.Parcelable {
-    ctor public Rule(@NonNull android.content.integrity.Formula, @android.content.integrity.Rule.Effect int);
+    ctor public Rule(@NonNull android.content.integrity.Formula, int);
     method public int describeContents();
-    method @android.content.integrity.Rule.Effect public int getEffect();
+    method public int getEffect();
     method @NonNull public android.content.integrity.Formula getFormula();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.integrity.Rule> CREATOR;
     field public static final int DENY = 0; // 0x0
     field public static final int FORCE_ALLOW = 1; // 0x1
-  }
-
-  @IntDef({android.content.integrity.Rule.DENY, android.content.integrity.Rule.FORCE_ALLOW}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface Rule.Effect {
   }
 
   public class RuleSet {

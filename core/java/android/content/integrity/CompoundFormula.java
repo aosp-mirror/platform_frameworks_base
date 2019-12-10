@@ -47,6 +47,7 @@ import java.util.Objects;
 public final class CompoundFormula implements Formula, Parcelable {
     private static final String TAG = "OpenFormula";
 
+    /** @hide */
     @IntDef(
             value = {
                 AND, OR, NOT,
