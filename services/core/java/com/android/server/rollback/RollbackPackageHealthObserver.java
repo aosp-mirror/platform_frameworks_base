@@ -393,13 +393,20 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
             @FailureReasons int rollbackReason) {
         final RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
         int reasonToLog = mapFailureReasonToMetric(rollbackReason);
+        final String failedPackageToLog;
+        if (rollbackReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH) {
+            failedPackageToLog = SystemProperties.get(
+                    "sys.init.updatable_crashing_process_name", "");
+        } else {
+            failedPackageToLog = failedPackage.getPackageName();
+        }
         final VersionedPackage logPackage = isModule(failedPackage.getPackageName())
                 ? getModuleMetadataPackage()
                 : null;
 
         logEvent(logPackage,
                 StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE,
-                reasonToLog, failedPackage.getPackageName());
+                reasonToLog, failedPackageToLog);
         final LocalIntentReceiver rollbackReceiver = new LocalIntentReceiver((Intent result) -> {
             int status = result.getIntExtra(RollbackManager.EXTRA_STATUS,
                     RollbackManager.STATUS_FAILURE);
@@ -417,12 +424,12 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                 } else {
                     logEvent(logPackage,
                             StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
-                            reasonToLog, failedPackage.getPackageName());
+                            reasonToLog, failedPackageToLog);
                 }
             } else {
                 logEvent(logPackage,
                         StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
-                        reasonToLog, failedPackage.getPackageName());
+                        reasonToLog, failedPackageToLog);
             }
         });
 
