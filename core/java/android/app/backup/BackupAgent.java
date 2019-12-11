@@ -45,7 +45,10 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -324,6 +327,28 @@ public abstract class BackupAgent extends ContextWrapper {
             ParcelFileDescriptor newState)
             throws IOException {
         onRestore(data, (int) appVersionCode, newState);
+    }
+
+    /**
+     * New version of {@link #onRestore(BackupDataInput, long, android.os.ParcelFileDescriptor)}
+     * that has a list of keys to be excluded from the restore. Key/value pairs for which the key
+     * is present in {@code excludedKeys} have already been excluded from the restore data by the
+     * system. The list is passed to the agent to make it aware of what data has been removed (in
+     * case it has any application-level consequences) as well as the data that should be removed
+     * by the agent itself.
+     *
+     * The default implementation calls {@link #onRestore(BackupDataInput, long,
+     * android.os.ParcelFileDescriptor)}.
+     *
+     * @param excludedKeys A list of keys to be excluded from restore.
+     *
+     * @hide
+     */
+    public void onRestore(BackupDataInput data, long appVersionCode,
+            ParcelFileDescriptor newState,
+            Set<String> excludedKeys)
+            throws IOException {
+        onRestore(data, appVersionCode, newState);
     }
 
     /**
@@ -1016,8 +1041,22 @@ public abstract class BackupAgent extends ContextWrapper {
 
         @Override
         public void doRestore(ParcelFileDescriptor data, long appVersionCode,
-                ParcelFileDescriptor newState,
-                int token, IBackupManager callbackBinder) throws RemoteException {
+                ParcelFileDescriptor newState, int token, IBackupManager callbackBinder)
+                throws RemoteException {
+            doRestoreInternal(data, appVersionCode, newState, token, callbackBinder,
+                    /* excludedKeys */ null);
+        }
+
+        @Override
+        public void doRestoreWithExcludedKeys(ParcelFileDescriptor data, long appVersionCode,
+                ParcelFileDescriptor newState, int token, IBackupManager callbackBinder,
+                List<String> excludedKeys) throws RemoteException {
+            doRestoreInternal(data, appVersionCode, newState, token, callbackBinder, excludedKeys);
+        }
+
+        private void doRestoreInternal(ParcelFileDescriptor data, long appVersionCode,
+                ParcelFileDescriptor newState, int token, IBackupManager callbackBinder,
+                List<String> excludedKeys) throws RemoteException {
             // Ensure that we're running with the app's normal permission level
             long ident = Binder.clearCallingIdentity();
 
@@ -1029,7 +1068,9 @@ public abstract class BackupAgent extends ContextWrapper {
 
             BackupDataInput input = new BackupDataInput(data.getFileDescriptor());
             try {
-                BackupAgent.this.onRestore(input, appVersionCode, newState);
+                BackupAgent.this.onRestore(input, appVersionCode, newState,
+                        excludedKeys != null ? new HashSet<>(excludedKeys)
+                                : Collections.emptySet());
             } catch (IOException ex) {
                 Log.d(TAG, "onRestore (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw new RuntimeException(ex);
