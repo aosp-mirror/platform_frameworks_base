@@ -243,12 +243,6 @@ public class NetworkMonitor extends StateMachine {
 
     private String mPrivateDnsProviderHostname = "";
 
-    public static boolean isValidationRequired(
-            NetworkCapabilities dfltNetCap, NetworkCapabilities nc) {
-        // TODO: Consider requiring validation for DUN networks.
-        return dfltNetCap.satisfiedByNetworkCapabilities(nc);
-    }
-
     private final Context mContext;
     private final Handler mConnectivityServiceHandler;
     private final NetworkAgentInfo mNetworkAgentInfo;
@@ -381,11 +375,19 @@ public class NetworkMonitor extends StateMachine {
         return 0 == mValidations ? ValidationStage.FIRST_VALIDATION : ValidationStage.REVALIDATION;
     }
 
-    private boolean isValidationRequired() {
-        return isValidationRequired(
-                mDefaultRequest.networkCapabilities, mNetworkAgentInfo.networkCapabilities);
+    @VisibleForTesting
+    public boolean isValidationRequired() {
+        // TODO: Consider requiring validation for DUN networks.
+        return mDefaultRequest.networkCapabilities.satisfiedByNetworkCapabilities(
+                mNetworkAgentInfo.networkCapabilities);
     }
 
+    public boolean isPrivateDnsValidationRequired() {
+        // VPNs become the default network for applications even if they do not provide the INTERNET
+        // capability (e.g., split tunnels; See b/119216095).
+        // Ensure private DNS works on such VPNs as well.
+        return isValidationRequired() || mNetworkAgentInfo.isVPN();
+    }
 
     private void notifyNetworkTestResultInvalid(Object obj) {
         mConnectivityServiceHandler.sendMessage(obtainMessage(
@@ -455,7 +457,7 @@ public class NetworkMonitor extends StateMachine {
                     return HANDLED;
                 case CMD_PRIVATE_DNS_SETTINGS_CHANGED: {
                     final PrivateDnsConfig cfg = (PrivateDnsConfig) message.obj;
-                    if (!isValidationRequired() || cfg == null || !cfg.inStrictMode()) {
+                    if (!isPrivateDnsValidationRequired() || cfg == null || !cfg.inStrictMode()) {
                         // No DNS resolution required.
                         //
                         // We don't force any validation in opportunistic mode
@@ -621,9 +623,20 @@ public class NetworkMonitor extends StateMachine {
                     //    the network so don't bother validating here.  Furthermore sending HTTP
                     //    packets over the network may be undesirable, for example an extremely
                     //    expensive metered network, or unwanted leaking of the User Agent string.
+                    //
+                    // On networks that need to support private DNS in strict mode (e.g., VPNs, but
+                    // not networks that don't provide Internet access), we still need to perform
+                    // private DNS server resolution.
                     if (!isValidationRequired()) {
-                        validationLog("Network would not satisfy default request, not validating");
-                        transitionTo(mValidatedState);
+                        if (isPrivateDnsValidationRequired()) {
+                            validationLog("Network would not satisfy default request, "
+                                    + "resolving private DNS");
+                            transitionTo(mEvaluatingPrivateDnsState);
+                        } else {
+                            validationLog("Network would not satisfy default request, "
+                                    + "not validating");
+                            transitionTo(mValidatedState);
+                        }
                         return HANDLED;
                     }
                     mAttempts++;
@@ -796,7 +809,7 @@ public class NetworkMonitor extends StateMachine {
             try {
                 // Do a blocking DNS resolution using the network-assigned nameservers.
                 // Do not set AI_ADDRCONFIG in ai_flags so we get all address families in advance.
-                final InetAddress[] ips = ResolvUtil.blockingResolveAllLocally(
+                final InetAddress[] ips = resolveAllLocally(
                         mNetwork, mPrivateDnsProviderHostname, 0 /* aiFlags */);
                 mPrivateDnsConfig = new PrivateDnsConfig(mPrivateDnsProviderHostname, ips);
             } catch (UnknownHostException uhe) {
@@ -830,7 +843,7 @@ public class NetworkMonitor extends StateMachine {
             final String host = UUID.randomUUID().toString().substring(0, 8) +
                     ONE_TIME_HOSTNAME_SUFFIX;
             try {
-                final InetAddress[] ips = mNetworkAgentInfo.network().getAllByName(host);
+                final InetAddress[] ips = getAllByName(mNetworkAgentInfo.network(), host);
                 return (ips != null && ips.length > 0);
             } catch (UnknownHostException uhe) {}
             return false;
@@ -1046,7 +1059,7 @@ public class NetworkMonitor extends StateMachine {
         int result;
         String connectInfo;
         try {
-            InetAddress[] addresses = mNetwork.getAllByName(host);
+            InetAddress[] addresses = getAllByName(mNetwork, host);
             StringBuffer buffer = new StringBuffer();
             for (InetAddress address : addresses) {
                 buffer.append(',').append(address.getHostAddress());
@@ -1231,6 +1244,18 @@ public class NetworkMonitor extends StateMachine {
             validationLog("Error: http or https probe wait interrupted!");
             return CaptivePortalProbeResult.FAILED;
         }
+    }
+
+    @VisibleForTesting
+    protected InetAddress[] getAllByName(Network network, String host) throws UnknownHostException {
+        return network.getAllByName(host);
+    }
+
+    @VisibleForTesting
+    protected InetAddress[] resolveAllLocally(Network network, String hostname, int flags)
+            throws UnknownHostException {
+        // We cannot use this in OneAddressPerFamilyNetwork#getAllByName because that's static.
+        return ResolvUtil.blockingResolveAllLocally(network, hostname, flags);
     }
 
     private URL makeURL(String url) {

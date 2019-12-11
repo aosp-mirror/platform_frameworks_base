@@ -26,6 +26,7 @@ import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_FOTA;
 import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
 import static android.net.ConnectivityManager.TYPE_NONE;
+import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
@@ -165,6 +166,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -387,7 +389,7 @@ public class ConnectivityServiceTest {
 
         MockNetworkAgent(int transport, LinkProperties linkProperties) {
             final int type = transportToLegacyType(transport);
-            final String typeName = ConnectivityManager.getNetworkTypeName(transport);
+            final String typeName = ConnectivityManager.getNetworkTypeName(type);
             mNetworkInfo = new NetworkInfo(type, 0, typeName, "Mock");
             mNetworkCapabilities = new NetworkCapabilities();
             mNetworkCapabilities.addTransportType(transport);
@@ -453,6 +455,10 @@ public class ConnectivityServiceTest {
         public void adjustScore(int change) {
             mScore += change;
             mNetworkAgent.sendNetworkScore(mScore);
+        }
+
+        public int getScore() {
+            return mScore;
         }
 
         public void explicitlySelected(boolean acceptUnvalidated) {
@@ -869,6 +875,7 @@ public class ConnectivityServiceTest {
         // HTTP response code fed back to NetworkMonitor for Internet connectivity probe.
         public int gen204ProbeResult = 500;
         public String gen204ProbeRedirectUrl = null;
+        public volatile InetAddress[] dnsLookupResults = null;
 
         public WrappedNetworkMonitor(Context context, Handler handler,
                 NetworkAgentInfo networkAgentInfo, NetworkRequest defaultRequest,
@@ -882,6 +889,25 @@ public class ConnectivityServiceTest {
         protected CaptivePortalProbeResult isCaptivePortal() {
             if (!mIsCaptivePortalCheckEnabled) { return new CaptivePortalProbeResult(204); }
             return new CaptivePortalProbeResult(gen204ProbeResult, gen204ProbeRedirectUrl, null);
+        }
+
+        private InetAddress[] fakeDnsLookup() throws UnknownHostException {
+            if (dnsLookupResults == null) {
+                throw new UnknownHostException();
+            }
+            return dnsLookupResults;
+        }
+
+        @Override
+        protected InetAddress[] getAllByName(Network network, String hostname)
+                throws UnknownHostException {
+            return fakeDnsLookup();
+        }
+
+        @Override
+        protected InetAddress[] resolveAllLocally(Network network, String hostname, int flags)
+                throws UnknownHostException {
+            return fakeDnsLookup();
         }
     }
 
@@ -1086,6 +1112,8 @@ public class ConnectivityServiceTest {
                 return TYPE_WIFI;
             case TRANSPORT_CELLULAR:
                 return TYPE_MOBILE;
+            case TRANSPORT_VPN:
+                return TYPE_VPN;
             default:
                 return TYPE_NONE;
         }
@@ -4021,7 +4049,7 @@ public class ConnectivityServiceTest {
         cellLp.addDnsServer(InetAddress.getByName("192.0.2.1"));
 
         mCellNetworkAgent.sendLinkProperties(cellLp);
-        mCellNetworkAgent.connect(false);
+        mCellNetworkAgent.connect(true);
         waitForIdle();
         verify(mNetworkManagementService, atLeastOnce()).setDnsConfigurationForNetwork(
                 anyInt(), mStringArrayCaptor.capture(), any(), any(),
@@ -4039,9 +4067,10 @@ public class ConnectivityServiceTest {
                 mCellNetworkAgent);
         CallbackInfo cbi = cellNetworkCallback.expectCallback(
                 CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
-        cellNetworkCallback.assertNoCallback();
         assertFalse(((LinkProperties)cbi.arg).isPrivateDnsActive());
         assertNull(((LinkProperties)cbi.arg).getPrivateDnsServerName());
+        cellNetworkCallback.expectCallback(CallbackState.NETWORK_CAPABILITIES, mCellNetworkAgent);
+        cellNetworkCallback.assertNoCallback();
 
         setPrivateDnsSettings(PRIVATE_DNS_MODE_OFF, "ignored.example.com");
         verify(mNetworkManagementService, times(1)).setDnsConfigurationForNetwork(
@@ -4066,14 +4095,45 @@ public class ConnectivityServiceTest {
         reset(mNetworkManagementService);
         cellNetworkCallback.assertNoCallback();
 
+        // Strict mode.
+        mCellNetworkAgent.getWrappedNetworkMonitor().dnsLookupResults = new InetAddress[] {
+                InetAddress.getByName("2001:db8::66"),
+                InetAddress.getByName("192.0.2.44")
+        };
         setPrivateDnsSettings(PRIVATE_DNS_MODE_PROVIDER_HOSTNAME, "strict.example.com");
-        // Can't test dns configuration for strict mode without properly mocking
-        // out the DNS lookups, but can test that LinkProperties is updated.
+
+        // Expect a callback saying that private DNS is now in strict mode.
         cbi = cellNetworkCallback.expectCallback(CallbackState.LINK_PROPERTIES,
                 mCellNetworkAgent);
+        LinkProperties lp = (LinkProperties) cbi.arg;
+        assertTrue(lp.isPrivateDnsActive());
+        assertEquals("strict.example.com", lp.getPrivateDnsServerName());
         cellNetworkCallback.assertNoCallback();
-        assertTrue(((LinkProperties)cbi.arg).isPrivateDnsActive());
-        assertEquals("strict.example.com", ((LinkProperties)cbi.arg).getPrivateDnsServerName());
+
+        // When the validation callback arrives, LinkProperties are updated.
+        // We need to wait for this callback because the test thread races with the NetworkMonitor
+        // thread, and if the test thread wins the race, then the times(2) verify call below will
+        // fail.
+        mService.mNetdEventCallback.onPrivateDnsValidationEvent(
+                mCellNetworkAgent.getNetwork().netId, "2001:db8::66", "strict.example.com", true);
+        cbi = cellNetworkCallback.expectCallback(CallbackState.LINK_PROPERTIES,
+                mCellNetworkAgent);
+        lp = (LinkProperties) cbi.arg;
+        assertTrue(lp.isPrivateDnsActive());
+        assertEquals(1, lp.getValidatedPrivateDnsServers().size());
+
+        // setDnsConfigurationForNetwork is called twice: once when private DNS is set to strict
+        // mode and once when the hostname resolves.
+        verify(mNetworkManagementService, times(2)).setDnsConfigurationForNetwork(
+                anyInt(), mStringArrayCaptor.capture(), any(), any(),
+                eq("strict.example.com"), tlsServers.capture());
+        assertEquals(2, mStringArrayCaptor.getValue().length);
+        assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
+                new String[]{"2001:db8::1", "192.0.2.1"}));
+        assertEquals(2, tlsServers.getValue().length);
+        assertTrue(ArrayUtils.containsAll(tlsServers.getValue(),
+                new String[]{"2001:db8::66", "192.0.2.44"}));
+        reset(mNetworkManagementService);
 
         // Send the same LinkProperties and expect getting the same result including private dns.
         // b/118518971
@@ -4393,6 +4453,69 @@ public class ConnectivityServiceTest {
         defaultCallback.expectAvailableCallbacksValidated(mWiFiNetworkAgent);
 
         mCm.unregisterNetworkCallback(defaultCallback);
+    }
+
+    @Test
+    public void testVpnUnvalidated() throws Exception {
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerDefaultNetworkCallback(callback);
+
+        // Enable private DNS.
+        setPrivateDnsSettings(PRIVATE_DNS_MODE_PROVIDER_HOSTNAME, "strict.example.com");
+
+        // Bring up Ethernet.
+        mEthernetNetworkAgent = new MockNetworkAgent(TRANSPORT_ETHERNET);
+        mEthernetNetworkAgent.getWrappedNetworkMonitor().dnsLookupResults =
+                new InetAddress[]{ InetAddress.getByName("2001:db8::1") };
+        mEthernetNetworkAgent.connect(true);
+        callback.expectAvailableThenValidatedCallbacks(mEthernetNetworkAgent);
+        callback.assertNoCallback();
+
+        // Bring up a VPN that has the INTERNET capability but does not validate.
+        final int uid = Process.myUid();
+        final MockNetworkAgent vpnNetworkAgent = new MockNetworkAgent(TRANSPORT_VPN);
+        vpnNetworkAgent.getWrappedNetworkMonitor().gen204ProbeResult = 500;
+        vpnNetworkAgent.getWrappedNetworkMonitor().dnsLookupResults = null;
+
+        final ArraySet<UidRange> ranges = new ArraySet<>();
+        ranges.add(new UidRange(uid, uid));
+        mMockVpn.setNetworkAgent(vpnNetworkAgent);
+        mMockVpn.setUids(ranges);
+        vpnNetworkAgent.connect(false /* validated */, true /* hasInternet */);
+        mMockVpn.connect();
+
+        // Even though the VPN is unvalidated, it becomes the default network for our app.
+        callback.expectAvailableCallbacksUnvalidated(vpnNetworkAgent);
+        // TODO: this looks like a spurious callback.
+        callback.expectCallback(CallbackState.NETWORK_CAPABILITIES, vpnNetworkAgent);
+        callback.assertNoCallback();
+
+        assertTrue(vpnNetworkAgent.getScore() > mEthernetNetworkAgent.getScore());
+        assertEquals(ConnectivityConstants.VPN_DEFAULT_SCORE, vpnNetworkAgent.getScore());
+        assertEquals(vpnNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        NetworkCapabilities nc = mCm.getNetworkCapabilities(vpnNetworkAgent.getNetwork());
+        assertFalse(nc.hasCapability(NET_CAPABILITY_VALIDATED));
+        assertTrue(nc.hasCapability(NET_CAPABILITY_INTERNET));
+
+        assertFalse(vpnNetworkAgent.getWrappedNetworkMonitor().isValidationRequired());
+        assertTrue(vpnNetworkAgent.getWrappedNetworkMonitor().isPrivateDnsValidationRequired());
+
+        // Pretend that the strict mode private DNS hostname now resolves. Even though the
+        // connectivity probe still returns 500, the network validates because the connectivity
+        // probe is not used on VPNs.
+        vpnNetworkAgent.getWrappedNetworkMonitor().dnsLookupResults =
+                new InetAddress[]{ InetAddress.getByName("2001:db8::1") };
+        mCm.reportNetworkConnectivity(vpnNetworkAgent.getNetwork(), true);
+
+        // Expect to see the validated capability, but no other changes, because the VPN is already
+        // the default network for the app.
+        callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, vpnNetworkAgent);
+        callback.assertNoCallback();
+
+        vpnNetworkAgent.disconnect();
+        callback.expectCallback(CallbackState.LOST, vpnNetworkAgent);
+        callback.expectAvailableCallbacksValidated(mEthernetNetworkAgent);
     }
 
     @Test
