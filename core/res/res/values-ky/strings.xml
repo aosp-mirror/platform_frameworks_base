@@ -612,8 +612,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"Колдонмого жаңы телеком туташууларын каттоо мүмкүнчүлүгүн берет."</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"телеком туташууларын башкаруу"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"Колдонмого телеком туташууларын башкаруу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"чалуу экраны менен байланыштыруу"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Колдонмого чалуу экраны качан жана кандай көрүнө тургандыгын башкаруу мүмкүнчүлүгүн берет."</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"сүйлөшүп жатканда экранды башкара аласыз"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Сүйлөшүп жатканда экранды башкара аласыз."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"телефония кызматтары"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"Колдонмого чалууларды жасоо/кабыл алуу үчүн телефония кызматтары менен байланышууга уруксат берет."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"чалуу ичиндеги колдонуучу тажрыйбасын камсыз кылуу"</string>

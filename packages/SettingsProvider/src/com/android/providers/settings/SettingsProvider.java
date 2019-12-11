@@ -4449,6 +4449,19 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 183;
                 }
 
+                if (currentVersion == 183) {
+                    // Version 169: by default, automotive setup wizard is in progress
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    Setting currentSetting = secureSettings.getSettingLocked(
+                            Secure.AUTOMOTIVE_USER_SETUP_IN_PROGRESS);
+                    if (currentSetting.isNull()) {
+                        secureSettings.insertSettingLocked(
+                                Secure.AUTOMOTIVE_USER_SETUP_IN_PROGRESS, "1", null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 184;
+                }
+
                 // vXXX: Add new settings above this point.
 
                 if (currentVersion != newVersion) {

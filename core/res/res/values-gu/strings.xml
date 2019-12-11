@@ -2019,7 +2019,7 @@
     <string name="mime_type_audio" msgid="4933450584432509875">"ઑડિયો"</string>
     <string name="mime_type_audio_ext" msgid="2615491023840514797">"<xliff:g id="EXTENSION">%1$s</xliff:g> ઑડિયો"</string>
     <string name="mime_type_video" msgid="7071965726609428150">"વીડિયો"</string>
-    <string name="mime_type_video_ext" msgid="185438149044230136">"<xliff:g id="EXTENSION">%1$s</xliff:g> વીડિઓ"</string>
+    <string name="mime_type_video_ext" msgid="185438149044230136">"<xliff:g id="EXTENSION">%1$s</xliff:g> વીડિયો"</string>
     <string name="mime_type_image" msgid="2134307276151645257">"છબી"</string>
     <string name="mime_type_image_ext" msgid="5743552697560999471">"<xliff:g id="EXTENSION">%1$s</xliff:g> છબી"</string>
     <string name="mime_type_compressed" msgid="8737300936080662063">"આર્કાઇવ"</string>

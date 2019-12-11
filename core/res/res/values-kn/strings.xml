@@ -1297,7 +1297,7 @@
     <string name="wifi_p2p_failed_message" msgid="6296397512378755690">"ವೈ-ಫೈ ಡೈರೆಕ್ಟ್ ಪ್ರಾರಂಭಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="9128862563403191596">"ವೈ-ಫೈ ಡೈರೆಕ್ಟ್ ಆನ್ ಆಗಿದೆ"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="5571179544720861510">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <string name="accept" msgid="5447154347815825107">"ಸ್ವೀಕರಿಸು"</string>
+    <string name="accept" msgid="5447154347815825107">"ಸ್ವೀಕರಿಸಿ"</string>
     <string name="decline" msgid="6490507610282145874">"ನಿರಾಕರಿಸಿ"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="355410493918793111">"ಆಹ್ವಾನವನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="8082524320754820762">"ಸಂಪರ್ಕಗೊಳ್ಳಲು ಆಹ್ವಾನ"</string>
