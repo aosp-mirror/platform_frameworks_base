@@ -17,6 +17,8 @@
 package android.provider;
 
 import android.accounts.Account;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -2899,6 +2901,40 @@ public final class ContactsContract {
                 if (cursor != null) cursor.close();
             }
             return lookupUri;
+        }
+
+        /**
+         * The default value used for {@link #ACCOUNT_NAME} of raw contacts when they are inserted
+         * without a value for this column.
+         *
+         * <p>This account is used to identify contacts that are only stored locally in the
+         * contacts database instead of being associated with an {@link Account} managed by an
+         * installed application.
+         *
+         * <p>When this returns null then {@link #getLocalAccountType} will also return null and
+         * when it is non-null {@link #getLocalAccountType} will also return a non-null value.
+         */
+        @Nullable
+        public static String getLocalAccountName(@NonNull Context context) {
+            return TextUtils.nullIfEmpty(context.getString(
+                    com.android.internal.R.string.config_rawContactsLocalAccountName));
+        }
+
+        /**
+         * The default value used for {@link #ACCOUNT_TYPE} of raw contacts when they are inserted
+         * without a value for this column.
+         *
+         * <p>This account is used to identify contacts that are only stored locally in the
+         * contacts database instead of being associated with an {@link Account} managed by an
+         * installed application.
+         *
+         * <p>When this returns null then {@link #getLocalAccountName} will also return null and
+         * when it is non-null {@link #getLocalAccountName} will also return a non-null value.
+         */
+        @Nullable
+        public static String getLocalAccountType(@NonNull Context context) {
+            return TextUtils.nullIfEmpty(context.getString(
+                    com.android.internal.R.string.config_rawContactsLocalAccountType));
         }
 
         /**
