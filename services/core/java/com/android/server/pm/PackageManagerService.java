@@ -3028,8 +3028,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mWellbeingPackage = getWellbeingPackageName();
             mDocumenterPackage = getDocumenterPackageName();
-            mConfiguratorPackage =
-                    mContext.getString(R.string.config_deviceConfiguratorPackageName);
+            mConfiguratorPackage = getDeviceConfiguratorPackageName();
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
             mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
             mTelephonyPackages = getTelephonyPackageNames();
@@ -19187,13 +19186,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getSystemTextClassifierPackageName() {
-        return mContext.getString(R.string.config_defaultTextClassifierPackage);
+        return ensureSystemPackageName(mContext.getString(
+                R.string.config_defaultTextClassifierPackage));
     }
 
     @Override
     public String[] getSystemTextClassifierPackages() {
-        return mContext.getResources().getStringArray(
-                R.array.config_defaultTextClassifierPackages);
+        return ensureSystemPackageNames(mContext.getResources().getStringArray(
+                R.array.config_defaultTextClassifierPackages));
     }
 
     @Override
@@ -19203,7 +19203,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (flattenedComponentName != null) {
             ComponentName componentName = ComponentName.unflattenFromString(flattenedComponentName);
             if (componentName != null && componentName.getPackageName() != null) {
-                return componentName.getPackageName();
+                return ensureSystemPackageName(componentName.getPackageName());
             }
         }
         return null;
@@ -19228,9 +19228,15 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @Nullable
+    private String getDeviceConfiguratorPackageName() {
+        return ensureSystemPackageName(mContext.getString(
+                R.string.config_deviceConfiguratorPackageName));
+    }
+
     @Override
     public String getWellbeingPackageName() {
-        return mContext.getString(R.string.config_defaultWellbeingPackage);
+        return ensureSystemPackageName(mContext.getString(R.string.config_defaultWellbeingPackage));
     }
 
     @Override
@@ -19245,7 +19251,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (appPredictionServiceComponentName == null) {
             return null;
         }
-        return appPredictionServiceComponentName.getPackageName();
+        return ensureSystemPackageName(appPredictionServiceComponentName.getPackageName());
     }
 
     @Override
@@ -19262,7 +19268,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (systemCaptionsServiceComponentName == null) {
             return null;
         }
-        return systemCaptionsServiceComponentName.getPackageName();
+        return ensureSystemPackageName(systemCaptionsServiceComponentName.getPackageName());
     }
 
     @Override
@@ -19274,7 +19280,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     public String getIncidentReportApproverPackageName() {
-        return mContext.getString(R.string.config_incidentReportApproverPackage);
+        return ensureSystemPackageName(mContext.getString(
+                R.string.config_incidentReportApproverPackage));
     }
 
     @Override
@@ -19284,7 +19291,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!TextUtils.isEmpty(names)) {
             telephonyPackageNames = names.trim().split(",");
         }
-        return telephonyPackageNames;
+        return ensureSystemPackageNames(telephonyPackageNames);
     }
 
     @Override
@@ -19301,7 +19308,32 @@ public class PackageManagerService extends IPackageManager.Stub
         if (contentCaptureServiceComponentName == null) {
             return null;
         }
-        return contentCaptureServiceComponentName.getPackageName();
+        return ensureSystemPackageName(contentCaptureServiceComponentName.getPackageName());
+    }
+
+    @Nullable
+    private String ensureSystemPackageName(@Nullable String packageName) {
+        if (packageName == null) {
+            return null;
+        }
+        if (getPackageInfo(packageName, MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE
+                        | MATCH_DIRECT_BOOT_UNAWARE | MATCH_DISABLED_COMPONENTS,
+                UserHandle.getCallingUserId()) == null) {
+            return null;
+        }
+        return packageName;
+    }
+
+    @Nullable
+    private String[] ensureSystemPackageNames(@Nullable String[] packageNames) {
+        if (packageNames == null) {
+            return null;
+        }
+        final int packageNamesLength = packageNames.length;
+        for (int i = 0; i < packageNamesLength; i++) {
+            packageNames[i] = ensureSystemPackageName(packageNames[i]);
+        }
+        return ArrayUtils.filterNotNull(packageNames, String[]::new);
     }
 
     @Override
