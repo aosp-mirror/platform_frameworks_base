@@ -154,12 +154,5 @@
     <declare-styleable name="CaptionsToggleImageButton">
         <attr name="optedOut" format="boolean" />
     </declare-styleable>
-
-    <!-- Theme attributes used to style the appearance of expanded Bubbles -->
-    <declare-styleable name="BubbleExpandedView">
-        <attr name="android:colorBackgroundFloating" />
-        <attr name="android:dialogCornerRadius" />
-    </declare-styleable>
-
 </resources>
 

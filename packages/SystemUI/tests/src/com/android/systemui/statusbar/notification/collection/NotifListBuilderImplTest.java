@@ -690,7 +690,6 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
         mListBuilder.addFilter(filter3);
 
         // GIVEN the SystemClock is set to a particular time:
-        mSystemClock.setAutoIncrement(true);
         mSystemClock.setUptimeMillis(47);
 
         // WHEN the pipeline is kicked off on a list of notifs

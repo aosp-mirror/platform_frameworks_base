@@ -297,7 +297,9 @@ class Bubble {
      * Whether the bubble for this notification should show a dot indicating updated content.
      */
     boolean showDot() {
-        return mShowBubbleUpdateDot && !mEntry.shouldSuppressNotificationDot();
+        return mShowBubbleUpdateDot
+                && !mEntry.shouldSuppressNotificationDot()
+                && !shouldSuppressNotification();
     }
 
     /**
@@ -305,6 +307,7 @@ class Bubble {
      */
     boolean showFlyout() {
         return !mSuppressFlyout && !mEntry.shouldSuppressPeek()
+                && !shouldSuppressNotification()
                 && !mEntry.shouldSuppressNotificationList();
     }
 

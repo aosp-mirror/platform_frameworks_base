@@ -13,7 +13,7 @@
 // limitations under the License.
 
 java_test_host {
-    name: "ApkVerityTests",
+    name: "ApkVerityTest",
     srcs: ["src/**/*.java"],
     libs: ["tradefed", "compatibility-tradefed", "compatibility-host-util"],
     test_suites: ["general-tests"],

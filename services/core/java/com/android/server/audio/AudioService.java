@@ -63,6 +63,8 @@ import android.hardware.input.InputManager;
 import android.hardware.usb.UsbManager;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.media.AudioAttributes;
+import android.media.AudioDeviceAddress;
+import android.media.AudioDeviceInfo;
 import android.media.AudioFocusInfo;
 import android.media.AudioFocusRequest;
 import android.media.AudioFormat;
@@ -1633,6 +1635,60 @@ public class AudioService extends IAudioService.Stub
     ///////////////////////////////////////////////////////////////////////////
     // IPC methods
     ///////////////////////////////////////////////////////////////////////////
+    /** @see AudioManager#setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceInfo) */
+    public int setPreferredDeviceForStrategy(int strategy, AudioDeviceAddress device) {
+        if (device == null) {
+            return AudioSystem.ERROR;
+        }
+        enforceModifyAudioRoutingPermission();
+        final String logString = String.format(
+                "setPreferredDeviceForStrategy u/pid:%d/%d strat:%d dev:%s",
+                Binder.getCallingUid(), Binder.getCallingPid(), strategy, device.toString());
+        sDeviceLogger.log(new AudioEventLogger.StringEvent(logString).printLog(TAG));
+        if (device.getRole() == AudioDeviceAddress.ROLE_INPUT) {
+            Log.e(TAG, "Unsupported input routing in " + logString);
+            return AudioSystem.ERROR;
+        }
+
+        final int status = mDeviceBroker.setPreferredDeviceForStrategySync(strategy, device);
+        if (status != AudioSystem.SUCCESS) {
+            Log.e(TAG, String.format("Error %d in %s)", status, logString));
+        }
+
+        return status;
+    }
+
+    /** @see AudioManager#removePreferredDeviceForStrategy(AudioProductStrategy) */
+    public int removePreferredDeviceForStrategy(int strategy) {
+        enforceModifyAudioRoutingPermission();
+        final String logString =
+                String.format("removePreferredDeviceForStrategy strat:%d", strategy);
+        sDeviceLogger.log(new AudioEventLogger.StringEvent(logString).printLog(TAG));
+
+        final int status = mDeviceBroker.removePreferredDeviceForStrategySync(strategy);
+        if (status != AudioSystem.SUCCESS) {
+            Log.e(TAG, String.format("Error %d in %s)", status, logString));
+        }
+        return status;
+    }
+
+    /** @see AudioManager#getPreferredDeviceForStrategy(AudioProductStrategy) */
+    public AudioDeviceAddress getPreferredDeviceForStrategy(int strategy) {
+        enforceModifyAudioRoutingPermission();
+        AudioDeviceAddress[] devices = new AudioDeviceAddress[1];
+        final long identity = Binder.clearCallingIdentity();
+        final int status = AudioSystem.getPreferredDeviceForStrategy(strategy, devices);
+        Binder.restoreCallingIdentity(identity);
+        if (status != AudioSystem.SUCCESS) {
+            Log.e(TAG, String.format("Error %d in getPreferredDeviceForStrategy(%d)",
+                    status, strategy));
+            return null;
+        } else {
+            return devices[0];
+        }
+    }
+
+
     /** @see AudioManager#adjustVolume(int, int) */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage, String caller) {

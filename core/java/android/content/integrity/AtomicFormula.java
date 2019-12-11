@@ -44,6 +44,7 @@ public abstract class AtomicFormula implements Formula {
 
     private static final String TAG = "AtomicFormula";
 
+    /** @hide */
     @IntDef(
             value = {
                 PACKAGE_NAME,
@@ -56,6 +57,7 @@ public abstract class AtomicFormula implements Formula {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Key {}
 
+    /** @hide */
     @IntDef(value = {EQ, LT, LE, GT, GE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Operator {}

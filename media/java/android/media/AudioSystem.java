@@ -1173,6 +1173,48 @@ public class AudioSystem
      */
     public static native boolean isCallScreeningModeSupported();
 
+    // use case routing by product strategy
+
+    /**
+     * Sets the preferred device to use for a given audio strategy in the audio policy engine
+     * @param strategy the id of the strategy to configure
+     * @param device the device type and address to route to when available
+     * @return {@link #SUCCESS} if successfully set
+     */
+    public static int setPreferredDeviceForStrategy(
+            int strategy, @NonNull AudioDeviceAddress device) {
+        return setPreferredDeviceForStrategy(strategy,
+                AudioDeviceInfo.convertDeviceTypeToInternalDevice(device.getType()),
+                device.getAddress());
+    }
+    /**
+     * Set device routing per product strategy.
+     * @param strategy the id of the strategy to configure
+     * @param deviceType the native device type, NOT AudioDeviceInfo types
+     * @param deviceAddress the address of the device
+     * @return {@link #SUCCESS} if successfully set
+     */
+    private static native int setPreferredDeviceForStrategy(
+            int strategy, int deviceType, String deviceAddress);
+
+    /**
+     * Remove preferred routing for the strategy
+     * @param strategy the id of the strategy to configure
+     * @return {@link #SUCCESS} if successfully removed
+     */
+    public static native int removePreferredDeviceForStrategy(int strategy);
+
+    /**
+     * Query previously set preferred device for a strategy
+     * @param strategy the id of the strategy to query for
+     * @param device an array of size 1 that will contain the preferred device, or null if
+     *               none was set
+     * @return {@link #SUCCESS} if there is a preferred device and it was successfully retrieved
+     *     and written to the array
+     */
+    public static native int getPreferredDeviceForStrategy(int strategy,
+                                                           AudioDeviceAddress[] device);
+
     // Items shared with audio service
 
     /**

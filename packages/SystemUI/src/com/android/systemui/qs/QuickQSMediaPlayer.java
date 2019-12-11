@@ -250,6 +250,14 @@ public class QuickQSMediaPlayer {
         return (state.getState() == PlaybackState.STATE_PLAYING);
     }
 
+    /**
+     * Check whether this player has an attached media session.
+     * @return whether there is a controller with a current media session.
+     */
+    public boolean hasMediaSession() {
+        return mController != null && mController.getPlaybackState() != null;
+    }
+
     private void addAlbumArtBackground(MediaMetadata metadata, int bgColor) {
         Bitmap albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
         float radius = mContext.getResources().getDimension(R.dimen.qs_media_corner_radius);

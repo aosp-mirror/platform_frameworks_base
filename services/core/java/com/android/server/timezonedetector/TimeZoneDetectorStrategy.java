@@ -86,7 +86,7 @@ public class TimeZoneDetectorStrategy {
         /**
          * Sets the device's time zone.
          */
-        void setDeviceTimeZone(@NonNull String zoneId, boolean sendNetworkBroadcast);
+        void setDeviceTimeZone(@NonNull String zoneId);
     }
 
     private static final String LOG_TAG = "TimeZoneDetectorStrategy";
@@ -172,7 +172,7 @@ public class TimeZoneDetectorStrategy {
      * (for use during debugging).
      */
     @NonNull
-    private final LocalLog mTimeZoneChangesLog = new LocalLog(30);
+    private final LocalLog mTimeZoneChangesLog = new LocalLog(30, false /* useLocalTimestamps */);
 
     /**
      * A mapping from phoneId to a linked list of phone time zone suggestions (the head being the
@@ -333,7 +333,6 @@ public class TimeZoneDetectorStrategy {
         Objects.requireNonNull(newZoneId);
         Objects.requireNonNull(cause);
 
-        boolean sendNetworkBroadcast = (origin == ORIGIN_PHONE);
         boolean isOriginAutomatic = isOriginAutomatic(origin);
         if (isOriginAutomatic) {
             if (!mCallback.isAutoTimeZoneDetectionEnabled()) {
@@ -373,12 +372,11 @@ public class TimeZoneDetectorStrategy {
             return;
         }
 
-        mCallback.setDeviceTimeZone(newZoneId, sendNetworkBroadcast);
+        mCallback.setDeviceTimeZone(newZoneId);
         String msg = "Set device time zone."
                 + " origin=" + origin
                 + ", currentZoneId=" + currentZoneId
                 + ", newZoneId=" + newZoneId
-                + ", sendNetworkBroadcast" + sendNetworkBroadcast
                 + ", cause=" + cause;
         if (DBG) {
             Slog.d(LOG_TAG, msg);

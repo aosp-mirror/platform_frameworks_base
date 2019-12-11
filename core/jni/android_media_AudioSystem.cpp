@@ -26,19 +26,19 @@
 #include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
+#include "android_media_AudioAttributes.h"
+#include "android_media_AudioDeviceAddress.h"
+#include "android_media_AudioEffectDescriptor.h"
+#include "android_media_AudioErrors.h"
+#include "android_media_AudioFormat.h"
+#include "android_media_MicrophoneInfo.h"
 #include <audiomanager/AudioManager.h>
-#include <media/AudioDeviceTypeAddr.h>
-#include <media/AudioSystem.h>
 #include <media/AudioPolicy.h>
+#include <media/AudioSystem.h>
 #include <media/MicrophoneInfo.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <system/audio.h>
 #include <system/audio_policy.h>
-#include "android_media_AudioEffectDescriptor.h"
-#include "android_media_AudioFormat.h"
-#include "android_media_AudioErrors.h"
-#include "android_media_MicrophoneInfo.h"
-#include "android_media_AudioAttributes.h"
 
 // ----------------------------------------------------------------------------
 
@@ -2254,9 +2254,9 @@ static jint
 android_media_AudioSystem_setAudioHalPids(JNIEnv *env, jobject clazz, jintArray jPids)
 {
     if (jPids == NULL) {
-        return (jint)AUDIO_JAVA_BAD_VALUE;
+        return (jint) AUDIO_JAVA_BAD_VALUE;
     }
-    pid_t *nPidsArray = (pid_t *)env->GetIntArrayElements(jPids, NULL);
+    pid_t *nPidsArray = (pid_t *) env->GetIntArrayElements(jPids, NULL);
     std::vector<pid_t> nPids(nPidsArray, nPidsArray + env->GetArrayLength(jPids));
     status_t status = AudioSystem::setAudioHalPids(nPids);
     env->ReleaseIntArrayElements(jPids, nPidsArray, 0);
@@ -2268,6 +2268,48 @@ static jboolean
 android_media_AudioSystem_isCallScreeningModeSupported(JNIEnv *env, jobject thiz)
 {
     return AudioSystem::isCallScreenModeSupported();
+}
+
+static jint
+android_media_AudioSystem_setPreferredDeviceForStrategy(JNIEnv *env, jobject thiz,
+        jint strategy, jint deviceType, jstring deviceAddress) {
+
+    const char *c_address = env->GetStringUTFChars(deviceAddress, NULL);
+    int status = check_AudioSystem_Command(
+            AudioSystem::setPreferredDeviceForStrategy((product_strategy_t) strategy,
+                    AudioDeviceTypeAddr(deviceType, c_address)));
+    env->ReleaseStringUTFChars(deviceAddress, c_address);
+    return (jint) status;
+}
+
+static jint
+android_media_AudioSystem_removePreferredDeviceForStrategy(JNIEnv *env, jobject thiz, jint strategy)
+{
+    return (jint) check_AudioSystem_Command(
+            AudioSystem::removePreferredDeviceForStrategy((product_strategy_t) strategy));
+}
+
+static jint
+android_media_AudioSystem_getPreferredDeviceForStrategy(JNIEnv *env, jobject thiz,
+        jint strategy, jobjectArray jDeviceArray)
+{
+    if (jDeviceArray == nullptr || env->GetArrayLength(jDeviceArray) != 1) {
+        ALOGE("%s invalid array to store AudioDeviceAddress", __FUNCTION__);
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+
+    AudioDeviceTypeAddr elDevice;
+    status_t status = check_AudioSystem_Command(
+            AudioSystem::getPreferredDeviceForStrategy((product_strategy_t) strategy, elDevice));
+    if (status != NO_ERROR) {
+        return (jint) status;
+    }
+    jobject jAudioDeviceAddress = NULL;
+    jint jStatus = createAudioDeviceAddressFromNative(env, &jAudioDeviceAddress, &elDevice);
+    if (jStatus == AUDIO_JAVA_SUCCESS) {
+        env->SetObjectArrayElement(jDeviceArray, 0, jAudioDeviceAddress);
+    }
+    return jStatus;
 }
 
 // ----------------------------------------------------------------------------
@@ -2350,6 +2392,9 @@ static const JNINativeMethod gMethods[] = {
     {"setRttEnabled",       "(Z)I",     (void *)android_media_AudioSystem_setRttEnabled},
     {"setAudioHalPids",  "([I)I", (void *)android_media_AudioSystem_setAudioHalPids},
     {"isCallScreeningModeSupported", "()Z", (void *)android_media_AudioSystem_isCallScreeningModeSupported},
+    {"setPreferredDeviceForStrategy", "(IILjava/lang/String;)I", (void *)android_media_AudioSystem_setPreferredDeviceForStrategy},
+    {"removePreferredDeviceForStrategy", "(I)I", (void *)android_media_AudioSystem_removePreferredDeviceForStrategy},
+    {"getPreferredDeviceForStrategy", "(I[Landroid/media/AudioDeviceAddress;)I", (void *)android_media_AudioSystem_getPreferredDeviceForStrategy},
 };
 
 static const JNINativeMethod gEventHandlerMethods[] = {

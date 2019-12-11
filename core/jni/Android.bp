@@ -152,6 +152,7 @@ cc_library_shared {
                 "android_util_StringBlock.cpp",
                 "android_util_XmlBlock.cpp",
                 "android_util_jar_StrictJarFile.cpp",
+                "android_media_AudioDeviceAddress.cpp",
                 "android_media_AudioEffectDescriptor.cpp",
                 "android_media_AudioRecord.cpp",
                 "android_media_AudioSystem.cpp",

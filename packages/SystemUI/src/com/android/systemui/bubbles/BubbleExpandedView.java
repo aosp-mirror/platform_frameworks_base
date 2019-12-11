@@ -275,17 +275,15 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     }
 
     void applyThemeAttrs() {
-        TypedArray ta = getContext().obtainStyledAttributes(R.styleable.BubbleExpandedView);
-        int bgColor = ta.getColor(
-                R.styleable.BubbleExpandedView_android_colorBackgroundFloating, Color.WHITE);
-        float cornerRadius = ta.getDimension(
-                R.styleable.BubbleExpandedView_android_dialogCornerRadius, 0);
+        final TypedArray ta = mContext.obtainStyledAttributes(
+                new int[] {
+                        android.R.attr.colorBackgroundFloating,
+                        android.R.attr.dialogCornerRadius});
+        int bgColor = ta.getColor(0, Color.WHITE);
+        float cornerRadius = ta.getDimensionPixelSize(1, 0);
         ta.recycle();
 
-        // Update triangle color.
         mPointerDrawable.setTint(bgColor);
-
-        // Update ActivityView cornerRadius
         if (ScreenDecorationsUtils.supportsRoundedCornersOnWindows(mContext.getResources())) {
             mActivityView.setCornerRadius(cornerRadius);
         }

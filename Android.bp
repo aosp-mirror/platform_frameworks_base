@@ -571,6 +571,7 @@ filegroup {
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
+        "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/UnsupportedAppUsage.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
         "core/java/com/android/internal/annotations/VisibleForTesting.java",
@@ -1683,7 +1684,8 @@ filegroup {
     name: "framework-wifi-service-shared-srcs",
     srcs: [
         ":framework-annotations",
-	"core/java/android/os/HandlerExecutor.java",
+        "core/java/android/net/InterfaceConfiguration.java",
+        "core/java/android/os/HandlerExecutor.java",
         "core/java/android/util/BackupUtils.java",
         "core/java/android/util/LocalLog.java",
         "core/java/android/util/Rational.java",

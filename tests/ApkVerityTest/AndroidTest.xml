@@ -36,6 +36,6 @@
     </target_preparer>
 
     <test class="com.android.compatibility.common.tradefed.testtype.JarHostTest" >
-        <option name="jar" value="ApkVerityTests.jar" />
+        <option name="jar" value="ApkVerityTest.jar" />
     </test>
 </configuration>

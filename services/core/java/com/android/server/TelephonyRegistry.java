@@ -357,7 +357,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
                         SubscriptionManager.getDefaultSubscriptionId());
                 int newDefaultPhoneId = intent.getIntExtra(
-                        PhoneConstants.PHONE_KEY,
+                        SubscriptionManager.EXTRA_SLOT_INDEX,
                         SubscriptionManager.getPhoneId(newDefaultSubId));
                 if (DBG) {
                     log("onReceive:current mDefaultSubId=" + mDefaultSubId
@@ -2146,6 +2146,16 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     // the legacy intent broadcasting
     //
 
+    // Legacy intent action.
+    /** Fired when a subscription's phone state changes. */
+    private static final String ACTION_SUBSCRIPTION_PHONE_STATE_CHANGED =
+            "android.intent.action.SUBSCRIPTION_PHONE_STATE";
+
+    // Legacy intent extra keys, copied from PhoneConstants.
+    // Used in legacy intents sent here, for backward compatibility.
+    private static final String PHONE_CONSTANTS_SLOT_KEY = "slot";
+    private static final String PHONE_CONSTANTS_SUBSCRIPTION_KEY = "subscription";
+
     private void broadcastServiceStateChanged(ServiceState state, int phoneId, int subId) {
         long ident = Binder.clearCallingIdentity();
         try {
@@ -2162,9 +2172,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         state.fillInNotifierBundle(data);
         intent.putExtras(data);
         // Pass the subscription along with the intent.
-        intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+        intent.putExtra(PHONE_CONSTANTS_SUBSCRIPTION_KEY, subId);
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
-        intent.putExtra(PhoneConstants.SLOT_KEY, phoneId);
+        intent.putExtra(PHONE_CONSTANTS_SLOT_KEY, phoneId);
+        intent.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, phoneId);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
@@ -2183,8 +2194,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         Bundle data = new Bundle();
         signalStrength.fillInNotifierBundle(data);
         intent.putExtras(data);
-        intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
-        intent.putExtra(PhoneConstants.SLOT_KEY, phoneId);
+        intent.putExtra(PHONE_CONSTANTS_SUBSCRIPTION_KEY, subId);
+        intent.putExtra(PHONE_CONSTANTS_SLOT_KEY, phoneId);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
@@ -2219,13 +2230,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // If a valid subId was specified, we should fire off a subId-specific state
         // change intent and include the subId.
         if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
-            intent.setAction(PhoneConstants.ACTION_SUBSCRIPTION_PHONE_STATE_CHANGED);
-            intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+            intent.setAction(ACTION_SUBSCRIPTION_PHONE_STATE_CHANGED);
+            intent.putExtra(PHONE_CONSTANTS_SUBSCRIPTION_KEY, subId);
             intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
         }
         // If the phoneId is invalid, the broadcast is for overall call state.
         if (phoneId != SubscriptionManager.INVALID_PHONE_INDEX) {
-            intent.putExtra(PhoneConstants.SLOT_KEY, phoneId);
+            intent.putExtra(PHONE_CONSTANTS_SLOT_KEY, phoneId);
+            intent.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, phoneId);
         }
 
         // Wakeup apps for the (SUBSCRIPTION_)PHONE_STATE broadcast.
@@ -2285,14 +2297,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         intent.putExtra(PhoneConstants.DATA_APN_KEY, apn);
         intent.putExtra(PhoneConstants.DATA_APN_TYPE_KEY, apnType);
-        intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+        intent.putExtra(PHONE_CONSTANTS_SUBSCRIPTION_KEY, subId);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void broadcastDataConnectionFailed(String apnType, int subId) {
         Intent intent = new Intent(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
         intent.putExtra(PhoneConstants.DATA_APN_TYPE_KEY, apnType);
-        intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+        intent.putExtra(PHONE_CONSTANTS_SUBSCRIPTION_KEY, subId);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 

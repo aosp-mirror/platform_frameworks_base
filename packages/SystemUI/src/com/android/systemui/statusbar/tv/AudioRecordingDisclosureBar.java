@@ -16,32 +16,44 @@
 
 package com.android.systemui.statusbar.tv;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
+import android.annotation.IntDef;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.Drawable;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.systemui.R;
 
-import java.util.ArrayList;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
 
+/**
+ * A component of {@link TvStatusBar} responsible for notifying the user whenever an application is
+ * recording audio.
+ *
+ * @see TvStatusBar
+ */
 class AudioRecordingDisclosureBar {
     private static final String TAG = "AudioRecordingDisclosureBar";
     private static final boolean DEBUG = false;
@@ -50,121 +62,310 @@ class AudioRecordingDisclosureBar {
     // CtsSystemUiHostTestCases:TvMicrophoneCaptureIndicatorTest
     private static final String LAYOUT_PARAMS_TITLE = "MicrophoneCaptureIndicator";
 
-    private static final int ANIM_DURATION_MS = 150;
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"STATE_"}, value = {
+            STATE_NOT_SHOWN,
+            STATE_APPEARING,
+            STATE_SHOWN,
+            STATE_MINIMIZING,
+            STATE_MINIMIZED,
+            STATE_MAXIMIZING,
+            STATE_DISAPPEARING
+    })
+    public @interface State {}
+
+    private static final int STATE_NOT_SHOWN = 0;
+    private static final int STATE_APPEARING = 1;
+    private static final int STATE_SHOWN = 2;
+    private static final int STATE_MINIMIZING = 3;
+    private static final int STATE_MINIMIZED = 4;
+    private static final int STATE_MAXIMIZING = 5;
+    private static final int STATE_DISAPPEARING = 6;
+
+    private static final int ANIMATION_DURATION = 600;
+    private static final int MAXIMIZED_DURATION = 3000;
+    private static final int PULSE_BIT_DURATION = 1000;
+    private static final float PULSE_SCALE = 1.25f;
 
     private final Context mContext;
-    private final List<String> mAudioRecordingApps = new ArrayList<>();
-    private View mView;
-    private ViewGroup mAppsInfoContainer;
+
+    private View mIndicatorView;
+    private View mIconTextsContainer;
+    private View mIconContainerBg;
+    private View mIcon;
+    private View mBgRight;
+    private View mTextsContainers;
+    private TextView mTextView;
+
+    @State private int mState = STATE_NOT_SHOWN;
+    private final Set<String> mAudioRecordingApps = new HashSet<>();
+    private final Queue<String> mPendingNotifications = new LinkedList<>();
 
     AudioRecordingDisclosureBar(Context context) {
         mContext = context;
     }
 
     void start() {
-        // Inflate and add audio recording disclosure bar
-        createView();
-
         // Register AppOpsManager callback
         final AppOpsManager appOpsManager = (AppOpsManager) mContext.getSystemService(
                 Context.APP_OPS_SERVICE);
         appOpsManager.startWatchingActive(
-                new String[]{AppOpsManager.OPSTR_RECORD_AUDIO}, mContext.getMainExecutor(),
+                new String[]{AppOpsManager.OPSTR_RECORD_AUDIO},
+                mContext.getMainExecutor(),
                 new OnActiveRecordingListener());
     }
 
-    private void createView() {
-        //TODO(b/142228704): this is to be re-implemented once proper design is completed
-        mView = View.inflate(mContext,
-                R.layout.tv_status_bar_audio_recording, null);
-        mAppsInfoContainer = mView.findViewById(R.id.container);
+    private void onStartedRecording(String packageName) {
+        if (!mAudioRecordingApps.add(packageName)) {
+            // This app is already known to perform recording
+            return;
+        }
+
+        switch (mState) {
+            case STATE_NOT_SHOWN:
+                show(packageName);
+                break;
+
+            case STATE_MINIMIZED:
+                expand(packageName);
+                break;
+
+            case STATE_DISAPPEARING:
+            case STATE_APPEARING:
+            case STATE_MAXIMIZING:
+            case STATE_SHOWN:
+            case STATE_MINIMIZING:
+                // Currently animating or expanded. Thus add to the pending notifications, and it
+                // will be picked up once the indicator comes to the STATE_MINIMIZED.
+                mPendingNotifications.add(packageName);
+                break;
+        }
+    }
+
+    private void onDoneRecording(String packageName) {
+        if (!mAudioRecordingApps.remove(packageName)) {
+            // Was not marked as an active recorder, do nothing
+            return;
+        }
+
+        // If not MINIMIZED, will check whether the indicator should be hidden when the indicator
+        // comes to the STATE_MINIMIZED eventually. If is in the STATE_MINIMIZED, but there are
+        // other active recorders - simply ignore.
+        if (mState == STATE_MINIMIZED && mAudioRecordingApps.isEmpty()) {
+            hide();
+        }
+    }
+
+    private void show(String packageName) {
+        // Inflate the indicator view
+        mIndicatorView = LayoutInflater.from(mContext).inflate(
+                R.layout.tv_audio_recording_indicator,
+                null);
+        mIconTextsContainer = mIndicatorView.findViewById(R.id.icon_texts_container);
+        mIconContainerBg = mIconTextsContainer.findViewById(R.id.icon_container_bg);
+        mIcon = mIconTextsContainer.findViewById(R.id.icon_mic);
+        mTextsContainers = mIconTextsContainer.findViewById(R.id.texts_container);
+        mTextView = mTextsContainers.findViewById(R.id.text);
+        mBgRight = mIndicatorView.findViewById(R.id.bg_right);
+
+        // Set up the notification text
+        final String label = getApplicationLabel(packageName);
+        mTextView.setText(mContext.getString(R.string.app_accessed_mic, label));
+
+        // Initially change the visibility to INVISIBLE, wait until and receives the size and
+        // then animate it moving from "off" the screen correctly
+        mIndicatorView.setVisibility(View.INVISIBLE);
+        mIndicatorView
+                .getViewTreeObserver()
+                .addOnGlobalLayoutListener(
+                        new ViewTreeObserver.OnGlobalLayoutListener() {
+                            @Override
+                            public void onGlobalLayout() {
+                                // Remove the observer
+                                mIndicatorView.getViewTreeObserver().removeOnGlobalLayoutListener(
+                                        this);
+
+                                // Now that the width of the indicator has been assigned, we can
+                                // move it in from off the screen.
+                                final int initialOffset = mIndicatorView.getWidth();
+                                final AnimatorSet set = new AnimatorSet();
+                                set.setDuration(ANIMATION_DURATION);
+                                set.playTogether(
+                                        ObjectAnimator.ofFloat(mIndicatorView,
+                                                View.TRANSLATION_X, initialOffset, 0),
+                                        ObjectAnimator.ofFloat(mIndicatorView, View.ALPHA, 0f,
+                                                1f));
+                                set.addListener(
+                                        new AnimatorListenerAdapter() {
+                                            @Override
+                                            public void onAnimationStart(Animator animation,
+                                                    boolean isReverse) {
+                                                // Indicator is INVISIBLE at the moment, change it.
+                                                mIndicatorView.setVisibility(View.VISIBLE);
+                                            }
+
+                                            @Override
+                                            public void onAnimationEnd(Animator animation) {
+                                                startPulsatingAnimation();
+                                                onExpanded();
+                                            }
+                                        });
+                                set.start();
+                            }
+                        });
 
         final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
-                MATCH_PARENT,
+                WRAP_CONTENT,
                 WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
-        layoutParams.gravity = Gravity.BOTTOM;
+        layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
         layoutParams.setTitle(LAYOUT_PARAMS_TITLE);
         layoutParams.packageName = mContext.getPackageName();
-
         final WindowManager windowManager = (WindowManager) mContext.getSystemService(
                 Context.WINDOW_SERVICE);
-        windowManager.addView(mView, layoutParams);
+        windowManager.addView(mIndicatorView, layoutParams);
 
-        // Set invisible first until it gains its actual size and we are able to hide it by moving
-        // off the screen
-        mView.setVisibility(View.INVISIBLE);
-        mView.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
+        mState = STATE_APPEARING;
+    }
+
+    private void expand(String packageName) {
+        final String label = getApplicationLabel(packageName);
+        mTextView.setText(mContext.getString(R.string.app_accessed_mic, label));
+
+        final AnimatorSet set = new AnimatorSet();
+        set.playTogether(
+                ObjectAnimator.ofFloat(mIconTextsContainer, View.TRANSLATION_X, 0),
+                ObjectAnimator.ofFloat(mIconContainerBg, View.ALPHA, 1f),
+                ObjectAnimator.ofFloat(mTextsContainers, View.ALPHA, 1f),
+                ObjectAnimator.ofFloat(mBgRight, View.ALPHA, 1f));
+        set.setDuration(ANIMATION_DURATION);
+        set.addListener(
+                new AnimatorListenerAdapter() {
                     @Override
-                    public void onGlobalLayout() {
-                        // Now that we get the height, we can move the bar off ("below") the screen
-                        final int height = mView.getHeight();
-                        mView.setTranslationY(height);
-                        // Remove the observer
-                        mView.getViewTreeObserver()
-                                .removeOnGlobalLayoutListener(this);
-                        // Now, that the view has been measured, and the translation was set to
-                        // move it off the screen, we change the visibility to GONE
-                        mView.setVisibility(View.GONE);
+                    public void onAnimationEnd(Animator animation) {
+                        onExpanded();
                     }
                 });
+        set.start();
+
+        mState = STATE_MAXIMIZING;
     }
 
-    private void showAudioRecordingDisclosureBar() {
-        mView.setVisibility(View.VISIBLE);
-        mView.animate()
-                .translationY(0f)
-                .setDuration(ANIM_DURATION_MS)
-                .start();
+    private void minimize() {
+        final int targetOffset = mTextsContainers.getWidth();
+        final AnimatorSet set = new AnimatorSet();
+        set.playTogether(
+                ObjectAnimator.ofFloat(mIconTextsContainer, View.TRANSLATION_X, targetOffset),
+                ObjectAnimator.ofFloat(mIconContainerBg, View.ALPHA, 0f),
+                ObjectAnimator.ofFloat(mTextsContainers, View.ALPHA, 0f),
+                ObjectAnimator.ofFloat(mBgRight, View.ALPHA, 0f));
+        set.setDuration(ANIMATION_DURATION);
+        set.addListener(
+                new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        onMinimized();
+                    }
+                });
+        set.start();
+
+        mState = STATE_MINIMIZING;
     }
 
-    private void addToAudioRecordingDisclosureBar(String packageName) {
+    private void hide() {
+        final int targetOffset =
+                mIndicatorView.getWidth() - (int) mIconTextsContainer.getTranslationX();
+        final AnimatorSet set = new AnimatorSet();
+        set.playTogether(
+                ObjectAnimator.ofFloat(mIndicatorView, View.TRANSLATION_X, targetOffset),
+                ObjectAnimator.ofFloat(mIcon, View.ALPHA, 0f));
+        set.setDuration(ANIMATION_DURATION);
+        set.addListener(
+                new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        onHidden();
+                    }
+                });
+        set.start();
+
+        mState = STATE_DISAPPEARING;
+    }
+
+    private void onExpanded() {
+        mState = STATE_SHOWN;
+
+        mIndicatorView.postDelayed(this::minimize, MAXIMIZED_DURATION);
+    }
+
+    private void onMinimized() {
+        mState = STATE_MINIMIZED;
+
+        if (!mPendingNotifications.isEmpty()) {
+            // There is a new application that started recording, tell the user about it.
+            expand(mPendingNotifications.poll());
+        } else if (mAudioRecordingApps.isEmpty()) {
+            // Nobody is recording anymore, remove the indicator.
+            hide();
+        }
+    }
+
+    private void onHidden() {
+        final WindowManager windowManager = (WindowManager) mContext.getSystemService(
+                Context.WINDOW_SERVICE);
+        windowManager.removeView(mIndicatorView);
+
+        mIndicatorView = null;
+        mIconTextsContainer = null;
+        mIconContainerBg = null;
+        mIcon = null;
+        mTextsContainers = null;
+        mTextView = null;
+        mBgRight = null;
+
+        mState = STATE_NOT_SHOWN;
+    }
+
+    private void startPulsatingAnimation() {
+        final View pulsatingView = mIconTextsContainer.findViewById(R.id.pulsating_circle);
+        final ObjectAnimator animator =
+                ObjectAnimator.ofPropertyValuesHolder(
+                        pulsatingView,
+                        PropertyValuesHolder.ofFloat(View.SCALE_X, PULSE_SCALE),
+                        PropertyValuesHolder.ofFloat(View.SCALE_Y, PULSE_SCALE));
+        animator.setDuration(PULSE_BIT_DURATION);
+        animator.setRepeatCount(ObjectAnimator.INFINITE);
+        animator.setRepeatMode(ObjectAnimator.REVERSE);
+        animator.start();
+    }
+
+    private String getApplicationLabel(String packageName) {
         final PackageManager pm = mContext.getPackageManager();
         final ApplicationInfo appInfo;
         try {
             appInfo = pm.getApplicationInfo(packageName, 0);
         } catch (PackageManager.NameNotFoundException e) {
-            return;
+            return packageName;
         }
-        final CharSequence label = pm.getApplicationLabel(appInfo);
-        final Drawable icon = pm.getApplicationIcon(appInfo);
-
-        final View view = LayoutInflater.from(mContext).inflate(R.layout.tv_item_app_info,
-                mAppsInfoContainer, false);
-        ((TextView) view.findViewById(R.id.title)).setText(label);
-        ((ImageView) view.findViewById(R.id.icon)).setImageDrawable(icon);
-
-        mAppsInfoContainer.addView(view);
-    }
-
-    private void removeFromAudioRecordingDisclosureBar(int index) {
-        mAppsInfoContainer.removeViewAt(index);
-    }
-
-    private void hideAudioRecordingDisclosureBar() {
-        final ViewPropertyAnimator animator = mView.animate();
-        animator.translationY(mView.getHeight())
-                .setDuration(ANIM_DURATION_MS)
-                .withEndAction(() -> mView.setVisibility(View.GONE))
-                .start();
+        return pm.getApplicationLabel(appInfo).toString();
     }
 
     private class OnActiveRecordingListener implements AppOpsManager.OnOpActiveChangedListener {
-        private final List<String> mExemptApps;
+        private final Set<String> mExemptApps;
 
         private OnActiveRecordingListener() {
-            mExemptApps = Arrays.asList(mContext.getResources().getStringArray(
-                    R.array.audio_recording_disclosure_exempt_apps));
+            mExemptApps = new ArraySet<>(Arrays.asList(mContext.getResources().getStringArray(
+                    R.array.audio_recording_disclosure_exempt_apps)));
         }
 
         @Override
         public void onOpActiveChanged(String op, int uid, String packageName, boolean active) {
             if (DEBUG) {
                 Log.d(TAG,
-                        "OP_RECORD_AUDIO active change, active=" + active + ", app=" + packageName);
+                        "OP_RECORD_AUDIO active change, active=" + active + ", app="
+                                + packageName);
             }
 
             if (mExemptApps.contains(packageName)) {
@@ -174,37 +375,10 @@ class AudioRecordingDisclosureBar {
                 return;
             }
 
-            final boolean alreadyTracking = mAudioRecordingApps.contains(packageName);
-            if ((active && alreadyTracking) || (!active && !alreadyTracking)) {
-                if (DEBUG) {
-                    Log.d(TAG, "\t- nothing changed");
-                }
-                return;
-            }
-
             if (active) {
-                if (DEBUG) {
-                    Log.d(TAG, "\t- new recording app");
-                }
-
-                if (mAudioRecordingApps.isEmpty()) {
-                    showAudioRecordingDisclosureBar();
-                }
-
-                mAudioRecordingApps.add(packageName);
-                addToAudioRecordingDisclosureBar(packageName);
+                onStartedRecording(packageName);
             } else {
-                if (DEBUG) {
-                    Log.d(TAG, "\t- not recording any more");
-                }
-
-                final int index = mAudioRecordingApps.indexOf(packageName);
-                removeFromAudioRecordingDisclosureBar(index);
-                mAudioRecordingApps.remove(index);
-
-                if (mAudioRecordingApps.isEmpty()) {
-                    hideAudioRecordingDisclosureBar();
-                }
+                onDoneRecording(packageName);
             }
         }
     }

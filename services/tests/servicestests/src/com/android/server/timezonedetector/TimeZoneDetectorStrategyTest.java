@@ -50,7 +50,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.Objects;
 
 /**
  * White-box unit tests for {@link TimeZoneDetectorStrategy}.
@@ -445,8 +444,7 @@ public class TimeZoneDetectorStrategyTest {
     static class FakeTimeZoneDetectorStrategyCallback implements TimeZoneDetectorStrategy.Callback {
 
         private boolean mAutoTimeZoneDetectionEnabled;
-        private TestState<TimeZoneChange> mTimeZoneChanges = new TestState<>();
-        private String mTimeZoneId;
+        private TestState<String> mTimeZoneId = new TestState<>();
 
         @Override
         public boolean isAutoTimeZoneDetectionEnabled() {
@@ -460,13 +458,12 @@ public class TimeZoneDetectorStrategyTest {
 
         @Override
         public String getDeviceTimeZone() {
-            return mTimeZoneId;
+            return mTimeZoneId.getLatest();
         }
 
         @Override
-        public void setDeviceTimeZone(String zoneId, boolean withNetworkBroadcast) {
-            mTimeZoneId = zoneId;
-            mTimeZoneChanges.set(new TimeZoneChange(zoneId, withNetworkBroadcast));
+        public void setDeviceTimeZone(String zoneId) {
+            mTimeZoneId.set(zoneId);
         }
 
         void initializeAutoTimeZoneDetection(boolean enabled) {
@@ -474,7 +471,7 @@ public class TimeZoneDetectorStrategyTest {
         }
 
         void initializeTimeZone(String zoneId) {
-            mTimeZoneId = zoneId;
+            mTimeZoneId.init(zoneId);
         }
 
         void setAutoTimeZoneDetectionEnabled(boolean enabled) {
@@ -482,46 +479,17 @@ public class TimeZoneDetectorStrategyTest {
         }
 
         void assertTimeZoneNotSet() {
-            mTimeZoneChanges.assertHasNotBeenSet();
+            mTimeZoneId.assertHasNotBeenSet();
         }
 
-        void assertTimeZoneSet(String timeZoneId, boolean withNetworkBroadcast) {
-            mTimeZoneChanges.assertHasBeenSet();
-            mTimeZoneChanges.assertChangeCount(1);
-            TimeZoneChange expectedChange = new TimeZoneChange(timeZoneId, withNetworkBroadcast);
-            mTimeZoneChanges.assertLatestEquals(expectedChange);
+        void assertTimeZoneSet(String timeZoneId) {
+            mTimeZoneId.assertHasBeenSet();
+            mTimeZoneId.assertChangeCount(1);
+            mTimeZoneId.assertLatestEquals(timeZoneId);
         }
 
         void commitAllChanges() {
-            mTimeZoneChanges.commitLatest();
-        }
-    }
-
-    private static class TimeZoneChange {
-        private final String mTimeZoneId;
-        private final boolean mWithNetworkBroadcast;
-
-        private TimeZoneChange(String timeZoneId, boolean withNetworkBroadcast) {
-            mTimeZoneId = timeZoneId;
-            mWithNetworkBroadcast = withNetworkBroadcast;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            TimeZoneChange that = (TimeZoneChange) o;
-            return mWithNetworkBroadcast == that.mWithNetworkBroadcast
-                    && mTimeZoneId.equals(that.mTimeZoneId);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(mTimeZoneId, mWithNetworkBroadcast);
+            mTimeZoneId.commitLatest();
         }
     }
 
@@ -614,21 +582,13 @@ public class TimeZoneDetectorStrategyTest {
         }
 
         Script verifyTimeZoneSetAndReset(PhoneTimeZoneSuggestion suggestion) {
-            // Phone suggestions should cause a TelephonyIntents.ACTION_NETWORK_SET_TIMEZONE
-            // broadcast.
-            boolean withNetworkBroadcast = true;
-            mFakeTimeZoneDetectorStrategyCallback.assertTimeZoneSet(
-                    suggestion.getZoneId(), withNetworkBroadcast);
+            mFakeTimeZoneDetectorStrategyCallback.assertTimeZoneSet(suggestion.getZoneId());
             mFakeTimeZoneDetectorStrategyCallback.commitAllChanges();
             return this;
         }
 
         Script verifyTimeZoneSetAndReset(ManualTimeZoneSuggestion suggestion) {
-            // Manual suggestions should not cause a TelephonyIntents.ACTION_NETWORK_SET_TIMEZONE
-            // broadcast.
-            boolean withNetworkBroadcast = false;
-            mFakeTimeZoneDetectorStrategyCallback.assertTimeZoneSet(
-                    suggestion.getZoneId(), withNetworkBroadcast);
+            mFakeTimeZoneDetectorStrategyCallback.assertTimeZoneSet(suggestion.getZoneId());
             mFakeTimeZoneDetectorStrategyCallback.commitAllChanges();
             return this;
         }

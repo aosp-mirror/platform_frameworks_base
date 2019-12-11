@@ -677,10 +677,19 @@ public final class PermissionPolicyService extends SystemService {
 
         private void setUidMode(int opCode, int uid, int mode,
                 @NonNull String packageName) {
-            final int currentMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager
-                    .opToPublicName(opCode), uid, packageName);
-            if (currentMode != mode) {
+            final int oldMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager.opToPublicName(
+                    opCode), uid, packageName);
+            if (oldMode != mode) {
                 mAppOpsManager.setUidMode(opCode, uid, mode);
+                final int newMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager.opToPublicName(
+                        opCode), uid, packageName);
+                if (newMode != mode) {
+                    // Work around incorrectly-set package mode. It never makes sense for app ops
+                    // related to runtime permissions, but can get in the way and we have to reset
+                    // it.
+                    mAppOpsManager.setMode(opCode, uid, packageName, AppOpsManager.opToDefaultMode(
+                            opCode));
+                }
             }
         }
 

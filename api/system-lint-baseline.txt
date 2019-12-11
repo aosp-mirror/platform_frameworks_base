@@ -196,7 +196,6 @@ ProtectedMember: android.service.contentcapture.ContentCaptureService#dump(java.
 ProtectedMember: android.service.notification.NotificationAssistantService#attachBaseContext(android.content.Context):
     
 
-
 SamShouldBeLast: android.accounts.AccountManager#addAccount(String, String, String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
     
 SamShouldBeLast: android.accounts.AccountManager#addOnAccountsUpdatedListener(android.accounts.OnAccountsUpdateListener, android.os.Handler, boolean):

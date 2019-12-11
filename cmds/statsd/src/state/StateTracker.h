@@ -80,10 +80,12 @@ private:
     // Set of all StateListeners (objects listening for state changes)
     std::set<wp<StateListener>> mListeners;
 
-    // Reset all state values in map to default state
+    // Reset all state values in map to default state.
     void handleReset(const int64_t eventTimeNs);
 
-    // Reset only the state value mapped to primary key to default state
+    // Reset only the state value mapped to the given primary key to default state.
+    // Partial resets are used when we only need to update the state of one primary
+    // key instead of clearing/reseting every key in the map.
     void handlePartialReset(const int64_t eventTimeNs, const HashableDimensionKey& primaryKey);
 
     // Update the StateMap based on the received state value.

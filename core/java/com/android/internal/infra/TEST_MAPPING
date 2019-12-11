@@ -6,9 +6,17 @@
     {
       "name": "CtsPermissionTestCases",
       "options": [
-          {
-              "include-filter": "android.permission.cts.PermissionControllerTest"
-          }
+        {
+          "include-filter": "android.permission.cts.PermissionControllerTest"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "com.android.internal.infra."
+        }
       ]
     }
   ]

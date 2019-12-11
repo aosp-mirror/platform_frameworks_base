@@ -1686,9 +1686,25 @@ package android.content {
     field public static final String EXTRA_REMOTE_CALLBACK = "android.intent.extra.REMOTE_CALLBACK";
     field public static final String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
     field public static final String EXTRA_ROLE_NAME = "android.intent.extra.ROLE_NAME";
+    field @Deprecated public static final String EXTRA_SIM_LOCKED_REASON = "reason";
+    field @Deprecated public static final String EXTRA_SIM_STATE = "ss";
     field public static final String EXTRA_UNKNOWN_INSTANT_APP = "android.intent.extra.UNKNOWN_INSTANT_APP";
     field public static final String EXTRA_VERIFICATION_BUNDLE = "android.intent.extra.VERIFICATION_BUNDLE";
     field public static final String METADATA_SETUP_VERSION = "android.SETUP_VERSION";
+    field @Deprecated public static final String SIM_ABSENT_ON_PERM_DISABLED = "PERM_DISABLED";
+    field @Deprecated public static final String SIM_LOCKED_NETWORK = "NETWORK";
+    field @Deprecated public static final String SIM_LOCKED_ON_PIN = "PIN";
+    field @Deprecated public static final String SIM_LOCKED_ON_PUK = "PUK";
+    field @Deprecated public static final String SIM_STATE_ABSENT = "ABSENT";
+    field @Deprecated public static final String SIM_STATE_CARD_IO_ERROR = "CARD_IO_ERROR";
+    field @Deprecated public static final String SIM_STATE_CARD_RESTRICTED = "CARD_RESTRICTED";
+    field @Deprecated public static final String SIM_STATE_IMSI = "IMSI";
+    field @Deprecated public static final String SIM_STATE_LOADED = "LOADED";
+    field @Deprecated public static final String SIM_STATE_LOCKED = "LOCKED";
+    field @Deprecated public static final String SIM_STATE_NOT_READY = "NOT_READY";
+    field @Deprecated public static final String SIM_STATE_PRESENT = "PRESENT";
+    field @Deprecated public static final String SIM_STATE_READY = "READY";
+    field @Deprecated public static final String SIM_STATE_UNKNOWN = "UNKNOWN";
   }
 
   public class IntentFilter implements android.os.Parcelable {
@@ -1730,7 +1746,7 @@ package android.content.integrity {
   }
 
   public abstract class AtomicFormula implements android.content.integrity.Formula {
-    ctor public AtomicFormula(@android.content.integrity.AtomicFormula.Key int);
+    ctor public AtomicFormula(int);
     method public int getKey();
     field public static final int APP_CERTIFICATE = 1; // 0x1
     field public static final int EQ = 0; // 0x0
@@ -1746,7 +1762,7 @@ package android.content.integrity {
   }
 
   public static final class AtomicFormula.BooleanAtomicFormula extends android.content.integrity.AtomicFormula implements android.os.Parcelable {
-    ctor public AtomicFormula.BooleanAtomicFormula(@android.content.integrity.AtomicFormula.Key int, boolean);
+    ctor public AtomicFormula.BooleanAtomicFormula(int, boolean);
     method public int describeContents();
     method public int getTag();
     method public boolean getValue();
@@ -1756,7 +1772,7 @@ package android.content.integrity {
   }
 
   public static final class AtomicFormula.IntAtomicFormula extends android.content.integrity.AtomicFormula implements android.os.Parcelable {
-    ctor public AtomicFormula.IntAtomicFormula(@android.content.integrity.AtomicFormula.Key int, @android.content.integrity.AtomicFormula.Operator int, int);
+    ctor public AtomicFormula.IntAtomicFormula(int, int, int);
     method public int describeContents();
     method public int getOperator();
     method public int getTag();
@@ -1766,14 +1782,8 @@ package android.content.integrity {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.integrity.AtomicFormula.IntAtomicFormula> CREATOR;
   }
 
-  @IntDef({android.content.integrity.AtomicFormula.PACKAGE_NAME, android.content.integrity.AtomicFormula.APP_CERTIFICATE, android.content.integrity.AtomicFormula.INSTALLER_NAME, android.content.integrity.AtomicFormula.INSTALLER_CERTIFICATE, android.content.integrity.AtomicFormula.VERSION_CODE, android.content.integrity.AtomicFormula.PRE_INSTALLED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface AtomicFormula.Key {
-  }
-
-  @IntDef({android.content.integrity.AtomicFormula.EQ, android.content.integrity.AtomicFormula.LT, android.content.integrity.AtomicFormula.LE, android.content.integrity.AtomicFormula.GT, android.content.integrity.AtomicFormula.GE}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface AtomicFormula.Operator {
-  }
-
   public static final class AtomicFormula.StringAtomicFormula extends android.content.integrity.AtomicFormula implements android.os.Parcelable {
-    ctor public AtomicFormula.StringAtomicFormula(@android.content.integrity.AtomicFormula.Key int, @NonNull String, boolean);
+    ctor public AtomicFormula.StringAtomicFormula(int, @NonNull String, boolean);
     method public int describeContents();
     method public boolean getIsHashedValue();
     method public int getTag();
@@ -1784,9 +1794,9 @@ package android.content.integrity {
   }
 
   public final class CompoundFormula implements android.content.integrity.Formula android.os.Parcelable {
-    ctor public CompoundFormula(@android.content.integrity.CompoundFormula.Connector int, @NonNull java.util.List<android.content.integrity.Formula>);
+    ctor public CompoundFormula(int, @NonNull java.util.List<android.content.integrity.Formula>);
     method public int describeContents();
-    method @android.content.integrity.CompoundFormula.Connector public int getConnector();
+    method public int getConnector();
     method @NonNull public java.util.List<android.content.integrity.Formula> getFormulas();
     method public int getTag();
     method public boolean isSatisfied(@NonNull android.content.integrity.AppInstallMetadata);
@@ -1797,11 +1807,8 @@ package android.content.integrity {
     field public static final int OR = 1; // 0x1
   }
 
-  @IntDef({android.content.integrity.CompoundFormula.AND, android.content.integrity.CompoundFormula.OR, android.content.integrity.CompoundFormula.NOT}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface CompoundFormula.Connector {
-  }
-
   public interface Formula {
-    method @android.content.integrity.Formula.Tag public int getTag();
+    method public int getTag();
     method public boolean isSatisfied(@NonNull android.content.integrity.AppInstallMetadata);
     method @NonNull public static android.content.integrity.Formula readFromParcel(@NonNull android.os.Parcel);
     method public static void writeToParcel(@NonNull android.content.integrity.Formula, @NonNull android.os.Parcel, int);
@@ -1811,21 +1818,15 @@ package android.content.integrity {
     field public static final int STRING_ATOMIC_FORMULA_TAG = 1; // 0x1
   }
 
-  @IntDef({android.content.integrity.Formula.COMPOUND_FORMULA_TAG, android.content.integrity.Formula.STRING_ATOMIC_FORMULA_TAG, android.content.integrity.Formula.INT_ATOMIC_FORMULA_TAG, android.content.integrity.Formula.BOOLEAN_ATOMIC_FORMULA_TAG}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface Formula.Tag {
-  }
-
   public final class Rule implements android.os.Parcelable {
-    ctor public Rule(@NonNull android.content.integrity.Formula, @android.content.integrity.Rule.Effect int);
+    ctor public Rule(@NonNull android.content.integrity.Formula, int);
     method public int describeContents();
-    method @android.content.integrity.Rule.Effect public int getEffect();
+    method public int getEffect();
     method @NonNull public android.content.integrity.Formula getFormula();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.integrity.Rule> CREATOR;
     field public static final int DENY = 0; // 0x0
     field public static final int FORCE_ALLOW = 1; // 0x1
-  }
-
-  @IntDef({android.content.integrity.Rule.DENY, android.content.integrity.Rule.FORCE_ALLOW}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface Rule.Effect {
   }
 
   public class RuleSet {
@@ -3928,16 +3929,19 @@ package android.media {
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioVolumeGroup> getAudioVolumeGroups();
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMaxVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMinVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioDeviceAddress getPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method public boolean isAudioServerRunning();
     method public boolean isHdmiSystemAudioSupported();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int registerAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
     method public void registerVolumeGroupCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.VolumeGroupCallback);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean removePreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, @NonNull android.media.AudioAttributes, int, int) throws java.lang.IllegalArgumentException;
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.MODIFY_AUDIO_ROUTING}) public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, @NonNull android.media.AudioAttributes, int, int, android.media.audiopolicy.AudioPolicy) throws java.lang.IllegalArgumentException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int requestAudioFocus(@NonNull android.media.AudioFocusRequest, @Nullable android.media.audiopolicy.AudioPolicy);
     method public void setAudioServerStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.AudioServerStateCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setFocusRequestResult(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy, @NonNull android.media.AudioDeviceAddress);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setVolumeIndexForAttributes(@NonNull android.media.AudioAttributes, int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterAudioPolicyAsync(@NonNull android.media.audiopolicy.AudioPolicy);
@@ -4108,9 +4112,11 @@ package android.media.audiopolicy {
   }
 
   public final class AudioProductStrategy implements android.os.Parcelable {
+    method @NonNull public static android.media.audiopolicy.AudioProductStrategy createInvalidAudioProductStrategy(int);
     method public int describeContents();
     method @NonNull public android.media.AudioAttributes getAudioAttributes();
     method public int getId();
+    method public boolean supportsAudioAttributes(@NonNull android.media.AudioAttributes);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioProductStrategy> CREATOR;
   }
@@ -4826,6 +4832,9 @@ package android.net.ipsec.ike {
   }
 
   public abstract class ChildSessionParams {
+    method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getLocalTrafficSelectors();
+    method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getRemoteTrafficSelectors();
+    method @NonNull public java.util.List<android.net.ipsec.ike.ChildSaProposal> getSaProposals();
   }
 
   public class IkeFqdnIdentification extends android.net.ipsec.ike.IkeIdentification {
@@ -4893,6 +4902,13 @@ package android.net.ipsec.ike {
   }
 
   public final class IkeSessionParams {
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig getLocalAuthConfig();
+    method @NonNull public android.net.ipsec.ike.IkeIdentification getLocalIdentification();
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig getRemoteAuthConfig();
+    method @NonNull public android.net.ipsec.ike.IkeIdentification getRemoteIdentification();
+    method @NonNull public java.util.List<android.net.ipsec.ike.IkeSaProposal> getSaProposals();
+    method @NonNull public java.net.InetAddress getServerAddress();
+    method @NonNull public android.net.IpSecManager.UdpEncapsulationSocket getUdpEncapsulationSocket();
   }
 
   public static final class IkeSessionParams.Builder {
@@ -4907,6 +4923,27 @@ package android.net.ipsec.ike {
     method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setRemoteIdentification(@NonNull android.net.ipsec.ike.IkeIdentification);
     method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setServerAddress(@NonNull java.net.InetAddress);
     method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setUdpEncapsulationSocket(@NonNull android.net.IpSecManager.UdpEncapsulationSocket);
+  }
+
+  public abstract static class IkeSessionParams.IkeAuthConfig {
+  }
+
+  public static class IkeSessionParams.IkeAuthDigitalSignLocalConfig extends android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig {
+    method @NonNull public java.security.cert.X509Certificate getClientEndCertificate();
+    method @NonNull public java.util.List<java.security.cert.X509Certificate> getIntermediateCertificates();
+    method @NonNull public java.security.PrivateKey getPrivateKey();
+  }
+
+  public static class IkeSessionParams.IkeAuthDigitalSignRemoteConfig extends android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig {
+    method @NonNull public java.security.cert.X509Certificate getRemoteCaCert();
+  }
+
+  public static class IkeSessionParams.IkeAuthEapConfig extends android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig {
+    method @NonNull public android.net.eap.EapSessionConfig getEapConfig();
+  }
+
+  public static class IkeSessionParams.IkeAuthPskConfig extends android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig {
+    method @NonNull public byte[] getPsk();
   }
 
   public final class IkeTrafficSelector {
@@ -4955,6 +4992,7 @@ package android.net.ipsec.ike {
   }
 
   public final class TunnelModeChildSessionParams extends android.net.ipsec.ike.ChildSessionParams {
+    method @NonNull public java.util.List<android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest> getConfigurationRequests();
   }
 
   public static final class TunnelModeChildSessionParams.Builder {
@@ -4970,6 +5008,39 @@ package android.net.ipsec.ike {
     method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addOutboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
     method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addSaProposal(@NonNull android.net.ipsec.ike.ChildSaProposal);
     method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams build();
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequest {
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4Address extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
+    method @Nullable public java.net.Inet4Address getAddress();
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4DhcpServer extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
+    method @Nullable public java.net.Inet4Address getAddress();
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4DnsServer extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
+    method @Nullable public java.net.Inet4Address getAddress();
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4Netmask extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4Subnet extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv6Address extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
+    method @Nullable public java.net.Inet6Address getAddress();
+    method public int getPrefixLength();
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv6DnsServer extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
+    method @Nullable public java.net.Inet6Address getAddress();
+  }
+
+  public static interface TunnelModeChildSessionParams.ConfigRequestIpv6Subnet extends android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequest {
   }
 
 }
@@ -6727,6 +6798,14 @@ package android.os.connectivity {
     method public long getTxTimeMillis();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.connectivity.WifiBatteryStats> CREATOR;
+  }
+
+}
+
+package android.os.ext {
+
+  public class SdkExtensions {
+    method public static int getExtensionVersion(int);
   }
 
 }
@@ -8868,6 +8947,7 @@ package android.telephony {
     field public static final int UE_SECURITY_CAPABILITIES_MISMATCH = 2185; // 0x889
     field public static final int UMTS_HANDOVER_TO_IWLAN = 2199; // 0x897
     field public static final int UMTS_REACTIVATION_REQ = 39; // 0x27
+    field public static final int UNACCEPTABLE_NETWORK_PARAMETER = 65538; // 0x10002
     field public static final int UNACCEPTABLE_NON_EPS_AUTHENTICATION = 2187; // 0x88b
     field public static final int UNKNOWN = 65536; // 0x10000
     field public static final int UNKNOWN_INFO_ELEMENT = 99; // 0x63

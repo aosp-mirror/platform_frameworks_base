@@ -102,6 +102,24 @@ public class Preconditions {
     }
 
     /**
+     * Ensures that an string reference passed as a parameter to the calling method is not empty.
+     *
+     * @param string an string reference
+     * @param messageTemplate a printf-style message template to use if the check fails; will be
+     *     converted to a string using {@link String#format(String, Object...)}
+     * @param messageArgs arguments for {@code messageTemplate}
+     * @return the string reference that was validated
+     * @throws IllegalArgumentException if {@code string} is empty
+     */
+    public static @NonNull <T extends CharSequence> T checkStringNotEmpty(
+            final T string, final String messageTemplate, final Object... messageArgs) {
+        if (TextUtils.isEmpty(string)) {
+            throw new IllegalArgumentException(String.format(messageTemplate, messageArgs));
+        }
+        return string;
+    }
+
+    /**
      * Ensures that an object reference passed as a parameter to the calling
      * method is not null.
      *

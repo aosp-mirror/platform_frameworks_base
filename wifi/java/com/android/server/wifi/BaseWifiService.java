@@ -547,19 +547,6 @@ public class BaseWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    /** @deprecated replaced by {@link #registerScanResultsCallback(IScanResultsCallback)} */
-    @Deprecated
-    public void registerScanResultsListener(
-            IBinder binder, IScanResultsListener listener, int listenerIdentifier) {
-        throw new UnsupportedOperationException();
-    }
-
-    /** @deprecated replaced by {@link #unregisterScanResultsCallback(IScanResultsCallback)} */
-    @Deprecated
-    public void unregisterScanResultsListener(int listenerIdentifier) {
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public void registerScanResultsCallback(IScanResultsCallback callback) {
         throw new UnsupportedOperationException();
