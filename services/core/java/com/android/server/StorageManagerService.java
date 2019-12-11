@@ -20,6 +20,7 @@ import static android.Manifest.permission.INSTALL_PACKAGES;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
+import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
 import static android.app.AppOpsManager.OP_READ_EXTERNAL_STORAGE;
@@ -3423,7 +3424,13 @@ class StorageManagerService extends IStorageManager.Stub
         public void opChanged(int op, int uid, String packageName) throws RemoteException {
             if (!ENABLE_ISOLATED_STORAGE) return;
 
-            remountUidExternalStorage(uid, getMountMode(uid, packageName));
+            int mountMode = getMountMode(uid, packageName);
+            boolean isUidActive = LocalServices.getService(ActivityManagerInternal.class)
+                    .getUidProcessState(uid) != PROCESS_STATE_NONEXISTENT;
+
+            if (isUidActive) {
+                remountUidExternalStorage(uid, mountMode);
+            }
         }
     };
 
