@@ -5980,16 +5980,6 @@ public final class Settings {
         public static final String USER_SETUP_COMPLETE = "user_setup_complete";
 
         /**
-         * Whether the Auto Embedded Setup Wizard (0 = false, 1 = true) is in progress.
-         * This differs from USER_SETUP_COMPLETE in that it can be reset back to 0
-         * in case Setup Wizard has been re-enabled on Auto Embedded devices.
-         *
-         * @hide
-         */
-        public static final String AUTOMOTIVE_USER_SETUP_IN_PROGRESS =
-                "automotive_user_setup_in_progress";
-
-        /**
          * Indicates that the user has not started setup personalization.
          * One of the possible states for {@link #USER_SETUP_PERSONALIZATION_STATE}.
          *
