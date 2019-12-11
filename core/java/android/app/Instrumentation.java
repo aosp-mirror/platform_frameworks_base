@@ -493,6 +493,7 @@ public class Instrumentation {
     public Activity startActivitySync(@NonNull Intent intent, @Nullable Bundle options) {
         validateNotAppThread();
 
+        final Activity activity;
         synchronized (mSync) {
             intent = new Intent(intent);
 
@@ -527,16 +528,18 @@ public class Instrumentation {
                 } catch (InterruptedException e) {
                 }
             } while (mWaitingActivities.contains(aw));
-
-            waitForEnterAnimationComplete(aw.activity);
-
-            // Apply an empty transaction to ensure SF has a chance to update before
-            // the Activity is ready (b/138263890).
-            try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
-                t.apply(true);
-            }
-            return aw.activity;
+            activity = aw.activity;
         }
+
+        // Do not call this method within mSync, lest it could block the main thread.
+        waitForEnterAnimationComplete(activity);
+
+        // Apply an empty transaction to ensure SF has a chance to update before
+        // the Activity is ready (b/138263890).
+        try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
+            t.apply(true);
+        }
+        return activity;
     }
 
     /**
