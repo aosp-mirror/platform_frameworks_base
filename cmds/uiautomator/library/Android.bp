@@ -22,6 +22,7 @@ droiddoc {
         "android.test.runner",
         "junit",
         "android.test.base",
+        "unsupportedappusage",
     ],
     custom_template: "droiddoc-templates-sdk",
     installable: false,
