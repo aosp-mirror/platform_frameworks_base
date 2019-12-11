@@ -1004,6 +1004,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return concise ? context.getString(R.string.wifi_security_short_psk_sae) :
                     context.getString(R.string.wifi_security_psk_sae);
         }
+        if (mIsOweTransitionMode) {
+            return concise ? context.getString(R.string.wifi_security_short_none_owe) :
+                    context.getString(R.string.wifi_security_none_owe);
+        }
 
         switch(security) {
             case SECURITY_EAP:

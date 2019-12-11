@@ -40,6 +40,8 @@
     <string name="wifi_security_short_sae" translatable="false">WPA3</string>
     <!-- Do not translate.  Concise terminology for wifi with WPA2/WPA3 transition security -->
     <string name="wifi_security_short_psk_sae" translatable="false">WPA2/WPA3</string>
+    <!-- Do not translate.  Concise terminology for Wi-Fi with None/OWE transition mode security -->
+    <string name="wifi_security_short_none_owe" translatable="false">None/OWE</string>
     <!-- Do not translate.  Concise terminology for wifi with OWE security -->
     <string name="wifi_security_short_owe" translatable="false">OWE</string>
     <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP Suite-B-192 security -->
@@ -70,6 +72,8 @@
     <string name="wifi_security_sae" translatable="false">WPA3-Personal</string>
     <!-- Do not translate.  Terminology for wifi with WPA2/WPA3 Transition mode security -->
     <string name="wifi_security_psk_sae" translatable="false">WPA2/WPA3-Personal</string>
+    <!-- Do not translate.  Terminology for Wi-Fi with None/OWE transition mode security -->
+    <string name="wifi_security_none_owe" translatable="false">None/Enhanced Open</string>
     <!-- Do not translate.  Terminology for wifi with OWE security -->
     <string name="wifi_security_owe" translatable="false">Enhanced Open</string>
     <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP Suite-B-192 security -->
