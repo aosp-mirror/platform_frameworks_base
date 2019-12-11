@@ -2254,6 +2254,11 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void remountUidExternalStorage(int uid, int mode) {
+        if (uid == Process.SYSTEM_UID) {
+            // No need to remount uid for system because it has all access anyways
+            return;
+        }
+
         try {
             mVold.remountUid(uid, mode);
         } catch (Exception e) {
