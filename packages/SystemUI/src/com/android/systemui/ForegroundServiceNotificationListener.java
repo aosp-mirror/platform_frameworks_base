@@ -66,6 +66,9 @@ public class ForegroundServiceNotificationListener {
                 removeNotification(entry.notification);
             }
         });
+
+        notificationEntryManager.addNotificationLifetimeExtender(
+                new ForegroundServiceLifetimeExtender());
     }
 
     /**
