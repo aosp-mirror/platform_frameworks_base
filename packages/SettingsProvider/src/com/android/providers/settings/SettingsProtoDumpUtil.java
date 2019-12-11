@@ -2411,10 +2411,6 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.USER_SETUP_COMPLETE,
                 SecureSettingsProto.USER_SETUP_COMPLETE);
 
-        dumpSetting(s, p,
-                Settings.Secure.AUTOMOTIVE_USER_SETUP_IN_PROGRESS,
-                SecureSettingsProto.Automotive.AUTOMOTIVE_USER_SETUP_IN_PROGRESS);
-
         final long voiceToken = p.start(SecureSettingsProto.VOICE);
         dumpSetting(s, p,
                 Settings.Secure.VOICE_INTERACTION_SERVICE,
