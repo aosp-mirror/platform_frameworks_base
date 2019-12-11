@@ -210,6 +210,12 @@ class ZygoteArguments {
     int mHiddenApiAccessStatslogSampleRate = -1;
 
     /**
+     * A set of disabled app compatibility changes for the running app. From
+     * --disabled-compat-changes.
+     */
+    long[] mDisabledCompatChanges = null;
+
+    /**
      * Constructs instance and parses args
      *
      * @param args zygote command-line args
@@ -416,6 +422,16 @@ class ZygoteArguments {
                 mUsapPoolStatusSpecified = true;
                 mUsapPoolEnabled = Boolean.parseBoolean(arg.substring(arg.indexOf('=') + 1));
                 expectRuntimeArgs = false;
+            } else if (arg.startsWith("--disabled-compat-changes=")) {
+                if (mDisabledCompatChanges != null) {
+                    throw new IllegalArgumentException("Duplicate arg specified");
+                }
+                final String[] params = arg.substring(arg.indexOf('=') + 1).split(",");
+                final int length = params.length;
+                mDisabledCompatChanges = new long[length];
+                for (int i = 0; i < length; i++) {
+                    mDisabledCompatChanges[i] = Long.parseLong(params[i]);
+                }
             } else {
                 break;
             }
