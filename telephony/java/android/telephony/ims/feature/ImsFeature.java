@@ -22,7 +22,6 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.os.IInterface;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.telephony.SubscriptionManager;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
@@ -31,6 +30,7 @@ import android.util.Log;
 
 import com.android.ims.internal.IImsFeatureStatusCallback;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.util.RemoteCallbackListExt;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -310,12 +310,12 @@ public abstract class ImsFeature {
     /** @hide */
     protected final Object mLock = new Object();
 
-    private final RemoteCallbackList<IImsFeatureStatusCallback> mStatusCallbacks =
-            new RemoteCallbackList<>();
+    private final RemoteCallbackListExt<IImsFeatureStatusCallback> mStatusCallbacks =
+            new RemoteCallbackListExt<>();
     private @ImsState int mState = STATE_UNAVAILABLE;
     private int mSlotId = SubscriptionManager.INVALID_SIM_SLOT_INDEX;
-    private final RemoteCallbackList<IImsCapabilityCallback> mCapabilityCallbacks =
-            new RemoteCallbackList<>();
+    private final RemoteCallbackListExt<IImsCapabilityCallback> mCapabilityCallbacks =
+            new RemoteCallbackListExt<>();
     private Capabilities mCapabilityStatus = new Capabilities();
 
     /**
@@ -391,7 +391,7 @@ public abstract class ImsFeature {
      * Internal method called by ImsFeature when setFeatureState has changed.
      */
     private void notifyFeatureState(@ImsState int state) {
-        mStatusCallbacks.broadcast((c) -> {
+        mStatusCallbacks.broadcastAction((c) -> {
             try {
                 c.notifyImsFeatureStatus(state);
             } catch (RemoteException e) {
@@ -470,7 +470,7 @@ public abstract class ImsFeature {
         synchronized (mLock) {
             mCapabilityStatus = caps.copy();
         }
-        mCapabilityCallbacks.broadcast((callback) -> {
+        mCapabilityCallbacks.broadcastAction((callback) -> {
             try {
                 callback.onCapabilitiesStatusChanged(caps.mCapabilities);
             } catch (RemoteException e) {
