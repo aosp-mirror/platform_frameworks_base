@@ -22,6 +22,7 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import android.annotation.Nullable;
@@ -46,13 +47,16 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
-import com.android.systemui.statusbar.notification.row.NotificationContentInflaterTest;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.tests.R;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A helper class to create {@link ExpandableNotificationRow} (for both individual and group
@@ -325,16 +329,36 @@ public class NotificationTestHelper {
         entry.setRow(row);
         entry.createIcons(mContext, entry.getSbn());
         row.setEntry(entry);
-        row.getNotificationInflater().addInflationFlags(extraInflationFlags);
-        NotificationContentInflaterTest.runThenWaitForInflation(
-                () -> row.inflateViews(),
-                row.getNotificationInflater());
+        row.setInflationFlags(extraInflationFlags);
+        inflateAndWait(row);
 
         // This would be done as part of onAsyncInflationFinished, but we skip large amounts of
         // the callback chain, so we need to make up for not adding it to the group manager
         // here.
         mGroupManager.onEntryAdded(entry);
         return row;
+    }
+
+    private static void inflateAndWait(ExpandableNotificationRow row) throws Exception {
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        row.getNotificationInflater().setInflateSynchronously(true);
+        NotificationContentInflater.InflationCallback callback =
+                new NotificationContentInflater.InflationCallback() {
+                    @Override
+                    public void handleInflationException(StatusBarNotification notification,
+                            Exception e) {
+                        countDownLatch.countDown();
+                    }
+
+                    @Override
+                    public void onAsyncInflationFinished(NotificationEntry entry,
+                            int inflatedFlags) {
+                        countDownLatch.countDown();
+                    }
+                };
+        row.setInflationCallback(callback);
+        row.inflateViews();
+        assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));
     }
 
     private BubbleMetadata makeBubbleMetadata(PendingIntent deleteIntent) {

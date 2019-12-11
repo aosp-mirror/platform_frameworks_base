@@ -152,7 +152,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
         row.setNeedsRedaction(true);
 
-        assertTrue(row.getNotificationInflater().isInflationFlagSet(FLAG_CONTENT_VIEW_PUBLIC));
+        assertTrue(row.isInflationFlagSet(FLAG_CONTENT_VIEW_PUBLIC));
     }
 
     @Test

@@ -93,27 +93,12 @@ public class NotificationContentInflater {
 
     public static final int FLAG_CONTENT_VIEW_ALL = ~0;
 
-    /**
-     * Content views that must be inflated at all times.
-     */
-    @InflationFlag
-    private static final int REQUIRED_INFLATION_FLAGS =
-            FLAG_CONTENT_VIEW_CONTRACTED
-            | FLAG_CONTENT_VIEW_EXPANDED;
-
-    /**
-     * The set of content views to inflate.
-     */
-    @InflationFlag
-    private int mInflationFlags = REQUIRED_INFLATION_FLAGS;
-
     private final ExpandableNotificationRow mRow;
     private boolean mIsLowPriority;
     private boolean mUsesIncreasedHeight;
     private boolean mUsesIncreasedHeadsUpHeight;
     private RemoteViews.OnClickHandler mRemoteViewClickHandler;
     private boolean mIsChildInGroup;
-    private InflationCallback mCallback;
     private boolean mInflateSynchronously = false;
     private final ArrayMap<Integer, RemoteViews> mCachedContentViews = new ArrayMap<>();
 
@@ -131,13 +116,7 @@ public class NotificationContentInflater {
      * @return whether the view was re-inflated
      */
     public void setIsChildInGroup(boolean childInGroup) {
-        if (childInGroup != mIsChildInGroup) {
-            mIsChildInGroup = childInGroup;
-            if (mIsLowPriority) {
-                int flags = FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED;
-                inflateNotificationViews(flags);
-            }
-        }
+        mIsChildInGroup = childInGroup;
     }
 
     public void setUsesIncreasedHeight(boolean usesIncreasedHeight) {
@@ -153,99 +132,43 @@ public class NotificationContentInflater {
     }
 
     /**
-     * Update whether or not the notification is redacted on the lock screen.  If the notification
-     * is now redacted, we should inflate the public contracted view to now show on the lock screen.
+     * Inflate notification content views and bind to the row
      *
-     * @param needsRedaction true if the notification should now be redacted on the lock screen
+     * @param contentToBind content views that should be inflated and bound
+     * @param forceInflate true to force reinflation even if views are cached
+     * @param callback callback after inflation is finished
      */
-    public void updateNeedsRedaction(boolean needsRedaction) {
-        if (mRow.getEntry() == null) {
-            return;
-        }
-        if (needsRedaction) {
-            int flags = FLAG_CONTENT_VIEW_PUBLIC;
-            inflateNotificationViews(flags);
-        }
-    }
-
-    /**
-     * Set whether or not a particular content view is needed and whether or not it should be
-     * inflated.  These flags will be used when we inflate or reinflate.
-     *
-     * @param flag the {@link InflationFlag} corresponding to the view that should/should not be
-     *             inflated
-     * @param shouldInflate true if the view should be inflated, false otherwise
-     */
-    public void updateInflationFlag(@InflationFlag int flag, boolean shouldInflate) {
-        if (shouldInflate) {
-            mInflationFlags |= flag;
-        } else if ((REQUIRED_INFLATION_FLAGS & flag) == 0) {
-            mInflationFlags &= ~flag;
-        }
-    }
-
-    /**
-     * Convenience method for setting multiple flags at once.
-     *
-     * @param flags a set of {@link InflationFlag} corresponding to content views that should be
-     *              inflated
-     */
-    @VisibleForTesting
-    public void addInflationFlags(@InflationFlag int flags) {
-        mInflationFlags |= flags;
-    }
-
-    /**
-     * Whether or not the view corresponding to the flag is set to be inflated currently.
-     *
-     * @param flag the {@link InflationFlag} corresponding to the view
-     * @return true if the flag is set and view will be inflated, false o/w
-     */
-    public boolean isInflationFlagSet(@InflationFlag int flag) {
-        return ((mInflationFlags & flag) != 0);
-    }
-
-    /**
-     * Inflate views for set flags on a background thread. This is asynchronous and will
-     * notify the callback once it's finished.
-     */
-    public void inflateNotificationViews() {
-        inflateNotificationViews(mInflationFlags);
-    }
-
-    /**
-     * Inflate all views for the specified flags on a background thread.  This is asynchronous and
-     * will notify the callback once it's finished.  If the content view is already inflated, this
-     * will reinflate it.
-     *
-     * @param reInflateFlags flags which views should be inflated. Should be a subset of
-     *                       {@link #mInflationFlags} as only those will be inflated/reinflated.
-     */
-    private void inflateNotificationViews(@InflationFlag int reInflateFlags) {
+    void inflateNotificationViews(
+            @InflationFlag int contentToBind,
+            boolean forceInflate,
+            @Nullable InflationCallback callback) {
         if (mRow.isRemoved()) {
             // We don't want to reinflate anything for removed notifications. Otherwise views might
             // be readded to the stack, leading to leaks. This may happen with low-priority groups
             // where the removal of already removed children can lead to a reinflation.
             return;
         }
-        // Only inflate the ones that are set.
-        reInflateFlags &= mInflationFlags;
+
         StatusBarNotification sbn = mRow.getEntry().getSbn();
 
         // To check if the notification has inline image and preload inline image if necessary.
         mRow.getImageResolver().preloadImages(sbn.getNotification());
 
+        if (forceInflate) {
+            mCachedContentViews.clear();
+        }
+
         AsyncInflationTask task = new AsyncInflationTask(
                 sbn,
                 mInflateSynchronously,
-                reInflateFlags,
+                contentToBind,
                 mCachedContentViews,
                 mRow,
                 mIsLowPriority,
                 mIsChildInGroup,
                 mUsesIncreasedHeight,
                 mUsesIncreasedHeadsUpHeight,
-                mCallback,
+                callback,
                 mRemoteViewClickHandler);
         if (mInflateSynchronously) {
             task.onPostExecute(task.doInBackground());
@@ -284,10 +207,6 @@ public class NotificationContentInflater {
      * @param inflateFlag the flag corresponding to the content view which should be freed
      */
     public void freeNotificationView(@InflationFlag int inflateFlag) {
-        if ((mInflationFlags & inflateFlag) != 0) {
-            // The view should still be inflated.
-            return;
-        }
         switch (inflateFlag) {
             case FLAG_CONTENT_VIEW_HEADS_UP:
                 if (mRow.getPrivateLayout().isContentViewInactive(VISIBLE_TYPE_HEADSUP)) {
@@ -718,10 +637,6 @@ public class NotificationContentInflater {
                         && !oldView.hasFlags(RemoteViews.FLAG_REAPPLY_DISALLOWED));
     }
 
-    public void setInflationCallback(InflationCallback callback) {
-        mCallback = callback;
-    }
-
     public interface InflationCallback {
         void handleInflationException(StatusBarNotification notification, Exception e);
 
@@ -734,17 +649,12 @@ public class NotificationContentInflater {
         void onAsyncInflationFinished(NotificationEntry entry, @InflationFlag int inflatedFlags);
     }
 
-    public void clearCachesAndReInflate() {
-        mCachedContentViews.clear();
-        inflateNotificationViews();
-    }
-
     /**
      * Sets whether to perform inflation on the same thread as the caller. This method should only
      * be used in tests, not in production.
      */
     @VisibleForTesting
-    void setInflateSynchronously(boolean inflateSynchronously) {
+    public void setInflateSynchronously(boolean inflateSynchronously) {
         mInflateSynchronously = inflateSynchronously;
     }
 
@@ -842,8 +752,10 @@ public class NotificationContentInflater {
             final String ident = sbn.getPackageName() + "/0x"
                     + Integer.toHexString(sbn.getId());
             Log.e(StatusBar.TAG, "couldn't inflate view for notification " + ident, e);
-            mCallback.handleInflationException(sbn,
-                    new InflationException("Couldn't inflate contentViews" + e));
+            if (mCallback != null) {
+                mCallback.handleInflationException(sbn,
+                        new InflationException("Couldn't inflate contentViews" + e));
+            }
         }
 
         @Override
@@ -872,7 +784,9 @@ public class NotificationContentInflater {
                 @InflationFlag int inflatedFlags) {
             mRow.getEntry().onInflationTaskFinished();
             mRow.onNotificationUpdated();
-            mCallback.onAsyncInflationFinished(mRow.getEntry(), inflatedFlags);
+            if (mCallback != null) {
+                mCallback.onAsyncInflationFinished(mRow.getEntry(), inflatedFlags);
+            }
 
             // Notify the resolver that the inflation task has finished,
             // try to purge unnecessary cached entries.

@@ -395,7 +395,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         @InflationFlag int contentFlag = alertManager.getContentFlag();
         if (!entry.getRow().isInflationFlagSet(contentFlag)) {
             mPendingAlerts.put(entry.getKey(), new PendingAlertInfo(entry));
-            entry.getRow().updateInflationFlag(contentFlag, true /* shouldInflate */);
+            entry.getRow().setInflationFlags(contentFlag);
             entry.getRow().inflateViews();
             return;
         }

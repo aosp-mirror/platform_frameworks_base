@@ -17,9 +17,10 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
+import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_CONTRACTED;
+import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_PUBLIC;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationCallback;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
 
@@ -88,6 +89,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationCallback;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
@@ -124,8 +126,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private static final String TAG = "ExpandableNotifRow";
     public static final float DEFAULT_HEADER_VISIBLE_AMOUNT = 1.0f;
     private static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
+
+    /**
+     * Content views that must be inflated at all times.
+     */
+    @InflationFlag
+    static final int REQUIRED_INFLATION_FLAGS =
+            FLAG_CONTENT_VIEW_CONTRACTED
+            | FLAG_CONTENT_VIEW_EXPANDED;
+
     private boolean mUpdateBackgroundOnUpdate;
     private boolean mNotificationTranslationFinished = false;
+
     /**
      * Listener for when {@link ExpandableNotificationRow} is laid out.
      */
@@ -232,6 +244,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private ExpandableNotificationRow mNotificationParent;
     private OnExpandClickListener mOnExpandClickListener;
     private View.OnClickListener mOnAppOpsClickListener;
+    private InflationCallback mInflationCallback;
+    private boolean mIsChildInGroup;
+    private @InflationFlag int mInflationFlags = REQUIRED_INFLATION_FLAGS;
 
     // Listener will be called when receiving a long click event.
     // Use #setLongPressPosition to optionally assign positional data with the long press.
@@ -447,7 +462,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * Inflate views based off the inflation flags set. Inflation happens asynchronously.
      */
     public void inflateViews() {
-        mNotificationInflater.inflateNotificationViews();
+        mNotificationInflater.inflateNotificationViews(mInflationFlags, false /* forceInflate */,
+                mInflationCallback);
     }
 
     /**
@@ -458,7 +474,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     public void freeContentViewWhenSafe(@InflationFlag int inflationFlag) {
         // View should not be reinflated in the future
-        updateInflationFlag(inflationFlag, false);
+        clearInflationFlags(inflationFlag);
         Runnable freeViewRunnable = () ->
                 mNotificationInflater.freeNotificationView(inflationFlag);
         switch (inflationFlag) {
@@ -475,13 +491,22 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     /**
-     * Update whether or not a content view should be inflated.
+     * Set flags for content views that should be inflated
      *
-     * @param flag the flag corresponding to the content view
-     * @param shouldInflate true if it should be inflated, false if it should not
+     * @param flags flags to inflate
      */
-    public void updateInflationFlag(@InflationFlag int flag, boolean shouldInflate) {
-        mNotificationInflater.updateInflationFlag(flag, shouldInflate);
+    public void setInflationFlags(@InflationFlag int flags) {
+        mInflationFlags |= flags;
+    }
+
+    /**
+     * Clear flags for content views that should not be inflated
+     *
+     * @param flags flags that should not be inflated
+     */
+    public void clearInflationFlags(@InflationFlag int flags) {
+        mInflationFlags &= ~flags;
+        mInflationFlags |= REQUIRED_INFLATION_FLAGS;
     }
 
     /**
@@ -491,7 +516,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * @return true if the flag is set, false otherwise
      */
     public boolean isInflationFlagSet(@InflationFlag int flag) {
-        return mNotificationInflater.isInflationFlagSet(flag);
+        return ((mInflationFlags & flag) != 0);
     }
 
     /**
@@ -821,6 +846,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mNotificationParent = isChildInGroup ? parent : null;
         mPrivateLayout.setIsChildInGroup(isChildInGroup);
         mNotificationInflater.setIsChildInGroup(isChildInGroup);
+        if (mIsChildInGroup != isChildInGroup) {
+            mIsChildInGroup = isChildInGroup;
+            if (mIsLowPriority) {
+                int flags = FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED;
+                mNotificationInflater.inflateNotificationViews(flags, false /* forceInflate */,
+                        mInflationCallback);
+            }
+        }
         resetBackgroundAlpha();
         updateBackgroundForGroupState();
         updateClickAndFocus();
@@ -1224,7 +1257,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             l.reInflateViews();
         }
         mEntry.getSbn().clearPackageContext();
-        mNotificationInflater.clearCachesAndReInflate();
+        mNotificationInflater.inflateNotificationViews(mInflationFlags, true /* forceInflate */,
+                mInflationCallback);
     }
 
     @Override
@@ -1602,16 +1636,24 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mNotificationInflater.setRemoteViewClickHandler(remoteViewClickHandler);
     }
 
+    /**
+     * Set callback for notification content inflation
+     *
+     * @param callback inflation callback
+     */
     public void setInflationCallback(InflationCallback callback) {
-        mNotificationInflater.setInflationCallback(callback);
+        mInflationCallback = callback;
     }
 
     public void setNeedsRedaction(boolean needsRedaction) {
         if (mNeedsRedaction != needsRedaction) {
             mNeedsRedaction = needsRedaction;
-            updateInflationFlag(FLAG_CONTENT_VIEW_PUBLIC, needsRedaction /* shouldInflate */);
-            mNotificationInflater.updateNeedsRedaction(needsRedaction);
-            if (!needsRedaction) {
+            if (needsRedaction) {
+                setInflationFlags(FLAG_CONTENT_VIEW_PUBLIC);
+                mNotificationInflater.inflateNotificationViews(FLAG_CONTENT_VIEW_PUBLIC,
+                        false /* forceInflate */, mInflationCallback);
+            } else {
+                clearInflationFlags(FLAG_CONTENT_VIEW_PUBLIC);
                 freeContentViewWhenSafe(FLAG_CONTENT_VIEW_PUBLIC);
             }
         }
