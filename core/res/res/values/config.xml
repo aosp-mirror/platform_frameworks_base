@@ -4255,7 +4255,4 @@
     <!-- The list of packages to automatically opt out of refresh rates higher than 60hz because
          of known compatibility issues. -->
     <string-array name="config_highRefreshRateBlacklist"></string-array>
-
-    <!-- pdp data retry for cause 29, 33 and 55-->
-    <bool name="config_pdp_retry_for_29_33_55_enabled">false</bool>
 </resources>
