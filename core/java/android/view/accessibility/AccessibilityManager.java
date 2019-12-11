@@ -102,6 +102,9 @@ public final class AccessibilityManager {
     public static final int STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED = 0x00000004;
 
     /** @hide */
+    public static final int STATE_FLAG_DISPATCH_DOUBLE_TAP = 0x00000008;
+
+    /** @hide */
     public static final int DALTONIZER_DISABLED = -1;
 
     /** @hide */

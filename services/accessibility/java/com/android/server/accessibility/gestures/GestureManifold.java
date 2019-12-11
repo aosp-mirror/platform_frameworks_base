@@ -65,6 +65,8 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
     private final Handler mHandler;
     // Listener to be notified of gesture start and end.
     private Listener mListener;
+    // Whether enhanced touch exploration mode is enabled.
+    private boolean mServiceHandlesDoubleTap = false;
     // Shared state information.
     private TouchState mState;
 
@@ -154,18 +156,23 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
      */
     public interface Listener {
         /**
-         * Called when the user has performed a double tap and then held down the second tap.
+         * When FLAG_SERVICE_HANDLES_DOUBLE_TAP is enabled, this method is not called; double-tap
+         * and hold is dispatched via onGestureCompleted. Otherwise, this method is called when the
+         * user has performed a double tap and then held down the second tap.
          */
         void onDoubleTapAndHold();
 
         /**
-         * Called when the user lifts their finger on the second tap of a double tap.
+         * When FLAG_SERVICE_HANDLES_DOUBLE_TAP is enabled, this method is not called; double-tap is
+         * dispatched via onGestureCompleted. Otherwise, this method is called when the user lifts
+         * their finger on the second tap of a double tap.
+         *
          * @return true if the event is consumed, else false
          */
         boolean onDoubleTap();
 
         /**
-         * Called when the system has decided the event stream is a gesture.
+         * Called when the system has decided the event stream is a potential gesture.
          *
          * @return true if the event is consumed, else false
          */
@@ -193,7 +200,13 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
     public void onStateChanged(
             int gestureId, int state, MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         if (state == GestureMatcher.STATE_GESTURE_STARTED && !mState.isGestureDetecting()) {
-            mListener.onGestureStarted();
+            if (gestureId == GESTURE_DOUBLE_TAP || gestureId == GESTURE_DOUBLE_TAP_AND_HOLD) {
+                if (mServiceHandlesDoubleTap) {
+                    mListener.onGestureStarted();
+                }
+            } else {
+                mListener.onGestureStarted();
+            }
         } else if (state == GestureMatcher.STATE_GESTURE_COMPLETED) {
             onGestureCompleted(gestureId);
         } else if (state == GestureMatcher.STATE_GESTURE_CANCELED && mState.isGestureDetecting()) {
@@ -217,11 +230,23 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
         // Gestures that complete on a delay call clear() here.
         switch (gestureId) {
             case GESTURE_DOUBLE_TAP:
-                mListener.onDoubleTap();
+                if (mServiceHandlesDoubleTap) {
+                    AccessibilityGestureEvent gestureEvent =
+                            new AccessibilityGestureEvent(gestureId, event.getDisplayId());
+                    mListener.onGestureCompleted(gestureEvent);
+                } else {
+                    mListener.onDoubleTap();
+                }
                 clear();
                 break;
             case GESTURE_DOUBLE_TAP_AND_HOLD:
-                mListener.onDoubleTapAndHold();
+                if (mServiceHandlesDoubleTap) {
+                    AccessibilityGestureEvent gestureEvent =
+                            new AccessibilityGestureEvent(gestureId, event.getDisplayId());
+                    mListener.onGestureCompleted(gestureEvent);
+                } else {
+                    mListener.onDoubleTapAndHold();
+                }
                 clear();
                 break;
             default:
@@ -230,5 +255,13 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
                 mListener.onGestureCompleted(gestureEvent);
                 break;
         }
+    }
+
+    public boolean isServiceHandlesDoubleTapEnabled() {
+        return mServiceHandlesDoubleTap;
+    }
+
+    public void setServiceHandlesDoubleTap(boolean mode) {
+        mServiceHandlesDoubleTap = mode;
     }
 }

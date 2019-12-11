@@ -1610,6 +1610,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (userState.isHandlingAccessibilityEventsLocked()
                     && userState.isTouchExplorationEnabledLocked()) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_TOUCH_EXPLORATION;
+                if (userState.isServiceHandlesDoubleTapEnabledLocked()) {
+                    flags |= AccessibilityInputFilter.FLAG_SERVICE_HANDLES_DOUBLE_TAP;
+                }
             }
             if (userState.isFilterKeyEventsEnabledLocked()) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_FILTER_KEY_EVENTS;
@@ -1882,21 +1885,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void updateTouchExplorationLocked(AccessibilityUserState userState) {
-        boolean enabled = mUiAutomationManager.isTouchExplorationEnabledLocked();
+        boolean touchExplorationEnabled = mUiAutomationManager.isTouchExplorationEnabledLocked();
+        boolean serviceHandlesDoubleTapEnabled = false;
         final int serviceCount = userState.mBoundServices.size();
         for (int i = 0; i < serviceCount; i++) {
             AccessibilityServiceConnection service = userState.mBoundServices.get(i);
             if (canRequestAndRequestsTouchExplorationLocked(service, userState)) {
-                enabled = true;
+                touchExplorationEnabled = true;
+                serviceHandlesDoubleTapEnabled = service.isServiceHandlesDoubleTapEnabled();
                 break;
             }
         }
-        if (enabled != userState.isTouchExplorationEnabledLocked()) {
-            userState.setTouchExplorationEnabledLocked(enabled);
+        if (touchExplorationEnabled != userState.isTouchExplorationEnabledLocked()) {
+            userState.setTouchExplorationEnabledLocked(touchExplorationEnabled);
+            userState.setServiceHandlesDoubleTapLocked(serviceHandlesDoubleTapEnabled);
             final long identity = Binder.clearCallingIdentity();
             try {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.TOUCH_EXPLORATION_ENABLED, enabled ? 1 : 0,
+                        Settings.Secure.TOUCH_EXPLORATION_ENABLED, touchExplorationEnabled ? 1 : 0,
                         userState.mUserId);
             } finally {
                 Binder.restoreCallingIdentity(identity);

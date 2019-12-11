@@ -99,9 +99,20 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      */
     static final int FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER = 0x00000040;
 
-    static final int FEATURES_AFFECTING_MOTION_EVENTS = FLAG_FEATURE_INJECT_MOTION_EVENTS
-            | FLAG_FEATURE_AUTOCLICK | FLAG_FEATURE_TOUCH_EXPLORATION
-            | FLAG_FEATURE_SCREEN_MAGNIFIER | FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER;
+    /**
+     * Flag for dispatching double tap and double tap and hold to the service.
+     *
+     * @see #setUserAndEnabledFeatures(int, int)
+     */
+    static final int FLAG_SERVICE_HANDLES_DOUBLE_TAP = 0x00000080;
+
+    static final int FEATURES_AFFECTING_MOTION_EVENTS =
+            FLAG_FEATURE_INJECT_MOTION_EVENTS
+                    | FLAG_FEATURE_AUTOCLICK
+                    | FLAG_FEATURE_TOUCH_EXPLORATION
+                    | FLAG_FEATURE_SCREEN_MAGNIFIER
+                    | FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER
+                    | FLAG_SERVICE_HANDLES_DOUBLE_TAP;
 
     private final Context mContext;
 
@@ -391,6 +402,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
             if ((mEnabledFeatures & FLAG_FEATURE_TOUCH_EXPLORATION) != 0) {
                 TouchExplorer explorer = new TouchExplorer(displayContext, mAms);
+                if ((mEnabledFeatures & FLAG_SERVICE_HANDLES_DOUBLE_TAP) != 0) {
+                    explorer.setServiceHandlesDoubleTap(true);
+                }
                 addFirstEventHandler(displayId, explorer);
                 mTouchExplorer.put(displayId, explorer);
             }

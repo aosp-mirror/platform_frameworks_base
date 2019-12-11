@@ -254,7 +254,10 @@ public class TouchExplorer extends BaseEventStreamTransformation
         } else if (mState.isDelegating()) {
             handleMotionEventStateDelegating(event, rawEvent, policyFlags);
         } else if (mState.isGestureDetecting()) {
-            // Already handled.
+            // Make sure we don't prematurely get TOUCH_INTERACTION_END
+            // It will be delivered on gesture completion or cancelation.
+            // Note that the delay for sending GESTURE_DETECTION_END remains in place.
+            mSendTouchInteractionEndDelayed.cancel();
         } else {
             Slog.e(LOG_TAG, "Illegal state: " + mState);
                 clear(event, policyFlags);
@@ -331,12 +334,8 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public boolean onGestureCompleted(AccessibilityGestureEvent gestureEvent) {
-        if (!mState.isGestureDetecting()) {
-            return false;
-        }
-
         endGestureDetection(true);
-
+        mSendTouchInteractionEndDelayed.cancel();
         mAms.onGesture(gestureEvent);
 
         return true;
@@ -872,6 +871,14 @@ public class TouchExplorer extends BaseEventStreamTransformation
     public void setNext(EventStreamTransformation next) {
         mDispatcher.setReceiver(next);
         super.setNext(next);
+    }
+
+    /**
+     * Whether to dispatch double tap and double tap and hold to the service rather than handle them
+     * in the framework.
+     */
+    public void setServiceHandlesDoubleTap(boolean mode) {
+        mGestureDetector.setServiceHandlesDoubleTap(mode);
     }
 
     /**

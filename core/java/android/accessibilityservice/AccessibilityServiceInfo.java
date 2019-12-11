@@ -341,6 +341,16 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK = 0x00000400;
 
+    /**
+     * This flag requests that when {@link #FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is enabled,
+     * double tap and double tap and hold gestures are dispatched to the service rather than being
+     * handled by the framework. If {@link #FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is disabled this
+     * flag has no effect.
+     *
+     * @see #FLAG_REQUEST_TOUCH_EXPLORATION_MODE
+     */
+    public static final int FLAG_SERVICE_HANDLES_DOUBLE_TAP = 0x0000800;
+
     /** {@hide} */
     public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
 
@@ -1221,6 +1231,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_INCLUDE_NOT_IMPORTANT_VIEWS";
             case FLAG_REQUEST_TOUCH_EXPLORATION_MODE:
                 return "FLAG_REQUEST_TOUCH_EXPLORATION_MODE";
+            case FLAG_SERVICE_HANDLES_DOUBLE_TAP:
+                return "FLAG_SERVICE_HANDLES_DOUBLE_TAP";
             case FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY:
                 return "FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY";
             case FLAG_REPORT_VIEW_IDS:
