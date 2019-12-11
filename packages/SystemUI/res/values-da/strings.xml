@@ -215,7 +215,7 @@
     <skip />
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notifikationen er annulleret."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Notifikationspanel."</string>
-    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Hurtige indstillinger."</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Kvikmenu."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Låseskærm."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Indstillinger"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Oversigt."</string>
@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre presserende notifikationer nedenfor"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Tryk igen for at åbne"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Stryg opad for at åbne"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Stryg opad for at prøve igen"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Denne enhed administreres af din organisation"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Denne enhed administreres af <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Stryg fra telefonikonet"</string>
@@ -543,7 +544,8 @@
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Dette fastholder skærmen i visningen, indtil du frigør den. Tryk på Tilbage, og hold fingeren nede for at frigøre skærmen."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Dette fastholder skærmen i visningen, indtil du frigør den. Hold Startskærm nede for at frigøre skærmen."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Hold knapperne Tilbage og Oversigt nede for at frigøre skærmen"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Hold knapperne Tilbage og Startskærm nede for at frigøre skærmen"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Hold knapperne Tilbage og Hjem nede for at frigøre skærmen"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Stryg opad, og hold fingeren nede for at frigøre denne skærm"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK, det er forstået"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nej tak"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Skærmen blev fastgjort"</string>
@@ -586,7 +588,7 @@
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Vis procent for det indbyggede batteri"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Vis procenttallet for batteriniveauet i ikonet for statusbjælken, når der ikke oplades"</string>
-    <string name="quick_settings" msgid="10042998191725428">"Hurtige indstillinger"</string>
+    <string name="quick_settings" msgid="10042998191725428">"Kvikmenu"</string>
     <string name="status_bar" msgid="4877645476959324760">"Statusbjælke"</string>
     <string name="overview" msgid="4018602013895926956">"Oversigt"</string>
     <string name="demo_mode" msgid="2532177350215638026">"Demotilstand for systemets brugerflade"</string>
@@ -602,7 +604,7 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"på <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Hurtige indstillinger <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Kvikmenu <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Arbejdsprofil"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Sjovt for nogle, men ikke for alle"</string>
@@ -615,8 +617,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"Applikationen er ikke installeret på din enhed."</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Vis sekunder"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Vis sekunder i statuslinjen. Dette kan påvirke batteriets levetid."</string>
-    <string name="qs_rearrange" msgid="8060918697551068765">"Omarranger Hurtige indstillinger"</string>
-    <string name="show_brightness" msgid="6613930842805942519">"Vis lysstyrke i Hurtige indstillinger"</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"Omarranger Kvikmenu"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"Vis lysstyrke i Kvikmenu"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimentel"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vil du slå Bluetooth til?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Bluetooth skal være slået til, før du kan knytte dit tastatur til din tablet."</string>
@@ -811,15 +813,15 @@
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Fjern <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add" msgid="3520406665865985109">"Føj <xliff:g id="TILE_NAME">%1$s</xliff:g> til position <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_move" msgid="3108103090006972938">"Flyt <xliff:g id="TILE_NAME">%1$s</xliff:g> til position <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Redigeringsværktøj for Hurtige indstillinger."</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Redigeringsværktøj til Kvikmenu."</string>
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g>-notifikation: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Appen fungerer muligvis ikke i opdelt skærm."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Appen understøtter ikke opdelt skærm."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Appen fungerer muligvis ikke på sekundære skærme."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Appen kan ikke åbnes på sekundære skærme."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Åbn Indstillinger."</string>
-    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Åbn Hurtige indstillinger."</string>
-    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Luk Hurtige indstillinger."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Åbn Kvikmenu."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Luk Kvikmenu."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Alarmen er indstillet."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Logget ind som <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"Intet internet"</string>

@@ -491,6 +491,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
             params.installFlags &= ~PackageManager.INSTALL_FROM_ADB;
             params.installFlags &= ~PackageManager.INSTALL_ALL_USERS;
+            params.installFlags &= ~PackageManager.INSTALL_ALLOW_TEST;
             params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
             if ((params.installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0
                     && !mPm.isCallerVerifier(callingUid)) {

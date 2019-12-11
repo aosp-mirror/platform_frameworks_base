@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Sakatu hau sare guztiak ikusteko"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Konektatu"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Sare guztiak"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Wifi-sareetara konektatu nahi duzu?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> aplikazioak iradoki du"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Bai"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ez"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Iradokitako wifi-sareak baimendu nahi dituzu?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> aplikazioak sare batzuk iradoki ditu. Baliteke gailua automatikoki konektatzea."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Baimendu"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Ez, eskerrik asko"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi konexioa automatikoki aktibatuko da"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Gordeta daukazun kalitate handiko sare batetik gertu zaudenean"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ez aktibatu berriro"</string>
@@ -1636,7 +1636,7 @@
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"PIN kode okerra."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Idatzi 4 eta 8 zenbaki arteko PINa."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK kodeak 8 zenbaki izan behar ditu."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"Idatzi berriro PUK kode zuzena. Hainbat saiakera oker eginez gero, betirako desgaituko da SIMa."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Idatzi berriro PUK kode zuzena. Hainbat saiakera oker eginez gero, betiko desgaituko da SIMa."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodeak ez datoz bat"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Eredua marrazteko saiakera gehiegi egin dira"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Desblokeatzeko, hasi saioa Google kontuarekin."</string>
@@ -1889,8 +1889,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Kategoriarik gabea"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Zuk ezarri duzu jakinarazpen hauen garrantzia."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Garrantzitsua da eragiten dien pertsonengatik."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> aplikazioari <xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> aplikazioari <xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu? (Badago kontu hori duen erabiltzaile bat)"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="APP">%1$s</xliff:g> aplikazioari <xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu? (Badago kontu hori duen erabiltzaile bat)"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="APP">%1$s</xliff:g> aplikazioari <xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Gehitu hizkuntza"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Lurralde-hobespena"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Adierazi hizkuntza"</string>

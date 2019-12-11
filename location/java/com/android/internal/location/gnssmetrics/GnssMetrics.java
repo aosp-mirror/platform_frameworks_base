@@ -31,7 +31,9 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.nano.GnssLogsProto.GnssLog;
 import com.android.internal.location.nano.GnssLogsProto.PowerMetrics;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * GnssMetrics: Is used for logging GNSS metrics
@@ -60,13 +62,20 @@ public class GnssMetrics {
   /** Default time between location fixes (in millisecs) */
   private static final int DEFAULT_TIME_BETWEEN_FIXES_MILLISECS = 1000;
 
+  /** The number of hertz in one MHz */
+  private static final double HZ_PER_MHZ = 1e6;
+
   /* The time since boot when logging started */
   private String logStartInElapsedRealTime;
 
   /* GNSS power metrics */
   private GnssPowerMetrics mGnssPowerMetrics;
 
-    /**
+  /** Frequency range of GPS L5, Galileo E5a, QZSS J5 frequency band */
+  private static final double L5_CARRIER_FREQ_RANGE_LOW_HZ = 1164 * HZ_PER_MHZ;
+  private static final double L5_CARRIER_FREQ_RANGE_HIGH_HZ = 1189 * HZ_PER_MHZ;
+
+  /**
      * A boolean array indicating whether the constellation types have been used in fix.
      */
     private boolean[] mConstellationTypes;
@@ -78,6 +87,11 @@ public class GnssMetrics {
     timeToFirstFixSecStatistics = new Statistics();
     positionAccuracyMeterStatistics = new Statistics();
     topFourAverageCn0Statistics = new Statistics();
+    mTopFourAverageCn0StatisticsL5 = new Statistics();
+    mNumSvStatus = 0;
+    mNumL5SvStatus = 0;
+    mNumSvStatusUsedInFix = 0;
+    mNumL5SvStatusUsedInFix = 0;
     reset();
   }
 
@@ -133,11 +147,16 @@ public class GnssMetrics {
     return;
   }
 
-  /*
+  /**
   * Logs CN0 when at least 4 SVs are available
   *
+  * @param cn0s
+  * @param numSv
+  * @param svCarrierFreqs
   */
-  public void logCn0(float[] cn0s, int numSv) {
+  public void logCn0(float[] cn0s, int numSv, float[] svCarrierFreqs) {
+    // Calculate L5 Cn0
+    logCn0L5(numSv, cn0s, svCarrierFreqs);
     if (numSv == 0 || cn0s == null || cn0s.length == 0 || cn0s.length < numSv) {
       if (numSv == 0) {
          mGnssPowerMetrics.reportSignalQuality(null, 0);
@@ -157,6 +176,76 @@ public class GnssMetrics {
       }
       top4AvgCn0 /= 4;
       topFourAverageCn0Statistics.addItem(top4AvgCn0);
+    }
+    return;
+  }
+
+  /* Helper function to check if a SV is L5 */
+  private static boolean isL5Sv(float carrierFreq) {
+    return (carrierFreq >= L5_CARRIER_FREQ_RANGE_LOW_HZ
+            && carrierFreq <= L5_CARRIER_FREQ_RANGE_HIGH_HZ);
+  }
+
+  /**
+   * Logs sv status data
+   *
+   * @param svCount
+   * @param svidWithFlags
+   * @param svCarrierFreqs
+   */
+  public void logSvStatus(int svCount, int[] svidWithFlags, float[] svCarrierFreqs) {
+    boolean isL5 = false;
+    // Calculate SvStatus Information
+    for (int i = 0; i < svCount; i++) {
+      if ((svidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY) != 0) {
+        mNumSvStatus++;
+        isL5 = isL5Sv(svCarrierFreqs[i]);
+        if (isL5) {
+          mNumL5SvStatus++;
+        }
+        if ((svidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0) {
+          mNumSvStatusUsedInFix++;
+          if (isL5) {
+            mNumL5SvStatusUsedInFix++;
+          }
+        }
+      }
+    }
+    return;
+  }
+
+  /**
+   * Logs CN0 when at least 4 SVs are available L5 Only
+   *
+   * @param svCount
+   * @param cn0s
+   * @param svCarrierFreqs
+   */
+  private void logCn0L5(int svCount, float[] cn0s, float[] svCarrierFreqs) {
+    if (svCount == 0 || cn0s == null || cn0s.length == 0 || cn0s.length < svCount
+            || svCarrierFreqs == null || svCarrierFreqs.length == 0
+            || svCarrierFreqs.length < svCount) {
+      return;
+    }
+    // Create array list of all L5 satellites in report.
+    ArrayList<Float> CnoL5Array = new ArrayList();
+    for (int i = 0; i < svCount; i++) {
+      if (isL5Sv(svCarrierFreqs[i])) {
+        CnoL5Array.add(cn0s[i]);
+      }
+    }
+    if (CnoL5Array.size() == 0 || CnoL5Array.size() < 4) {
+      return;
+    }
+    int numSvL5 = CnoL5Array.size();
+    Collections.sort(CnoL5Array);
+    if (CnoL5Array.get(numSvL5 - 4) > 0.0) {
+      double top4AvgCn0 = 0.0;
+      for (int i = numSvL5 - 4; i < numSvL5; i++) {
+        top4AvgCn0 += (double) CnoL5Array.get(i);
+      }
+      top4AvgCn0 /= 4;
+      mTopFourAverageCn0StatisticsL5.addItem(top4AvgCn0);
     }
     return;
   }
@@ -200,6 +289,24 @@ public class GnssMetrics {
       msg.meanTopFourAverageCn0DbHz = topFourAverageCn0Statistics.getMean();
       msg.standardDeviationTopFourAverageCn0DbHz
           = topFourAverageCn0Statistics.getStandardDeviation();
+    }
+    if (mNumSvStatus > 0) {
+      msg.numSvStatusProcessed = mNumSvStatus;
+    }
+    if (mNumL5SvStatus > 0) {
+      msg.numL5SvStatusProcessed = mNumL5SvStatus;
+    }
+    if (mNumSvStatusUsedInFix > 0) {
+      msg.numSvStatusUsedInFix = mNumSvStatusUsedInFix;
+    }
+    if (mNumL5SvStatusUsedInFix > 0) {
+      msg.numL5SvStatusUsedInFix = mNumL5SvStatusUsedInFix;
+    }
+    if (mTopFourAverageCn0StatisticsL5.getCount() > 0) {
+      msg.numL5TopFourAverageCn0Processed = mTopFourAverageCn0StatisticsL5.getCount();
+      msg.meanL5TopFourAverageCn0DbHz = mTopFourAverageCn0StatisticsL5.getMean();
+      msg.standardDeviationL5TopFourAverageCn0DbHz =
+              mTopFourAverageCn0StatisticsL5.getStandardDeviation();
     }
     msg.powerMetrics = mGnssPowerMetrics.buildProto();
     msg.hardwareRevision = SystemProperties.get("ro.boot.revision", "");
@@ -248,6 +355,22 @@ public class GnssMetrics {
           topFourAverageCn0Statistics.getMean()).append("\n");
       s.append("  Top 4 Avg CN0 standard deviation (dB-Hz): ").append(
           topFourAverageCn0Statistics.getStandardDeviation()).append("\n");
+    }
+    s.append("  Total number of sv status messages processed: ").append(
+            mNumSvStatus).append("\n");
+    s.append("  Total number of L5 sv status messages processed: ").append(
+            mNumL5SvStatus).append("\n");
+    s.append("  Total number of sv status messages processed, where sv is used in fix: ").append(
+            mNumSvStatusUsedInFix).append("\n");
+    s.append("  Total number of L5 sv status messages processed, where sv is used in fix: ").append(
+            mNumL5SvStatusUsedInFix).append("\n");
+    s.append("  Number of L5 CN0 reports: ").append(
+            mTopFourAverageCn0StatisticsL5.getCount()).append("\n");
+    if (mTopFourAverageCn0StatisticsL5.getCount() > 0) {
+      s.append("  L5 Top 4 Avg CN0 mean (dB-Hz): ").append(
+              mTopFourAverageCn0StatisticsL5.getMean()).append("\n");
+      s.append("  L5 Top 4 Avg CN0 standard deviation (dB-Hz): ").append(
+              mTopFourAverageCn0StatisticsL5.getStandardDeviation()).append("\n");
     }
         s.append("  Used-in-fix constellation types: ");
         for (int i = 0; i < mConstellationTypes.length; i++) {
@@ -333,6 +456,21 @@ public class GnssMetrics {
   /** Top 4 average CN0 statistics */
   private Statistics topFourAverageCn0Statistics;
 
+  /** Top 4 average CN0 statistics L5 */
+  private Statistics mTopFourAverageCn0StatisticsL5;
+
+  /** Total number of sv status messages processed */
+  private int mNumSvStatus;
+
+  /** Total number of L5 sv status messages processed */
+  private int mNumL5SvStatus;
+
+  /** Total number of sv status messages processed, where sv is used in fix */
+  private int mNumSvStatusUsedInFix;
+
+  /** Total number of L5 sv status messages processed, where sv is used in fix */
+  private int mNumL5SvStatusUsedInFix;
+
   /**
    * Resets GNSS metrics
    */
@@ -344,6 +482,11 @@ public class GnssMetrics {
     timeToFirstFixSecStatistics.reset();
     positionAccuracyMeterStatistics.reset();
     topFourAverageCn0Statistics.reset();
+    mTopFourAverageCn0StatisticsL5.reset();
+    mNumSvStatus = 0;
+    mNumL5SvStatus = 0;
+    mNumSvStatusUsedInFix = 0;
+    mNumL5SvStatusUsedInFix = 0;
         resetConstellationTypes();
     return;
   }

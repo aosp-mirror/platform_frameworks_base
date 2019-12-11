@@ -20,6 +20,7 @@
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         package="com.android.systemui"
         android:sharedUserId="android.uid.systemui"
+        xmlns:tools="http://schemas.android.com/tools"
         coreApp="true">
 
     <!-- Using OpenGL ES 2.0 -->
@@ -270,7 +271,8 @@
         android:theme="@style/Theme.SystemUI"
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true"
-        android:appComponentFactory="androidx.core.app.CoreComponentFactory">
+        tools:replace="android:appComponentFactory"
+        android:appComponentFactory=".SystemUIAppComponentFactory">
         <!-- Keep theme in sync with SystemUIApplication.onCreate().
              Setting the theme on the application does not affect views inflated by services.
              The application theme is set again from onCreate to take effect for those views. -->
@@ -618,6 +620,10 @@
                 android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                 android:process=":ui"
                 android:visibleToInstantApps="true">
+            <intent-filter>
+                <action android:name="android.intent.action.CHOOSER" />
+                <category android:name="android.intent.category.VOICE" />
+            </intent-filter>
         </activity>
 
         <!-- Doze with notifications, run in main sysui process for every user  -->

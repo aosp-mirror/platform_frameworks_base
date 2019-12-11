@@ -5227,18 +5227,28 @@ class ActivityStack extends ConfigurationContainer {
      *         then skip running tasks that match those types.
      */
     void getRunningTasks(List<TaskRecord> tasksOut, @ActivityType int ignoreActivityType,
-            @WindowingMode int ignoreWindowingMode, int callingUid, boolean allowed) {
+            @WindowingMode int ignoreWindowingMode, int callingUid, boolean allowed,
+            boolean crossUser, ArraySet<Integer> profileIds) {
         boolean focusedStack = mRootActivityContainer.getTopDisplayFocusedStack() == this;
         boolean topTask = true;
+        int userId = UserHandle.getUserId(callingUid);
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             if (task.getTopActivity() == null) {
                 // Skip if there are no activities in the task
                 continue;
             }
-            if (!allowed && !task.isActivityTypeHome() && task.effectiveUid != callingUid) {
-                // Skip if the caller can't fetch this task
-                continue;
+            if (task.effectiveUid != callingUid) {
+                if (task.userId != userId && !crossUser && !profileIds.contains(task.userId)) {
+                    // Skip if the caller does not have cross user permission or cannot access
+                    // the task's profile
+                    continue;
+                }
+                if (!allowed && !task.isActivityTypeHome()) {
+                    // Skip if the caller isn't allowed to fetch this task, except for the home
+                    // task which we always return.
+                    continue;
+                }
             }
             if (ignoreActivityType != ACTIVITY_TYPE_UNDEFINED
                     && task.getActivityType() == ignoreActivityType) {
@@ -5454,6 +5464,7 @@ class ActivityStack extends ConfigurationContainer {
             task.cleanUpResourcesForDestroy();
         }
 
+        final ActivityDisplay display = getDisplay();
         if (mTaskHistory.isEmpty()) {
             if (DEBUG_STACK) Slog.i(TAG_STACK, "removeTask: removing stack=" + this);
             // We only need to adjust focused stack if this stack is in focus and we are not in the
@@ -5462,11 +5473,11 @@ class ActivityStack extends ConfigurationContainer {
                     && mRootActivityContainer.isTopDisplayFocusedStack(this)) {
                 String myReason = reason + " leftTaskHistoryEmpty";
                 if (!inMultiWindowMode() || adjustFocusToNextFocusableStack(myReason) == null) {
-                    getDisplay().moveHomeStackToFront(myReason);
+                    display.moveHomeStackToFront(myReason);
                 }
             }
             if (isAttached()) {
-                getDisplay().positionChildAtBottom(this);
+                display.positionChildAtBottom(this);
             }
             if (!isActivityTypeHome() || !isAttached()) {
                 remove();
@@ -5478,6 +5489,9 @@ class ActivityStack extends ConfigurationContainer {
         // Notify if a task from the pinned stack is being removed (or moved depending on the mode)
         if (inPinnedWindowingMode()) {
             mService.getTaskChangeNotificationController().notifyActivityUnpinned();
+        }
+        if (display.isSingleTaskInstance()) {
+            mService.notifySingleTaskDisplayEmpty(display.mDisplayId);
         }
     }
 

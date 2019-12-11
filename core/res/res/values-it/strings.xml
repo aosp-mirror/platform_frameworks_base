@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tocca per vedere tutte le reti"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Connetti"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Tutte le reti"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Connettersi a reti Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Consigliato da <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Sì"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Vuoi consentire le reti Wi-Fi suggerite?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> ha suggerito delle reti. Il dispositivo potrebbe collegarsi automaticamente."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Consenti"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"No, grazie"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Il Wi‑Fi verrà attivato automaticamente"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Quando ti trovi nell\'area di una rete salvata di alta qualità"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Non riattivare"</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Senza categoria"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Stabilisci tu l\'importanza di queste notifiche."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Importante a causa delle persone coinvolte."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Consentire a <xliff:g id="APP">%1$s</xliff:g> di creare un nuovo utente con <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Consentire a <xliff:g id="APP">%1$s</xliff:g> di creare un nuovo utente con <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Esiste già un utente con questo account)"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Consentire a <xliff:g id="APP">%1$s</xliff:g> di creare un nuovo utente con l\'account <xliff:g id="ACCOUNT">%2$s</xliff:g> (esiste già un utente con questo account)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Consentire a <xliff:g id="APP">%1$s</xliff:g> di creare un nuovo utente con l\'account <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Aggiungi una lingua"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Area geografica preferita"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Digita nome lingua"</string>

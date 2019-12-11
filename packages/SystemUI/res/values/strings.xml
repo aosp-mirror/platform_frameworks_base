@@ -961,6 +961,9 @@
     <!-- Message shown when lock screen is tapped or face authentication fails. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to open</string>
 
+    <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
+    <string name="keyguard_retry">Swipe up to try again</string>
+
     <!-- Text on keyguard screen and in Quick Settings footer indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=60] -->
     <string name="do_disclosure_generic">This device is managed by your organization</string>
 
@@ -1386,6 +1389,8 @@
         buttons</string>
     <string name="screen_pinning_toast_recents_invisible">To unpin this screen, touch &amp; hold Back
         and Home buttons</string>
+    <!-- Notify (in toast) user how to unpin screen in gesture navigation mode [CHAR LIMIT=NONE] -->
+    <string name="screen_pinning_toast_gesture_nav">To unpin this screen, swipe up &amp; hold</string>
     <!-- Screen pinning positive response. -->
     <string name="screen_pinning_positive">Got it</string>
     <!-- Screen pinning negative response. -->

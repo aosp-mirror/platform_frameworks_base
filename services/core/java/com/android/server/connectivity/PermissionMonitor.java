@@ -130,6 +130,11 @@ public class PermissionMonitor {
         }
 
         @Override
+        public void onPackageChanged(@NonNull String packageName, int uid) {
+            sendPackagePermissionsForUid(uid, getPermissionForUid(uid));
+        }
+
+        @Override
         public void onPackageRemoved(String packageName, int uid) {
             sendPackagePermissionsForUid(uid, getPermissionForUid(uid));
         }

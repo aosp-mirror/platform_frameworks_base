@@ -257,6 +257,11 @@ public class CarBatteryController extends BroadcastReceiver implements BatteryCo
         return false;
     }
 
+    @Override
+    public boolean isAodPowerSave() {
+        return false;
+    }
+
     private void notifyBatteryLevelChanged() {
         for (int i = 0, size = mChangeCallbacks.size(); i < size; i++) {
             mChangeCallbacks.get(i)

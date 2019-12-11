@@ -20,6 +20,13 @@
     android:layout_height="@dimen/pip_dismiss_gradient_height"
     android:layout_gravity="bottom|center_horizontal">
 
+    <FrameLayout
+        android:id="@+id/bubble_dismiss_circle"
+        android:layout_width="@dimen/bubble_dismiss_encircle_size"
+        android:layout_height="@dimen/bubble_dismiss_encircle_size"
+        android:layout_gravity="center"
+        android:background="@drawable/bubble_dismiss_circle" />
+
     <LinearLayout
         android:id="@+id/bubble_dismiss_icon_container"
         android:layout_width="wrap_content"
@@ -38,29 +45,5 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/bubble_dismiss_icon" />
-
-        <TextView
-            android:id="@+id/bubble_dismiss_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="9dp"
-            android:layout_marginBottom="9dp"
-            android:layout_marginLeft="8dp"
-            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body1"
-            android:textColor="@android:color/white"
-            android:shadowColor="@android:color/black"
-            android:shadowDx="-1"
-            android:shadowDy="1"
-            android:shadowRadius="0.01"
-            android:text="@string/bubble_dismiss_text" />
-
     </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/bubble_dismiss_circle"
-        android:layout_width="@dimen/bubble_dismiss_encircle_size"
-        android:layout_height="@dimen/bubble_dismiss_encircle_size"
-        android:layout_gravity="center"
-        android:alpha="0"
-        android:background="@drawable/bubble_dismiss_circle" />
 </FrameLayout>

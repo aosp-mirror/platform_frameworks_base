@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Thông báo ít khẩn cấp hơn bên dưới"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Nhấn lại để mở"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Vuốt lên để mở"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Vuốt lên để thử lại"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Thiết bị này do tổ chức của bạn quản lý"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Thiết bị này được <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> quản lý"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Vuốt từ biểu tượng để mở điện thoại"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Thao tác này sẽ duy trì hiển thị màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ nút Màn hình chính để bỏ ghim."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Để bỏ ghim màn hình này, hãy chạm và giữ nút Quay lại và nút Tổng quan"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Để bỏ ghim màn hình này, hãy chạm và giữ nút Quay lại và nút Màn hình chính"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Để bỏ ghim màn hình này, hãy vuốt lên và giữ"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Ok"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Không, cảm ơn"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Đã ghim màn hình"</string>

@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ନିମ୍ନରେ କମ୍‍ ଜରୁରୀ ବିଜ୍ଞପ୍ତି"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ଖୋଲିବା ପାଇଁ ପୁଣି ଟାପ୍‍ କରନ୍ତୁ"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"ଖୋଲିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"ପୁଣି ଚେଷ୍ଟା କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"ଏହି ଡିଭାଇସ୍‌ ଆପଣଙ୍କ ସଂସ୍ଥା ଦ୍ୱାରା ପରିଚାଳିତ।"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"ଏହି ଡିଭାଇସ୍‌ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ଦ୍ୱାରା ପରିଚାଳିତ ହେଉଛି"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ଫୋନ୍‍ ପାଇଁ ଆଇକନରୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପର୍ଯ୍ୟନ୍ତ ହୋମ୍‌କୁ ଦାବିଧରନ୍ତୁ।"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ଏହି ସ୍କ୍ରୀନ୍‍‍କୁ ଅନପିନ୍‍ କରିବା ପାଇଁ, ବ୍ୟାକ୍ ଏବଂ ଓଭରଭ୍ୟୁ ବଟନ୍‍‌କୁ ଦାବିଧରନ୍ତୁ"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"ଏହି ସ୍କ୍ରୀନ୍‍‍କୁ ଅନପିନ୍‍ କରିବା ପାଇଁ, ବ୍ୟାକ୍ ଏବଂ ହୋମ୍ ବଟନ୍‍‌କୁ ଦାବିଧରନ୍ତୁ"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"ଏହି ସ୍କ୍ରୀନ୍‌କୁ ଅନପିନ୍ କରିବା ପାଇଁ, ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ ଏବଂ ଧରି ରଖନ୍ତୁ"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ବୁଝିଲି"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ନାହିଁ, ଥାଉ"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"ସ୍କ୍ରୀନ୍‌କୁ ପିନ୍‌ କରାଗଲା"</string>

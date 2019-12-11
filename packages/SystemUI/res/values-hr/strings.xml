@@ -403,6 +403,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Manje hitne obavijesti pri dnu"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Dodirnite opet za otvaranje"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Prijeđite prstom prema gore da biste otvorili"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Prijeđite prstom prema gore za ponovni pokušaj"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Ovim uređajem upravlja vaša organizacija"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Ovim uređajem upravlja <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Prijeđite prstom od ikone za telefon"</string>
@@ -547,6 +548,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Zaslon će tako ostati u prvom planu dok ga ne otkvačite. Dodirnite gumb Početna i zadržite pritisak da biste ga otkvačili."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Da biste otkvačili ovaj zaslon, dodirnite gumbe Natrag i Pregled i zadržite pritisak"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Da biste otkvačili ovaj zaslon, dodirnite gumbe Natrag i Početna i zadržite pritisak"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Da biste otkvačili ovaj zaslon, prijeđite prstom i zadržite pritisak"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Shvaćam"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, hvala"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Zaslon je pričvršćen"</string>

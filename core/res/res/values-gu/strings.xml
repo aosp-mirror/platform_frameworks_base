@@ -282,7 +282,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારા સંપર્કોને ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"સ્થાન"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"આ ઉપકરણના સ્થાનને ઍક્સેસ કરવાની"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને આ ઉપકરણના સ્થાનને ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને આ ડિવાઇસના સ્થાનને ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"જ્યારે તમે ઍપનો ઉપયોગ કરી રહ્યા હશો માત્ર ત્યારે જ ઍપ સ્થાનને ઍક્સેસ કરી શકશે"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને આ ડિવાઇસનું સ્થાન &lt;b&gt;હંમેશાં&lt;/b&gt; ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"હાલમાં માત્ર જ્યારે તમે ઍપનો ઉપયોગ કરી રહ્યા હશો હોય ત્યારે જ ઍપ સ્થાનને ઍક્સેસ કરી શકશે"</string>
@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"બધા નેટવર્ક જોવા ટૅપ કરો"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"કનેક્ટ કરો"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"બધા નેટવર્કો"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"વાઇ-ફાઇ નેટવર્ક સાથે કનેક્ટ કરીએ?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> દ્વારા સૂચવાયેલ"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"હા"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ના"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"સૂચવેલા વાઇ-ફાઇ નેટવર્કને મંજૂરી આપીએ?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> સૂચવેલા નેટવર્ક. ડિવાઇસ ઑટોમૅટિક રીતે કનેક્ટ થાય તેમ બની શકે છે."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"મંજૂરી આપો"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"ના, આભાર"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"વાઇ-ફાઇ આપમેળે ચાલુ થઈ જશે"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"જ્યારે તમે એક ઉચ્ચ ક્વૉલિટીવાળા સાચવેલ નેટવર્કની નજીક હોવ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"પાછું ચાલુ કરશો નહીં"</string>
@@ -1889,8 +1889,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"અવર્ગીકૃત"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"તમે આ સૂચનાઓનું મહત્વ સેટ કર્યું છે."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"શામેલ થયેલ લોકોને કારણે આ મહત્વપૂર્ણ છે."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> ને <xliff:g id="ACCOUNT">%2$s</xliff:g> સાથે એક નવા વપરાશકર્તાને બનાવવાની મંજૂરી આપીએ?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g> સાથે <xliff:g id="APP">%1$s</xliff:g> ને એક નવા વપરાશકર્તાને બનાવવાની મંજૂરી આપીએ (આ એકાઉન્ટ સાથેના એક વપરાશકર્તા પહેલાંથી અસ્તિત્વમાં છે)?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="APP">%1$s</xliff:g>ને <xliff:g id="ACCOUNT">%2$s</xliff:g> માટે એક નવા વપરાશકર્તા બનાવવાની મંજૂરી આપીએ (આ એકાઉન્ટ માટે એક વપરાશકર્તા પહેલાંથી અસ્તિત્વમાં છે) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="APP">%1$s</xliff:g>ને <xliff:g id="ACCOUNT">%2$s</xliff:g> માટે એક નવા વપરાશકર્તા બનાવવાની મંજૂરી આપીએ ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"ભાષા ઉમેરો"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"પ્રદેશ પસંદગી"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ભાષાનું નામ ટાઇપ કરો"</string>

@@ -101,7 +101,9 @@ public class InvocationLightsView extends View
 
         int cornerRadiusBottom = DisplayUtils.getCornerRadiusBottom(context);
         int cornerRadiusTop = DisplayUtils.getCornerRadiusTop(context);
-        mViewHeight = Math.max(cornerRadiusBottom, cornerRadiusTop);
+        // ensure that height is non-zero even for square corners
+        mViewHeight = Math.max(Math.max(cornerRadiusBottom, cornerRadiusTop),
+            DisplayUtils.convertDpToPx(LIGHT_HEIGHT_DP, context));
 
         final int dualToneDarkTheme = Utils.getThemeAttr(mContext, R.attr.darkIconTheme);
         final int dualToneLightTheme = Utils.getThemeAttr(mContext, R.attr.lightIconTheme);

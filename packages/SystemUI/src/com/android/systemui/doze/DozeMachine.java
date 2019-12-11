@@ -24,7 +24,10 @@ import android.util.Log;
 import android.view.Display;
 
 import com.android.internal.util.Preconditions;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.WakefulnessLifecycle.Wakefulness;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -118,6 +121,8 @@ public class DozeMachine {
     private final Service mDozeService;
     private final WakeLock mWakeLock;
     private final AmbientDisplayConfiguration mConfig;
+    private final WakefulnessLifecycle mWakefulnessLifecycle;
+    private final BatteryController mBatteryController;
     private Part[] mParts;
 
     private final ArrayList<State> mQueuedRequests = new ArrayList<>();
@@ -126,10 +131,13 @@ public class DozeMachine {
     private boolean mWakeLockHeldForCurrentState = false;
 
     public DozeMachine(Service service, AmbientDisplayConfiguration config,
-            WakeLock wakeLock) {
+            WakeLock wakeLock, WakefulnessLifecycle wakefulnessLifecycle,
+            BatteryController batteryController) {
         mDozeService = service;
         mConfig = config;
+        mWakefulnessLifecycle = wakefulnessLifecycle;
         mWakeLock = wakeLock;
+        mBatteryController = batteryController;
     }
 
     /** Initializes the set of {@link Part}s. Must be called exactly once after construction. */
@@ -312,6 +320,9 @@ public class DozeMachine {
             Log.i(TAG, "Dropping pulse done because current state is already done: " + mState);
             return mState;
         }
+        if (requestedState == State.DOZE_AOD && mBatteryController.isAodPowerSave()) {
+            return State.DOZE;
+        }
         if (requestedState == State.DOZE_REQUEST_PULSE && !mState.canPulse()) {
             Log.i(TAG, "Dropping pulse request because current state can't pulse: " + mState);
             return mState;
@@ -334,9 +345,18 @@ public class DozeMachine {
         switch (state) {
             case INITIALIZED:
             case DOZE_PULSE_DONE:
-                transitionTo(mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)
-                        ? DozeMachine.State.DOZE_AOD : DozeMachine.State.DOZE,
-                        DozeLog.PULSE_REASON_NONE);
+                final State nextState;
+                @Wakefulness int wakefulness = mWakefulnessLifecycle.getWakefulness();
+                if (wakefulness == WakefulnessLifecycle.WAKEFULNESS_AWAKE
+                        || wakefulness == WakefulnessLifecycle.WAKEFULNESS_WAKING) {
+                    nextState = State.FINISH;
+                } else if (mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)) {
+                    nextState = State.DOZE_AOD;
+                } else {
+                    nextState = State.DOZE;
+                }
+
+                transitionTo(nextState, DozeLog.PULSE_REASON_NONE);
                 break;
             default:
                 break;

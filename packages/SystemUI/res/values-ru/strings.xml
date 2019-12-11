@@ -405,6 +405,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Показать менее важные уведомления"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Нажмите ещё раз, чтобы открыть"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Проведите вверх, чтобы открыть"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Чтобы повторить попытку, проведите вверх"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Этим устройством управляет ваша организация"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Этим устройством управляет компания \"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>\""</string>
     <string name="phone_hint" msgid="4872890986869209950">"Телефон: проведите от значка"</string>
@@ -548,8 +549,9 @@
     <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Экран будет зафиксирован, пока вы не отмените блокировку (для этого нужно провести вверх и удерживать)."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Обзор\"."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Главный экран\"."</string>
-    <string name="screen_pinning_toast" msgid="2266705122951934150">"Чтобы отменить блокировку, нажмите и удерживайте кнопки \"Назад\" и \"Обзор\""</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Чтобы отменить блокировку, нажмите и удерживайте кнопки \"Назад\" и \"Главный экран\""</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Чтобы открепить экран, нажмите и удерживайте кнопки \"Назад\" и \"Обзор\"."</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Чтобы открепить экран, нажмите и удерживайте кнопки \"Назад\" и \"Главный экран\"."</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Чтобы открепить этот экран, проведите по нему вверх и задержите руку в крайнем положении."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ОК"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Нет, спасибо"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Блокировка включена"</string>

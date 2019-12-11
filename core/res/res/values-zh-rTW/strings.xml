@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"輕觸即可查看所有網路"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"連線"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"所有網路"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"要連線到 Wi-Fi 網路嗎？"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"「<xliff:g id="NAME">%s</xliff:g>」建議的無線網路"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"是"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"否"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"是否允許系統連線到建議的 Wi‑Fi 網路？"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"「<xliff:g id="NAME">%s</xliff:g>」建議的網路。裝置可能會自動連線到這些網路。"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"允許"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"不用了，謝謝"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi 將自動開啟"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"當你位於已儲存的高品質網路範圍內時"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"不要重新開啟"</string>
@@ -1362,7 +1362,7 @@
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB 連接埠中有液體或灰塵"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"系統已自動停用 USB 連接埠。輕觸即可瞭解詳情。"</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"現在可以使用 USB 連接埠"</string>
-    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"手機目前無法偵測液體或灰塵。"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"手機目前沒有偵測到液體或灰塵。"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"正在接收錯誤報告…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"要分享錯誤報告嗎？"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"正在分享錯誤報告…"</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"未分類"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"這些通知的重要性由你決定。"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"這則通知涉及特定人士，因此被歸為重要通知。"</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"要允許 <xliff:g id="APP">%1$s</xliff:g> 為 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者嗎？"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"要允許 <xliff:g id="APP">%1$s</xliff:g> 為 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者嗎 (這個帳戶目前已有使用者)？"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"要允許「<xliff:g id="APP">%1$s</xliff:g>」替 <xliff:g id="ACCOUNT">%2$s</xliff:g> (這個帳戶目前已有使用者) 建立新使用者嗎？"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"要允許「<xliff:g id="APP">%1$s</xliff:g>」替 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者嗎？"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"新增語言"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"地區偏好設定"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"請輸入語言名稱"</string>

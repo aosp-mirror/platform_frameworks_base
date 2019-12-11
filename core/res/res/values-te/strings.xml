@@ -291,7 +291,7 @@
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"మీ క్యాలెండర్‌ని యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS సందేశాలను పంపడం మరియు వీక్షించడం"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"SMS సందేశాలు పంపడానికి మరియు వీక్షించడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"SMS సందేశాలు పంపడం, చూడటం చేయగలిగేలా &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ను అనుమతించాలా?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"నిల్వ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైల్‌లను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైల్‌లను యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ను అనుమతించాలా?"</string>
@@ -331,7 +331,7 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"స్థితి బార్‌ ఉండేలా చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"స్థితి పట్టీని విస్తరింపజేయడం/కుదించడం"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"స్థితి బార్‌ను విస్తరింపజేయడానికి లేదా కుదించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_install_shortcut" msgid="4279070216371564234">"సత్వరమార్గాలను ఇన్‌స్టాల్ చేయడం"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"షార్ట్‌కట్‌లను ఇన్‌స్టాల్ చేయడం"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"వినియోగదారు ప్రమేయం లేకుండానే హోమ్‌స్క్రీన్ సత్వరమార్గాలను జోడించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"సత్వరమార్గాలను అన్ఇన్‌స్టాల్ చేయడం"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"వినియోగదారు ప్రమేయం లేకుండానే హోమ్‌స్క్రీన్ సత్వరమార్గాలను తీసివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
@@ -359,7 +359,7 @@
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ప్రస్తుతం మరియు ఇటీవల అమలవుతున్న విధుల గురించి వివరణాత్మక సమాచారాన్ని తిరిగి పొందడానికి యాప్‌ను అనుమతిస్తుంది. ఇది పరికరంలో ఉపయోగించబడిన యాప్‌ల గురించి సమాచారాన్ని కనుగొనడానికి యాప్‌ను అనుమతించవచ్చు."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"ప్రొఫైల్ మరియు పరికర యజమానులను నిర్వహించడం"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"ప్రొఫైల్ యజమానులను మరియు పరికరం యజమానిని సెట్ చేయడానికి అనువర్తనాలను అనుమతిస్తుంది."</string>
-    <string name="permlab_reorderTasks" msgid="2018575526934422779">"అమలవుతున్న అనువర్తనాలను మళ్లీ క్రమం చేయడం"</string>
+    <string name="permlab_reorderTasks" msgid="2018575526934422779">"అమలవుతోన్న యాప్‌లను మళ్లీ క్రమం చేయడం"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"విధులను ముందుకు మరియు నేపథ్యానికి తరలించడానికి యాప్‌ను అనుమతిస్తుంది. యాప్ మీ ప్రమేయం లేకుండానే దీన్ని చేయవచ్చు."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"కారు మోడ్‌ను ప్రారంభించడం"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"కారు మోడ్‌ను ప్రారంభించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -451,7 +451,7 @@
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"పరికరం యొక్క ఫోన్ నంబర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"టాబ్లెట్‌ను నిద్రావస్థకు వెళ్లనీయకుండా నిరోధించడం"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"టీవీ నిద్రావస్థకు వెళ్లకుండా నిరోధించడం"</string>
-    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ఫోన్‌ను నిద్రావస్థకు వెళ్లనీయకుండా నిరోధించడం"</string>
+    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ఫోన్‌ను స్లీప్ మోడ్‌లోకి వెళ్లనీయకుండా నిరోధించగలగడం"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"నిద్రావస్థకి వెళ్లకుండా టాబ్లెట్‌ను నిరోధించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"టీవీ నిద్రావస్థకు వెళ్లకుండా నిరోధించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"నిద్రావస్థకి వెళ్లకుండా ఫోన్‌ను నిరోధించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -473,7 +473,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"ఫోన్‌కు తెలిసిన ఖాతాల జాబితాను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా సృష్టించబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"నెట్‌వర్క్ కనెక్షన్‌లను వీక్షించడం"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"ఏ నెట్‌వర్క్‌లు ఉన్నాయి మరియు కనెక్ట్ చేయబడ్డాయి వంటి నెట్‌వర్క్ కనెక్షన్‌ల గురించి సమాచారాన్ని వీక్షించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"పూర్తి నెట్‌వర్క్ ప్రాప్యతను కలిగి ఉండటం"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"నెట్‌వర్క్‌ను పూర్తిగా యాక్సెస్ చేయగలగడం"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"నెట్‌వర్క్ సాకెట్‌లను సృష్టించడానికి మరియు అనుకూల నెట్‌వర్క్ ప్రోటోకాల్‌లను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది. బ్రౌజర్ మరియు ఇతర యాప్‌లు ఇంటర్నెట్‌కు డేటా పంపడానికి మార్గాలను అందిస్తాయి, కనుక ఇంటర్నెట్‌కు డేటా పంపడానికి ఈ అనుమతి అవసరం లేదు."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"నెట్‌వర్క్ కనెక్టివిటీని మార్చడం"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"నెట్‌వర్క్ కనెక్టివిటీ యొక్క స్థితిని మార్చడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -594,11 +594,11 @@
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="4024817159806482191">"ముఖ చిహ్నం"</string>
-    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"సమకాలీకరణ సెట్టింగ్‌లను చదవడం"</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"సింక్ సెట్టింగ్‌లను చదవగలగడం"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ఖాతా యొక్క సమకాలీకరణ సెట్టింగ్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, వ్యక్తుల యాప్‌ ఖాతాతో సమకాలీకరించబడాలా లేదా అనే విషయాన్ని ఇది నిశ్చయించవచ్చు."</string>
-    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"సమకాలీకరణను ఆన్ మరియు ఆఫ్‌కు టోగుల్ చేయడం"</string>
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"\'సింక్\'ను ఆన్, ఆఫ్‌ల మధ్య టోగుల్ చేయడం"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ఖాతా యొక్క సమకాలీకరణ సెట్టింగ్‌లను సవరించడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, ఇది ఒక ఖాతాతో వ్యక్తుల యాప్ యొక్క సమకాలీకరణను ప్రారంభించడానికి ఉపయోగించబడవచ్చు."</string>
-    <string name="permlab_readSyncStats" msgid="7396577451360202448">"సమకాలీకరణ గణాంకాలను చదవడం"</string>
+    <string name="permlab_readSyncStats" msgid="7396577451360202448">"సింక్ గణాంకాలను చదవగలగడం"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"ఖాతా యొక్క సమకాలీకరణ గణాంకాలను అలాగే సమకాలీకరణ ఈవెంట్‌ల చరిత్రను మరియు ఎంత డేటా సమకాలీకరించబడింది అనేవాటిని చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_sdcardRead" msgid="1438933556581438863">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను చదువుతుంది"</string>
     <string name="permdesc_sdcardRead" msgid="1804941689051236391">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"అన్ని నెట్‌వర్క్‌లు చూడటానికి నొక్కండి"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"కనెక్ట్ చేయి"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"అన్ని నెట్‌వర్క్‌లు"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Wi‑Fi నెట్‌వర్క్‌లకు కనెక్ట్ చేయాలా?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> ద్వారా సూచించబడింది"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"అవును"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"లేదు"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"సూచించిన Wi‑Fi నెట్‌వర్క్‌లను అనుమతించాలా?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> సూచించిన నెట్‌వర్క్‌లు. పరికరం ఆటోమేటిక్‌గా కనెక్ట్ అవచ్చు."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"అనుమతించు"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"వద్దు"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi స్వయంచాలకంగా ఆన్ అవుతుంది"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"మీరు అధిక నాణ్యత గల సేవ్ చేసిన నెట్‌వర్క్‌కు సమీపంగా ఉన్నప్పుడు"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"తిరిగి ఆన్ చేయవద్దు"</string>
@@ -1328,7 +1328,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"పూర్తయింది"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"సిమ్ కార్డు జోడించబడింది"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"మొబైల్ నెట్‌వర్క్‌ను యాక్సెస్ చేయడానికి మీ పరికరాన్ని పునఃప్రారంభించండి."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"పునఃప్రారంభించు"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"రీస్టార్ట్ చేయి"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"మొబైల్ సేవను సక్రియం చేయండి"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"మీ కొత్త SIMని సక్రియం చేయడానికి క్యారియర్ యాప్‌ను డౌన్‌లోడ్ చేయండి"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"మీ కొత్త SIMని సక్రియం చేయడం కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> యాప్‌ని డౌన్‌లోడ్ చేయండి"</string>
@@ -1604,7 +1604,7 @@
     <string name="media_route_button_content_description" msgid="591703006349356016">"ప్రసారం చేయండి"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"పరికరానికి కనెక్ట్ చేయండి"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"స్క్రీన్‌ను పరికరానికి ప్రసారం చేయండి"</string>
-    <string name="media_route_chooser_searching" msgid="4776236202610828706">"పరికరాల కోసం శోధిస్తోంది…"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"పరికరాల కోసం వెతుకుతోంది…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"సెట్టింగ్‌లు"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"డిస్‌కనెక్ట్ చేయి"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"స్కాన్ చేస్తోంది..."</string>
@@ -1671,7 +1671,7 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"యాక్సెస్ సామర్థ్య షార్ట్‌కట్ ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ని ఉపయోగించడానికి వాల్యూమ్ కీలు రెండింటినీ 3 సెకన్లు నొక్కి ఉంచండి"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"యాక్సెసిబిలిటీ బటన్‌ను మీరు నొక్కినప్పుడు ఉపయోగించాల్సిన ఒక ఫీచర్‌ను ఎంచుకోండి:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"యాక్సెసిబిలిటీ సంజ్ఞతో ఉపయోగించడానికి ఒక సేవను ఎంచుకోండి (రెండు చేతి వేళ్లతో స్క్రీన్‌ను కింద నుండి పైకి స్వైప్ చేయండి):"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"యాక్సెసిబిలిటీ సంజ్ఞతో ఉపయోగించడానికి ఒక సేవను ఎంచుకోండి (రెండు వేళ్లతో స్క్రీన్‌ను కింద నుండి పైకి స్వైప్ చేయండి):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"యాక్సెసిబిలిటీ సంజ్ఞతో ఉపయోగించడానికి ఒక సేవను ఎంచుకోండి (మూడు చేతి వేళ్లతో స్క్రీన్‌ను కింద నుండి పైకి స్వైప్ చేయండి):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"సేవల మధ్య మారడానికి, యాక్సెసిబిలిటీ బటన్‌ను నొక్కి &amp; పట్టుకోండి."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"సేవల మధ్య మారడానికి, రెండు చేతి వేళ్ళతో పైకి స్వైప్ చేసి పట్టుకోండి."</string>
@@ -1889,8 +1889,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"వర్గీకరించబడలేదు"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"మీరు ఈ నోటిఫికేషన్‌ల ప్రాముఖ్యతను సెట్ చేసారు."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ఇందులో పేర్కొనబడిన వ్యక్తులను బట్టి ఇది చాలా ముఖ్యమైనది."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ని అనుమతించాలా ?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో (ఈ ఖాతాతో ఇప్పటికే ఒక వినియోగదారు ఉన్నారు) కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ని అనుమతించాలా?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ను అనుమతించాలా (ఈ ఖాతాతో ఇప్పటికే ఒక వినియోగదారు ఉన్నారు) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ను అనుమతించాలా?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"భాషను జోడించండి"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ప్రాంతం ప్రాధాన్యత"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"భాష పేరును టైప్ చేయండి"</string>

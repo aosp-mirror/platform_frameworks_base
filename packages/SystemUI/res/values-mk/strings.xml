@@ -192,7 +192,7 @@
     <string name="not_default_data_content_description" msgid="9194667237765917844">"Не е поставен да користи интернет"</string>
     <string name="cell_data_off" msgid="1051264981229902873">"Исклучи"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Се поврзува со Bluetooth."</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим на работа во авион."</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Авионски режим."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN е вклучена."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Нема SIM-картичка"</string>
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Променување на мрежата на операторот"</string>
@@ -347,7 +347,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Осветленост"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"Автоматски"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Преврти ги боите"</string>
-    <string name="quick_settings_color_space_label" msgid="853443689745584770">"Режим за корекција на боја"</string>
+    <string name="quick_settings_color_space_label" msgid="853443689745584770">"Режим за корекција на бои"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Повеќе поставки"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Готово"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Поврзано"</string>
@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Долу се помалку итни известувања"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Допрете повторно за да се отвори"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Повлечете за да отворите"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Повлечете нагоре за да се обидете повторно"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Вашата организација управува со уредов"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Уредов го управува <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Повлечете од иконата за телефонот"</string>
@@ -456,7 +457,7 @@
     <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"При снимањето или емитувањето, услугата што ја обезбедува функцијава може да ги сними чувствителните информации што се прикажани на вашиот екран или пуштени од вашиот уред, вклучувајќи чувствителни информации како што се аудио, лозинки, информации за плаќање, фотографии и пораки."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Изложување чувствителни информации при емитување/снимање"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Не покажувај повторно"</string>
-    <string name="clear_all_notifications_text" msgid="814192889771462828">"Исчисти сè"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"Избриши сѐ"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Управувајте"</string>
     <string name="notification_section_header_gentle" msgid="4372438504154095677">"Тивки известувања"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Исчисти ги сите тивки известувања"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ќе се гледа сѐ додека не го откачите. Допрете и задржете „Почетен екран“ за откачување."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"За откачување на екранов, допрете и задржете ги копчињата „Назад“ и „Краток преглед“"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"За откачување на екранов, допрете и задржете ги копчињата „Назад“ и „Почетен екран“"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"За да го откачите екранов, повлечете нагоре и задржете"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Сфатив"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Не, фала"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Екранот е прикачен"</string>
@@ -595,7 +597,7 @@
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Етернет"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Аларм"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Работен профил"</string>
-    <string name="status_bar_airplane" msgid="7057575501472249002">"Режим на работа во авион"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Авионски режим"</string>
     <string name="add_tile" msgid="2995389510240786221">"Додај плочка"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Емитувај плочка"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Нема да го слушнете следниот аларм <xliff:g id="WHEN">%1$s</xliff:g> освен ако претходно не го исклучите ова"</string>

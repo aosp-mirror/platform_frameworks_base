@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Λιγότερο επείγουσες ειδοποιήσεις παρακάτω"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Πατήστε ξανά για να ανοίξετε"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Σύρετε προς τα επάνω για άνοιγμα"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Σύρετε προς τα πάνω για να δοκιμάσετε ξανά"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Αυτή η συσκευή είναι διαχειριζόμενη από τον οργανισμό σας"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Τη συσκευή διαχειρίζεται ο οργανισμός <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Σύρετε προς τα έξω για τηλέφωνο"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Με αυτόν τον τρόπο, παραμένει σε προβολή μέχρι να το ξεκαρφιτσώσετε. Αγγίξτε παρατεταμένα το στοιχείο \"Αρχική οθόνη\" για ξεκαρφίτσωμα."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Για να ξεκαρφιτσώσετε αυτήν την οθόνη, αγγίξτε παρατεταμένα τα κουμπιά \"Πίσω\" και \"Επισκόπηση\""</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Για να ξεκαρφιτσώσετε αυτήν την οθόνη, αγγίξτε παρατεταμένα τα κουμπιά \"Πίσω\" και \"Αρχική οθόνη\""</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Για να ξεκαρφιτσώσετε αυτήν την οθόνη, σύρετε προς τα πάνω και κρατήστε παρατεταμένα"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Το κατάλαβα"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Όχι"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Η οθόνη καρφιτσώθηκε"</string>

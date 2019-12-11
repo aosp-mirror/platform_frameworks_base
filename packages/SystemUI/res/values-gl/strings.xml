@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificacións menos urxentes abaixo"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Toca de novo para abrir"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Pasa o dedo cara arriba para abrir"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Pasa o dedo cara arriba para tentalo de novo"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Este dispositivo está xestionado pola túa organización"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Este dispositivo está xestionado por <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Pasa o dedo desde a icona para acceder ao teléfono"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"A pantalla manterase visible ata que deixes de fixala. Para facelo, mantén premido Inicio."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Para deixar de fixar a pantalla, mantén premidos os botóns Volver e Visión xeral"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Para deixar de fixar a pantalla, mantén premidos os botóns Atrás e Inicio"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Para soltar esta pantalla, pasa o dedo cara arriba e mantena premida"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"De acordo"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Non, grazas"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Fixouse a pantalla"</string>
@@ -597,7 +599,7 @@
     <string name="status_bar_work" msgid="6022553324802866373">"Perfil de traballo"</string>
     <string name="status_bar_airplane" msgid="7057575501472249002">"Modo avión"</string>
     <string name="add_tile" msgid="2995389510240786221">"Engade un atallo"</string>
-    <string name="broadcast_tile" msgid="3894036511763289383">"Atallo de emisión"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"Atallo de difusión"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Non escoitarás a alarma seguinte <xliff:g id="WHEN">%1$s</xliff:g> a menos que desactives esta opción antes desa hora"</string>
     <string name="zen_alarm_warning" msgid="444533119582244293">"Non escoitarás a alarma seguinte <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"ás <xliff:g id="WHEN">%1$s</xliff:g>"</string>

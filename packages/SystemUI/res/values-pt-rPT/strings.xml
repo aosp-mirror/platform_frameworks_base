@@ -68,7 +68,7 @@
     <string name="learn_more" msgid="5000517160980853569">"Saiba mais"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom para preencher o ecrã"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Esticar p. caber em ec. int."</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de ecrã"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Capt. ecrã"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"A guardar captura de ecrã..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"A guardar captura de ecrã..."</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Captura de ecrã guardada"</string>
@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificações menos urgentes abaixo"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Toque novamente para abrir"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Deslize rapidamente para cima para abrir"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Deslize rapidamente para cima para tentar novamente."</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Este dispositivo é gerido pela sua entidade"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Este dispositivo é gerido por <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Deslize rapid. a partir do ícone para aceder ao telemóvel"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Esta opção mantém o item visível até o soltar. Toque sem soltar em Página inicial para soltar."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Para soltar este ecrã, toque sem soltar nos botões Anterior e Vista geral."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Para soltar este ecrã, toque sem soltar nos botões Anterior e Página inicial."</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Para soltar este ecrã, deslize rapidamente para cima sem soltar."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Compreendi"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Não, obrigado"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Ecrã fixo"</string>

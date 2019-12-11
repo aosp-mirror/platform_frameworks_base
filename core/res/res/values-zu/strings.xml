@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Thepha ukuze ubone onke amanethiwekhi"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Xhuma"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Onke amanethiwekhi"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Xhumeka kumanethiwekhi e-Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Kuphakanyiswe ngu-<xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Yebo"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Cha"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Vumela amanethiwekhi e-Wi-Fi aphakanyisiwe?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> amanethiwekhi aphakanyisiwe. Idivayisi ingaxhumeka ngokuzenzakalela."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Vumela"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Cha ngiyabonga"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"I-Wi-Fi izovuleka ngokuzenzakalela"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Uma useduze kwenethiwekhi yekhwalithi ephezulu elondoloziwe"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ungaphindi uvule"</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Akufakwanga esigabeni"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Usethe ukubaluleka kwalezi zaziso."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Lokhu kubalulekile ngenxa yabantu ababandakanyekayo."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Vumela i-<xliff:g id="APP">%1$s</xliff:g> ukudala umsebenzisi omusha nge-<xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Vumela i-<xliff:g id="APP">%1$s</xliff:g> ukudala umsebenzisi omusha nge-<xliff:g id="ACCOUNT">%2$s</xliff:g> (umsebenzisi onale akhawunti usuvel ukhona) ?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Vumela i-<xliff:g id="APP">%1$s</xliff:g> ukuthi idale umsebenzisi omusha nge-<xliff:g id="ACCOUNT">%2$s</xliff:g> (Umsebenzisi onale akhawunti usevele ukhona) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Vumela i-<xliff:g id="APP">%1$s</xliff:g> ukuthi idale umsebenzisi omusha nge-<xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Engeza ulwimi"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Okuncamelayo kwesifunda"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Thayipha igama lolimi"</string>

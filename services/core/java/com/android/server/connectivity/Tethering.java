@@ -455,7 +455,20 @@ public class Tethering extends BaseNetworkObserver {
 
             @Override
             public void onServiceConnected(int profile, BluetoothProfile proxy) {
-                ((BluetoothPan) proxy).setBluetoothTethering(enable);
+                // Clear identify is fine because caller already pass tethering permission at
+                // ConnectivityService#startTethering()(or stopTethering) before the control comes
+                // here. Bluetooth will check tethering permission again that there is
+                // Context#getOpPackageName() under BluetoothPan#setBluetoothTethering() to get
+                // caller's package name for permission check.
+                // Calling BluetoothPan#setBluetoothTethering() here means the package name always
+                // be system server. If calling identity is not cleared, that package's uid might
+                // not match calling uid and end up in permission denied.
+                final long identityToken = Binder.clearCallingIdentity();
+                try {
+                    ((BluetoothPan) proxy).setBluetoothTethering(enable);
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
                 // TODO: Enabling bluetooth tethering can fail asynchronously here.
                 // We should figure out a way to bubble up that failure instead of sending success.
                 final int result = (((BluetoothPan) proxy).isTetheringOn() == enable)

@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tik om alle netwerken te bekijken"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Verbinding maken"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Alle netwerken"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Verbinding maken met wifi-netwerken?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Voorgesteld door <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ja"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nee"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Voorgestelde wifi-netwerken toestaan?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> heeft netwerken voorgesteld. Apparaat kan automatisch verbinding maken."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Toestaan"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Nee, bedankt"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wifi wordt automatisch ingeschakeld"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Wanneer je in de buurt van een opgeslagen netwerk van hoge kwaliteit bent"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Niet weer inschakelen"</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Geen categorie"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Je stelt het belang van deze meldingen in."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Dit is belangrijk vanwege de betrokken mensen."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Toestaan dat <xliff:g id="APP">%1$s</xliff:g> een nieuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> maakt?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Toestaan dat <xliff:g id="APP">%1$s</xliff:g> een nieuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> maakt (er is al een gebruiker met dit account)?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Toestaan dat <xliff:g id="APP">%1$s</xliff:g> een nieuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> maakt (er is al een gebruiker met dit account)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Toestaan dat <xliff:g id="APP">%1$s</xliff:g> een nieuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> maakt?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Een taal toevoegen"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Regiovoorkeur"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Typ een taalnaam"</string>

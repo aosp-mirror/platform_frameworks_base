@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ਹੇਠਾਂ ਘੱਟ ਲਾਜ਼ਮੀ ਸੂਚਨਾਵਾਂ"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ਖੋਲ੍ਹਣ ਲਈ ਦੁਬਾਰਾ ਟੈਪ ਕਰੋ"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"ਖੋਲ੍ਹਣ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਲਈ ਉੱਤੇ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਤੁਹਾਡੇ ਸੰਗਠਨ ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"ਇਹ ਡੀਵਾਈਸ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ਵੱਲੋਂ ਪ੍ਰਬੰਧਿਤ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ਫ਼ੋਨ ਲਈ ਪ੍ਰਤੀਕ ਤੋਂ ਸਵਾਈਪ ਕਰੋ"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਹੋਮ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ਇਸ ਸਕ੍ਰੀਨ ਨੂੰ ਅਨਪਿੰਨ ਕਰਨ ਲਈ, \'ਪਿੱਛੇ\' ਅਤੇ \'ਰੂਪ-ਰੇਖਾ\' ਬਟਨਾਂ ਨੂੰ ਸਪੱਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"ਇਸ ਸਕ੍ਰੀਨ ਨੂੰ ਅਨਪਿੰਨ ਕਰਨ ਲਈ, \'ਪਿੱਛੇ\' ਅਤੇ \'ਹੋਮ\' ਬਟਨਾਂ ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾਈ ਰੱਖੋ"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"ਇਸ ਸਕ੍ਰੀਨ ਨੂੰ ਅਨਪਿੰਨ ਕਰਨ ਲਈ, ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਰੱਖੋ"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ਸਮਝ ਲਿਆ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ਨਹੀਂ ਧੰਨਵਾਦ"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"ਸਕ੍ਰੀਨ ਪਿੰਨ ਕੀਤੀ ਗਈ"</string>

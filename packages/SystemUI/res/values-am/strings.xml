@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"በጣም አስቸካይ ያልሆኑ ማሳወቂያዎች ከታች"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ለመክፈት ዳግም መታ ያድርጉ"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"ለመክፈት በጣት ወደ ላይ ጠረግ ያድርጉ"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"እንደገና ለመሞከር ወደ ላይ ይጥረጉ"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"ይህ መሣሪያ በእርስዎ ድርጅት የሚተዳደር ነው"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"ይህ መሣሪያ በ<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> የሚተዳደር ነው"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ለስልክ ከአዶ ላይ ጠረግ ያድርጉ"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"ይሄ እስኪነቅሉት ድረስ በእይታ ውስጥ ያስቀምጠዋል። ለመንቀል መነሻ የሚለውን ይንኩ እና ይያዙ።"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ይህን ማያ ገጽ ለመንቀል ተመለስ እና አጠቃላይ ዕይታ አዝራሮችን ይንኩ እና ይያዙ"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"ይህን ማያ ገጽ ለመንቀል ተመለስ እና መነሻ የሚለውን ይንኩ እና ይያዙ"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"ይህን ማያ ገጽ ለመንቀል ወደ ላይ ጠርገው ይያዙ"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ገባኝ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"አይ፣ አመሰግናለሁ"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"ማያ ገጽ ተሰክቷል"</string>

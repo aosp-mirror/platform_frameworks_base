@@ -723,7 +723,8 @@ public class SettingsBackupTest {
                  Settings.Secure.LOCATION_ACCESS_CHECK_DELAY_MILLIS,
                  Settings.Secure.BIOMETRIC_DEBUG_ENABLED,
                  Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED,
-                 Settings.Secure.FACE_UNLOCK_DIVERSITY_REQUIRED);
+                 Settings.Secure.FACE_UNLOCK_DIVERSITY_REQUIRED,
+                 Settings.Secure.FACE_UNLOCK_RE_ENROLL);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {

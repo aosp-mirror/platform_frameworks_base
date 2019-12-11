@@ -291,7 +291,7 @@
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder à votre agenda ?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"envoyer et consulter des SMS"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'envoyer et d\'afficher des SMS ?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Autoriser l\'application &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à envoyer et afficher des SMS ?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stockage"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"accéder aux photos, contenus multimédias et fichiers sur votre appareil"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Autoriser l\'appli &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder aux photos, contenus multimédias et fichiers sur votre appareil ?"</string>
@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Appuyer pour afficher tous les réseaux"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Se connecter"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Tous les réseaux"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Se connecter à des réseaux Wi-Fi ?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Suggérée par <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Oui"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Non"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Autoriser les suggestions de réseaux Wi‑Fi ?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Réseaux suggérés par <xliff:g id="NAME">%s</xliff:g>. L\'appareil pourra se connecter automatiquement."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Autoriser"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Non, merci"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Le Wi-Fi sera activé automatiquement"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Lorsque vous êtes à proximité d\'un réseau enregistré de haute qualité"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ne pas réactiver"</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Sans catégorie"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Vous définissez l\'importance de ces notifications."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ces notifications sont importantes en raison des participants."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g> (un utilisateur associé à ce compte existe déjà) ?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g> (un utilisateur associé à ce compte existe déjà) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Ajouter une langue"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Préférences régionales"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Saisissez la langue"</string>

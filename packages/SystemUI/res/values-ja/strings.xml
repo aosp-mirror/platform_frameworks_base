@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"緊急度の低い通知を下に表示"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"開くにはもう一度タップしてください"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"開くには上にスワイプします"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"上にスワイプしてもう一度お試しください"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"このデバイスは組織によって管理されています"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"このデバイスは <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> が管理しています"</string>
     <string name="phone_hint" msgid="4872890986869209950">"右にスワイプして通話"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"固定を解除するまで画面が常に表示されるようになります。[ホーム] を押し続けると固定が解除されます。"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"この画面の固定を解除するには [戻る] ボタンと [最近] ボタンを押し続けます"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"この画面の固定を解除するには [戻る] ボタンと [ホーム] ボタンを押し続けます"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"この画面の固定を解除するには、上にスワイプして長押しします"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"はい"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"いいえ"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"画面を固定しました"</string>

@@ -11001,6 +11001,8 @@ public class TelephonyManager {
      * The {@link #EXTRA_NETWORK_COUNTRY} extra indicates the country code of the current
      * network returned by {@link #getNetworkCountryIso()}.
      *
+     * <p>There may be a delay of several minutes before reporting that no country is detected.
+     *
      * @see #EXTRA_NETWORK_COUNTRY
      * @see #getNetworkCountryIso()
      */

@@ -55,12 +55,12 @@
     <string name="label_view" msgid="6304565553218192990">"Դիտել"</string>
     <string name="always_use_device" msgid="4015357883336738417">"Միշտ բացել <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածը, երբ <xliff:g id="USB_DEVICE">%2$s</xliff:g> լրասարքը միացված է"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"Միշտ բացել <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածը, երբ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> լրասարքը միացված է"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"Թույլատրե՞լ USB-ի կարգաբերումը:"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Թույլատրե՞լ USB-ով վրիպազերծումը"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Համակարգչի RSA-ի բանալի մատնահետքն է`\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Միշտ թույլատրել այս համակարգչից"</string>
     <string name="usb_debugging_allow" msgid="2272145052073254852">"Թույլատրել"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB վրիպազերծումը արգելված է"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Ընթացիկ հաշվի օգտատերը չի կարող միացնել USB վրիպազերծումը: Այս գործառույթը միացնելու համար մուտք գործեք հիմնական օգտատիրոջ հաշվով:"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-ով վրիպազերծումը թույլատրված չէ"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Ընթացիկ հաշվի միջոցով չեք կարող միացնել USB-ով վրիպազերծումը: Այս գործառույթը միացնելու համար մուտք գործեք հիմնական օգտատիրոջ հաշիվ:"</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB միացքն անջատված է"</string>
     <string name="usb_contaminant_message" msgid="7379089091591609111">"USB միացքն անջատվել է, որպեսզի ձեր սարքը չթրջվի կամ չաղտոտվի: Այժմ USB միացքի միջոցով հնարավոր չէ միացնել այլ սարքեր:\n\nԴուք ծանուցում կստանաք, երբ այն նորից անվտանգ լինի օգտագործել:"</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"USB միացքը միացվել է՝ լիցքավորիչներն ու լրասարքերը հայտնաբերելու համար"</string>
@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Պակաս հրատապ ծանուցումները ստորև"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Կրկին հպեք՝ բացելու համար"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Բացելու համար սահեցրեք վերև"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Սահեցրեք վերև՝ նորից փորձելու համար"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Այս սարքը կառավարում է ձեր կազմակերպությունը"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Այս սարքը կառավարվում է <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>-ի կողմից"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Սահահարվածեք հեռախոսի պատկերակից"</string>
@@ -538,12 +539,13 @@
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Փոխել արտածման սարքը"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Էկրանն ամրացված է"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Էկրանը կմնա տեսադաշտում, մինչև այն ապամրացնեք: Ապամրացնելու համար հպեք և պահեք Հետ և Համատեսք կոճակները:"</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև որ չապամրացնեք այն: Ապամրացնելու համար հպեք և պահեք Հետ և գլխավոր էկրանի կոճակները:"</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև չապամրացնեք այն: Ապամրացնելու համար հպեք և պահեք «Հետ» և «Գլխավոր էկրան» կոճակները"</string>
     <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև որ չապամրացնեք այն: Ապամրացնելու համար մատը սահեցրեք վեր և պահեք։"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Էկրանը կմնա տեսադաշտում, մինչև այն ապամրացնեք: Ապամրացնելու համար հպեք և պահեք Համատեսք կոճակը:"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև որ չապամրացնեք այն: Ապամրացնելու համար հպեք և պահեք գլխավոր էկրանի կոճակը:"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Էկրանն ապամրացնելու համար հպեք և պահեք Հետ և Համատեսք կոճակները"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Էկրանն ապամրացնելու համար հպեք և պահեք Հետ և գլխավոր էկրանի կոճակները"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Էկրանն ապամրացնելու համար հպեք և պահեք «Հետ» և «Գլխավոր էկրան» կոճակները"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Էկրանն ապամրացնելու համար մատը սահեցրեք վերև և պահեք"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Եղավ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ոչ"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Էկրանն ամրացված է"</string>

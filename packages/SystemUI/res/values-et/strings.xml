@@ -192,7 +192,7 @@
     <string name="not_default_data_content_description" msgid="9194667237765917844">"Ei ole andmeside kasutamiseks seadistatud"</string>
     <string name="cell_data_off" msgid="1051264981229902873">"Väljas"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Jagamine Bluetoothiga."</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lennurežiim."</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lennukirežiim."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN on sees."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM-kaarti pole."</string>
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Operaatori võrku muudetakse"</string>
@@ -229,7 +229,7 @@
     <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Lennurežiim on väljas."</string>
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Lennurežiim on sees."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Lennurežiim on välja lülitatud."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Lennurežiim on sisse lülitatud."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Lennukirežiim on sisse lülitatud."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"täielik vaikus"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"ainult alarmid"</string>
     <string name="accessibility_quick_settings_dnd" msgid="5555155552520665891">"Mitte segada."</string>
@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Vähem kiireloomulised märguanded on allpool"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Avamiseks puudutage uuesti"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Pühkige avamiseks üles"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Uuesti proovimiseks pühkige üles"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Seda seadet haldab teie organisatsioon"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Seda seadet haldab <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Telefoni kasutamiseks pühkige ikoonilt eemale"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppu Avakuva."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Ekraanikuva vabastamiseks puudutage pikalt nuppe Tagasi ja Ülevaade"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Ekraanikuva vabastamiseks puudutage pikalt nuppe Tagasi ja Avakuva"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Ekraanikuva vabastamiseks pühkige üles ja hoidke sõrme ekraanil"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Selge"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Tänan, ei"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Ekraanikuva on kinnitatud"</string>
@@ -595,7 +597,7 @@
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Äratus"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Tööprofiil"</string>
-    <string name="status_bar_airplane" msgid="7057575501472249002">"Lennurežiim"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Lennukirežiim"</string>
     <string name="add_tile" msgid="2995389510240786221">"Paani lisamine"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Paani ülekandmine"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Kuulete järgmist äratust kell <xliff:g id="WHEN">%1$s</xliff:g> vaid siis, kui lülitate selle enne seda välja"</string>

@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Vähemmän kiireelliset ilmoitukset ovat alla"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Avaa napauttamalla uudelleen"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Avaa pyyhkäisemällä ylös"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Yritä uudelleen pyyhkäisemällä ylös"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Organisaatiosi hallinnoi laitetta"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Tätä laitetta hallinnoi <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
     <string name="phone_hint" msgid="4872890986869209950">"Avaa puhelu pyyhkäisemällä."</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Pysyy näkyvissä, kunnes irrotat sen. Irrota painamalla pitkään Aloitusnäyttö."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Irrota näyttö koskettamalla pitkään Takaisin- ja Viimeisimmät-painikkeita"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Irrota näyttö koskettamalla pitkään Takaisin- ja Aloitusnäyttö-painikkeita"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Irrota näyttö pyyhkäisemällä ylös ja painamalla pitkään"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Selvä"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ei kiitos"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Näyttö kiinnitetty"</string>

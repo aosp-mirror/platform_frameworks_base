@@ -405,6 +405,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mažiau skubūs pranešimai toliau"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Palieskite dar kartą, kad atidarytumėte"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Perbraukite aukštyn, kad atidarytumėte"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Jei norite bandyti dar kartą, perbraukite aukštyn"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Šį įrenginį tvarko jūsų organizacija"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Šį įrenginį tvarko <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Perbraukite iš telefono piktogramos"</string>
@@ -510,7 +511,7 @@
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"„<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>“ naudoja „<xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g>“ įrenginiui tvarkyti."</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"Administrat. gali stebėti ir tvark. nustat., įmonės prieigos par., progr., su įreng. susietus duomenis ir įreng. vietovės inform."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
-    <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Sužinoti daugiau"</string>
+    <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Sužinokite daugiau"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Esate prisijungę prie programos „<xliff:g id="VPN_APP">%1$s</xliff:g>“, kuri gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Atidaryti VPN nustatymus"</string>
@@ -550,6 +551,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Tai bus rodoma, kol atsegsite. Palieskite ir palaikykite „Pagrindinis ekranas“, kad atsegtumėte."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Kad atsegtumėte šį ekraną, palieskite ir palaikykite mygtukus „Atgal“ ir „Apžvalga“"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Kad atsegtumėte šį ekraną, palieskite ir palaikykite mygtukus „Atgal“ ir „Pagrindinis ekranas“"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Kad atsegtumėte šį ekraną, perbraukite aukštyn ir palaikykite"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Supratau"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, ačiū"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Ekranas prisegtas"</string>

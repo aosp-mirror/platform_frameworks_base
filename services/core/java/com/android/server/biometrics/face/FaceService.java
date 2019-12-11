@@ -53,6 +53,7 @@ import android.os.SELinux;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -926,7 +927,8 @@ public class FaceService extends BiometricServiceBase {
                     final Face face = new Face("", 0 /* identifier */, deviceId);
                     FaceService.super.handleRemoved(face, 0 /* remaining */);
                 }
-
+                Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_RE_ENROLL, 0, UserHandle.USER_CURRENT);
             });
         }
 

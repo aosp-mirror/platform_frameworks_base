@@ -1261,10 +1261,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"सबै नेटवर्कहरू हेर्न ट्याप गर्नुहोस्"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"जडान गर्नुहोस्"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"सबै नेटवर्कहरू"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Wi-Fi नेटवर्कसँग जोड्ने हो?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> ले सुझाव दिएको"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"हो"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"होइन"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"सिफारिस गरिएका Wi‑Fi नेटवर्कहरूलाई अनुमति दिनुहोस्?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> ले सिफारिस गरेका नेटवर्कहरू। यन्त्र स्वतः जडान हुन सक्छ।"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"अनुमति दिनुहोस्"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"पर्दैन, धन्यवाद"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi स्वतः सक्रिय हुनेछ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"तपाईं कुनै सुरक्षित गरिएको उच्च गुणस्तरीय नेटवर्कको नजिक हुनुभएको अवस्थामा"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"फेरि सक्रिय नगर्नुहोला"</string>
@@ -1894,8 +1894,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"वर्गीकरण नगरिएको"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"तपाईंले यी सूचनाहरूको महत्त्व सेट गर्नुहोस् ।"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"यसमा सङ्लग्न भएका मानिसहरूको कारणले गर्दा यो महत्वपूर्ण छ।"</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सँगै नयाँ प्रयोगकर्ता सिर्जना गर्न <xliff:g id="APP">%1$s</xliff:g> लाई अनुमति दिने हो?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सँगै नयाँ प्रयोगकर्ता सिर्जना गर्न <xliff:g id="APP">%1$s</xliff:g> लाई अनुमति दिने (यस खाताको प्रयोगकर्ता पहिले नै अवस्थित छ) ?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="ACCOUNT">%2$s</xliff:g> (यस खाताको प्रयोगकर्ता पहिले नै अवस्थित छ) मा नयाँ प्रयोगकर्ता सिर्जना गर्न <xliff:g id="APP">%1$s</xliff:g> लाई अनुमति दिने हो?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="ACCOUNT">%2$s</xliff:g> मा नयाँ प्रयोगकर्ता सिर्जना गर्न <xliff:g id="APP">%1$s</xliff:g> लाई अनुमति दिने हो?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"भाषा थप्नुहोस्"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"क्षेत्रको प्राथमिकता"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"भाषाको नाम टाइप गर्नुहोस्"</string>

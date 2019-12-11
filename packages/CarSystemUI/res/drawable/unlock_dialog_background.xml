@@ -12,8 +12,15 @@
   ~ distributed under the License is distributed on an "AS IS" BASIS,
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
+  ~ limitations under the License
   -->
-
-<!-- empty stub -->
-<merge />
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+  <solid android:color="@color/unlock_dialog_background_color"/>
+  <padding
+      android:bottom="@*android:dimen/car_padding_2"
+      android:left="@*android:dimen/car_padding_2"
+      android:right="@*android:dimen/car_padding_2"
+      android:top="@*android:dimen/car_padding_2"/>
+  <corners
+      android:radius="@dimen/unlock_dialog_radius"/>
+</shape>

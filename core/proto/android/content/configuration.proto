@@ -32,7 +32,7 @@ message ConfigurationProto {
     optional float font_scale = 1;
     optional uint32 mcc = 2;
     optional uint32 mnc = 3 [ (.android.privacy).dest = DEST_EXPLICIT ];
-    repeated LocaleProto locales = 4;
+    repeated LocaleProto locales = 4 [deprecated = true];
     optional uint32 screen_layout = 5;
     optional uint32 color_mode = 6;
     optional uint32 touchscreen = 7;
@@ -48,6 +48,7 @@ message ConfigurationProto {
     optional uint32 smallest_screen_width_dp = 17;
     optional uint32 density_dpi = 18;
     optional .android.app.WindowConfigurationProto window_configuration = 19;
+    optional string locale_list = 20;
 }
 
 /**

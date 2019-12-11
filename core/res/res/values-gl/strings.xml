@@ -387,7 +387,7 @@
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Permite á aplicación executarse unha vez o sistema se inicie completamente. Isto pode provocar que o teléfono tarde máis tempo en iniciarse e permitir á aplicación reducir a velocidade xeral do teléfono ao manterse sempre en execución."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"enviar difusión persistente"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Permite á aplicación enviar difusións permanentes que continúan unha vez finalizada a difusión. Un uso excesivo pode provocar que a tableta funcione con lentitude ou de forma inestable debido á necesidade de utilizar demasiada memoria."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Permite que a aplicación envíe emisións permanentes, que continúan unha vez finalizada a emisión. O uso excesivo pode volver a televisión máis lenta ou inestable, facendo que utilice moita memoria."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Permite que a aplicación envíe emisións atractivas, que permanecen unha vez finalizada a emisión. O uso excesivo pode volver a televisión máis lenta ou inestable, facendo que utilice moita memoria."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Permite á aplicación enviar difusións permanentes que continúan unha vez finalizada a difusión. Un uso excesivo pode provocar que o teléfono funcione con lentitude ou de forma inestable debido á necesidade de utilizar demasiada memoria."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"ler os teus contactos"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Permite á aplicación ler datos acerca dos teus contactos almacenados na tableta, incluída a frecuencia coa que os chamaches, lles enviaches un correo electrónico ou te comunicaches con individuos específicos doutras formas. Con este permiso as aplicacións poden gardar os teus datos de contacto e as aplicacións maliciosas poden compartir os datos de contacto sen o teu coñecemento."</string>
@@ -1091,27 +1091,27 @@
     <string name="inputMethod" msgid="1653630062304567879">"Método de introdución de texto"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Accións de texto"</string>
     <string name="email" msgid="4560673117055050403">"Correo electrónico"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Envía un correo electrónico ao enderezo seleccionado"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Enviar un correo electrónico ao enderezo seleccionado"</string>
     <string name="dial" msgid="1253998302767701559">"Chamar"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"Chama ao número de teléfono seleccionado"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Chamar ao número de teléfono seleccionado"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <string name="map_desc" msgid="1836995341943772348">"Localiza o enderezo seleccionado"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Localizar o enderezo seleccionado"</string>
     <string name="browse" msgid="1245903488306147205">"Abrir"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"Abre o URL seleccionado"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"Abrir o URL seleccionado"</string>
     <string name="sms" msgid="4560537514610063430">"Enviar SMS"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"Envía unha mensaxe ao número de teléfono seleccionado"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Enviar unha mensaxe ao número de teléfono seleccionado"</string>
     <string name="add_contact" msgid="7867066569670597203">"Engadir"</string>
-    <string name="add_contact_desc" msgid="4830217847004590345">"Engade o elemento aos contactos"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Engadir o elemento aos contactos"</string>
     <string name="view_calendar" msgid="979609872939597838">"Ver"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Consulta a hora seleccionada no calendario"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Consultar a hora seleccionada no calendario"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Programar"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programa un evento para a data seleccionada"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programar un evento para a data seleccionada"</string>
     <string name="view_flight" msgid="7691640491425680214">"Realizar seguimento"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"Fai un seguimento do voo seleccionado"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Facer un seguimento do voo seleccionado"</string>
     <string name="translate" msgid="9218619809342576858">"Traducir"</string>
-    <string name="translate_desc" msgid="4502367770068777202">"Traduce o texto seleccionado"</string>
+    <string name="translate_desc" msgid="4502367770068777202">"Traducir o texto seleccionado"</string>
     <string name="define" msgid="7394820043869954211">"Definir"</string>
-    <string name="define_desc" msgid="7910883642444919726">"Define o texto seleccionado"</string>
+    <string name="define_desc" msgid="7910883642444919726">"Definir o texto seleccionado"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Estase esgotando o espazo de almacenamento"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"É posible que algunhas funcións do sistema non funcionen"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Non hai almacenamento suficiente para o sistema. Asegúrate de ter un espazo libre de 250 MB e reinicia o dispositivo."</string>
@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Toca para ver todas as redes"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Conectarse"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Todas as redes"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Queres conectarte a redes wifi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Suxerido por <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Si"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Non"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Queres permitir as redes wifi suxeridas?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Redes suxeridas de <xliff:g id="NAME">%s</xliff:g>. O dispositivo pode conectarse automaticamente."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Permitir"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Non, grazas"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"A wifi activarase automaticamente"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Cando esteas preto dunha rede gardada de alta calidade"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Non volver activar"</string>
@@ -1889,8 +1889,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Sen clasificar"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Ti defines a importancia destas notificacións."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"É importante polas persoas involucradas."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Queres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario novo con <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Queres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario novo con <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Xa existe un usuario con esta conta)"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Queres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario novo con <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Xa existe un usuario con esta conta)"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Queres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario novo con <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Engadir un idioma"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Preferencia de rexión"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Nome do idioma"</string>

@@ -376,7 +376,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"在日出时关闭"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"在<xliff:g id="TIME">%s</xliff:g> 开启"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"直到<xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"深色主题背景"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"深色主题"</string>
     <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"深色主题背景\n省电模式"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC 已停用"</string>
@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"不太紧急的通知会显示在下方"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"再次点按即可打开"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"向上滑动即可打开"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"向上滑动即可重试"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"此设备由您所属单位管理"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"此设备是由<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>托管"</string>
     <string name="phone_hint" msgid="4872890986869209950">"滑动图标即可拨打电话"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“主屏幕”即可取消固定屏幕。"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"要取消固定此屏幕，请触摸并按住“返回”和“概览”按钮"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"要取消固定此屏幕，请触摸并按住“返回”和“主屏幕”按钮"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"要取消固定此屏幕，请向上滑动并按住"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"知道了"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"不用了"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"已固定屏幕"</string>

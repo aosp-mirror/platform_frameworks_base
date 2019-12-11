@@ -1257,10 +1257,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ចុចដើម្បីមើលបណ្តាញទាំងអស់"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ភ្ជាប់"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"បណ្ដាញ​ទាំងអស់"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"ភ្ជាប់​ប​ណ្តា​ញ Wi​-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"បាន​ណែនាំដោយ <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"បាទ/ចាស"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ទេ"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"អនុញ្ញាតឱ្យ​ភ្ជាប់​បណ្ដាញ Wi‑Fi ដែលបាន​ណែនាំ?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"បណ្ដាញ​ដែលបាន​ណែនាំ​របស់ <xliff:g id="NAME">%s</xliff:g> ។ ឧបករណ៍​អាច​ភ្ជាប់​ដោយស្វ័យប្រវត្តិ។"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"អនុញ្ញាត"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"ទេ អរគុណ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi នឹង​បើក​ដោយ​ស្វ័យប្រវត្តិ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"នៅពេល​ដែល​អ្នក​នៅ​ជិត​បណ្តាញ​គុណភាព​ខ្ពស់​ដែល​បាន​រក្សាទុក"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"កុំ​បើក​ឡើង​វិញ"</string>
@@ -1890,8 +1890,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"មិន​​បែងចែក​ប្រភេទ"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"អ្នកបានកំណត់សារៈសំខាន់នៃការជូនដំណឹងទាំងនេះ"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"វាមានសារៈសំខាន់ដោយសារតែមនុស្សដែលពាក់ព័ន្ធ"</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"អនុញ្ញាតឲ្យ <xliff:g id="APP">%1$s</xliff:g> បង្កើតអ្នកប្រើថ្មីដោយប្រើ <xliff:g id="ACCOUNT">%2$s</xliff:g> ឬទេ?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"អនុញ្ញាតឲ្យ <xliff:g id="APP">%1$s</xliff:g> បង្កើតអ្នកប្រើថ្មីដោយប្រើ <xliff:g id="ACCOUNT">%2$s</xliff:g> (មានអ្នកប្រើសម្រាប់គណនីនេះរួចហើយ) ឬទេ?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"អនុញ្ញាតឱ្យ <xliff:g id="APP">%1$s</xliff:g> បង្កើតអ្នកប្រើប្រាស់​ថ្មីដោយប្រើ <xliff:g id="ACCOUNT">%2$s</xliff:g> (អ្នកប្រើប្រាស់ដែលមានគណនីនេះមានរួចហើយ) ដែរឬទេ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"អនុញ្ញាតឱ្យ <xliff:g id="APP">%1$s</xliff:g> បង្កើតអ្នកប្រើប្រាស់​ថ្មីដោយប្រើ <xliff:g id="ACCOUNT">%2$s</xliff:g> ដែរឬទេ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"បន្ថែមភាសា"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ចំណូលចិត្តតំបន់"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"វាយបញ្ចូលឈ្មោះភាសា"</string>

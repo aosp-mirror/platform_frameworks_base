@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Toca per veure totes les xarxes"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Connecta"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Totes les xarxes"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Vols connectar-te a una xarxa Wi‑Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Suggerida per <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Sí"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Vols permetre les xarxes Wi‑Fi suggerides?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Xarxes suggerides de l\'aplicació <xliff:g id="NAME">%s</xliff:g>. El dispositiu pot connectar-se automàticament."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Permet"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"No, gràcies"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"La Wi-Fi s\'activarà automàticament"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Quan siguis a prop d\'una xarxa de qualitat desada"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"No tornis a activar"</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Sense classificar"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Has definit la importància d\'aquestes notificacions."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Aquest missatge és important per les persones implicades."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Concedeixes permís a <xliff:g id="APP">%1$s</xliff:g> per crear un usuari amb el compte <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Concedeixes permís a <xliff:g id="APP">%1$s</xliff:g> per crear un usuari amb el compte <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Ja hi ha un usuari amb aquest compte.)"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Concedeixes permís a <xliff:g id="APP">%1$s</xliff:g> per crear un usuari amb el compte <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Ja hi ha un usuari amb aquest compte.)"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Concedeixes permís a <xliff:g id="APP">%1$s</xliff:g> per crear un usuari amb el compte <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Afegeix un idioma"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Preferència de regió"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Nom de l\'idioma"</string>

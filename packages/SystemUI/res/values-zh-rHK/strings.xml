@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"不太緊急的通知會在下方顯示"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"再次輕按即可開啟"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"向上滑動即可開啟"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"請向上滑動以再試一次"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"此裝置由您的機構管理"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"此裝置由<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>管理"</string>
     <string name="phone_hint" msgid="4872890986869209950">"從圖示滑動即可使用手機功能"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"畫面將會繼續顯示，直至您取消固定為止。按住主按鈕即可取消固定。"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"如要取消固定此畫面，請按住 [返回] 按鈕和 [概覽] 按鈕"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"如要取消固定此畫面，請按住 [返回] 按鈕和主按鈕"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"如要取消固定此畫面，請向上滑動然後按住"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"知道了"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"不用了，謝謝"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"已固定畫面"</string>
