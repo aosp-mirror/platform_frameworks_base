@@ -52,6 +52,17 @@ LogEvent::LogEvent(uint8_t* msg, uint32_t len, uint32_t uid)
 #endif
 }
 
+LogEvent::LogEvent(uint8_t* msg, uint32_t len, uint32_t uid, bool useNewSchema)
+    : mBuf(msg), mRemainingLen(len), mLogdTimestampNs(time(nullptr)), mLogUid(uid) {
+    if (useNewSchema) {
+        initNew();
+    } else {
+        mContext = create_android_log_parser((char*)msg, len);
+        init(mContext);
+        if (mContext) android_log_destroy(&mContext);  // set mContext to NULL
+    }
+}
+
 LogEvent::LogEvent(const LogEvent& event) {
     mTagId = event.mTagId;
     mLogUid = event.mLogUid;
