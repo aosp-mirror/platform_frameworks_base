@@ -22,17 +22,16 @@ cc_library_shared {
         "src/os/DropBoxManager.cpp",
         "src/os/StatsDimensionsValue.cpp",
         "src/os/StatsLogEventWrapper.cpp",
-        "src/util/StatsEvent.cpp",
     ],
 
     shared_libs: [
         "libbinder",
-        "liblog",
         "libcutils",
+        "liblog",
         "libutils",
     ],
     header_libs: [
-	"libbase_headers",
+        "libbase_headers",
     ],
     aidl: {
         include_dirs: ["frameworks/base/core/java/"],
