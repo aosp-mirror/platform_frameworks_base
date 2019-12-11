@@ -29,18 +29,15 @@ StateManager& StateManager::getInstance() {
 }
 
 void StateManager::onLogEvent(const LogEvent& event) {
-    std::lock_guard<std::mutex> lock(mMutex);
     if (mStateTrackers.find(event.GetTagId()) != mStateTrackers.end()) {
         mStateTrackers[event.GetTagId()]->onLogEvent(event);
     }
 }
 
 bool StateManager::registerListener(int32_t atomId, wp<StateListener> listener) {
-    std::lock_guard<std::mutex> lock(mMutex);
-
-    // Check if state tracker already exists
+    // Check if state tracker already exists.
     if (mStateTrackers.find(atomId) == mStateTrackers.end()) {
-        // Create a new state tracker iff atom is a state atom
+        // Create a new state tracker iff atom is a state atom.
         auto it = android::util::AtomsInfo::kStateAtomsFieldOptions.find(atomId);
         if (it != android::util::AtomsInfo::kStateAtomsFieldOptions.end()) {
             mStateTrackers[atomId] = new StateTracker(atomId, it->second);
@@ -79,8 +76,6 @@ void StateManager::unregisterListener(int32_t atomId, wp<StateListener> listener
 
 bool StateManager::getStateValue(int32_t atomId, const HashableDimensionKey& key,
                                  FieldValue* output) const {
-    std::lock_guard<std::mutex> lock(mMutex);
-
     auto it = mStateTrackers.find(atomId);
     if (it != mStateTrackers.end()) {
         return it->second->getStateValue(key, output);
