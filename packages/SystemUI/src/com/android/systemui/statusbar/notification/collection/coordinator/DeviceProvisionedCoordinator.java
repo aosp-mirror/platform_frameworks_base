@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import android.Manifest;
-import android.app.AppGlobals;
 import android.app.Notification;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -43,10 +42,13 @@ public class DeviceProvisionedCoordinator implements Coordinator {
     private static final String TAG = "DeviceProvisionedCoordinator";
 
     private final DeviceProvisionedController mDeviceProvisionedController;
+    private final IPackageManager mIPackageManager;
 
     @Inject
-    public DeviceProvisionedCoordinator(DeviceProvisionedController deviceProvisionedController) {
+    public DeviceProvisionedCoordinator(DeviceProvisionedController deviceProvisionedController,
+            IPackageManager packageManager) {
         mDeviceProvisionedController = deviceProvisionedController;
+        mIPackageManager = packageManager;
     }
 
     @Override
@@ -70,17 +72,16 @@ public class DeviceProvisionedCoordinator implements Coordinator {
      * marking them as relevant for setup are allowed to show when device is unprovisioned
      */
     private boolean showNotificationEvenIfUnprovisioned(StatusBarNotification sbn) {
-        final boolean hasPermission = checkUidPermission(AppGlobals.getPackageManager(),
+        final boolean hasPermission = checkUidPermission(
                 Manifest.permission.NOTIFICATION_DURING_SETUP,
                 sbn.getUid()) == PackageManager.PERMISSION_GRANTED;
         return hasPermission
                 && sbn.getNotification().extras.getBoolean(Notification.EXTRA_ALLOW_DURING_SETUP);
     }
 
-    private static int checkUidPermission(IPackageManager packageManager, String permission,
-            int uid) {
+    private int checkUidPermission(String permission, int uid) {
         try {
-            return packageManager.checkUidPermission(permission, uid);
+            return mIPackageManager.checkUidPermission(permission, uid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
