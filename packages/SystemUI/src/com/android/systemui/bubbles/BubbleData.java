@@ -48,6 +48,7 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import com.android.systemui.R;
 
 /**
  * Keeps track of active bubbles.
@@ -56,8 +57,6 @@ import javax.inject.Singleton;
 public class BubbleData {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleData" : TAG_BUBBLES;
-
-    private static final int MAX_BUBBLES = 5;
 
     private static final Comparator<Bubble> BUBBLES_BY_SORT_KEY_DESCENDING =
             Comparator.comparing(BubbleData::sortKey).reversed();
@@ -115,6 +114,7 @@ public class BubbleData {
     private final List<Bubble> mBubbles;
     private Bubble mSelectedBubble;
     private boolean mExpanded;
+    private final int mMaxBubbles;
 
     // State tracked during an operation -- keeps track of what listener events to dispatch.
     private Update mStateChange;
@@ -144,6 +144,7 @@ public class BubbleData {
         mContext = context;
         mBubbles = new ArrayList<>();
         mStateChange = new Update(mBubbles);
+        mMaxBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_rendered);
     }
 
     public boolean hasBubbles() {
@@ -329,7 +330,7 @@ public class BubbleData {
     }
 
     private void trim() {
-        if (mBubbles.size() > MAX_BUBBLES) {
+        if (mBubbles.size() > mMaxBubbles) {
             mBubbles.stream()
                     // sort oldest first (ascending lastActivity)
                     .sorted(Comparator.comparingLong(Bubble::getLastActivity))
