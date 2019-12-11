@@ -58,6 +58,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.PackageWatchdog;
+import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.pm.Installer;
 
@@ -1003,10 +1004,18 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 installerPackageName) == PackageManager.PERMISSION_GRANTED;
 
         // For now only allow rollbacks for modules or for testing.
-        return (isModule(packageName) && manageRollbacksGranted)
+        return (isRollbackWhitelisted(packageName) && manageRollbacksGranted)
             || testManageRollbacksGranted;
     }
 
+    /**
+     * Returns true is this package is eligible for enabling rollback.
+     */
+    private boolean isRollbackWhitelisted(String packageName) {
+        // TODO: Remove #isModule when the white list is ready.
+        return SystemConfig.getInstance().getRollbackWhitelistedPackages().contains(packageName)
+                || isModule(packageName);
+    }
     /**
      * Returns true if the package name is the name of a module.
      */
