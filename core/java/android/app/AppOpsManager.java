@@ -2008,7 +2008,7 @@ public class AppOpsManager {
             false, // WRITE_MEDIA_VIDEO
             false, // READ_MEDIA_IMAGES
             false, // WRITE_MEDIA_IMAGES
-            false, // LEGACY_STORAGE
+            true,  // LEGACY_STORAGE
             false, // ACCESS_ACCESSIBILITY
             false, // READ_DEVICE_IDENTIFIERS
             false, // ACCESS_MEDIA_LOCATION
