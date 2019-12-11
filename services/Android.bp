@@ -14,6 +14,7 @@ filegroup {
         ":services.appwidget-sources",
         ":services.autofill-sources",
         ":services.backup-sources",
+        ":backuplib-sources",
         ":services.companion-sources",
         ":services.contentcapture-sources",
         ":services.contentsuggestions-sources",
@@ -100,4 +101,30 @@ platform_compat_config {
 filegroup {
     name: "art-profile",
     srcs: ["art-profile"],
+}
+
+// API stub
+// =============================================================
+
+droidstubs {
+    name: "services-stubs.sources",
+    srcs: [":services-sources"],
+    installable: false,
+    // TODO: remove the --hide options below
+    args: " --show-single-annotation android.annotation.SystemApi" +
+        " --hide-annotation android.annotation.Hide" +
+        " --hide-package com.google.android.startop.iorap" +
+        " --hide ReferencesHidden" +
+        " --hide DeprecationMismatch" +
+        " --hide HiddenTypedefConstant",
+    libs: [
+        "framework-all",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "services-stubs",
+    srcs: [":services-stubs.sources"],
+    installable: false,
 }
