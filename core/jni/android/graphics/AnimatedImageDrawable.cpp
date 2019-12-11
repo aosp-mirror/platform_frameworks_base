@@ -25,6 +25,7 @@
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
 #include <hwui/AnimatedImageDrawable.h>
+#include <hwui/ImageDecoder.h>
 #include <hwui/Canvas.h>
 #include <utils/Looper.h>
 

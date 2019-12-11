@@ -138,6 +138,10 @@ public:
         return mPalette;
     }
 
+  // returns true if rowBytes * height can be represented by a positive int32_t value
+  // and places that value in size.
+  static bool computeAllocationSize(size_t rowBytes, int height, size_t* size);
+
 private:
     static sk_sp<Bitmap> allocateAshmemBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);
     static sk_sp<Bitmap> allocateHeapBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);
