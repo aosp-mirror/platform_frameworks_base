@@ -24,7 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.os.IStatsManager;
+import android.os.IStatsd;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
@@ -36,7 +36,7 @@ public final class StatsLog extends StatsLogInternal {
     private static final String TAG = "StatsLog";
     private static final boolean DEBUG = false;
 
-    private static IStatsManager sService;
+    private static IStatsd sService;
 
     private static Object sLogLock = new Object();
 
@@ -52,7 +52,7 @@ public final class StatsLog extends StatsLogInternal {
     public static boolean logStart(int label) {
         synchronized (sLogLock) {
             try {
-                IStatsManager service = getIStatsManagerLocked();
+                IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
                         Slog.d(TAG, "Failed to find statsd when logging start");
@@ -81,7 +81,7 @@ public final class StatsLog extends StatsLogInternal {
     public static boolean logStop(int label) {
         synchronized (sLogLock) {
             try {
-                IStatsManager service = getIStatsManagerLocked();
+                IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
                         Slog.d(TAG, "Failed to find statsd when logging stop");
@@ -109,7 +109,7 @@ public final class StatsLog extends StatsLogInternal {
     public static boolean logEvent(int label) {
         synchronized (sLogLock) {
             try {
-                IStatsManager service = getIStatsManagerLocked();
+                IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
                         Slog.d(TAG, "Failed to find statsd when logging event");
@@ -151,7 +151,7 @@ public final class StatsLog extends StatsLogInternal {
             @NonNull long[] experimentIds) {
         synchronized (sLogLock) {
             try {
-                IStatsManager service = getIStatsManagerLocked();
+                IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
                         Slog.d(TAG, "Failed to find statsd when logging event");
@@ -191,7 +191,7 @@ public final class StatsLog extends StatsLogInternal {
             long packageVersionCode, int rollbackReason, String failingPackageName) {
         synchronized (sLogLock) {
             try {
-                IStatsManager service = getIStatsManagerLocked();
+                IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
                         Slog.d(TAG, "Failed to find statsd when logging event");
@@ -215,11 +215,11 @@ public final class StatsLog extends StatsLogInternal {
     }
 
 
-    private static IStatsManager getIStatsManagerLocked() throws RemoteException {
+    private static IStatsd getIStatsdLocked() throws RemoteException {
         if (sService != null) {
             return sService;
         }
-        sService = IStatsManager.Stub.asInterface(ServiceManager.getService("stats"));
+        sService = IStatsd.Stub.asInterface(ServiceManager.getService("stats"));
         return sService;
     }
 

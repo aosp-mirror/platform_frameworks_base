@@ -79,7 +79,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IPullAtomCallback;
 import android.os.IStatsCompanionService;
-import android.os.IStatsManager;
+import android.os.IStatsd;
 import android.os.IStoraged;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
@@ -268,7 +268,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private final AlarmManager mAlarmManager;
     private final INetworkStatsService mNetworkStatsService;
     @GuardedBy("sStatsdLock")
-    private static IStatsManager sStatsd;
+    private static IStatsd sStatsd;
     private static final Object sStatsdLock = new Object();
 
     private final OnAlarmListener mAnomalyAlarmListener = new AnomalyAlarmListener();
@@ -2743,8 +2743,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
      * Note: This should only be called from sayHiToStatsd. All other clients should use the cached
      * sStatsd with a null check.
      */
-    private static IStatsManager fetchStatsdService() {
-        return IStatsManager.Stub.asInterface(ServiceManager.getService("stats"));
+    private static IStatsd fetchStatsdService() {
+        return IStatsd.Stub.asInterface(ServiceManager.getService("stats"));
     }
 
     public static final class Lifecycle extends SystemService {
