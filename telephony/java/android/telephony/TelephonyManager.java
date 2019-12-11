@@ -763,88 +763,6 @@ public class TelephonyManager {
     public static final String EXTRA_PRECISE_DISCONNECT_CAUSE = "precise_disconnect_cause";
 
     /**
-     * Broadcast intent action indicating a data connection has changed,
-     * providing precise information about the connection.
-     *
-     * <p>
-     * The {@link #EXTRA_DATA_STATE} extra indicates the connection state.
-     * The {@link #EXTRA_DATA_NETWORK_TYPE} extra indicates the connection network type.
-     * The {@link #EXTRA_DATA_APN_TYPE} extra indicates the APN type.
-     * The {@link #EXTRA_DATA_APN} extra indicates the APN.
-     * The {@link #EXTRA_DATA_IFACE_PROPERTIES} extra indicates the connection interface.
-     * The {@link #EXTRA_DATA_FAILURE_CAUSE} extra indicates the connection fail cause.
-     *
-     * <p class="note">
-     * Requires the READ_PRECISE_PHONE_STATE permission.
-     *
-     * @see #EXTRA_DATA_STATE
-     * @see #EXTRA_DATA_NETWORK_TYPE
-     * @see #EXTRA_DATA_APN_TYPE
-     * @see #EXTRA_DATA_APN
-     * @see #EXTRA_DATA_IFACE
-     * @see #EXTRA_DATA_FAILURE_CAUSE
-     * @hide
-     *
-     * @deprecated If the app is running in the background, it won't be able to receive this
-     * broadcast. Apps should use ConnectivityManager {@link #registerNetworkCallback(
-     * android.net.NetworkRequest, ConnectivityManager.NetworkCallback)} to listen for network
-     * changes.
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @Deprecated
-    @UnsupportedAppUsage
-    public static final String ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED =
-            "android.intent.action.PRECISE_DATA_CONNECTION_STATE_CHANGED";
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
-     * for an integer containing the state of the current data connection.
-     *
-     * @see TelephonyManager#DATA_UNKNOWN
-     * @see TelephonyManager#DATA_DISCONNECTED
-     * @see TelephonyManager#DATA_CONNECTING
-     * @see TelephonyManager#DATA_CONNECTED
-     * @see TelephonyManager#DATA_SUSPENDED
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getIntExtra(String name, int defaultValue)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_DATA_STATE = PhoneConstants.STATE_KEY;
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
-     * for an integer containing the network type.
-     *
-     * @see TelephonyManager#NETWORK_TYPE_UNKNOWN
-     * @see TelephonyManager#NETWORK_TYPE_GPRS
-     * @see TelephonyManager#NETWORK_TYPE_EDGE
-     * @see TelephonyManager#NETWORK_TYPE_UMTS
-     * @see TelephonyManager#NETWORK_TYPE_CDMA
-     * @see TelephonyManager#NETWORK_TYPE_EVDO_0
-     * @see TelephonyManager#NETWORK_TYPE_EVDO_A
-     * @see TelephonyManager#NETWORK_TYPE_1xRTT
-     * @see TelephonyManager#NETWORK_TYPE_HSDPA
-     * @see TelephonyManager#NETWORK_TYPE_HSUPA
-     * @see TelephonyManager#NETWORK_TYPE_HSPA
-     * @see TelephonyManager#NETWORK_TYPE_IDEN
-     * @see TelephonyManager#NETWORK_TYPE_EVDO_B
-     * @see TelephonyManager#NETWORK_TYPE_LTE
-     * @see TelephonyManager#NETWORK_TYPE_EHRPD
-     * @see TelephonyManager#NETWORK_TYPE_HSPAP
-     * @see TelephonyManager#NETWORK_TYPE_NR
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getIntExtra(String name, int defaultValue)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_DATA_NETWORK_TYPE = PhoneConstants.DATA_NETWORK_TYPE_KEY;
-
-    /**
      * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
      * for an String containing the data APN type.
      *
@@ -879,18 +797,6 @@ public class TelephonyManager {
      * @hide
      */
     public static final String EXTRA_DATA_LINK_PROPERTIES_KEY = PhoneConstants.DATA_LINK_PROPERTIES_KEY;
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
-     * for the data connection fail cause.
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getStringExtra(String name)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_DATA_FAILURE_CAUSE = PhoneConstants.DATA_FAILURE_CAUSE_KEY;
 
     /**
      * Broadcast intent action for letting the default dialer to know to show voicemail
