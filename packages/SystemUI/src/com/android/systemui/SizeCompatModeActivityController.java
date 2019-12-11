@@ -280,6 +280,7 @@ public class SizeCompatModeActivityController extends SystemUI implements Comman
                     R.layout.size_compat_mode_hint, null /* root */);
             PopupWindow popupWindow = new PopupWindow(popupView,
                     LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            popupWindow.setWindowLayoutType(mWinParams.type);
             popupWindow.setElevation(getResources().getDimension(R.dimen.bubble_elevation));
             popupWindow.setAnimationStyle(android.R.style.Animation_InputMethod);
             popupWindow.setClippingEnabled(false);

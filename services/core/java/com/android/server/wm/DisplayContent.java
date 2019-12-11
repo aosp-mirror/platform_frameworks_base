@@ -346,6 +346,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /** The desired scaling factor for compatible apps. */
     float mCompatibleScreenScale;
 
+    /** @see #getCurrentOverrideConfigurationChanges */
+    private int mCurrentOverrideConfigurationChanges;
+
     /**
      * Orientation forced by some window. If there is no visible window that specifies orientation
      * it is set to {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED}.
@@ -1865,6 +1868,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     void onStackWindowingModeChanged(ActivityStack stack) {
         mTaskStackContainers.onStackWindowingModeChanged(stack);
+    }
+
+    /**
+     * The value is only valid in the scope {@link #onRequestedOverrideConfigurationChanged} of the
+     * changing hierarchy and the {@link #onConfigurationChanged} of its children.
+     *
+     * @return The current changes ({@link android.content.pm.ActivityInfo.Config}) of requested
+     *         override configuration.
+     */
+    int getCurrentOverrideConfigurationChanges() {
+        return mCurrentOverrideConfigurationChanges;
+    }
+
+    @Override
+    public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
+        mCurrentOverrideConfigurationChanges =
+                getRequestedOverrideConfiguration().diff(overrideConfiguration);
+        super.onRequestedOverrideConfigurationChanged(overrideConfiguration);
+        mCurrentOverrideConfigurationChanges = 0;
     }
 
     @Override
