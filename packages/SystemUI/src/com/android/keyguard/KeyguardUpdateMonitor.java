@@ -1491,7 +1491,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         mStrongAuthTracker = new StrongAuthTracker(context, this::notifyStrongAuthStateChanged);
         mFingerprintWakeAndUnlock = mContext.getResources().getBoolean(
-                com.android.keyguard.R.bool.config_fingerprintWakeAndUnlock);
+                R.bool.config_fingerprintWakeAndUnlock);
 
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
