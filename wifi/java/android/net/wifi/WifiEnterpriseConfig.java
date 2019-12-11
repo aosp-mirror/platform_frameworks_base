@@ -22,7 +22,6 @@ import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.security.Credentials;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -93,10 +92,26 @@ public class WifiEnterpriseConfig implements Parcelable {
      */
     public static final String ENGINE_DISABLE = "0";
 
+    /**
+     * Key prefix for CA certificates.
+     * Note: copied from {@link android.security.Credentials#CA_CERTIFICATE} since it is @hide.
+     */
+    private static final String CA_CERTIFICATE = "CACERT_";
+    /**
+     * Key prefix for user certificates.
+     * Note: copied from {@link android.security.Credentials#USER_CERTIFICATE} since it is @hide.
+     */
+    private static final String USER_CERTIFICATE = "USRCERT_";
+    /**
+     * Key prefix for user private and secret keys.
+     * Note: copied from {@link android.security.Credentials#USER_PRIVATE_KEY} since it is @hide.
+     */
+    private static final String USER_PRIVATE_KEY = "USRPKEY_";
+
     /** @hide */
-    public static final String CA_CERT_PREFIX = KEYSTORE_URI + Credentials.CA_CERTIFICATE;
+    public static final String CA_CERT_PREFIX = KEYSTORE_URI + CA_CERTIFICATE;
     /** @hide */
-    public static final String CLIENT_CERT_PREFIX = KEYSTORE_URI + Credentials.USER_CERTIFICATE;
+    public static final String CLIENT_CERT_PREFIX = KEYSTORE_URI + USER_CERTIFICATE;
     /** @hide */
     public static final String CLIENT_CERT_KEY     = "client_cert";
     /** @hide */
@@ -659,7 +674,7 @@ public class WifiEnterpriseConfig implements Parcelable {
                 if (i > 0) {
                     sb.append(CA_CERT_ALIAS_DELIMITER);
                 }
-                sb.append(encodeCaCertificateAlias(Credentials.CA_CERTIFICATE + aliases[i]));
+                sb.append(encodeCaCertificateAlias(CA_CERTIFICATE + aliases[i]));
             }
             setFieldValue(CA_CERT_KEY, sb.toString(), KEYSTORES_URI);
         }
@@ -693,8 +708,8 @@ public class WifiEnterpriseConfig implements Parcelable {
             String[] aliases = TextUtils.split(values, CA_CERT_ALIAS_DELIMITER);
             for (int i = 0; i < aliases.length; i++) {
                 aliases[i] = decodeCaCertificateAlias(aliases[i]);
-                if (aliases[i].startsWith(Credentials.CA_CERTIFICATE)) {
-                    aliases[i] = aliases[i].substring(Credentials.CA_CERTIFICATE.length());
+                if (aliases[i].startsWith(CA_CERTIFICATE)) {
+                    aliases[i] = aliases[i].substring(CA_CERTIFICATE.length());
                 }
             }
             return aliases.length != 0 ? aliases : null;
@@ -832,7 +847,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     @SystemApi
     public void setClientCertificateAlias(@Nullable String alias) {
         setFieldValue(CLIENT_CERT_KEY, alias, CLIENT_CERT_PREFIX);
-        setFieldValue(PRIVATE_KEY_ID_KEY, alias, Credentials.USER_PRIVATE_KEY);
+        setFieldValue(PRIVATE_KEY_ID_KEY, alias, USER_PRIVATE_KEY);
         // Also, set engine parameters
         if (TextUtils.isEmpty(alias)) {
             setFieldValue(ENGINE_KEY, ENGINE_DISABLE);
