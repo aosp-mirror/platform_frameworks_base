@@ -384,6 +384,44 @@ public class StagedRollbackTest {
         RollbackUtils.getRollbackManager().expireRollbackForPackage(getModuleMetadataPackageName());
     }
 
+    @Test
+    public void testRollbackDataPolicy_Phase1() throws Exception {
+        Uninstall.packages(TestApp.A, TestApp.B);
+        Install.multi(TestApp.A1, TestApp.B1).commit();
+        // Write user data version = 1
+        InstallUtils.processUserData(TestApp.A);
+        InstallUtils.processUserData(TestApp.B);
+
+        Install a2 = Install.single(TestApp.A2).setStaged()
+                .setEnableRollback(PackageManager.RollbackDataPolicy.WIPE);
+        Install b2 = Install.single(TestApp.B2).setStaged()
+                .setEnableRollback(PackageManager.RollbackDataPolicy.RESTORE);
+        Install.multi(a2, b2).setEnableRollback().setStaged().commit();
+    }
+
+    @Test
+    public void testRollbackDataPolicy_Phase2() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+        assertThat(InstallUtils.getInstalledVersion(TestApp.B)).isEqualTo(2);
+        // Write user data version = 2
+        InstallUtils.processUserData(TestApp.A);
+        InstallUtils.processUserData(TestApp.B);
+
+        RollbackInfo info = RollbackUtils.getAvailableRollback(TestApp.A);
+        RollbackUtils.rollback(info.getRollbackId());
+    }
+
+    @Test
+    public void testRollbackDataPolicy_Phase3() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+        assertThat(InstallUtils.getInstalledVersion(TestApp.B)).isEqualTo(1);
+        // Read user data version from userdata.txt
+        // A's user data version is -1 for user data is wiped.
+        // B's user data version is 1 as rollback committed.
+        assertThat(InstallUtils.getUserDataVersion(TestApp.A)).isEqualTo(-1);
+        assertThat(InstallUtils.getUserDataVersion(TestApp.B)).isEqualTo(1);
+    }
+
     private static void runShellCommand(String cmd) {
         ParcelFileDescriptor pfd = InstrumentationRegistry.getInstrumentation().getUiAutomation()
                 .executeShellCommand(cmd);
