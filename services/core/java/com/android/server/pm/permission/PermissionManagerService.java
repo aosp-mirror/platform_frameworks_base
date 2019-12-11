@@ -321,7 +321,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,
                 int uid) {
             onPermissionUpdated(updatedUserIds, sync);
-            mOnPermissionChangeListeners.onPermissionsChanged(uid);
+            for (int i = 0; i < updatedUserIds.length; i++) {
+                int userUid = UserHandle.getUid(updatedUserIds[i], UserHandle.getAppId(uid));
+                mOnPermissionChangeListeners.onPermissionsChanged(userUid);
+            }
         }
         public void onInstallPermissionUpdatedNotifyListener(int uid) {
             onInstallPermissionUpdated();
@@ -733,7 +736,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // Install and runtime permissions are stored in different places,
             // so figure out what permission changed and persist the change.
             if (permissionsState.getInstallPermissionState(permName) != null) {
-                callback.onInstallPermissionUpdatedNotifyListener(pkg.getUid());
+                int userUid = UserHandle.getUid(userId, UserHandle.getAppId(pkg.getUid()));
+                callback.onInstallPermissionUpdatedNotifyListener(userUid);
             } else if (permissionsState.getRuntimePermissionState(permName, userId) != null
                     || hadState) {
                 callback.onPermissionUpdatedNotifyListener(new int[]{userId}, false,
