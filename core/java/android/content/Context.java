@@ -4973,7 +4973,7 @@ public abstract class Context {
      * {@link android.content.pm.DataLoaderManager}.
      * @hide
      */
-    public static final String DATA_LOADER_MANAGER_SERVICE = "dataloadermanager";
+    public static final String DATA_LOADER_MANAGER_SERVICE = "dataloader_manager";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
