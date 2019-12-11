@@ -161,7 +161,6 @@ public final class SelectionEvent implements Parcelable {
         mEntityType = in.readString();
         mWidgetVersion = in.readInt() > 0 ? in.readString() : null;
         mPackageName = in.readString();
-        mUserId = in.readInt();
         mWidgetType = in.readString();
         mInvocationMethod = in.readInt();
         mResultId = in.readString();
@@ -175,6 +174,7 @@ public final class SelectionEvent implements Parcelable {
         mEnd = in.readInt();
         mSmartStart = in.readInt();
         mSmartEnd = in.readInt();
+        mUserId = in.readInt();
     }
 
     @Override
@@ -188,7 +188,6 @@ public final class SelectionEvent implements Parcelable {
             dest.writeString(mWidgetVersion);
         }
         dest.writeString(mPackageName);
-        dest.writeInt(mUserId);
         dest.writeString(mWidgetType);
         dest.writeInt(mInvocationMethod);
         dest.writeString(mResultId);
@@ -204,6 +203,7 @@ public final class SelectionEvent implements Parcelable {
         dest.writeInt(mEnd);
         dest.writeInt(mSmartStart);
         dest.writeInt(mSmartEnd);
+        dest.writeInt(mUserId);
     }
 
     @Override
