@@ -2563,7 +2563,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     return;
                 }
 
-                if ((flags & FLAG_MANUAL_REQUEST) == 0 && mAugmentedAutofillableIds != null
+                if (!isSameViewEntered
+                        && (flags & FLAG_MANUAL_REQUEST) == 0
+                        && mAugmentedAutofillableIds != null
                         && mAugmentedAutofillableIds.contains(id)) {
                     // View was already reported when server could not handle a response, but it
                     // triggered augmented autofill
@@ -2576,13 +2578,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
 
                 requestNewFillResponseOnViewEnteredIfNecessaryLocked(id, viewState, flags);
-
-                // Remove the UI if the ViewState has changed.
-                if (!Objects.equals(mCurrentViewId, viewState.id)) {
-                    mUi.hideFillUi(this);
-                    mCurrentViewId = viewState.id;
-                    hideAugmentedAutofillLocked(viewState);
-                }
 
                 if (isSameViewEntered) {
                     return;
