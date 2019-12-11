@@ -822,4 +822,19 @@ public abstract class PackageManagerInternal {
 
     /** Sets the enforcement of reading external storage */
     public abstract void setReadExternalStorageEnforced(boolean enforced);
+
+    /**
+     * Allows the integrity component to respond to the
+     * {@link Intent#ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION package verification
+     * broadcast} to respond to the package manager. The response must include
+     * the {@code verificationCode} which is one of
+     * {@link PackageManager#VERIFICATION_ALLOW} or
+     * {@link PackageManager#VERIFICATION_REJECT}.
+     *
+     * @param verificationId pending package identifier as passed via the
+     *            {@link PackageManager#EXTRA_VERIFICATION_ID} Intent extra.
+     * @param verificationResult either {@link PackageManager#VERIFICATION_ALLOW}
+     *            or {@link PackageManager#VERIFICATION_REJECT}.
+     */
+    public abstract void setIntegrityVerificationResult(int verificationId, int verificationResult);
 }

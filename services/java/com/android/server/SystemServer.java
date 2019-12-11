@@ -109,6 +109,7 @@ import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
 import com.android.server.inputmethod.InputMethodSystemProperty;
 import com.android.server.inputmethod.MultiClientInputMethodManagerService;
+import com.android.server.integrity.AppIntegrityManagerService;
 import com.android.server.lights.LightsService;
 import com.android.server.media.MediaResourceMonitorService;
 import com.android.server.media.MediaRouterService;
@@ -1127,6 +1128,10 @@ public final class SystemServer {
 
             t.traceBegin("SignedConfigService");
             SignedConfigService.registerUpdateReceiver(mSystemContext);
+            t.traceEnd();
+
+            t.traceBegin("AppIntegrityService");
+            mSystemServiceManager.startService(AppIntegrityManagerService.class);
             t.traceEnd();
 
         } catch (Throwable e) {
