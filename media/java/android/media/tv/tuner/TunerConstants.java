@@ -75,6 +75,7 @@ final class TunerConstants {
     public static final int DEMUX_T_PID = 1;
     public static final int DEMUX_MMPT_PID = 2;
 
+    @Retention(RetentionPolicy.SOURCE)
     @IntDef({FRONTEND_SETTINGS_ANALOG, FRONTEND_SETTINGS_ATSC, FRONTEND_SETTINGS_ATSC3,
             FRONTEND_SETTINGS_DVBS, FRONTEND_SETTINGS_DVBC, FRONTEND_SETTINGS_DVBT,
             FRONTEND_SETTINGS_ISDBS, FRONTEND_SETTINGS_ISDBS3, FRONTEND_SETTINGS_ISDBT})
@@ -125,6 +126,50 @@ final class TunerConstants {
     public static final int FILTER_SUBTYPE_PAYLOAD_THROUGH = 14;
     public static final int FILTER_SUBTYPE_TLV = 15;
     public static final int FILTER_SUBTYPE_PTP = 16;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_SCAN_UNDEFINED, FRONTEND_SCAN_AUTO, FRONTEND_SCAN_BLIND})
+    public @interface FrontendScanType {}
+
+    public static final int FRONTEND_SCAN_UNDEFINED = Constants.FrontendScanType.SCAN_UNDEFINED;
+    public static final int FRONTEND_SCAN_AUTO = Constants.FrontendScanType.SCAN_AUTO;
+    public static final int FRONTEND_SCAN_BLIND = Constants.FrontendScanType.SCAN_BLIND;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({SCAN_MESSAGE_TYPE_LOCKED, SCAN_MESSAGE_TYPE_END, SCAN_MESSAGE_TYPE_PROGRESS_PERCENT,
+            SCAN_MESSAGE_TYPE_FREQUENCY, SCAN_MESSAGE_TYPE_SYMBOL_RATE, SCAN_MESSAGE_TYPE_PLP_IDS,
+            SCAN_MESSAGE_TYPE_GROUP_IDS, SCAN_MESSAGE_TYPE_INPUT_STREAM_IDS,
+            SCAN_MESSAGE_TYPE_STANDARD, SCAN_MESSAGE_TYPE_ATSC3_PLP_INFO})
+    public @interface ScanMessageType {}
+
+    public static final int SCAN_MESSAGE_TYPE_LOCKED = Constants.FrontendScanMessageType.LOCKED;
+    public static final int SCAN_MESSAGE_TYPE_END = Constants.FrontendScanMessageType.END;
+    public static final int SCAN_MESSAGE_TYPE_PROGRESS_PERCENT =
+            Constants.FrontendScanMessageType.PROGRESS_PERCENT;
+    public static final int SCAN_MESSAGE_TYPE_FREQUENCY =
+            Constants.FrontendScanMessageType.FREQUENCY;
+    public static final int SCAN_MESSAGE_TYPE_SYMBOL_RATE =
+            Constants.FrontendScanMessageType.SYMBOL_RATE;
+    public static final int SCAN_MESSAGE_TYPE_PLP_IDS = Constants.FrontendScanMessageType.PLP_IDS;
+    public static final int SCAN_MESSAGE_TYPE_GROUP_IDS =
+            Constants.FrontendScanMessageType.GROUP_IDS;
+    public static final int SCAN_MESSAGE_TYPE_INPUT_STREAM_IDS =
+            Constants.FrontendScanMessageType.INPUT_STREAM_IDS;
+    public static final int SCAN_MESSAGE_TYPE_STANDARD =
+            Constants.FrontendScanMessageType.STANDARD;
+    public static final int SCAN_MESSAGE_TYPE_ATSC3_PLP_INFO =
+            Constants.FrontendScanMessageType.ATSC3_PLP_INFO;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FILTER_SETTINGS_TS, FILTER_SETTINGS_MMTP, FILTER_SETTINGS_IP, FILTER_SETTINGS_TLV,
+            FILTER_SETTINGS_ALP})
+    public @interface FilterSettingsType {}
+
+    public static final int FILTER_SETTINGS_TS = Constants.DemuxFilterMainType.TS;
+    public static final int FILTER_SETTINGS_MMTP = Constants.DemuxFilterMainType.MMTP;
+    public static final int FILTER_SETTINGS_IP = Constants.DemuxFilterMainType.IP;
+    public static final int FILTER_SETTINGS_TLV = Constants.DemuxFilterMainType.TLV;
+    public static final int FILTER_SETTINGS_ALP = Constants.DemuxFilterMainType.ALP;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({DVR_SETTINGS_RECORD, DVR_SETTINGS_PLAYBACK})

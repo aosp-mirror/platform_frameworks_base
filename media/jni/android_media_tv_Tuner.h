@@ -39,6 +39,7 @@ using ::android::hardware::tv::tuner::V1_0::FrontendEventType;
 using ::android::hardware::tv::tuner::V1_0::FrontendId;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanMessage;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanMessageType;
+using ::android::hardware::tv::tuner::V1_0::FrontendScanType;
 using ::android::hardware::tv::tuner::V1_0::FrontendSettings;
 using ::android::hardware::tv::tuner::V1_0::IDemux;
 using ::android::hardware::tv::tuner::V1_0::IDescrambler;
@@ -122,6 +123,7 @@ struct JTuner : public RefBase {
     jobject getFrontendIds();
     jobject openFrontendById(int id);
     int tune(const FrontendSettings& settings);
+    int scan(const FrontendSettings& settings, FrontendScanType scanType);
     jobject getLnbIds();
     jobject openLnbById(int id);
     jobject openFilter(DemuxFilterType type, int bufferSize);
