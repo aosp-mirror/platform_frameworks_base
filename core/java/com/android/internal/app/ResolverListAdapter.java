@@ -37,7 +37,6 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -81,7 +80,7 @@ public class ResolverListAdapter extends BaseAdapter {
 
     // This one is the list that the Adapter will actually present.
     List<DisplayResolveInfo> mDisplayList;
-    List<ResolvedComponentInfo> mUnfilteredResolveList;
+    private List<ResolvedComponentInfo> mUnfilteredResolveList;
 
     private int mLastChosenPosition = -1;
     private boolean mFilterLastUsed;
@@ -160,6 +159,10 @@ public class ResolverListAdapter extends BaseAdapter {
 
     public void updateChooserCounts(String packageName, int userId, String action) {
         mResolverListController.updateChooserCounts(packageName, userId, action);
+    }
+
+    List<ResolvedComponentInfo> getUnfilteredResolveList() {
+        return mUnfilteredResolveList;
     }
 
     /**
@@ -576,7 +579,7 @@ public class ResolverListAdapter extends BaseAdapter {
 
     Drawable loadIconForResolveInfo(ResolveInfo ri) {
         // Load icons based on the current process. If in work profile icons should be badged.
-        return makePresentationGetter(ri).getIcon(Process.myUserHandle());
+        return makePresentationGetter(ri).getIcon(mResolverListController.getUserHandle());
     }
 
     void loadFilteredItemIconTaskAsync(@NonNull ImageView iconView) {

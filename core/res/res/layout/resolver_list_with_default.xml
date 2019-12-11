@@ -144,25 +144,21 @@
     </LinearLayout>
 
     <View
+        android:id="@+id/divider"
         android:layout_alwaysShow="true"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="?attr/colorBackgroundFloating"
         android:foreground="?attr/dividerVertical" />
-    <ListView
+
+    <com.android.internal.app.WrapHeightViewPager
+        android:id="@+id/profile_pager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/resolver_list"
-        android:clipToPadding="false"
-        android:background="?attr/colorBackgroundFloating"
-        android:elevation="@dimen/resolver_elevation"
-        android:nestedScrollingEnabled="true"
-        android:scrollbarStyle="outsideOverlay"
-        android:scrollIndicators="top|bottom"
+        android:dividerHeight="1dp"
         android:divider="?attr/dividerVertical"
         android:footerDividersEnabled="false"
-        android:headerDividersEnabled="false"
-        android:dividerHeight="1dp" />
+        android:headerDividersEnabled="false"/>
     <View
         android:layout_alwaysShow="true"
         android:layout_width="match_parent"

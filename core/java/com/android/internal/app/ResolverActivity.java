@@ -18,11 +18,15 @@ package com.android.internal.app;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
+import static com.android.internal.app.AbstractMultiProfilePagerAdapter.PROFILE_PERSONAL;
+import static com.android.internal.app.AbstractMultiProfilePagerAdapter.PROFILE_WORK;
+
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UiThread;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.VoiceInteractor.PickOptionRequest;
@@ -72,6 +76,7 @@ import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.AbstractMultiProfilePagerAdapter.Profile;
 import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.app.chooser.TargetInfo;
 import com.android.internal.content.PackageMonitor;
@@ -99,10 +104,7 @@ public class ResolverActivity extends Activity implements
     public ResolverActivity() {
     }
 
-    @UnsupportedAppUsage
-    protected ResolverListAdapter mAdapter;
     private boolean mSafeForwardingMode;
-    private AbsListView mAdapterView;
     private Button mAlwaysButton;
     private Button mOnceButton;
     protected View mProfileView;
@@ -143,7 +145,15 @@ public class ResolverActivity extends Activity implements
     private static final String EXTRA_FRAGMENT_ARG_KEY = ":settings:fragment_args_key";
     private static final String OPEN_LINKS_COMPONENT_KEY = "app_link_state";
 
+    /**
+     * TODO(arangelov): Remove a couple of weeks after work/personal tabs are finalized.
+     */
+    static final boolean ENABLE_TABBED_VIEW = false;
+
     private final PackageMonitor mPackageMonitor = createPackageMonitor();
+
+    @VisibleForTesting
+    protected AbstractMultiProfilePagerAdapter mMultiProfilePagerAdapter;
 
     // Intent extra for connected audio devices
     public static final String EXTRA_IS_AUDIO_CAPTURE_DEVICE = "is_audio_capture_device";
@@ -230,7 +240,7 @@ public class ResolverActivity extends Activity implements
         return new PackageMonitor() {
             @Override
             public void onSomePackagesChanged() {
-                mAdapter.handlePackagesChanged();
+                mMultiProfilePagerAdapter.getCurrentListAdapter().handlePackagesChanged();
                 updateProfileViewButton();
             }
 
@@ -325,15 +335,13 @@ public class ResolverActivity extends Activity implements
 
         mSupportsAlwaysUseOption = supportsAlwaysUseOption;
 
-        // The last argument of createAdapter is whether to do special handling
+        // The last argument of createResolverListAdapter is whether to do special handling
         // of the last used choice to highlight it in the list.  We need to always
         // turn this off when running under voice interaction, since it results in
         // a more complicated UI that the current voice interaction flow is not able
         // to handle.
         boolean filterLastUsed = mSupportsAlwaysUseOption && !isVoiceInteraction();
-        mAdapter = createAdapter(this, mIntents, initialIntents, rList,
-                filterLastUsed, mUseLayoutForBrowsables);
-
+        mMultiProfilePagerAdapter = createMultiProfilePagerAdapter(initialIntents, rList, filterLastUsed);
         if (configureContentView()) {
             return;
         }
@@ -364,15 +372,96 @@ public class ResolverActivity extends Activity implements
         }
 
         final Set<String> categories = intent.getCategories();
-        MetricsLogger.action(this, mAdapter.hasFilteredItem()
+        MetricsLogger.action(this, mMultiProfilePagerAdapter.getCurrentListAdapter().hasFilteredItem()
                 ? MetricsProto.MetricsEvent.ACTION_SHOW_APP_DISAMBIG_APP_FEATURED
                 : MetricsProto.MetricsEvent.ACTION_SHOW_APP_DISAMBIG_NONE_FEATURED,
                 intent.getAction() + ":" + intent.getType() + ":"
                         + (categories != null ? Arrays.toString(categories.toArray()) : ""));
     }
 
+    protected AbstractMultiProfilePagerAdapter createMultiProfilePagerAdapter(
+            Intent[] initialIntents,
+            List<ResolveInfo> rList,
+            boolean filterLastUsed) {
+        AbstractMultiProfilePagerAdapter resolverMultiProfilePagerAdapter = null;
+        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+            resolverMultiProfilePagerAdapter =
+                    createResolverMultiProfilePagerAdapterForTwoProfiles(
+                            initialIntents, rList, filterLastUsed);
+        } else {
+            resolverMultiProfilePagerAdapter = createResolverMultiProfilePagerAdapterForOneProfile(
+                    initialIntents, rList, filterLastUsed);
+        }
+        return resolverMultiProfilePagerAdapter;
+    }
+
+    private ResolverMultiProfilePagerAdapter createResolverMultiProfilePagerAdapterForOneProfile(
+            Intent[] initialIntents,
+            List<ResolveInfo> rList, boolean filterLastUsed) {
+        ResolverListAdapter adapter = createResolverListAdapter(
+                /* context */ this,
+                /* payloadIntents */ mIntents,
+                initialIntents,
+                rList,
+                filterLastUsed,
+                mUseLayoutForBrowsables,
+                /* userHandle */ UserHandle.of(UserHandle.myUserId()));
+        return new ResolverMultiProfilePagerAdapter(
+                /* context */ this,
+                adapter);
+    }
+
+    private ResolverMultiProfilePagerAdapter createResolverMultiProfilePagerAdapterForTwoProfiles(
+            Intent[] initialIntents,
+            List<ResolveInfo> rList,
+            boolean filterLastUsed) {
+        ResolverListAdapter personalAdapter = createResolverListAdapter(
+                /* context */ this,
+                /* payloadIntents */ mIntents,
+                initialIntents,
+                rList,
+                filterLastUsed,
+                mUseLayoutForBrowsables,
+                /* userHandle */ getPersonalProfileUserHandle());
+        ResolverListAdapter workAdapter = createResolverListAdapter(
+                /* context */ this,
+                /* payloadIntents */ mIntents,
+                initialIntents,
+                rList,
+                filterLastUsed,
+                mUseLayoutForBrowsables,
+                /* userHandle */ getWorkProfileUserHandle());
+        return new ResolverMultiProfilePagerAdapter(
+                /* context */ this,
+                personalAdapter,
+                workAdapter,
+                /* defaultProfile */ getCurrentProfile());
+    }
+
+    protected @Profile int getCurrentProfile() {
+        return (UserHandle.myUserId() == UserHandle.USER_SYSTEM ? PROFILE_PERSONAL : PROFILE_WORK);
+    }
+
+    protected UserHandle getPersonalProfileUserHandle() {
+        return UserHandle.of(ActivityManager.getCurrentUser());
+    }
+    protected @Nullable UserHandle getWorkProfileUserHandle() {
+        UserManager userManager = getSystemService(UserManager.class);
+        for (final UserInfo userInfo : userManager.getProfiles(ActivityManager.getCurrentUser())) {
+            if (userInfo.isManagedProfile()) {
+                return userInfo.getUserHandle();
+            }
+        }
+        return null;
+    }
+
+    protected boolean hasWorkProfile() {
+        return getWorkProfileUserHandle() != null;
+    }
+
     protected void onProfileClick(View v) {
-        final DisplayResolveInfo dri = mAdapter.getOtherProfile();
+        final DisplayResolveInfo dri =
+                mMultiProfilePagerAdapter.getCurrentListAdapter().getOtherProfile();
         if (dri == null) {
             return;
         }
@@ -395,11 +484,13 @@ public class ResolverActivity extends Activity implements
             if (mFooterSpacer == null) {
                 mFooterSpacer = new Space(getApplicationContext());
             } else {
-                ((ListView) mAdapterView).removeFooterView(mFooterSpacer);
+                ((ResolverMultiProfilePagerAdapter) mMultiProfilePagerAdapter)
+                        .getCurrentAdapterView().removeFooterView(mFooterSpacer);
             }
             mFooterSpacer.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,
                                                                        mSystemWindowInsets.bottom));
-            ((ListView) mAdapterView).addFooterView(mFooterSpacer);
+            ((ResolverMultiProfilePagerAdapter) mMultiProfilePagerAdapter)
+                    .getCurrentAdapterView().addFooterView(mFooterSpacer);
         } else {
             View emptyView = findViewById(R.id.empty);
             if (emptyView != null) {
@@ -417,7 +508,7 @@ public class ResolverActivity extends Activity implements
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mAdapter.handlePackagesChanged();
+        mMultiProfilePagerAdapter.getCurrentListAdapter().handlePackagesChanged();
 
         if (mSystemWindowInsets != null) {
             mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,
@@ -432,9 +523,10 @@ public class ResolverActivity extends Activity implements
             return;
         }
 
-        final Option[] options = new Option[mAdapter.getCount()];
+        int count = mMultiProfilePagerAdapter.getCurrentListAdapter().getCount();
+        final Option[] options = new Option[count];
         for (int i = 0, N = options.length; i < N; i++) {
-            TargetInfo target = mAdapter.getItem(i);
+            TargetInfo target = mMultiProfilePagerAdapter.getCurrentListAdapter().getItem(i);
             if (target == null) {
                 // If this occurs, a new set of targets is being loaded. Let that complete,
                 // and have the next call to send voice choices proceed instead.
@@ -483,8 +575,9 @@ public class ResolverActivity extends Activity implements
             return;
         }
 
-        final DisplayResolveInfo dri = mAdapter.getOtherProfile();
-        if (dri != null) {
+        final DisplayResolveInfo dri =
+                mMultiProfilePagerAdapter.getCurrentListAdapter().getOtherProfile();
+        if (dri != null && !ENABLE_TABBED_VIEW) {
             mProfileView.setVisibility(View.VISIBLE);
             View text = mProfileView.findViewById(R.id.profile_button);
             if (!(text instanceof TextView)) {
@@ -535,7 +628,8 @@ public class ResolverActivity extends Activity implements
 
         // While there may already be a filtered item, we can only use it in the title if the list
         // is already sorted and all information relevant to it is already in the list.
-        final boolean named = mAdapter.getFilteredPosition() >= 0;
+        final boolean named =
+                mMultiProfilePagerAdapter.getCurrentListAdapter().getFilteredPosition() >= 0;
         if (title == ActionTitle.DEFAULT && defaultTitleRes != 0) {
             return getString(defaultTitleRes);
         } else if (isHttpSchemeAndViewAction(intent)) {
@@ -544,12 +638,14 @@ public class ResolverActivity extends Activity implements
             String dialogTitle = null;
             if (named && !mUseLayoutForBrowsables) {
                 dialogTitle = getString(ActionTitle.BROWSABLE_APP_TITLE_RES,
-                        mAdapter.getFilteredItem().getDisplayLabel());
+                        mMultiProfilePagerAdapter.getCurrentListAdapter().getFilteredItem()
+                                .getDisplayLabel());
             } else if (named && mUseLayoutForBrowsables) {
                 dialogTitle = getString(ActionTitle.BROWSABLE_HOST_APP_TITLE_RES,
                         intent.getData().getHost(),
-                        mAdapter.getFilteredItem().getDisplayLabel());
-            } else if (mAdapter.areAllTargetsBrowsers()) {
+                        mMultiProfilePagerAdapter.getCurrentListAdapter().getFilteredItem()
+                                .getDisplayLabel());
+            } else if (mMultiProfilePagerAdapter.getCurrentListAdapter().areAllTargetsBrowsers()) {
                 dialogTitle = getString(ActionTitle.BROWSABLE_TITLE_RES);
             } else {
                 dialogTitle = getString(ActionTitle.BROWSABLE_HOST_TITLE_RES,
@@ -558,7 +654,8 @@ public class ResolverActivity extends Activity implements
             return dialogTitle;
         } else {
             return named
-                    ? getString(title.namedTitleRes, mAdapter.getFilteredItem().getDisplayLabel())
+                    ? getString(title.namedTitleRes, mMultiProfilePagerAdapter
+                            .getCurrentListAdapter().getFilteredItem().getDisplayLabel())
                     : getString(title.titleRes);
         }
     }
@@ -576,7 +673,7 @@ public class ResolverActivity extends Activity implements
             mPackageMonitor.register(this, getMainLooper(), false);
             mRegistered = true;
         }
-        mAdapter.handlePackagesChanged();
+        mMultiProfilePagerAdapter.getCurrentListAdapter().handlePackagesChanged();
         updateProfileViewButton();
     }
 
@@ -609,8 +706,8 @@ public class ResolverActivity extends Activity implements
         if (!isChangingConfigurations() && mPickOptionRequest != null) {
             mPickOptionRequest.cancel();
         }
-        if (mAdapter != null) {
-            mAdapter.onDestroy();
+        if (mMultiProfilePagerAdapter.getCurrentListAdapter() != null) {
+            mMultiProfilePagerAdapter.getCurrentListAdapter().onDestroy();
         }
     }
 
@@ -660,7 +757,8 @@ public class ResolverActivity extends Activity implements
         boolean enabled = false;
         ResolveInfo ri = null;
         if (hasValidSelection) {
-            ri = mAdapter.resolveInfoForPosition(checkedPos, filtered);
+            ri = mMultiProfilePagerAdapter.getCurrentListAdapter()
+                    .resolveInfoForPosition(checkedPos, filtered);
             if (ri == null) {
                 Log.e(TAG, "Invalid position supplied to setAlwaysButtonEnabled");
                 return;
@@ -701,11 +799,13 @@ public class ResolverActivity extends Activity implements
 
     public void onButtonClick(View v) {
         final int id = v.getId();
-        int which = mAdapter.hasFilteredItem()
-                ? mAdapter.getFilteredPosition()
-                : mAdapterView.getCheckedItemPosition();
-        boolean hasIndexBeenFiltered = !mAdapter.hasFilteredItem();
-        ResolveInfo ri = mAdapter.resolveInfoForPosition(which, hasIndexBeenFiltered);
+        ListView listView = (ListView) mMultiProfilePagerAdapter.getCurrentAdapterView();
+        ResolverListAdapter currentListAdapter = mMultiProfilePagerAdapter.getCurrentListAdapter();
+        int which = currentListAdapter.hasFilteredItem()
+                ? currentListAdapter.getFilteredPosition()
+                : listView.getCheckedItemPosition();
+        boolean hasIndexBeenFiltered = !currentListAdapter.hasFilteredItem();
+        ResolveInfo ri = currentListAdapter.resolveInfoForPosition(which, hasIndexBeenFiltered);
         if (mUseLayoutForBrowsables
                 && !ri.handleAllWebDataURI && id == R.id.button_always) {
             showSettingsForSelected(ri);
@@ -736,7 +836,8 @@ public class ResolverActivity extends Activity implements
         if (isFinishing()) {
             return;
         }
-        ResolveInfo ri = mAdapter.resolveInfoForPosition(which, hasIndexBeenFiltered);
+        ResolveInfo ri = mMultiProfilePagerAdapter.getCurrentListAdapter()
+                .resolveInfoForPosition(which, hasIndexBeenFiltered);
         if (mResolvingHome && hasManagedProfile() && !supportsManagedProfiles(ri)) {
             Toast.makeText(this, String.format(getResources().getString(
                     com.android.internal.R.string.activity_resolver_work_profiles_support),
@@ -745,7 +846,8 @@ public class ResolverActivity extends Activity implements
             return;
         }
 
-        TargetInfo target = mAdapter.targetInfoForPosition(which, hasIndexBeenFiltered);
+        TargetInfo target = mMultiProfilePagerAdapter.getCurrentListAdapter()
+                .targetInfoForPosition(which, hasIndexBeenFiltered);
         if (target == null) {
             return;
         }
@@ -760,7 +862,8 @@ public class ResolverActivity extends Activity implements
                 MetricsLogger.action(
                         this, MetricsProto.MetricsEvent.ACTION_APP_DISAMBIG_TAP);
             }
-            MetricsLogger.action(this, mAdapter.hasFilteredItem()
+            MetricsLogger.action(this,
+                    mMultiProfilePagerAdapter.getCurrentListAdapter().hasFilteredItem()
                             ? MetricsProto.MetricsEvent.ACTION_HIDE_APP_DISAMBIG_APP_FEATURED
                             : MetricsProto.MetricsEvent.ACTION_HIDE_APP_DISAMBIG_NONE_FEATURED);
             finish();
@@ -783,10 +886,11 @@ public class ResolverActivity extends Activity implements
     }
 
     protected void onListRebuilt() {
-        int count = mAdapter.getUnfilteredCount();
-        if (count == 1 && mAdapter.getOtherProfile() == null) {
+        int count = mMultiProfilePagerAdapter.getCurrentListAdapter().getUnfilteredCount();
+        if (count == 1 && mMultiProfilePagerAdapter.getCurrentListAdapter().getOtherProfile() == null) {
             // Only one target, so we're a candidate to auto-launch!
-            final TargetInfo target = mAdapter.targetInfoForPosition(0, false);
+            final TargetInfo target =
+                    mMultiProfilePagerAdapter.getCurrentListAdapter().targetInfoForPosition(0, false);
             if (shouldAutoLaunchSingleChoice(target)) {
                 safelyStartActivity(target);
                 finish();
@@ -798,8 +902,9 @@ public class ResolverActivity extends Activity implements
         final ResolveInfo ri = target.getResolveInfo();
         final Intent intent = target != null ? target.getResolvedIntent() : null;
 
-        if (intent != null && (mSupportsAlwaysUseOption || mAdapter.hasFilteredItem())
-                && mAdapter.mUnfilteredResolveList != null) {
+        if (intent != null && (mSupportsAlwaysUseOption
+                || mMultiProfilePagerAdapter.getCurrentListAdapter().hasFilteredItem())
+                && mMultiProfilePagerAdapter.getCurrentListAdapter().getUnfilteredResolveList() != null) {
             // Build a reasonable intent filter, based on what matched.
             IntentFilter filter = new IntentFilter();
             Intent filterIntent;
@@ -884,13 +989,14 @@ public class ResolverActivity extends Activity implements
             }
 
             if (filter != null) {
-                final int N = mAdapter.mUnfilteredResolveList.size();
+                final int N = mMultiProfilePagerAdapter.getCurrentListAdapter()
+                        .getUnfilteredResolveList().size();
                 ComponentName[] set;
                 // If we don't add back in the component for forwarding the intent to a managed
                 // profile, the preferred activity may not be updated correctly (as the set of
                 // components we tell it we knew about will have changed).
                 final boolean needToAddBackProfileForwardingComponent =
-                        mAdapter.getOtherProfile() != null;
+                        mMultiProfilePagerAdapter.getCurrentListAdapter().getOtherProfile() != null;
                 if (!needToAddBackProfileForwardingComponent) {
                     set = new ComponentName[N];
                 } else {
@@ -899,15 +1005,18 @@ public class ResolverActivity extends Activity implements
 
                 int bestMatch = 0;
                 for (int i=0; i<N; i++) {
-                    ResolveInfo r = mAdapter.mUnfilteredResolveList.get(i).getResolveInfoAt(0);
+                    ResolveInfo r = mMultiProfilePagerAdapter.getCurrentListAdapter()
+                            .getUnfilteredResolveList().get(i).getResolveInfoAt(0);
                     set[i] = new ComponentName(r.activityInfo.packageName,
                             r.activityInfo.name);
                     if (r.match > bestMatch) bestMatch = r.match;
                 }
 
                 if (needToAddBackProfileForwardingComponent) {
-                    set[N] = mAdapter.getOtherProfile().getResolvedComponentName();
-                    final int otherProfileMatch = mAdapter.getOtherProfile().getResolveInfo().match;
+                    set[N] = mMultiProfilePagerAdapter.getCurrentListAdapter()
+                            .getOtherProfile().getResolvedComponentName();
+                    final int otherProfileMatch = mMultiProfilePagerAdapter.getCurrentListAdapter()
+                            .getOtherProfile().getResolveInfo().match;
                     if (otherProfileMatch > bestMatch) bestMatch = otherProfileMatch;
                 }
 
@@ -946,7 +1055,8 @@ public class ResolverActivity extends Activity implements
                     }
                 } else {
                     try {
-                        mAdapter.mResolverListController.setLastChosen(intent, filter, bestMatch);
+                        mMultiProfilePagerAdapter.getCurrentListAdapter()
+                                .mResolverListController.setLastChosen(intent, filter, bestMatch);
                     } catch (RemoteException re) {
                         Log.d(TAG, "Error calling setLastChosenActivity\n" + re);
                     }
@@ -984,14 +1094,15 @@ public class ResolverActivity extends Activity implements
         if (mProfileSwitchMessageId != -1) {
             Toast.makeText(this, getString(mProfileSwitchMessageId), Toast.LENGTH_LONG).show();
         }
+        UserHandle currentUserHandle = mMultiProfilePagerAdapter.getCurrentUserHandle();
         if (!mSafeForwardingMode) {
-            if (cti.start(this, null)) {
+            if (cti.startAsUser(this, null, currentUserHandle)) {
                 onActivityStarted(cti);
             }
             return;
         }
         try {
-            if (cti.startAsCaller(this, null, UserHandle.USER_NULL)) {
+            if (cti.startAsCaller(this, null, currentUserHandle.getIdentifier())) {
                 onActivityStarted(cti);
             }
         } catch (RuntimeException e) {
@@ -1061,26 +1172,27 @@ public class ResolverActivity extends Activity implements
         startActivity(in);
     }
 
-    public ResolverListAdapter createAdapter(Context context, List<Intent> payloadIntents,
-            Intent[] initialIntents, List<ResolveInfo> rList,
-            boolean filterLastUsed, boolean useLayoutForBrowsables) {
-
+    @VisibleForTesting
+    protected ResolverListAdapter createResolverListAdapter(Context context,
+            List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,
+            boolean filterLastUsed, boolean useLayoutForBrowsables, UserHandle userHandle) {
         Intent startIntent = getIntent();
         boolean isAudioCaptureDevice =
                 startIntent.getBooleanExtra(EXTRA_IS_AUDIO_CAPTURE_DEVICE, false);
         return new ResolverListAdapter(context, payloadIntents, initialIntents, rList,
-                filterLastUsed, createListController(), useLayoutForBrowsables, this,
+                filterLastUsed, createListController(userHandle), useLayoutForBrowsables, this,
                 isAudioCaptureDevice);
     }
 
     @VisibleForTesting
-    protected ResolverListController createListController() {
+    protected ResolverListController createListController(UserHandle userHandle) {
         return new ResolverListController(
                 this,
                 mPm,
                 getTargetIntent(),
                 getReferrerPackageName(),
-                mLaunchedFromUid);
+                mLaunchedFromUid,
+                userHandle);
     }
 
     /**
@@ -1088,16 +1200,17 @@ public class ResolverActivity extends Activity implements
      * @return <code>true</code> if the activity is finishing and creation should halt.
      */
     private boolean configureContentView() {
-        if (mAdapter == null) {
+        if (mMultiProfilePagerAdapter.getCurrentListAdapter() == null) {
             throw new IllegalStateException("mAdapter cannot be null.");
         }
-        boolean rebuildCompleted = mAdapter.rebuildList();
+        boolean rebuildCompleted = mMultiProfilePagerAdapter.getCurrentListAdapter().rebuildList();
         if (useLayoutWithDefault()) {
             mLayoutId = R.layout.resolver_list_with_default;
         } else {
             mLayoutId = getLayoutResource();
         }
         setContentView(mLayoutId);
+        mMultiProfilePagerAdapter.setupViewPager(findViewById(R.id.profile_pager));
         return postRebuildList(rebuildCompleted);
     }
 
@@ -1118,14 +1231,16 @@ public class ResolverActivity extends Activity implements
      */
     final boolean postRebuildListInternal(boolean rebuildCompleted) {
 
-        int count = mAdapter.getUnfilteredCount();
+        int count = mMultiProfilePagerAdapter.getCurrentListAdapter().getUnfilteredCount();
 
         // We only rebuild asynchronously when we have multiple elements to sort. In the case where
         // we're already done, we can check if we should auto-launch immediately.
         if (rebuildCompleted) {
-            if (count == 1 && mAdapter.getOtherProfile() == null) {
+            if (count == 1
+                    && mMultiProfilePagerAdapter.getCurrentListAdapter().getOtherProfile() == null) {
                 // Only one target, so we're a candidate to auto-launch!
-                final TargetInfo target = mAdapter.targetInfoForPosition(0, false);
+                final TargetInfo target = mMultiProfilePagerAdapter.getCurrentListAdapter()
+                        .targetInfoForPosition(0, false);
                 if (shouldAutoLaunchSingleChoice(target)) {
                     safelyStartActivity(target);
                     mPackageMonitor.unregister();
@@ -1136,37 +1251,32 @@ public class ResolverActivity extends Activity implements
             }
         }
 
-        boolean isAdapterViewVisible = true;
-        if (count == 0 && mAdapter.getPlaceholderCount() == 0) {
+        setupViewVisibilities(count);
+        return false;
+    }
+
+    private void setupViewVisibilities(int count) {
+        if (count == 0
+                && mMultiProfilePagerAdapter.getCurrentListAdapter().getPlaceholderCount() == 0) {
             final TextView emptyView = findViewById(R.id.empty);
             emptyView.setVisibility(View.VISIBLE);
-            isAdapterViewVisible = false;
+            findViewById(R.id.profile_pager).setVisibility(View.GONE);
+        } else {
+            onPrepareAdapterView(mMultiProfilePagerAdapter.getCurrentListAdapter());
         }
-
-        onPrepareAdapterView(mAdapter, isAdapterViewVisible);
-        return false;
     }
 
     /**
      * Prepare the scrollable view which consumes data in the list adapter.
      * @param adapter The adapter used to provide data to item views.
-     * @param isVisible True if the scrollable view should be visible; false, otherwise.
      */
-    public void onPrepareAdapterView(ResolverListAdapter adapter, boolean isVisible) {
-        mAdapterView = findViewById(R.id.resolver_list);
-        if (!isVisible) {
-            mAdapterView.setVisibility(View.GONE);
-            return;
-        }
-        mAdapterView.setVisibility(View.VISIBLE);
+    public void onPrepareAdapterView(ResolverListAdapter adapter) {
+        mMultiProfilePagerAdapter.getCurrentAdapterView().setVisibility(View.VISIBLE);
         final boolean useHeader = adapter.hasFilteredItem();
-        final ListView listView = mAdapterView instanceof ListView ? (ListView) mAdapterView : null;
-
-        mAdapterView.setAdapter(mAdapter);
-
+        final ListView listView = (ListView) mMultiProfilePagerAdapter.getCurrentAdapterView();
         final ItemClickListener listener = new ItemClickListener();
-        mAdapterView.setOnItemClickListener(listener);
-        mAdapterView.setOnItemLongClickListener(listener);
+        listView.setOnItemClickListener(listener);
+        listView.setOnItemLongClickListener(listener);
 
         if (mSupportsAlwaysUseOption || mUseLayoutForBrowsables) {
             listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
@@ -1185,7 +1295,8 @@ public class ResolverActivity extends Activity implements
      * Configure the area above the app selection list (title, content preview, etc).
      */
     public void setHeader() {
-        if (mAdapter.getCount() == 0 && mAdapter.getPlaceholderCount() == 0) {
+        if (mMultiProfilePagerAdapter.getCurrentListAdapter().getCount() == 0
+                && mMultiProfilePagerAdapter.getCurrentListAdapter().getPlaceholderCount() == 0) {
             final TextView titleView = findViewById(R.id.title);
             if (titleView != null) {
                 titleView.setVisibility(View.GONE);
@@ -1206,11 +1317,11 @@ public class ResolverActivity extends Activity implements
 
         final ImageView iconView = findViewById(R.id.icon);
         if (iconView != null) {
-            mAdapter.loadFilteredItemIconTaskAsync(iconView);
+            mMultiProfilePagerAdapter.getCurrentListAdapter().loadFilteredItemIconTaskAsync(iconView);
         }
     }
 
-    private void resetButtonBar() {
+    protected void resetButtonBar() {
         if (!mSupportsAlwaysUseOption && !mUseLayoutForBrowsables) {
             return;
         }
@@ -1234,24 +1345,27 @@ public class ResolverActivity extends Activity implements
     }
 
     private void resetAlwaysOrOnceButtonBar() {
-        if (useLayoutWithDefault()
-                && mAdapter.getFilteredPosition() != ListView.INVALID_POSITION) {
-            setAlwaysButtonEnabled(true, mAdapter.getFilteredPosition(), false);
+        int filteredPosition = mMultiProfilePagerAdapter.getCurrentListAdapter()
+                .getFilteredPosition();
+        if (useLayoutWithDefault() && filteredPosition != ListView.INVALID_POSITION) {
+            setAlwaysButtonEnabled(true, filteredPosition, false);
             mOnceButton.setEnabled(true);
             return;
         }
 
         // When the items load in, if an item was already selected, enable the buttons
-        if (mAdapterView != null
-                && mAdapterView.getCheckedItemPosition() != ListView.INVALID_POSITION) {
-            setAlwaysButtonEnabled(true, mAdapterView.getCheckedItemPosition(), true);
+        ListView currentAdapterView = (ListView) mMultiProfilePagerAdapter.getCurrentAdapterView();
+        if (currentAdapterView != null
+                && currentAdapterView.getCheckedItemPosition() != ListView.INVALID_POSITION) {
+            setAlwaysButtonEnabled(true, currentAdapterView.getCheckedItemPosition(), true);
             mOnceButton.setEnabled(true);
         }
     }
 
     @Override // ResolverListCommunicator
     public boolean useLayoutWithDefault() {
-        return mSupportsAlwaysUseOption && mAdapter.hasFilteredItem();
+        return mSupportsAlwaysUseOption
+                && mMultiProfilePagerAdapter.getCurrentListAdapter().hasFilteredItem();
     }
 
     /**
@@ -1275,7 +1389,7 @@ public class ResolverActivity extends Activity implements
 
     @Override // ResolverListCommunicator
     public void onHandlePackagesChanged() {
-        if (mAdapter.getCount() == 0) {
+        if (mMultiProfilePagerAdapter.getCurrentListAdapter().getCount() == 0) {
             // We no longer have any items...  just finish the activity.
             finish();
         }
@@ -1350,11 +1464,14 @@ public class ResolverActivity extends Activity implements
                 return;
             }
             // If we're still loading, we can't yet enable the buttons.
-            if (mAdapter.resolveInfoForPosition(position, true) == null) {
+            if (mMultiProfilePagerAdapter.getCurrentListAdapter()
+                    .resolveInfoForPosition(position, true) == null) {
                 return;
             }
 
-            final int checkedPos = mAdapterView.getCheckedItemPosition();
+            ListView currentAdapterView =
+                    (ListView) mMultiProfilePagerAdapter.getCurrentAdapterView();
+            final int checkedPos = currentAdapterView.getCheckedItemPosition();
             final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
             if (!useLayoutWithDefault()
                     && (!hasValidSelection || mLastSelected != checkedPos)
@@ -1362,7 +1479,7 @@ public class ResolverActivity extends Activity implements
                 setAlwaysButtonEnabled(hasValidSelection, checkedPos, true);
                 mOnceButton.setEnabled(hasValidSelection);
                 if (hasValidSelection) {
-                    mAdapterView.smoothScrollToPosition(checkedPos);
+                    currentAdapterView.smoothScrollToPosition(checkedPos);
                 }
                 mLastSelected = checkedPos;
             } else {
@@ -1380,7 +1497,8 @@ public class ResolverActivity extends Activity implements
                 // Header views don't count.
                 return false;
             }
-            ResolveInfo ri = mAdapter.resolveInfoForPosition(position, true);
+            ResolveInfo ri = mMultiProfilePagerAdapter.getCurrentListAdapter()
+                    .resolveInfoForPosition(position, true);
             showTargetDetails(ri);
             return true;
         }
@@ -1420,7 +1538,8 @@ public class ResolverActivity extends Activity implements
 
             final ResolverActivity ra = (ResolverActivity) getActivity();
             if (ra != null) {
-                final TargetInfo ti = ra.mAdapter.getItem(selections[0].getIndex());
+                final TargetInfo ti = ra.mMultiProfilePagerAdapter.getCurrentListAdapter()
+                        .getItem(selections[0].getIndex());
                 if (ra.onTargetSelected(ti, false)) {
                     ra.mPickOptionRequest = null;
                     ra.finish();

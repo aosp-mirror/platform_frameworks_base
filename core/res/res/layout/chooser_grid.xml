@@ -29,7 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alwaysShow="true"
-        android:elevation="1dp"
+        android:elevation="0dp"
         android:background="@drawable/bottomsheet_background">
 
         <ImageView
@@ -55,16 +55,10 @@
                   android:layout_centerHorizontal="true"/>
     </RelativeLayout>
 
-    <com.android.internal.widget.RecyclerView
+    <com.android.internal.widget.ViewPager
+        android:id="@+id/profile_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layoutManager="com.android.internal.widget.GridLayoutManager"
-        android:id="@+id/resolver_list"
-        android:clipToPadding="false"
-        android:background="?attr/colorBackgroundFloating"
-        android:scrollbars="none"
-        android:elevation="1dp"
-        android:nestedScrollingEnabled="true"/>
+        android:layout_height="wrap_content"/>
 
     <TextView android:id="@+id/empty"
               android:layout_width="match_parent"

@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.UserHandle;
 
 import com.android.internal.app.chooser.TargetInfo;
 
@@ -37,15 +38,15 @@ public class ResolverWrapperActivity extends ResolverActivity {
     private UsageStatsManager mUsm;
 
     @Override
-    public ResolverListAdapter createAdapter(Context context, List<Intent> payloadIntents,
-            Intent[] initialIntents, List<ResolveInfo> rList, boolean filterLastUsed,
-            boolean useLayoutForBrowsables) {
+    public ResolverListAdapter createResolverListAdapter(Context context,
+            List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,
+            boolean filterLastUsed, boolean useLayoutForBrowsables, UserHandle userHandle) {
         return new ResolverWrapperAdapter(context, payloadIntents, initialIntents, rList,
-                filterLastUsed, createListController(), useLayoutForBrowsables, this);
+                filterLastUsed, createListController(userHandle), useLayoutForBrowsables, this);
     }
 
     ResolverWrapperAdapter getAdapter() {
-        return (ResolverWrapperAdapter) mAdapter;
+        return (ResolverWrapperAdapter) mMultiProfilePagerAdapter.getCurrentListAdapter();
     }
 
     @Override
@@ -66,7 +67,7 @@ public class ResolverWrapperActivity extends ResolverActivity {
     }
 
     @Override
-    protected ResolverListController createListController() {
+    protected ResolverListController createListController(UserHandle userHandle) {
         return sOverrides.resolverListController;
     }
 

@@ -313,7 +313,7 @@ public class ChooserActivityTest {
         assertThat(activity.isFinishing(), is(false));
 
         onView(withId(R.id.empty)).check(matches(isDisplayed()));
-        onView(withId(R.id.resolver_list)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.profile_pager)).check(matches(not(isDisplayed())));
         InstrumentationRegistry.getInstrumentation().runOnMainSync(
                 () -> activity.getAdapter().handlePackagesChanged()
         );
@@ -674,12 +674,12 @@ public class ChooserActivityTest {
 
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
+        // Second invocation is from onCreate
         verify(mockLogger, Mockito.times(2)).write(logMakerCaptor.capture());
-        // First invocation is from onCreate
-        assertThat(logMakerCaptor.getAllValues().get(1).getCategory(),
-                is(MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
-        assertThat(logMakerCaptor.getAllValues().get(1).getSubtype(),
+        assertThat(logMakerCaptor.getAllValues().get(0).getSubtype(),
                 is(CONTENT_PREVIEW_TEXT));
+        assertThat(logMakerCaptor.getAllValues().get(0).getCategory(),
+                is(MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
     }
 
     @Test
@@ -706,10 +706,10 @@ public class ChooserActivityTest {
         waitForIdle();
         verify(mockLogger, Mockito.times(2)).write(logMakerCaptor.capture());
         // First invocation is from onCreate
-        assertThat(logMakerCaptor.getAllValues().get(1).getCategory(),
-                is(MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
-        assertThat(logMakerCaptor.getAllValues().get(1).getSubtype(),
+        assertThat(logMakerCaptor.getAllValues().get(0).getSubtype(),
                 is(CONTENT_PREVIEW_IMAGE));
+        assertThat(logMakerCaptor.getAllValues().get(0).getCategory(),
+                is(MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
     }
 
     @Test
