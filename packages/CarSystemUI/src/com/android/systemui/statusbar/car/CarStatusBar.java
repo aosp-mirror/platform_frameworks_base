@@ -558,7 +558,12 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mCarUxRestrictionManagerWrapper = new CarUxRestrictionManagerWrapper();
 
         mNotificationDataManager = new NotificationDataManager();
-        mNotificationDataManager.setOnUnseenCountUpdateListener(this::onUnseenCountUpdate);
+
+        mNotificationDataManager.setOnUnseenCountUpdateListener(() -> {
+            if (mNotificationDataManager != null) {
+                onUseenCountUpdate(mNotificationDataManager.getUnseenNotificationCount());
+            }
+        });
 
         mEnableHeadsUpNotificationWhenNotificationShadeOpen = mContext.getResources().getBoolean(
                 R.bool.config_enableHeadsUpNotificationWhenNotificationShadeOpen);
@@ -680,15 +685,13 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     }
 
     /**
-     * This method is called whenever there is an update to the number of unseen notifications.
-     * This method can be extended by OEMs to customize the desired logic.
+     * This method is automatically called whenever there is an update to the number of unseen
+     * notifications. This method can be extended by OEMs to customize the desired logic.
      */
-    protected void onUnseenCountUpdate() {
-        if (mNotificationDataManager != null) {
-            boolean hasUnseen = mNotificationDataManager.getUnseenNotificationCount() > 0;
-            mCarNavigationBarController.toggleAllNotificationsUnseenIndicator(
-                    mDeviceProvisionedController.isCurrentUserSetup(), hasUnseen);
-        }
+    protected void onUseenCountUpdate(int unseenNotificationCount) {
+        boolean hasUnseen = unseenNotificationCount > 0;
+        mCarNavigationBarController.toggleAllNotificationsUnseenIndicator(
+                mDeviceProvisionedController.isCurrentUserSetup(), hasUnseen);
     }
 
     /**
