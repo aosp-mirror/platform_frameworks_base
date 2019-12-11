@@ -436,7 +436,7 @@ public class PackageInfoUtils {
         ii.functionalTest = i.functionalTest;
 
         ii.sourceDir = pkg.getBaseCodePath();
-        ii.publicSourceDir = pkg.getCodePath();
+        ii.publicSourceDir = pkg.getBaseCodePath();
         ii.splitNames = pkg.getSplitNames();
         ii.splitSourceDirs = pkg.getSplitCodePaths();
         ii.splitPublicSourceDirs = pkg.getSplitCodePaths();
