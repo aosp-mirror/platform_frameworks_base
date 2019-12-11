@@ -1264,7 +1264,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mRemoteInputUriController.attach(mEntryManager);
 
         rowBinder.setNotificationClicker(new NotificationClicker(
-                this, mBubbleController, mNotificationActivityStarter));
+                Optional.of(this), mBubbleController, mNotificationActivityStarter));
 
         mGroupAlertTransferHelper.bind(mEntryManager, mGroupManager);
         mNotificationListController.bind();
