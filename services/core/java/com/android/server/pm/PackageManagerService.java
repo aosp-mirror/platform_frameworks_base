@@ -23255,11 +23255,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 PackageSetting ps = it.next();
                 if (ps.getInstalled(userId)) {
                     res[i++] = ps.name;
-                } else {
-                    res = ArrayUtils.removeElement(String.class, res, res[i]);
                 }
             }
-            return res;
+            res = ArrayUtils.trimToSize(res, i);
+            if (res != null) {
+                return res;
+            }
         } catch (PackageManagerException e) {
             // Should not happen
         }
