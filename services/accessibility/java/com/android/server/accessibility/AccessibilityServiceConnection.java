@@ -294,6 +294,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
     }
 
+    // TODO(a11y shortcut): Refactoring the logic here, after the new Settings shortcut Ui merged.
     public boolean isAccessibilityButtonAvailableLocked(AccessibilityUserState userState) {
         // If the service does not request the accessibility button, it isn't available
         if (!mRequestAccessibilityButton) {
