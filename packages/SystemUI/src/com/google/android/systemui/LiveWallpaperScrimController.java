@@ -31,8 +31,8 @@ public class LiveWallpaperScrimController extends ScrimController {
         REDUCED_SCRIM_WALLPAPERS = Sets.newArraySet(new ComponentName[]{new ComponentName("com.breel.geswallpapers", "com.breel.geswallpapers.wallpapers.EarthWallpaperService"), new ComponentName(str, "com.breel.wallpapers18.delight.wallpapers.DelightWallpaperV1"), new ComponentName(str, "com.breel.wallpapers18.delight.wallpapers.DelightWallpaperV2"), new ComponentName(str, "com.breel.wallpapers18.delight.wallpapers.DelightWallpaperV3"), new ComponentName(str, "com.breel.wallpapers18.surfandturf.wallpapers.variations.SurfAndTurfWallpaperV2"), new ComponentName(str, "com.breel.wallpapers18.cities.wallpapers.variations.SanFranciscoWallpaper"), new ComponentName(str, "com.breel.wallpapers18.cities.wallpapers.variations.NewYorkWallpaper")});
     }
 
-    public LiveWallpaperScrimController(ScrimView scrimView, ScrimView scrimView2, LockscreenWallpaper lockscreenWallpaper, TriConsumer<ScrimState, Float, GradientColors> triConsumer, Consumer<Integer> consumer, DozeParameters dozeParameters, AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
-        super(scrimView, scrimView2, triConsumer, consumer, dozeParameters, alarmManager, keyguardMonitor);
+    public LiveWallpaperScrimController(ScrimView scrimView, ScrimView scrimView2, ScrimView scrimForBubble, LockscreenWallpaper lockscreenWallpaper, TriConsumer<ScrimState, Float, GradientColors> triConsumer, Consumer<Integer> consumer, DozeParameters dozeParameters, AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
+        super(scrimView, scrimView2, scrimForBubble, triConsumer, consumer, dozeParameters, alarmManager, keyguardMonitor);
         mLockscreenWallpaper = lockscreenWallpaper;
     }
 
