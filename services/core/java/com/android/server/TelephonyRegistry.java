@@ -2730,5 +2730,4 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 return "UNKNOWN";
         }
     }
-
 }
