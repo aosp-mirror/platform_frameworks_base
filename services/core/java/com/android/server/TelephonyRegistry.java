@@ -446,9 +446,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mOtaspMode[i] = TelephonyManager.OTASP_UNKNOWN;
             mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
             mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
-            mCallQuality[i] = new CallQuality();
+            mCallQuality[i] = createCallQuality();
             mCallAttributes[i] = new CallAttributes(new PreciseCallState(),
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN, new CallQuality());
+                    TelephonyManager.NETWORK_TYPE_UNKNOWN, createCallQuality());
             mCallNetworkType[i] = TelephonyManager.NETWORK_TYPE_UNKNOWN;
             mPreciseCallState[i] = new PreciseCallState();
             mRingingCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
@@ -541,9 +541,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mOtaspMode[i] = TelephonyManager.OTASP_UNKNOWN;
             mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
             mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
-            mCallQuality[i] = new CallQuality();
+            mCallQuality[i] = createCallQuality();
             mCallAttributes[i] = new CallAttributes(new PreciseCallState(),
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN, new CallQuality());
+                    TelephonyManager.NETWORK_TYPE_UNKNOWN, createCallQuality());
             mCallNetworkType[i] = TelephonyManager.NETWORK_TYPE_UNKNOWN;
             mPreciseCallState[i] = new PreciseCallState();
             mRingingCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
@@ -1704,7 +1704,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if (mPreciseCallState[phoneId].getForegroundCallState()
                             != PreciseCallState.PRECISE_CALL_STATE_ACTIVE) {
                         mCallNetworkType[phoneId] = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-                        mCallQuality[phoneId] = new CallQuality();
+                        mCallQuality[phoneId] = createCallQuality();
                     }
                     mCallAttributes[phoneId] = new CallAttributes(mPreciseCallState[phoneId],
                             mCallNetworkType[phoneId], mCallQuality[phoneId]);
@@ -2717,5 +2717,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             default:
                 return "UNKNOWN";
         }
+    }
+
+    /** Returns a new CallQuality object with default values. */
+    private static CallQuality createCallQuality() {
+        return new CallQuality(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 }
