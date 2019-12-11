@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "incfs-dls-jni"
+#define LOG_TAG "dataloader-jni"
 
 #include <vector>
 
 #include "core_jni_helpers.h"
-#include "incremental_dataloader_ndk.h"
+#include "dataloader_ndk.h"
 #include "jni.h"
 
 namespace android {
@@ -93,7 +93,7 @@ static jboolean nativeCreateDataLoader(JNIEnv* env,
                                        jobject callback) {
     ALOGE("nativeCreateDataLoader: %p/%d, %d, %p, %p, %p", thiz,
           env->GetObjectRefType(thiz), storageId, params, control, callback);
-    return Incremental_DataLoaderService_OnCreate(env, thiz,
+    return DataLoaderService_OnCreate(env, thiz,
                      storageId, control, params, callback);
 }
 
@@ -102,7 +102,7 @@ static jboolean nativeStartDataLoader(JNIEnv* env,
                                       jint storageId) {
     ALOGE("nativeStartDataLoader: %p/%d, %d", thiz, env->GetObjectRefType(thiz),
           storageId);
-    return Incremental_DataLoaderService_OnStart(storageId);
+    return DataLoaderService_OnStart(storageId);
 }
 
 static jboolean nativeStopDataLoader(JNIEnv* env,
@@ -110,7 +110,7 @@ static jboolean nativeStopDataLoader(JNIEnv* env,
                                      jint storageId) {
     ALOGE("nativeStopDataLoader: %p/%d, %d", thiz, env->GetObjectRefType(thiz),
           storageId);
-    return Incremental_DataLoaderService_OnStop(storageId);
+    return DataLoaderService_OnStop(storageId);
 }
 
 static jboolean nativeDestroyDataLoader(JNIEnv* env,
@@ -118,7 +118,7 @@ static jboolean nativeDestroyDataLoader(JNIEnv* env,
                                         jint storageId) {
     ALOGE("nativeDestroyDataLoader: %p/%d, %d", thiz,
           env->GetObjectRefType(thiz), storageId);
-    return Incremental_DataLoaderService_OnDestroy(storageId);
+    return DataLoaderService_OnDestroy(storageId);
 }
 
 
@@ -129,7 +129,7 @@ static jboolean nativeOnFileCreated(JNIEnv* env,
                                    jbyteArray metadata) {
     ALOGE("nativeOnFileCreated: %p/%d, %d", thiz,
           env->GetObjectRefType(thiz), storageId);
-    return Incremental_DataLoaderService_OnFileCreated(storageId, inode, metadata);
+    return DataLoaderService_OnFileCreated(storageId, inode, metadata);
 }
 
 static jboolean nativeIsFileRangeLoadedNode(JNIEnv* env,
@@ -177,8 +177,8 @@ static jboolean nativeWriteMissingData(JNIEnv* env,
         inst.data_len = jniScopedArrays.back().size();
     }
 
-    auto connector = (IncrementalFilesystemConnectorPtr)self;
-    if (auto err = Incremental_FilesystemConnector_writeBlocks(
+    auto connector = (DataLoaderFilesystemConnectorPtr)self;
+    if (auto err = DataLoader_FilesystemConnector_writeBlocks(
                              connector, instructions.data(), length);
         err < 0) {
         jniScopedArrays.clear();
@@ -201,10 +201,10 @@ static jbyteArray nativeGetFileMetadataNode(JNIEnv* env,
                                             jobject clazz,
                                             jlong self,
                                             jlong inode) {
-    auto connector = (IncrementalFilesystemConnectorPtr)self;
+    auto connector = (DataLoaderFilesystemConnectorPtr)self;
     std::vector<char> metadata(INCFS_MAX_FILE_ATTR_SIZE);
     size_t size = metadata.size();
-    if (Incremental_FilesystemConnector_getRawMetadata(connector, inode,
+    if (DataLoader_FilesystemConnector_getRawMetadata(connector, inode,
                   metadata.data(), &size) < 0) {
         size = 0;
     }
@@ -228,9 +228,9 @@ static jboolean nativeReportStatus(JNIEnv* env,
                                    jobject clazz,
                                    jlong self,
                                    jint status) {
-    auto listener = (IncrementalStatusListenerPtr)self;
-    return Incremental_StatusListener_reportStatus(listener,
-                     (IncrementalDataLoaderStatus)status);
+    auto listener = (DataLoaderStatusListenerPtr)self;
+    return DataLoader_StatusListener_reportStatus(listener,
+                     (DataLoaderStatus)status);
 }
 
 static const JNINativeMethod dlc_method_table[] = {
@@ -260,7 +260,7 @@ static const JNINativeMethod dlc_method_table[] = {
 
 }  // namespace
 
-int register_android_service_incremental_IncrementalDataLoaderService(JNIEnv* env) {
+int register_android_service_DataLoaderService(JNIEnv* env) {
     return jniRegisterNativeMethods(env,
                                     "android/service/incremental/IncrementalDataLoaderService",
                                     dlc_method_table, NELEM(dlc_method_table));
