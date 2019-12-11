@@ -553,6 +553,7 @@ public class ZygoteInit {
              * Pass the remaining arguments to SystemServer.
              */
             return ZygoteInit.zygoteInit(parsedArgs.mTargetSdkVersion,
+                    parsedArgs.mDisabledCompatChanges,
                     parsedArgs.mRemainingArgs, cl);
         }
 
@@ -988,14 +989,16 @@ public class ZygoteInit {
      *
      * Current recognized args:
      * <ul>
-     *   <li> <code> [--] &lt;start class name&gt;  &lt;args&gt;
+     * <li> <code> [--] &lt;start class name&gt;  &lt;args&gt;
      * </ul>
      *
      * @param targetSdkVersion target SDK version
-     * @param argv arg strings
+     * @param disabledCompatChanges set of disabled compat changes for the process (all others
+     *                              are enabled)
+     * @param argv             arg strings
      */
-    public static final Runnable zygoteInit(int targetSdkVersion, String[] argv,
-            ClassLoader classLoader) {
+    public static final Runnable zygoteInit(int targetSdkVersion, long[] disabledCompatChanges,
+            String[] argv, ClassLoader classLoader) {
         if (RuntimeInit.DEBUG) {
             Slog.d(RuntimeInit.TAG, "RuntimeInit: Starting application from zygote");
         }
@@ -1005,7 +1008,8 @@ public class ZygoteInit {
 
         RuntimeInit.commonInit();
         ZygoteInit.nativeZygoteInit();
-        return RuntimeInit.applicationInit(targetSdkVersion, argv, classLoader);
+        return RuntimeInit.applicationInit(targetSdkVersion, disabledCompatChanges, argv,
+                classLoader);
     }
 
     /**
