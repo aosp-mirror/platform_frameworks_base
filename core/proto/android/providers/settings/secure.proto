@@ -139,6 +139,13 @@ message SecureSettingsProto {
     }
     optional AutomaticStorageManager automatic_storage_manager = 9;
 
+    message Automotive {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto automotive_user_setup_in_progress = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Automotive automotive = 77;
+
     message Backup {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -566,5 +573,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 77;
+    // Next tag = 78;
 }
