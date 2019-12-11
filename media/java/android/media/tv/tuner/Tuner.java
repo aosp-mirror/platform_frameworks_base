@@ -368,6 +368,7 @@ public final class Tuner implements AutoCloseable  {
 
         private native boolean nativeAttachFilter(Filter filter);
         private native boolean nativeDetachFilter(Filter filter);
+        private native int nativeConfigureDvr(DvrSettings settings);
         private native boolean nativeStartDvr();
         private native boolean nativeStopDvr();
         private native boolean nativeFlushDvr();
@@ -379,6 +380,9 @@ public final class Tuner implements AutoCloseable  {
         }
         public boolean detachFilter(Filter filter) {
             return nativeDetachFilter(filter);
+        }
+        public int configure(DvrSettings settings) {
+            return nativeConfigureDvr(settings);
         }
         public boolean start() {
             return nativeStartDvr();
