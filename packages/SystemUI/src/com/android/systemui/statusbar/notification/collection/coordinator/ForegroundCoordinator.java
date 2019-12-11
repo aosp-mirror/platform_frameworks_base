@@ -83,7 +83,7 @@ public class ForegroundCoordinator implements Coordinator {
         mAppOpsController.addCallback(ForegroundServiceController.APP_OPS, this::onAppOpsChanged);
 
         // filter out foreground service notifications that aren't necessary anymore
-        notifListBuilder.addFilter(mNotifFilter);
+        notifListBuilder.addPreGroupFilter(mNotifFilter);
     }
 
     /**

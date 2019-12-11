@@ -63,7 +63,7 @@ public class RankingCoordinatorTest extends SysuiTestCase {
 
         ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
         mRankingCoordinator.attach(null, mNotifListBuilder);
-        verify(mNotifListBuilder, times(1)).addFilter(filterCaptor.capture());
+        verify(mNotifListBuilder, times(1)).addPreGroupFilter(filterCaptor.capture());
         mRankingFilter = filterCaptor.getValue();
     }
 

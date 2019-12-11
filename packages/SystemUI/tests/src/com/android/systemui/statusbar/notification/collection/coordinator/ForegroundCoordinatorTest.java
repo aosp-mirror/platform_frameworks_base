@@ -85,7 +85,7 @@ public class ForegroundCoordinatorTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(NotifLifetimeExtender.class);
 
         mForegroundCoordinator.attach(mNotifCollection, mNotifListBuilder);
-        verify(mNotifListBuilder, times(1)).addFilter(filterCaptor.capture());
+        verify(mNotifListBuilder, times(1)).addPreGroupFilter(filterCaptor.capture());
         verify(mNotifCollection, times(1)).addNotificationLifetimeExtender(
                 lifetimeExtenderCaptor.capture());
 

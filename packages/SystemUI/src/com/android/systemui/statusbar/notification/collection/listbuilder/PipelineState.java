@@ -78,18 +78,24 @@ public class PipelineState {
     public static final int STATE_IDLE = 0;
     public static final int STATE_BUILD_PENDING = 1;
     public static final int STATE_BUILD_STARTED = 2;
-    public static final int STATE_FILTERING = 3;
-    public static final int STATE_TRANSFORMING = 4;
-    public static final int STATE_SORTING = 5;
-    public static final int STATE_FINALIZING = 6;
+    public static final int STATE_RESETTING = 3;
+    public static final int STATE_PRE_GROUP_FILTERING = 4;
+    public static final int STATE_GROUPING = 5;
+    public static final int STATE_TRANSFORMING = 6;
+    public static final int STATE_SORTING = 7;
+    public static final int STATE_PRE_RENDER_FILTERING = 8;
+    public static final int STATE_FINALIZING = 9;
 
     @IntDef(prefix = { "STATE_" }, value = {
             STATE_IDLE,
             STATE_BUILD_PENDING,
             STATE_BUILD_STARTED,
-            STATE_FILTERING,
+            STATE_RESETTING,
+            STATE_PRE_GROUP_FILTERING,
+            STATE_GROUPING,
             STATE_TRANSFORMING,
             STATE_SORTING,
+            STATE_PRE_RENDER_FILTERING,
             STATE_FINALIZING,
     })
     @Retention(RetentionPolicy.SOURCE)

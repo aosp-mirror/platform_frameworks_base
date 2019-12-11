@@ -85,7 +85,7 @@ public class DeviceProvisionedCoordinatorTest extends SysuiTestCase {
 
         ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
         mDeviceProvisionedCoordinator.attach(null, mNotifListBuilder);
-        verify(mNotifListBuilder, times(1)).addFilter(filterCaptor.capture());
+        verify(mNotifListBuilder, times(1)).addPreGroupFilter(filterCaptor.capture());
         mDeviceProvisionedFilter = filterCaptor.getValue();
     }
 
