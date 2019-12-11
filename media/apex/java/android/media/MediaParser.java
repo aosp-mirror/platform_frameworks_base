@@ -156,19 +156,29 @@ public final class MediaParser {
      * <p>A {@link SeekPoint} is a position in the stream from which a player may successfully start
      * playing media samples.
      */
-    public interface SeekMap {
+    public static final class SeekMap {
 
         /** Returned by {@link #getDurationUs()} when the duration is unknown. */
-        int UNKNOWN_DURATION = Integer.MIN_VALUE;
+        public static final int UNKNOWN_DURATION = Integer.MIN_VALUE;
+
+        private final com.google.android.exoplayer2.extractor.SeekMap mExoPlayerSeekMap;
+
+        private SeekMap(com.google.android.exoplayer2.extractor.SeekMap exoplayerSeekMap) {
+            mExoPlayerSeekMap = exoplayerSeekMap;
+        }
 
         /** Returns whether seeking is supported. */
-        boolean isSeekable();
+        public boolean isSeekable() {
+            return mExoPlayerSeekMap.isSeekable();
+        }
 
         /**
          * Returns the duration of the stream in microseconds or {@link #UNKNOWN_DURATION} if the
          * duration is unknown.
          */
-        long getDurationUs();
+        public long getDurationUs() {
+            return mExoPlayerSeekMap.getDurationUs();
+        }
 
         /**
          * Obtains {@link SeekPoint SeekPoints} for the specified seek time in microseconds.
@@ -184,7 +194,10 @@ public final class MediaParser {
          * @return The corresponding {@link SeekPoint SeekPoints}.
          */
         @NonNull
-        Pair<SeekPoint, SeekPoint> getSeekPoints(long timeUs);
+        public Pair<SeekPoint, SeekPoint> getSeekPoints(long timeUs) {
+            SeekPoints seekPoints = mExoPlayerSeekMap.getSeekPoints(timeUs);
+            return new Pair<>(toSeekPoint(seekPoints.first), toSeekPoint(seekPoints.second));
+        }
     }
 
     /** Defines a seek point in a media stream. */
@@ -647,7 +660,7 @@ public final class MediaParser {
 
         @Override
         public void seekMap(com.google.android.exoplayer2.extractor.SeekMap exoplayerSeekMap) {
-            mOutputConsumer.onSeekMap(new ExoToMediaParserSeekMapAdapter(exoplayerSeekMap));
+            mOutputConsumer.onSeekMap(new SeekMap(exoplayerSeekMap));
         }
     }
 
@@ -762,32 +775,6 @@ public final class MediaParser {
 
         /** Returns a new extractor instance. */
         Extractor createInstance();
-    }
-
-    private static class ExoToMediaParserSeekMapAdapter implements SeekMap {
-
-        private final com.google.android.exoplayer2.extractor.SeekMap mExoPlayerSeekMap;
-
-        private ExoToMediaParserSeekMapAdapter(
-                com.google.android.exoplayer2.extractor.SeekMap exoplayerSeekMap) {
-            mExoPlayerSeekMap = exoplayerSeekMap;
-        }
-
-        @Override
-        public boolean isSeekable() {
-            return mExoPlayerSeekMap.isSeekable();
-        }
-
-        @Override
-        public long getDurationUs() {
-            return mExoPlayerSeekMap.getDurationUs();
-        }
-
-        @Override
-        public Pair<SeekPoint, SeekPoint> getSeekPoints(long timeUs) {
-            SeekPoints seekPoints = mExoPlayerSeekMap.getSeekPoints(timeUs);
-            return new Pair<>(toSeekPoint(seekPoints.first), toSeekPoint(seekPoints.second));
-        }
     }
 
     // Private static methods.
