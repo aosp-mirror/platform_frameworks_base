@@ -326,6 +326,25 @@ TEST(ProguardRulesTest, MenuRulesAreEmitted) {
   EXPECT_THAT(actual, Not(HasSubstr("com.foo.Bat")));
 }
 
+TEST(ProguardRulesTest, MenuRulesAreEmittedForActionClasses) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<xml::XmlResource> menu = test::BuildXmlDom(R"(
+      <menu xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto">
+        <item android:id="@+id/my_item"
+            app:actionViewClass="com.foo.Bar"
+            app:actionProviderClass="com.foo.Baz" />
+      </menu>)");
+  menu->file.name = test::ParseNameOrDie("menu/foo");
+
+  proguard::KeepSet set;
+  ASSERT_TRUE(proguard::CollectProguardRules(context.get(), menu.get(), &set));
+
+  std::string actual = GetKeepSetString(set, /** minimal_rules */ false);
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Baz"));
+}
+
 TEST(ProguardRulesTest, TransitionPathMotionRulesAreEmitted) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   std::unique_ptr<xml::XmlResource> transition = test::BuildXmlDom(R"(
