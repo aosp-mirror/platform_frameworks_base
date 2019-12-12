@@ -346,8 +346,9 @@ public class PackageWatchdog {
                 if (mAllObservers.isEmpty()) {
                     return;
                 }
-
-                if (failureReason == FAILURE_REASON_NATIVE_CRASH) {
+                boolean requiresImmediateAction = (failureReason == FAILURE_REASON_NATIVE_CRASH
+                        || failureReason == FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
+                if (requiresImmediateAction) {
                     handleFailureImmediately(packages, failureReason);
                 } else {
                     for (int pIndex = 0; pIndex < packages.size(); pIndex++) {
@@ -384,8 +385,8 @@ public class PackageWatchdog {
     }
 
     /**
-     * For native crashes, call directly into each observer to mitigate the error without going
-     * through failure threshold logic.
+     * For native crashes or explicit health check failures, call directly into each observer to
+     * mitigate the error without going through failure threshold logic.
      */
     private void handleFailureImmediately(List<VersionedPackage> packages,
             @FailureReasons int failureReason) {
@@ -867,13 +868,8 @@ public class PackageWatchdog {
                         Slog.wtf(TAG, "NetworkStack failed but could not find its package");
                         return;
                     }
-                    // This is a severe failure and recovery should be attempted immediately.
-                    // TODO: have a better way to handle such failures.
                     final List<VersionedPackage> pkgList = Collections.singletonList(pkg);
-                    final long failureCount = getTriggerFailureCount();
-                    for (int i = 0; i < failureCount; i++) {
-                        onPackageFailure(pkgList, FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
-                    }
+                    onPackageFailure(pkgList, FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
                 });
     }
 
