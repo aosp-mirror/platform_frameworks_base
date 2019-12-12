@@ -56,6 +56,7 @@ import com.android.server.location.GnssMeasurementCorrectionsProvider;
 import com.android.server.location.GnssMeasurementsProvider;
 import com.android.server.location.GnssNavigationMessageProvider;
 import com.android.server.location.GnssStatusListenerHelper;
+import com.android.server.location.LocationUsageLogger;
 import com.android.server.location.RemoteListenerHelper;
 
 import java.io.FileDescriptor;

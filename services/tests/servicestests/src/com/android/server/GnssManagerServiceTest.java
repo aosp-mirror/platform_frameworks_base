@@ -61,6 +61,7 @@ import com.android.server.location.GnssMeasurementsProvider.GnssMeasurementProvi
 import com.android.server.location.GnssNavigationMessageProvider;
 import com.android.server.location.GnssNavigationMessageProvider.GnssNavigationMessageProviderNative;
 import com.android.server.location.GnssStatusListenerHelper;
+import com.android.server.location.LocationUsageLogger;
 
 import org.junit.Before;
 import org.junit.Test;
