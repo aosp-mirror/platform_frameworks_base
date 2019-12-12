@@ -95,13 +95,13 @@ public class TimeDetectorServiceTest {
 
     @Test
     public void testSuggestManualTime() throws Exception {
-        doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
+        doNothing().when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
 
         ManualTimeSuggestion manualTimeSuggestion = createManualTimeSuggestion();
         mTimeDetectorService.suggestManualTime(manualTimeSuggestion);
         mTestHandler.assertTotalMessagesEnqueued(1);
 
-        verify(mMockContext).enforceCallingPermission(
+        verify(mMockContext).enforceCallingOrSelfPermission(
                 eq(android.Manifest.permission.SET_TIME),
                 anyString());
 
