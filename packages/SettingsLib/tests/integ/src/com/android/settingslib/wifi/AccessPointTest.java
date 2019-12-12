@@ -1713,4 +1713,21 @@ public class AccessPointTest {
                 .setScanResults(new ArrayList<ScanResult>(Arrays.asList(scanResult)))
                 .build();
     }
+
+    @Test
+    public void testGenerateOpenNetworkConfig_oweNotSupported_shouldGetCorrectSecurity() {
+        when(mMockContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mMockWifiManager);
+        AccessPoint oweAccessPoint = new TestAccessPointBuilder(mMockContext)
+                .setSecurity(AccessPoint.SECURITY_OWE).build();
+        AccessPoint noneAccessPoint = new TestAccessPointBuilder(mMockContext)
+                .setSecurity(AccessPoint.SECURITY_NONE).build();
+
+        oweAccessPoint.generateOpenNetworkConfig();
+        noneAccessPoint.generateOpenNetworkConfig();
+
+        assertThat(oweAccessPoint.getConfig().allowedKeyManagement.get(KeyMgmt.NONE)).isFalse();
+        assertThat(oweAccessPoint.getConfig().allowedKeyManagement.get(KeyMgmt.OWE)).isTrue();
+        assertThat(noneAccessPoint.getConfig().allowedKeyManagement.get(KeyMgmt.NONE)).isTrue();
+        assertThat(noneAccessPoint.getConfig().allowedKeyManagement.get(KeyMgmt.OWE)).isFalse();
+    }
 }
