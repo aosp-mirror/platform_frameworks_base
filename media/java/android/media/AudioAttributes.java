@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.media.audiopolicy.AudioProductStrategy;
@@ -178,6 +179,13 @@ public final class AudioAttributes implements Parcelable {
      * utterances.
      */
     public final static int USAGE_ASSISTANT = 16;
+    /**
+     * @hide
+     * Usage value to use for assistant voice interaction with remote caller on Cell and VoIP calls.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public static final int USAGE_CALL_ASSISTANT = 17;
 
     /**
      * IMPORTANT: when adding new usage types, add them to SDK_USAGES and update SUPPRESSIBLE_USAGES
@@ -254,6 +262,7 @@ public final class AudioAttributes implements Parcelable {
         SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,    SUPPRESSIBLE_MEDIA);
         SUPPRESSIBLE_USAGES.put(USAGE_GAME,                              SUPPRESSIBLE_MEDIA);
         SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANT,                         SUPPRESSIBLE_MEDIA);
+        SUPPRESSIBLE_USAGES.put(USAGE_CALL_ASSISTANT,                    SUPPRESSIBLE_NEVER);
         /** default volume assignment is STREAM_MUSIC, handle unknown usage as media */
         SUPPRESSIBLE_USAGES.put(USAGE_UNKNOWN,                           SUPPRESSIBLE_MEDIA);
         SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_SONIFICATION,           SUPPRESSIBLE_SYSTEM);
@@ -682,6 +691,7 @@ public final class AudioAttributes implements Parcelable {
                 case USAGE_GAME:
                 case USAGE_VIRTUAL_SOURCE:
                 case USAGE_ASSISTANT:
+                case USAGE_CALL_ASSISTANT:
                     mUsage = usage;
                     break;
                 default:
@@ -1135,6 +1145,8 @@ public final class AudioAttributes implements Parcelable {
                 return new String("USAGE_GAME");
             case USAGE_ASSISTANT:
                 return new String("USAGE_ASSISTANT");
+            case USAGE_CALL_ASSISTANT:
+                return new String("USAGE_CALL_ASSISTANT");
             default:
                 return new String("unknown usage " + usage);
         }
@@ -1238,6 +1250,7 @@ public final class AudioAttributes implements Parcelable {
             case USAGE_ASSISTANCE_SONIFICATION:
                 return AudioSystem.STREAM_SYSTEM;
             case USAGE_VOICE_COMMUNICATION:
+            case USAGE_CALL_ASSISTANT:
                 return AudioSystem.STREAM_VOICE_CALL;
             case USAGE_VOICE_COMMUNICATION_SIGNALLING:
                 return fromGetVolumeControlStream ?
@@ -1302,6 +1315,7 @@ public final class AudioAttributes implements Parcelable {
         USAGE_ASSISTANCE_SONIFICATION,
         USAGE_GAME,
         USAGE_ASSISTANT,
+        USAGE_CALL_ASSISTANT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AttributeUsage {}
