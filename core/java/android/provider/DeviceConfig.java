@@ -40,6 +40,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -734,19 +735,19 @@ public final class DeviceConfig {
         List<String> pathSegments = uri.getPathSegments();
         // pathSegments(0) is "config"
         final String namespace = pathSegments.get(1);
-        Map<String, String> propertyMap = new ArrayMap<>();
+        Properties.Builder propBuilder = new Properties.Builder(namespace);
         try {
             Properties allProperties = getProperties(namespace);
             for (int i = 2; i < pathSegments.size(); ++i) {
                 String key = pathSegments.get(i);
-                propertyMap.put(key, allProperties.getString(key, null));
+                propBuilder.setString(key, allProperties.getString(key, null));
             }
         } catch (SecurityException e) {
             // Silently failing to not crash binder or listener threads.
             Log.e(TAG, "OnPropertyChangedListener update failed: permission violation.");
             return;
         }
-        Properties properties = new Properties(namespace, propertyMap);
+        Properties properties = propBuilder.build();
 
         synchronized (sLock) {
             for (int i = 0; i < sListeners.size(); i++) {
@@ -819,6 +820,7 @@ public final class DeviceConfig {
     public static class Properties {
         private final String mNamespace;
         private final HashMap<String, String> mMap;
+        private Set<String> mKeyset;
 
         /**
          * Create a mapping of properties to values and the namespace they belong to.
@@ -849,7 +851,10 @@ public final class DeviceConfig {
          */
         @NonNull
         public Set<String> getKeyset() {
-            return mMap.keySet();
+            if (mKeyset == null) {
+                mKeyset = Collections.unmodifiableSet(mMap.keySet());
+            }
+            return mKeyset;
         }
 
         /**
@@ -942,6 +947,93 @@ public final class DeviceConfig {
             } catch (NumberFormatException e) {
                 Log.e(TAG, "Parsing float failed for " + name);
                 return defaultValue;
+            }
+        }
+
+        /**
+         * Builder class for the construction of {@link Properties} objects.
+         */
+        public static final class Builder {
+            @NonNull
+            private final String mNamespace;
+            @NonNull
+            private final Map<String, String> mKeyValues = new HashMap<>();
+
+            /**
+             * Create a new Builders for the specified namespace.
+             * @param namespace non null namespace.
+             */
+            public Builder(@NonNull String namespace) {
+                mNamespace = namespace;
+            }
+
+            /**
+             * Add a new property with the specified key and value.
+             * @param name non null name of the property.
+             * @param value nullable string value of the property.
+             * @return this Builder object
+             */
+            @NonNull
+            public Builder setString(@NonNull String name, @Nullable String value) {
+                mKeyValues.put(name, value);
+                return this;
+            }
+
+            /**
+             * Add a new property with the specified key and value.
+             * @param name non null name of the property.
+             * @param value nullable string value of the property.
+             * @return this Builder object
+             */
+            @NonNull
+            public Builder setBoolean(@NonNull String name, boolean value) {
+                mKeyValues.put(name, Boolean.toString(value));
+                return this;
+            }
+
+            /**
+             * Add a new property with the specified key and value.
+             * @param name non null name of the property.
+             * @param value int value of the property.
+             * @return this Builder object
+             */
+            @NonNull
+            public Builder setInt(@NonNull String name, int value) {
+                mKeyValues.put(name, Integer.toString(value));
+                return this;
+            }
+
+            /**
+             * Add a new property with the specified key and value.
+             * @param name non null name of the property.
+             * @param value long value of the property.
+             * @return this Builder object
+             */
+            @NonNull
+            public Builder setLong(@NonNull String name, long value) {
+                mKeyValues.put(name, Long.toString(value));
+                return this;
+            }
+
+            /**
+             * Add a new property with the specified key and value.
+             * @param name non null name of the property.
+             * @param value float value of the property.
+             * @return this Builder object
+             */
+            @NonNull
+            public Builder setFloat(@NonNull String name, float value) {
+                mKeyValues.put(name, Float.toString(value));
+                return this;
+            }
+
+            /**
+             * Create a new {@link Properties} object.
+             * @return non null Properties.
+             */
+            @NonNull
+            public Properties build() {
+                return new Properties(mNamespace, mKeyValues);
             }
         }
     }
