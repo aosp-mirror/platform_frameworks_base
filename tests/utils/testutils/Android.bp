@@ -17,15 +17,6 @@
 java_library {
     name: "frameworks-base-testutils",
 
-    static_libs: [
-        "frameworks-base-testutils-minus-mockito",
-        "mockito-target-minus-junit4",
-    ]
-}
-
-java_library {
-    name: "frameworks-base-testutils-minus-mockito",
-
     srcs: [
         "java/**/*.java",
         "java/**/*.kt",
@@ -35,6 +26,7 @@ java_library {
         "junit",
         "hamcrest-library",
         "truth-prebuilt",
+        "mockito-target-minus-junit4",
     ],
 
     libs: [
