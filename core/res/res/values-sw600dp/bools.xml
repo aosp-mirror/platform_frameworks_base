@@ -15,7 +15,6 @@
 -->
 
 <resources>
-    <bool name="target_honeycomb_needs_options_menu">false</bool>
     <bool name="show_ongoing_ime_switcher">true</bool>
     <bool name="kg_share_status_area">false</bool>
     <bool name="kg_sim_puk_account_full_screen">false</bool>
