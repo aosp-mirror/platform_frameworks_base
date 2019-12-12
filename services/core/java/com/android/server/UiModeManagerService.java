@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.content.Intent.ACTION_SCREEN_OFF;
+
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -53,6 +55,7 @@ import android.service.dreams.Sandman;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.util.Slog;
+
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.DisableCarModeActivity;
@@ -66,8 +69,6 @@ import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-
-import static android.content.Intent.ACTION_SCREEN_OFF;
 
 final class UiModeManagerService extends SystemService {
     private static final String TAG = UiModeManager.class.getSimpleName();
@@ -94,6 +95,7 @@ final class UiModeManagerService extends SystemService {
     private boolean mCarModeKeepsScreenOn;
     private boolean mDeskModeKeepsScreenOn;
     private boolean mTelevision;
+    private boolean mCar;
     private boolean mWatch;
     private boolean mVrHeadset;
     private boolean mComputedNightMode;
@@ -201,9 +203,13 @@ final class UiModeManagerService extends SystemService {
         public void onTwilightStateChanged(@Nullable TwilightState state) {
             synchronized (mLock) {
                 if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
-                    final IntentFilter intentFilter =
-                            new IntentFilter(ACTION_SCREEN_OFF);
-                    getContext().registerReceiver(mOnScreenOffHandler, intentFilter);
+                    if (mCar) {
+                        updateLocked(0, 0);
+                    } else {
+                        final IntentFilter intentFilter =
+                                new IntentFilter(ACTION_SCREEN_OFF);
+                        getContext().registerReceiver(mOnScreenOffHandler, intentFilter);
+                    }
                 }
             }
         }
@@ -320,6 +326,7 @@ final class UiModeManagerService extends SystemService {
         final PackageManager pm = context.getPackageManager();
         mTelevision = pm.hasSystemFeature(PackageManager.FEATURE_TELEVISION)
                 || pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK);
+        mCar = pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
         mWatch = pm.hasSystemFeature(PackageManager.FEATURE_WATCH);
 
         updateNightModeFromSettings(context, res, UserHandle.getCallingUserId());
@@ -492,7 +499,7 @@ final class UiModeManagerService extends SystemService {
                         mNightMode = mode;
                         mNightModeOverride = mode;
                         //on screen off will update configuration instead
-                        if (mNightMode != UiModeManager.MODE_NIGHT_AUTO) {
+                        if (mNightMode != UiModeManager.MODE_NIGHT_AUTO || mCar) {
                             updateLocked(0, 0);
                         } else {
                             getContext().registerReceiver(
