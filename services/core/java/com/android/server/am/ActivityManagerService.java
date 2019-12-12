@@ -2386,7 +2386,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mConstants = hasHandlerThread
                 ? new ActivityManagerConstants(mContext, this, mHandler) : null;
         final ActiveUids activeUids = new ActiveUids(this, false /* postChangesToAtm */);
-        mProcessList.init(this, activeUids);
+        mPlatformCompat = null;
+        mProcessList.init(this, activeUids, mPlatformCompat);
         mLowMemDetector = null;
         mOomAdjuster = hasHandlerThread
                 ? new OomAdjuster(this, mProcessList, activeUids, handlerThread) : null;
@@ -2410,7 +2411,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mFactoryTest = FACTORY_TEST_OFF;
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mInternal = new LocalService();
-        mPlatformCompat = null;
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -2439,7 +2439,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mConstants = new ActivityManagerConstants(mContext, this, mHandler);
         final ActiveUids activeUids = new ActiveUids(this, true /* postChangesToAtm */);
-        mProcessList.init(this, activeUids);
+        mPlatformCompat = (PlatformCompat) ServiceManager.getService(
+                Context.PLATFORM_COMPAT_SERVICE);
+        mProcessList.init(this, activeUids, mPlatformCompat);
         mLowMemDetector = new LowMemDetector(this);
         mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
 
@@ -2546,9 +2548,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         };
 
         mHiddenApiBlacklist = new HiddenApiSettings(mHandler, mContext);
-
-        mPlatformCompat = (PlatformCompat) ServiceManager.getService(
-                Context.PLATFORM_COMPAT_SERVICE);
 
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
@@ -5032,9 +5031,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             bindApplicationTimeMillis = SystemClock.elapsedRealtime();
             mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
-            long[] disabledCompatChanges = {};
             if (mPlatformCompat != null) {
-                disabledCompatChanges = mPlatformCompat.getDisabledChanges(app.info);
                 mPlatformCompat.resetReporting(app.info);
             }
             if (app.isolatedEntryPoint != null) {
@@ -5053,7 +5050,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial, autofillOptions, contentCaptureOptions,
-                        disabledCompatChanges);
+                        app.mDisabledCompatChanges);
             } else {
                 thread.bindApplication(processName, appInfo, providers, null, profilerInfo,
                         null, null, null, testMode,
@@ -5063,7 +5060,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial, autofillOptions, contentCaptureOptions,
-                        disabledCompatChanges);
+                        app.mDisabledCompatChanges);
             }
             if (profilerInfo != null) {
                 profilerInfo.closeFd();

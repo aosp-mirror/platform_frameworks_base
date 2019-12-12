@@ -310,6 +310,8 @@ class ProcessRecord implements WindowProcessListener {
     long startTime;
     // This will be same as {@link #uid} usually except for some apps used during factory testing.
     int startUid;
+    // set of disabled compat changes for the process (all others are enabled)
+    long[] mDisabledCompatChanges;
 
     // Cached task info for OomAdjuster
     private static final int VALUE_INVALID = -1;
