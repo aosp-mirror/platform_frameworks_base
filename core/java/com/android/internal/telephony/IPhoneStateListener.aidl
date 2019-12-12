@@ -43,7 +43,6 @@ oneway interface IPhoneStateListener {
     void onDataConnectionStateChanged(int state, int networkType);
     void onDataActivity(int direction);
     void onSignalStrengthsChanged(in SignalStrength signalStrength);
-    void onOtaspChanged(in int otaspMode);
     void onCellInfoChanged(in List<CellInfo> cellInfo);
     void onPreciseCallStateChanged(in PreciseCallState callState);
     void onPreciseDataConnectionStateChanged(in PreciseDataConnectionState dataConnectionState);
