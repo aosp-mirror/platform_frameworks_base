@@ -160,6 +160,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     // Saves notification keys of user created "fake" bubbles so that we can allow notifications
     // like these to bubble by default. Doesn't persist across reboots, not a long-term solution.
     private final HashSet<String> mUserCreatedBubbles;
+    // If we're auto-bubbling bubbles via a whitelist, we need to track which notifs from that app
+    // have been "demoted" back to a notification so that we don't auto-bubbles those again.
+    // Doesn't persist across reboots, not a long-term solution.
+    private final HashSet<String> mUserBlockedBubbles;
 
     // Bubbles get added to the status bar view
     private final StatusBarWindowController mStatusBarWindowController;
@@ -346,6 +350,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 });
 
         mUserCreatedBubbles = new HashSet<>();
+        mUserBlockedBubbles = new HashSet<>();
 
         mScreenshotHelper = new ScreenshotHelper(context);
     }
@@ -581,6 +586,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         entry.setFlagBubble(true);
         updateBubble(entry, true /* suppressFlyout */, false /* showInShade */);
         mUserCreatedBubbles.add(entry.getKey());
+        mUserBlockedBubbles.remove(entry.getKey());
     }
 
     /**
@@ -596,6 +602,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         entry.setFlagBubble(false);
         removeBubble(entry.getKey(), DISMISS_BLOCKED);
         mUserCreatedBubbles.remove(entry.getKey());
+        if (BubbleExperimentConfig.isPackageWhitelistedToAutoBubble(
+                mContext, entry.getSbn().getPackageName())) {
+            // This package is whitelist but user demoted the bubble, let's save it so we don't
+            // auto-bubble for the whitelist again.
+            mUserBlockedBubbles.add(entry.getKey());
+        }
     }
 
     /**
@@ -725,8 +737,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         @Override
         public void onPendingEntryAdded(NotificationEntry entry) {
             boolean previouslyUserCreated = mUserCreatedBubbles.contains(entry.getKey());
+            boolean userBlocked = mUserBlockedBubbles.contains(entry.getKey());
             boolean wasAdjusted = BubbleExperimentConfig.adjustForExperiments(
-                    mContext, entry, previouslyUserCreated);
+                    mContext, entry, previouslyUserCreated, userBlocked);
 
             if (mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
                     && (canLaunchInActivityView(mContext, entry) || wasAdjusted)) {
@@ -741,8 +754,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         @Override
         public void onPreEntryUpdated(NotificationEntry entry) {
             boolean previouslyUserCreated = mUserCreatedBubbles.contains(entry.getKey());
+            boolean userBlocked = mUserBlockedBubbles.contains(entry.getKey());
             boolean wasAdjusted = BubbleExperimentConfig.adjustForExperiments(
-                    mContext, entry, previouslyUserCreated);
+                    mContext, entry, previouslyUserCreated, userBlocked);
 
             boolean shouldBubble = mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
                     && (canLaunchInActivityView(mContext, entry) || wasAdjusted);

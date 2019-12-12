@@ -143,7 +143,7 @@ public class BubbleExperimentConfig {
      * @return whether an adjustment was made.
      */
     static boolean adjustForExperiments(Context context, NotificationEntry entry,
-            boolean previouslyUserCreated) {
+            boolean previouslyUserCreated, boolean userBlocked) {
         Notification.BubbleMetadata metadata = null;
         boolean addedMetadata = false;
         boolean whiteListedToAutoBubble =
@@ -205,7 +205,9 @@ public class BubbleExperimentConfig {
             }
         }
 
-        boolean bubbleForWhitelist = whiteListedToAutoBubble && (addedMetadata || hasMetadata);
+        boolean bubbleForWhitelist = !userBlocked
+                && whiteListedToAutoBubble
+                && (addedMetadata || hasMetadata);
         if ((previouslyUserCreated && addedMetadata) || bubbleForWhitelist) {
             // Update to a previous bubble (or new autobubble), set its flag now.
             if (DEBUG_EXPERIMENTS) {
