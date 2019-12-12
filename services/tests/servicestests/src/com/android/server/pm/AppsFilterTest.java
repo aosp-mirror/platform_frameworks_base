@@ -35,11 +35,6 @@ import android.content.pm.parsing.ParsingPackage;
 import android.os.Build;
 import android.os.Process;
 import android.util.ArrayMap;
-import android.util.ArraySet;
-
-import androidx.annotation.NonNull;
-
-import com.android.server.om.OverlayReferenceMapper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,18 +43,11 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-
 @RunWith(JUnit4.class)
 public class AppsFilterTest {
 
     private static final int DUMMY_CALLING_UID = 10345;
     private static final int DUMMY_TARGET_UID = 10556;
-    private static final int DUMMY_ACTOR_UID = 10656;
-    private static final int DUMMY_OVERLAY_UID = 10756;
-    private static final int DUMMY_ACTOR_TWO_UID = 10856;
 
     @Mock
     AppsFilter.FeatureConfig mFeatureConfigMock;
@@ -129,7 +117,7 @@ public class AppsFilterTest {
     @Test
     public void testSystemReadyPropogates() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false);
         appsFilter.onSystemReady();
         verify(mFeatureConfigMock).onSystemReady();
     }
@@ -137,8 +125,7 @@ public class AppsFilterTest {
     @Test
     public void testQueriesAction_FilterMatches() {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
-        appsFilter.onSystemReady();
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false);
 
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkg("com.some.package", new IntentFilter("TEST_ACTION")), DUMMY_TARGET_UID);
@@ -151,8 +138,7 @@ public class AppsFilterTest {
     @Test
     public void testQueriesAction_NoMatchingAction_Filters() {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
-        appsFilter.onSystemReady();
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false);
 
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkg("com.some.package"), DUMMY_TARGET_UID);
@@ -165,8 +151,7 @@ public class AppsFilterTest {
     @Test
     public void testQueriesAction_NoMatchingActionFilterLowSdk_DoesntFilter() {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
-        appsFilter.onSystemReady();
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false);
 
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkg("com.some.package"), DUMMY_TARGET_UID);
@@ -184,8 +169,7 @@ public class AppsFilterTest {
     @Test
     public void testNoQueries_Filters() {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
-        appsFilter.onSystemReady();
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false);
 
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkg("com.some.package"), DUMMY_TARGET_UID);
@@ -198,8 +182,7 @@ public class AppsFilterTest {
     @Test
     public void testForceQueryable_DoesntFilter() {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
-        appsFilter.onSystemReady();
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false);
 
         PackageSetting target = simulateAddPackage(appsFilter,
                         pkg("com.some.package").setForceQueryable(true), DUMMY_TARGET_UID);
@@ -212,8 +195,7 @@ public class AppsFilterTest {
     @Test
     public void testForceQueryableByDevice_SystemCaller_DoesntFilter() {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{"com.some.package"}, false, null);
-        appsFilter.onSystemReady();
+                new AppsFilter(mFeatureConfigMock, new String[]{"com.some.package"}, false);
 
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkg("com.some.package"), DUMMY_TARGET_UID,
@@ -227,8 +209,7 @@ public class AppsFilterTest {
     @Test
     public void testForceQueryableByDevice_NonSystemCaller_Filters() {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{"com.some.package"}, false, null);
-        appsFilter.onSystemReady();
+                new AppsFilter(mFeatureConfigMock, new String[]{"com.some.package"}, false);
 
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkg("com.some.package"), DUMMY_TARGET_UID);
@@ -243,8 +224,7 @@ public class AppsFilterTest {
     public void testSystemQueryable_DoesntFilter() {
         final AppsFilter appsFilter =
                 new AppsFilter(mFeatureConfigMock, new String[]{},
-                        true /* system force queryable */, null);
-        appsFilter.onSystemReady();
+                        true /* system force queryable */);
 
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkg("com.some.package"), DUMMY_TARGET_UID,
@@ -258,8 +238,7 @@ public class AppsFilterTest {
     @Test
     public void testQueriesPackage_DoesntFilter() {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
-        appsFilter.onSystemReady();
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false);
 
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkg("com.some.package"), DUMMY_TARGET_UID);
@@ -274,8 +253,7 @@ public class AppsFilterTest {
         when(mFeatureConfigMock.packageIsEnabled(any(AndroidPackage.class)))
                 .thenReturn(false);
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
-        appsFilter.onSystemReady();
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false);
 
         PackageSetting target = simulateAddPackage(
                 appsFilter, pkg("com.some.package"), DUMMY_TARGET_UID);
@@ -288,22 +266,20 @@ public class AppsFilterTest {
     @Test
     public void testSystemUid_DoesntFilter() {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
-        appsFilter.onSystemReady();
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false);
 
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkg("com.some.package"), DUMMY_TARGET_UID);
 
         assertFalse(appsFilter.shouldFilterApplication(0, null, target, 0));
-        assertFalse(appsFilter.shouldFilterApplication(Process.FIRST_APPLICATION_UID - 1,
-                null, target, 0));
+        assertFalse(appsFilter.shouldFilterApplication(
+                Process.FIRST_APPLICATION_UID - 1, null, target, 0));
     }
 
     @Test
     public void testNonSystemUid_NoCallingSetting_Filters() {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
-        appsFilter.onSystemReady();
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false);
 
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkg("com.some.package"), DUMMY_TARGET_UID);
@@ -314,8 +290,7 @@ public class AppsFilterTest {
     @Test
     public void testNoTargetPackage_filters() {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
-        appsFilter.onSystemReady();
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false);
 
         PackageSetting target = new PackageSettingBuilder()
                 .setName("com.some.package")
@@ -327,127 +302,6 @@ public class AppsFilterTest {
                 pkg("com.some.other.package", new Intent("TEST_ACTION")), DUMMY_CALLING_UID);
 
         assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
-    }
-
-    @Test
-    public void testActsOnTargetOfOverlay() {
-        final String actorName = "overlay://test/actorName";
-
-        ParsingPackage target = pkg("com.some.package.target")
-                .addOverlayable("overlayableName", actorName);
-        ParsingPackage overlay = pkg("com.some.package.overlay")
-                .setIsOverlay(true)
-                .setOverlayTarget(target.getPackageName())
-                .setOverlayTargetName("overlayableName");
-        ParsingPackage actor = pkg("com.some.package.actor");
-
-        final AppsFilter appsFilter = new AppsFilter(mFeatureConfigMock, new String[]{}, false,
-                new OverlayReferenceMapper.Provider() {
-                    @Nullable
-                    @Override
-                    public String getActorPkg(String actorString) {
-                        if (actorName.equals(actorString)) {
-                            return actor.getPackageName();
-                        }
-                        return null;
-                    }
-
-                    @NonNull
-                    @Override
-                    public Map<String, Set<String>> getTargetToOverlayables(
-                            @NonNull AndroidPackage pkg) {
-                        if (overlay.getPackageName().equals(pkg.getPackageName())) {
-                            Map<String, Set<String>> map = new ArrayMap<>();
-                            Set<String> set = new ArraySet<>();
-                            set.add(overlay.getOverlayTargetName());
-                            map.put(overlay.getOverlayTarget(), set);
-                            return map;
-                        }
-                        return Collections.emptyMap();
-                    }
-                });
-        appsFilter.onSystemReady();
-
-        PackageSetting targetSetting = simulateAddPackage(appsFilter, target, DUMMY_TARGET_UID);
-        PackageSetting overlaySetting = simulateAddPackage(appsFilter, overlay, DUMMY_OVERLAY_UID);
-        PackageSetting actorSetting = simulateAddPackage(appsFilter, actor, DUMMY_ACTOR_UID);
-
-        // Actor can see both target and overlay
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_ACTOR_UID, actorSetting,
-                targetSetting, 0));
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_ACTOR_UID, actorSetting,
-                overlaySetting, 0));
-
-        // But target/overlay can't see each other
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_TARGET_UID, targetSetting,
-                overlaySetting, 0));
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_OVERLAY_UID, overlaySetting,
-                targetSetting, 0));
-
-        // And can't see the actor
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_TARGET_UID, targetSetting,
-                actorSetting, 0));
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_OVERLAY_UID, overlaySetting,
-                actorSetting, 0));
-    }
-
-    @Test
-    public void testActsOnTargetOfOverlayThroughSharedUser() {
-        final String actorName = "overlay://test/actorName";
-
-        ParsingPackage target = pkg("com.some.package.target")
-                .addOverlayable("overlayableName", actorName);
-        ParsingPackage overlay = pkg("com.some.package.overlay")
-                .setIsOverlay(true)
-                .setOverlayTarget(target.getPackageName())
-                .setOverlayTargetName("overlayableName");
-        ParsingPackage actorOne = pkg("com.some.package.actor.one");
-        ParsingPackage actorTwo = pkg("com.some.package.actor.two");
-
-        final AppsFilter appsFilter = new AppsFilter(mFeatureConfigMock, new String[]{}, false,
-                new OverlayReferenceMapper.Provider() {
-                    @Nullable
-                    @Override
-                    public String getActorPkg(String actorString) {
-                        // Only actorOne is mapped as a valid actor
-                        if (actorName.equals(actorString)) {
-                            return actorOne.getPackageName();
-                        }
-                        return null;
-                    }
-
-                    @NonNull
-                    @Override
-                    public Map<String, Set<String>> getTargetToOverlayables(
-                            @NonNull AndroidPackage pkg) {
-                        if (overlay.getPackageName().equals(pkg.getPackageName())) {
-                            Map<String, Set<String>> map = new ArrayMap<>();
-                            Set<String> set = new ArraySet<>();
-                            set.add(overlay.getOverlayTargetName());
-                            map.put(overlay.getOverlayTarget(), set);
-                            return map;
-                        }
-                        return Collections.emptyMap();
-                    }
-                });
-        appsFilter.onSystemReady();
-
-        PackageSetting targetSetting = simulateAddPackage(appsFilter, target, DUMMY_TARGET_UID);
-        PackageSetting overlaySetting = simulateAddPackage(appsFilter, overlay, DUMMY_OVERLAY_UID);
-        PackageSetting actorOneSetting = simulateAddPackage(appsFilter, actorOne, DUMMY_ACTOR_UID);
-        PackageSetting actorTwoSetting = simulateAddPackage(appsFilter, actorTwo,
-                DUMMY_ACTOR_TWO_UID);
-
-        SharedUserSetting actorSharedSetting = new SharedUserSetting("actorSharedUser",
-                actorOneSetting.pkgFlags, actorOneSetting.pkgPrivateFlags);
-        actorSharedSetting.addPackage(actorOneSetting);
-        actorSharedSetting.addPackage(actorTwoSetting);
-
-        // actorTwo can see both target and overlay
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_ACTOR_TWO_UID, actorSharedSetting,
-                targetSetting, 0));
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_ACTOR_TWO_UID, actorSharedSetting,
-                overlaySetting, 0));
     }
 
     private interface WithSettingBuilder {

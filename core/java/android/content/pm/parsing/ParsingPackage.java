@@ -62,8 +62,6 @@ public interface ParsingPackage extends AndroidPackage {
 
     ParsingPackage addOriginalPackage(String originalPackage);
 
-    ParsingPackage addOverlayable(String overlayableName, String actorName);
-
     ParsingPackage addPermission(ParsedPermission permission);
 
     ParsingPackage addPermissionGroup(ParsedPermissionGroup permissionGroup);
