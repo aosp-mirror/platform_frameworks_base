@@ -77,6 +77,13 @@ private:
     jweak mDvr;
 };
 
+struct Dvr : public RefBase {
+    Dvr(sp<IDvr> sp, jweak obj);
+    sp<IDvr> getIDvr();
+    sp<IDvr> mDvrSp;
+    jweak mDvrObj;
+};
+
 struct FilterCallback : public IFilterCallback {
     virtual Return<void> onFilterEvent(const DemuxFilterEvent& filterEvent);
     virtual Return<void> onFilterStatus(const DemuxFilterStatus status);
