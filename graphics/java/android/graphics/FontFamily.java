@@ -17,7 +17,6 @@
 package android.graphics;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.graphics.fonts.FontVariationAxis;
 import android.text.TextUtils;
@@ -58,7 +57,6 @@ public class FontFamily {
      *
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
     public long mNativePtr;
 
     // Points native font family builder. Must be zero after freezing this family.
@@ -67,7 +65,6 @@ public class FontFamily {
     /**
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
     public FontFamily() {
         mBuilderPtr = nInitBuilder(null, 0);
         mNativeBuilderCleaner = sBuilderRegistry.registerNativeAllocation(this, mBuilderPtr);
@@ -76,7 +73,6 @@ public class FontFamily {
     /**
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
     public FontFamily(@Nullable String[] langs, int variant) {
         final String langsString;
         if (langs == null || langs.length == 0) {
@@ -98,7 +94,6 @@ public class FontFamily {
      *
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
     public boolean freeze() {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("This FontFamily is already frozen");
@@ -115,7 +110,6 @@ public class FontFamily {
     /**
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
     public void abortCreation() {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("This FontFamily is already frozen or abandoned");
@@ -127,7 +121,6 @@ public class FontFamily {
     /**
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
     public boolean addFont(String path, int ttcIndex, FontVariationAxis[] axes, int weight,
             int italic) {
         if (mBuilderPtr == 0) {
@@ -151,7 +144,6 @@ public class FontFamily {
     /**
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
     public boolean addFontFromBuffer(ByteBuffer font, int ttcIndex, FontVariationAxis[] axes,
             int weight, int italic) {
         if (mBuilderPtr == 0) {
@@ -179,7 +171,6 @@ public class FontFamily {
      *
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
     public boolean addFontFromAssetManager(AssetManager mgr, String path, int cookie,
             boolean isAsset, int ttcIndex, int weight, int isItalic,
             FontVariationAxis[] axes) {
