@@ -532,6 +532,17 @@ public class PackageWatchdog {
         default boolean isPersistent() {
             return false;
         }
+
+        /**
+         * Returns {@code true} if this observer wishes to observe the given package, {@code false}
+         * otherwise
+         *
+         * <p> A persistent observer may choose to start observing certain failing packages, even if
+         * it has not explicitly asked to watch the package with {@link #startObservingHealth}.
+         */
+        default boolean mayObservePackage(String packageName) {
+            return false;
+        }
     }
 
     long getTriggerFailureCount() {
@@ -1016,6 +1027,11 @@ public class PackageWatchdog {
          */
         @GuardedBy("mLock")
         public boolean onPackageFailureLocked(String packageName) {
+            if (packages.get(packageName) == null && registeredObserver.isPersistent()
+                    && registeredObserver.mayObservePackage(packageName)) {
+                packages.put(packageName, sPackageWatchdog.newMonitoredPackage(
+                        packageName, DEFAULT_OBSERVING_DURATION_MS, false));
+            }
             MonitoredPackage p = packages.get(packageName);
             if (p != null) {
                 return p.onFailureLocked();
