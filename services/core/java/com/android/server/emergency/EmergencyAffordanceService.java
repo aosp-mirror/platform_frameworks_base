@@ -231,7 +231,8 @@ public class EmergencyAffordanceService extends SystemService {
                 // a Sim with a different mcc code was found
                 neededNow = false;
             }
-            String simOperator  = mTelephonyManager.getSimOperator(info.getSubscriptionId());
+            String simOperator = mTelephonyManager
+                    .createForSubscriptionId(info.getSubscriptionId()).getSimOperator();
             mcc = 0;
             if (simOperator != null && simOperator.length() >= 3) {
                 mcc = Integer.parseInt(simOperator.substring(0, 3));
