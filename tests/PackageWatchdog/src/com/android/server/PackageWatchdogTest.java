@@ -896,37 +896,76 @@ public class PackageWatchdogTest {
         assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_A);
     }
 
-    /** Test that observers execute correctly for different failure reasons */
+    /** Test that observers execute correctly for failures reasons that go through thresholding. */
     @Test
-    public void testFailureReasons() {
+    public void testNonImmediateFailureReasons() {
         PackageWatchdog watchdog = createWatchdog();
         TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
         TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
-        TestObserver observer3 = new TestObserver(OBSERVER_NAME_3);
-        TestObserver observer4 = new TestObserver(OBSERVER_NAME_4);
 
         watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog.startObservingHealth(observer2, Arrays.asList(APP_B), SHORT_DURATION);
-        watchdog.startObservingHealth(observer3, Arrays.asList(APP_C), SHORT_DURATION);
-        watchdog.startObservingHealth(observer4, Arrays.asList(APP_D), SHORT_DURATION);
+
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_APP_CRASH);
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_B,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
+
+        assertThat(observer1.getLastFailureReason()).isEqualTo(
+                PackageWatchdog.FAILURE_REASON_APP_CRASH);
+        assertThat(observer2.getLastFailureReason()).isEqualTo(
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
+    }
+
+    /** Test that observers execute correctly for failures reasons that skip thresholding. */
+    @Test
+    public void testImmediateFailures() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
+
+        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
 
         raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
                 VERSION_CODE)), PackageWatchdog.FAILURE_REASON_NATIVE_CRASH);
         raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_B,
                 VERSION_CODE)), PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
-        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_C,
-                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_APP_CRASH);
-        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_D,
-                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
 
-        assertThat(observer1.getLastFailureReason()).isEqualTo(
-                PackageWatchdog.FAILURE_REASON_NATIVE_CRASH);
-        assertThat(observer2.getLastFailureReason()).isEqualTo(
-                PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
-        assertThat(observer3.getLastFailureReason()).isEqualTo(
-                PackageWatchdog.FAILURE_REASON_APP_CRASH);
-        assertThat(observer4.getLastFailureReason()).isEqualTo(
-                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
+        assertThat(observer1.mMitigatedPackages).containsExactly(APP_A, APP_B);
+    }
+
+    /**
+     * Test that a persistent observer will mitigate failures if it wishes to observe a package.
+     */
+    @Test
+    public void testPersistentObserverWatchesPackage() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver persistentObserver = new TestObserver(OBSERVER_NAME_1);
+        persistentObserver.setPersistent(true);
+        persistentObserver.setMayObservePackages(true);
+
+        watchdog.startObservingHealth(persistentObserver, Arrays.asList(APP_B), SHORT_DURATION);
+
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+        assertThat(persistentObserver.mHealthCheckFailedPackages).containsExactly(APP_A);
+    }
+
+    /**
+     * Test that a persistent observer will not mitigate failures if it does not wish to observe
+     * a given package.
+     */
+    @Test
+    public void testPersistentObserverDoesNotWatchPackage() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver persistentObserver = new TestObserver(OBSERVER_NAME_1);
+        persistentObserver.setPersistent(true);
+        persistentObserver.setMayObservePackages(false);
+
+        watchdog.startObservingHealth(persistentObserver, Arrays.asList(APP_B), SHORT_DURATION);
+
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+        assertThat(persistentObserver.mHealthCheckFailedPackages).isEmpty();
     }
 
     private void adoptShellPermissions(String... permissions) {
@@ -964,7 +1003,12 @@ public class PackageWatchdogTest {
     /** Trigger package failures above the threshold. */
     private void raiseFatalFailureAndDispatch(PackageWatchdog watchdog,
             List<VersionedPackage> packages, int failureReason) {
-        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
+        long triggerFailureCount = watchdog.getTriggerFailureCount();
+        if (failureReason == PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK
+                || failureReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH) {
+            triggerFailureCount = 1;
+        }
+        for (int i = 0; i < triggerFailureCount; i++) {
             watchdog.onPackageFailure(packages, failureReason);
         }
         mTestLooper.dispatchAll();
@@ -1000,6 +1044,8 @@ public class PackageWatchdogTest {
         private final String mName;
         private int mImpact;
         private int mLastFailureReason;
+        private boolean mIsPersistent = false;
+        private boolean mMayObservePackages = false;
         final List<String> mHealthCheckFailedPackages = new ArrayList<>();
         final List<String> mMitigatedPackages = new ArrayList<>();
 
@@ -1028,8 +1074,24 @@ public class PackageWatchdogTest {
             return mName;
         }
 
+        public boolean isPersistent() {
+            return mIsPersistent;
+        }
+
+        public boolean mayObservePackage(String packageName) {
+            return mMayObservePackages;
+        }
+
         public int getLastFailureReason() {
             return mLastFailureReason;
+        }
+
+        public void setPersistent(boolean persistent) {
+            mIsPersistent = persistent;
+        }
+
+        public void setMayObservePackages(boolean mayObservePackages) {
+            mMayObservePackages = mayObservePackages;
         }
     }
 

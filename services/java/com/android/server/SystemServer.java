@@ -751,6 +751,7 @@ public final class SystemServer {
         // Now that we have the bare essentials of the OS up and running, take
         // note that we just booted, which might send out a rescue party if
         // we're stuck in a runtime restart loop.
+        RescueParty.registerHealthObserver(mSystemContext);
         RescueParty.noteBoot(mSystemContext);
 
         // Manages LEDs and display backlight so we need it to bring up the display.

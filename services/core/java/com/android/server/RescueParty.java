@@ -18,8 +18,12 @@ package com.android.server;
 
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.VersionedPackage;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -36,8 +40,12 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.StatsLog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.PackageWatchdog.FailureReasons;
+import com.android.server.PackageWatchdog.PackageHealthObserver;
+import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
 import com.android.server.am.SettingsToPropertiesMapper;
 import com.android.server.utils.FlagNamespaceUtils;
 
@@ -79,18 +87,29 @@ public class RescueParty {
     @VisibleForTesting
     static final long BOOT_TRIGGER_WINDOW_MILLIS = 600 * DateUtils.SECOND_IN_MILLIS;
     @VisibleForTesting
-    static final long PERSISTENT_APP_CRASH_TRIGGER_WINDOW_MILLIS = 30 * DateUtils.SECOND_IN_MILLIS;
-    @VisibleForTesting
     static final String TAG = "RescueParty";
+
+    private static final String NAME = "rescue-party-observer";
+
 
     private static final String PROP_DISABLE_RESCUE = "persist.sys.disable_rescue";
     private static final String PROP_RESCUE_BOOT_START = "sys.rescue_boot_start";
     private static final String PROP_VIRTUAL_DEVICE = "ro.hardware.virtual_device";
 
+    private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
+            | ApplicationInfo.FLAG_SYSTEM;
+
+
     /** Threshold for boot loops */
     private static final Threshold sBoot = new BootThreshold();
     /** Threshold for app crash loops */
     private static SparseArray<Threshold> sApps = new SparseArray<>();
+
+    /** Register the Rescue Party observer as a Package Watchdog health observer */
+    public static void registerHealthObserver(Context context) {
+        PackageWatchdog.getInstance(context).registerHealthObserver(
+                RescuePartyObserver.getInstance(context));
+    }
 
     private static boolean isDisabled() {
         // Check if we're explicitly enabled for testing
@@ -135,24 +154,6 @@ public class RescueParty {
     }
 
     /**
-     * Take note of a persistent app or apex module crash. If we notice too many of these
-     * events happening in rapid succession, we'll send out a rescue party.
-     */
-    public static void noteAppCrash(Context context, int uid) {
-        if (isDisabled()) return;
-        Threshold t = sApps.get(uid);
-        if (t == null) {
-            t = new AppThreshold(uid);
-            sApps.put(uid, t);
-        }
-        if (t.incrementAndTest()) {
-            t.reset();
-            incrementRescueLevel(t.uid);
-            executeRescueLevel(context);
-        }
-    }
-
-    /**
      * Check if we're currently attempting to reboot for a factory reset.
      */
     public static boolean isAttemptingFactoryReset() {
@@ -171,11 +172,6 @@ public class RescueParty {
     @VisibleForTesting
     static void resetAllThresholds() {
         sBoot.reset();
-
-        for (int i = 0; i < sApps.size(); i++) {
-            Threshold appThreshold = sApps.get(sApps.keyAt(i));
-            appThreshold.reset();
-        }
     }
 
     @VisibleForTesting
@@ -243,6 +239,28 @@ public class RescueParty {
                 FlagNamespaceUtils.NAMESPACE_NO_PACKAGE);
     }
 
+    private static int mapRescueLevelToUserImpact(int rescueLevel) {
+        switch(rescueLevel) {
+            case LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
+            case LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES:
+                return PackageHealthObserverImpact.USER_IMPACT_LOW;
+            case LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS:
+            case LEVEL_FACTORY_RESET:
+                return PackageHealthObserverImpact.USER_IMPACT_HIGH;
+            default:
+                return PackageHealthObserverImpact.USER_IMPACT_NONE;
+        }
+    }
+
+    private static int getPackageUid(Context context, String packageName) {
+        try {
+            return context.getPackageManager().getPackageUid(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            // Since UIDs are always >= 0, this value means the UID could not be determined.
+            return -1;
+        }
+    }
+
     private static void resetAllSettings(Context context, int mode) throws Exception {
         // Try our best to reset all settings possible, and once finished
         // rethrow any exception that we encountered
@@ -267,6 +285,89 @@ public class RescueParty {
         }
         if (res != null) {
             throw res;
+        }
+    }
+
+    /**
+     * Handle mitigation action for package failures. This observer will be register to Package
+     * Watchdog and will receive calls about package failures. This observer is persistent so it
+     * may choose to mitigate failures for packages it has not explicitly asked to observe.
+     */
+    public static class RescuePartyObserver implements PackageHealthObserver {
+
+        private Context mContext;
+
+        @GuardedBy("RescuePartyObserver.class")
+        static RescuePartyObserver sRescuePartyObserver;
+
+        private RescuePartyObserver(Context context) {
+            mContext = context;
+        }
+
+        /** Creates or gets singleton instance of RescueParty. */
+        public static RescuePartyObserver getInstance(Context context) {
+            synchronized (RescuePartyObserver.class) {
+                if (sRescuePartyObserver == null) {
+                    sRescuePartyObserver = new RescuePartyObserver(context);
+                }
+                return sRescuePartyObserver;
+            }
+        }
+
+        @Override
+        public int onHealthCheckFailed(@Nullable VersionedPackage failedPackage,
+                @FailureReasons int failureReason) {
+            if (failureReason == PackageWatchdog.FAILURE_REASON_APP_CRASH
+                    || failureReason == PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING) {
+                int rescueLevel = MathUtils.constrain(
+                        SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE) + 1,
+                        LEVEL_NONE, LEVEL_FACTORY_RESET);
+                return mapRescueLevelToUserImpact(rescueLevel);
+            } else {
+                return PackageHealthObserverImpact.USER_IMPACT_NONE;
+            }
+        }
+
+        @Override
+        public boolean execute(@Nullable VersionedPackage failedPackage,
+                @FailureReasons int failureReason) {
+            if (isDisabled()) {
+                return false;
+            }
+            if (failureReason == PackageWatchdog.FAILURE_REASON_APP_CRASH
+                    || failureReason == PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING) {
+                int triggerUid = getPackageUid(mContext, failedPackage.getPackageName());
+                incrementRescueLevel(triggerUid);
+                executeRescueLevel(mContext);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public boolean isPersistent() {
+            return true;
+        }
+
+        @Override
+        public boolean mayObservePackage(String packageName) {
+            PackageManager pm = mContext.getPackageManager();
+            try {
+                // A package is a Mainline module if this is non-null
+                if (pm.getModuleInfo(packageName, 0) != null) {
+                    return true;
+                }
+                ApplicationInfo info = pm.getApplicationInfo(packageName, 0);
+                return (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK;
+            } catch (PackageManager.NameNotFoundException e) {
+                return false;
+            }
+        }
+
+        @Override
+        public String getName() {
+            return NAME;
         }
     }
 
@@ -347,27 +448,6 @@ public class RescueParty {
         public void setStart(long start) {
             SystemProperties.set(PROP_RESCUE_BOOT_START, Long.toString(start));
         }
-    }
-
-    /**
-     * Specialization of {@link Threshold} for monitoring app crashes. It stores
-     * counters in memory.
-     */
-    private static class AppThreshold extends Threshold {
-        private int count;
-        private long start;
-
-        public AppThreshold(int uid) {
-            // We're interested in TRIGGER_COUNT events in any
-            // PERSISTENT_APP_CRASH_TRIGGER_WINDOW_MILLIS second period; apps crash pretty quickly
-            // so we can keep a tight leash on them.
-            super(uid, TRIGGER_COUNT, PERSISTENT_APP_CRASH_TRIGGER_WINDOW_MILLIS);
-        }
-
-        @Override public int getCount() { return count; }
-        @Override public void setCount(int count) { this.count = count; }
-        @Override public long getStart() { return start; }
-        @Override public void setStart(long start) { this.start = start; }
     }
 
     private static int[] getAllUserIds() {

@@ -199,13 +199,14 @@ public class PackageWatchdog {
         mSystemClock = clock;
         mNumberOfNativeCrashPollsRemaining = NUMBER_OF_NATIVE_CRASH_POLLS;
         loadFromFile();
+        sPackageWatchdog = this;
     }
 
     /** Creates or gets singleton instance of PackageWatchdog. */
     public static PackageWatchdog getInstance(Context context) {
         synchronized (PackageWatchdog.class) {
             if (sPackageWatchdog == null) {
-                sPackageWatchdog = new PackageWatchdog(context);
+                new PackageWatchdog(context);
             }
             return sPackageWatchdog;
         }
