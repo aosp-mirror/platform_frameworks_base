@@ -2406,7 +2406,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // We are finishing the top focused activity and its stack has nothing to be focused so
             // the next focusable stack should be focused.
             if (mayAdjustTop
-                    && (stack.topRunningActivityLocked() == null || !stack.isFocusable())) {
+                    && (stack.topRunningActivity() == null || !stack.isFocusable())) {
                 if (shouldAdjustGlobalFocus) {
                     // Move the entire hierarchy to top with updating global top resumed activity
                     // and focused application if needed.
@@ -3440,7 +3440,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom) {
+    ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom,
+            WindowContainer boundary) {
         return callback.test(this) ? this : null;
     }
 

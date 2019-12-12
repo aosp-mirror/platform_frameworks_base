@@ -235,7 +235,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
         ActivityStack stack = new StackBuilder(mRootActivityContainer).setDisplay(display)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
-        Task task = stack.getChildAt(0);
+        Task task = stack.getBottomMostTask();
         task.getRootActivity().setOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
         DisplayInfo info = new DisplayInfo();
         display.mDisplay.getDisplayInfo(info);
@@ -276,7 +276,7 @@ public class TaskRecordTests extends ActivityTestsBase {
 
         ActivityStack stack = new StackBuilder(mRootActivityContainer)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
-        Task task = stack.getChildAt(0);
+        Task task = stack.getBottomMostTask();
         ActivityRecord root = task.getTopNonFinishingActivity();
 
         assertEquals(fullScreenBounds, task.getBounds());
@@ -337,7 +337,7 @@ public class TaskRecordTests extends ActivityTestsBase {
                 display.getRequestedOverrideConfiguration());
         ActivityStack stack = new StackBuilder(mRootActivityContainer)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
-        Task task = stack.getChildAt(0);
+        Task task = stack.getBottomMostTask();
         ActivityRecord root = task.getTopNonFinishingActivity();
 
         final WindowContainer parentWindowContainer =
@@ -803,7 +803,7 @@ public class TaskRecordTests extends ActivityTestsBase {
 
     private Task getTestTask() {
         final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
-        return stack.getChildAt(0);
+        return stack.getBottomMostTask();
     }
 
     private void testStackBoundsConfiguration(int windowingMode, Rect parentBounds, Rect bounds,

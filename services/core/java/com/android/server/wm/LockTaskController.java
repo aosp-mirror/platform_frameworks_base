@@ -150,7 +150,7 @@ public class LockTaskController {
      * The first task in the list, which started the current LockTask session, is called the root
      * task. It coincides with the Home task in a typical multi-app kiosk deployment. When there are
      * more than one locked tasks, the root task can't be finished. Nor can it be moved to the back
-     * of the stack by {@link ActivityStack#moveTaskToBackLocked(int)};
+     * of the stack by {@link ActivityStack#moveTaskToBack(Task)};
      *
      * Calling {@link Activity#stopLockTask()} on the root task will finish all tasks but itself in
      * this list, and the device will exit LockTask mode.
@@ -251,7 +251,7 @@ public class LockTaskController {
 
     /**
      * @return whether the given task can be moved to the back of the stack with
-     * {@link ActivityStack#moveTaskToBackLocked(int)}
+     * {@link ActivityStack#moveTaskToBack(Task)}
      * @see #mLockTaskModeTasks
      */
     boolean canMoveTaskToBack(Task task) {
@@ -653,10 +653,7 @@ public class LockTaskController {
             taskChanged = true;
         }
 
-        for (int displayNdx = mSupervisor.mRootActivityContainer.getChildCount() - 1;
-             displayNdx >= 0; --displayNdx) {
-            mSupervisor.mRootActivityContainer.getChildAt(displayNdx).onLockTaskPackagesUpdated();
-        }
+        mSupervisor.mRootActivityContainer.mRootWindowContainer.forAllTasks(Task::setLockTaskAuth);
 
         final ActivityRecord r = mSupervisor.mRootActivityContainer.topRunningActivity();
         final Task task = (r != null) ? r.getTask() : null;

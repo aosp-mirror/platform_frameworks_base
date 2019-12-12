@@ -155,6 +155,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 class Task extends WindowContainer<WindowContainer> {
@@ -684,7 +685,7 @@ class Task extends WindowContainer<WindowContainer> {
 
         final boolean toTopOfStack = position == MAX_VALUE;
         if (toTopOfStack && toStack.getResumedActivity() != null
-                && toStack.topRunningActivityLocked() != null) {
+                && toStack.topRunningActivity() != null) {
             // Pause the resumed activity on the target stack while re-parenting task on top of it.
             toStack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
                     null /* resuming */);
@@ -720,7 +721,7 @@ class Task extends WindowContainer<WindowContainer> {
             // Whenever we are moving the top activity from the front stack we want to make sure to
             // move the stack to the front.
             final boolean wasFront = r != null && sourceStack.isTopStackOnDisplay()
-                    && (sourceStack.topRunningActivityLocked() == r);
+                    && (sourceStack.topRunningActivity() == r);
 
             final boolean moveStackToFront = moveStackMode == REPARENT_MOVE_STACK_TO_FRONT
                     || (moveStackMode == REPARENT_KEEP_STACK_AT_FRONT && (wasFocused || wasFront));
@@ -1256,7 +1257,7 @@ class Task extends WindowContainer<WindowContainer> {
                 // work.
                 // TODO: If the callers to removeChild() changes such that we have multiple places
                 //       where we are destroying the task, move this back into removeChild()
-                mAtmService.mStackSupervisor.removeTaskByIdLocked(mTaskId, false /* killProcess */,
+                mAtmService.mStackSupervisor.removeTask(this, false /* killProcess */,
                         !REMOVE_FROM_RECENTS, reason);
             }
         } else if (!mReuseTask) {
@@ -2659,12 +2660,13 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
-    void forAllTasks(Consumer<Task> callback) {
+    void forAllTasks(Consumer<Task> callback, boolean traverseTopToBottom) {
+        // TODO(task-hierarchy): Change to traverse children when tasks can contain other tasks.
         callback.accept(this);
     }
 
     @Override
-    boolean forAllTasks(ToBooleanFunction<Task> callback) {
+    boolean forAllTasks(Function<Task, Boolean> callback) {
         return callback.apply(this);
     }
 
@@ -2705,6 +2707,10 @@ class Task extends WindowContainer<WindowContainer> {
     @Override
     Dimmer getDimmer() {
         return mDimmer;
+    }
+
+    boolean isTaskForUser(int userId) {
+        return mUserId == userId;
     }
 
     @Override
@@ -2798,6 +2804,10 @@ class Task extends WindowContainer<WindowContainer> {
         ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
         fillTaskInfo(info);
         return info;
+    }
+
+    boolean isTaskId(int taskId) {
+        return mTaskId == taskId;
     }
 
     void dump(PrintWriter pw, String prefix) {

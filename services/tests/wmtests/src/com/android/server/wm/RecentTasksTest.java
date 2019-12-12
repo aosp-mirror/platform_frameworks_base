@@ -1282,10 +1282,10 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         @Override
         void getTasks(int maxNum, List<RunningTaskInfo> list, int ignoreActivityType,
-                int ignoreWindowingMode, ArrayList<ActivityDisplay> activityDisplays,
+                int ignoreWindowingMode, RootActivityContainer root,
                 int callingUid, boolean allowed, boolean crossUser, ArraySet<Integer> profileIds) {
             mLastAllowed = allowed;
-            super.getTasks(maxNum, list, ignoreActivityType, ignoreWindowingMode, activityDisplays,
+            super.getTasks(maxNum, list, ignoreActivityType, ignoreWindowingMode, root,
                     callingUid, allowed, crossUser, profileIds);
         }
     }

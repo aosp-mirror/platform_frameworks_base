@@ -216,7 +216,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 // and default launchers coexisting), then move the task to the top as a part of
                 // moving the stack to the front
                 final Task task = targetActivity.getTask();
-                if (targetStack.topTask() != task) {
+                if (targetStack.getTopMostTask() != task) {
                     targetStack.positionChildAtTop(task);
                 }
             } else {
@@ -432,7 +432,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         // cases:
         // 1) The next launching task is not being animated by the recents animation
         // 2) The next task is home activity. (i.e. pressing home key to back home in recents).
-        if ((!controller.isAnimatingTask(stack.getTopChild())
+        if ((!controller.isAnimatingTask(stack.getTopMostTask())
                 || controller.isTargetApp(stack.getTopNonFinishingActivity()))
                 && controller.shouldDeferCancelUntilNextTransition()) {
             // Always prepare an app transition since we rely on the transition callbacks to cleanup

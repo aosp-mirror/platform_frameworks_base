@@ -45,7 +45,7 @@ class EnsureActivitiesVisibleHelper {
     void reset(ActivityRecord starting, int configChanges, boolean preserveWindows,
             boolean notifyClients) {
         mStarting = starting;
-        mTop = mContiner.topRunningActivityLocked();
+        mTop = mContiner.topRunningActivity();
         // If the top activity is not fullscreen, then we need to make sure any activities under it
         // are now visible.
         mAboveTop = mTop != null;
