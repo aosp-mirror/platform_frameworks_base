@@ -259,6 +259,8 @@ applications that come with the platform
     </privapp-permissions>
 
     <privapp-permissions package="com.android.shell">
+        <!-- Needed for test only -->
+        <permission name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
         <permission name="android.permission.ACCESS_LOWPAN_STATE"/>
         <permission name="android.permission.BACKUP"/>
         <permission name="android.permission.BATTERY_STATS"/>

@@ -551,16 +551,13 @@ final class UiModeManagerService extends SystemService {
                         if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
                             unregisterScreenOffEvent();
                         }
-                        // Only persist setting if not in car mode
-                        if (!mCarModeEnabled) {
-                            Secure.putIntForUser(getContext().getContentResolver(),
-                                    Secure.UI_NIGHT_MODE, mode, user);
-                            Secure.putIntForUser(getContext().getContentResolver(),
-                                    OVERRIDE_NIGHT_MODE, mNightModeOverride, user);
-                        }
 
                         mNightMode = mode;
                         mNightModeOverride = mode;
+                        // Only persist setting if not in car mode
+                        if (!mCarModeEnabled) {
+                            persistNightMode(user);
+                        }
                         // on screen off will update configuration instead
                         if (mNightMode != UiModeManager.MODE_NIGHT_AUTO || mCar) {
                             updateLocked(0, 0);
@@ -610,6 +607,7 @@ final class UiModeManagerService extends SystemService {
         @Override
         public boolean setNightModeActivated(boolean active) {
             synchronized (mLock) {
+                final int user = UserHandle.getCallingUserId();
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
@@ -625,6 +623,7 @@ final class UiModeManagerService extends SystemService {
                     }
                     updateConfigurationLocked();
                     applyConfigurationExternallyLocked();
+                    persistNightMode(user);
                     return true;
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -832,6 +831,13 @@ final class UiModeManagerService extends SystemService {
             default:
                 return false;
         }
+    }
+
+    private void persistNightMode(int user) {
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.UI_NIGHT_MODE, mNightMode, user);
+        Secure.putIntForUser(getContext().getContentResolver(),
+                OVERRIDE_NIGHT_MODE, mNightModeOverride, user);
     }
 
     private void updateConfigurationLocked() {
