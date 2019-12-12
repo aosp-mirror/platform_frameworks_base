@@ -14144,7 +14144,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     verification.putExtra(PackageManager.EXTRA_VERIFICATION_ID, verificationId);
 
                     verification.putExtra(PackageManager.EXTRA_VERIFICATION_INSTALLER_PACKAGE,
-                            installSource.installerPackageName);
+                            installSource.initiatingPackageName);
 
                     verification.putExtra(PackageManager.EXTRA_VERIFICATION_INSTALL_FLAGS,
                             installFlags);
