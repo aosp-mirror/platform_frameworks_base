@@ -22,7 +22,10 @@ apex_defaults {
     // libc.so and libcutils.so are included in the apex
     // native_shared_libs: ["libc", "libcutils"],
     // binaries: ["vold"],
-    java_libs: ["service-statsd"],
+    java_libs: [
+        "framework-statsd",
+        "service-statsd",
+    ],
     // prebuilts: ["my_prebuilt"],
     name: "com.android.os.statsd-defaults",
     key: "com.android.os.statsd.key",
