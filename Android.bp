@@ -366,7 +366,9 @@ java_defaults {
 
     sdk_version: "core_platform",
     libs: [
+        "app-compat-annotations",
         "ext",
+        "unsupportedappusage",
         "updatable_media_stubs",
     ],
 
@@ -426,7 +428,6 @@ java_library {
     name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
-    libs: ["app-compat-annotations"],
     installable: true,
     javac_shard_size: 150,
     required: [
@@ -468,14 +469,16 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-all-sources"],
     installable: false,
-    libs: ["app-compat-annotations"],
 }
 
 java_library {
     name: "framework-annotation-proc",
     defaults: ["framework-defaults"],
     srcs: [":framework-all-sources"],
-    libs: ["app-compat-annotations"],
+    libs: [
+        "app-compat-annotations",
+        "unsupportedappusage",
+    ],
     installable: false,
     plugins: [
         "unsupportedappusage-annotation-processor",
