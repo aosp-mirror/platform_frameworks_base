@@ -5573,7 +5573,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * @param linkProperties the initial link properties of this network. They can be updated
      *         later : see {@link #updateLinkProperties}.
      * @param networkCapabilities the initial capabilites of this network. They can be updated
-     *         later : see {@link #updateNetworkCapabilities}.
+     *         later : see {@link #updateCapabilities}.
      * @param currentScore the initial score of the network. See
      *         {@link NetworkAgentInfo#getCurrentScore}.
      * @param networkMisc metadata about the network. This is never updated.
