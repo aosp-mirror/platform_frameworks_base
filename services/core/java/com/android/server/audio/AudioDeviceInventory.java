@@ -68,9 +68,6 @@ public class AudioDeviceInventory {
 
     private @NonNull AudioDeviceBroker mDeviceBroker;
 
-    // cache of the address of the last dock the device was connected to
-    private String mDockAddress;
-
     // Monitoring of audio routes.  Protected by mAudioRoutes.
     final AudioRoutesInfo mCurAudioRoutes = new AudioRoutesInfo();
     final RemoteCallbackList<IAudioRoutesObserver> mRoutesObservers =
@@ -187,7 +184,7 @@ public class AudioDeviceInventory {
         int a2dpVolume = btInfo.getVolume();
         if (AudioService.DEBUG_DEVICES) {
             Log.d(TAG, "onSetA2dpSinkConnectionState btDevice=" + btDevice + " state="
-                    + state + " is dock=" + btDevice.isBluetoothDock() + " vol=" + a2dpVolume);
+                    + state + " vol=" + a2dpVolume);
         }
         String address = btDevice.getAddress();
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
@@ -215,42 +212,17 @@ public class AudioDeviceInventory {
                         mDeviceBroker.postBluetoothA2dpDeviceConfigChange(btDevice);
                     }
                 } else {
-                    if (btDevice.isBluetoothDock()) {
-                        if (state == BluetoothProfile.STATE_DISCONNECTED) {
-                            // introduction of a delay for transient disconnections of docks when
-                            // power is rapidly turned off/on, this message will be canceled if
-                            // we reconnect the dock under a preset delay
-                            makeA2dpDeviceUnavailableLater(address,
-                                    AudioDeviceBroker.BTA2DP_DOCK_TIMEOUT_MS);
-                            // the next time isConnected is evaluated, it will be false for the dock
-                        }
-                    } else {
-                        makeA2dpDeviceUnavailableNow(address, di.mDeviceCodecFormat);
-                    }
+                    makeA2dpDeviceUnavailableNow(address, di.mDeviceCodecFormat);
                 }
-            } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
-                if (btDevice.isBluetoothDock()) {
-                    // this could be a reconnection after a transient disconnection
-                    mDeviceBroker.cancelA2dpDockTimeout();
-                    mDockAddress = address;
-                } else {
-                    // this could be a connection of another A2DP device before the timeout of
-                    // a dock: cancel the dock timeout, and make the dock unavailable now
-                    if (mDeviceBroker.hasScheduledA2dpDockTimeout() && mDockAddress != null) {
-                        mDeviceBroker.cancelA2dpDockTimeout();
-                        makeA2dpDeviceUnavailableNow(mDockAddress,
-                                AudioSystem.AUDIO_FORMAT_DEFAULT);
-                    }
-                }
-                if (a2dpVolume != -1) {
-                    mDeviceBroker.postSetVolumeIndexOnDevice(AudioSystem.STREAM_MUSIC,
-                            // convert index to internal representation in VolumeStreamState
-                            a2dpVolume * 10,
-                            AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, "onSetA2dpSinkConnectionState");
-                }
-                makeA2dpDeviceAvailable(address, BtHelper.getName(btDevice),
-                        "onSetA2dpSinkConnectionState", a2dpCodec);
             }
+            if (a2dpVolume != -1) {
+                mDeviceBroker.postSetVolumeIndexOnDevice(AudioSystem.STREAM_MUSIC,
+                        // convert index to internal representation in VolumeStreamState
+                        a2dpVolume * 10,
+                        AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, "onSetA2dpSinkConnectionState");
+            }
+            makeA2dpDeviceAvailable(address, BtHelper.getName(btDevice),
+                    "onSetA2dpSinkConnectionState", a2dpCodec);
         }
     }
 
@@ -723,9 +695,6 @@ public class AudioDeviceInventory {
                 DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address));
         // Remove A2DP routes as well
         setCurrentAudioRouteNameIfPossible(null);
-        if (mDockAddress == address) {
-            mDockAddress = null;
-        }
     }
 
     @GuardedBy("mConnectedDevices")

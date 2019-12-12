@@ -1423,15 +1423,24 @@ package android.bluetooth {
 
   public final class BluetoothDevice implements android.os.Parcelable {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean cancelBondProcess();
+    method public boolean cancelPairing();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getBatteryLevel();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getMessageAccessPermission();
     method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public byte[] getMetadata(int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getPhonebookAccessPermission();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getSimAccessPermission();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isBondingInitiatedLocally();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isConnected();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isEncrypted();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isInSilenceMode();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean removeBond();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean setAlias(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setMessageAccessPermission(int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setMetadata(int, @NonNull byte[]);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setPhonebookAccessPermission(int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setPin(@Nullable String);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setSilenceMode(boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setSimAccessPermission(int);
     field public static final int ACCESS_ALLOWED = 1; // 0x1
     field public static final int ACCESS_REJECTED = 2; // 0x2
     field public static final int ACCESS_UNKNOWN = 0; // 0x0
