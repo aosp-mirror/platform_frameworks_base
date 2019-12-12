@@ -24,7 +24,7 @@ import android.os.ParcelFileDescriptor;
   * Binder interface to communicate with the statistics management service.
   * {@hide}
   */
-interface IStatsManager {
+interface IStatsd {
     /**
      * Tell the stats daemon that the android system server is up and running.
      */

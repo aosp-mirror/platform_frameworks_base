@@ -29,9 +29,9 @@
 
 #include <android/frameworks/stats/1.0/IStats.h>
 #include <android/frameworks/stats/1.0/types.h>
-#include <android/os/BnStatsManager.h>
+#include <android/os/BnStatsd.h>
 #include <android/os/IStatsCompanionService.h>
-#include <android/os/IStatsManager.h>
+#include <android/os/IStatsd.h>
 #include <binder/IResultReceiver.h>
 #include <binder/ParcelFileDescriptor.h>
 #include <utils/Looper.h>
@@ -52,7 +52,7 @@ namespace statsd {
 
 using android::hardware::Return;
 
-class StatsService : public BnStatsManager,
+class StatsService : public BnStatsd,
                      public IStats,
                      public IBinder::DeathRecipient {
 public:

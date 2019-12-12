@@ -272,7 +272,7 @@ status_t StatsService::onTransact(uint32_t code, const Parcel& data, Parcel* rep
             }
             return NO_ERROR;
         }
-        default: { return BnStatsManager::onTransact(code, data, reply, flags); }
+        default: { return BnStatsd::onTransact(code, data, reply, flags); }
     }
 }
 
@@ -862,13 +862,13 @@ status_t StatsService::cmd_log_binary_push(int out, const Vector<String8>& args)
     int64_t trainVersion = strtoll(args[2].c_str(), nullptr, 10);
     int options = 0;
     if (args[3] == "1") {
-        options = options | IStatsManager::FLAG_REQUIRE_STAGING;
+        options = options | IStatsd::FLAG_REQUIRE_STAGING;
     }
     if (args[4] == "1") {
-        options = options | IStatsManager::FLAG_ROLLBACK_ENABLED;
+        options = options | IStatsd::FLAG_ROLLBACK_ENABLED;
     }
     if (args[5] == "1") {
-        options = options | IStatsManager::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
+        options = options | IStatsd::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
     }
     int32_t state = atoi(args[6].c_str());
     vector<int64_t> experimentIds;
@@ -1406,9 +1406,9 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
     StorageManager::writeTrainInfo(trainVersionCode, trainNameUtf8, state, experimentIds);
 
     userid_t userId = multiuser_get_user_id(uid);
-    bool requiresStaging = options & IStatsManager::FLAG_REQUIRE_STAGING;
-    bool rollbackEnabled = options & IStatsManager::FLAG_ROLLBACK_ENABLED;
-    bool requiresLowLatencyMonitor = options & IStatsManager::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
+    bool requiresStaging = options & IStatsd::FLAG_REQUIRE_STAGING;
+    bool rollbackEnabled = options & IStatsd::FLAG_ROLLBACK_ENABLED;
+    bool requiresLowLatencyMonitor = options & IStatsd::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
     LogEvent event(trainNameUtf8, trainVersionCode, requiresStaging, rollbackEnabled,
                    requiresLowLatencyMonitor, state, experimentIdsProtoBuffer, userId);
     mProcessor->OnLogEvent(&event);
