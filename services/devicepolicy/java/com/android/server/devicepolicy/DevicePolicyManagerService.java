@@ -7429,7 +7429,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
-     * Returns whether or auto time is used on the device or not.
+     * Returns whether auto time is used on the device or not.
      */
     @Override
     public boolean getAutoTime(ComponentName who) {
@@ -7440,6 +7440,42 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         enforceDeviceOwnerOrProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
 
         return mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) > 0;
+    }
+
+    /**
+     * Set whether auto time zone is enabled on the device.
+     */
+    @Override
+    public void setAutoTimeZone(ComponentName who, boolean enabled) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        // TODO (b/145286957) Refactor security checks
+        enforceDeviceOwnerOrProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
+
+        mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.settingsGlobalPutInt(Global.AUTO_TIME_ZONE, enabled ? 1 : 0));
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_AUTO_TIME_ZONE)
+                .setAdmin(who)
+                .setBoolean(enabled)
+                .write();
+    }
+
+    /**
+     * Returns whether auto time zone is used on the device or not.
+     */
+    @Override
+    public boolean getAutoTimeZone(ComponentName who) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        enforceDeviceOwnerOrProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
+
+        return mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) > 0;
     }
 
     @Override

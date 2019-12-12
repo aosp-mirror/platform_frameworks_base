@@ -5805,6 +5805,49 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device owner, a profile owner for the primary user or a profile
+     * owner of an organization-owned managed profile to turn auto time zone on and off.
+     * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME}
+     * to prevent the user from changing this setting.
+     * <p>
+     * If user restriction {@link UserManager#DISALLOW_CONFIG_DATE_TIME} is used,
+     * no user will be able set the date and time zone. Instead, the network date
+     * and time zone will be used.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param enabled Whether time zone should be obtained automatically from the network or not.
+     * @throws SecurityException if caller is not a device owner, a profile owner for the
+     * primary user, or a profile owner of an organization-owned managed profile.
+     */
+    public void setAutoTimeZone(@NonNull ComponentName admin, boolean enabled) {
+        throwIfParentInstance("setAutoTimeZone");
+        if (mService != null) {
+            try {
+                mService.setAutoTimeZone(admin, enabled);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * @return true if auto time zone is enabled on the device.
+     * @throws SecurityException if caller is not a device owner, a profile owner for the
+     * primary user, or a profile owner of an organization-owned managed profile.
+     */
+    public boolean getAutoTimeZone(@NonNull ComponentName admin) {
+        throwIfParentInstance("getAutoTimeZone");
+        if (mService != null) {
+            try {
+                return mService.getAutoTimeZone(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Called by a device owner to set whether all users created on the device should be ephemeral.
      * <p>
      * The system user is exempt from this policy - it is never ephemeral.

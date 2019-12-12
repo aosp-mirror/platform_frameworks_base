@@ -3673,6 +3673,45 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME, 0);
     }
 
+    public void testSetAutoTimeZoneModifiesSetting() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        dpm.setAutoTimeZone(admin1, true);
+        verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME_ZONE, 1);
+
+        dpm.setAutoTimeZone(admin1, false);
+        verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME_ZONE, 0);
+    }
+
+    public void testSetAutoTimeZoneWithPOOnUser0() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupProfileOwnerOnUser0();
+        dpm.setAutoTimeZone(admin1, true);
+        verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME_ZONE, 1);
+
+        dpm.setAutoTimeZone(admin1, false);
+        verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME_ZONE, 0);
+    }
+
+    public void testSetAutoTimeZoneFailWithPONotOnUser0() throws Exception {
+        setupProfileOwner();
+        assertExpectException(SecurityException.class, null,
+                () -> dpm.setAutoTimeZone(admin1, false));
+        verify(getServices().settings, never()).settingsGlobalPutInt(Settings.Global.AUTO_TIME_ZONE,
+                0);
+    }
+
+    public void testSetAutoTimeZoneWithPOOfOrganizationOwnedDevice() throws Exception {
+        setupProfileOwner();
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
+
+        dpm.setAutoTimeZone(admin1, true);
+        verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME_ZONE, 1);
+
+        dpm.setAutoTimeZone(admin1, false);
+        verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME_ZONE, 0);
+    }
+
     public void testSetTime() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
