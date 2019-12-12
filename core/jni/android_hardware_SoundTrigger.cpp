@@ -44,6 +44,13 @@ static struct {
     jmethodID    toString;
 } gUUIDMethods;
 
+static const char* const kUnsupportedOperationExceptionClassPathName =
+     "java/lang/UnsupportedOperationException";
+static jclass gUnsupportedOperationExceptionClass;
+static const char* const kIllegalArgumentExceptionClassPathName =
+     "java/lang/IllegalArgumentException";
+static jclass gIllegalArgumentExceptionClass;
+
 static const char* const kSoundTriggerClassPathName = "android/hardware/soundtrigger/SoundTrigger";
 static jclass gSoundTriggerClass;
 
@@ -90,6 +97,11 @@ static jclass gKeyphraseSoundModelClass;
 static struct {
     jfieldID    keyphrases;
 } gKeyphraseSoundModelFields;
+
+static const char* const kModelParamRangeClassPathName =
+                                "android/hardware/soundtrigger/SoundTrigger$ModelParamRange";
+static jclass gModelParamRangeClass;
+static jmethodID gModelParamRangeCstor;
 
 static const char* const kRecognitionConfigClassPathName =
                                      "android/hardware/soundtrigger/SoundTrigger$RecognitionConfig";
@@ -163,6 +175,16 @@ enum  {
     SOUNDTRIGGER_EVENT_SOUNDMODEL = 3,
     SOUNDTRIGGER_EVENT_SERVICE_STATE_CHANGE = 4,
 };
+
+static jint throwUnsupportedOperationException(JNIEnv *env)
+{
+    return env->ThrowNew(gUnsupportedOperationExceptionClass, nullptr);
+}
+
+static jint throwIllegalArgumentException(JNIEnv *env)
+{
+    return env->ThrowNew(gIllegalArgumentExceptionClass, nullptr);
+}
 
 // ----------------------------------------------------------------------------
 // ref-counted object for callbacks
@@ -822,6 +844,69 @@ android_hardware_SoundTrigger_getModelState(JNIEnv *env, jobject thiz,
     return status;
 }
 
+static jint
+android_hardware_SoundTrigger_setParameter(JNIEnv *env, jobject thiz,
+                                            jint jHandle, jint jModelParam, jint jValue)
+{
+    ALOGV("setParameter");
+    sp<SoundTrigger> module = getSoundTrigger(env, thiz);
+    if (module == NULL) {
+        return SOUNDTRIGGER_STATUS_NO_INIT;
+    }
+    return module->setParameter(jHandle, (sound_trigger_model_parameter_t) jModelParam, jValue);
+}
+
+static jint
+android_hardware_SoundTrigger_getParameter(JNIEnv *env, jobject thiz,
+                                            jint jHandle, jint jModelParam)
+{
+    ALOGV("getParameter");
+    sp<SoundTrigger> module = getSoundTrigger(env, thiz);
+    if (module == NULL) {
+        throwUnsupportedOperationException(env);
+        return -1;
+    }
+
+    jint nValue;
+    jint status = module->getParameter(jHandle,
+            (sound_trigger_model_parameter_t) jModelParam, &nValue);
+
+    switch (status) {
+        case 0:
+            return nValue;
+        case -EINVAL:
+            throwIllegalArgumentException(env);
+            break;
+        default:
+            throwUnsupportedOperationException(env);
+            break;
+    }
+
+    return -1;
+}
+
+static jobject
+android_hardware_SoundTrigger_queryParameter(JNIEnv *env, jobject thiz,
+                                            jint jHandle, jint jModelParam)
+{
+    ALOGV("queryParameter");
+    sp<SoundTrigger> module = getSoundTrigger(env, thiz);
+    if (module == nullptr) {
+        return nullptr;
+    }
+
+    sound_trigger_model_parameter_range_t nRange;
+    jint nValue = module->queryParameter(jHandle,
+            (sound_trigger_model_parameter_t) jModelParam, &nRange);
+
+    if (nValue != 0) {
+        ALOGE("failed to query parameter error code: %d", nValue);
+        return nullptr;
+    }
+
+    return env->NewObject(gModelParamRangeClass, gModelParamRangeCstor, nRange.start, nRange.end);
+}
+
 static const JNINativeMethod gMethods[] = {
     {"listModules",
         "(Ljava/lang/String;Ljava/util/ArrayList;)I",
@@ -854,6 +939,15 @@ static const JNINativeMethod gModuleMethods[] = {
     {"getModelState",
         "(I)I",
         (void *)android_hardware_SoundTrigger_getModelState},
+    {"setParameter",
+         "(III)I",
+         (void *)android_hardware_SoundTrigger_setParameter},
+    {"getParameter",
+         "(II)I",
+         (void *)android_hardware_SoundTrigger_getParameter},
+    {"queryParameter",
+         "(II)Landroid/hardware/soundtrigger/SoundTrigger$ModelParamRange;",
+         (void *)android_hardware_SoundTrigger_queryParameter}
 };
 
 int register_android_hardware_SoundTrigger(JNIEnv *env)
@@ -865,6 +959,12 @@ int register_android_hardware_SoundTrigger(JNIEnv *env)
     jclass uuidClass = FindClassOrDie(env, "java/util/UUID");
     gUUIDClass = MakeGlobalRefOrDie(env, uuidClass);
     gUUIDMethods.toString = GetMethodIDOrDie(env, uuidClass, "toString", "()Ljava/lang/String;");
+
+    jclass exUClass = FindClassOrDie(env, kUnsupportedOperationExceptionClassPathName);
+    gUnsupportedOperationExceptionClass = MakeGlobalRefOrDie(env, exUClass);
+
+    jclass exIClass = FindClassOrDie(env, kIllegalArgumentExceptionClassPathName);
+    gIllegalArgumentExceptionClass = MakeGlobalRefOrDie(env, exIClass);
 
     jclass lClass = FindClassOrDie(env, kSoundTriggerClassPathName);
     gSoundTriggerClass = MakeGlobalRefOrDie(env, lClass);
@@ -905,6 +1005,10 @@ int register_android_hardware_SoundTrigger(JNIEnv *env)
     gKeyphraseSoundModelFields.keyphrases = GetFieldIDOrDie(env, keyphraseSoundModelClass,
                                          "keyphrases",
                                          "[Landroid/hardware/soundtrigger/SoundTrigger$Keyphrase;");
+
+    jclass modelParamRangeClass = FindClassOrDie(env, kModelParamRangeClassPathName);
+    gModelParamRangeClass = MakeGlobalRefOrDie(env, modelParamRangeClass);
+    gModelParamRangeCstor = GetMethodIDOrDie(env, modelParamRangeClass, "<init>", "(II)V");
 
     jclass recognitionEventClass = FindClassOrDie(env, kRecognitionEventClassPathName);
     gRecognitionEventClass = MakeGlobalRefOrDie(env, recognitionEventClass);

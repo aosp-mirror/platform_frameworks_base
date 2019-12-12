@@ -3410,6 +3410,14 @@ package android.hardware.soundtrigger {
     field public static final int STATUS_OK = 0; // 0x0
   }
 
+  public static final class SoundTrigger.ModelParamRange implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.ModelParamRange> CREATOR;
+    field public final int end;
+    field public final int start;
+  }
+
   public static final class SoundTrigger.ModuleProperties implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
@@ -4199,8 +4207,11 @@ package android.media.soundtrigger {
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.media.soundtrigger.SoundTriggerDetector createSoundTriggerDetector(java.util.UUID, @NonNull android.media.soundtrigger.SoundTriggerDetector.Callback, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public void deleteModel(java.util.UUID);
     method public int getDetectionServiceOperationsTimeout();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.media.soundtrigger.SoundTriggerManager.Model getModel(java.util.UUID);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.media.soundtrigger.SoundTriggerManager.Model getModel(java.util.UUID);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.hardware.soundtrigger.SoundTrigger.ModuleProperties getModuleProperties();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int getParameter(@NonNull java.util.UUID, int) throws java.lang.IllegalArgumentException, java.lang.UnsupportedOperationException;
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.hardware.soundtrigger.SoundTrigger.ModelParamRange queryParameter(@Nullable java.util.UUID, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int setParameter(@Nullable java.util.UUID, int, int) throws java.lang.IllegalArgumentException, java.lang.UnsupportedOperationException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public void updateModel(android.media.soundtrigger.SoundTriggerManager.Model);
   }
 

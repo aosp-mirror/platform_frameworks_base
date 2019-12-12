@@ -26,9 +26,11 @@ import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.hardware.soundtrigger.ModelParams;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
+import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.hardware.soundtrigger.SoundTrigger.SoundModel;
 import android.os.Bundle;
@@ -67,7 +69,7 @@ public final class SoundTriggerManager {
     /**
      * @hide
      */
-    public SoundTriggerManager(Context context, ISoundTriggerService soundTriggerService ) {
+    public SoundTriggerManager(Context context, ISoundTriggerService soundTriggerService) {
         if (DBG) {
             Slog.i(TAG, "SoundTriggerManager created.");
         }
@@ -89,14 +91,22 @@ public final class SoundTriggerManager {
     }
 
     /**
-     * Returns the sound trigger model represented by the given UUID. An instance of {@link Model}
-     * is returned.
+     * Get {@link SoundTriggerManager.Model} which is registered with the passed UUID
+     *
+     * @param soundModelId UUID associated with a loaded model
+     * @return {@link SoundTriggerManager.Model} associated with UUID soundModelId
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    @Nullable
     public Model getModel(UUID soundModelId) {
         try {
-            return new Model(mSoundTriggerService.getSoundModel(
-                    new ParcelUuid(soundModelId)));
+            GenericSoundModel model =
+                    mSoundTriggerService.getSoundModel(new ParcelUuid(soundModelId));
+            if (model == null) {
+                return null;
+            }
+
+            return new Model(model);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -395,6 +405,82 @@ public final class SoundTriggerManager {
 
         try {
             return mSoundTriggerService.getModuleProperties();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set a model specific {@link ModelParams} with the given value. This
+     * parameter will keep its value for the duration the model is loaded regardless of starting and
+     * stopping recognition. Once the model is unloaded, the value will be lost.
+     * {@link SoundTriggerManager#queryParameter} should be checked first before calling this
+     * method.
+     *
+     * @param soundModelId UUID of model to apply the parameter value to.
+     * @param modelParam   {@link ModelParams}
+     * @param value        Value to set
+     * @return - {@link SoundTrigger#STATUS_OK} in case of success
+     *         - {@link SoundTrigger#STATUS_NO_INIT} if the native service cannot be reached
+     *         - {@link SoundTrigger#STATUS_BAD_VALUE} invalid input parameter
+     *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence or
+     *           if API is not supported by HAL
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    public int setParameter(@Nullable UUID soundModelId,
+            @ModelParams int modelParam, int value)
+            throws UnsupportedOperationException, IllegalArgumentException {
+        try {
+            return mSoundTriggerService.setParameter(new ParcelUuid(soundModelId), modelParam,
+                    value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get a model specific {@link ModelParams}. This parameter will keep its value
+     * for the duration the model is loaded regardless of starting and stopping recognition.
+     * Once the model is unloaded, the value will be lost. If the value is not set, a default
+     * value is returned. See {@link ModelParams} for parameter default values.
+     * {@link SoundTriggerManager#queryParameter} should be checked first before
+     * calling this method. Otherwise, an exception can be thrown.
+     *
+     * @param soundModelId UUID of model to get parameter
+     * @param modelParam   {@link ModelParams}
+     * @return value of parameter
+     * @throws UnsupportedOperationException if hal or model do not support this API.
+     *         {@link SoundTriggerManager#queryParameter} should be checked first.
+     * @throws IllegalArgumentException if invalid model handle or parameter is passed.
+     *         {@link SoundTriggerManager#queryParameter} should be checked first.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    public int getParameter(@NonNull UUID soundModelId,
+            @ModelParams int modelParam)
+            throws UnsupportedOperationException, IllegalArgumentException {
+        try {
+            return mSoundTriggerService.getParameter(new ParcelUuid(soundModelId), modelParam);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Determine if parameter control is supported for the given model handle.
+     * This method should be checked prior to calling {@link SoundTriggerManager#setParameter} or
+     * {@link SoundTriggerManager#getParameter}.
+     *
+     * @param soundModelId handle of model to get parameter
+     * @param modelParam {@link ModelParams}
+     * @return supported range of parameter, null if not supported
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    @Nullable
+    public ModelParamRange queryParameter(@Nullable UUID soundModelId,
+            @ModelParams int modelParam) {
+        try {
+            return mSoundTriggerService.queryParameter(new ParcelUuid(soundModelId),
+                    modelParam);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

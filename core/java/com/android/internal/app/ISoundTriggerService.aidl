@@ -20,6 +20,7 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
+import android.hardware.soundtrigger.ModelParams;
 import android.os.Bundle;
 import android.os.ParcelUuid;
 
@@ -56,4 +57,16 @@ interface ISoundTriggerService {
     int getModelState(in ParcelUuid soundModelId);
 
     @nullable SoundTrigger.ModuleProperties getModuleProperties();
+
+    int setParameter(in ParcelUuid soundModelId, in ModelParams modelParam,
+        int value);
+
+    /**
+     * @throws UnsupportedOperationException if hal or model do not support this API.
+     * @throws IllegalArgumentException if invalid model handle or parameter is passed.
+     */
+    int getParameter(in ParcelUuid soundModelId, in ModelParams modelParam);
+
+    @nullable SoundTrigger.ModelParamRange queryParameter(in ParcelUuid soundModelId,
+        in ModelParams modelParam);
 }
