@@ -8095,16 +8095,6 @@ package android.service.settings.suggestions {
 
 }
 
-package android.service.sms {
-
-  public abstract class FinancialSmsService extends android.app.Service {
-    method public android.os.IBinder onBind(android.content.Intent);
-    method @Nullable public abstract android.database.CursorWindow onGetSmsMessages(@NonNull android.os.Bundle);
-    field public static final String ACTION_FINANCIAL_SERVICE_INTENT = "android.service.sms.action.FINANCIAL_SERVICE_INTENT";
-  }
-
-}
-
 package android.service.storage {
 
   public abstract class ExternalStorageService extends android.app.Service {
