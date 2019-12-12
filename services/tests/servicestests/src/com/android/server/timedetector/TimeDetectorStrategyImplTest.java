@@ -40,7 +40,7 @@ import org.junit.runner.RunWith;
 import java.time.Duration;
 
 @RunWith(AndroidJUnit4.class)
-public class SimpleTimeDetectorStrategyTest {
+public class TimeDetectorStrategyImplTest {
 
     private static final TimestampedValue<Long> ARBITRARY_CLOCK_INITIALIZATION_INFO =
             new TimestampedValue<>(
@@ -213,7 +213,7 @@ public class SimpleTimeDetectorStrategyTest {
         }
 
         // Let enough time pass that phone1Id's suggestion should now be too old.
-        mScript.simulateTimePassing(SimpleTimeDetectorStrategy.PHONE_BUCKET_SIZE_MILLIS);
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.PHONE_BUCKET_SIZE_MILLIS);
 
         // Make another suggestion with phone2Id. It should be used because the phoneId1
         // is in an older "bucket".
@@ -394,7 +394,7 @@ public class SimpleTimeDetectorStrategyTest {
         assertEquals(phoneSuggestion, mScript.peekBestPhoneSuggestion());
 
         // Simulate time passing, long enough that phoneSuggestion is now too old.
-        mScript.simulateTimePassing(SimpleTimeDetectorStrategy.PHONE_MAX_AGE_MILLIS);
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.PHONE_MAX_AGE_MILLIS);
 
         // Look inside and check what the strategy considers the current best phone suggestion. It
         // should still be the, it's just no longer used.
@@ -631,11 +631,11 @@ public class SimpleTimeDetectorStrategyTest {
     private class Script {
 
         private final FakeCallback mFakeCallback;
-        private final SimpleTimeDetectorStrategy mTimeDetectorStrategy;
+        private final TimeDetectorStrategyImpl mTimeDetectorStrategy;
 
         Script() {
             mFakeCallback = new FakeCallback();
-            mTimeDetectorStrategy = new SimpleTimeDetectorStrategy();
+            mTimeDetectorStrategy = new TimeDetectorStrategyImpl();
             mTimeDetectorStrategy.initialize(mFakeCallback);
 
         }
