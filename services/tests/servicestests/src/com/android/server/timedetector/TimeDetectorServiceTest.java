@@ -38,8 +38,6 @@ import android.util.TimestampedValue;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.timedetector.TimeDetectorStrategy.Callback;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +50,6 @@ public class TimeDetectorServiceTest {
 
     private Context mMockContext;
     private StubbedTimeDetectorStrategy mStubbedTimeDetectorStrategy;
-    private Callback mMockCallback;
 
     private TimeDetectorService mTimeDetectorService;
     private HandlerThread mHandlerThread;
@@ -68,12 +65,10 @@ public class TimeDetectorServiceTest {
         mHandlerThread.start();
         mTestHandler = new TestHandler(mHandlerThread.getLooper());
 
-        mMockCallback = mock(Callback.class);
         mStubbedTimeDetectorStrategy = new StubbedTimeDetectorStrategy();
 
         mTimeDetectorService = new TimeDetectorService(
-                mMockContext, mTestHandler, mMockCallback,
-                mStubbedTimeDetectorStrategy);
+                mMockContext, mTestHandler, mStubbedTimeDetectorStrategy);
     }
 
     @After
