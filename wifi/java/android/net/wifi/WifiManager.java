@@ -549,6 +549,7 @@ public class WifiManager {
      * currently support general and no_channel
      * @see #SAP_START_FAILURE_GENERAL
      * @see #SAP_START_FAILURE_NO_CHANNEL
+     * @see #SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION
      *
      * @hide
      */
@@ -652,6 +653,7 @@ public class WifiManager {
     @IntDef(flag = false, prefix = { "SAP_START_FAILURE_" }, value = {
         SAP_START_FAILURE_GENERAL,
         SAP_START_FAILURE_NO_CHANNEL,
+        SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SapStartFailure {}
@@ -672,6 +674,15 @@ public class WifiManager {
      */
     @SystemApi
     public static final int SAP_START_FAILURE_NO_CHANNEL = 1;
+
+    /**
+     *  If Wi-Fi AP start failed, this reason code means that the specified configuration
+     *  is not supported by the current HAL version.
+     *
+     *  @hide
+     */
+    @SystemApi
+    public static final int SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION = 2;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -3431,6 +3442,16 @@ public class WifiManager {
         default void onInfoChanged(@NonNull SoftApInfo softApInfo) {
             // Do nothing: can be updated to add SoftApInfo details (e.g. channel) to the UI.
         }
+
+        /**
+         * Called when capability of softap changes.
+         *
+         * @param softApCapability is the softap capability. {@link SoftApCapability}
+         */
+        default void onCapabilityChanged(@NonNull SoftApCapability softApCapability) {
+            // Do nothing: can be updated to add SoftApCapability details (e.g. meximum supported
+            // client number) to the UI.
+        }
     }
 
     /**
@@ -3482,6 +3503,19 @@ public class WifiManager {
             Binder.clearCallingIdentity();
             mExecutor.execute(() -> {
                 mCallback.onInfoChanged(softApInfo);
+            });
+        }
+
+        @Override
+        public void onCapabilityChanged(SoftApCapability capability) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "SoftApCallbackProxy: onCapabilityChanged: SoftApCapability="
+                        + capability);
+            }
+
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
+                mCallback.onCapabilityChanged(capability);
             });
         }
     }

@@ -5608,11 +5608,19 @@ package android.net.wifi {
     field public static final int KEY_MGMT_WAPI_PSK = 13; // 0xd
   }
 
+  public final class SoftApCapability implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getMaxSupportedClients();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.SoftApCapability> CREATOR;
+  }
+
   public final class SoftApConfiguration implements android.os.Parcelable {
     method public int describeContents();
     method public int getBand();
     method @Nullable public android.net.MacAddress getBssid();
     method public int getChannel();
+    method public int getMaxNumberOfClients();
     method public int getSecurityType();
     method @Nullable public String getSsid();
     method @Nullable public String getWpa2Passphrase();
@@ -5635,6 +5643,7 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBssid(@Nullable android.net.MacAddress);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setChannel(int, int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setHiddenSsid(boolean);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setMaxNumberOfClients(int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setSsid(@Nullable String);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setWpa2Passphrase(@Nullable String);
   }
@@ -5868,6 +5877,7 @@ package android.net.wifi {
     field public static final int PASSPOINT_ROAMING_NETWORK = 1; // 0x1
     field public static final int SAP_START_FAILURE_GENERAL = 0; // 0x0
     field public static final int SAP_START_FAILURE_NO_CHANNEL = 1; // 0x1
+    field public static final int SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION = 2; // 0x2
     field public static final String WIFI_AP_STATE_CHANGED_ACTION = "android.net.wifi.WIFI_AP_STATE_CHANGED";
     field public static final int WIFI_AP_STATE_DISABLED = 11; // 0xb
     field public static final int WIFI_AP_STATE_DISABLING = 10; // 0xa
@@ -5906,6 +5916,7 @@ package android.net.wifi {
   }
 
   public static interface WifiManager.SoftApCallback {
+    method public default void onCapabilityChanged(@NonNull android.net.wifi.SoftApCapability);
     method public default void onConnectedClientsChanged(@NonNull java.util.List<android.net.wifi.WifiClient>);
     method public default void onInfoChanged(@NonNull android.net.wifi.SoftApInfo);
     method public default void onStateChanged(int, int);
@@ -8906,6 +8917,11 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void updateConfigForPhoneId(int, String);
     field public static final String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
     field public static final String KEY_SUPPORT_CDMA_1X_VOICE_CALLS_BOOL = "support_cdma_1x_voice_calls_bool";
+  }
+
+  public static final class CarrierConfigManager.Wifi {
+    field public static final String KEY_HOTSPOT_MAX_CLIENT_COUNT = "wifi.hotspot_maximum_client_count";
+    field public static final String KEY_PREFIX = "wifi.";
   }
 
   public final class CarrierRestrictionRules implements android.os.Parcelable {

@@ -877,6 +877,25 @@ public class WifiManagerTest {
         verify(mSoftApCallback).onInfoChanged(testSoftApInfo);
     }
 
+
+    /*
+     * Verify client-provided callback is being called through callback proxy
+     */
+    @Test
+    public void softApCallbackProxyCallsOnCapabilityChanged() throws Exception {
+        SoftApCapability testSoftApCapability = new SoftApCapability();
+        testSoftApCapability.setMaxSupportedClients(10);
+        ArgumentCaptor<ISoftApCallback.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(ISoftApCallback.Stub.class);
+        mWifiManager.registerSoftApCallback(new HandlerExecutor(mHandler), mSoftApCallback);
+        verify(mWifiService).registerSoftApCallback(any(IBinder.class), callbackCaptor.capture(),
+                anyInt());
+
+        callbackCaptor.getValue().onCapabilityChanged(testSoftApCapability);
+        mLooper.dispatchAll();
+        verify(mSoftApCallback).onCapabilityChanged(testSoftApCapability);
+    }
+
     /*
      * Verify client-provided callback is being called through callback proxy on multiple events
      */
@@ -885,6 +904,8 @@ public class WifiManagerTest {
         SoftApInfo testSoftApInfo = new SoftApInfo();
         testSoftApInfo.setFrequency(TEST_AP_FREQUENCY);
         testSoftApInfo.setBandwidth(TEST_AP_BANDWIDTH);
+        SoftApCapability testSoftApCapability = new SoftApCapability();
+        testSoftApCapability.setMaxSupportedClients(10);
         ArgumentCaptor<ISoftApCallback.Stub> callbackCaptor =
                 ArgumentCaptor.forClass(ISoftApCallback.Stub.class);
         mWifiManager.registerSoftApCallback(new HandlerExecutor(mHandler), mSoftApCallback);
@@ -896,12 +917,15 @@ public class WifiManagerTest {
         callbackCaptor.getValue().onConnectedClientsChanged(testClients);
         callbackCaptor.getValue().onInfoChanged(testSoftApInfo);
         callbackCaptor.getValue().onStateChanged(WIFI_AP_STATE_FAILED, SAP_START_FAILURE_GENERAL);
+        callbackCaptor.getValue().onCapabilityChanged(testSoftApCapability);
+
 
         mLooper.dispatchAll();
         verify(mSoftApCallback).onStateChanged(WIFI_AP_STATE_ENABLING, 0);
         verify(mSoftApCallback).onConnectedClientsChanged(testClients);
         verify(mSoftApCallback).onInfoChanged(testSoftApInfo);
         verify(mSoftApCallback).onStateChanged(WIFI_AP_STATE_FAILED, SAP_START_FAILURE_GENERAL);
+        verify(mSoftApCallback).onCapabilityChanged(testSoftApCapability);
     }
 
     /*
