@@ -21,6 +21,7 @@ import static android.net.NetworkCapabilities.transportNamesOf;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.net.CaptivePortalData;
 import android.net.IDnsResolver;
 import android.net.INetd;
 import android.net.INetworkMonitor;
@@ -166,6 +167,10 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     // Set to true when partial connectivity was detected.
     public boolean partialConnectivity;
+
+    // Captive portal info of the network, if any.
+    // Obtained by ConnectivityService and merged into NetworkAgent-provided information.
+    public CaptivePortalData captivePortalData;
 
     // Networks are lingered when they become unneeded as a result of their NetworkRequests being
     // satisfied by a higher-scoring network. so as to allow communication to wrap up before the
