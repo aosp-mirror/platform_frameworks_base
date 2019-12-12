@@ -115,6 +115,12 @@ public final class BasePermission {
         protectionLevel = PermissionInfo.PROTECTION_SIGNATURE;
     }
 
+    @Override
+    public String toString() {
+        return "BasePermission{" + Integer.toHexString(System.identityHashCode(this)) + " " + name
+                + "}";
+    }
+
     public String getName() {
         return name;
     }
@@ -170,7 +176,8 @@ public final class BasePermission {
         if (this.perm == null) {
             return false;
         }
-        return Objects.equals(this.perm.className, perm.className);
+        return Objects.equals(this.perm.getPackageName(), perm.getPackageName())
+                && Objects.equals(this.perm.className, perm.className);
     }
 
     public boolean isDynamic() {
@@ -406,7 +413,8 @@ public final class BasePermission {
             r.append("DUP:");
             r.append(p.getName());
         }
-        if (bp.perm != null && Objects.equals(bp.perm.className, p.className)) {
+        if (bp.perm != null && Objects.equals(bp.perm.getPackageName(), p.getPackageName())
+                && Objects.equals(bp.perm.className, p.className)) {
             bp.protectionLevel = p.protectionLevel;
         }
         if (PackageManagerService.DEBUG_PACKAGE_SCANNING && r != null) {
@@ -642,21 +650,5 @@ public final class BasePermission {
             pw.println(readEnforced);
         }
         return true;
-    }
-
-    @Override
-    public String toString() {
-        return "BasePermission{" +
-                "name='" + name + '\'' +
-                ", type=" + type +
-                ", sourcePackageName='" + sourcePackageName + '\'' +
-                ", sourcePackageSetting=" + sourcePackageSetting +
-                ", protectionLevel=" + protectionLevel +
-                ", perm=" + perm +
-                ", pendingPermissionInfo=" + pendingPermissionInfo +
-                ", uid=" + uid +
-                ", gids=" + Arrays.toString(gids) +
-                ", perUser=" + perUser +
-                '}';
     }
 }
