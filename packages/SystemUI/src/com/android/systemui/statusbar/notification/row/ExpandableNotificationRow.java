@@ -17,12 +17,12 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_CONTRACTED;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_EXPANDED;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_PUBLIC;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -89,8 +89,9 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
-import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationCallback;
-import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams;
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -247,6 +248,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private InflationCallback mInflationCallback;
     private boolean mIsChildInGroup;
     private @InflationFlag int mInflationFlags = REQUIRED_INFLATION_FLAGS;
+    private final BindParams mBindParams = new BindParams();
 
     // Listener will be called when receiving a long click event.
     // Use #setLongPressPosition to optionally assign positional data with the long press.
@@ -462,8 +464,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * Inflate views based off the inflation flags set. Inflation happens asynchronously.
      */
     public void inflateViews() {
-        mNotificationInflater.inflateNotificationViews(mInflationFlags, false /* forceInflate */,
-                mInflationCallback);
+        mNotificationInflater.bindContent(mEntry, this, mInflationFlags, mBindParams,
+                false /* forceInflate */, mInflationCallback);
     }
 
     /**
@@ -475,8 +477,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void freeContentViewWhenSafe(@InflationFlag int inflationFlag) {
         // View should not be reinflated in the future
         clearInflationFlags(inflationFlag);
-        Runnable freeViewRunnable = () ->
-                mNotificationInflater.freeNotificationView(inflationFlag);
+        Runnable freeViewRunnable =
+                () -> mNotificationInflater.unbindContent(mEntry, this, inflationFlag);
         switch (inflationFlag) {
             case FLAG_CONTENT_VIEW_HEADS_UP:
                 getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_HEADSUP,
@@ -845,13 +847,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mNotificationParent = isChildInGroup ? parent : null;
         mPrivateLayout.setIsChildInGroup(isChildInGroup);
-        mNotificationInflater.setIsChildInGroup(isChildInGroup);
+        mBindParams.isChildInGroup = isChildInGroup;
         if (mIsChildInGroup != isChildInGroup) {
             mIsChildInGroup = isChildInGroup;
             if (mIsLowPriority) {
                 int flags = FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED;
-                mNotificationInflater.inflateNotificationViews(flags, false /* forceInflate */,
-                        mInflationCallback);
+                mNotificationInflater.bindContent(mEntry, this, flags, mBindParams,
+                        false /* forceInflate */, mInflationCallback);
             }
         }
         resetBackgroundAlpha();
@@ -1257,8 +1259,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             l.reInflateViews();
         }
         mEntry.getSbn().clearPackageContext();
-        mNotificationInflater.inflateNotificationViews(mInflationFlags, true /* forceInflate */,
-                mInflationCallback);
+        mNotificationInflater.bindContent(mEntry, this, mInflationFlags, mBindParams,
+                true /* forceInflate */, mInflationCallback);
     }
 
     @Override
@@ -1612,7 +1614,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void setIsLowPriority(boolean isLowPriority) {
         mIsLowPriority = isLowPriority;
         mPrivateLayout.setIsLowPriority(isLowPriority);
-        mNotificationInflater.setIsLowPriority(mIsLowPriority);
+        mBindParams.isLowPriority = mIsLowPriority;
         if (mChildrenContainer != null) {
             mChildrenContainer.setIsLowPriority(isLowPriority);
         }
@@ -1624,12 +1626,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void setUseIncreasedCollapsedHeight(boolean use) {
         mUseIncreasedCollapsedHeight = use;
-        mNotificationInflater.setUsesIncreasedHeight(use);
+        mBindParams.usesIncreasedHeight = use;
     }
 
     public void setUseIncreasedHeadsUpHeight(boolean use) {
         mUseIncreasedHeadsUpHeight = use;
-        mNotificationInflater.setUsesIncreasedHeadsUpHeight(use);
+        mBindParams.usesIncreasedHeadsUpHeight = use;
     }
 
     public void setRemoteViewClickHandler(RemoteViews.OnClickHandler remoteViewClickHandler) {
@@ -1650,8 +1652,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mNeedsRedaction = needsRedaction;
             if (needsRedaction) {
                 setInflationFlags(FLAG_CONTENT_VIEW_PUBLIC);
-                mNotificationInflater.inflateNotificationViews(FLAG_CONTENT_VIEW_PUBLIC,
-                        false /* forceInflate */, mInflationCallback);
+                mNotificationInflater.bindContent(mEntry, this, FLAG_CONTENT_VIEW_PUBLIC,
+                        mBindParams, false /* forceInflate */, mInflationCallback);
             } else {
                 clearInflationFlags(FLAG_CONTENT_VIEW_PUBLIC);
                 freeContentViewWhenSafe(FLAG_CONTENT_VIEW_PUBLIC);
@@ -1670,7 +1672,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mNotificationInflater = new NotificationContentInflater(this);
+        mNotificationInflater = new NotificationContentInflater();
         mMenuRow = new NotificationMenuRow(mContext);
         mImageResolver = new NotificationInlineImageResolver(context,
                 new NotificationInlineImageCache());

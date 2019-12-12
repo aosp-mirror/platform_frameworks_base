@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_ERROR;
 
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -45,8 +47,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationRowBin
 import com.android.systemui.statusbar.notification.logging.NotifEvent;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
-import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -94,7 +95,7 @@ import javax.inject.Singleton;
 @Singleton
 public class NotificationEntryManager implements
         Dumpable,
-        NotificationContentInflater.InflationCallback,
+        InflationCallback,
         VisualStabilityManager.Callback {
     private static final String TAG = "NotificationEntryMgr";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);

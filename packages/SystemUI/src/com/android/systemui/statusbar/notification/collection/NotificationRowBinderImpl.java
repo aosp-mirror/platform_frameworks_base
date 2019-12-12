@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.collection;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.annotation.Nullable;
 import android.content.Context;
