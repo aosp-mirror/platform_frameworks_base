@@ -22,6 +22,11 @@ import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HARD_K
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HIDDEN;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_IGNORE_HARD_KEYBOARD;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_MASK;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
+import static android.view.accessibility.AccessibilityManager.ShortcutType;
+
+import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 
 import android.accessibilityservice.AccessibilityService.SoftKeyboardShowMode;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -33,9 +38,13 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteCallbackList;
 import android.provider.Settings;
+import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
+
+import com.android.internal.accessibility.AccessibilityShortcutController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -79,19 +88,18 @@ class AccessibilityUserState {
 
     final Set<ComponentName> mTouchExplorationGrantedServices = new HashSet<>();
 
+    final ArraySet<String> mAccessibilityShortcutKeyTargets = new ArraySet<>();
+
+    final ArraySet<String> mAccessibilityButtonTargets = new ArraySet<>();
+
     private final ServiceInfoChangeListener mServiceInfoChangeListener;
 
-    private ComponentName mServiceAssignedToAccessibilityButton;
-
     private ComponentName mServiceChangingSoftKeyboardMode;
-
-    private ComponentName mServiceToEnableWithShortcut;
 
     private boolean mBindInstantServiceAllowed;
     private boolean mIsAutoclickEnabled;
     private boolean mIsDisplayMagnificationEnabled;
     private boolean mIsFilterKeyEventsEnabled;
-    private boolean mIsNavBarMagnificationAssignedToAccessibilityButton;
     private boolean mIsNavBarMagnificationEnabled;
     private boolean mIsPerformGesturesEnabled;
     private boolean mIsTextHighContrastEnabled;
@@ -141,11 +149,11 @@ class AccessibilityUserState {
         // Clear state persisted in settings.
         mEnabledServices.clear();
         mTouchExplorationGrantedServices.clear();
+        mAccessibilityShortcutKeyTargets.clear();
+        mAccessibilityButtonTargets.clear();
         mIsTouchExplorationEnabled = false;
         mIsDisplayMagnificationEnabled = false;
         mIsNavBarMagnificationEnabled = false;
-        mServiceAssignedToAccessibilityButton = null;
-        mIsNavBarMagnificationAssignedToAccessibilityButton = false;
         mIsAutoclickEnabled = false;
         mUserNonInteractiveUiTimeout = 0;
         mUserInteractiveUiTimeout = 0;
@@ -435,6 +443,26 @@ class AccessibilityUserState {
         pw.append(", installedServiceCount=").append(String.valueOf(mInstalledServices.size()));
         pw.append("}");
         pw.println();
+        pw.append("     shortcut key:{");
+        int size = mAccessibilityShortcutKeyTargets.size();
+        for (int i = 0; i < size; i++) {
+            final String componentId = mAccessibilityShortcutKeyTargets.valueAt(i);
+            pw.append(componentId);
+            if (i + 1 < size) {
+                pw.append(", ");
+            }
+        }
+        pw.println("}");
+        pw.append("     button:{");
+        size = mAccessibilityButtonTargets.size();
+        for (int i = 0; i < size; i++) {
+            final String componentId = mAccessibilityButtonTargets.valueAt(i);
+            pw.append(componentId);
+            if (i + 1 < size) {
+                pw.append(", ");
+            }
+        }
+        pw.println("}");
         pw.append("     Bound services:{");
         final int serviceCount = mBoundServices.size();
         for (int j = 0; j < serviceCount; j++) {
@@ -525,20 +553,85 @@ class AccessibilityUserState {
         mLastSentClientState = state;
     }
 
-    public boolean isNavBarMagnificationAssignedToAccessibilityButtonLocked() {
-        return mIsNavBarMagnificationAssignedToAccessibilityButton;
+    public boolean isShortcutKeyMagnificationEnabledLocked() {
+        return mAccessibilityShortcutKeyTargets.contains(MAGNIFICATION_CONTROLLER_NAME);
     }
 
-    public void setNavBarMagnificationAssignedToAccessibilityButtonLocked(boolean assigned) {
-        mIsNavBarMagnificationAssignedToAccessibilityButton = assigned;
+    /**
+     * Disable both shortcuts' magnification function.
+     */
+    public void disableShortcutMagnificationLocked() {
+        mAccessibilityShortcutKeyTargets.remove(MAGNIFICATION_CONTROLLER_NAME);
+        mAccessibilityButtonTargets.remove(MAGNIFICATION_CONTROLLER_NAME);
     }
 
-    public boolean isNavBarMagnificationEnabledLocked() {
-        return mIsNavBarMagnificationEnabled;
+    /**
+     * Returns a set which contains the flattened component names and the system class names
+     * assigned to the given shortcut.
+     *
+     * @param shortcutType The shortcut type.
+     * @return The array set of the strings
+     */
+    public ArraySet<String> getShortcutTargetsLocked(@ShortcutType int shortcutType) {
+        if (shortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
+            return mAccessibilityShortcutKeyTargets;
+        } else if (shortcutType == ACCESSIBILITY_BUTTON) {
+            return mAccessibilityButtonTargets;
+        }
+        return null;
     }
 
-    public void setNavBarMagnificationEnabledLocked(boolean enabled) {
-        mIsNavBarMagnificationEnabled = enabled;
+    /**
+     * Whether or not the given shortcut target is installed in device.
+     *
+     * @param name The shortcut target name
+     * @return true if the shortcut target is installed.
+     */
+    public boolean isShortcutTargetInstalledLocked(String name) {
+        if (TextUtils.isEmpty(name)) {
+            return false;
+        }
+        if (MAGNIFICATION_CONTROLLER_NAME.equals(name)) {
+            return true;
+        }
+
+        final ComponentName componentName = ComponentName.unflattenFromString(name);
+        if (componentName == null) {
+            return false;
+        }
+        if (AccessibilityShortcutController.getFrameworkShortcutFeaturesMap()
+                .containsKey(componentName)) {
+            return true;
+        }
+        if (getInstalledServiceInfoLocked(componentName) != null) {
+            return true;
+        }
+        for (int i = 0; i < mInstalledShortcuts.size(); i++) {
+            if (mInstalledShortcuts.get(i).getComponentName().equals(componentName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns installed accessibility service info by the given service component name.
+     */
+    public AccessibilityServiceInfo getInstalledServiceInfoLocked(ComponentName componentName) {
+        for (int i = 0; i < mInstalledServices.size(); i++) {
+            final AccessibilityServiceInfo serviceInfo = mInstalledServices.get(i);
+            if (serviceInfo.getComponentName().equals(componentName)) {
+                return serviceInfo;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns accessibility service connection by the given service component name.
+     */
+    public AccessibilityServiceConnection getServiceConnectionLocked(ComponentName componentName) {
+        return mComponentNameToServiceMap.get(componentName);
     }
 
     public int getNonInteractiveUiTimeoutLocked() {
@@ -557,14 +650,6 @@ class AccessibilityUserState {
         mIsPerformGesturesEnabled = enabled;
     }
 
-    public ComponentName getServiceAssignedToAccessibilityButtonLocked() {
-        return mServiceAssignedToAccessibilityButton;
-    }
-
-    public void setServiceAssignedToAccessibilityButtonLocked(ComponentName componentName) {
-        mServiceAssignedToAccessibilityButton = componentName;
-    }
-
     public ComponentName getServiceChangingSoftKeyboardModeLocked() {
         return mServiceChangingSoftKeyboardMode;
     }
@@ -572,14 +657,6 @@ class AccessibilityUserState {
     public void setServiceChangingSoftKeyboardModeLocked(
             ComponentName serviceChangingSoftKeyboardMode) {
         mServiceChangingSoftKeyboardMode = serviceChangingSoftKeyboardMode;
-    }
-
-    public ComponentName getServiceToEnableWithShortcutLocked() {
-        return mServiceToEnableWithShortcut;
-    }
-
-    public void setServiceToEnableWithShortcutLocked(ComponentName componentName) {
-        mServiceToEnableWithShortcut = componentName;
     }
 
     public boolean isTextHighContrastEnabledLocked() {
@@ -613,4 +690,28 @@ class AccessibilityUserState {
     public void setUserNonInteractiveUiTimeoutLocked(int timeout) {
         mUserNonInteractiveUiTimeout = timeout;
     }
+
+    // TODO(a11y shortcut): These functions aren't necessary, after the new Settings shortcut Ui
+    //  is merged.
+    boolean isNavBarMagnificationEnabledLocked() {
+        return mIsNavBarMagnificationEnabled;
+    }
+
+    void setNavBarMagnificationEnabledLocked(boolean enabled) {
+        mIsNavBarMagnificationEnabled = enabled;
+    }
+
+    boolean isNavBarMagnificationAssignedToAccessibilityButtonLocked() {
+        return mAccessibilityButtonTargets.contains(MAGNIFICATION_CONTROLLER_NAME);
+    }
+
+    ComponentName getServiceAssignedToAccessibilityButtonLocked() {
+        final String targetName = mAccessibilityButtonTargets.isEmpty() ? null
+                : mAccessibilityButtonTargets.valueAt(0);
+        if (targetName == null) {
+            return null;
+        }
+        return ComponentName.unflattenFromString(targetName);
+    }
+    // TODO(a11y shortcut): End
 }

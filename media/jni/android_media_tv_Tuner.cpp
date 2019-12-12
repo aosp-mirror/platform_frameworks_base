@@ -27,6 +27,7 @@
 
 using ::android::hardware::Void;
 using ::android::hardware::hidl_vec;
+using ::android::hardware::tv::tuner::V1_0::DataFormat;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterPesDataSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterSettings;
@@ -35,10 +36,13 @@ using ::android::hardware::tv::tuner::V1_0::DemuxQueueNotifyBits;
 using ::android::hardware::tv::tuner::V1_0::DemuxTpid;
 using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterType;
+using ::android::hardware::tv::tuner::V1_0::DvrSettings;
 using ::android::hardware::tv::tuner::V1_0::FrontendAnalogSettings;
 using ::android::hardware::tv::tuner::V1_0::FrontendAnalogSifStandard;
 using ::android::hardware::tv::tuner::V1_0::FrontendAnalogType;
 using ::android::hardware::tv::tuner::V1_0::ITuner;
+using ::android::hardware::tv::tuner::V1_0::PlaybackSettings;
+using ::android::hardware::tv::tuner::V1_0::RecordSettings;
 using ::android::hardware::tv::tuner::V1_0::Result;
 
 struct fields_t {
@@ -91,6 +95,14 @@ void DvrCallback::setDvr(const jobject dvr) {
     ALOGD("FilterCallback::setDvr");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     mDvr = env->NewWeakGlobalRef(dvr);
+}
+
+/////////////// Dvr ///////////////////////
+
+Dvr::Dvr(sp<IDvr> sp, jweak obj) : mDvrSp(sp), mDvrObj(obj) {}
+
+sp<IDvr> Dvr::getIDvr() {
+    return mDvrSp;
 }
 
 /////////////// FilterCallback ///////////////////////
@@ -391,14 +403,14 @@ jobject JTuner::openDvr(DvrType type, int bufferSize) {
             return NULL;
         }
     }
-    sp<IDvr> dvrSp;
+    sp<IDvr> iDvrSp;
     sp<DvrCallback> callback = new DvrCallback();
     mDemux->openDvr(type, bufferSize, callback,
             [&](Result, const sp<IDvr>& dvr) {
-                dvrSp = dvr;
+                iDvrSp = dvr;
             });
 
-    if (dvrSp == NULL) {
+    if (iDvrSp == NULL) {
         return NULL;
     }
 
@@ -408,7 +420,7 @@ jobject JTuner::openDvr(DvrType type, int bufferSize) {
                     env->FindClass("android/media/tv/tuner/Tuner$Dvr"),
                     gFields.dvrInitID,
                     mObject);
-
+    sp<Dvr> dvrSp = new Dvr(iDvrSp, dvrObj);
     dvrSp->incStrong(dvrObj);
     env->SetLongField(dvrObj, gFields.dvrContext, (jlong)dvrSp.get());
 
@@ -485,8 +497,51 @@ static sp<Filter> getFilter(JNIEnv *env, jobject filter) {
     return (Filter *)env->GetLongField(filter, gFields.filterContext);
 }
 
-static sp<IDvr> getDvr(JNIEnv *env, jobject dvr) {
-    return (IDvr *)env->GetLongField(dvr, gFields.dvrContext);
+static DvrSettings getDvrSettings(JNIEnv *env, jobject settings) {
+    DvrSettings dvrSettings;
+    jclass clazz = env->FindClass("android/media/tv/tuner/DvrSettings");
+    uint32_t statusMask =
+            static_cast<uint32_t>(env->GetIntField(
+                    settings, env->GetFieldID(clazz, "mStatusMask", "I")));
+    uint32_t lowThreshold =
+            static_cast<uint32_t>(env->GetIntField(
+                    settings, env->GetFieldID(clazz, "mLowThreshold", "I")));
+    uint32_t highThreshold =
+            static_cast<uint32_t>(env->GetIntField(
+                    settings, env->GetFieldID(clazz, "mHighThreshold", "I")));
+    uint8_t packetSize =
+            static_cast<uint8_t>(env->GetIntField(
+                    settings, env->GetFieldID(clazz, "mPacketSize", "I")));
+    DataFormat dataFormat =
+            static_cast<DataFormat>(env->GetIntField(
+                    settings, env->GetFieldID(clazz, "mDataFormat", "I")));
+    DvrType type =
+            static_cast<DvrType>(env->GetIntField(
+                    settings, env->GetFieldID(clazz, "mType", "I")));
+    if (type == DvrType::RECORD) {
+        RecordSettings recordSettings {
+                .statusMask = static_cast<unsigned char>(statusMask),
+                .lowThreshold = lowThreshold,
+                .highThreshold = highThreshold,
+                .dataFormat = dataFormat,
+                .packetSize = packetSize,
+        };
+        dvrSettings.record(recordSettings);
+    } else if (type == DvrType::PLAYBACK) {
+        PlaybackSettings PlaybackSettings {
+                .statusMask = statusMask,
+                .lowThreshold = lowThreshold,
+                .highThreshold = highThreshold,
+                .dataFormat = dataFormat,
+                .packetSize = packetSize,
+        };
+        dvrSettings.playback(PlaybackSettings);
+    }
+    return dvrSettings;
+}
+
+static sp<Dvr> getDvr(JNIEnv *env, jobject dvr) {
+    return (Dvr *)env->GetLongField(dvr, gFields.dvrContext);
 }
 
 static void android_media_tv_Tuner_native_init(JNIEnv *env) {
@@ -730,7 +785,7 @@ static jobject android_media_tv_Tuner_open_dvr(JNIEnv *env, jobject thiz, jint t
 }
 
 static bool android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobject filter) {
-    sp<IDvr> dvrSp = getDvr(env, dvr);
+    sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
     sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     if (dvrSp == NULL || filterSp == NULL) {
         return false;
@@ -740,7 +795,7 @@ static bool android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobje
 }
 
 static bool android_media_tv_Tuner_detach_filter(JNIEnv *env, jobject dvr, jobject filter) {
-    sp<IDvr> dvrSp = getDvr(env, dvr);
+    sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
     sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     if (dvrSp == NULL || filterSp == NULL) {
         return false;
@@ -749,8 +804,18 @@ static bool android_media_tv_Tuner_detach_filter(JNIEnv *env, jobject dvr, jobje
     return result == Result::SUCCESS;
 }
 
+static int android_media_tv_Tuner_configure_dvr(JNIEnv *env, jobject dvr, jobject settings) {
+    sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
+    if (dvrSp == NULL) {
+        ALOGD("Failed to configure dvr: dvr not found");
+        return (int)Result::INVALID_STATE;
+    }
+    Result result = dvrSp->configure(getDvrSettings(env, settings));
+    return (int)result;
+}
+
 static bool android_media_tv_Tuner_start_dvr(JNIEnv *env, jobject dvr) {
-    sp<IDvr> dvrSp = getDvr(env, dvr);
+    sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
     if (dvrSp == NULL) {
         ALOGD("Failed to start dvr: dvr not found");
         return false;
@@ -759,7 +824,7 @@ static bool android_media_tv_Tuner_start_dvr(JNIEnv *env, jobject dvr) {
 }
 
 static bool android_media_tv_Tuner_stop_dvr(JNIEnv *env, jobject dvr) {
-    sp<IDvr> dvrSp = getDvr(env, dvr);
+    sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
     if (dvrSp == NULL) {
         ALOGD("Failed to stop dvr: dvr not found");
         return false;
@@ -768,7 +833,7 @@ static bool android_media_tv_Tuner_stop_dvr(JNIEnv *env, jobject dvr) {
 }
 
 static bool android_media_tv_Tuner_flush_dvr(JNIEnv *env, jobject dvr) {
-    sp<IDvr> dvrSp = getDvr(env, dvr);
+    sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
     if (dvrSp == NULL) {
         ALOGD("Failed to flush dvr: dvr not found");
         return false;
@@ -818,6 +883,8 @@ static const JNINativeMethod gDvrMethods[] = {
             (void *)android_media_tv_Tuner_attach_filter },
     { "nativeDetachFilter", "(Landroid/media/tv/tuner/Tuner$Filter;)Z",
             (void *)android_media_tv_Tuner_detach_filter },
+    { "nativeConfigureDvr", "(Landroid/media/tv/tuner/DvrSettings;)I",
+            (void *)android_media_tv_Tuner_configure_dvr },
     { "nativeStartDvr", "()Z", (void *)android_media_tv_Tuner_start_dvr },
     { "nativeStopDvr", "()Z", (void *)android_media_tv_Tuner_stop_dvr },
     { "nativeFlushDvr", "()Z", (void *)android_media_tv_Tuner_flush_dvr },

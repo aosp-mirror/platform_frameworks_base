@@ -698,7 +698,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private final Runnable mUpdateOomAdjRunnable = new Runnable() {
         @Override
-	public void run() {
+        public void run() {
             mAmInternal.updateOomAdj();
         }
     };
@@ -1591,7 +1591,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // We should consolidate.
             if (mController != null) {
                 // Find the first activity that is not finishing.
-                final ActivityRecord next = r.getActivityStack().topRunningActivityLocked(token, 0);
+                final ActivityRecord next =
+                        r.getActivityStack().topRunningActivity(token, INVALID_TASK_ID);
                 if (next != null) {
                     // ask watcher if this is allowed
                     boolean resumeOK = true;
@@ -1628,11 +1629,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     // because we don't support returning them across task boundaries. Also, to
                     // keep backwards compatibility we remove the task from recents when finishing
                     // task with root activity.
-                    res = mStackSupervisor.removeTaskByIdLocked(tr.mTaskId, false /* killProcess */,
+                    mStackSupervisor.removeTask(tr, false /*killProcess*/,
                             finishWithRootActivity, "finish-activity");
-                    if (!res) {
-                        Slog.i(TAG, "Removing task failed to finish activity");
-                    }
+                    res = true;
                     // Explicitly dismissing the activity so reset its relaunch flag.
                     r.mRelaunchReason = RELAUNCH_REASON_NONE;
                 } else {
@@ -1901,7 +1900,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean isTopActivityImmersive() {
         enforceNotIsolatedCaller("isTopActivityImmersive");
         synchronized (mGlobalLock) {
-            final ActivityRecord r = getTopDisplayFocusedStack().topRunningActivityLocked();
+            final ActivityRecord r = getTopDisplayFocusedStack().topRunningActivity();
             return (r != null) ? r.immersive : false;
         }
     }
@@ -1931,7 +1930,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public int getFrontActivityScreenCompatMode() {
         enforceNotIsolatedCaller("getFrontActivityScreenCompatMode");
         synchronized (mGlobalLock) {
-            final ActivityRecord r = getTopDisplayFocusedStack().topRunningActivityLocked();
+            final ActivityRecord r = getTopDisplayFocusedStack().topRunningActivity();
             if (r == null) {
                 return ActivityManager.COMPAT_MODE_UNKNOWN;
             }
@@ -1945,7 +1944,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "setFrontActivityScreenCompatMode");
         ApplicationInfo ai;
         synchronized (mGlobalLock) {
-            final ActivityRecord r = getTopDisplayFocusedStack().topRunningActivityLocked();
+            final ActivityRecord r = getTopDisplayFocusedStack().topRunningActivity();
             if (r == null) {
                 Slog.w(TAG, "setFrontActivityScreenCompatMode failed: no top activity");
                 return;
@@ -2078,7 +2077,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.w(TAG, "setFocusedStack: No stack with id=" + stackId);
                     return;
                 }
-                final ActivityRecord r = stack.topRunningActivityLocked();
+                final ActivityRecord r = stack.topRunningActivity();
                 if (r != null && r.moveFocusableActivityToTop("setFocusedStack")) {
                     mRootActivityContainer.resumeFocusedStacksTopActivities();
                 }
@@ -2133,7 +2132,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mStackSupervisor.removeTaskByIdLocked(taskId, true, REMOVE_FROM_RECENTS,
+                return mStackSupervisor.removeTaskById(taskId, true, REMOVE_FROM_RECENTS,
                         "remove-task");
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -2207,7 +2206,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 int taskId = ActivityRecord.getTaskForActivityLocked(token, !nonRoot);
                 final Task task = mRootActivityContainer.anyTaskForId(taskId);
                 if (task != null) {
-                    return ActivityRecord.getStackLocked(token).moveTaskToBackLocked(taskId);
+                    return ActivityRecord.getStackLocked(token).moveTaskToBack(task);
                 }
             } finally {
                 Binder.restoreCallingIdentity(origId);
@@ -2918,7 +2917,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         final ActivityStack stack = mRootActivityContainer.getTopDisplayFocusedStack();
-        if (stack == null || task != stack.topTask()) {
+        if (stack == null || task != stack.getTopMostTask()) {
             throw new IllegalArgumentException("Invalid task, not in foreground");
         }
 
@@ -5787,7 +5786,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // If the configuration changed, and the caller is not already
                 // in the process of starting an activity, then find the top
                 // activity to check if its configuration needs to change.
-                starting = mainStack.topRunningActivityLocked();
+                starting = mainStack.topRunningActivity();
             }
 
             if (starting != null) {

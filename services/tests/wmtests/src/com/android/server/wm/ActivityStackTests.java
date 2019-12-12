@@ -286,12 +286,12 @@ public class ActivityStackTests extends ActivityTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Do not move display to back because there is still another stack.
-        stack2.moveToBack("testMoveStackToBackIncludingParent", stack2.topTask());
+        stack2.moveToBack("testMoveStackToBackIncludingParent", stack2.getTopMostTask());
         verify(stack2).positionChildAtBottom(any(), eq(false) /* includingParents */);
 
         // Also move display to back because there is only one stack left.
         display.removeStack(stack1);
-        stack2.moveToBack("testMoveStackToBackIncludingParent", stack2.topTask());
+        stack2.moveToBack("testMoveStackToBackIncludingParent", stack2.getTopMostTask());
         verify(stack2).positionChildAtBottom(any(), eq(true) /* includingParents */);
     }
 
@@ -545,7 +545,7 @@ public class ActivityStackTests extends ActivityTestsBase {
     public void testShouldBeVisible_Finishing() {
         final ActivityStack homeStack = createStackForShouldBeVisibleTest(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
-        ActivityRecord topRunningHomeActivity = homeStack.topRunningActivityLocked();
+        ActivityRecord topRunningHomeActivity = homeStack.topRunningActivity();
         if (topRunningHomeActivity == null) {
             topRunningHomeActivity = new ActivityBuilder(mService)
                     .setStack(homeStack)
@@ -563,7 +563,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         topRunningHomeActivity.finishing = true;
         final ActivityRecord topRunningTranslucentActivity =
-                translucentStack.topRunningActivityLocked();
+                translucentStack.topRunningActivity();
         topRunningTranslucentActivity.finishing = true;
 
         // Home stack should be visible even there are no running activities.
@@ -883,7 +883,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         // removed from the task. Since the overlay activity should be removed as well, the task
         // should be empty.
         assertFalse(mTask.hasChild());
-        assertThat(mStack.getAllTasks()).isEmpty();
+        assertFalse(mStack.hasChild());
     }
 
     @Test
@@ -905,7 +905,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         mStack.handleAppDiedLocked(secondActivity.app);
 
         assertFalse(mTask.hasChild());
-        assertThat(mStack.getAllTasks()).isEmpty();
+        assertFalse(mStack.hasChild());
     }
 
     @Test
@@ -919,7 +919,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         mStack.handleAppDiedLocked(activity.app);
 
         assertEquals(1, mTask.getChildCount());
-        assertEquals(1, mStack.getAllTasks().size());
+        assertEquals(1, mStack.getChildCount());
     }
 
     @Test
@@ -933,7 +933,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         mStack.handleAppDiedLocked(activity.app);
 
         assertFalse(mTask.hasChild());
-        assertThat(mStack.getAllTasks()).isEmpty();
+        assertFalse(mStack.hasChild());
     }
 
     @Test
@@ -947,7 +947,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         mStack.handleAppDiedLocked(activity.app);
 
         assertEquals(1, mTask.getChildCount());
-        assertEquals(1, mStack.getAllTasks().size());
+        assertEquals(1, mStack.getChildCount());
     }
 
     @Test
@@ -961,7 +961,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         mStack.handleAppDiedLocked(activity.app);
 
         assertFalse(mTask.hasChild());
-        assertThat(mStack.getAllTasks()).isEmpty();
+        assertFalse(mStack.hasChild());
     }
 
     @Test
@@ -982,7 +982,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         final ActivityStack homeStack = createStackForShouldBeVisibleTest(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
 
-        ActivityRecord activity = homeStack.topRunningActivityLocked();
+        ActivityRecord activity = homeStack.topRunningActivity();
         if (activity == null) {
             activity = new ActivityBuilder(mService)
                     .setStack(homeStack)
@@ -1020,7 +1020,7 @@ public class ActivityStackTests extends ActivityTestsBase {
     }
 
     private ActivityRecord finishTopActivity(ActivityStack stack) {
-        final ActivityRecord activity = stack.topRunningActivityLocked();
+        final ActivityRecord activity = stack.topRunningActivity();
         assertNotNull(activity);
         activity.setState(STOPPED, "finishTopActivity");
         activity.makeFinishingLocked();

@@ -1439,6 +1439,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int ENABLE_ROLLBACK_TIMEOUT = 22;
     static final int DEFERRED_NO_KILL_POST_DELETE = 23;
     static final int DEFERRED_NO_KILL_INSTALL_OBSERVER = 24;
+    static final int INTEGRITY_VERIFICATION_COMPLETE = 25;
 
     static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 3 * 1000;
     static final int DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS = 500;
@@ -1603,6 +1604,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     final boolean didRestore = (msg.arg2 != 0);
                     mRunningInstalls.delete(msg.arg1);
 
+                    if (data != null && data.res.freezer != null) {
+                        data.res.freezer.close();
+                    }
+
                     if (data != null && data.mPostInstallRunnable != null) {
                         data.mPostInstallRunnable.run();
                     } else if (data != null) {
@@ -1761,6 +1766,10 @@ public class PackageManagerService extends IPackageManager.Stub
                         params.handleVerificationFinished();
                     }
 
+                    break;
+                }
+                case INTEGRITY_VERIFICATION_COMPLETE: {
+                    // TODO: implement this case.
                     break;
                 }
                 case START_INTENT_FILTER_VERIFICATIONS: {
@@ -3019,8 +3028,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mWellbeingPackage = getWellbeingPackageName();
             mDocumenterPackage = getDocumenterPackageName();
-            mConfiguratorPackage =
-                    mContext.getString(R.string.config_deviceConfiguratorPackageName);
+            mConfiguratorPackage = getDeviceConfiguratorPackageName();
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
             mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
             mTelephonyPackages = getTelephonyPackageNames();
@@ -13434,35 +13442,10 @@ public class PackageManagerService extends IPackageManager.Stub
             // restore if appropriate, then pass responsibility back to the
             // Package Manager to run the post-install observer callbacks
             // and broadcasts.
-            IBackupManager bm = IBackupManager.Stub.asInterface(
-                    ServiceManager.getService(Context.BACKUP_SERVICE));
-            if (bm != null) {
-                // For backwards compatibility as USER_ALL previously routed directly to USER_SYSTEM
-                // in the BackupManager. USER_ALL is used in compatibility tests.
-                if (userId == UserHandle.USER_ALL) {
-                    userId = UserHandle.USER_SYSTEM;
-                }
-                if (DEBUG_INSTALL) {
-                    Log.v(TAG, "token " + token + " to BM for possible restore for user " + userId);
-                }
-                Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "restore", token);
-                try {
-                    if (bm.isBackupServiceActive(userId)) {
-                        bm.restoreAtInstallForUser(
-                                userId, res.pkg.getAppInfoPackageName(), token);
-                    } else {
-                        doRestore = false;
-                    }
-                } catch (RemoteException e) {
-                    // can't happen; the backup manager is local
-                } catch (Exception e) {
-                    Slog.e(TAG, "Exception trying to enqueue restore", e);
-                    doRestore = false;
-                }
-            } else {
-                Slog.e(TAG, "Backup Manager not found!");
-                doRestore = false;
+            if (res.freezer != null) {
+                res.freezer.close();
             }
+            doRestore = performBackupManagerRestore(userId, token, res);
         }
 
         // If this is an update to a package that might be potentially downgraded, then we
@@ -13471,42 +13454,7 @@ public class PackageManagerService extends IPackageManager.Stub
         //
         // TODO(narayan): Get this working for cases where userId == UserHandle.USER_ALL.
         if (res.returnCode == PackageManager.INSTALL_SUCCEEDED && !doRestore && update) {
-            IRollbackManager rm = IRollbackManager.Stub.asInterface(
-                    ServiceManager.getService(Context.ROLLBACK_SERVICE));
-
-            final String packageName = res.pkg.getAppInfoPackageName();
-            final String seInfo = res.pkg.getSeInfo();
-            final int[] allUsers = mUserManager.getUserIds();
-            final int[] installedUsers;
-
-            final PackageSetting ps;
-            int appId = -1;
-            long ceDataInode = -1;
-            synchronized (mSettings) {
-                ps = mSettings.getPackageLPr(packageName);
-                if (ps != null) {
-                    appId = ps.appId;
-                    ceDataInode = ps.getCeDataInode(userId);
-                }
-
-                // NOTE: We ignore the user specified in the InstallParam because we know this is
-                // an update, and hence need to restore data for all installed users.
-                installedUsers = ps.queryInstalledUsers(allUsers, true);
-            }
-
-            boolean doSnapshotOrRestore = data != null && data.args != null
-                    && ((data.args.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0
-                    || (data.args.installFlags & PackageManager.INSTALL_REQUEST_DOWNGRADE) != 0);
-
-            if (ps != null && doSnapshotOrRestore) {
-                try {
-                    rm.snapshotAndRestoreUserData(packageName, installedUsers, appId, ceDataInode,
-                            seInfo, token);
-                } catch (RemoteException re) {
-                    Log.e(TAG, "Error snapshotting/restoring user data: " + re);
-                }
-                doRestore = true;
-            }
+            doRestore = performRollbackManagerRestore(userId, token, res, data);
         }
 
         if (!doRestore) {
@@ -13519,6 +13467,89 @@ public class PackageManagerService extends IPackageManager.Stub
             Message msg = mHandler.obtainMessage(POST_INSTALL, token, 0);
             mHandler.sendMessage(msg);
         }
+    }
+
+    /**
+     * Perform Backup Manager restore for a given {@link PackageInstalledInfo}.
+     * Returns whether the restore successfully completed.
+     */
+    private boolean performBackupManagerRestore(int userId, int token, PackageInstalledInfo res) {
+        IBackupManager bm = IBackupManager.Stub.asInterface(
+                ServiceManager.getService(Context.BACKUP_SERVICE));
+        if (bm != null) {
+            // For backwards compatibility as USER_ALL previously routed directly to USER_SYSTEM
+            // in the BackupManager. USER_ALL is used in compatibility tests.
+            if (userId == UserHandle.USER_ALL) {
+                userId = UserHandle.USER_SYSTEM;
+            }
+            if (DEBUG_INSTALL) {
+                Log.v(TAG, "token " + token + " to BM for possible restore for user " + userId);
+            }
+            Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "restore", token);
+            try {
+                if (bm.isBackupServiceActive(userId)) {
+                    bm.restoreAtInstallForUser(
+                            userId, res.pkg.getAppInfoPackageName(), token);
+                } else {
+                    return false;
+                }
+            } catch (RemoteException e) {
+                // can't happen; the backup manager is local
+            } catch (Exception e) {
+                Slog.e(TAG, "Exception trying to enqueue restore", e);
+                return false;
+            }
+        } else {
+            Slog.e(TAG, "Backup Manager not found!");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Perform Rollback Manager restore for a given {@link PackageInstalledInfo}.
+     * Returns whether the restore successfully completed.
+     */
+    private boolean performRollbackManagerRestore(int userId, int token, PackageInstalledInfo res,
+            PostInstallData data) {
+        IRollbackManager rm = IRollbackManager.Stub.asInterface(
+                ServiceManager.getService(Context.ROLLBACK_SERVICE));
+
+        final String packageName = res.pkg.getAppInfoPackageName();
+        final String seInfo = res.pkg.getSeInfo();
+        final int[] allUsers = mUserManager.getUserIds();
+        final int[] installedUsers;
+
+        final PackageSetting ps;
+        int appId = -1;
+        long ceDataInode = -1;
+        synchronized (mSettings) {
+            ps = mSettings.getPackageLPr(packageName);
+            if (ps != null) {
+                appId = ps.appId;
+                ceDataInode = ps.getCeDataInode(userId);
+            }
+
+            // NOTE: We ignore the user specified in the InstallParam because we know this is
+            // an update, and hence need to restore data for all installed users.
+            installedUsers = ps.queryInstalledUsers(allUsers, true);
+        }
+
+        boolean doSnapshotOrRestore = data != null && data.args != null
+                && ((data.args.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0
+                || (data.args.installFlags & PackageManager.INSTALL_REQUEST_DOWNGRADE) != 0);
+
+        if (ps != null && doSnapshotOrRestore) {
+            try {
+                rm.snapshotAndRestoreUserData(packageName, installedUsers, appId, ceDataInode,
+                        seInfo, token);
+            } catch (RemoteException re) {
+                Log.e(TAG, "Error snapshotting/restoring user data: " + re);
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -14802,6 +14833,7 @@ public class PackageManagerService extends IPackageManager.Stub
         ArrayMap<String, PackageInstalledInfo> addedChildPackages;
         // The set of packages consuming this shared library or null if no consumers exist.
         ArrayList<AndroidPackage> libraryConsumers;
+        PackageFreezer freezer;
 
         public void setError(int code, String msg) {
             setReturnCode(code);
@@ -15675,14 +15707,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 // TODO(patb): create a more descriptive reason than unknown in future release
                 // mark all non-failure installs as UNKNOWN so we do not treat them as success
                 for (InstallRequest request : requests) {
+                    request.installResult.freezer.close();
                     if (request.installResult.returnCode == PackageManager.INSTALL_SUCCEEDED) {
                         request.installResult.returnCode = PackageManager.INSTALL_UNKNOWN;
                     }
-                }
-            }
-            for (PrepareResult result : prepareResults.values()) {
-                if (result.freezer != null) {
-                    result.freezer.close();
                 }
             }
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -15792,15 +15820,13 @@ public class PackageManagerService extends IPackageManager.Stub
         public final ParsedPackage packageToScan;
         public final boolean clearCodeCache;
         public final boolean system;
-        public final PackageFreezer freezer;
         public final PackageSetting originalPs;
         public final PackageSetting disabledPs;
 
         private PrepareResult(boolean replace, int scanFlags,
                 int parseFlags, AndroidPackage existingPackage,
                 ParsedPackage packageToScan, boolean clearCodeCache, boolean system,
-                PackageFreezer freezer, PackageSetting originalPs,
-                PackageSetting disabledPs) {
+                PackageSetting originalPs, PackageSetting disabledPs) {
             this.replace = replace;
             this.scanFlags = scanFlags;
             this.parseFlags = parseFlags;
@@ -15808,7 +15834,6 @@ public class PackageManagerService extends IPackageManager.Stub
             this.packageToScan = packageToScan;
             this.clearCodeCache = clearCodeCache;
             this.system = system;
-            this.freezer = freezer;
             this.originalPs = originalPs;
             this.disabledPs = disabledPs;
         }
@@ -16437,9 +16462,10 @@ public class PackageManagerService extends IPackageManager.Stub
             shouldCloseFreezerBeforeReturn = false;
 
             return new PrepareResult(replace, targetScanFlags, targetParseFlags,
-                    existingPackage, parsedPackage, replace /* clearCodeCache */, sysPkg, freezer,
+                    existingPackage, parsedPackage, replace /* clearCodeCache */, sysPkg,
                     ps, disabledPs);
         } finally {
+            res.freezer = freezer;
             if (shouldCloseFreezerBeforeReturn) {
                 freezer.close();
             }
@@ -19160,13 +19186,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getSystemTextClassifierPackageName() {
-        return mContext.getString(R.string.config_defaultTextClassifierPackage);
+        return ensureSystemPackageName(mContext.getString(
+                R.string.config_defaultTextClassifierPackage));
     }
 
     @Override
     public String[] getSystemTextClassifierPackages() {
-        return mContext.getResources().getStringArray(
-                R.array.config_defaultTextClassifierPackages);
+        return ensureSystemPackageNames(mContext.getResources().getStringArray(
+                R.array.config_defaultTextClassifierPackages));
     }
 
     @Override
@@ -19176,7 +19203,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (flattenedComponentName != null) {
             ComponentName componentName = ComponentName.unflattenFromString(flattenedComponentName);
             if (componentName != null && componentName.getPackageName() != null) {
-                return componentName.getPackageName();
+                return ensureSystemPackageName(componentName.getPackageName());
             }
         }
         return null;
@@ -19201,9 +19228,15 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @Nullable
+    private String getDeviceConfiguratorPackageName() {
+        return ensureSystemPackageName(mContext.getString(
+                R.string.config_deviceConfiguratorPackageName));
+    }
+
     @Override
     public String getWellbeingPackageName() {
-        return mContext.getString(R.string.config_defaultWellbeingPackage);
+        return ensureSystemPackageName(mContext.getString(R.string.config_defaultWellbeingPackage));
     }
 
     @Override
@@ -19218,7 +19251,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (appPredictionServiceComponentName == null) {
             return null;
         }
-        return appPredictionServiceComponentName.getPackageName();
+        return ensureSystemPackageName(appPredictionServiceComponentName.getPackageName());
     }
 
     @Override
@@ -19235,7 +19268,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (systemCaptionsServiceComponentName == null) {
             return null;
         }
-        return systemCaptionsServiceComponentName.getPackageName();
+        return ensureSystemPackageName(systemCaptionsServiceComponentName.getPackageName());
     }
 
     @Override
@@ -19247,7 +19280,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     public String getIncidentReportApproverPackageName() {
-        return mContext.getString(R.string.config_incidentReportApproverPackage);
+        return ensureSystemPackageName(mContext.getString(
+                R.string.config_incidentReportApproverPackage));
     }
 
     @Override
@@ -19257,7 +19291,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!TextUtils.isEmpty(names)) {
             telephonyPackageNames = names.trim().split(",");
         }
-        return telephonyPackageNames;
+        return ensureSystemPackageNames(telephonyPackageNames);
     }
 
     @Override
@@ -19274,7 +19308,32 @@ public class PackageManagerService extends IPackageManager.Stub
         if (contentCaptureServiceComponentName == null) {
             return null;
         }
-        return contentCaptureServiceComponentName.getPackageName();
+        return ensureSystemPackageName(contentCaptureServiceComponentName.getPackageName());
+    }
+
+    @Nullable
+    private String ensureSystemPackageName(@Nullable String packageName) {
+        if (packageName == null) {
+            return null;
+        }
+        if (getPackageInfo(packageName, MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE
+                        | MATCH_DIRECT_BOOT_UNAWARE | MATCH_DISABLED_COMPONENTS,
+                UserHandle.getCallingUserId()) == null) {
+            return null;
+        }
+        return packageName;
+    }
+
+    @Nullable
+    private String[] ensureSystemPackageNames(@Nullable String[] packageNames) {
+        if (packageNames == null) {
+            return null;
+        }
+        final int packageNamesLength = packageNames.length;
+        for (int i = 0; i < packageNamesLength; i++) {
+            packageNames[i] = ensureSystemPackageName(packageNames[i]);
+        }
+        return ArrayUtils.filterNotNull(packageNames, String[]::new);
     }
 
     @Override
@@ -23199,6 +23258,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.writeLPr();
             }
         }
+
+        @Override
+        public void setIntegrityVerificationResult(int verificationId, int verificationResult) {
+            final Message msg = mHandler.obtainMessage(INTEGRITY_VERIFICATION_COMPLETE);
+            msg.arg1 = verificationId;
+            msg.obj = verificationResult;
+            mHandler.sendMessage(msg);
+        }
     }
 
     @GuardedBy("mLock")
@@ -23233,11 +23300,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 PackageSetting ps = it.next();
                 if (ps.getInstalled(userId)) {
                     res[i++] = ps.name;
-                } else {
-                    res = ArrayUtils.removeElement(String.class, res, res[i]);
                 }
             }
-            return res;
+            res = ArrayUtils.trimToSize(res, i);
+            if (res != null) {
+                return res;
+            }
         } catch (PackageManagerException e) {
             // Should not happen
         }

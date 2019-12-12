@@ -4185,4 +4185,18 @@
 
     <!-- The package name for the default bug report handler app from power menu short press. This app must be whitelisted. -->
     <string name="config_defaultBugReportHandlerApp" translatable="false"></string>
+
+    <!-- The default value used for RawContacts.ACCOUNT_NAME when contacts are inserted without this
+         column set. These contacts are stored locally on the device and will not be removed even
+         if an android.account.Account with this name and type exists. A null string will be used
+         if the value is left empty. When this is non-empty then config_rawContactsLocalAccountType
+         should also be non-empty.  -->
+    <string name="config_rawContactsLocalAccountName" translatable="false"></string>
+
+    <!-- The default value used for RawContacts.ACCOUNT_TYPE when contacts are inserted without this
+         column set. These contacts are stored locally on the device and will not be removed even
+         if an android.account.Account with this name and type exists. A null string will be used
+         if the value is left empty.  When this is non-empty then config_rawContactsLocalAccountName
+         should also be non-empty.-->
+    <string name="config_rawContactsLocalAccountType" translatable="false"></string>
 </resources>

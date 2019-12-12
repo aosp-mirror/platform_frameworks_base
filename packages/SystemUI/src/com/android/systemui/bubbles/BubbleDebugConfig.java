@@ -16,6 +16,8 @@
 
 package com.android.systemui.bubbles;
 
+import java.util.List;
+
 /**
  * Common class for the various debug {@link android.util.Log} output configuration in the Bubbles
  * package.
@@ -38,5 +40,23 @@ public class BubbleDebugConfig {
     static final boolean DEBUG_BUBBLE_STACK_VIEW = false;
     static final boolean DEBUG_BUBBLE_EXPANDED_VIEW = false;
     static final boolean DEBUG_EXPERIMENTS = true;
+    static final boolean DEBUG_OVERFLOW = false;
 
+    static String formatBubblesString(List<Bubble> bubbles, Bubble selected) {
+        StringBuilder sb = new StringBuilder();
+        for (Bubble bubble : bubbles) {
+            if (bubble == null) {
+                sb.append("   <null> !!!!!\n");
+            } else {
+                boolean isSelected = (selected != null && bubble == selected);
+                String arrow = isSelected ? "=>" : "  ";
+                sb.append(String.format("%s Bubble{act=%12d, ongoing=%d, key=%s}\n",
+                        arrow,
+                        bubble.getLastActivity(),
+                        (bubble.isOngoing() ? 1 : 0),
+                        bubble.getKey()));
+            }
+        }
+        return sb.toString();
+    }
 }

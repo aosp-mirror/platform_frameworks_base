@@ -247,6 +247,7 @@
   <java-symbol type="id" name="mic" />
   <java-symbol type="id" name="overlay" />
   <java-symbol type="id" name="app_ops" />
+  <java-symbol type="id" name="profile_pager" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -1533,6 +1534,8 @@
   <java-symbol type="layout" name="user_switching_dialog" />
   <java-symbol type="layout" name="common_tab_settings" />
   <java-symbol type="layout" name="notification_material_media_seekbar" />
+  <java-symbol type="layout" name="resolver_list_per_profile" />
+  <java-symbol type="layout" name="chooser_list_per_profile" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />
@@ -3768,4 +3771,8 @@
   <java-symbol type="string" name="accessibility_system_action_toggle_split_screen_label" />
 
   <java-symbol type="string" name="accessibility_freeform_caption" />
+
+  <!-- For contacts provider. -->
+  <java-symbol type="string" name="config_rawContactsLocalAccountName" />
+  <java-symbol type="string" name="config_rawContactsLocalAccountType" />
 </resources>

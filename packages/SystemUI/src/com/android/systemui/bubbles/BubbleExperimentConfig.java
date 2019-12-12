@@ -224,7 +224,11 @@ public class BubbleExperimentConfig {
         // Use the icon of the person if available
         List<Person> personList = getPeopleFromNotification(entry);
         if (personList.size() > 0) {
-            icon = personList.get(0).getIcon();
+            final Person person = personList.get(0);
+
+            if (person != null) {
+                icon = person.getIcon();
+            }
         }
         if (icon == null) {
             icon = notification.getLargeIcon() != null

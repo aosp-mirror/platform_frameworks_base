@@ -468,7 +468,7 @@ class ActivityDisplay extends DisplayContent {
             if (resumedActivity == null || resumedActivity.app == null) {
                 // If previously resumed activity doesn't work either - find the topmost running
                 // activity that can be focused.
-                resumedActivity = focusedStack.topRunningActivityLocked(true /* focusableOnly */);
+                resumedActivity = focusedStack.topRunningActivity(true /* focusableOnly */);
             }
         }
         return resumedActivity;
@@ -832,7 +832,7 @@ class ActivityDisplay extends DisplayContent {
         ActivityRecord topRunning = null;
         final ActivityStack focusedStack = getFocusedStack();
         if (focusedStack != null) {
-            topRunning = focusedStack.topRunningActivityLocked();
+            topRunning = focusedStack.topRunningActivity();
         }
 
         // Look in other focusable stacks.
@@ -843,7 +843,7 @@ class ActivityDisplay extends DisplayContent {
                 if (stack == focusedStack || !stack.isFocusable()) {
                     continue;
                 }
-                topRunning = stack.topRunningActivityLocked();
+                topRunning = stack.topRunningActivity();
                 if (topRunning != null) {
                     break;
                 }
@@ -961,12 +961,6 @@ class ActivityDisplay extends DisplayContent {
         super.onConfigurationChanged(newParentConfig);
     }
 
-    void onLockTaskPackagesUpdated() {
-        for (int i = getStackCount() - 1; i >= 0; --i) {
-            getStackAt(i).onLockTaskPackagesUpdated();
-        }
-    }
-
     /** Checks whether the given activity is in size compatibility mode and notifies the change. */
     void handleActivitySizeCompatModeIfNeeded(ActivityRecord r) {
         if (!r.isState(RESUMED) || r.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
@@ -1082,7 +1076,7 @@ class ActivityDisplay extends DisplayContent {
         }
 
         final ActivityStack stack = getStackCount() == 1 ? getStackAt(0) : null;
-        if (stack != null && stack.isActivityTypeHome() && stack.getAllTasks().isEmpty()) {
+        if (stack != null && stack.isActivityTypeHome() && !stack.hasChild()) {
             // Release this display if an empty home stack is the only thing left.
             // Since it is the last stack, this display will be released along with the stack
             // removal.
@@ -1318,13 +1312,7 @@ class ActivityDisplay extends DisplayContent {
 
     @VisibleForTesting
     void removeAllTasks() {
-        for (int i = getStackCount() - 1; i >= 0; --i) {
-            final ActivityStack stack = getStackAt(i);
-            final ArrayList<Task> tasks = stack.getAllTasks();
-            for (int j = tasks.size() - 1; j >= 0; --j) {
-                stack.removeChild(tasks.get(j), "removeAllTasks");
-            }
-        }
+        mDisplayContent.forAllTasks((t) -> { t.getStack().removeChild(t, "removeAllTasks"); });
     }
 
     public void dump(PrintWriter pw, String prefix) {

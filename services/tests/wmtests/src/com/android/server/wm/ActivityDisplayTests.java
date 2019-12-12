@@ -144,7 +144,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
 
         // Put a finishing standard activity which will be reparented.
         final ActivityStack stack = createFullscreenStackWithSimpleActivityAt(display);
-        stack.topRunningActivityLocked().makeFinishingLocked();
+        stack.topRunningActivity().makeFinishingLocked();
 
         clearInvocations(homeStack);
         display.remove();
@@ -301,24 +301,18 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         doAnswer(invocation -> {
             display.positionStackAtTop(stack3, false);
             return true;
-        }).when(mSupervisor).removeTaskByIdLocked(eq(task4.mTaskId), anyBoolean(), anyBoolean(),
-                any());
+        }).when(mSupervisor).removeTask(eq(task4), anyBoolean(), anyBoolean(), any());
 
         // Removing stacks from the display while removing stacks.
         doAnswer(invocation -> {
             display.removeStack(stack2);
             return true;
-        }).when(mSupervisor).removeTaskByIdLocked(eq(task2.mTaskId), anyBoolean(), anyBoolean(),
-                any());
+        }).when(mSupervisor).removeTask(eq(task2), anyBoolean(), anyBoolean(), any());
 
         runnable.run();
-        verify(mSupervisor).removeTaskByIdLocked(eq(task4.mTaskId), anyBoolean(), anyBoolean(),
-                any());
-        verify(mSupervisor).removeTaskByIdLocked(eq(task3.mTaskId), anyBoolean(), anyBoolean(),
-                any());
-        verify(mSupervisor).removeTaskByIdLocked(eq(task2.mTaskId), anyBoolean(), anyBoolean(),
-                any());
-        verify(mSupervisor).removeTaskByIdLocked(eq(task1.mTaskId), anyBoolean(), anyBoolean(),
-                any());
+        verify(mSupervisor).removeTask(eq(task4), anyBoolean(), anyBoolean(), any());
+        verify(mSupervisor).removeTask(eq(task3), anyBoolean(), anyBoolean(), any());
+        verify(mSupervisor).removeTask(eq(task2), anyBoolean(), anyBoolean(), any());
+        verify(mSupervisor).removeTask(eq(task1), anyBoolean(), anyBoolean(), any());
     }
 }

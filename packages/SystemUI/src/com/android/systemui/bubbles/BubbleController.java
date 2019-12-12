@@ -878,12 +878,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
             if (DEBUG_BUBBLE_CONTROLLER) {
                 Log.d(TAG, "[BubbleData]");
-                Log.d(TAG, formatBubblesString(mBubbleData.getBubbles(),
+                Log.d(TAG, BubbleDebugConfig.formatBubblesString(mBubbleData.getBubbles(),
                         mBubbleData.getSelectedBubble()));
 
                 if (mStackView != null) {
                     Log.d(TAG, "[BubbleStackView]");
-                    Log.d(TAG, formatBubblesString(mStackView.getBubblesOnScreen(),
+                    Log.d(TAG, BubbleDebugConfig.formatBubblesString(mStackView.getBubblesOnScreen(),
                             mStackView.getExpandedBubble()));
                 }
             }
@@ -970,23 +970,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             mStackView.dump(fd, pw, args);
         }
         pw.println();
-    }
-
-    static String formatBubblesString(List<Bubble> bubbles, Bubble selected) {
-        StringBuilder sb = new StringBuilder();
-        for (Bubble bubble : bubbles) {
-            if (bubble == null) {
-                sb.append("   <null> !!!!!\n");
-            } else {
-                boolean isSelected = (bubble == selected);
-                sb.append(String.format("%s Bubble{act=%12d, ongoing=%d, key=%s}\n",
-                        ((isSelected) ? "->" : "  "),
-                        bubble.getLastActivity(),
-                        (bubble.isOngoing() ? 1 : 0),
-                        bubble.getKey()));
-            }
-        }
-        return sb.toString();
     }
 
     /**

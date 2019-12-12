@@ -81,9 +81,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      */
     private Configuration mFullConfiguration = new Configuration();
 
-    /** The bit mask of the last override fields of full configuration. */
-    private int mLastOverrideConfigurationChanges;
-
     /**
      * Contains merged override configuration settings from the top of the hierarchy down to this
      * particular instance. It is different from {@link #mFullConfiguration} because it starts from
@@ -121,11 +118,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return mFullConfiguration;
     }
 
-    /** Returns the last changes from applying override configuration. */
-    int getLastOverrideConfigurationChanges() {
-        return mLastOverrideConfigurationChanges;
-    }
-
     /**
      * Notify that parent config changed and we need to update full configuration.
      * @see #mFullConfiguration
@@ -141,8 +133,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         mResolvedTmpConfig.setTo(mResolvedOverrideConfiguration);
         resolveOverrideConfiguration(newParentConfig);
         mFullConfiguration.setTo(newParentConfig);
-        mLastOverrideConfigurationChanges =
-                mFullConfiguration.updateFrom(mResolvedOverrideConfiguration);
+        mFullConfiguration.updateFrom(mResolvedOverrideConfiguration);
         if (!mResolvedTmpConfig.equals(mResolvedOverrideConfiguration)) {
             onMergedOverrideConfigurationChanged();
             // This depends on the assumption that change-listeners don't do

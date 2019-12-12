@@ -446,9 +446,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mOtaspMode[i] = TelephonyManager.OTASP_UNKNOWN;
             mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
             mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
-            mCallQuality[i] = new CallQuality();
+            mCallQuality[i] = createCallQuality();
             mCallAttributes[i] = new CallAttributes(new PreciseCallState(),
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN, new CallQuality());
+                    TelephonyManager.NETWORK_TYPE_UNKNOWN, createCallQuality());
             mCallNetworkType[i] = TelephonyManager.NETWORK_TYPE_UNKNOWN;
             mPreciseCallState[i] = new PreciseCallState();
             mRingingCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
@@ -541,9 +541,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mOtaspMode[i] = TelephonyManager.OTASP_UNKNOWN;
             mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
             mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
-            mCallQuality[i] = new CallQuality();
+            mCallQuality[i] = createCallQuality();
             mCallAttributes[i] = new CallAttributes(new PreciseCallState(),
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN, new CallQuality());
+                    TelephonyManager.NETWORK_TYPE_UNKNOWN, createCallQuality());
             mCallNetworkType[i] = TelephonyManager.NETWORK_TYPE_UNKNOWN;
             mPreciseCallState[i] = new PreciseCallState();
             mRingingCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
@@ -1571,8 +1571,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         broadcastDataConnectionStateChanged(state, isDataAllowed, apn, apnType, linkProperties,
                 networkCapabilities, roaming, subId);
-        broadcastPreciseDataConnectionStateChanged(state, networkType, apnType, apn,
-                linkProperties, DataFailCause.NONE);
     }
 
     public void notifyDataConnectionFailed(String apnType) {
@@ -1612,9 +1610,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             handleRemoveListLocked();
         }
         broadcastDataConnectionFailed(apnType, subId);
-        broadcastPreciseDataConnectionStateChanged(TelephonyManager.DATA_UNKNOWN,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, apnType, null, null,
-                DataFailCause.NONE);
     }
 
     public void notifyCellLocation(Bundle cellLocation) {
@@ -1704,7 +1699,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if (mPreciseCallState[phoneId].getForegroundCallState()
                             != PreciseCallState.PRECISE_CALL_STATE_ACTIVE) {
                         mCallNetworkType[phoneId] = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-                        mCallQuality[phoneId] = new CallQuality();
+                        mCallQuality[phoneId] = createCallQuality();
                     }
                     mCallAttributes[phoneId] = new CallAttributes(mPreciseCallState[phoneId],
                             mCallNetworkType[phoneId], mCallQuality[phoneId]);
@@ -1732,8 +1727,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             handleRemoveListLocked();
         }
-        broadcastPreciseCallStateChanged(ringingCallState, foregroundCallState,
-                backgroundCallState);
     }
 
     public void notifyDisconnectCause(int phoneId, int subId, int disconnectCause,
@@ -1815,8 +1808,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
             handleRemoveListLocked();
         }
-        broadcastPreciseDataConnectionStateChanged(TelephonyManager.DATA_UNKNOWN,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, apnType, apn, null, failCause);
     }
 
     @Override
@@ -2308,33 +2299,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
-    private void broadcastPreciseCallStateChanged(int ringingCallState, int foregroundCallState,
-                                                  int backgroundCallState) {
-        Intent intent = new Intent(TelephonyManager.ACTION_PRECISE_CALL_STATE_CHANGED);
-        intent.putExtra(TelephonyManager.EXTRA_RINGING_CALL_STATE, ringingCallState);
-        intent.putExtra(TelephonyManager.EXTRA_FOREGROUND_CALL_STATE, foregroundCallState);
-        intent.putExtra(TelephonyManager.EXTRA_BACKGROUND_CALL_STATE, backgroundCallState);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
-                android.Manifest.permission.READ_PRECISE_PHONE_STATE);
-    }
-
-    private void broadcastPreciseDataConnectionStateChanged(int state, int networkType,
-            String apnType, String apn, LinkProperties linkProperties,
-            @DataFailureCause int failCause) {
-        Intent intent = new Intent(TelephonyManager.ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED);
-        intent.putExtra(TelephonyManager.EXTRA_STATE, state);
-        intent.putExtra(PhoneConstants.DATA_NETWORK_TYPE_KEY, networkType);
-        if (apnType != null) intent.putExtra(PhoneConstants.DATA_APN_TYPE_KEY, apnType);
-        if (apn != null) intent.putExtra(PhoneConstants.DATA_APN_KEY, apn);
-        if (linkProperties != null) {
-            intent.putExtra(PhoneConstants.DATA_LINK_PROPERTIES_KEY, linkProperties);
-        }
-        intent.putExtra(PhoneConstants.DATA_FAILURE_CAUSE_KEY, failCause);
-
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
-                android.Manifest.permission.READ_PRECISE_PHONE_STATE);
-    }
-
     private void enforceNotifyPermissionOrCarrierPrivilege(String method) {
         if (checkNotifyPermission()) {
             return;
@@ -2731,4 +2695,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    /** Returns a new CallQuality object with default values. */
+    private static CallQuality createCallQuality() {
+        return new CallQuality(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    }
 }

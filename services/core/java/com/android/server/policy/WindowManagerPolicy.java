@@ -18,6 +18,7 @@ package com.android.server.policy;
 
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -876,13 +877,15 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
             case TYPE_ACCESSIBILITY_OVERLAY:
                 // overlay put by accessibility services to intercept user interaction
                 return  30;
+            case TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY:
+                return 31;
             case TYPE_SECURE_SYSTEM_OVERLAY:
-                return  31;
-            case TYPE_BOOT_PROGRESS:
                 return  32;
+            case TYPE_BOOT_PROGRESS:
+                return  33;
             case TYPE_POINTER:
                 // the (mouse) pointer layer
-                return  33;
+                return  34;
             default:
                 Slog.e("WindowManager", "Unknown window type: " + type);
                 return APPLICATION_LAYER;

@@ -129,6 +129,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Root node for activity containers.
@@ -168,8 +169,8 @@ class RootActivityContainer extends ConfigurationContainer
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
     private DisplayManagerInternal mDisplayManagerInternal;
-    // TODO: Remove after object merge with RootWindowContainer.
-    private RootWindowContainer mRootWindowContainer;
+    // TODO(root-unify): Remove after object merge with RootWindowContainer.
+    RootWindowContainer mRootWindowContainer;
 
     /**
      * List of displays which contain activities, sorted by z-order.
@@ -214,7 +215,7 @@ class RootActivityContainer extends ConfigurationContainer
     private RemoteException mTmpRemoteException;
 
     private final FindTaskResult mTmpFindTaskResult = new FindTaskResult();
-    static class FindTaskResult implements ToBooleanFunction<Task> {
+    static class FindTaskResult implements Function<Task, Boolean> {
         ActivityRecord mRecord;
         boolean mIdealMatch;
 
@@ -259,7 +260,7 @@ class RootActivityContainer extends ConfigurationContainer
         }
 
         @Override
-        public boolean apply(Task task) {
+        public Boolean apply(Task task) {
             if (task.voiceSession != null) {
                 // We never match voice sessions; those always run independently.
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping " + task + ": voice session");
@@ -899,7 +900,7 @@ class RootActivityContainer extends ConfigurationContainer
             mTmpBoolean = false; // Set to true if an activity was started.
             final PooledFunction c = PooledLambda.obtainFunction(
                     RootActivityContainer::startActivityForAttachedApplicationIfNeeded, this,
-                    PooledLambda.__(ActivityRecord.class), app, stack.topRunningActivityLocked());
+                    PooledLambda.__(ActivityRecord.class), app, stack.topRunningActivity());
             stack.forAllActivities(c);
             c.recycle();
             if (mTmpRemoteException != null) {
@@ -992,7 +993,7 @@ class RootActivityContainer extends ConfigurationContainer
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
                 stack.switchUser(userId);
-                Task task = stack.topTask();
+                Task task = stack.getTopMostTask();
                 if (task != null) {
                     stack.positionChildAtTop(task);
                 }
@@ -1075,7 +1076,7 @@ class RootActivityContainer extends ConfigurationContainer
                     "moveTopStackActivityToPinnedStack: Unknown stackId=" + stackId);
         }
 
-        final ActivityRecord r = stack.topRunningActivityLocked();
+        final ActivityRecord r = stack.topRunningActivity();
         if (r == null) {
             Slog.w(TAG, "moveTopStackActivityToPinnedStack: No top running activity"
                     + " in stack=" + stack);
@@ -1263,7 +1264,7 @@ class RootActivityContainer extends ConfigurationContainer
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
-                final ActivityRecord topRunningActivity = stack.topRunningActivityLocked();
+                final ActivityRecord topRunningActivity = stack.topRunningActivity();
                 if (!stack.isFocusableAndVisible() || topRunningActivity == null) {
                     continue;
                 }
@@ -1401,30 +1402,35 @@ class RootActivityContainer extends ConfigurationContainer
         info.position = display != null ? display.getIndexOf(stack) : 0;
         info.configuration.setTo(stack.getConfiguration());
 
-        ArrayList<Task> tasks = stack.getAllTasks();
-        final int numTasks = tasks.size();
-        int[] taskIds = new int[numTasks];
-        String[] taskNames = new String[numTasks];
-        Rect[] taskBounds = new Rect[numTasks];
-        int[] taskUserIds = new int[numTasks];
-        for (int i = 0; i < numTasks; ++i) {
-            final Task task = tasks.get(i);
-            taskIds[i] = task.mTaskId;
-            taskNames[i] = task.origActivity != null ? task.origActivity.flattenToString()
-                    : task.realActivity != null ? task.realActivity.flattenToString()
-                    : task.getTopNonFinishingActivity() != null
-                            ? task.getTopNonFinishingActivity().packageName : "unknown";
-            taskBounds[i] = mService.getTaskBounds(task.mTaskId);
-            taskUserIds[i] = task.mUserId;
-        }
-        info.taskIds = taskIds;
-        info.taskNames = taskNames;
-        info.taskBounds = taskBounds;
-        info.taskUserIds = taskUserIds;
+        final int numTasks = stack.getChildCount();
+        info.taskIds = new int[numTasks];
+        info.taskNames = new String[numTasks];
+        info.taskBounds = new Rect[numTasks];
+        info.taskUserIds = new int[numTasks];
+        final int[] currenIndex = {0};
 
-        final ActivityRecord top = stack.topRunningActivityLocked();
+        final PooledConsumer c = PooledLambda.obtainConsumer(
+                RootActivityContainer::processTaskForStackInfo, PooledLambda.__(Task.class), info,
+                currenIndex);
+        stack.forAllTasks(c, false);
+        c.recycle();
+
+        final ActivityRecord top = stack.topRunningActivity();
         info.topActivity = top != null ? top.intent.getComponent() : null;
         return info;
+    }
+
+    private static void processTaskForStackInfo(
+            Task task, ActivityManager.StackInfo info, int[] currentIndex) {
+        int i = currentIndex[0];
+        info.taskIds[i] = task.mTaskId;
+        info.taskNames[i] = task.origActivity != null ? task.origActivity.flattenToString()
+                : task.realActivity != null ? task.realActivity.flattenToString()
+                        : task.getTopNonFinishingActivity() != null
+                                ? task.getTopNonFinishingActivity().packageName : "unknown";
+        info.taskBounds[i] = task.mAtmService.getTaskBounds(task.mTaskId);
+        info.taskUserIds[i] = task.mUserId;
+        currentIndex[0] = ++i;
     }
 
     ActivityManager.StackInfo getStackInfo(int stackId) {
@@ -1905,7 +1911,7 @@ class RootActivityContainer extends ConfigurationContainer
                 }
                 if (windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY
                         && display.getSplitScreenPrimaryStack() == stack
-                        && candidateTask == stack.topTask()) {
+                        && candidateTask == stack.getTopMostTask()) {
                     // This is a special case when we try to launch an activity that is currently on
                     // top of split-screen primary stack, but is targeting split-screen secondary.
                     // In this case we don't want to move it to another stack.
@@ -2338,24 +2344,11 @@ class RootActivityContainer extends ConfigurationContainer
     void lockAllProfileTasks(@UserIdInt int userId) {
         mService.deferWindowLayout();
         try {
-            for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-                final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-                for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
-                    final ActivityStack stack = display.getStackAt(stackNdx);
-                    final List<Task> tasks = stack.getAllTasks();
-                    for (int taskNdx = tasks.size() - 1; taskNdx >= 0; taskNdx--) {
-                        final Task task = tasks.get(taskNdx);
-
-                        // Check the task for a top activity belonging to userId, or returning a
-                        // result to an activity belonging to userId. Example case: a document
-                        // picker for personal files, opened by a work app, should still get locked.
-                        if (taskTopActivityIsUser(task, userId)) {
-                            mService.getTaskChangeNotificationController().notifyTaskProfileLocked(
-                                    task.mTaskId, userId);
-                        }
-                    }
-                }
-            }
+            final PooledConsumer c = PooledLambda.obtainConsumer(
+                    RootActivityContainer::taskTopActivityIsUser, this, PooledLambda.__(Task.class),
+                    userId);
+            mRootWindowContainer.forAllTasks(c);
+            c.recycle();
         } finally {
             mService.continueWindowLayout();
         }
@@ -2372,13 +2365,19 @@ class RootActivityContainer extends ConfigurationContainer
      *
      * @return {@code true} if the top activity looks like it belongs to {@param userId}.
      */
-    private boolean taskTopActivityIsUser(Task task, @UserIdInt int userId) {
+    private void taskTopActivityIsUser(Task task, @UserIdInt int userId) {
         // To handle the case that work app is in the task but just is not the top one.
         final ActivityRecord activityRecord = task.getTopNonFinishingActivity();
         final ActivityRecord resultTo = (activityRecord != null ? activityRecord.resultTo : null);
 
-        return (activityRecord != null && activityRecord.mUserId == userId)
-                || (resultTo != null && resultTo.mUserId == userId);
+        // Check the task for a top activity belonging to userId, or returning a
+        // result to an activity belonging to userId. Example case: a document
+        // picker for personal files, opened by a work app, should still get locked.
+        if ((activityRecord != null && activityRecord.mUserId == userId)
+                || (resultTo != null && resultTo.mUserId == userId)) {
+            mService.getTaskChangeNotificationController().notifyTaskProfileLocked(
+                    task.mTaskId, userId);
+        }
     }
 
     void cancelInitializingActivities() {
@@ -2414,29 +2413,25 @@ class RootActivityContainer extends ConfigurationContainer
                     + " lookup");
         }
 
-        int numDisplays = mActivityDisplays.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getStackAt(stackNdx);
-                final Task task = stack.taskForIdLocked(id);
-                if (task == null) {
-                    continue;
+        final PooledPredicate p = PooledLambda.obtainPredicate(
+                Task::isTaskId, PooledLambda.__(Task.class), id);
+        Task task = mRootWindowContainer.getTask(p);
+        p.recycle();
+
+        if (task != null) {
+            if (aOptions != null) {
+                // Resolve the stack the task should be placed in now based on options
+                // and reparent if needed.
+                final ActivityStack launchStack =
+                        getLaunchStack(null, aOptions, task, onTop);
+                if (launchStack != null && task.getStack() != launchStack) {
+                    final int reparentMode = onTop
+                            ? REPARENT_MOVE_STACK_TO_FRONT : REPARENT_LEAVE_STACK_IN_PLACE;
+                    task.reparent(launchStack, onTop, reparentMode, ANIMATE, DEFER_RESUME,
+                            "anyTaskForId");
                 }
-                if (aOptions != null) {
-                    // Resolve the stack the task should be placed in now based on options
-                    // and reparent if needed.
-                    final ActivityStack launchStack =
-                            getLaunchStack(null, aOptions, task, onTop);
-                    if (launchStack != null && stack != launchStack) {
-                        final int reparentMode = onTop
-                                ? REPARENT_MOVE_STACK_TO_FRONT : REPARENT_LEAVE_STACK_IN_PLACE;
-                        task.reparent(launchStack, onTop, reparentMode, ANIMATE, DEFER_RESUME,
-                                "anyTaskForId");
-                    }
-                }
-                return task;
             }
+            return task;
         }
 
         // If we are matching stack tasks only, return now
@@ -2447,7 +2442,7 @@ class RootActivityContainer extends ConfigurationContainer
         // Otherwise, check the recent tasks and return if we find it there and we are not restoring
         // the task from recents
         if (DEBUG_RECENTS) Slog.v(TAG_RECENTS, "Looking for task id=" + id + " in recents");
-        final Task task = mStackSupervisor.mRecentTasks.getTask(id);
+        task = mStackSupervisor.mRecentTasks.getTask(id);
 
         if (task == null) {
             if (DEBUG_RECENTS) {
@@ -2492,7 +2487,7 @@ class RootActivityContainer extends ConfigurationContainer
             @WindowConfiguration.WindowingMode int ignoreWindowingMode, int callingUid,
             boolean allowed, boolean crossUser, ArraySet<Integer> profileIds) {
         mStackSupervisor.getRunningTasks().getTasks(maxNum, list, ignoreActivityType,
-                ignoreWindowingMode, mActivityDisplays, callingUid, allowed, crossUser, profileIds);
+                ignoreWindowingMode, this, callingUid, allowed, crossUser, profileIds);
     }
 
     void sendPowerHintForLaunchStartIfNeeded(boolean forceSend, ActivityRecord targetActivity) {

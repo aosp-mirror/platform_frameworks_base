@@ -101,6 +101,13 @@ final class TunerConstants {
     public static final int FILTER_SETTINGS_TLV = Constants.DemuxFilterMainType.TLV;
     public static final int FILTER_SETTINGS_ALP = Constants.DemuxFilterMainType.ALP;
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({DVR_SETTINGS_RECORD, DVR_SETTINGS_PLAYBACK})
+    public @interface DvrSettingsType {}
+
+    public static final int DVR_SETTINGS_RECORD = Constants.DvrType.RECORD;
+    public static final int DVR_SETTINGS_PLAYBACK = Constants.DvrType.PLAYBACK;
+
     private TunerConstants() {
     }
 }

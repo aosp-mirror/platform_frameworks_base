@@ -2406,7 +2406,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // We are finishing the top focused activity and its stack has nothing to be focused so
             // the next focusable stack should be focused.
             if (mayAdjustTop
-                    && (stack.topRunningActivityLocked() == null || !stack.isFocusable())) {
+                    && (stack.topRunningActivity() == null || !stack.isFocusable())) {
                 if (shouldAdjustGlobalFocus) {
                     // Move the entire hierarchy to top with updating global top resumed activity
                     // and focused application if needed.
@@ -3440,7 +3440,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom) {
+    ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom,
+            WindowContainer boundary) {
         return callback.test(this) ? this : null;
     }
 
@@ -6138,10 +6139,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mCompatDisplayInsets == null || !shouldUseSizeCompatMode()) {
             return false;
         }
-        final Configuration resolvedConfig = getResolvedOverrideConfiguration();
-        final Rect resolvedAppBounds = resolvedConfig.windowConfiguration.getAppBounds();
-        if (resolvedAppBounds == null) {
-            // The override configuration has not been resolved yet.
+        final Rect appBounds = getConfiguration().windowConfiguration.getAppBounds();
+        if (appBounds == null) {
+            // The app bounds hasn't been computed yet.
             return false;
         }
 
@@ -6149,13 +6149,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Although colorMode, screenLayout, smallestScreenWidthDp are also fixed, generally these
         // fields should be changed with density and bounds, so here only compares the most
         // significant field.
-        if (parentConfig.densityDpi != resolvedConfig.densityDpi) {
+        if (parentConfig.densityDpi != getConfiguration().densityDpi) {
             return true;
         }
 
         final Rect parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
-        final int appWidth = resolvedAppBounds.width();
-        final int appHeight = resolvedAppBounds.height();
+        final int appWidth = appBounds.width();
+        final int appHeight = appBounds.height();
         final int parentAppWidth = parentAppBounds.width();
         final int parentAppHeight = parentAppBounds.height();
         if (parentAppWidth == appWidth && parentAppHeight == appHeight) {
@@ -6174,7 +6174,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // The rest of the condition is that only one side is smaller than the parent, but it still
         // needs to exclude the cases where the size is limited by the fixed aspect ratio.
         if (info.maxAspectRatio > 0) {
-            final float aspectRatio = Math.max(appWidth, appHeight) / Math.min(appWidth, appHeight);
+            final float aspectRatio =
+                    (float) Math.max(appWidth, appHeight) / Math.min(appWidth, appHeight);
             if (aspectRatio >= info.maxAspectRatio) {
                 // The current size has reached the max aspect ratio.
                 return false;
@@ -6526,7 +6527,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (mCompatDisplayInsets != null) {
             // The override changes can only be obtained from display, because we don't have the
             // difference of full configuration in each hierarchy.
-            final int displayChanges = display.getLastOverrideConfigurationChanges();
+            final int displayChanges = display.getCurrentOverrideConfigurationChanges();
             final int orientationChanges = CONFIG_WINDOW_CONFIGURATION
                     | CONFIG_SCREEN_SIZE | CONFIG_ORIENTATION;
             final boolean hasNonOrienSizeChanged = hasResizeChange(displayChanges)

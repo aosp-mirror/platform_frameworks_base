@@ -43,7 +43,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
-import java.io.IOException;
 
 /**
  * Controls storage sessions for users initiated by the {@link StorageManagerService}.
@@ -101,17 +100,9 @@ public final class StorageSessionController {
                 connection = new StorageUserConnection(mContext, userId, this);
                 mConnections.put(userId, connection);
             }
-            Slog.i(TAG, "Creating session with id: " + sessionId);
-            connection.createSession(sessionId, new ParcelFileDescriptor(deviceFd),
+            Slog.i(TAG, "Creating and starting session with id: " + sessionId);
+            connection.startSession(sessionId, new ParcelFileDescriptor(deviceFd),
                     vol.getPath().getPath(), vol.getInternalPath().getPath());
-        }
-
-        // At boot, a volume can be mounted before user is unlocked, in that case, we create it
-        // above and save it so that we can restart all sessions when the user is unlocked
-        if (mExternalStorageServiceComponent != null) {
-            connection.startSession(sessionId);
-        } else {
-            Slog.i(TAG, "Controller not initialised, session not started " + sessionId);
         }
     }
 
@@ -179,23 +170,32 @@ public final class StorageSessionController {
      * a session will be ignored.
      */
     public void onUnlockUser(int userId) throws ExternalStorageServiceException {
+        Slog.i(TAG, "On user unlock " + userId);
+        if (shouldHandle(null) && userId == 0) {
+            initExternalStorageServiceComponent();
+        }
+    }
+
+    /**
+     * Called when a user is in the process is being stopped.
+     *
+     * Does nothing if {@link #shouldHandle} is {@code false}
+     *
+     * This call removes all sessions for the user that is being stopped;
+     * this will make sure that we don't rebind to the service needlessly.
+     */
+    public void onUserStopping(int userId) throws ExternalStorageServiceException {
         if (!shouldHandle(null)) {
             return;
         }
-
-        Slog.i(TAG, "On user unlock " + userId);
-        if (userId == 0) {
-            initExternalStorageServiceComponent();
-        }
-
         StorageUserConnection connection = null;
         synchronized (mLock) {
             connection = mConnections.get(userId);
         }
 
         if (connection != null) {
-            Slog.i(TAG, "Restarting all sessions for user: " + userId);
-            connection.startAllSessions();
+            Slog.i(TAG, "Removing all sessions for user: " + userId);
+            connection.removeAllSessions();
         } else {
             Slog.w(TAG, "No connection found for user: " + userId);
         }

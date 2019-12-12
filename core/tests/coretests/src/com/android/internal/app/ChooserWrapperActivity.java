@@ -29,6 +29,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.UserHandle;
 import android.util.Size;
 
 import com.android.internal.app.ResolverListAdapter.ResolveInfoPresentationGetter;
@@ -47,7 +48,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
     private UsageStatsManager mUsm;
 
     ChooserListAdapter getAdapter() {
-        return (ChooserListAdapter) mAdapter;
+        return mChooserMultiProfilePagerAdapter.getCurrentListAdapter();
     }
 
     boolean getIsSelected() { return mIsSuccessfullySelected; }
@@ -77,7 +78,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
     }
 
     @Override
-    protected ResolverListController createListController() {
+    protected ResolverListController createListController(UserHandle userHandle) {
         return sOverrides.resolverListController;
     }
 

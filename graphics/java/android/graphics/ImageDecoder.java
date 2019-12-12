@@ -1675,6 +1675,9 @@ public final class ImageDecoder implements AutoCloseable {
         if (r == null) {
             return;
         }
+        if (r.width() <= 0 || r.height() <= 0) {
+            throw new IllegalStateException("Subset " + r + " is empty/unsorted");
+        }
         if (r.left < 0 || r.top < 0 || r.right > width || r.bottom > height) {
             throw new IllegalStateException("Subset " + r + " not contained by "
                     + "scaled image bounds: (" + width + " x " + height + ")");

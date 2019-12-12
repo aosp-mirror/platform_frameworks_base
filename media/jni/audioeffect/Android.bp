@@ -17,6 +17,7 @@ cc_library_shared {
         "libnativehelper",
         "libaudioclient",
         "libaudioutils",
+        "libaudiofoundation",
     ],
 
     version_script: "exports.lds",

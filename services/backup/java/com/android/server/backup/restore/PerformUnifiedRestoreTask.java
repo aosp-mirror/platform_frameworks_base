@@ -766,8 +766,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             backupManagerService.prepareOperationTimeout(
                     mEphemeralOpToken, restoreAgentTimeoutMillis, this, OP_TYPE_RESTORE_WAIT);
             startedAgentRestore = true;
-            mAgent.doRestore(mBackupData, appVersionCode, mNewState,
-                    mEphemeralOpToken, backupManagerService.getBackupManagerBinder());
+            mAgent.doRestoreWithExcludedKeys(mBackupData, appVersionCode, mNewState,
+                    mEphemeralOpToken, backupManagerService.getBackupManagerBinder(),
+                    mExcludedKeys.containsKey(packageName)
+                            ? new ArrayList<>(mExcludedKeys.get(packageName)) : null);
         } catch (Exception e) {
             Slog.e(TAG, "Unable to call app for restore: " + packageName, e);
             EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,

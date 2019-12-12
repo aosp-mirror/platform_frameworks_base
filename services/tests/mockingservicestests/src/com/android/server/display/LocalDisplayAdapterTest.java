@@ -120,11 +120,14 @@ public class LocalDisplayAdapterTest {
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
 
         // This should be public
-        assertDisplay(mListener.addedDisplays.get(0).getDisplayDeviceInfoLocked(), PORT_A, false);
-        // This should be private
-        assertDisplay(mListener.addedDisplays.get(1).getDisplayDeviceInfoLocked(), PORT_B, true);
+        assertDisplayPrivateFlag(mListener.addedDisplays.get(0).getDisplayDeviceInfoLocked(),
+                PORT_A, false);
         // This should be public
-        assertDisplay(mListener.addedDisplays.get(2).getDisplayDeviceInfoLocked(), PORT_C, false);
+        assertDisplayPrivateFlag(mListener.addedDisplays.get(1).getDisplayDeviceInfoLocked(),
+                PORT_B, true);
+        // This should be public
+        assertDisplayPrivateFlag(mListener.addedDisplays.get(2).getDisplayDeviceInfoLocked(),
+                PORT_C, false);
     }
 
     /**
@@ -141,18 +144,53 @@ public class LocalDisplayAdapterTest {
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
 
         // This should be public
-        assertDisplay(mListener.addedDisplays.get(0).getDisplayDeviceInfoLocked(), PORT_A, false);
+        assertDisplayPrivateFlag(mListener.addedDisplays.get(0).getDisplayDeviceInfoLocked(),
+                PORT_A, false);
         // This should be public
-        assertDisplay(mListener.addedDisplays.get(1).getDisplayDeviceInfoLocked(), PORT_C, false);
+        assertDisplayPrivateFlag(mListener.addedDisplays.get(1).getDisplayDeviceInfoLocked(),
+                PORT_C, false);
     }
 
-    private static void assertDisplay(
+    private static void assertDisplayPrivateFlag(
             DisplayDeviceInfo info, int expectedPort, boolean shouldBePrivate) {
         final DisplayAddress.Physical address = (DisplayAddress.Physical) info.address;
         assertNotNull(address);
         assertEquals((byte) expectedPort, address.getPort());
         assertEquals(DISPLAY_MODEL, address.getModel());
         assertEquals(shouldBePrivate, (info.flags & DisplayDeviceInfo.FLAG_PRIVATE) != 0);
+    }
+
+    /**
+     * Confirm that external display uses physical density.
+     */
+    @Test
+    public void testDpiValues() throws Exception {
+        // needs default one always
+        setUpDisplay(new DisplayConfig(createDisplayAddress(PORT_A), createDummyDisplayInfo()));
+        setUpDisplay(new DisplayConfig(createDisplayAddress(PORT_B), createDummyDisplayInfo()));
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertDisplayDpi(
+                mListener.addedDisplays.get(0).getDisplayDeviceInfoLocked(), PORT_A, 100, 100,
+                16000);
+        assertDisplayDpi(
+                mListener.addedDisplays.get(1).getDisplayDeviceInfoLocked(), PORT_B, 100, 100,
+                16000);
+    }
+
+    private void assertDisplayDpi(DisplayDeviceInfo info, int expectedPort,
+                                  float expectedXdpi,
+                                  float expectedYDpi,
+                                  int expectedDensityDpi) {
+        final DisplayAddress.Physical physical = (DisplayAddress.Physical) info.address;
+        assertNotNull(physical);
+        assertEquals((byte) expectedPort, physical.getPort());
+        assertEquals(expectedXdpi, info.xDpi, 0.01);
+        assertEquals(expectedYDpi, info.yDpi, 0.01);
+        assertEquals(expectedDensityDpi, info.densityDpi);
     }
 
     private class DisplayConfig {

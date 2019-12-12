@@ -1052,9 +1052,6 @@ public class CarrierConfigManager {
      *
      * When {@code false}, the old behavior is used, where the toggle in accessibility settings is
      * used to set the IMS stack's RTT enabled state.
-     *
-     * @deprecated -- this flag no longer does anything. Remove once the new behavior is verified.
-     *
      * @hide
      */
     public static final String KEY_IGNORE_RTT_MODE_SETTING_BOOL =
@@ -2092,12 +2089,6 @@ public class CarrierConfigManager {
             "allow_metered_network_for_cert_download_bool";
 
     /**
-     * Carrier specified WiFi networks.
-     * @hide
-     */
-    public static final String KEY_CARRIER_WIFI_STRING_ARRAY = "carrier_wifi_string_array";
-
-    /**
      * Time delay (in ms) after which we show the notification to switch the preferred
      * network.
      * @hide
@@ -3046,7 +3037,6 @@ public class CarrierConfigManager {
         /**
          * Location information during (and after) an emergency call is only provided over control
          * plane signaling from the network.
-         * @hide
          */
         public static final int SUPL_EMERGENCY_MODE_TYPE_CP_ONLY = 0;
 
@@ -3054,7 +3044,6 @@ public class CarrierConfigManager {
          * Location information during (and after) an emergency call is provided over the data
          * plane and serviced by the framework GNSS service, but if it fails, the carrier also
          * supports control plane backup signaling.
-         * @hide
          */
         public static final int SUPL_EMERGENCY_MODE_TYPE_CP_FALLBACK = 1;
 
@@ -3062,7 +3051,6 @@ public class CarrierConfigManager {
          * Location information during (and after) an emergency call is provided over the data plane
          * and serviced by the framework GNSS service only. There is no backup signalling over the
          * control plane if it fails.
-         * @hide
          */
         public static final int SUPL_EMERGENCY_MODE_TYPE_DP_ONLY = 2;
 
@@ -3169,10 +3157,20 @@ public class CarrierConfigManager {
          * {@link #SUPL_EMERGENCY_MODE_TYPE_CP_ONLY}.
          * <p>
          * The default value for this configuration is {@link #SUPL_EMERGENCY_MODE_TYPE_CP_ONLY}.
-         * @hide
          */
         public static final String KEY_ES_SUPL_CONTROL_PLANE_SUPPORT_INT = KEY_PREFIX
                 + "es_supl_control_plane_support_int";
+
+        /**
+         * A list of roaming PLMNs where SUPL ES mode does not support a control-plane mechanism to
+         * get a user's location in the event that data plane SUPL fails or is otherwise
+         * unavailable.
+         * <p>
+         * A string array of PLMNs that do not support a control-plane mechanism for getting a
+         * user's location for SUPL ES.
+         */
+        public static final String KEY_ES_SUPL_DATA_PLANE_ONLY_ROAMING_PLMN_STRING_ARRAY =
+                KEY_PREFIX + "es_supl_data_plane_only_roaming_plmn_string_array";
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
@@ -3190,61 +3188,9 @@ public class CarrierConfigManager {
             defaults.putString(KEY_NFW_PROXY_APPS_STRING, "");
             defaults.putInt(KEY_ES_SUPL_CONTROL_PLANE_SUPPORT_INT,
                     SUPL_EMERGENCY_MODE_TYPE_CP_ONLY);
+            defaults.putStringArray(KEY_ES_SUPL_DATA_PLANE_ONLY_ROAMING_PLMN_STRING_ARRAY, null);
             return defaults;
         }
-    }
-
-    /**
-     * Wi-Fi configs used in Carrier Wi-Fi application.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final class Wifi {
-        /** Prefix of all Wifi.KEY_* constants. */
-        public static final String KEY_PREFIX = "wifi.";
-
-        /**
-         * Whenever any information under wifi namespace is changed, the version should be
-         * incremented by 1 so that the device is able to figure out the latest profiles based on
-         * the version.
-         */
-        public static final String KEY_CARRIER_PROFILES_VERSION_INT =
-                KEY_PREFIX + "carrier_profiles_version_int";
-
-        /**
-         * It contains the package name of connection manager that the carrier owns.
-         *
-         * <P>Once it is installed, the profiles installed by Carrier Wi-Fi Application
-         * will be deleted.
-         * Once it is uninstalled, Carrier Wi-Fi Application will re-install the latest profiles.
-         */
-        public static final String KEY_CARRIER_CONNECTION_MANAGER_PACKAGE_STRING =
-                KEY_PREFIX + "carrier_connection_manager_package_string";
-        /**
-         * It is to have the list of wifi networks profiles which contain the information about
-         * the wifi-networks to which carrier wants the device to connect.
-         */
-        public static final String KEY_NETWORK_PROFILES_STRING_ARRAY =
-                KEY_PREFIX + "network_profiles_string_array";
-
-        /**
-         * It is to have the list of Passpoint profiles which contain the information about
-         * the Passpoint networks to which carrier wants the device to connect.
-         */
-        public static final String KEY_PASSPOINT_PROFILES_STRING_ARRAY =
-                KEY_PREFIX + "passpoint_profiles_string_array";
-
-        private static PersistableBundle getDefaults() {
-            PersistableBundle defaults = new PersistableBundle();
-            defaults.putInt(KEY_CARRIER_PROFILES_VERSION_INT, -1);
-            defaults.putString(KEY_CARRIER_CONNECTION_MANAGER_PACKAGE_STRING, null);
-            defaults.putStringArray(KEY_NETWORK_PROFILES_STRING_ARRAY, null);
-            defaults.putStringArray(KEY_PASSPOINT_PROFILES_STRING_ARRAY, null);
-            return defaults;
-        }
-
-        private Wifi() {}
     }
 
    /**
@@ -3548,7 +3494,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putInt(KEY_CDMA_DTMF_TONE_DELAY_INT, 100);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_MAP_NON_NUMBER_TO_VOICEMAIL_BOOL, false);
-        sDefaults.putBoolean(KEY_IGNORE_RTT_MODE_SETTING_BOOL, true);
+        sDefaults.putBoolean(KEY_IGNORE_RTT_MODE_SETTING_BOOL, false);
         sDefaults.putInt(KEY_CDMA_3WAYCALL_FLASH_DELAY_INT , 0);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL, true);
@@ -3699,7 +3645,6 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_METERED_NETWORK_FOR_CERT_DOWNLOAD_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_DIGITS_HELPER_TEXT_ON_STK_INPUT_SCREEN_BOOL, true);
-        sDefaults.putStringArray(KEY_CARRIER_WIFI_STRING_ARRAY, null);
         sDefaults.putInt(KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT, -1);
         sDefaults.putInt(KEY_EMERGENCY_NOTIFICATION_DELAY_INT, -1);
         sDefaults.putBoolean(KEY_ALLOW_USSD_REQUESTS_VIA_TELEPHONY_MANAGER_BOOL, true);
@@ -3828,7 +3773,6 @@ public class CarrierConfigManager {
         /* Default value is 60 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_MAX_BACKOFF_TIME_LONG, 60000);
         sDefaults.putAll(Gps.getDefaults());
-        sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,
                 new int[] {
                         1 /* Roaming Indicator Off */

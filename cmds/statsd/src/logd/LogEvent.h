@@ -75,6 +75,11 @@ public:
     explicit LogEvent(uint8_t* msg, uint32_t len, uint32_t uid);
 
     /**
+     * Temp constructor to use for pulled atoms until we flip the socket schema.
+     */
+    explicit LogEvent(uint8_t* msg, uint32_t len, uint32_t uid, bool useNewSchema);
+
+    /**
      * Creates LogEvent from StatsLogEventWrapper.
      */
     static void createLogEvents(const StatsLogEventWrapper& statsLogEventWrapper,

@@ -109,4 +109,13 @@ public abstract class StorageManagerInternal {
      */
     public abstract void onAppOpsChanged(int code, int uid,
             @Nullable String packageName, int mode);
+
+    /**
+     * Asks the StorageManager to reset all state for the provided user; this will result
+     * in the unmounting for all volumes of the user, and, if the user is still running, the
+     * volumes will be re-mounted as well.
+     *
+     * @param userId the userId for which to reset storage
+     */
+    public abstract void resetUser(int userId);
 }

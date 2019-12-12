@@ -259,7 +259,7 @@ public class DockedStackDividerController {
         if (homeStack == null) {
             return false;
         }
-        final Task homeTask = homeStack.findHomeTask();
+        final Task homeTask = homeStack.getTopMostTask();
         return homeTask != null && homeTask.isResizeable();
     }
 
@@ -708,7 +708,7 @@ public class DockedStackDividerController {
         if (homeStack == null) {
             return;
         }
-        final Task homeTask = homeStack.findHomeTask();
+        final Task homeTask = homeStack.getTopMostTask();
         if (homeTask == null || !isWithinDisplay(homeTask)) {
             return;
         }

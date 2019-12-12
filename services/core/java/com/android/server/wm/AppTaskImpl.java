@@ -62,7 +62,7 @@ class AppTaskImpl extends IAppTask.Stub {
             long origId = Binder.clearCallingIdentity();
             try {
                 // We remove the task from recents to preserve backwards
-                if (!mService.mStackSupervisor.removeTaskByIdLocked(mTaskId, false,
+                if (!mService.mStackSupervisor.removeTaskById(mTaskId, false,
                         REMOVE_FROM_RECENTS, "finish-and-remove-task")) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }

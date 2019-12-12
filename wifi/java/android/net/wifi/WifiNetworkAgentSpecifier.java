@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.MacAddress;
 import android.net.MatchAllNetworkSpecifier;
-import android.net.NetworkAgent;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.os.Parcel;
@@ -120,7 +119,7 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
 
     /**
      * Match {@link WifiNetworkSpecifier} in app's {@link NetworkRequest} with the
-     * {@link WifiNetworkAgentSpecifier} in wifi platform's {@link NetworkAgent}.
+     * {@link WifiNetworkAgentSpecifier} in wifi platform's {@link android.net.NetworkAgent}.
      */
     public boolean satisfiesNetworkSpecifier(@NonNull WifiNetworkSpecifier ns) {
         // None of these should be null by construction.

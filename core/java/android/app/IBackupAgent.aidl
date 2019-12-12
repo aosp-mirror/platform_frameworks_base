@@ -84,6 +84,19 @@ oneway interface IBackupAgent {
             long appVersionCode, in ParcelFileDescriptor newState,
             int token, IBackupManager callbackBinder);
 
+     /**
+     * Restore an entire data snapshot to the application and pass the list of excluded keys to the
+     * backup agent.
+     *
+     * @param excludedKeys List of keys to be excluded from the restore. It will be passed to the
+     *        backup agent to make it aware of what data has been removed (in case it has any
+     *        application-level implications) as well as the data that should be removed by the
+     *        agent itself.
+     */
+    void doRestoreWithExcludedKeys(in ParcelFileDescriptor data,
+            long appVersionCode, in ParcelFileDescriptor newState,
+            int token, IBackupManager callbackBinder, in List<String> excludedKeys);
+
     /**
      * Perform a "full" backup to the given file descriptor.  The output file is presumed
      * to be a socket or other non-seekable, write-only data sink.  When this method is

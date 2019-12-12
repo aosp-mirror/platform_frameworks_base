@@ -1434,7 +1434,7 @@ class ActivityStarter {
                 // If there is no state change (e.g. a resumed activity is reparented to top of
                 // another display) to trigger a visibility/configuration checking, we have to
                 // update the configuration for changing to different display.
-                final ActivityRecord currentTop = startedActivityStack.topRunningActivityLocked();
+                final ActivityRecord currentTop = startedActivityStack.topRunningActivity();
                 if (currentTop != null && currentTop.shouldUpdateConfigForDisplayChanged()) {
                     mRootActivityContainer.ensureVisibilityAndConfig(
                             currentTop, currentTop.getDisplayId(),
@@ -2307,7 +2307,7 @@ class ActivityStarter {
                     ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
             final Task topTask = curTop != null ? curTop.getTask() : null;
             differentTopTask = topTask != intentActivity.getTask()
-                    || (focusStack != null && topTask != focusStack.topTask());
+                    || (focusStack != null && topTask != focusStack.getTopMostTask());
         } else {
             // The existing task should always be different from those in other displays.
             differentTopTask = true;
@@ -2371,7 +2371,7 @@ class ActivityStarter {
                     mMovedToFront = true;
                 }
 
-                if (launchStack != null && launchStack.topTask() == null) {
+                if (launchStack != null && launchStack.getTopMostTask() == null) {
                     // The task does not need to be reparented to the launch stack. Remove the
                     // launch stack if there is no activity in it.
                     Slog.w(TAG, "Removing an empty stack: " + launchStack);
@@ -2588,7 +2588,7 @@ class ActivityStarter {
             // If task's parent stack is not focused - use it during adjacent launch.
             return parentStack;
         } else {
-            if (focusedStack != null && task == focusedStack.topTask()) {
+            if (focusedStack != null && task == focusedStack.getTopMostTask()) {
                 // If task is already on top of focused stack - use it. We don't want to move the
                 // existing focused task to adjacent stack, just deliver new intent in this case.
                 return focusedStack;

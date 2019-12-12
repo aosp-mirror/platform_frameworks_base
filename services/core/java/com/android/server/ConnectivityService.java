@@ -5596,7 +5596,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 ns, mContext, mTrackerHandler, new NetworkMisc(networkMisc), this, mNetd,
                 mDnsResolver, mNMS, factorySerialNumber);
         // Make sure the network capabilities reflect what the agent info says.
-        nai.setNetworkCapabilities(mixInCapabilities(nai, nc));
+        nai.getAndSetNetworkCapabilities(mixInCapabilities(nai, nc));
         final String extraInfo = networkInfo.getExtraInfo();
         final String name = TextUtils.isEmpty(extraInfo)
                 ? nai.networkCapabilities.getSSID() : extraInfo;
@@ -5950,11 +5950,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
-        final NetworkCapabilities prevNc;
-        synchronized (nai) {
-            prevNc = nai.networkCapabilities;
-            nai.setNetworkCapabilities(newNc);
-        }
+        final NetworkCapabilities prevNc = nai.getAndSetNetworkCapabilities(newNc);
 
         updateUids(nai, prevNc, newNc);
 
@@ -5963,7 +5959,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // the change we're processing can't affect any requests, it can only affect the listens
             // on this network. We might have been called by rematchNetworkAndRequests when a
             // network changed foreground state.
-            processListenRequests(nai, true);
+            processListenRequests(nai);
         } else {
             // If the requestable capabilities have changed or the score changed, we can't have been
             // called by rematchNetworkAndRequests, so it's safe to start a rematch.
@@ -6271,8 +6267,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
         updateAllVpnsCapabilities();
     }
 
-    private void processListenRequests(NetworkAgentInfo nai, boolean capabilitiesChanged) {
+    private void processListenRequests(@NonNull final NetworkAgentInfo nai) {
         // For consistency with previous behaviour, send onLost callbacks before onAvailable.
+        processNewlyLostListenRequests(nai);
+        notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
+        processNewlySatisfiedListenRequests(nai);
+    }
+
+    private void processNewlyLostListenRequests(@NonNull final NetworkAgentInfo nai) {
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
             NetworkRequest nr = nri.request;
             if (!nr.isListen()) continue;
@@ -6281,11 +6283,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_LOST, 0);
             }
         }
+    }
 
-        if (capabilitiesChanged) {
-            notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
-        }
-
+    private void processNewlySatisfiedListenRequests(@NonNull final NetworkAgentInfo nai) {
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
             NetworkRequest nr = nri.request;
             if (!nr.isListen()) continue;
@@ -6468,19 +6468,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // before LegacyTypeTracker sends legacy broadcasts
         for (NetworkRequestInfo nri : addedRequests) notifyNetworkAvailable(newNetwork, nri);
 
-        // Second pass: process all listens.
-        if (wasBackgroundNetwork != newNetwork.isBackgroundNetwork()) {
-            // TODO : most of the following is useless because the only thing that changed
-            // here is whether the network is a background network. Clean this up.
+        // Finally, process listen requests and update capabilities if the background state has
+        // changed for this network. For consistency with previous behavior, send onLost callbacks
+        // before onAvailable.
+        processNewlyLostListenRequests(newNetwork);
 
-            NetworkCapabilities newNc = mixInCapabilities(newNetwork,
+        // Maybe the network changed background states. Update its capabilities.
+        final boolean backgroundChanged = wasBackgroundNetwork != newNetwork.isBackgroundNetwork();
+        if (backgroundChanged) {
+            final NetworkCapabilities newNc = mixInCapabilities(newNetwork,
                     newNetwork.networkCapabilities);
-
-            if (Objects.equals(newNetwork.networkCapabilities, newNc)) return;
 
             final int oldPermission = getNetworkPermission(newNetwork.networkCapabilities);
             final int newPermission = getNetworkPermission(newNc);
-            if (oldPermission != newPermission && newNetwork.created && !newNetwork.isVPN()) {
+            if (oldPermission != newPermission) {
                 try {
                     mNMS.setNetworkPermission(newNetwork.network.netId, newPermission);
                 } catch (RemoteException e) {
@@ -6488,53 +6489,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
 
-            final NetworkCapabilities prevNc;
-            synchronized (newNetwork) {
-                prevNc = newNetwork.networkCapabilities;
-                newNetwork.setNetworkCapabilities(newNc);
-            }
-
-            updateUids(newNetwork, prevNc, newNc);
-
-            if (newNetwork.getCurrentScore() == score
-                    && newNc.equalRequestableCapabilities(prevNc)) {
-                // If the requestable capabilities haven't changed, and the score hasn't changed,
-                // then the change we're processing can't affect any requests, it can only affect
-                // the listens on this network.
-                processListenRequests(newNetwork, true);
-            } else {
-                rematchAllNetworksAndRequests();
-                notifyNetworkCallbacks(newNetwork, ConnectivityManager.CALLBACK_CAP_CHANGED);
-            }
-
-            if (prevNc != null) {
-                final boolean oldMetered = prevNc.isMetered();
-                final boolean newMetered = newNc.isMetered();
-                final boolean meteredChanged = oldMetered != newMetered;
-
-                if (meteredChanged) {
-                    maybeNotifyNetworkBlocked(newNetwork, oldMetered, newMetered,
-                            mRestrictBackground, mRestrictBackground);
-                }
-
-                final boolean roamingChanged = prevNc.hasCapability(NET_CAPABILITY_NOT_ROAMING)
-                        != newNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
-
-                // Report changes that are interesting for network statistics tracking.
-                if (meteredChanged || roamingChanged) {
-                    notifyIfacesChangedForNetworkStats();
-                }
-            }
-
-            if (!newNc.hasTransport(TRANSPORT_VPN)) {
-                // Tell VPNs about updated capabilities, since they may need to
-                // bubble those changes through.
-                updateAllVpnsCapabilities();
-            }
-
-        } else {
-            processListenRequests(newNetwork, false);
+            newNetwork.getAndSetNetworkCapabilities(newNc);
+            notifyNetworkCallbacks(newNetwork, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
+
+        processNewlySatisfiedListenRequests(newNetwork);
     }
 
     /**
@@ -6719,9 +6678,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             // NetworkCapabilities need to be set before sending the private DNS config to
             // NetworkMonitor, otherwise NetworkMonitor cannot determine if validation is required.
-            synchronized (networkAgent) {
-                networkAgent.setNetworkCapabilities(networkAgent.networkCapabilities);
-            }
+            networkAgent.getAndSetNetworkCapabilities(networkAgent.networkCapabilities);
+
             handlePerNetworkPrivateDnsConfig(networkAgent, mDnsManager.getPrivateDnsConfig());
             updateLinkProperties(networkAgent, new LinkProperties(networkAgent.linkProperties),
                     null);

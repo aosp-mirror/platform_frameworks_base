@@ -1859,6 +1859,7 @@ public class Resources {
             mResId = other.mResId == null ? null : other.mResId.clone();
             mForce = other.mForce == null ? null : other.mForce.clone();
             mCount = other.mCount;
+            mHashCode = other.mHashCode;
         }
 
         @Override

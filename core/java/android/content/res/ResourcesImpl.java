@@ -344,7 +344,7 @@ public class ResourcesImpl {
         try {
             return mAssets.openNonAssetFd(tempValue.assetCookie, tempValue.string.toString());
         } catch (Exception e) {
-            throw new NotFoundException("File " + tempValue.string.toString() + " from drawable "
+            throw new NotFoundException("File " + tempValue.string.toString() + " from "
                     + "resource ID #0x" + Integer.toHexString(id), e);
         }
     }
@@ -359,7 +359,7 @@ public class ResourcesImpl {
             // Note: value.string might be null
             NotFoundException rnf = new NotFoundException("File "
                     + (value.string == null ? "(null)" : value.string.toString())
-                    + " from drawable resource ID #0x" + Integer.toHexString(id));
+                    + " from resource ID #0x" + Integer.toHexString(id));
             rnf.initCause(e);
             throw rnf;
         }

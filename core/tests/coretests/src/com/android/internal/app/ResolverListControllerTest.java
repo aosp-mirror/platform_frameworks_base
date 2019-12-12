@@ -115,7 +115,7 @@ public class ResolverListControllerTest {
         mUsm = new UsageStatsManager(mMockContext, mMockService);
         when(mMockContext.getSystemService(Context.USAGE_STATS_SERVICE)).thenReturn(mUsm);
         mController = new ResolverListController(mMockContext, mMockPackageManager, sendIntent,
-                refererPackage, UserHandle.USER_CURRENT);
+                refererPackage, UserHandle.USER_CURRENT, /* userHandle */ UserHandle.SYSTEM);
         mController.sort(new ArrayList<ResolvedComponentInfo>());
         long beforeReport = getCount(mUsm, packageName, action, annotation);
         mController.updateChooserCounts(packageName, UserHandle.USER_CURRENT, action);
@@ -132,7 +132,7 @@ public class ResolverListControllerTest {
         mUsm = new UsageStatsManager(mMockContext, mMockService);
         when(mMockContext.getSystemService(Context.USAGE_STATS_SERVICE)).thenReturn(mUsm);
         mController = new ResolverListController(mMockContext, mMockPackageManager, sendIntent,
-                refererPackage, UserHandle.USER_CURRENT);
+                refererPackage, UserHandle.USER_CURRENT, /* userHandle */ UserHandle.SYSTEM);
         List<ResolvedComponentInfo> topKList = new ArrayList<>(resolvedComponents);
         mController.topK(topKList, 5);
         List<ResolvedComponentInfo> sortList = new ArrayList<>(topKList);

@@ -35,8 +35,9 @@ namespace android {
 namespace os {
 namespace statsd {
 
-StatsCallbackPuller::StatsCallbackPuller(int tagId, const sp<IPullAtomCallback>& callback)
-    : StatsPuller(tagId), mCallback(callback) {
+StatsCallbackPuller::StatsCallbackPuller(int tagId, const sp<IPullAtomCallback>& callback,
+                                         int64_t timeoutNs)
+    : StatsPuller(tagId), mCallback(callback), mTimeoutNs(timeoutNs) {
     VLOG("StatsCallbackPuller created for tag %d", tagId);
 }
 
@@ -64,10 +65,9 @@ bool StatsCallbackPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
                 {
                     lock_guard<mutex> lk(*cv_mutex);
                     for (const StatsEventParcel& parcel: output) {
-                        shared_ptr<LogEvent> event =
-                              make_shared<LogEvent>(const_cast<uint8_t*>(parcel.buffer.data()),
-                                                    parcel.buffer.size(),
-                                                    /*uid=*/ -1);
+                        shared_ptr<LogEvent> event = make_shared<LogEvent>(
+                                const_cast<uint8_t*>(parcel.buffer.data()), parcel.buffer.size(),
+                                /*uid=*/-1, /*useNewSchema=*/true);
                         sharedData->push_back(event);
                     }
                     *pullSuccess = success;
@@ -76,7 +76,8 @@ bool StatsCallbackPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
                 cv->notify_one();
             });
 
-    // Initiate the pull.
+    // Initiate the pull. This is a oneway call to a different process, except
+    // in unit tests. In process calls are not oneway.
     Status status = mCallback->onPullAtom(mTagId, resultReceiver);
     if (!status.isOk()) {
         return false;
@@ -84,10 +85,8 @@ bool StatsCallbackPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
 
     {
         unique_lock<mutex> unique_lk(*cv_mutex);
-        int64_t pullTimeoutNs =
-                StatsPullerManager::kAllPullAtomInfo.at({.atomTag = mTagId}).pullTimeoutNs;
         // Wait until the pull finishes, or until the pull timeout.
-        cv->wait_for(unique_lk, chrono::nanoseconds(pullTimeoutNs),
+        cv->wait_for(unique_lk, chrono::nanoseconds(mTimeoutNs),
                      [pullFinish] { return *pullFinish; });
         if (!*pullFinish) {
             // Note: The parent stats puller will also note that there was a timeout and that the
@@ -96,7 +95,7 @@ bool StatsCallbackPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
             return true;
         } else {
             // Only copy the data if we did not timeout and the pull was successful.
-            if (pullSuccess) {
+            if (*pullSuccess) {
                 *data = std::move(*sharedData);
             }
             VLOG("StatsCallbackPuller::pull succeeded for %d", mTagId);
