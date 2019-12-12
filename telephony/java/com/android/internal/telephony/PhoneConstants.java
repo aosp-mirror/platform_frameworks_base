@@ -161,6 +161,8 @@ public class PhoneConstants {
     public static final String APN_TYPE_EMERGENCY = "emergency";
     /** APN type for Mission Critical Services */
     public static final String APN_TYPE_MCX = "mcx";
+    /** APN type for XCAP */
+    public static final String APN_TYPE_XCAP = "xcap";
     /** Array of all APN types */
     public static final String[] APN_TYPES = {APN_TYPE_DEFAULT,
             APN_TYPE_MMS,
@@ -172,7 +174,8 @@ public class PhoneConstants {
             APN_TYPE_CBS,
             APN_TYPE_IA,
             APN_TYPE_EMERGENCY,
-            APN_TYPE_MCX
+            APN_TYPE_MCX,
+            APN_TYPE_XCAP,
     };
 
     public static final int RIL_CARD_MAX_APPS    = 8;
