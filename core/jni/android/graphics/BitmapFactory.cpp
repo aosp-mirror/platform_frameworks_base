@@ -7,7 +7,6 @@
 #include "SkAndroidCodec.h"
 #include "SkBRDAllocator.h"
 #include "SkFrontBufferedStream.h"
-#include "SkMakeUnique.h"
 #include "SkMath.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
@@ -586,7 +585,7 @@ static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
     // since we know we'll be done with the asset when we return, we can
     // just use a simple wrapper
-    return doDecode(env, skstd::make_unique<AssetStreamAdaptor>(asset), padding, options,
+    return doDecode(env, std::make_unique<AssetStreamAdaptor>(asset), padding, options,
                     inBitmapHandle, colorSpaceHandle);
 }
 
@@ -594,7 +593,7 @@ static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
         jint offset, jint length, jobject options, jlong inBitmapHandle, jlong colorSpaceHandle) {
 
     AutoJavaByteArray ar(env, byteArray);
-    return doDecode(env, skstd::make_unique<SkMemoryStream>(ar.ptr() + offset, length, false),
+    return doDecode(env, std::make_unique<SkMemoryStream>(ar.ptr() + offset, length, false),
                     nullptr, options, inBitmapHandle, colorSpaceHandle);
 }
 
