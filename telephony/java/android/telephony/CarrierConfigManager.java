@@ -2989,7 +2989,6 @@ public class CarrierConfigManager {
         /**
          * Location information during (and after) an emergency call is only provided over control
          * plane signaling from the network.
-         * @hide
          */
         public static final int SUPL_EMERGENCY_MODE_TYPE_CP_ONLY = 0;
 
@@ -2997,7 +2996,6 @@ public class CarrierConfigManager {
          * Location information during (and after) an emergency call is provided over the data
          * plane and serviced by the framework GNSS service, but if it fails, the carrier also
          * supports control plane backup signaling.
-         * @hide
          */
         public static final int SUPL_EMERGENCY_MODE_TYPE_CP_FALLBACK = 1;
 
@@ -3005,7 +3003,6 @@ public class CarrierConfigManager {
          * Location information during (and after) an emergency call is provided over the data plane
          * and serviced by the framework GNSS service only. There is no backup signalling over the
          * control plane if it fails.
-         * @hide
          */
         public static final int SUPL_EMERGENCY_MODE_TYPE_DP_ONLY = 2;
 
@@ -3113,10 +3110,20 @@ public class CarrierConfigManager {
          * {@link #SUPL_EMERGENCY_MODE_TYPE_CP_ONLY}.
          * <p>
          * The default value for this configuration is {@link #SUPL_EMERGENCY_MODE_TYPE_CP_ONLY}.
-         * @hide
          */
         public static final String KEY_ES_SUPL_CONTROL_PLANE_SUPPORT_INT = KEY_PREFIX
                 + "es_supl_control_plane_support_int";
+
+        /**
+         * A list of roaming PLMNs where SUPL ES mode does not support a control-plane mechanism to
+         * get a user's location in the event that data plane SUPL fails or is otherwise
+         * unavailable.
+         * <p>
+         * A string array of PLMNs that do not support a control-plane mechanism for getting a
+         * user's location for SUPL ES.
+         */
+        public static final String KEY_ES_SUPL_DATA_PLANE_ONLY_ROAMING_PLMN_STRING_ARRAY =
+                KEY_PREFIX + "es_supl_data_plane_only_roaming_plmn_string_array";
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
@@ -3134,6 +3141,7 @@ public class CarrierConfigManager {
             defaults.putString(KEY_NFW_PROXY_APPS_STRING, "");
             defaults.putInt(KEY_ES_SUPL_CONTROL_PLANE_SUPPORT_INT,
                     SUPL_EMERGENCY_MODE_TYPE_CP_ONLY);
+            defaults.putStringArray(KEY_ES_SUPL_DATA_PLANE_ONLY_ROAMING_PLMN_STRING_ARRAY, null);
             return defaults;
         }
     }
