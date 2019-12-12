@@ -358,8 +358,6 @@ public class MediaScanner implements AutoCloseable {
     private int mOriginalCount;
     /** Whether the scanner has set a default sound for the ringer ringtone. */
     private boolean mDefaultRingtoneSet;
-    /** Whether the scanner has set a default sound for the ringer ringtone2. */
-    private boolean mDefaultRingtone2Set;
     /** Whether the scanner has set a default sound for the notification ringtone. */
     private boolean mDefaultNotificationSet;
     /** Whether the scanner has set a default sound for the alarm ringtone. */
@@ -367,8 +365,6 @@ public class MediaScanner implements AutoCloseable {
     /** The filename for the default sound for the ringer ringtone. */
     @UnsupportedAppUsage
     private String mDefaultRingtoneFilename;
-    /** The filename for the default sound for the ringer ringtone2. */
-    private String mDefaultRingtone2Filename;
     /** The filename for the default sound for the notification ringtone. */
     @UnsupportedAppUsage
     private String mDefaultNotificationFilename;
@@ -381,8 +377,6 @@ public class MediaScanner implements AutoCloseable {
      * to get the full system property.
      */
     private static final String DEFAULT_RINGTONE_PROPERTY_PREFIX = "ro.config.";
-    /** The seperator to split ringtone for each slot in ro.config.ringtone. */
-    private static final String RINGTONE_SEPARATOR = ",";
 
     private final BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
 
@@ -492,17 +486,8 @@ public class MediaScanner implements AutoCloseable {
     }
 
     private void setDefaultRingtoneFileNames() {
-        String defaultRingtoneProp = SystemProperties.get(DEFAULT_RINGTONE_PROPERTY_PREFIX
+        mDefaultRingtoneFilename = SystemProperties.get(DEFAULT_RINGTONE_PROPERTY_PREFIX
                 + Settings.System.RINGTONE);
-        if (!TextUtils.isEmpty(defaultRingtoneProp)) {
-            String defaultRingtoneArray[] = defaultRingtoneProp.split(RINGTONE_SEPARATOR);
-            mDefaultRingtoneFilename = defaultRingtoneArray[0];
-            if (defaultRingtoneArray.length > 1) {
-                // If length of defaultRingtoneArray more than 1, it means ro.default.ringtone
-                // also includes slot2's ringtone
-                mDefaultRingtone2Filename = defaultRingtoneArray[1];
-            }
-        }
         mDefaultNotificationFilename = SystemProperties.get(DEFAULT_RINGTONE_PROPERTY_PREFIX
                 + Settings.System.NOTIFICATION_SOUND);
         mDefaultAlarmAlertFilename = SystemProperties.get(DEFAULT_RINGTONE_PROPERTY_PREFIX
@@ -662,11 +647,7 @@ public class MediaScanner implements AutoCloseable {
                     if (((!mDefaultNotificationSet &&
                                 doesPathHaveFilename(entry.mPath, mDefaultNotificationFilename))
                         || (!mDefaultRingtoneSet &&
-                                !TextUtils.isEmpty(mDefaultRingtoneFilename) &&
                                 doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename))
-                        || (!mDefaultRingtone2Set &&
-                                !TextUtils.isEmpty(mDefaultRingtone2Filename) &&
-                                doesPathHaveFilename(entry.mPath, mDefaultRingtone2Filename))
                         || (!mDefaultAlarmSet &&
                                 doesPathHaveFilename(entry.mPath, mDefaultAlarmAlertFilename)))) {
                         Log.w(TAG, "forcing rescan of " + entry.mPath +
@@ -1108,13 +1089,9 @@ public class MediaScanner implements AutoCloseable {
                         doesPathHaveFilename(entry.mPath, mDefaultNotificationFilename)) {
                     needToSetSettings = true;
                 }
-            } else if (ringtones) {
-                if (!mDefaultRingtoneSet && (TextUtils.isEmpty(mDefaultRingtoneFilename) ||
-                        doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename))) {
-                    needToSetSettings = true;
-                }
-                if (!mDefaultRingtone2Set && (TextUtils.isEmpty(mDefaultRingtone2Filename) ||
-                        doesPathHaveFilename(entry.mPath, mDefaultRingtone2Filename))) {
+            } else if (ringtones && !mDefaultRingtoneSet) {
+                if (TextUtils.isEmpty(mDefaultRingtoneFilename) ||
+                        doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename)) {
                     needToSetSettings = true;
                 }
             } else if (alarms && !mDefaultAlarmSet) {
@@ -1180,16 +1157,8 @@ public class MediaScanner implements AutoCloseable {
                     setRingtoneIfNotSet(Settings.System.NOTIFICATION_SOUND, tableUri, rowId);
                     mDefaultNotificationSet = true;
                 } else if (ringtones) {
-                    if (!TextUtils.isEmpty(mDefaultRingtoneFilename)
-                            && doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename)) {
-                        setRingtoneIfNotSet(Settings.System.RINGTONE, tableUri, rowId);
-                        mDefaultRingtoneSet = true;
-                    }
-                    if (!TextUtils.isEmpty(mDefaultRingtone2Filename)
-                            && doesPathHaveFilename(entry.mPath, mDefaultRingtone2Filename)) {
-                        setRingtoneIfNotSet(Settings.System.RINGTONE2, tableUri, rowId);
-                        mDefaultRingtone2Set = true;
-                    }
+                    setRingtoneIfNotSet(Settings.System.RINGTONE, tableUri, rowId);
+                    mDefaultRingtoneSet = true;
                 } else if (alarms) {
                     setRingtoneIfNotSet(Settings.System.ALARM_ALERT, tableUri, rowId);
                     mDefaultAlarmSet = true;
@@ -1216,9 +1185,8 @@ public class MediaScanner implements AutoCloseable {
             if (TextUtils.isEmpty(existingSettingValue)) {
                 final Uri settingUri = Settings.System.getUriFor(settingName);
                 final Uri ringtoneUri = ContentUris.withAppendedId(uri, rowId);
-                final int slotId = Settings.System.RINGTONE2.equals(settingName) ? 1 : 0;
-                RingtoneManager.setActualDefaultRingtoneUriBySlot(mContext,
-                        RingtoneManager.getDefaultType(settingUri), ringtoneUri, slotId);
+                RingtoneManager.setActualDefaultRingtoneUri(mContext,
+                        RingtoneManager.getDefaultType(settingUri), ringtoneUri);
             }
             Settings.System.putInt(cr, settingSetIndicatorName(settingName), 1);
         }
@@ -1297,7 +1265,6 @@ public class MediaScanner implements AutoCloseable {
         }
 
         mDefaultRingtoneSet = wasRingtoneAlreadySet(Settings.System.RINGTONE);
-        mDefaultRingtone2Set = wasRingtoneAlreadySet(Settings.System.RINGTONE2);
         mDefaultNotificationSet = wasRingtoneAlreadySet(Settings.System.NOTIFICATION_SOUND);
         mDefaultAlarmSet = wasRingtoneAlreadySet(Settings.System.ALARM_ALERT);
 

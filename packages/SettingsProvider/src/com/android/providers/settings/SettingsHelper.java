@@ -146,7 +146,6 @@ public class SettingsHelper {
             } else if (isAlreadyConfiguredCriticalAccessibilitySetting(name)) {
                 return;
             } else if (Settings.System.RINGTONE.equals(name)
-                    || Settings.System.RINGTONE2.equals(name)
                     || Settings.System.NOTIFICATION_SOUND.equals(name)
                     || Settings.System.ALARM_ALERT.equals(name)) {
                 setRingtone(name, value);
@@ -179,12 +178,11 @@ public class SettingsHelper {
 
     public String onBackupValue(String name, String value) {
         // Special processing for backing up ringtones & notification sounds
-        if (Settings.System.RINGTONE.equals(name) || Settings.System.RINGTONE2.equals(name)
+        if (Settings.System.RINGTONE.equals(name)
                 || Settings.System.NOTIFICATION_SOUND.equals(name)
                 || Settings.System.ALARM_ALERT.equals(name)) {
             if (value == null) {
-                if (Settings.System.RINGTONE.equals(name)
-                        || Settings.System.RINGTONE2.equals(name)) {
+                if (Settings.System.RINGTONE.equals(name)) {
                     // For ringtones, we need to distinguish between non-telephony vs telephony
                     if (mTelephonyManager != null && mTelephonyManager.isVoiceCapable()) {
                         // Backup a null ringtone as silent on voice-capable devices
@@ -208,7 +206,7 @@ public class SettingsHelper {
     /**
      * Sets the ringtone of type specified by the name.
      *
-     * @param name should be Settings.System.RINGTONE, Settings.System.RINGTONE2, Settings.System.NOTIFICATION_SOUND
+     * @param name should be Settings.System.RINGTONE, Settings.System.NOTIFICATION_SOUND
      * or Settings.System.ALARM_ALERT.
      * @param value can be a canonicalized uri or "_silent" to indicate a silent (null) ringtone.
      */
@@ -234,8 +232,6 @@ public class SettingsHelper {
     private int getRingtoneType(String name) {
         switch (name) {
             case Settings.System.RINGTONE:
-                return RingtoneManager.TYPE_RINGTONE;
-            case Settings.System.RINGTONE2:
                 return RingtoneManager.TYPE_RINGTONE;
             case Settings.System.NOTIFICATION_SOUND:
                 return RingtoneManager.TYPE_NOTIFICATION;

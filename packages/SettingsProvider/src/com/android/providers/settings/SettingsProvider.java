@@ -767,9 +767,6 @@ public class SettingsProvider extends ContentProvider {
         if (Settings.System.RINGTONE_CACHE_URI.equals(uri)) {
             cacheRingtoneSetting = Settings.System.RINGTONE;
             cacheName = Settings.System.RINGTONE_CACHE;
-        } else if (Settings.System.RINGTONE2_CACHE_URI.equals(uri)) {
-            cacheRingtoneSetting = Settings.System.RINGTONE2;
-            cacheName = Settings.System.RINGTONE2_CACHE;
         } else if (Settings.System.NOTIFICATION_SOUND_CACHE_URI.equals(uri)) {
             cacheRingtoneSetting = Settings.System.NOTIFICATION_SOUND;
             cacheName = Settings.System.NOTIFICATION_SOUND_CACHE;
@@ -1727,8 +1724,6 @@ public class SettingsProvider extends ContentProvider {
         String cacheName = null;
         if (Settings.System.RINGTONE.equals(name)) {
             cacheName = Settings.System.RINGTONE_CACHE;
-        } else if (Settings.System.RINGTONE2.equals(name)) {
-            cacheName = Settings.System.RINGTONE2_CACHE;
         } else if (Settings.System.NOTIFICATION_SOUND.equals(name)) {
             cacheName = Settings.System.NOTIFICATION_SOUND_CACHE;
         } else if (Settings.System.ALARM_ALERT.equals(name)) {
