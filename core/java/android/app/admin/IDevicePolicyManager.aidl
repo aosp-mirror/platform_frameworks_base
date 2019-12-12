@@ -438,6 +438,9 @@ interface IDevicePolicyManager {
     boolean isPackageAllowedToAccessCalendarForUser(String packageName, int userHandle);
     List<String> getCrossProfileCalendarPackagesForUser(int userHandle);
 
+    void setCrossProfilePackages(in ComponentName admin, in List<String> packageNames);
+    List<String> getCrossProfilePackages(in ComponentName admin);
+
     boolean isManagedKiosk();
     boolean isUnattendedManagedKiosk();
 

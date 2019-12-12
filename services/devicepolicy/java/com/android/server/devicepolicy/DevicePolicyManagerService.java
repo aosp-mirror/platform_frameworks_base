@@ -990,6 +990,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 "cross-profile-calendar-packages";
         private static final String TAG_CROSS_PROFILE_CALENDAR_PACKAGES_NULL =
                 "cross-profile-calendar-packages-null";
+        private static final String TAG_CROSS_PROFILE_PACKAGES = "cross-profile-packages";
 
         DeviceAdminInfo info;
 
@@ -1103,6 +1104,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // This whitelist should be in default an empty list, which indicates that no package
         // is whitelisted.
         List<String> mCrossProfileCalendarPackages = Collections.emptyList();
+
+        // The whitelist of packages that the admin has enabled to be able to request consent from
+        // the user to communicate cross-profile. By default, no packages are whitelisted, which is
+        // represented as an empty list.
+        List<String> mCrossProfilePackages = Collections.emptyList();
 
         ActiveAdmin(DeviceAdminInfo _info, boolean parent) {
             info = _info;
@@ -1329,6 +1335,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 writePackageListToXml(out, TAG_CROSS_PROFILE_CALENDAR_PACKAGES,
                         mCrossProfileCalendarPackages);
             }
+            writePackageListToXml(out, TAG_CROSS_PROFILE_PACKAGES, mCrossProfilePackages);
         }
 
         void writeTextToXml(XmlSerializer out, String tag, String text) throws IOException {
@@ -1560,6 +1567,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     mCrossProfileCalendarPackages = readPackageList(parser, tag);
                 } else if (TAG_CROSS_PROFILE_CALENDAR_PACKAGES_NULL.equals(tag)) {
                     mCrossProfileCalendarPackages = null;
+                } else if (TAG_CROSS_PROFILE_PACKAGES.equals(tag)) {
+                    mCrossProfilePackages = readPackageList(parser, tag);
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -1783,6 +1792,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 pw.print("mCrossProfileCalendarPackages=");
                 pw.println(mCrossProfileCalendarPackages);
             }
+            pw.print("mCrossProfilePackages=");
+            pw.println(mCrossProfilePackages);
         }
     }
 
@@ -14642,6 +14653,35 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public void setCrossProfilePackages(ComponentName who, List<String> packageNames) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        Preconditions.checkNotNull(packageNames, "Package names is null");
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin =
+                    getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            admin.mCrossProfilePackages = packageNames;
+            saveSettingsLocked(mInjector.userHandleGetCallingUserId());
+        }
+    }
+
+    @Override
+    public List<String> getCrossProfilePackages(ComponentName who) {
+        if (!mHasFeature) {
+            return Collections.emptyList();
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getActiveAdminForCallerLocked(
+                    who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return admin.mCrossProfilePackages;
+        }
     }
 
     @Override
