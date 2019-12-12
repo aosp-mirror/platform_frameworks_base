@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -1246,7 +1247,8 @@ public class AudioSystem
      * </ul>
      */
     public static int getPlatformType(Context context) {
-        if (context.getResources().getBoolean(com.android.internal.R.bool.config_voice_capable)) {
+        if (((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE))
+                .isVoiceCapable()) {
             return PLATFORM_VOICE;
         } else if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
             return PLATFORM_TELEVISION;

@@ -28,6 +28,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.telecom.TelecomManager;
+import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.MotionEvent;
@@ -86,11 +87,14 @@ public class EmergencyButton extends Button {
 
     public EmergencyButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mIsVoiceCapable = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_voice_capable);
+        mIsVoiceCapable = getTelephonyManager().isVoiceCapable();
         mEnableEmergencyCallWhileSimLocked = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enable_emergency_call_while_sim_locked);
         mEmergencyAffordanceManager = new EmergencyAffordanceManager(context);
+    }
+
+    private TelephonyManager getTelephonyManager() {
+        return (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
     }
 
     @Override
