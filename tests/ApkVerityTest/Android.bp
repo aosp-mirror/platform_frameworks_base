@@ -19,14 +19,14 @@ java_test_host {
     test_suites: ["general-tests"],
     target_required: [
         "block_device_writer_module",
-        "ApkVerityTestApp",
-        "ApkVerityTestAppSplit",
     ],
     data: [
         ":ApkVerityTestCertDer",
+        ":ApkVerityTestApp",
         ":ApkVerityTestAppFsvSig",
         ":ApkVerityTestAppDm",
         ":ApkVerityTestAppDmFsvSig",
+        ":ApkVerityTestAppSplit",
         ":ApkVerityTestAppSplitFsvSig",
         ":ApkVerityTestAppSplitDm",
         ":ApkVerityTestAppSplitDmFsvSig",
