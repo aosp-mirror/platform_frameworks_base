@@ -245,7 +245,7 @@ filegroup {
         ":libcamera_client_framework_aidl",
         ":libupdate_engine_aidl",
         // TODO: this needs to be removed when statsd-framework.jar is separated out
-        ":statsd_aidl",
+        ":statsd_java_aidl",
         ":storaged_aidl",
         ":vold_aidl",
 

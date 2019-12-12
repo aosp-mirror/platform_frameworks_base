@@ -137,7 +137,6 @@ import com.android.internal.os.StoragedUidIoStatsReader;
 import com.android.internal.util.DumpUtils;
 import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalServices;
-import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.notification.NotificationManagerService;
@@ -277,6 +276,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private final BroadcastReceiver mAppUpdateReceiver;
     private final BroadcastReceiver mUserUpdateReceiver;
     private final ShutdownEventReceiver mShutdownEventReceiver;
+
+    private StatsManagerService mStatsManagerService;
 
     private static final class PullerKey {
         private final int mUid;
@@ -2681,6 +2682,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             Slog.d(TAG, "learned that statsdReady");
         }
         sayHiToStatsd(); // tell statsd that we're ready too and link to it
+        mStatsManagerService.systemReady();
         mContext.sendBroadcastAsUser(new Intent(StatsManager.ACTION_STATSD_STARTED)
                         .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND),
                 UserHandle.SYSTEM, android.Manifest.permission.DUMP);
@@ -2736,7 +2738,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    // Lifecycle and related code
+    // Statsd related code
 
     /**
      * Fetches the statsd IBinder service.
@@ -2747,40 +2749,16 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         return IStatsd.Stub.asInterface(ServiceManager.getService("stats"));
     }
 
-    public static final class Lifecycle extends SystemService {
-        private StatsCompanionService mStatsCompanionService;
-
-        public Lifecycle(Context context) {
-            super(context);
-        }
-
-        @Override
-        public void onStart() {
-            mStatsCompanionService = new StatsCompanionService(getContext());
-            try {
-                publishBinderService(Context.STATS_COMPANION_SERVICE,
-                        mStatsCompanionService);
-                if (DEBUG) Slog.d(TAG, "Published " + Context.STATS_COMPANION_SERVICE);
-            } catch (Exception e) {
-                Slog.e(TAG, "Failed to publishBinderService", e);
-            }
-        }
-
-        @Override
-        public void onBootPhase(int phase) {
-            super.onBootPhase(phase);
-            if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
-                mStatsCompanionService.systemReady();
-            }
-        }
-    }
-
     /**
      * Now that the android system is ready, StatsCompanion is ready too, so inform statsd.
      */
-    private void systemReady() {
+    void systemReady() {
         if (DEBUG) Slog.d(TAG, "Learned that systemReady");
         sayHiToStatsd();
+    }
+
+    void setStatsManagerService(StatsManagerService statsManagerService) {
+        mStatsManagerService = statsManagerService;
     }
 
     /**

@@ -4803,6 +4803,12 @@ public abstract class Context {
     public static final String INCIDENT_COMPANION_SERVICE = "incidentcompanion";
 
     /**
+     * Service to assist {@link android.app.StatsManager} that lives in system server.
+     * @hide
+     */
+    public static final String STATS_MANAGER_SERVICE = "statsmanager";
+
+    /**
      * Service to assist statsd in obtaining general stats.
      * @hide
      */

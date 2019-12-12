@@ -209,8 +209,8 @@ public final class SystemServer {
             "com.android.server.print.PrintManagerService";
     private static final String COMPANION_DEVICE_MANAGER_SERVICE_CLASS =
             "com.android.server.companion.CompanionDeviceManagerService";
-    private static final String STATS_COMPANION_SERVICE_LIFECYCLE_CLASS =
-            "com.android.server.stats.StatsCompanionService$Lifecycle";
+    private static final String STATS_COMPANION_LIFECYCLE_CLASS =
+            "com.android.server.stats.StatsCompanion$Lifecycle";
     private static final String USB_SERVICE_CLASS =
             "com.android.server.usb.UsbService$Lifecycle";
     private static final String MIDI_SERVICE_CLASS =
@@ -1955,8 +1955,8 @@ public final class SystemServer {
         }
 
         // Statsd helper
-        t.traceBegin("StartStatsCompanionService");
-        mSystemServiceManager.startService(STATS_COMPANION_SERVICE_LIFECYCLE_CLASS);
+        t.traceBegin("StartStatsCompanion");
+        mSystemServiceManager.startService(STATS_COMPANION_LIFECYCLE_CLASS);
         t.traceEnd();
 
         // Incidentd and dumpstated helper

@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.os.IPullAtomCallback;
 import android.os.IPullAtomResultReceiver;
 import android.os.IStatsCompanionService;
+import android.os.IStatsManagerService;
 import android.os.IStatsPullerCallback;
 import android.os.IStatsd;
 import android.os.RemoteException;
@@ -60,6 +61,9 @@ public final class StatsManager {
 
     @GuardedBy("sLock")
     private IStatsCompanionService mStatsCompanion;
+
+    @GuardedBy("sLock")
+    private IStatsManagerService mStatsManagerService;
 
     /**
      * Long extra of uid that added the relevant stats config.
@@ -684,6 +688,16 @@ public final class StatsManager {
         mStatsCompanion = IStatsCompanionService.Stub.asInterface(
                 ServiceManager.getService("statscompanion"));
         return mStatsCompanion;
+    }
+
+    @GuardedBy("sLock")
+    private IStatsManagerService getIStatsManagerServiceLocked() {
+        if (mStatsManagerService != null) {
+            return mStatsManagerService;
+        }
+        mStatsManagerService = IStatsManagerService.Stub.asInterface(
+                ServiceManager.getService(Context.STATS_MANAGER_SERVICE));
+        return mStatsManagerService;
     }
 
     /**
