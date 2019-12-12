@@ -14608,7 +14608,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 return false;
             }
 
-            if (!SELinux.restoreconRecursive(afterCodeFile)) {
+            //TODO(b/136132412): enable selinux restorecon for incremental directories
+            if (!onIncremental && !SELinux.restoreconRecursive(afterCodeFile)) {
                 Slog.w(TAG, "Failed to restorecon");
                 return false;
             }
