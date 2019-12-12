@@ -307,6 +307,8 @@ class ProcessRecord implements WindowProcessListener {
     long startTime;
     // This will be same as {@link #uid} usually except for some apps used during factory testing.
     int startUid;
+    // set of disabled compat changes for the process (all others are enabled)
+    long[] mDisabledCompatChanges;
 
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startTime) {

@@ -642,6 +642,7 @@ public final class Zygote {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
             return ZygoteInit.zygoteInit(args.mTargetSdkVersion,
+                                         args.mDisabledCompatChanges,
                                          args.mRemainingArgs,
                                          null /* classLoader */);
         } finally {

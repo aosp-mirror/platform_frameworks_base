@@ -23,15 +23,17 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructCapUserData;
 import android.system.StructCapUserHeader;
-import android.util.TimingsTraceLog;
 import android.util.Slog;
+import android.util.TimingsTraceLog;
+
 import dalvik.system.VMRuntime;
+
+import libcore.io.IoUtils;
+
 import java.io.DataOutputStream;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import libcore.io.IoUtils;
 
 /**
  * Startup class for the wrapper process.
@@ -166,10 +168,10 @@ public class WrapperInit {
             System.arraycopy(argv, 2, removedArgs, 0, argv.length - 2);
             argv = removedArgs;
         }
-
         // Perform the same initialization that would happen after the Zygote forks.
         Zygote.nativePreApplicationInit();
-        return RuntimeInit.applicationInit(targetSdkVersion, argv, classLoader);
+        return RuntimeInit.applicationInit(targetSdkVersion, /*disabledCompatChanges*/ null,
+                argv, classLoader);
     }
 
     /**
