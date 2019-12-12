@@ -56,6 +56,7 @@ public final class ManualTimeSuggestion implements Parcelable {
 
     public ManualTimeSuggestion(@NonNull TimestampedValue<Long> utcTime) {
         mUtcTime = Objects.requireNonNull(utcTime);
+        Objects.requireNonNull(utcTime.getValue());
     }
 
     private static ManualTimeSuggestion createFromParcel(Parcel in) {
