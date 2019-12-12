@@ -1645,10 +1645,9 @@ class UserController implements Handler.Callback {
             final boolean allow;
             final boolean isSameProfileGroup = isSameProfileGroup(callingUserId, targetUserId);
             if (mInjector.isCallerRecents(callingUid)
-                    && callingUserId == getCurrentUserId()
-                    && isSameProfileGroup) {
-                // If the caller is Recents and it is running in the current user, we then allow it
-                // to access its profiles.
+                    && isSameProfileGroup(callingUserId, targetUserId)) {
+                // If the caller is Recents and the caller has ownership of the profile group,
+                // we then allow it to access its profiles.
                 allow = true;
             } else if (mInjector.checkComponentPermission(INTERACT_ACROSS_USERS_FULL, callingPid,
                     callingUid, -1, true) == PackageManager.PERMISSION_GRANTED) {
