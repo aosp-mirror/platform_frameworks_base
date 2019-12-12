@@ -53,7 +53,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.util.Assert;
 
 import com.google.android.collect.Lists;
@@ -79,7 +78,6 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationGroupManager mGroupManager;
     @Mock private VisualStabilityManager mVisualStabilityManager;
-    @Mock private ShadeController mShadeController;
 
     private TestableLooper mTestableLooper;
     private Handler mHandler;
@@ -99,14 +97,12 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 mLockscreenUserManager);
         mDependency.injectTestDependency(NotificationGroupManager.class, mGroupManager);
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
-        mDependency.injectTestDependency(ShadeController.class, mShadeController);
 
         mHelper = new NotificationTestHelper(mContext, mDependency);
 
         mViewHierarchyManager = new NotificationViewHierarchyManager(mContext,
                 mHandler, mLockscreenUserManager, mGroupManager, mVisualStabilityManager,
                 mock(StatusBarStateControllerImpl.class), mEntryManager,
-                () -> mShadeController,
                 mock(KeyguardBypassController.class),
                 mock(BubbleController.class),
                 mock(DynamicPrivacyController.class));

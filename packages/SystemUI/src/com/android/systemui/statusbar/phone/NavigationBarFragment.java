@@ -164,6 +164,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private int mDisabledFlags1;
     private int mDisabledFlags2;
     private final Lazy<StatusBar> mStatusBarLazy;
+    private final ShadeController mShadeController;
     private Recents mRecents;
     private StatusBar mStatusBar;
     private final Divider mDivider;
@@ -216,7 +217,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             mNavigationBarView.getRotationButtonController().setRotateSuggestionButtonState(false);
 
             // Hide the notifications panel when quick step starts
-            mStatusBarLazy.get().collapsePanel(true /* animate */);
+            mShadeController.collapsePanel(true /* animate */);
         }
 
         @Override
@@ -272,6 +273,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             BroadcastDispatcher broadcastDispatcher,
             CommandQueue commandQueue, Divider divider,
             Optional<Recents> recentsOptional, Lazy<StatusBar> statusBarLazy,
+            ShadeController shadeController,
             @MainHandler Handler mainHandler) {
         mAccessibilityManagerWrapper = accessibilityManagerWrapper;
         mDeviceProvisionedController = deviceProvisionedController;
@@ -280,6 +282,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mAssistManager = assistManager;
         mSysUiFlagsContainer = sysUiFlagsContainer;
         mStatusBarLazy = statusBarLazy;
+        mShadeController = shadeController;
         mAssistantAvailable = mAssistManager.getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
         mOverviewProxyService = overviewProxyService;
         mNavigationModeController = navigationModeController;

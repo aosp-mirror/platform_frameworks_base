@@ -164,6 +164,7 @@ public class StatusBarModule {
             LightsOutNotifController lightsOutNotifController,
             StatusBarNotificationActivityStarter.Builder
                     statusBarNotificationActivityStarterBuilder,
+            ShadeController shadeController,
             SuperStatusBarViewFactory superStatusBarViewFactory,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
@@ -237,6 +238,7 @@ public class StatusBarModule {
                 dividerOptional,
                 lightsOutNotifController,
                 statusBarNotificationActivityStarterBuilder,
+                shadeController,
                 superStatusBarViewFactory,
                 statusBarKeyguardViewManager,
                 viewMediatorCallback,

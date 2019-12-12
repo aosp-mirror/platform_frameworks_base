@@ -111,6 +111,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private Handler mHandler;
     @Mock
     private BubbleController mBubbleController;
+    @Mock
+    private ShadeControllerImpl mShadeController;
 
     @Mock
     private ActivityIntentHelper mActivityIntentHelper;
@@ -177,7 +179,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mock(NotificationInterruptionStateProvider.class), mock(MetricsLogger.class),
                 mock(LockPatternUtils.class), mHandler, mHandler, mActivityIntentHelper,
-                mBubbleController, mSuperStatusBarViewFactory))
+                mBubbleController, mShadeController, mSuperStatusBarViewFactory))
                 .setStatusBar(mStatusBar)
                 .setNotificationPresenter(mock(NotificationPresenter.class))
                 .setActivityLaunchAnimator(mock(ActivityLaunchAnimator.class))
@@ -194,7 +196,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         // set up addPostCollapseAction to synchronously invoke the Runnable arg
         doAnswer(answerVoid(Runnable::run))
-                .when(mStatusBar).addPostCollapseAction(any(Runnable.class));
+                .when(mShadeController).addPostCollapseAction(any(Runnable.class));
 
         // set up Handler to synchronously invoke the Runnable arg
         doAnswer(answerVoid(Runnable::run))
@@ -219,7 +221,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         mNotificationActivityStarter.onNotificationClicked(sbn, mNotificationRow);
 
         // Then
-        verify(mStatusBar, atLeastOnce()).collapsePanel();
+        verify(mShadeController, atLeastOnce()).collapsePanel();
 
         verify(mContentIntent).sendAndReturnResult(
                 any(Context.class),
@@ -254,7 +256,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verify(mBubbleController).expandStackAndSelectBubble(eq(sbn.getKey()));
 
         // This is called regardless, and simply short circuits when there is nothing to do.
-        verify(mStatusBar, atLeastOnce()).collapsePanel();
+        verify(mShadeController, atLeastOnce()).collapsePanel();
 
         verify(mAssistManager).hideAssist();
 
@@ -284,7 +286,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Then
         verify(mBubbleController).expandStackAndSelectBubble(eq(sbn.getKey()));
 
-        verify(mStatusBar, atLeastOnce()).collapsePanel();
+        verify(mShadeController, atLeastOnce()).collapsePanel();
 
         verify(mAssistManager).hideAssist();
 
@@ -314,7 +316,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Then
         verify(mBubbleController).expandStackAndSelectBubble(eq(sbn.getKey()));
 
-        verify(mStatusBar, atLeastOnce()).collapsePanel();
+        verify(mShadeController, atLeastOnce()).collapsePanel();
 
         verify(mAssistManager).hideAssist();
 

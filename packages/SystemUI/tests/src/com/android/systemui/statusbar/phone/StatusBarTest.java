@@ -63,6 +63,7 @@ import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import androidx.test.filters.SmallTest;
@@ -243,6 +244,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private LockscreenLockIconController mLockscreenLockIconController;
     @Mock private StatusBarNotificationActivityStarter.Builder
             mStatusBarNotificationActivityStarterBuilder;
+    private ShadeController mShadeController;
 
     @Before
     public void setup() throws Exception {
@@ -309,6 +311,11 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBarComponentBuilder.build()).thenReturn(mStatusBarComponent);
         when(mStatusBarComponent.getStatusBarWindowViewController()).thenReturn(
                 mStatusBarWindowViewController);
+
+        mShadeController = new ShadeControllerImpl(mCommandQueue,
+                mStatusBarStateController, mStatusBarWindowController,
+                mStatusBarKeyguardViewManager, mContext.getSystemService(WindowManager.class),
+                () -> mStatusBar, () -> mAssistManager, () -> mBubbleController);
 
         mStatusBar = new StatusBar(
                 mContext,
@@ -382,6 +389,7 @@ public class StatusBarTest extends SysuiTestCase {
                 Optional.of(mDivider),
                 mLightsOutNotifController,
                 mStatusBarNotificationActivityStarterBuilder,
+                mShadeController,
                 mSuperStatusBarViewFactory,
                 mStatusBarKeyguardViewManager,
                 mViewMediatorCallback,

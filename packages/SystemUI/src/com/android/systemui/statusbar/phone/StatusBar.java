@@ -107,7 +107,6 @@ import android.view.RemoteAnimationAdapter;
 import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -232,7 +231,6 @@ import com.android.systemui.volume.VolumeComponent;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 
@@ -245,8 +243,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         ActivityStarter, KeyguardStateController.Callback,
         OnHeadsUpChangedListener, CommandQueue.Callbacks,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener,
-        StatusBarStateController.StateListener, ShadeController,
-        ActivityLaunchAnimator.Callback {
+        StatusBarStateController.StateListener, ActivityLaunchAnimator.Callback {
     public static final boolean MULTIUSER_DEBUG = false;
 
     public static final boolean ENABLE_CHILD_NOTIFICATIONS
@@ -387,6 +384,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Optional<Divider> mDividerOptional;
     private final StatusBarNotificationActivityStarter.Builder
             mStatusBarNotificationActivityStarterBuilder;
+    private final ShadeController mShadeController;
     private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private final LightsOutNotifController mLightsOutNotifController;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
@@ -409,7 +407,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mExpandedVisible;
 
     private final int[] mAbsPos = new int[2];
-    private final ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
 
     private final NotificationGutsManager mGutsManager;
     private final NotificationLogger mNotificationLogger;
@@ -683,6 +680,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             LightsOutNotifController lightsOutNotifController,
             StatusBarNotificationActivityStarter.Builder
                     statusBarNotificationActivityStarterBuilder,
+            ShadeController shadeController,
             SuperStatusBarViewFactory superStatusBarViewFactory,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
@@ -754,6 +752,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mRemoteInputUriController = remoteInputUriController;
         mDividerOptional = dividerOptional;
         mStatusBarNotificationActivityStarterBuilder = statusBarNotificationActivityStarterBuilder;
+        mShadeController = shadeController;
         mSuperStatusBarViewFactory = superStatusBarViewFactory;
         mLightsOutNotifController =  lightsOutNotifController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
@@ -1240,7 +1239,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mScrimController, mActivityLaunchAnimator, mDynamicPrivacyController,
                 mNotificationAlertingManager, rowBinder, mKeyguardStateController,
                 mKeyguardIndicationController,
-                this /* statusBar */, mCommandQueue);
+                this /* statusBar */, mShadeController, mCommandQueue);
 
         mNotificationListController =
                 new NotificationListController(
@@ -1318,7 +1317,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mRemoteInputManager.checkRemoteInputOutside(event);
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (mExpandedVisible) {
-                    animateCollapsePanels();
+                    mShadeController.animateCollapsePanels();
                 }
             }
             return mStatusBarWindow.onTouchEvent(event);
@@ -1417,6 +1416,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public StatusBarWindowView getStatusBarWindow() {
         return mStatusBarWindow;
+    }
+
+    public StatusBarWindowViewController getStatusBarWindowViewController() {
+        return mStatusBarWindowViewController;
     }
 
     protected ViewGroup getBouncerContainer() {
@@ -1574,7 +1577,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if ((diff1 & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state1 & StatusBarManager.DISABLE_EXPAND) != 0) {
-                animateCollapsePanels();
+                mShadeController.animateCollapsePanels();
             }
         }
 
@@ -1598,7 +1601,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if ((diff2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
             updateQsExpansionEnabled();
             if ((state1 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
-                animateCollapsePanels();
+                mShadeController.animateCollapsePanels();
             }
         }
     }
@@ -1840,7 +1843,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 && !mActivityLaunchAnimator.isLaunchForActivity()) {
             onClosingFinished();
         } else {
-            collapsePanel(true /* animate */);
+            mShadeController.collapsePanel(true /* animate */);
         }
     }
 
@@ -1888,7 +1891,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     animateExpandSettingsPanel((String) m.obj);
                     break;
                 case MSG_CLOSE_PANELS:
-                    animateCollapsePanels();
+                    mShadeController.animateCollapsePanels();
                     break;
                 case MSG_LAUNCH_TRANSITION_TIMEOUT:
                     onLaunchTransitionTimeout();
@@ -1985,20 +1988,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
     }
 
-    public void animateCollapsePanels() {
-        animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
-    }
-
-    private final Runnable mAnimateCollapsePanels = this::animateCollapsePanels;
-
     public void postAnimateCollapsePanels() {
-        mHandler.post(mAnimateCollapsePanels);
+        mHandler.post(mShadeController::animateCollapsePanels);
     }
 
     public void postAnimateForceCollapsePanels() {
-        mHandler.post(() -> {
-            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
-        });
+        mHandler.post(() -> mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE,
+                true /* force */));
     }
 
     public void postAnimateOpenPanels() {
@@ -2008,67 +2004,35 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void togglePanel() {
         if (mPanelExpanded) {
-            animateCollapsePanels();
+            mShadeController.animateCollapsePanels();
         } else {
             animateExpandNotificationsPanel();
         }
     }
 
-    public void animateCollapsePanels(int flags) {
-        animateCollapsePanels(flags, false /* force */, false /* delayed */,
+    @Override
+    public void animateCollapsePanels(int flags, boolean force) {
+        mShadeController.animateCollapsePanels(flags, force, false /* delayed */,
                 1.0f /* speedUpFactor */);
     }
 
-    @Override
-    public void animateCollapsePanels(int flags, boolean force) {
-        animateCollapsePanels(flags, force, false /* delayed */, 1.0f /* speedUpFactor */);
-    }
-
-    public void animateCollapsePanels(int flags, boolean force, boolean delayed) {
-        animateCollapsePanels(flags, force, delayed, 1.0f /* speedUpFactor */);
-    }
-
-    public void animateCollapsePanels(int flags, boolean force, boolean delayed,
-            float speedUpFactor) {
-        if (!force && mState != StatusBarState.SHADE) {
-            runPostCollapseRunnables();
-            return;
-        }
-        if (SPEW) {
-            Log.d(TAG, "animateCollapse():"
-                    + " mExpandedVisible=" + mExpandedVisible
-                    + " flags=" + flags);
-        }
-
-        if ((flags & CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL) == 0) {
-            if (!mHandler.hasMessages(MSG_HIDE_RECENT_APPS)) {
-                mHandler.removeMessages(MSG_HIDE_RECENT_APPS);
-                mHandler.sendEmptyMessage(MSG_HIDE_RECENT_APPS);
-            }
-        }
-
-        // TODO(b/62444020): remove when this bug is fixed
-        Log.v(TAG, "mStatusBarWindow: " + mStatusBarWindow + " canPanelBeCollapsed(): "
-                + mNotificationPanel.canPanelBeCollapsed());
-        if (mStatusBarWindow != null && mNotificationPanel.canPanelBeCollapsed()) {
-            // release focus immediately to kick off focus change transition
-            mStatusBarWindowController.setStatusBarFocusable(false);
-
-            mStatusBarWindowViewController.cancelExpandHelper();
-            mStatusBarView.collapsePanel(true /* animate */, delayed, speedUpFactor);
-        } else {
-            mBubbleController.collapseStack();
+    /**
+     * Called by {@link ShadeController} when it calls
+     * {@link ShadeController#animateCollapsePanels(int, boolean, boolean, float)}.
+     */
+    void postHideRecentApps() {
+        if (!mHandler.hasMessages(MSG_HIDE_RECENT_APPS)) {
+            mHandler.removeMessages(MSG_HIDE_RECENT_APPS);
+            mHandler.sendEmptyMessage(MSG_HIDE_RECENT_APPS);
         }
     }
 
-    private void runPostCollapseRunnables() {
-        ArrayList<Runnable> clonedList = new ArrayList<>(mPostCollapseRunnables);
-        mPostCollapseRunnables.clear();
-        int size = clonedList.size();
-        for (int i = 0; i < size; i++) {
-            clonedList.get(i).run();
-        }
-        mStatusBarKeyguardViewManager.readyForKeyguardDone();
+    public boolean isExpandedVisible() {
+        return mExpandedVisible;
+    }
+
+    public boolean isPanelExpanded() {
+        return mPanelExpanded;
     }
 
     /**
@@ -2147,7 +2111,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGutsManager.closeAndSaveGuts(true /* removeLeavebehind */, true /* force */,
                 true /* removeControls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
 
-        runPostCollapseRunnables();
+        mShadeController.runPostCollapseRunnables();
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
         if (!mNotificationActivityStarter.isCollapsingToShowActivityOverLockscreen()) {
             showBouncerIfKeyguard();
@@ -2672,12 +2636,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             if (dismissShade) {
                 if (mExpandedVisible && !mBouncerShowing) {
-                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */,
-                            true /* delayed*/);
+                    mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
+                            true /* force */, true /* delayed*/);
                 } else {
 
                     // Do it after DismissAction has been processed to conserve the needed ordering.
-                    mHandler.post(this::runPostCollapseRunnables);
+                    mHandler.post(mShadeController::runPostCollapseRunnables);
                 }
             } else if (isInLaunchTransition() && mNotificationPanel.isLaunchTransitionFinished()) {
 
@@ -2709,7 +2673,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     if (reason != null && reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
                         flags |= CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL;
                     }
-                    animateCollapsePanels(flags);
+                    mShadeController.animateCollapsePanels(flags);
                 }
             }
             else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
@@ -2803,7 +2767,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         mScreenPinningRequest.onConfigurationChanged();
     }
 
-    @Override
+    /**
+     * Notify the shade controller that the current user changed
+     *
+     * @param newUserId userId of the new user
+     */
     public void setLockscreenUser(int newUserId) {
         if (mLockscreenWallpaper != null) {
             mLockscreenWallpaper.setCurrentUser(newUserId);
@@ -3145,7 +3113,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void updatePanelExpansionForKeyguard() {
         if (mState == StatusBarState.KEYGUARD && mBiometricUnlockController.getMode()
                 != BiometricUnlockController.MODE_WAKE_AND_UNLOCK && !mBouncerShowing) {
-            instantExpandNotificationsPanel();
+            mShadeController.instantExpandNotificationsPanel();
         } else if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
             instantCollapseNotificationPanel();
         }
@@ -3158,10 +3126,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         runLaunchTransitionEndRunnable();
         mKeyguardStateController.setLaunchTransitionFadingAway(false);
         mPresenter.updateMediaMetaData(true /* metaDataChanged */, true);
-    }
-
-    public void addPostCollapseAction(Runnable r) {
-        mPostCollapseRunnables.add(r);
     }
 
     public boolean isInLaunchTransition() {
@@ -3396,7 +3360,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public boolean onMenuPressed() {
         if (shouldUnlockOnMenuPressed()) {
-            animateCollapsePanels(
+            mShadeController.animateCollapsePanels(
                     CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL /* flags */, true /* force */);
             return true;
         }
@@ -3426,7 +3390,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         if (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED) {
             if (mNotificationPanel.canPanelBeCollapsed()) {
-                animateCollapsePanels();
+                mShadeController.animateCollapsePanels();
             } else {
                 mBubbleController.performBackPressIfNeeded();
             }
@@ -3440,7 +3404,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public boolean onSpacePressed() {
         if (mDeviceInteractive && mState != StatusBarState.SHADE) {
-            animateCollapsePanels(
+            mShadeController.animateCollapsePanels(
                     CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL /* flags */, true /* force */);
             return true;
         }
@@ -3454,43 +3418,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    @Override
-    public void instantExpandNotificationsPanel() {
-        // Make our window larger and the panel expanded.
-        makeExpandedVisible(true);
-        mNotificationPanel.expand(false /* animate */);
-        mCommandQueue.recomputeDisableFlags(mDisplayId, false /* animate */);
-    }
-
-    @Override
-    public boolean closeShadeIfOpen() {
-        if (!mNotificationPanel.isFullyCollapsed()) {
-            mCommandQueue.animateCollapsePanels(
-                    CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
-            visibilityChanged(false);
-            mAssistManagerLazy.get().hideAssist();
-        }
-        return false;
-    }
-
-    @Override
-    public void postOnShadeExpanded(Runnable executable) {
-        mNotificationPanel.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        if (getStatusBarWindow().getHeight() != getStatusBarHeight()) {
-                            mNotificationPanel.getViewTreeObserver()
-                                    .removeOnGlobalLayoutListener(this);
-                            mNotificationPanel.post(executable);
-                        }
-                    }
-                });
-    }
-
-    private void instantCollapseNotificationPanel() {
+    void instantCollapseNotificationPanel() {
         mNotificationPanel.instantCollapse();
-        runPostCollapseRunnables();
+        mShadeController.runPostCollapseRunnables();
     }
 
     @Override
@@ -3576,11 +3506,11 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void onTrackingStarted() {
-        runPostCollapseRunnables();
+        mShadeController.runPostCollapseRunnables();
     }
 
     public void onClosingFinished() {
-        runPostCollapseRunnables();
+        mShadeController.runPostCollapseRunnables();
         if (!mPresenter.isPresenterFullyCollapsed()) {
             // if we set it not to be focusable when collapsing, we have to undo it when we aborted
             // the closing
@@ -3641,7 +3571,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      *
      * @param expandView The view to expand after going to the shade.
      */
-    public void goToLockedShade(View expandView) {
+    void goToLockedShade(View expandView) {
         if ((mDisabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
             return;
         }
@@ -3700,7 +3630,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mStatusBarWindowViewController.cancelCurrentTouch();
         }
         if (mPanelExpanded && mState == StatusBarState.SHADE) {
-            animateCollapsePanels();
+            mShadeController.animateCollapsePanels();
         }
     }
 
@@ -4067,7 +3997,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 Settings.Secure.putInt(mContext.getContentResolver(),
                         Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 0);
                 if (BANNER_ACTION_SETUP.equals(action)) {
-                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
+                    mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
                             true /* force */);
                     mContext.startActivity(new Intent(Settings.ACTION_APP_NOTIFICATION_REDACTION)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -4077,35 +4007,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
     };
-
-    @Override
-    public void collapsePanel(boolean animate) {
-        if (animate) {
-            boolean willCollapse = collapsePanel();
-            if (!willCollapse) {
-                runPostCollapseRunnables();
-            }
-        } else if (!mPresenter.isPresenterFullyCollapsed()) {
-            instantCollapseNotificationPanel();
-            visibilityChanged(false);
-        } else {
-            runPostCollapseRunnables();
-        }
-    }
-
-    @Override
-    public boolean collapsePanel() {
-        if (!mNotificationPanel.isFullyCollapsed()) {
-            // close the shade if it was open
-            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */,
-                    true /* delayed */);
-            visibilityChanged(false);
-
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     private final NotificationListener mNotificationListener;
 
@@ -4217,7 +4118,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 action.run();
             }).start();
 
-            return collapsePanel();
+            return mShadeController.collapsePanel();
         }, afterKeyguardGone);
     }
 
@@ -4277,7 +4178,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         return options.toBundle();
     }
 
-    protected void visibilityChanged(boolean visible) {
+    void visibilityChanged(boolean visible) {
         if (mVisible != visible) {
             mVisible = visible;
             if (!visible) {

@@ -94,8 +94,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import dagger.Lazy;
-
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -153,7 +151,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Mock
     private Resources mResources;
     @Mock
-    private Lazy<ShadeController> mShadeController;
+    private ShadeController mShadeController;
     @Mock
     private RemoteInputUriController mRemoteInputUriController;
 
@@ -719,7 +717,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         TestableBubbleController(Context context,
                 StatusBarWindowController statusBarWindowController,
                 StatusBarStateController statusBarStateController,
-                Lazy<ShadeController> shadeController,
+                ShadeController shadeController,
                 BubbleData data,
                 ConfigurationController configurationController,
                 NotificationInterruptionStateProvider interruptionStateProvider,

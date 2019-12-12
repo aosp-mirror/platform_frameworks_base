@@ -524,7 +524,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         private final ActivityIntentHelper mActivityIntentHelper;
         private final BubbleController mBubbleController;
         private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
-        private ShadeController mShadeController;
+        private final ShadeController mShadeController;
         private NotificationPresenter mNotificationPresenter;
         private ActivityLaunchAnimator mActivityLaunchAnimator;
         private StatusBar mStatusBar;
@@ -553,6 +553,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 @BgHandler Handler backgroundHandler,
                 ActivityIntentHelper activityIntentHelper,
                 BubbleController bubbleController,
+                ShadeController shadeController,
                 SuperStatusBarViewFactory superStatusBarViewFactory) {
             mContext = context;
             mCommandQueue = commandQueue;
@@ -577,13 +578,13 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mBackgroundHandler = backgroundHandler;
             mActivityIntentHelper = activityIntentHelper;
             mBubbleController = bubbleController;
+            mShadeController = shadeController;
             mSuperStatusBarViewFactory = superStatusBarViewFactory;
         }
 
-        /** Sets the status bar to use as {@link StatusBar} and {@link ShadeController}. */
+        /** Sets the status bar to use as {@link StatusBar}. */
         public Builder setStatusBar(StatusBar statusBar) {
             mStatusBar = statusBar;
-            mShadeController = statusBar;
             return this;
         }
 
