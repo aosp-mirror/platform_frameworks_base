@@ -166,7 +166,12 @@ public final class PhoneTimeSuggestion implements Parcelable {
         }
 
         /** Returns the builder for call chaining. */
-        public Builder setUtcTime(TimestampedValue<Long> utcTime) {
+        public Builder setUtcTime(@Nullable TimestampedValue<Long> utcTime) {
+            if (utcTime != null) {
+                // utcTime can be null, but the value it holds cannot.
+                Objects.requireNonNull(utcTime.getValue());
+            }
+
             mUtcTime = utcTime;
             return this;
         }
