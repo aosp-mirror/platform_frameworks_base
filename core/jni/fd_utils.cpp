@@ -40,6 +40,7 @@ static const char* kPathWhitelist[] = {
   "/apex/com.android.sdkext/javalib/framework-sdkext.jar",
   "/apex/com.android.telephony/javalib/telephony-common.jar",
   "/apex/com.android.telephony/javalib/ims-common.jar",
+  "/apex/com.android.wifi/javalib/framework-wifi.jar",
   "/dev/null",
   "/dev/socket/zygote",
   "/dev/socket/zygote_secondary",
