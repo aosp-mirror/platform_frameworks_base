@@ -16,38 +16,31 @@
 
 package android.view.textclassifier;
 
+import android.annotation.Nullable;
+import android.provider.DeviceConfig;
+
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * TextClassifier specific settings.
- * This is encoded as a key=value list, separated by commas.
- * <p>
- * Example of setting the values for testing.
- * <p>
- * <pre>
- * adb shell settings put global text_classifier_constants \
- *      model_dark_launch_enabled=true,smart_selection_enabled=true, \
- *      entity_list_default=phone:address, \
- *      lang_id_context_settings=20:1.0:0.4
- * </pre>
- * <p>
- * Settings are also available in device config. These take precedence over those in settings
- * global.
- * <p>
+ *
+ * <p>Currently, this class does not guarantee co-diverted flags are updated atomically.
+ *
  * <pre>
  * adb shell cmd device_config put textclassifier system_textclassifier_enabled true
  * </pre>
  *
- * @see android.provider.Settings.Global.TEXT_CLASSIFIER_CONSTANTS
- * @see android.provider.DeviceConfig.NAMESPACE_TEXTCLASSIFIER
+ * @see android.provider.DeviceConfig#NAMESPACE_TEXTCLASSIFIER
  * @hide
  */
 // TODO: Rename to TextClassifierSettings.
 public final class TextClassificationConstants {
+    private static final String DELIMITER = ":";
 
     /**
      * Whether the smart linkify feature is enabled.
@@ -56,11 +49,12 @@ public final class TextClassificationConstants {
     /**
      * Whether SystemTextClassifier is enabled.
      */
-    private static final String SYSTEM_TEXT_CLASSIFIER_ENABLED = "system_textclassifier_enabled";
+    static final String SYSTEM_TEXT_CLASSIFIER_ENABLED = "system_textclassifier_enabled";
     /**
      * Whether TextClassifierImpl is enabled.
      */
-    private static final String LOCAL_TEXT_CLASSIFIER_ENABLED = "local_textclassifier_enabled";
+    @VisibleForTesting
+    static final String LOCAL_TEXT_CLASSIFIER_ENABLED = "local_textclassifier_enabled";
     /**
      * Enable smart selection without a visible UI changes.
      */
@@ -82,7 +76,8 @@ public final class TextClassificationConstants {
     /**
      * Max length of text that suggestSelection can accept.
      */
-    private static final String SUGGEST_SELECTION_MAX_RANGE_LENGTH =
+    @VisibleForTesting
+    static final String SUGGEST_SELECTION_MAX_RANGE_LENGTH =
             "suggest_selection_max_range_length";
     /**
      * Max length of text that classifyText can accept.
@@ -101,7 +96,8 @@ public final class TextClassificationConstants {
      * A colon(:) separated string that specifies the default entities types for
      * generateLinks when hint is not given.
      */
-    private static final String ENTITY_LIST_DEFAULT = "entity_list_default";
+    @VisibleForTesting
+    static final String ENTITY_LIST_DEFAULT = "entity_list_default";
     /**
      * A colon(:) separated string that specifies the default entities types for
      * generateLinks when the text is in a not editable UI widget.
@@ -127,7 +123,8 @@ public final class TextClassificationConstants {
     /**
      * Threshold to accept a suggested language from LangID model.
      */
-    private static final String LANG_ID_THRESHOLD_OVERRIDE = "lang_id_threshold_override";
+    @VisibleForTesting
+    static final String LANG_ID_THRESHOLD_OVERRIDE = "lang_id_threshold_override";
     /**
      * Whether to enable {@link android.view.textclassifier.TemplateIntentFactory}.
      */
@@ -156,7 +153,8 @@ public final class TextClassificationConstants {
      * Reject all text less than minimumTextSize with penalizeRatio=0
      * @see {@code TextClassifierImpl#detectLanguages(String, int, int)} for reference.
      */
-    private static final String LANG_ID_CONTEXT_SETTINGS = "lang_id_context_settings";
+    @VisibleForTesting
+    static final String LANG_ID_CONTEXT_SETTINGS = "lang_id_context_settings";
 
     /**
      * The TextClassifierService which would like to use. Example of setting the package:
@@ -164,9 +162,9 @@ public final class TextClassificationConstants {
      * adb shell cmd device_config put textclassifier textclassifier_service_package_override \
      *      com.android.textclassifier
      * </pre>
-     *
      */
-    private static final String TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE =
+    @VisibleForTesting
+    static final String TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE =
             "textclassifier_service_package_override";
 
     private static final String DEFAULT_TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE = null;
@@ -213,142 +211,124 @@ public final class TextClassificationConstants {
     private static final boolean DETECT_LANGUAGES_FROM_TEXT_ENABLED_DEFAULT = true;
     private static final float[] LANG_ID_CONTEXT_SETTINGS_DEFAULT = new float[] {20f, 1.0f, 0.4f};
 
-    private final ConfigParser mConfigParser;
-
-    public TextClassificationConstants(Supplier<String> legacySettingsSupplier) {
-        mConfigParser = new ConfigParser(legacySettingsSupplier);
-    }
-
-    public String getTextClassifierServiceName() {
-        return mConfigParser.getString(
+    @Nullable
+    public String getTextClassifierServicePackageOverride() {
+        return DeviceConfig.getString(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
                 TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE,
                 DEFAULT_TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE);
     }
 
     public boolean isLocalTextClassifierEnabled() {
-        return mConfigParser.getBoolean(
-                LOCAL_TEXT_CLASSIFIER_ENABLED,
-                LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT);
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                LOCAL_TEXT_CLASSIFIER_ENABLED, LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT);
     }
 
     public boolean isSystemTextClassifierEnabled() {
-        return mConfigParser.getBoolean(
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
                 SYSTEM_TEXT_CLASSIFIER_ENABLED,
                 SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT);
     }
 
     public boolean isModelDarkLaunchEnabled() {
-        return mConfigParser.getBoolean(
-                MODEL_DARK_LAUNCH_ENABLED,
-                MODEL_DARK_LAUNCH_ENABLED_DEFAULT);
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                MODEL_DARK_LAUNCH_ENABLED, MODEL_DARK_LAUNCH_ENABLED_DEFAULT);
     }
 
     public boolean isSmartSelectionEnabled() {
-        return mConfigParser.getBoolean(
-                SMART_SELECTION_ENABLED,
-                SMART_SELECTION_ENABLED_DEFAULT);
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                SMART_SELECTION_ENABLED, SMART_SELECTION_ENABLED_DEFAULT);
     }
 
     public boolean isSmartTextShareEnabled() {
-        return mConfigParser.getBoolean(
-                SMART_TEXT_SHARE_ENABLED,
-                SMART_TEXT_SHARE_ENABLED_DEFAULT);
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                SMART_TEXT_SHARE_ENABLED, SMART_TEXT_SHARE_ENABLED_DEFAULT);
     }
 
     public boolean isSmartLinkifyEnabled() {
-        return mConfigParser.getBoolean(
-                SMART_LINKIFY_ENABLED,
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER, SMART_LINKIFY_ENABLED,
                 SMART_LINKIFY_ENABLED_DEFAULT);
     }
 
     public boolean isSmartSelectionAnimationEnabled() {
-        return mConfigParser.getBoolean(
-                SMART_SELECT_ANIMATION_ENABLED,
-                SMART_SELECT_ANIMATION_ENABLED_DEFAULT);
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                SMART_SELECT_ANIMATION_ENABLED, SMART_SELECT_ANIMATION_ENABLED_DEFAULT);
     }
 
     public int getSuggestSelectionMaxRangeLength() {
-        return mConfigParser.getInt(
-                SUGGEST_SELECTION_MAX_RANGE_LENGTH,
-                SUGGEST_SELECTION_MAX_RANGE_LENGTH_DEFAULT);
+        return DeviceConfig.getInt(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                SUGGEST_SELECTION_MAX_RANGE_LENGTH, SUGGEST_SELECTION_MAX_RANGE_LENGTH_DEFAULT);
     }
 
     public int getClassifyTextMaxRangeLength() {
-        return mConfigParser.getInt(
-                CLASSIFY_TEXT_MAX_RANGE_LENGTH,
-                CLASSIFY_TEXT_MAX_RANGE_LENGTH_DEFAULT);
+        return DeviceConfig.getInt(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                CLASSIFY_TEXT_MAX_RANGE_LENGTH, CLASSIFY_TEXT_MAX_RANGE_LENGTH_DEFAULT);
     }
 
     public int getGenerateLinksMaxTextLength() {
-        return mConfigParser.getInt(
-                GENERATE_LINKS_MAX_TEXT_LENGTH,
-                GENERATE_LINKS_MAX_TEXT_LENGTH_DEFAULT);
+        return DeviceConfig.getInt(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                GENERATE_LINKS_MAX_TEXT_LENGTH, GENERATE_LINKS_MAX_TEXT_LENGTH_DEFAULT);
     }
 
     public int getGenerateLinksLogSampleRate() {
-        return mConfigParser.getInt(
-                GENERATE_LINKS_LOG_SAMPLE_RATE,
-                GENERATE_LINKS_LOG_SAMPLE_RATE_DEFAULT);
+        return DeviceConfig.getInt(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                GENERATE_LINKS_LOG_SAMPLE_RATE, GENERATE_LINKS_LOG_SAMPLE_RATE_DEFAULT);
     }
 
     public List<String> getEntityListDefault() {
-        return mConfigParser.getStringList(
-                ENTITY_LIST_DEFAULT,
-                ENTITY_LIST_DEFAULT_VALUE);
+        return getDeviceConfigStringList(ENTITY_LIST_DEFAULT, ENTITY_LIST_DEFAULT_VALUE);
     }
 
     public List<String> getEntityListNotEditable() {
-        return mConfigParser.getStringList(
-                ENTITY_LIST_NOT_EDITABLE,
-                ENTITY_LIST_DEFAULT_VALUE);
+        return getDeviceConfigStringList(ENTITY_LIST_NOT_EDITABLE, ENTITY_LIST_DEFAULT_VALUE);
     }
 
     public List<String> getEntityListEditable() {
-        return mConfigParser.getStringList(
-                ENTITY_LIST_EDITABLE,
-                ENTITY_LIST_DEFAULT_VALUE);
+        return getDeviceConfigStringList(ENTITY_LIST_EDITABLE, ENTITY_LIST_DEFAULT_VALUE);
     }
 
     public List<String> getInAppConversationActionTypes() {
-        return mConfigParser.getStringList(
+        return getDeviceConfigStringList(
                 IN_APP_CONVERSATION_ACTION_TYPES_DEFAULT,
                 CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES);
     }
 
     public List<String> getNotificationConversationActionTypes() {
-        return mConfigParser.getStringList(
+        return getDeviceConfigStringList(
                 NOTIFICATION_CONVERSATION_ACTION_TYPES_DEFAULT,
                 CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES);
     }
 
     public float getLangIdThresholdOverride() {
-        return mConfigParser.getFloat(
+        return DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
                 LANG_ID_THRESHOLD_OVERRIDE,
                 LANG_ID_THRESHOLD_OVERRIDE_DEFAULT);
     }
 
     public boolean isTemplateIntentFactoryEnabled() {
-        return mConfigParser.getBoolean(
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
                 TEMPLATE_INTENT_FACTORY_ENABLED,
                 TEMPLATE_INTENT_FACTORY_ENABLED_DEFAULT);
     }
 
     public boolean isTranslateInClassificationEnabled() {
-        return mConfigParser.getBoolean(
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
                 TRANSLATE_IN_CLASSIFICATION_ENABLED,
                 TRANSLATE_IN_CLASSIFICATION_ENABLED_DEFAULT);
     }
 
     public boolean isDetectLanguagesFromTextEnabled() {
-        return mConfigParser.getBoolean(
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
                 DETECT_LANGUAGES_FROM_TEXT_ENABLED,
                 DETECT_LANGUAGES_FROM_TEXT_ENABLED_DEFAULT);
     }
 
     public float[] getLangIdContextSettings() {
-        return mConfigParser.getFloatArray(
-                LANG_ID_CONTEXT_SETTINGS,
-                LANG_ID_CONTEXT_SETTINGS_DEFAULT);
+        return getDeviceConfigFloatArray(
+                LANG_ID_CONTEXT_SETTINGS, LANG_ID_CONTEXT_SETTINGS_DEFAULT);
     }
 
     void dump(IndentingPrintWriter pw) {
@@ -356,7 +336,7 @@ public final class TextClassificationConstants {
         pw.increaseIndent();
         pw.printPair("classify_text_max_range_length", getClassifyTextMaxRangeLength())
                 .println();
-        pw.printPair("detect_language_from_text_enabled", isDetectLanguagesFromTextEnabled())
+        pw.printPair("detect_languages_from_text_enabled", isDetectLanguagesFromTextEnabled())
                 .println();
         pw.printPair("entity_list_default", getEntityListDefault())
                 .println();
@@ -396,8 +376,47 @@ public final class TextClassificationConstants {
                 .println();
         pw.printPair("translate_in_classification_enabled", isTranslateInClassificationEnabled())
                 .println();
-        pw.printPair("textclassifier_service_package_override", getTextClassifierServiceName())
-                .println();
+        pw.printPair("textclassifier_service_package_override",
+                getTextClassifierServicePackageOverride()).println();
         pw.decreaseIndent();
+    }
+
+    private static List<String> getDeviceConfigStringList(String key, List<String> defaultValue) {
+        return parse(
+                DeviceConfig.getString(DeviceConfig.NAMESPACE_TEXTCLASSIFIER, key, null),
+                defaultValue);
+    }
+
+    private static float[] getDeviceConfigFloatArray(String key, float[] defaultValue) {
+        return parse(
+                DeviceConfig.getString(DeviceConfig.NAMESPACE_TEXTCLASSIFIER, key, null),
+                defaultValue);
+    }
+
+    private static List<String> parse(@Nullable String listStr, List<String> defaultValue) {
+        if (listStr != null) {
+            return Collections.unmodifiableList(Arrays.asList(listStr.split(DELIMITER)));
+        }
+        return defaultValue;
+    }
+
+    private static float[] parse(@Nullable String arrayStr, float[] defaultValue) {
+        if (arrayStr != null) {
+            final String[] split = arrayStr.split(DELIMITER);
+            if (split.length != defaultValue.length) {
+                return defaultValue;
+            }
+            final float[] result = new float[split.length];
+            for (int i = 0; i < split.length; i++) {
+                try {
+                    result[i] = Float.parseFloat(split[i]);
+                } catch (NumberFormatException e) {
+                    return defaultValue;
+                }
+            }
+            return result;
+        } else {
+            return defaultValue;
+        }
     }
 }
