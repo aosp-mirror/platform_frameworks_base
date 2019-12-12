@@ -3374,7 +3374,7 @@
     <!-- Text of the button that will disable MAC randomization for the network when tapped. [CHAR_LIMIT=NONE]-->
     <string name="wifi_disable_mac_randomization_dialog_confirm_text">Change setting</string>
     <!-- Toast message which shows up after MAC randomization for the network is disabled. [CHAR_LIMIT=NONE]-->
-    <string name="wifi_disable_mac_randomization_dialog_success">Setting updated. Try Connecting again.</string>
+    <string name="wifi_disable_mac_randomization_dialog_success">Setting updated. Try connecting again.</string>
     <!-- Toast message which shows up if the operation failed. [CHAR_LIMIT=NONE]-->
     <string name="wifi_disable_mac_randomization_dialog_failure">Can\u2019t change privacy setting</string>
     <!-- Toast message which shows up if the network no longer exists on the device. [CHAR_LIMIT=NONE]-->
