@@ -16,15 +16,22 @@
 
 package android.media.tv.tuner;
 
+import android.annotation.SystemApi;
 import android.media.tv.tuner.TunerConstants.FrontendSettingsType;
 
 import java.util.List;
 
 /**
+ * Frontend settings for tune and scan operations.
  * @hide
  */
+@SystemApi
 public abstract class FrontendSettings {
-    protected int mFrequency;
+    private final int mFrequency;
+
+    FrontendSettings(int frequency) {
+        mFrequency = frequency;
+    }
 
     /**
      * Returns the frontend type.
@@ -32,7 +39,12 @@ public abstract class FrontendSettings {
     @FrontendSettingsType
     public abstract int getType();
 
-    public int getFrequency() {
+    /**
+     * Gets the frequency setting.
+     *
+     * @return the frequency in Hz.
+     */
+    public final int getFrequency() {
         return mFrequency;
     }
 
@@ -42,6 +54,7 @@ public abstract class FrontendSettings {
 
     /**
      * Frontend settings for analog.
+     * @hide
      */
     public static class FrontendAnalogSettings extends FrontendSettings {
         private int mAnalogType;
@@ -68,7 +81,7 @@ public abstract class FrontendSettings {
         }
 
         private FrontendAnalogSettings(int frequency, int analogType, int sifStandard) {
-            mFrequency = frequency;
+            super(frequency);
             mAnalogType = analogType;
             mSifStandard = sifStandard;
         }
@@ -118,9 +131,14 @@ public abstract class FrontendSettings {
 
     /**
      * Frontend settings for ATSC.
+     * @hide
      */
     public static class FrontendAtscSettings extends FrontendSettings {
         public int modulation;
+
+        FrontendAtscSettings(int frequency) {
+            super(frequency);
+        }
 
         @Override
         public int getType() {
@@ -130,11 +148,16 @@ public abstract class FrontendSettings {
 
     /**
      * Frontend settings for ATSC-3.
+     * @hide
      */
     public static class FrontendAtsc3Settings extends FrontendSettings {
         public int bandwidth;
         public byte demodOutputFormat;
         public List<FrontendAtsc3PlpSettings> plpSettings;
+
+        FrontendAtsc3Settings(int frequency) {
+            super(frequency);
+        }
 
         @Override
         public int getType() {
@@ -144,6 +167,7 @@ public abstract class FrontendSettings {
 
     /**
      * Frontend settings for DVBS.
+     * @hide
      */
     public static class FrontendDvbsSettings extends FrontendSettings {
         public int modulation;
@@ -154,6 +178,10 @@ public abstract class FrontendSettings {
         public int inputStreamId;
         public byte standard;
 
+        FrontendDvbsSettings(int frequency) {
+            super(frequency);
+        }
+
         @Override
         public int getType() {
             return TunerConstants.FRONTEND_TYPE_DVBS;
@@ -162,6 +190,7 @@ public abstract class FrontendSettings {
 
     /**
      * Frontend settings for DVBC.
+     * @hide
      */
     public static class FrontendDvbcSettings extends FrontendSettings {
         public int modulation;
@@ -171,6 +200,10 @@ public abstract class FrontendSettings {
         public byte annex;
         public int spectralInversion;
 
+        FrontendDvbcSettings(int frequency) {
+            super(frequency);
+        }
+
         @Override
         public int getType() {
             return TunerConstants.FRONTEND_TYPE_DVBC;
@@ -179,6 +212,7 @@ public abstract class FrontendSettings {
 
     /**
      * Frontend settings for DVBT.
+     * @hide
      */
     public static class FrontendDvbtSettings extends FrontendSettings {
         public int transmissionMode;
@@ -195,6 +229,10 @@ public abstract class FrontendSettings {
         public byte plpId;
         public byte plpGroupId;
 
+        FrontendDvbtSettings(int frequency) {
+            super(frequency);
+        }
+
         @Override
         public int getType() {
             return TunerConstants.FRONTEND_TYPE_DVBT;
@@ -203,6 +241,7 @@ public abstract class FrontendSettings {
 
     /**
      * Frontend settings for ISDBS.
+     * @hide
      */
     public static class FrontendIsdbsSettings extends FrontendSettings {
         public int streamId;
@@ -212,6 +251,10 @@ public abstract class FrontendSettings {
         public int symbolRate;
         public int rolloff;
 
+        FrontendIsdbsSettings(int frequency) {
+            super(frequency);
+        }
+
         @Override
         public int getType() {
             return TunerConstants.FRONTEND_TYPE_ISDBS;
@@ -220,6 +263,7 @@ public abstract class FrontendSettings {
 
     /**
      * Frontend settings for ISDBS-3.
+     * @hide
      */
     public static class FrontendIsdbs3Settings extends FrontendSettings {
         public int streamId;
@@ -229,6 +273,10 @@ public abstract class FrontendSettings {
         public int symbolRate;
         public int rolloff;
 
+        FrontendIsdbs3Settings(int frequency) {
+            super(frequency);
+        }
+
         @Override
         public int getType() {
             return TunerConstants.FRONTEND_TYPE_ISDBS3;
@@ -237,6 +285,7 @@ public abstract class FrontendSettings {
 
     /**
      * Frontend settings for ISDBT.
+     * @hide
      */
     public static class FrontendIsdbtSettings extends FrontendSettings {
         public int modulation;
@@ -244,6 +293,10 @@ public abstract class FrontendSettings {
         public int coderate;
         public int guardInterval;
         public int serviceAreaId;
+
+        FrontendIsdbtSettings(int frequency) {
+            super(frequency);
+        }
 
         @Override
         public int getType() {
@@ -253,6 +306,7 @@ public abstract class FrontendSettings {
 
     /**
      * PLP settings for ATSC-3.
+     * @hide
      */
     public static class FrontendAtsc3PlpSettings {
         public byte plpId;
@@ -264,6 +318,7 @@ public abstract class FrontendSettings {
 
     /**
      * Code rate for DVBS.
+     * @hide
      */
     public static class FrontendDvbsCodeRate {
         public long fec;

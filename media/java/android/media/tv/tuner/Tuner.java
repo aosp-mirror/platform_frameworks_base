@@ -18,6 +18,10 @@ package android.media.tv.tuner;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.tv.tuner.TunerConstants.DemuxPidType;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,14 +30,20 @@ import android.os.Message;
 import java.util.List;
 
 /**
- * Tuner is used to interact with tuner devices.
+ * This class is used to interact with hardware tuners devices.
+ *
+ * <p> Each TvInputService Session should create one instance of this class.
+ *
+ * <p> This class controls the TIS interaction with Tuner HAL.
  *
  * @hide
  */
+@SystemApi
 public final class Tuner implements AutoCloseable  {
     private static final String TAG = "MediaTvTuner";
     private static final boolean DEBUG = false;
 
+    private static final String PERMISSION = android.Manifest.permission.ACCESS_TV_TUNER;
     private static final int MSG_ON_FRONTEND_EVENT = 1;
     private static final int MSG_ON_FILTER_EVENT = 2;
     private static final int MSG_ON_FILTER_STATUS = 3;
@@ -44,6 +54,8 @@ public final class Tuner implements AutoCloseable  {
         nativeInit();
     }
 
+    private final Context mContext;
+
     private List<Integer> mFrontendIds;
     private Frontend mFrontend;
     private EventHandler mHandler;
@@ -51,12 +63,26 @@ public final class Tuner implements AutoCloseable  {
     private List<Integer> mLnbIds;
     private Lnb mLnb;
 
-    public Tuner() {
+    /**
+     * Constructs a Tuner instance.
+     *
+     * @param context context of the caller.
+     */
+    public Tuner(@NonNull Context context) {
+        mContext = context;
         nativeSetup();
+    }
+
+    private void checkPermission() {
+        if (mContext.checkCallingOrSelfPermission(PERMISSION)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Caller must have " + PERMISSION + " permission.");
+        }
     }
 
     private long mNativeContext; // used by native jMediaTuner
 
+    /** @hide */
     @Override
     public void close() {}
 
@@ -92,6 +118,8 @@ public final class Tuner implements AutoCloseable  {
 
     /**
      * Frontend Callback.
+     *
+     * @hide
      */
     public interface FrontendCallback {
 
@@ -103,6 +131,8 @@ public final class Tuner implements AutoCloseable  {
 
     /**
      * LNB Callback.
+     *
+     * @hide
      */
     public interface LnbCallback {
         /**
@@ -113,6 +143,8 @@ public final class Tuner implements AutoCloseable  {
 
     /**
      * Frontend Callback.
+     *
+     * @hide
      */
     public interface FilterCallback {
         /**
@@ -123,6 +155,8 @@ public final class Tuner implements AutoCloseable  {
 
     /**
      * DVR Callback.
+     *
+     * @hide
      */
     public interface DvrCallback {
         /**
@@ -177,7 +211,7 @@ public final class Tuner implements AutoCloseable  {
         }
     }
 
-    protected class Frontend {
+    private class Frontend {
         private int mId;
         private FrontendCallback mCallback;
 
@@ -210,9 +244,15 @@ public final class Tuner implements AutoCloseable  {
     }
 
     /**
-     * Tunes the frontend to using the settings given.
+     * Tunes the frontend to the settings given.
+     *
+     * @return result status of tune operation.
+     * @throws SecurityException if the caller does not have appropriate permissions.
+     * TODO: add result constants or throw exceptions.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     public int tune(@NonNull FrontendSettings settings) {
+        checkPermission();
         return nativeTune(settings.getType(), settings);
     }
 
@@ -238,7 +278,8 @@ public final class Tuner implements AutoCloseable  {
         }
     }
 
-    protected class Filter {
+    /** @hide */
+    public class Filter {
         private long mNativeContext;
         private FilterCallback mCallback;
         int mId;
@@ -297,7 +338,8 @@ public final class Tuner implements AutoCloseable  {
         return filter;
     }
 
-    protected class Lnb {
+    /** @hide */
+    public class Lnb {
         private int mId;
         private LnbCallback mCallback;
 
@@ -338,7 +380,8 @@ public final class Tuner implements AutoCloseable  {
         }
     }
 
-    protected class Descrambler {
+    /** @hide */
+    public class Descrambler {
         private long mNativeContext;
 
         private native boolean nativeAddPid(int pidType, int pid, Filter filter);
@@ -362,7 +405,8 @@ public final class Tuner implements AutoCloseable  {
     }
 
     // TODO: consider splitting Dvr to Playback and Recording
-    protected class Dvr {
+    /** @hide */
+    public class Dvr {
         private long mNativeContext;
         private DvrCallback mCallback;
 
