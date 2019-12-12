@@ -11723,6 +11723,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return mStateCache;
         }
 
+        @Override
+        public List<String> getAllCrossProfilePackages() {
+            return DevicePolicyManagerService.this.getAllCrossProfilePackages();
+        }
+
     }
 
     private Intent createShowAdminSupportIntent(ComponentName admin, int userId) {
