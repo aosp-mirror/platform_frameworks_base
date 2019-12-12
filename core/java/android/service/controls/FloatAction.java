@@ -18,6 +18,7 @@ package android.service.controls;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.Parcel;
 
 /**
@@ -25,6 +26,8 @@ import android.os.Parcel;
  * @hide
  */
 public final class FloatAction extends ControlAction {
+
+    private static final String KEY_NEW_VALUE = "key_new_value";
 
     private final float mNewValue;
 
@@ -50,9 +53,9 @@ public final class FloatAction extends ControlAction {
         mNewValue = newValue;
     }
 
-    public FloatAction(Parcel in) {
-        super(in);
-        mNewValue = in.readFloat();
+    public FloatAction(Bundle b) {
+        super(b);
+        mNewValue = b.getFloat(KEY_NEW_VALUE);
     }
 
     /**
@@ -71,15 +74,16 @@ public final class FloatAction extends ControlAction {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeFloat(mNewValue);
+    protected Bundle getDataBundle() {
+        Bundle b = super.getDataBundle();
+        b.putFloat(KEY_NEW_VALUE, mNewValue);
+        return b;
     }
 
     public static final @NonNull Creator<FloatAction> CREATOR = new Creator<FloatAction>() {
         @Override
         public FloatAction createFromParcel(Parcel source) {
-            return new FloatAction(source);
+            return new FloatAction(source.readBundle());
         }
 
         @Override

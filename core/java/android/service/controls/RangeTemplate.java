@@ -18,9 +18,8 @@ package android.service.controls;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.Parcel;
-
-import com.android.internal.util.Preconditions;
 
 import java.security.InvalidParameterException;
 
@@ -31,6 +30,12 @@ import java.security.InvalidParameterException;
  * @hide
  */
 public final class RangeTemplate extends ControlTemplate {
+
+    private static final String KEY_MIN_VALUE = "key_min_value";
+    private static final String KEY_MAX_VALUE = "key_max_value";
+    private static final String KEY_CURRENT_VALUE = "key_current_value";
+    private static final String KEY_STEP_VALUE = "key_step_value";
+    private static final String KEY_FORMAT_STRING = "key_format_string";
 
     private final float mMinValue;
     private final float mMaxValue;
@@ -67,7 +72,6 @@ public final class RangeTemplate extends ControlTemplate {
             float stepValue,
             @Nullable CharSequence formatString) {
         super(templateId);
-        Preconditions.checkNotNull(formatString);
         mMinValue = minValue;
         mMaxValue = maxValue;
         mCurrentValue = currentValue;
@@ -87,13 +91,13 @@ public final class RangeTemplate extends ControlTemplate {
      * @see RangeTemplate#RangeTemplate(String, float, float, float, float, CharSequence)
      * @hide
      */
-    RangeTemplate(Parcel in) {
-        super(in);
-        mMinValue = in.readFloat();
-        mMaxValue = in.readFloat();
-        mCurrentValue = in.readFloat();
-        mStepValue = in.readFloat();
-        mFormatString = in.readCharSequence();
+    RangeTemplate(Bundle b) {
+        super(b);
+        mMinValue = b.getFloat(KEY_MIN_VALUE);
+        mMaxValue = b.getFloat(KEY_MAX_VALUE);
+        mCurrentValue = b.getFloat(KEY_CURRENT_VALUE);
+        mStepValue = b.getFloat(KEY_STEP_VALUE);
+        mFormatString = b.getCharSequence(KEY_FORMAT_STRING, "%.1f");
         validate();
     }
 
@@ -144,13 +148,14 @@ public final class RangeTemplate extends ControlTemplate {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeFloat(mMinValue);
-        dest.writeFloat(mMaxValue);
-        dest.writeFloat(mCurrentValue);
-        dest.writeFloat(mStepValue);
-        dest.writeCharSequence(mFormatString);
+    protected Bundle getDataBundle() {
+        Bundle b = super.getDataBundle();
+        b.putFloat(KEY_MIN_VALUE, mMinValue);
+        b.putFloat(KEY_MAX_VALUE, mMaxValue);
+        b.putFloat(KEY_CURRENT_VALUE, mCurrentValue);
+        b.putFloat(KEY_STEP_VALUE, mStepValue);
+        b.putCharSequence(KEY_FORMAT_STRING, mFormatString);
+        return b;
     }
 
     /**
@@ -179,7 +184,7 @@ public final class RangeTemplate extends ControlTemplate {
     public static final Creator<RangeTemplate> CREATOR = new Creator<RangeTemplate>() {
         @Override
         public RangeTemplate createFromParcel(Parcel source) {
-            return new RangeTemplate(source);
+            return new RangeTemplate(source.readBundle());
         }
 
         @Override

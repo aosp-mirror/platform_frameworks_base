@@ -18,6 +18,7 @@ package android.service.controls;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Icon;
@@ -55,7 +56,7 @@ public class Control implements Parcelable {
     private final @NonNull Icon mIcon;
     private final @NonNull CharSequence mTitle;
     private final @Nullable ColorStateList mTintColor;
-    private final @NonNull Intent mAppIntent;
+    private final @NonNull PendingIntent mAppIntent;
     private final @ControlTemplate.TemplateType int mPrimaryType;
 
     /**
@@ -64,14 +65,15 @@ public class Control implements Parcelable {
      * @param title the user facing name of this control (e.g. "Bedroom thermostat").
      * @param tintColor the color to tint parts of the element UI. If {@code null} is passed, the
      *                  system accent color will be used.
-     * @param appIntent an intent linking to a page to interact with the corresponding device.
+     * @param appIntent a {@link PendingIntent} linking to a page to interact with the
+     *                  corresponding device.
      * @param primaryType the primary template for this type.
      */
     public Control(@NonNull String controlId,
             @NonNull Icon icon,
             @NonNull CharSequence title,
             @Nullable ColorStateList tintColor,
-            @NonNull Intent appIntent,
+            @NonNull PendingIntent appIntent,
             int primaryType) {
         Preconditions.checkNotNull(controlId);
         Preconditions.checkNotNull(icon);
@@ -94,7 +96,7 @@ public class Control implements Parcelable {
         } else {
             mTintColor = null;
         }
-        mAppIntent = Intent.CREATOR.createFromParcel(in);
+        mAppIntent = PendingIntent.CREATOR.createFromParcel(in);
         mPrimaryType = in.readInt();
     }
 
@@ -119,7 +121,7 @@ public class Control implements Parcelable {
     }
 
     @NonNull
-    public Intent getAppIntent() {
+    public PendingIntent getAppIntent() {
         return mAppIntent;
     }
 
@@ -175,17 +177,17 @@ public class Control implements Parcelable {
         private Icon mIcon;
         private CharSequence mTitle = "";
         private ColorStateList mTintColor;
-        private @Nullable Intent mAppIntent;
+        private @Nullable PendingIntent mAppIntent;
         private @ControlTemplate.TemplateType int mPrimaryType = ControlTemplate.TYPE_NONE;
 
         /**
          * @param controlId the identifier for the {@link Control}.
          * @param icon the icon for the {@link Control}.
-         * @param appIntent the intent linking to the device Activity.
+         * @param appIntent the pending intent linking to the device Activity.
          */
         public Builder(@NonNull String controlId,
                 @NonNull Icon icon,
-                @NonNull Intent appIntent) {
+                @NonNull PendingIntent appIntent) {
             Preconditions.checkNotNull(controlId);
             Preconditions.checkNotNull(icon);
             Preconditions.checkNotNull(appIntent);
@@ -256,7 +258,7 @@ public class Control implements Parcelable {
          * @return {@code this}
          */
         @NonNull
-        public Builder setAppIntent(@NonNull Intent appIntent) {
+        public Builder setAppIntent(@NonNull PendingIntent appIntent) {
             Preconditions.checkNotNull(appIntent);
             mAppIntent = appIntent;
             return this;

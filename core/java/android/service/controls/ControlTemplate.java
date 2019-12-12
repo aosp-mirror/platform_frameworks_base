@@ -16,8 +16,10 @@
 
 package android.service.controls;
 
+import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -39,6 +41,8 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 public abstract class ControlTemplate implements Parcelable {
+
+    private static final String KEY_TEMPLATE_ID = "key_template_id";
 
     /**
      * Singleton representing a {@link Control} with no input.
@@ -114,17 +118,28 @@ public abstract class ControlTemplate implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public final void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(getTemplateType());
-        dest.writeString(mTemplateId);
+        dest.writeBundle(getDataBundle());
+    }
+
+    /**
+     * Obtain a {@link Bundle} describing this object populated with data.
+     * @return a {@link Bundle} containing the data that represents this object.
+     */
+    @CallSuper
+    protected Bundle getDataBundle() {
+        Bundle b = new Bundle();
+        b.putString(KEY_TEMPLATE_ID, mTemplateId);
+        return b;
     }
 
     private ControlTemplate() {
         mTemplateId = "";
     }
 
-    ControlTemplate(Parcel in) {
-        mTemplateId = in.readString();
+    ControlTemplate(@NonNull Bundle b) {
+        mTemplateId = b.getString(KEY_TEMPLATE_ID);
     }
 
     /**
@@ -148,6 +163,7 @@ public abstract class ControlTemplate implements Parcelable {
         }
     };
 
+
     private static ControlTemplate createTemplateFromType(@TemplateType int type, Parcel source) {
         switch(type) {
             case TYPE_TOGGLE:
@@ -159,9 +175,9 @@ public abstract class ControlTemplate implements Parcelable {
             case TYPE_DISCRETE_TOGGLE:
                 return DiscreteToggleTemplate.CREATOR.createFromParcel(source);
             case TYPE_NONE:
-                return NO_TEMPLATE;
             default:
-                return null;
+                source.readBundle();
+                return NO_TEMPLATE;
         }
     }
 }

@@ -17,6 +17,7 @@
 package android.service.controls;
 
 import android.annotation.NonNull;
+import android.os.Bundle;
 import android.os.Parcel;
 
 import com.android.internal.util.Preconditions;
@@ -24,7 +25,7 @@ import com.android.internal.util.Preconditions;
 /**
  * A template for a {@link Control} with a single button that can be toggled between two states.
  *
- * The states for the toggle correspond to the states in {@link ControlButton#isActive()}.
+ * The states for the toggle correspond to the states in {@link ControlButton#isChecked()}.
  * An action on this template will originate a {@link BooleanAction} to change that state.
  *
  * @see BooleanAction
@@ -32,6 +33,7 @@ import com.android.internal.util.Preconditions;
  */
 public final class ToggleTemplate extends ControlTemplate {
 
+    private static final String KEY_BUTTON = "key_button";
     private final @NonNull ControlButton mButton;
 
     /**
@@ -44,9 +46,9 @@ public final class ToggleTemplate extends ControlTemplate {
         mButton = button;
     }
 
-    ToggleTemplate(Parcel in) {
-        super(in);
-        mButton = ControlButton.CREATOR.createFromParcel(in);
+    ToggleTemplate(Bundle b) {
+        super(b);
+        mButton = b.getParcelable(KEY_BUTTON);
     }
 
     /**
@@ -66,15 +68,16 @@ public final class ToggleTemplate extends ControlTemplate {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        mButton.writeToParcel(dest, flags);
+    protected Bundle getDataBundle() {
+        Bundle b =  super.getDataBundle();
+        b.putObject(KEY_BUTTON, mButton);
+        return b;
     }
 
     public static final Creator<ToggleTemplate> CREATOR = new Creator<ToggleTemplate>() {
         @Override
         public ToggleTemplate createFromParcel(Parcel source) {
-            return new ToggleTemplate(source);
+            return new ToggleTemplate(source.readBundle());
         }
 
         @Override
