@@ -1800,11 +1800,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else if (taskSwitch && allowTaskSnapshot) {
-            if (mWmService.mLowRamTaskSnapshotsAndRecents) {
-                // For low RAM devices, we use the splash screen starting window instead of the
-                // task snapshot starting window.
-                return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-            }
             return snapshot == null ? STARTING_WINDOW_TYPE_NONE
                     : snapshotOrientationSameAsTask(snapshot) || fromRecents
                             ? STARTING_WINDOW_TYPE_SNAPSHOT : STARTING_WINDOW_TYPE_SPLASH_SCREEN;

@@ -2652,11 +2652,6 @@
     <!-- Package name for default network scorer app; overridden by product overlays. -->
     <string name="config_defaultNetworkScorerPackageName"></string>
 
-    <!-- Feature flag to enable memory efficient task snapshots that are used in recents optimized
-         for low memory devices and replace the app transition starting window with the splash
-         screen. -->
-    <bool name="config_lowRamTaskSnapshotsAndRecents">false</bool>
-
     <!-- The amount to scale fullscreen snapshots for Overview and snapshot starting windows. -->
     <item name="config_fullTaskSnapshotScale" format="float" type="dimen">1.0</item>
 
