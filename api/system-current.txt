@@ -9601,6 +9601,7 @@ package android.telephony {
     method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.IccOpenLogicalChannelResponse iccOpenLogicalChannelBySlot(int, @Nullable String, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String iccTransmitApduBasicChannelBySlot(int, int, int, int, int, int, @Nullable String);
     method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String iccTransmitApduLogicalChannelBySlot(int, int, int, int, int, int, int, @Nullable String);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAnyRadioPoweredOn();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApplicationOnUicc(int);
     method public boolean isDataConnectivityPossible();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
@@ -9639,6 +9640,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSimPowerStateForSlot(int, int);
     method @Deprecated public void setVisualVoicemailEnabled(android.telecom.PhoneAccountHandle, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVoiceActivationState(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void shutdownAllRadios();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean supplyPin(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPinReportResult(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean supplyPuk(String, String);
