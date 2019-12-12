@@ -263,6 +263,7 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
         mHandler.removeMessages(RANKER_SERVICE_RESULT);
         mHandler.removeMessages(RANKER_RESULT_TIMEOUT);
         afterCompute();
+        mAfterCompute = null;
     }
 
     private boolean isDefaultBrowser(ResolveInfo ri) {
