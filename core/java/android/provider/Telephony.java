@@ -25,6 +25,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.ChangeId;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -4032,6 +4033,16 @@ public final class Telephony {
         @Retention(RetentionPolicy.SOURCE)
         public @interface Skip464XlatStatus {}
 
+        /**
+         * Compat framework change ID for the APN db read permission change.
+         *
+         * In API level 30 and beyond, accessing the APN database will require the
+         * {@link android.Manifest.permission#WRITE_APN_SETTINGS} permission. This change ID tracks
+         * apps that are affected because they don't hold this permission.
+         * @hide
+         */
+        @ChangeId
+        public static final long APN_READING_PERMISSION_CHANGE_ID = 124107808L;
     }
 
     /**
