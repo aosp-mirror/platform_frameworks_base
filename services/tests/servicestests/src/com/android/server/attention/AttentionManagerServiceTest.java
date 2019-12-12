@@ -16,7 +16,11 @@
 
 package com.android.server.attention;
 
+import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
+
 import static com.android.server.attention.AttentionManagerService.ATTENTION_CACHE_BUFFER_SIZE;
+import static com.android.server.attention.AttentionManagerService.DEFAULT_STALE_AFTER_MILLIS;
+import static com.android.server.attention.AttentionManagerService.KEY_STALE_AFTER_MILLIS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -35,6 +39,7 @@ import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.provider.DeviceConfig;
 import android.service.attention.IAttentionCallback;
 import android.service.attention.IAttentionService;
 
@@ -178,6 +183,45 @@ public class AttentionManagerServiceTest {
         }
         // The element that was at index 1 should be at index 0 after inserting SIZE + 1 elements.
         assertThat(buffer.get(0)).isEqualTo(cache);
+    }
+
+    @Test
+    public void testGetStaleAfterMillis_handlesGoodFlagValue() {
+        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_STALE_AFTER_MILLIS, "123", false);
+        assertThat(mSpyAttentionManager.getStaleAfterMillis()).isEqualTo(123);
+    }
+
+    @Test
+    public void testGetStaleAfterMillis_handlesBadFlagValue_1() {
+        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_STALE_AFTER_MILLIS, "-123", false);
+        assertThat(mSpyAttentionManager.getStaleAfterMillis()).isEqualTo(
+                DEFAULT_STALE_AFTER_MILLIS);
+    }
+
+    @Test
+    public void testGetStaleAfterMillis_handlesBadFlagValue_2() {
+        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_STALE_AFTER_MILLIS, "15000", false);
+        assertThat(mSpyAttentionManager.getStaleAfterMillis()).isEqualTo(
+                DEFAULT_STALE_AFTER_MILLIS);
+    }
+
+    @Test
+    public void testGetStaleAfterMillis_handlesBadFlagValue_3() {
+        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_STALE_AFTER_MILLIS, "abracadabra", false);
+        assertThat(mSpyAttentionManager.getStaleAfterMillis()).isEqualTo(
+                DEFAULT_STALE_AFTER_MILLIS);
+    }
+
+    @Test
+    public void testGetStaleAfterMillis_handlesBadFlagValue_4() {
+        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_STALE_AFTER_MILLIS, "15_000L", false);
+        assertThat(mSpyAttentionManager.getStaleAfterMillis()).isEqualTo(
+                DEFAULT_STALE_AFTER_MILLIS);
     }
 
     private class MockIAttentionService implements IAttentionService {
