@@ -226,7 +226,7 @@ public class SystemConfig {
      * Map of system pre-defined, uniquely named actors; keys are namespace,
      * value maps actor name to package name.
      */
-    private Map<String, Map<String, String>> mNamedActors = null;
+    private ArrayMap<String, ArrayMap<String, String>> mNamedActors = null;
 
     public static SystemConfig getInstance() {
         if (!isSystemProcess()) {
@@ -406,7 +406,7 @@ public class SystemConfig {
     }
 
     @NonNull
-    public Map<String, Map<String, String>> getNamedActors() {
+    public Map<String, ? extends Map<String, String>> getNamedActors() {
         return mNamedActors != null ? mNamedActors : Collections.emptyMap();
     }
 
@@ -1063,7 +1063,7 @@ public class SystemConfig {
                                 mNamedActors = new ArrayMap<>();
                             }
 
-                            Map<String, String> nameToPkgMap = mNamedActors.get(namespace);
+                            ArrayMap<String, String> nameToPkgMap = mNamedActors.get(namespace);
                             if (nameToPkgMap == null) {
                                 nameToPkgMap = new ArrayMap<>();
                                 mNamedActors.put(namespace, nameToPkgMap);

@@ -1073,6 +1073,8 @@ public final class OverlayManagerService extends SystemService {
             mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         }
 
+        // TODO(b/143096091): Remove PackageInfo cache so that PackageManager is always queried
+        //  to enforce visibility/other permission checks
         public PackageInfo getPackageInfo(@NonNull final String packageName, final int userId,
                 final boolean useCache) {
             if (useCache) {
@@ -1095,12 +1097,18 @@ public final class OverlayManagerService extends SystemService {
 
         @Override
         public PackageInfo getPackageInfo(@NonNull final String packageName, final int userId) {
-            return getPackageInfo(packageName, userId, true);
+            // TODO(b/143096091): Remove clearing calling ID
+            long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                return getPackageInfo(packageName, userId, true);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
         }
 
         @NonNull
         @Override
-        public Map<String, Map<String, String>> getNamedActors() {
+        public Map<String, ? extends Map<String, String>> getNamedActors() {
             return SystemConfig.getInstance().getNamedActors();
         }
 
@@ -1128,45 +1136,57 @@ public final class OverlayManagerService extends SystemService {
         public OverlayableInfo getOverlayableForTarget(@NonNull String packageName,
                 @Nullable String targetOverlayableName, int userId)
                 throws IOException {
-            PackageInfo packageInfo = getPackageInfo(packageName, userId);
-            if (packageInfo == null) {
-                throw new IOException("Unable to get target package");
-            }
-
-            String baseCodePath = packageInfo.applicationInfo.getBaseCodePath();
-
-            ApkAssets apkAssets = null;
+            // TODO(b/143096091): Remove clearing calling ID
+            long callingIdentity = Binder.clearCallingIdentity();
             try {
-                apkAssets = ApkAssets.loadFromPath(baseCodePath);
-                return apkAssets.getOverlayableInfo(targetOverlayableName);
-            } finally {
-                if (apkAssets != null) {
-                    try {
-                        apkAssets.close();
-                    } catch (Throwable ignored) {
+                PackageInfo packageInfo = getPackageInfo(packageName, userId);
+                if (packageInfo == null) {
+                    throw new IOException("Unable to get target package");
+                }
+
+                String baseCodePath = packageInfo.applicationInfo.getBaseCodePath();
+
+                ApkAssets apkAssets = null;
+                try {
+                    apkAssets = ApkAssets.loadFromPath(baseCodePath);
+                    return apkAssets.getOverlayableInfo(targetOverlayableName);
+                } finally {
+                    if (apkAssets != null) {
+                        try {
+                            apkAssets.close();
+                        } catch (Throwable ignored) {
+                        }
                     }
                 }
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
             }
         }
 
         @Override
         public boolean doesTargetDefineOverlayable(String targetPackageName, int userId)
                 throws RemoteException, IOException {
-            PackageInfo packageInfo = mPackageManager.getPackageInfo(targetPackageName, 0,
-                    userId);
-            String baseCodePath = packageInfo.applicationInfo.getBaseCodePath();
-
-            ApkAssets apkAssets = null;
+            // TODO(b/143096091): Remove clearing calling ID
+            long callingIdentity = Binder.clearCallingIdentity();
             try {
-                apkAssets = ApkAssets.loadFromPath(baseCodePath);
-                return apkAssets.definesOverlayable();
-            } finally {
-                if (apkAssets != null) {
-                    try {
-                        apkAssets.close();
-                    } catch (Throwable ignored) {
+                PackageInfo packageInfo = mPackageManager.getPackageInfo(targetPackageName, 0,
+                        userId);
+                String baseCodePath = packageInfo.applicationInfo.getBaseCodePath();
+
+                ApkAssets apkAssets = null;
+                try {
+                    apkAssets = ApkAssets.loadFromPath(baseCodePath);
+                    return apkAssets.definesOverlayable();
+                } finally {
+                    if (apkAssets != null) {
+                        try {
+                            apkAssets.close();
+                        } catch (Throwable ignored) {
+                        }
                     }
                 }
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
             }
         }
 
@@ -1209,10 +1229,16 @@ public final class OverlayManagerService extends SystemService {
         @Nullable
         @Override
         public String[] getPackagesForUid(int uid) {
+            // TODO(b/143096091): Remove clearing calling ID
+            long callingIdentity = Binder.clearCallingIdentity();
             try {
-                return mPackageManager.getPackagesForUid(uid);
-            } catch (RemoteException ignored) {
-                return null;
+                try {
+                    return mPackageManager.getPackagesForUid(uid);
+                } catch (RemoteException ignored) {
+                    return null;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
             }
         }
 
