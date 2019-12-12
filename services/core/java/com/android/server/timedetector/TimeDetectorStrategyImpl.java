@@ -114,16 +114,10 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @Override
-    public synchronized void suggestManualTime(ManualTimeSuggestion suggestion) {
+    public synchronized void suggestManualTime(@NonNull ManualTimeSuggestion suggestion) {
         final TimestampedValue<Long> newUtcTime = suggestion.getUtcTime();
 
-        // We can validate the suggestion against the reference time clock.
-        long elapsedRealtimeMillis = mCallback.elapsedRealtimeMillis();
-        if (elapsedRealtimeMillis < newUtcTime.getReferenceTimeMillis()) {
-            // elapsedRealtime clock went backwards?
-            Slog.w(LOG_TAG, "New reference time is in the future? Ignoring."
-                    + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
-                    + ", timeSuggestion=" + suggestion);
+        if (!validateSuggestionTime(newUtcTime, suggestion)) {
             return;
         }
 
@@ -202,58 +196,72 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @GuardedBy("this")
-    private boolean validateAndStorePhoneSuggestion(@NonNull PhoneTimeSuggestion timeSuggestion) {
-        if (timeSuggestion.getUtcTime().getValue() == null) {
-            Slog.w(LOG_TAG, "Suggestion utcTime contains null value"
-                    + " timeSuggestion=" + timeSuggestion);
+    private boolean validateAndStorePhoneSuggestion(@NonNull PhoneTimeSuggestion suggestion) {
+        TimestampedValue<Long> newUtcTime = suggestion.getUtcTime();
+        if (!validateSuggestionTime(newUtcTime, suggestion)) {
+            // There's probably nothing useful we can do: elsewhere we assume that reference
+            // times are in the past so just stop here.
             return false;
         }
 
-        int phoneId = timeSuggestion.getPhoneId();
+        int phoneId = suggestion.getPhoneId();
         LinkedList<PhoneTimeSuggestion> phoneSuggestions = mSuggestionByPhoneId.get(phoneId);
         if (phoneSuggestions == null) {
             // The first time we've seen this phoneId.
             phoneSuggestions = new LinkedList<>();
             mSuggestionByPhoneId.put(phoneId, phoneSuggestions);
         } else if (phoneSuggestions.isEmpty()) {
-            Slog.w(LOG_TAG, "Suggestions unexpectedly empty when adding"
-                    + " timeSuggestion=" + timeSuggestion);
+            Slog.w(LOG_TAG, "Suggestions unexpectedly empty when adding suggestion=" + suggestion);
         }
 
         if (!phoneSuggestions.isEmpty()) {
-            PhoneTimeSuggestion previousSuggestion = phoneSuggestions.getFirst();
-
             // We can log / discard suggestions with obvious issues with the reference time clock.
-            long elapsedRealtimeMillis = mCallback.elapsedRealtimeMillis();
-            TimestampedValue<Long> newTime = timeSuggestion.getUtcTime();
-            if (elapsedRealtimeMillis < newTime.getReferenceTimeMillis()) {
-                // elapsedRealtime clock went backwards?
-                Slog.w(LOG_TAG, "New reference time is in the future?"
-                        + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
-                        + ", timeSuggestion=" + timeSuggestion);
-                // There's probably nothing useful we can do: elsewhere we assume that reference
-                // times are in the past so just stop here.
+            PhoneTimeSuggestion previousSuggestion = phoneSuggestions.getFirst();
+            if (previousSuggestion == null
+                    || previousSuggestion.getUtcTime() == null
+                    || previousSuggestion.getUtcTime().getValue() == null) {
+                // This should be impossible given we only store validated suggestions.
+                Slog.w(LOG_TAG, "Previous suggestion is null or has a null time."
+                        + " previousSuggestion=" + previousSuggestion
+                        + ", suggestion=" + suggestion);
                 return false;
             }
 
-            if (previousSuggestion.getUtcTime() != null) {
-                long referenceTimeDifference = TimestampedValue.referenceTimeDifference(
-                        timeSuggestion.getUtcTime(), previousSuggestion.getUtcTime());
-                if (referenceTimeDifference < 0) {
-                    // The reference time is before the previously received suggestion. Ignore it.
-                    Slog.w(LOG_TAG, "Out of order phone suggestion received."
-                            + " referenceTimeDifference=" + referenceTimeDifference
-                            + " lastSuggestion=" + previousSuggestion
-                            + " newSuggestion=" + timeSuggestion);
-                    return false;
-                }
+            long referenceTimeDifference = TimestampedValue.referenceTimeDifference(
+                    newUtcTime, previousSuggestion.getUtcTime());
+            if (referenceTimeDifference < 0) {
+                // The reference time is before the previously received suggestion. Ignore it.
+                Slog.w(LOG_TAG, "Out of order phone suggestion received."
+                        + " referenceTimeDifference=" + referenceTimeDifference
+                        + " previousSuggestion=" + previousSuggestion
+                        + " suggestion=" + suggestion);
+                return false;
             }
         }
 
         // Store the latest suggestion.
-        phoneSuggestions.addFirst(timeSuggestion);
+        phoneSuggestions.addFirst(suggestion);
         if (phoneSuggestions.size() > KEEP_SUGGESTION_HISTORY_SIZE) {
             phoneSuggestions.removeLast();
+        }
+        return true;
+    }
+
+    private boolean validateSuggestionTime(
+            @NonNull TimestampedValue<Long> newUtcTime, @NonNull Object suggestion) {
+        if (newUtcTime.getValue() == null) {
+            Slog.w(LOG_TAG, "Suggested time value is null. suggestion=" + suggestion);
+            return false;
+        }
+
+        // We can validate the suggestion against the reference time clock.
+        long elapsedRealtimeMillis = mCallback.elapsedRealtimeMillis();
+        if (elapsedRealtimeMillis < newUtcTime.getReferenceTimeMillis()) {
+            // elapsedRealtime clock went backwards?
+            Slog.w(LOG_TAG, "New reference time is in the future? Ignoring."
+                    + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
+                    + ", suggestion=" + suggestion);
+            return false;
         }
         return true;
     }
