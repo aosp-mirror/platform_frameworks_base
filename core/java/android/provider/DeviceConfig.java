@@ -357,6 +357,13 @@ public final class DeviceConfig {
     @TestApi
     public static final String NAMESPACE_PERMISSIONS = "permissions";
 
+    /**
+     * Namespace for all widget related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_WIDGET = "widget";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =
