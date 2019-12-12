@@ -91,7 +91,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         boolean nightMode = (mContext.getResources().getConfiguration().uiMode
                         & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
 
-        if (isAuto) {
+        if (isAuto && !powerSave) {
             state.secondaryLabel = mContext.getResources().getString(nightMode
                     ? R.string.quick_settings_dark_mode_secondary_label_until_sunrise
                     : R.string.quick_settings_dark_mode_secondary_label_on_at_sunset);
@@ -121,7 +121,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_DISPLAY_SETTINGS);
+        return new Intent(Settings.ACTION_DARK_THEME_SETTINGS);
     }
 
     @Override
