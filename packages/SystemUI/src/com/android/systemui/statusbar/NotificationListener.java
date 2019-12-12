@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -89,11 +90,22 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         }
         final RankingMap currentRanking = getCurrentRanking();
         mMainHandler.post(() -> {
+            // There's currently a race condition between the calls to getActiveNotifications() and
+            // getCurrentRanking(). It's possible for the ranking that we store here to not contain
+            // entries for every notification in getActiveNotifications(). To prevent downstream
+            // crashes, we temporarily fill in these missing rankings with stubs.
+            // See b/146011844 for long-term fix
+            final List<Ranking> newRankings = new ArrayList<>();
+            for (StatusBarNotification sbn : notifications) {
+                newRankings.add(getRankingOrTemporaryStandIn(currentRanking, sbn.getKey()));
+            }
+            final RankingMap completeMap = new RankingMap(newRankings.toArray(new Ranking[0]));
+
             for (StatusBarNotification sbn : notifications) {
                 if (mDownstreamListener != null) {
-                    mDownstreamListener.onNotificationPosted(sbn, currentRanking);
+                    mDownstreamListener.onNotificationPosted(sbn, completeMap);
                 }
-                mEntryManager.addNotification(sbn, currentRanking);
+                mEntryManager.addNotification(sbn, completeMap);
             }
         });
         NotificationManager noMan = mContext.getSystemService(NotificationManager.class);
@@ -190,6 +202,35 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to register notification listener", e);
         }
+    }
+
+    private static Ranking getRankingOrTemporaryStandIn(RankingMap rankingMap, String key) {
+        Ranking ranking = new Ranking();
+        if (!rankingMap.getRanking(key, ranking)) {
+            ranking.populate(
+                    key,
+                    0,
+                    false,
+                    0,
+                    0,
+                    0,
+                    null,
+                    null,
+                    null,
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    false,
+                    0,
+                    false,
+                    0,
+                    false,
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    false,
+                    false
+            );
+        }
+        return ranking;
     }
 
     public interface NotificationSettingsListener {
