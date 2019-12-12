@@ -1033,6 +1033,7 @@ public class NumberPicker extends LinearLayout {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_ENTER:
+            case KeyEvent.KEYCODE_NUMPAD_ENTER:
                 removeAllCallbacks();
                 break;
             case KeyEvent.KEYCODE_DPAD_DOWN:
