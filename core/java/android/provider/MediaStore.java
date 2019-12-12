@@ -32,6 +32,7 @@ import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.AppGlobals;
+import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -86,6 +87,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -162,6 +164,15 @@ public final class MediaStore {
     /** {@hide} */
     public static final String SUICIDE_CALL = "suicide";
 
+    /** {@hide} */
+    public static final String CREATE_WRITE_REQUEST_CALL = "create_write_request";
+    /** {@hide} */
+    public static final String CREATE_TRASH_REQUEST_CALL = "create_trash_request";
+    /** {@hide} */
+    public static final String CREATE_FAVORITE_REQUEST_CALL = "create_favorite_request";
+    /** {@hide} */
+    public static final String CREATE_DELETE_REQUEST_CALL = "create_delete_request";
+
     /**
      * Extra used with {@link #SCAN_FILE_CALL} or {@link #SCAN_VOLUME_CALL} to indicate that
      * the file path originated from shell.
@@ -198,6 +209,13 @@ public final class MediaStore {
     public static final String GET_CONTRIBUTED_MEDIA_CALL = "get_contributed_media";
     /** {@hide} */
     public static final String DELETE_CONTRIBUTED_MEDIA_CALL = "delete_contributed_media";
+
+    /** {@hide} */
+    public static final String EXTRA_CLIP_DATA = "clip_data";
+    /** {@hide} */
+    public static final String EXTRA_CONTENT_VALUES = "content_values";
+    /** {@hide} */
+    public static final String EXTRA_RESULT = "result";
 
     /**
      * This is for internal use by the media scanner only.
@@ -606,6 +624,10 @@ public final class MediaStore {
      * {@link ContentResolver#delete}.
      * <p>
      * By default, trashed items are filtered away from operations.
+     *
+     * @see MediaColumns#IS_TRASHED
+     * @see MediaStore#QUERY_ARG_MATCH_TRASHED
+     * @see MediaStore#createTrashRequest
      */
     @Match
     public static final String QUERY_ARG_MATCH_TRASHED = "android:query-arg-match-trashed";
@@ -620,6 +642,10 @@ public final class MediaStore {
      * <p>
      * By default, favorite items are <em>not</em> filtered away from
      * operations.
+     *
+     * @see MediaColumns#IS_FAVORITE
+     * @see MediaStore#QUERY_ARG_MATCH_FAVORITE
+     * @see MediaStore#createFavoriteRequest
      */
     @Match
     public static final String QUERY_ARG_MATCH_FAVORITE = "android:query-arg-match-favorite";
@@ -952,7 +978,9 @@ public final class MediaStore {
      * @see MediaStore#setIncludeTrashed(Uri)
      * @see MediaStore#trash(Context, Uri)
      * @see MediaStore#untrash(Context, Uri)
+     * @removed
      */
+    @Deprecated
     public static void trash(@NonNull Context context, @NonNull Uri uri) {
         trash(context, uri, 48 * DateUtils.HOUR_IN_MILLIS);
     }
@@ -970,7 +998,9 @@ public final class MediaStore {
      * @see MediaStore#setIncludeTrashed(Uri)
      * @see MediaStore#trash(Context, Uri)
      * @see MediaStore#untrash(Context, Uri)
+     * @removed
      */
+    @Deprecated
     public static void trash(@NonNull Context context, @NonNull Uri uri,
             @DurationMillisLong long timeoutMillis) {
         if (timeoutMillis < 0) {
@@ -992,7 +1022,9 @@ public final class MediaStore {
      * @see MediaStore#setIncludeTrashed(Uri)
      * @see MediaStore#trash(Context, Uri)
      * @see MediaStore#untrash(Context, Uri)
+     * @removed
      */
+    @Deprecated
     public static void untrash(@NonNull Context context, @NonNull Uri uri) {
         final ContentValues values = new ContentValues();
         values.put(MediaColumns.IS_TRASHED, 0);
@@ -1008,6 +1040,180 @@ public final class MediaStore {
      */
     public static @NonNull Uri rewriteToLegacy(@NonNull Uri uri) {
         return uri.buildUpon().authority(MediaStore.AUTHORITY_LEGACY).build();
+    }
+
+    private static @NonNull PendingIntent createRequest(@NonNull ContentResolver resolver,
+            @NonNull String method, @NonNull Collection<Uri> uris, @Nullable ContentValues values) {
+        Objects.requireNonNull(resolver);
+        Objects.requireNonNull(uris);
+
+        final Iterator<Uri> it = uris.iterator();
+        final ClipData clipData = ClipData.newRawUri(null, it.next());
+        while (it.hasNext()) {
+            clipData.addItem(new ClipData.Item(it.next()));
+        }
+
+        final Bundle extras = new Bundle();
+        extras.putParcelable(EXTRA_CLIP_DATA, clipData);
+        extras.putParcelable(EXTRA_CONTENT_VALUES, values);
+        return resolver.call(AUTHORITY, method, null, extras).getParcelable(EXTRA_RESULT);
+    }
+
+    /**
+     * Create a {@link PendingIntent} that will prompt the user to grant your
+     * app write access for the requested media items.
+     * <p>
+     * This call only generates the request for a prompt; to display the prompt,
+     * call {@link Activity#startIntentSenderForResult} with
+     * {@link PendingIntent#getIntentSender()}. You can then determine if the
+     * user granted your request by testing for {@link Activity#RESULT_OK} in
+     * {@link Activity#onActivityResult}.
+     * <p>
+     * Permissions granted through this mechanism are tied to the lifecycle of
+     * the {@link Activity} that requests them. If you need to retain
+     * longer-term access for background actions, you can place items into a
+     * {@link ClipData} or {@link Intent} which can then be passed to
+     * {@link Context#startService} or
+     * {@link android.app.job.JobInfo.Builder#setClipData}. Be sure to include
+     * any relevant access modes you want to retain, such as
+     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION}.
+     * <p>
+     * The displayed prompt will reflect all the media items you're requesting,
+     * including those for which you already hold write access. If you want to
+     * determine if you already hold write access before requesting access, use
+     * {@code ContentResolver#checkUriPermission(Uri, int, int)} with
+     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION}.
+     * <p>
+     * For security and performance reasons this method does not support
+     * {@link Intent#FLAG_GRANT_PERSISTABLE_URI_PERMISSION} or
+     * {@link Intent#FLAG_GRANT_PREFIX_URI_PERMISSION}.
+     *
+     * @param resolver Used to connect with {@link MediaStore#AUTHORITY}.
+     *            Typically this value is {@link Context#getContentResolver()},
+     *            but if you need more explicit lifecycle controls, you can
+     *            obtain a {@link ContentProviderClient} and wrap it using
+     *            {@link ContentResolver#wrap(ContentProviderClient)}.
+     * @param uris The set of media items to include in this request. Each item
+     *            must be hosted by {@link MediaStore#AUTHORITY} and must
+     *            reference a specific media item by {@link BaseColumns#_ID}.
+     */
+    public static @NonNull PendingIntent createWriteRequest(@NonNull ContentResolver resolver,
+            @NonNull Collection<Uri> uris) {
+        return createRequest(resolver, CREATE_WRITE_REQUEST_CALL, uris, null);
+    }
+
+    /**
+     * Create a {@link PendingIntent} that will prompt the user to trash the
+     * requested media items. When the user approves this request,
+     * {@link MediaColumns#IS_TRASHED} is set on these items.
+     * <p>
+     * This call only generates the request for a prompt; to display the prompt,
+     * call {@link Activity#startIntentSenderForResult} with
+     * {@link PendingIntent#getIntentSender()}. You can then determine if the
+     * user granted your request by testing for {@link Activity#RESULT_OK} in
+     * {@link Activity#onActivityResult}.
+     * <p>
+     * The displayed prompt will reflect all the media items you're requesting,
+     * including those for which you already hold write access. If you want to
+     * determine if you already hold write access before requesting access, use
+     * {@code ContentResolver#checkUriPermission(Uri, int, int)} with
+     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION}.
+     *
+     * @param resolver Used to connect with {@link MediaStore#AUTHORITY}.
+     *            Typically this value is {@link Context#getContentResolver()},
+     *            but if you need more explicit lifecycle controls, you can
+     *            obtain a {@link ContentProviderClient} and wrap it using
+     *            {@link ContentResolver#wrap(ContentProviderClient)}.
+     * @param uris The set of media items to include in this request. Each item
+     *            must be hosted by {@link MediaStore#AUTHORITY} and must
+     *            reference a specific media item by {@link BaseColumns#_ID}.
+     * @param value The {@link MediaColumns#IS_TRASHED} value to apply.
+     * @see MediaColumns#IS_TRASHED
+     * @see MediaStore#QUERY_ARG_MATCH_TRASHED
+     */
+    public static @NonNull PendingIntent createTrashRequest(@NonNull ContentResolver resolver,
+            @NonNull Collection<Uri> uris, boolean value) {
+        final ContentValues values = new ContentValues();
+        if (value) {
+            values.put(MediaColumns.IS_TRASHED, 1);
+            values.put(MediaColumns.DATE_EXPIRES,
+                    (System.currentTimeMillis() + DateUtils.WEEK_IN_MILLIS) / 1000);
+        } else {
+            values.put(MediaColumns.IS_TRASHED, 0);
+            values.putNull(MediaColumns.DATE_EXPIRES);
+        }
+        return createRequest(resolver, CREATE_TRASH_REQUEST_CALL, uris, values);
+    }
+
+    /**
+     * Create a {@link PendingIntent} that will prompt the user to favorite the
+     * requested media items. When the user approves this request,
+     * {@link MediaColumns#IS_FAVORITE} is set on these items.
+     * <p>
+     * This call only generates the request for a prompt; to display the prompt,
+     * call {@link Activity#startIntentSenderForResult} with
+     * {@link PendingIntent#getIntentSender()}. You can then determine if the
+     * user granted your request by testing for {@link Activity#RESULT_OK} in
+     * {@link Activity#onActivityResult}.
+     * <p>
+     * The displayed prompt will reflect all the media items you're requesting,
+     * including those for which you already hold write access. If you want to
+     * determine if you already hold write access before requesting access, use
+     * {@code ContentResolver#checkUriPermission(Uri, int, int)} with
+     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION}.
+     *
+     * @param resolver Used to connect with {@link MediaStore#AUTHORITY}.
+     *            Typically this value is {@link Context#getContentResolver()},
+     *            but if you need more explicit lifecycle controls, you can
+     *            obtain a {@link ContentProviderClient} and wrap it using
+     *            {@link ContentResolver#wrap(ContentProviderClient)}.
+     * @param uris The set of media items to include in this request. Each item
+     *            must be hosted by {@link MediaStore#AUTHORITY} and must
+     *            reference a specific media item by {@link BaseColumns#_ID}.
+     * @param value The {@link MediaColumns#IS_FAVORITE} value to apply.
+     * @see MediaColumns#IS_FAVORITE
+     * @see MediaStore#QUERY_ARG_MATCH_FAVORITE
+     */
+    public static @NonNull PendingIntent createFavoriteRequest(@NonNull ContentResolver resolver,
+            @NonNull Collection<Uri> uris, boolean value) {
+        final ContentValues values = new ContentValues();
+        if (value) {
+            values.put(MediaColumns.IS_FAVORITE, 1);
+        } else {
+            values.put(MediaColumns.IS_FAVORITE, 0);
+        }
+        return createRequest(resolver, CREATE_FAVORITE_REQUEST_CALL, uris, values);
+    }
+
+    /**
+     * Create a {@link PendingIntent} that will prompt the user to permanently
+     * delete the requested media items. When the user approves this request,
+     * {@link ContentResolver#delete} will be called on these items.
+     * <p>
+     * This call only generates the request for a prompt; to display the prompt,
+     * call {@link Activity#startIntentSenderForResult} with
+     * {@link PendingIntent#getIntentSender()}. You can then determine if the
+     * user granted your request by testing for {@link Activity#RESULT_OK} in
+     * {@link Activity#onActivityResult}.
+     * <p>
+     * The displayed prompt will reflect all the media items you're requesting,
+     * including those for which you already hold write access. If you want to
+     * determine if you already hold write access before requesting access, use
+     * {@code ContentResolver#checkUriPermission(Uri, int, int)} with
+     * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION}.
+     *
+     * @param resolver Used to connect with {@link MediaStore#AUTHORITY}.
+     *            Typically this value is {@link Context#getContentResolver()},
+     *            but if you need more explicit lifecycle controls, you can
+     *            obtain a {@link ContentProviderClient} and wrap it using
+     *            {@link ContentResolver#wrap(ContentProviderClient)}.
+     * @param uris The set of media items to include in this request. Each item
+     *            must be hosted by {@link MediaStore#AUTHORITY} and must
+     *            reference a specific media item by {@link BaseColumns#_ID}.
+     */
+    public static @NonNull PendingIntent createDeleteRequest(@NonNull ContentResolver resolver,
+            @NonNull Collection<Uri> uris) {
+        return createRequest(resolver, CREATE_DELETE_REQUEST_CALL, uris, null);
     }
 
     /**
@@ -1127,9 +1333,9 @@ public final class MediaStore {
          * Trashed items are retained until they expire as defined by
          * {@link #DATE_EXPIRES}.
          *
+         * @see MediaColumns#IS_TRASHED
          * @see MediaStore#QUERY_ARG_MATCH_TRASHED
-         * @see MediaStore#trash(Context, Uri)
-         * @see MediaStore#untrash(Context, Uri)
+         * @see MediaStore#createTrashRequest
          */
         @Column(Cursor.FIELD_TYPE_INTEGER)
         public static final String IS_TRASHED = "is_trashed";
@@ -1302,7 +1508,9 @@ public final class MediaStore {
          * Flag indicating if the media item has been marked as being a
          * "favorite" by the user.
          *
+         * @see MediaColumns#IS_FAVORITE
          * @see MediaStore#QUERY_ARG_MATCH_FAVORITE
+         * @see MediaStore#createFavoriteRequest
          */
         @Column(Cursor.FIELD_TYPE_INTEGER)
         public static final String IS_FAVORITE = "is_favorite";
