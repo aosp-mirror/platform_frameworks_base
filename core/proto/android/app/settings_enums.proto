@@ -2472,4 +2472,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     SETTINGS_BUGREPORT_HANDLER = 1808;
+
+    // Panel for adding Wi-Fi networks
+    // CATEGORY: SETTINGS
+    // OS: R
+    PANEL_ADD_WIFI_NETWORKS = 1809;
 }
