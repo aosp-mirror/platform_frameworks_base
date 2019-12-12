@@ -443,8 +443,8 @@ public final class MediaController {
      * Get the session's tag for debugging purposes.
      *
      * @return The session's tag.
-     * @hide
      */
+    @NonNull
     public String getTag() {
         if (mTag == null) {
             try {
