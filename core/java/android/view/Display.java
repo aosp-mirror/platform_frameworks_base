@@ -453,7 +453,7 @@ public final class Display {
         mResources = res;
         mDisplayAdjustments = mResources != null
             ? new DisplayAdjustments(mResources.getConfiguration())
-            : daj != null ? new DisplayAdjustments(daj) : null;
+            : daj != null ? new DisplayAdjustments(daj) : new DisplayAdjustments();
         mIsValid = true;
 
         // Cache properties that cannot change as long as the display is valid.
