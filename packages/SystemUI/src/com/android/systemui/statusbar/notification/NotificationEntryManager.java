@@ -33,6 +33,8 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
+import com.android.systemui.statusbar.NotificationListener;
+import com.android.systemui.statusbar.NotificationListener.NotifServiceListener;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
@@ -172,6 +174,11 @@ public class NotificationEntryManager implements
         mGroupManager = groupManager;
         mRankingManager = rankingManager;
         mKeyguardEnvironment = keyguardEnvironment;
+    }
+
+    /** Once called, the NEM will start processing notification events from system server. */
+    public void attach(NotificationListener notificationListener) {
+        notificationListener.addNotificationListener(mNotifListener);
     }
 
     /** Adds a {@link NotificationEntryListener}. */
@@ -317,6 +324,36 @@ public class NotificationEntryManager implements
             }
         }
     }
+
+    private final NotifServiceListener mNotifListener = new NotifServiceListener() {
+        @Override
+        public void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
+            final boolean isUpdate = mActiveNotifications.containsKey(sbn.getKey());
+            if (isUpdate) {
+                updateNotification(sbn, rankingMap);
+            } else {
+                addNotification(sbn, rankingMap);
+            }
+        }
+
+        @Override
+        public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap) {
+            removeNotification(sbn.getKey(), rankingMap, UNDEFINED_DISMISS_REASON);
+        }
+
+        @Override
+        public void onNotificationRemoved(
+                StatusBarNotification sbn,
+                RankingMap rankingMap,
+                int reason) {
+            removeNotification(sbn.getKey(), rankingMap, reason);
+        }
+
+        @Override
+        public void onNotificationRankingUpdate(RankingMap rankingMap) {
+            updateNotificationRanking(rankingMap);
+        }
+    };
 
     /**
      * Equivalent to the old NotificationData#add

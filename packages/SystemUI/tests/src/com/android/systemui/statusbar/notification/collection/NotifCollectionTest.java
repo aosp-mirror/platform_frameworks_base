@@ -99,7 +99,7 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         // Capture the listener object that the collection registers with the listener service so
         // we can simulate listener service events in tests below
-        verify(mListenerService).setDownstreamListener(mListenerCaptor.capture());
+        verify(mListenerService).addNotificationListener(mListenerCaptor.capture());
         mServiceListener = checkNotNull(mListenerCaptor.getValue());
 
         mNoMan = new NoManSimulator(mServiceListener);

@@ -813,15 +813,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * @param parent the new parent notification
      */
     public void setIsChildInGroup(boolean isChildInGroup, ExpandableNotificationRow parent) {
-        boolean childInGroup = StatusBar.ENABLE_CHILD_NOTIFICATIONS && isChildInGroup;
         if (mExpandAnimationRunning && !isChildInGroup && mNotificationParent != null) {
             mNotificationParent.setChildIsExpanding(false);
             mNotificationParent.setExtraWidthForClipping(0.0f);
             mNotificationParent.setMinimumHeightForClipping(0);
         }
-        mNotificationParent = childInGroup ? parent : null;
-        mPrivateLayout.setIsChildInGroup(childInGroup);
-        mNotificationInflater.setIsChildInGroup(childInGroup);
+        mNotificationParent = isChildInGroup ? parent : null;
+        mPrivateLayout.setIsChildInGroup(isChildInGroup);
+        mNotificationInflater.setIsChildInGroup(isChildInGroup);
         resetBackgroundAlpha();
         updateBackgroundForGroupState();
         updateClickAndFocus();
@@ -2354,8 +2353,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private void onChildrenCountChanged() {
-        mIsSummaryWithChildren = StatusBar.ENABLE_CHILD_NOTIFICATIONS
-                && mChildrenContainer != null && mChildrenContainer.getNotificationChildCount() > 0;
+        mIsSummaryWithChildren = mChildrenContainer != null
+                && mChildrenContainer.getNotificationChildCount() > 0;
         if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() == null) {
             mChildrenContainer.recreateNotificationHeader(mExpandClickListener
             );
