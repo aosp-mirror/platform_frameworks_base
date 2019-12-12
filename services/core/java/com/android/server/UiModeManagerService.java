@@ -16,8 +16,6 @@
 
 package com.android.server;
 
-import static android.content.Intent.ACTION_SCREEN_OFF;
-
 import android.annotation.IntRange;
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -98,6 +96,10 @@ final class UiModeManagerService extends SystemService {
     private boolean mCarModeEnabled = false;
     private boolean mCharging = false;
     private boolean mPowerSave = false;
+    // Do not change configuration now. wait until screen turns off.
+    // This prevents jank and activity restart when the user
+    // is actively using the device
+    private boolean mWaitForScreenOff = false;
     private int mDefaultUiModeType;
     private boolean mCarModeKeepsScreenOn;
     private boolean mDeskModeKeepsScreenOn;
@@ -213,25 +215,24 @@ final class UiModeManagerService extends SystemService {
                     if (mCar) {
                         updateLocked(0, 0);
                     } else {
-                        final IntentFilter intentFilter =
-                                new IntentFilter(ACTION_SCREEN_OFF);
-                        getContext().registerReceiver(mOnScreenOffHandler, intentFilter);
+                        registerScreenOffEvent();
                     }
                 }
             }
         }
     };
 
+    /**
+     *  DO NOT USE DIRECTLY
+     *  see register registerScreenOffEvent and unregisterScreenOffEvent
+     */
     private final BroadcastReceiver mOnScreenOffHandler = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             synchronized (mLock) {
+                // must unregister first before updating
+                unregisterScreenOffEvent();
                 updateLocked(0, 0);
-                try {
-                    getContext().unregisterReceiver(mOnScreenOffHandler);
-                } catch (IllegalArgumentException e) {
-                    // we ignore this exception if the receiver is unregistered already.
-                }
             }
         }
     };
@@ -270,7 +271,7 @@ final class UiModeManagerService extends SystemService {
             int mode = Secure.getIntForUser(getContext().getContentResolver(), Secure.UI_NIGHT_MODE,
                     mNightMode, 0);
             mode = mode == UiModeManager.MODE_NIGHT_AUTO
-                    ? UiModeManager.MODE_NIGHT_YES : UiModeManager.MODE_NIGHT_NO;
+                    ? UiModeManager.MODE_NIGHT_YES : mode;
             SystemProperties.set(SYSTEM_PROPERTY_DEVICE_THEME, Integer.toString(mode));
         }
     };
@@ -342,7 +343,7 @@ final class UiModeManagerService extends SystemService {
         SystemServerInitThreadPool.get().submit(() -> {
             synchronized (mLock) {
                 updateConfigurationLocked();
-                sendConfigurationLocked();
+                applyConfigurationExternallyLocked();
             }
 
         }, TAG + ".onStart");
@@ -409,6 +410,22 @@ final class UiModeManagerService extends SystemService {
         }
 
         return oldNightMode != mNightMode;
+    }
+
+    private void registerScreenOffEvent() {
+        mWaitForScreenOff = true;
+        final IntentFilter intentFilter =
+                new IntentFilter(Intent.ACTION_SCREEN_OFF);
+        getContext().registerReceiver(mOnScreenOffHandler, intentFilter);
+    }
+
+    private void unregisterScreenOffEvent() {
+        mWaitForScreenOff = false;
+        try {
+            getContext().unregisterReceiver(mOnScreenOffHandler);
+        } catch (IllegalArgumentException e) {
+            // we ignore this exception if the receiver is unregistered already.
+        }
     }
 
     private final IUiModeManager.Stub mService = new IUiModeManager.Stub() {
@@ -532,28 +549,21 @@ final class UiModeManagerService extends SystemService {
                 synchronized (mLock) {
                     if (mNightMode != mode) {
                         if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
-                            try {
-                                getContext().unregisterReceiver(mOnScreenOffHandler);
-                            } catch (IllegalArgumentException e) {
-                                // we ignore this exception if the receiver is unregistered already.
-                            }
-                        }
-                        // Only persist setting if not in car mode
-                        if (!mCarModeEnabled) {
-                            Secure.putIntForUser(getContext().getContentResolver(),
-                                    Secure.UI_NIGHT_MODE, mode, user);
-                            Secure.putIntForUser(getContext().getContentResolver(),
-                                    OVERRIDE_NIGHT_MODE, mNightModeOverride, user);
+                            unregisterScreenOffEvent();
                         }
 
                         mNightMode = mode;
                         mNightModeOverride = mode;
-                        //on screen off will update configuration instead
+
+                        // Only persist setting if not in car mode
+                        if (!mCarModeEnabled) {
+                            persistNightMode(user);
+                        }
+                        // on screen off will update configuration instead
                         if (mNightMode != UiModeManager.MODE_NIGHT_AUTO || mCar) {
                             updateLocked(0, 0);
                         } else {
-                            getContext().registerReceiver(
-                                    mOnScreenOffHandler, new IntentFilter(ACTION_SCREEN_OFF));
+                            registerScreenOffEvent();
                         }
                     }
                 }
@@ -598,13 +608,11 @@ final class UiModeManagerService extends SystemService {
         @Override
         public boolean setNightModeActivated(boolean active) {
             synchronized (mLock) {
+                final int user = UserHandle.getCallingUserId();
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
-                        try {
-                            getContext().unregisterReceiver(mOnScreenOffHandler);
-                        } catch (IllegalArgumentException e) {
-                        }
+                        unregisterScreenOffEvent();
                         mNightModeOverride = active
                                 ? UiModeManager.MODE_NIGHT_YES : UiModeManager.MODE_NIGHT_NO;
                     } else if (mNightMode == UiModeManager.MODE_NIGHT_NO
@@ -615,7 +623,8 @@ final class UiModeManagerService extends SystemService {
                         mNightMode = UiModeManager.MODE_NIGHT_NO;
                     }
                     updateConfigurationLocked();
-                    sendConfigurationLocked();
+                    applyConfigurationExternallyLocked();
+                    persistNightMode(user);
                     return true;
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -825,6 +834,13 @@ final class UiModeManagerService extends SystemService {
         }
     }
 
+    private void persistNightMode(int user) {
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.UI_NIGHT_MODE, mNightMode, user);
+        Secure.putIntForUser(getContext().getContentResolver(),
+                OVERRIDE_NIGHT_MODE, mNightModeOverride, user);
+    }
+
     private void updateConfigurationLocked() {
         int uiMode = mDefaultUiModeType;
         if (mUiModeLocked) {
@@ -870,15 +886,14 @@ final class UiModeManagerService extends SystemService {
         }
 
         mCurUiMode = uiMode;
-        if (!mHoldingConfiguration) {
+        if (!mHoldingConfiguration || !mWaitForScreenOff) {
             mConfiguration.uiMode = uiMode;
         }
     }
 
-    private void sendConfigurationLocked() {
+    private void applyConfigurationExternallyLocked() {
         if (mSetUiMode != mConfiguration.uiMode) {
             mSetUiMode = mConfiguration.uiMode;
-
             try {
                 ActivityTaskManager.getService().updateConfiguration(mConfiguration);
             } catch (RemoteException e) {
@@ -1058,7 +1073,7 @@ final class UiModeManagerService extends SystemService {
         }
 
         // Send the new configuration.
-        sendConfigurationLocked();
+        applyConfigurationExternallyLocked();
 
         // If we did not start a dock app, then start dreaming if supported.
         if (category != null && !dockAppStarted) {
@@ -1136,7 +1151,6 @@ final class UiModeManagerService extends SystemService {
             final int user = UserHandle.getCallingUserId();
             Secure.putIntForUser(getContext().getContentResolver(),
                     OVERRIDE_NIGHT_MODE, mNightModeOverride, user);
-
         }
     }
 
