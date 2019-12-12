@@ -53,7 +53,7 @@ OverlayStringPool::~OverlayStringPool() {
 
 const char16_t* OverlayStringPool::stringAt(size_t idx, size_t* outLen) const {
   const size_t offset = dtohl(data_header_->string_pool_index_offset);
-  if (idmap_string_pool_ != nullptr && idx >= size() && idx >= offset) {
+  if (idmap_string_pool_ != nullptr && idx >= ResStringPool::size() && idx >= offset) {
     return idmap_string_pool_->stringAt(idx - offset, outLen);
   }
 
@@ -62,11 +62,15 @@ const char16_t* OverlayStringPool::stringAt(size_t idx, size_t* outLen) const {
 
 const char* OverlayStringPool::string8At(size_t idx, size_t* outLen) const {
   const size_t offset = dtohl(data_header_->string_pool_index_offset);
-  if (idmap_string_pool_ != nullptr && idx >= size() && idx >= offset) {
+  if (idmap_string_pool_ != nullptr && idx >= ResStringPool::size() && idx >= offset) {
     return idmap_string_pool_->string8At(idx - offset, outLen);
   }
 
   return ResStringPool::string8At(idx, outLen);
+}
+
+size_t OverlayStringPool::size() const {
+  return ResStringPool::size() + (idmap_string_pool_ != nullptr ? idmap_string_pool_->size() : 0U);
 }
 
 OverlayDynamicRefTable::OverlayDynamicRefTable(const Idmap_data_header* data_header,
