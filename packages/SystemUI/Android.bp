@@ -127,7 +127,7 @@ android_library {
         "SystemUI-proto",
         "metrics-helper-lib",
         "androidx.test.rules", "hamcrest-library",
-        "mockito-target-inline-minus-junit4",
+        "mockito-target-extended-minus-junit4",
         "testables",
         "truth-prebuilt",
         "dagger2-2.19",

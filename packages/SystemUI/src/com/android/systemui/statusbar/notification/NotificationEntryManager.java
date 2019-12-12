@@ -267,14 +267,13 @@ public class NotificationEntryManager implements
             NotificationEntry entry = mPendingNotifications.get(key);
             entry.abortTask();
             mPendingNotifications.remove(key);
-            mNotifLog.log(NotifEvent.INFLATION_ABORTED, entry.getSbn(), null,
-                    "PendingNotification aborted. " + reason);
+            mNotifLog.log(NotifEvent.INFLATION_ABORTED, entry, "PendingNotification aborted"
+                    + " reason=" + reason);
         }
         NotificationEntry addedEntry = getActiveNotificationUnfiltered(key);
         if (addedEntry != null) {
             addedEntry.abortTask();
-            mNotifLog.log(NotifEvent.INFLATION_ABORTED, addedEntry.getSbn(),
-                    null, reason);
+            mNotifLog.log(NotifEvent.INFLATION_ABORTED, addedEntry.getKey() + " " + reason);
         }
     }
 
@@ -501,7 +500,7 @@ public class NotificationEntryManager implements
 
         abortExistingInflation(key, "addNotification");
         mPendingNotifications.put(key, entry);
-        mNotifLog.log(NotifEvent.NOTIF_ADDED, entry.getSbn());
+        mNotifLog.log(NotifEvent.NOTIF_ADDED, entry);
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPendingEntryAdded(entry);
         }
@@ -536,7 +535,7 @@ public class NotificationEntryManager implements
         entry.setSbn(notification);
         mGroupManager.onEntryUpdated(entry, oldSbn);
 
-        mNotifLog.log(NotifEvent.NOTIF_UPDATED, entry.getSbn(), entry.getRanking());
+        mNotifLog.log(NotifEvent.NOTIF_UPDATED, entry);
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPreEntryUpdated(entry);
         }

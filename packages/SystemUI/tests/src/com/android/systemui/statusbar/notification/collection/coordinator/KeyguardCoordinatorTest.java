@@ -24,6 +24,8 @@ import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Handler;
@@ -40,12 +42,15 @@ import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
+import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -61,14 +66,16 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock private NotifListBuilderImpl mNotifListBuilder;
 
     private NotificationEntry mEntry;
-    private KeyguardCoordinator mKeyguardNotificationCoordinator;
+    private KeyguardCoordinator mKeyguardCoordinator;
+    private NotifFilter mKeyguardFilter;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mKeyguardNotificationCoordinator = new KeyguardCoordinator(
+        mKeyguardCoordinator = new KeyguardCoordinator(
                 mContext, mMainHandler, mKeyguardStateController, mLockscreenUserManager,
                 mBroadcastDispatcher, mStatusBarStateController,
                 mKeyguardUpdateMonitor);
@@ -76,6 +83,11 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
         mEntry = new NotificationEntryBuilder()
                 .setUser(new UserHandle(NOTIF_USER_ID))
                 .build();
+
+        ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
+        mKeyguardCoordinator.attach(null, mNotifListBuilder);
+        verify(mNotifListBuilder, times(1)).addFilter(filterCaptor.capture());
+        mKeyguardFilter = filterCaptor.getValue();
     }
 
     @Test
@@ -84,7 +96,7 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
         setupUnfilteredState();
 
         // THEN don't filter out the entry
-        assertFalse(mKeyguardNotificationCoordinator.mNotifFilter.shouldFilterOut(mEntry, 0));
+        assertFalse(mKeyguardFilter.shouldFilterOut(mEntry, 0));
     }
 
     @Test
@@ -94,7 +106,7 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
         when(mLockscreenUserManager.isCurrentProfile(NOTIF_USER_ID)).thenReturn(false);
 
         // THEN filter out the entry
-        assertTrue(mKeyguardNotificationCoordinator.mNotifFilter.shouldFilterOut(mEntry, 0));
+        assertTrue(mKeyguardFilter.shouldFilterOut(mEntry, 0));
     }
 
     @Test
@@ -104,7 +116,7 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
         when(mKeyguardStateController.isShowing()).thenReturn(false);
 
         // THEN don't filter out the entry
-        assertFalse(mKeyguardNotificationCoordinator.mNotifFilter.shouldFilterOut(mEntry, 0));
+        assertFalse(mKeyguardFilter.shouldFilterOut(mEntry, 0));
     }
 
     @Test
@@ -116,7 +128,7 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
         when(mLockscreenUserManager.shouldShowLockscreenNotifications()).thenReturn(false);
 
         // THEN filter out the entry
-        assertTrue(mKeyguardNotificationCoordinator.mNotifFilter.shouldFilterOut(mEntry, 0));
+        assertTrue(mKeyguardFilter.shouldFilterOut(mEntry, 0));
     }
 
     @Test
@@ -128,7 +140,7 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.isUserInLockdown(NOTIF_USER_ID)).thenReturn(true);
 
         // THEN filter out the entry
-        assertTrue(mKeyguardNotificationCoordinator.mNotifFilter.shouldFilterOut(mEntry, 0));
+        assertTrue(mKeyguardFilter.shouldFilterOut(mEntry, 0));
     }
 
     @Test
@@ -143,7 +155,7 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
                 .thenReturn(false);
 
         // THEN filter out the entry
-        assertTrue(mKeyguardNotificationCoordinator.mNotifFilter.shouldFilterOut(mEntry, 0));
+        assertTrue(mKeyguardFilter.shouldFilterOut(mEntry, 0));
     }
 
     @Test
@@ -159,7 +171,7 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
                 .setVisibilityOverride(VISIBILITY_SECRET).build());
 
         // THEN filter out the entry
-        assertTrue(mKeyguardNotificationCoordinator.mNotifFilter.shouldFilterOut(mEntry, 0));
+        assertTrue(mKeyguardFilter.shouldFilterOut(mEntry, 0));
     }
 
     @Test
@@ -174,7 +186,7 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
                 .build());
 
         // THEN filter out the entry
-        assertTrue(mKeyguardNotificationCoordinator.mNotifFilter.shouldFilterOut(mEntry, 0));
+        assertTrue(mKeyguardFilter.shouldFilterOut(mEntry, 0));
     }
 
     @Test
@@ -199,7 +211,7 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
         mEntry.setParent(group);
 
         // THEN don't filter out the entry
-        assertFalse(mKeyguardNotificationCoordinator.mNotifFilter.shouldFilterOut(mEntry, 0));
+        assertFalse(mKeyguardFilter.shouldFilterOut(mEntry, 0));
     }
 
     /**

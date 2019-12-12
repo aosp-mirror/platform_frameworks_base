@@ -35,8 +35,10 @@ import javax.inject.Singleton;
  *      dependency DumpController DozeLog
  */
 @Singleton
-public class DozeLog extends SysuiLog {
+public class DozeLog extends SysuiLog<DozeEvent> {
     private static final String TAG = "DozeLog";
+
+    private DozeEvent mRecycledEvent;
 
     private boolean mPulsing;
     private long mSince;
@@ -73,8 +75,8 @@ public class DozeLog extends SysuiLog {
      * Appends pickup wakeup event to the logs
      */
     public void tracePickupWakeUp(boolean withinVibrationThreshold) {
-        if (log(DozeEvent.PICKUP_WAKEUP,
-                "withinVibrationThreshold=" + withinVibrationThreshold)) {
+        log(DozeEvent.PICKUP_WAKEUP, "withinVibrationThreshold=" + withinVibrationThreshold);
+        if (mEnabled) {
             (withinVibrationThreshold ? mPickupPulseNearVibrationStats
                     : mPickupPulseNotNearVibrationStats).append();
         }
@@ -85,27 +87,24 @@ public class DozeLog extends SysuiLog {
      * @param reason why the pulse started
      */
     public void tracePulseStart(@DozeEvent.Reason int reason) {
-        if (log(DozeEvent.PULSE_START, DozeEvent.reasonToString(reason))) {
-            mPulsing = true;
-        }
+        log(DozeEvent.PULSE_START, DozeEvent.reasonToString(reason));
+        if (mEnabled) mPulsing = true;
     }
 
     /**
      * Appends pulse finished event to the logs
      */
     public void tracePulseFinish() {
-        if (log(DozeEvent.PULSE_FINISH)) {
-            mPulsing = false;
-        }
+        log(DozeEvent.PULSE_FINISH);
+        if (mEnabled) mPulsing = false;
     }
 
     /**
      * Appends pulse event to the logs
      */
     public void traceNotificationPulse() {
-        if (log(DozeEvent.NOTIFICATION_PULSE)) {
-            mNotificationPulseStats.append();
-        }
+        log(DozeEvent.NOTIFICATION_PULSE);
+        if (mEnabled) mNotificationPulseStats.append();
     }
 
     /**
@@ -113,9 +112,8 @@ public class DozeLog extends SysuiLog {
      * @param dozing true if dozing, else false
      */
     public void traceDozing(boolean dozing) {
-        if (log(DozeEvent.DOZING, "dozing=" + dozing)) {
-            mPulsing = false;
-        }
+        log(DozeEvent.DOZING, "dozing=" + dozing);
+        if (mEnabled) mPulsing = false;
     }
 
     /**
@@ -133,9 +131,8 @@ public class DozeLog extends SysuiLog {
      * Appends emergency call event to the logs
      */
     public void traceEmergencyCall() {
-        if (log(DozeEvent.EMERGENCY_CALL)) {
-            mEmergencyCallStats.append();
-        }
+        log(DozeEvent.EMERGENCY_CALL);
+        if (mEnabled) mEmergencyCallStats.append();
     }
 
     /**
@@ -150,7 +147,8 @@ public class DozeLog extends SysuiLog {
      * Appends screen-on event to the logs
      */
     public void traceScreenOn() {
-        if (log(DozeEvent.SCREEN_ON, "pulsing=" + mPulsing)) {
+        log(DozeEvent.SCREEN_ON, "pulsing=" + mPulsing);
+        if (mEnabled) {
             (mPulsing ? mScreenOnPulsingStats : mScreenOnNotPulsingStats).append();
             mPulsing = false;
         }
@@ -188,10 +186,8 @@ public class DozeLog extends SysuiLog {
      * @param showing whether the keyguard is now showing
      */
     public void traceKeyguard(boolean showing) {
-        if (log(DozeEvent.KEYGUARD_VISIBILITY_CHANGE, "showing=" + showing)
-                && !showing) {
-            mPulsing = false;
-        }
+        log(DozeEvent.KEYGUARD_VISIBILITY_CHANGE, "showing=" + showing);
+        if (mEnabled && !showing) mPulsing = false;
     }
 
     /**
@@ -217,12 +213,11 @@ public class DozeLog extends SysuiLog {
      * @param reason why proximity result was triggered
      */
     public void traceProximityResult(boolean near, long millis, @DozeEvent.Reason int reason) {
-        if (log(DozeEvent.PROXIMITY_RESULT,
+        log(DozeEvent.PROXIMITY_RESULT,
                 " reason=" + DozeEvent.reasonToString(reason)
-                + " near=" + near
-                + " millis=" + millis)) {
-            mProxStats[reason][near ? 0 : 1].append();
-        }
+                        + " near=" + near
+                        + " millis=" + millis);
+        if (mEnabled) mProxStats[reason][near ? 0 : 1].append();
     }
 
     /**
@@ -250,15 +245,16 @@ public class DozeLog extends SysuiLog {
         }
     }
 
-    private boolean log(@DozeEvent.EventType int eventType) {
-        return log(eventType, "");
+    private void log(@DozeEvent.EventType int eventType) {
+        log(eventType, "");
     }
 
-    private boolean log(@DozeEvent.EventType int eventType, String msg) {
-        return super.log(new DozeEvent.DozeEventBuilder()
-                .setType(eventType)
-                .setReason(msg)
-                .build());
+    private void log(@DozeEvent.EventType int eventType, String msg) {
+        if (mRecycledEvent != null) {
+            mRecycledEvent = log(mRecycledEvent.init(eventType, msg));
+        } else {
+            mRecycledEvent = log(new DozeEvent().init(eventType, msg));
+        }
     }
 
     /**
