@@ -328,7 +328,8 @@ public class PackageWatchdogTest {
         long differentVersionCode = 2L;
         TestObserver observer = new TestObserver(OBSERVER_NAME_1) {
                 @Override
-                public int onHealthCheckFailed(VersionedPackage versionedPackage) {
+                public int onHealthCheckFailed(VersionedPackage versionedPackage,
+                        int failureReason) {
                     if (versionedPackage.getVersionCode() == VERSION_CODE) {
                         // Only rollback for specific versionCode
                         return PackageHealthObserverImpact.USER_IMPACT_MEDIUM;
@@ -1012,7 +1013,7 @@ public class PackageWatchdogTest {
             mImpact = impact;
         }
 
-        public int onHealthCheckFailed(VersionedPackage versionedPackage) {
+        public int onHealthCheckFailed(VersionedPackage versionedPackage, int failureReason) {
             mHealthCheckFailedPackages.add(versionedPackage.getPackageName());
             return mImpact;
         }

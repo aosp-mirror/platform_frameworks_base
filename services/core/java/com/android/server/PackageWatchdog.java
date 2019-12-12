@@ -29,6 +29,7 @@ import android.net.ConnectivityModuleConnector;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemProperties;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -82,6 +83,12 @@ public class PackageWatchdog {
     static final String PROPERTY_WATCHDOG_EXPLICIT_HEALTH_CHECK_ENABLED =
             "watchdog_explicit_health_check_enabled";
 
+    // TODO: make the following values configurable via DeviceConfig
+    private static final long NATIVE_CRASH_POLLING_INTERVAL_MILLIS =
+            TimeUnit.SECONDS.toMillis(30);
+    private static final long NUMBER_OF_NATIVE_CRASH_POLLS = 10;
+
+
     public static final int FAILURE_REASON_UNKNOWN = 0;
     public static final int FAILURE_REASON_NATIVE_CRASH = 1;
     public static final int FAILURE_REASON_EXPLICIT_HEALTH_CHECK = 2;
@@ -109,6 +116,8 @@ public class PackageWatchdog {
     static final long DEFAULT_OBSERVING_DURATION_MS = TimeUnit.DAYS.toMillis(2);
     // Whether explicit health checks are enabled or not
     private static final boolean DEFAULT_EXPLICIT_HEALTH_CHECK_ENABLED = true;
+
+    private long mNumberOfNativeCrashPollsRemaining;
 
     private static final int DB_VERSION = 1;
     private static final String TAG_PACKAGE_WATCHDOG = "package-watchdog";
@@ -188,6 +197,7 @@ public class PackageWatchdog {
         mHealthCheckController = controller;
         mConnectivityModuleConnector = connectivityModuleConnector;
         mSystemClock = clock;
+        mNumberOfNativeCrashPollsRemaining = NUMBER_OF_NATIVE_CRASH_POLLS;
         loadFromFile();
     }
 
@@ -337,35 +347,66 @@ public class PackageWatchdog {
                     return;
                 }
 
-                for (int pIndex = 0; pIndex < packages.size(); pIndex++) {
-                    VersionedPackage versionedPackage = packages.get(pIndex);
-                    // Observer that will receive failure for versionedPackage
-                    PackageHealthObserver currentObserverToNotify = null;
-                    int currentObserverImpact = Integer.MAX_VALUE;
+                if (failureReason == FAILURE_REASON_NATIVE_CRASH) {
+                    handleFailureImmediately(packages, failureReason);
+                } else {
+                    for (int pIndex = 0; pIndex < packages.size(); pIndex++) {
+                        VersionedPackage versionedPackage = packages.get(pIndex);
+                        // Observer that will receive failure for versionedPackage
+                        PackageHealthObserver currentObserverToNotify = null;
+                        int currentObserverImpact = Integer.MAX_VALUE;
 
-                    // Find observer with least user impact
-                    for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
-                        ObserverInternal observer = mAllObservers.valueAt(oIndex);
-                        PackageHealthObserver registeredObserver = observer.registeredObserver;
-                        if (registeredObserver != null
-                                && observer.onPackageFailureLocked(
-                                        versionedPackage.getPackageName())) {
-                            int impact = registeredObserver.onHealthCheckFailed(versionedPackage);
-                            if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
-                                    && impact < currentObserverImpact) {
-                                currentObserverToNotify = registeredObserver;
-                                currentObserverImpact = impact;
+                        // Find observer with least user impact
+                        for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
+                            ObserverInternal observer = mAllObservers.valueAt(oIndex);
+                            PackageHealthObserver registeredObserver = observer.registeredObserver;
+                            if (registeredObserver != null
+                                    && observer.onPackageFailureLocked(
+                                    versionedPackage.getPackageName())) {
+                                int impact = registeredObserver.onHealthCheckFailed(
+                                        versionedPackage, failureReason);
+                                if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
+                                        && impact < currentObserverImpact) {
+                                    currentObserverToNotify = registeredObserver;
+                                    currentObserverImpact = impact;
+                                }
                             }
                         }
-                    }
 
-                    // Execute action with least user impact
-                    if (currentObserverToNotify != null) {
-                        currentObserverToNotify.execute(versionedPackage, failureReason);
+                        // Execute action with least user impact
+                        if (currentObserverToNotify != null) {
+                            currentObserverToNotify.execute(versionedPackage, failureReason);
+                        }
                     }
                 }
             }
         });
+    }
+
+    /**
+     * For native crashes, call directly into each observer to mitigate the error without going
+     * through failure threshold logic.
+     */
+    private void handleFailureImmediately(List<VersionedPackage> packages,
+            @FailureReasons int failureReason) {
+        VersionedPackage failingPackage = packages.size() > 0 ? packages.get(0) : null;
+        PackageHealthObserver currentObserverToNotify = null;
+        int currentObserverImpact = Integer.MAX_VALUE;
+        for (ObserverInternal observer: mAllObservers.values()) {
+            PackageHealthObserver registeredObserver = observer.registeredObserver;
+            if (registeredObserver != null) {
+                int impact = registeredObserver.onHealthCheckFailed(
+                        failingPackage, failureReason);
+                if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
+                        && impact < currentObserverImpact) {
+                    currentObserverToNotify = registeredObserver;
+                    currentObserverImpact = impact;
+                }
+            }
+        }
+        if (currentObserverToNotify != null) {
+            currentObserverToNotify.execute(failingPackage,  failureReason);
+        }
     }
 
     // TODO(b/120598832): Optimize write? Maybe only write a separate smaller file? Also
@@ -400,6 +441,37 @@ public class PackageWatchdog {
         }
     }
 
+    /**
+     * This method should be only called on mShortTaskHandler, since it modifies
+     * {@link #mNumberOfNativeCrashPollsRemaining}.
+     */
+    private void checkAndMitigateNativeCrashes() {
+        mNumberOfNativeCrashPollsRemaining--;
+        // Check if native watchdog reported a crash
+        if ("1".equals(SystemProperties.get("sys.init.updatable_crashing"))) {
+            // We rollback everything available when crash is unattributable
+            onPackageFailure(Collections.EMPTY_LIST, FAILURE_REASON_NATIVE_CRASH);
+            // we stop polling after an attempt to execute rollback, regardless of whether the
+            // attempt succeeds or not
+        } else {
+            if (mNumberOfNativeCrashPollsRemaining > 0) {
+                mShortTaskHandler.postDelayed(() -> checkAndMitigateNativeCrashes(),
+                        NATIVE_CRASH_POLLING_INTERVAL_MILLIS);
+            }
+        }
+    }
+
+    /**
+     * Since this method can eventually trigger a rollback, it should be called
+     * only once boot has completed {@code onBootCompleted} and not earlier, because the install
+     * session must be entirely completed before we try to rollback.
+     */
+    public void scheduleCheckAndMitigateNativeCrashes() {
+        Slog.i(TAG, "Scheduling " + mNumberOfNativeCrashPollsRemaining + " polls to check "
+                + "and mitigate native crashes");
+        mShortTaskHandler.post(()->checkAndMitigateNativeCrashes());
+    }
+
     /** Possible severity values of the user impact of a {@link PackageHealthObserver#execute}. */
     @Retention(SOURCE)
     @IntDef(value = {PackageHealthObserverImpact.USER_IMPACT_NONE,
@@ -422,17 +494,28 @@ public class PackageWatchdog {
         /**
          * Called when health check fails for the {@code versionedPackage}.
          *
+         * @param versionedPackage the package that is failing. This may be null if a native
+         *                          service is crashing.
+         * @param failureReason   the type of failure that is occurring.
+         *
+         *
          * @return any one of {@link PackageHealthObserverImpact} to express the impact
          * to the user on {@link #execute}
          */
-        @PackageHealthObserverImpact int onHealthCheckFailed(VersionedPackage versionedPackage);
+        @PackageHealthObserverImpact int onHealthCheckFailed(
+                @Nullable VersionedPackage versionedPackage,
+                @FailureReasons int failureReason);
 
         /**
          * Executes mitigation for {@link #onHealthCheckFailed}.
          *
+         * @param versionedPackage the package that is failing. This may be null if a native
+         *                          service is crashing.
+         * @param failureReason   the type of failure that is occurring.
          * @return {@code true} if action was executed successfully, {@code false} otherwise
          */
-        boolean execute(VersionedPackage versionedPackage, @FailureReasons int failureReason);
+        boolean execute(@Nullable VersionedPackage versionedPackage,
+                @FailureReasons int failureReason);
 
         // TODO(b/120598832): Ensure uniqueness?
         /**
