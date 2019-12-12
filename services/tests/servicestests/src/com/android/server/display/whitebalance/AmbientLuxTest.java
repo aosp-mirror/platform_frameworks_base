@@ -16,29 +16,19 @@
 
 package com.android.server.display.whitebalance;
 
-import com.android.internal.R;
-import com.google.common.collect.ImmutableList;
-
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
-import org.mockito.stubbing.Answer;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -46,15 +36,21 @@ import android.util.TypedValue;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.internal.R;
+import com.android.server.display.TestUtils;
+import com.android.server.display.whitebalance.AmbientFilter;
+
+import com.google.common.collect.ImmutableList;
+
 import org.junit.Before;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 
 @RunWith(JUnit4.class)
@@ -80,8 +76,8 @@ public final class AmbientLuxTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mLightSensor = createSensor(Sensor.TYPE_LIGHT, null);
-        mAmbientColorSensor = createSensor(AMBIENT_COLOR_TYPE, AMBIENT_COLOR_TYPE_STR);
+        mLightSensor = TestUtils.createSensor(Sensor.TYPE_LIGHT, null);
+        mAmbientColorSensor = TestUtils.createSensor(AMBIENT_COLOR_TYPE, AMBIENT_COLOR_TYPE_STR);
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
         mResourcesSpy = spy(mContextSpy.getResources());
         when(mContextSpy.getResources()).thenReturn(mResourcesSpy);
@@ -458,25 +454,6 @@ public final class AmbientLuxTest {
         for (int i = 0; i < vals.length; i++) {
             when(array.getFloat(i, Float.NaN)).thenReturn(vals[i]);
         }
-    }
-
-    private void setSensorType(Sensor sensor, int type, String strType) throws Exception {
-        Method setter = Sensor.class.getDeclaredMethod("setType", Integer.TYPE);
-        setter.setAccessible(true);
-        setter.invoke(sensor, type);
-        if (strType != null) {
-            Field f = sensor.getClass().getDeclaredField("mStringType");
-            f.setAccessible(true);
-            f.set(sensor, strType);
-        }
-    }
-
-    private Sensor createSensor(int type, String strType) throws Exception {
-        Constructor<Sensor> constr = Sensor.class.getDeclaredConstructor();
-        constr.setAccessible(true);
-        Sensor sensor = constr.newInstance();
-        setSensorType(sensor, type, strType);
-        return sensor;
     }
 
     private TypedArray createTypedArray() throws Exception {
