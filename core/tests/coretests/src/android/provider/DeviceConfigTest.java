@@ -488,7 +488,7 @@ public class DeviceConfigTest {
     }
 
     @Test
-    public void setProperties() {
+    public void setProperties() throws DeviceConfig.BadConfigException {
         Map<String, String> keyValues = new HashMap<>();
         keyValues.put(KEY, VALUE);
         keyValues.put(KEY2, VALUE2);
@@ -514,7 +514,7 @@ public class DeviceConfigTest {
     }
 
     @Test
-    public void setProperties_multipleNamespaces() {
+    public void setProperties_multipleNamespaces() throws DeviceConfig.BadConfigException {
         Map<String, String> keyValues = new HashMap<>();
         keyValues.put(KEY, VALUE);
         keyValues.put(KEY2, VALUE2);

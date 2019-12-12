@@ -578,11 +578,13 @@ public final class DeviceConfig {
      * none or all of this update is picked up, but never only part of it.
      *
      * @param properties the complete set of properties to set for a specific namespace.
+     * @throws BadConfigException if the provided properties are banned by RescueParty.
+     * @return True if the values were set, false otherwise.
      * @hide
      */
     @SystemApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
-    public static boolean setProperties(@NonNull Properties properties) {
+    public static boolean setProperties(@NonNull Properties properties) throws BadConfigException {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
         return Settings.Config.setStrings(contentResolver, properties.getNamespace(),
                 properties.mMap);
@@ -799,6 +801,15 @@ public final class DeviceConfig {
     }
 
     /**
+     * Thrown by {@link #setProperties(Properties)} when a configuration is rejected. This
+     * happens if RescueParty has identified a bad configuration and reset the namespace.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static class BadConfigException extends Exception {}
+
+    /**
      * A mapping of properties to values, as well as a single namespace which they all belong to.
      *
      * @hide
@@ -934,4 +945,5 @@ public final class DeviceConfig {
             }
         }
     }
+
 }
