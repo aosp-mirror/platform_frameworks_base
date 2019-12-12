@@ -46,7 +46,7 @@ import java.util.Map;
  *
  * <p>Most public methods are marked synchronized to ensure thread safety around internal state.
  */
-public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
+public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     private static final boolean DBG = false;
     private static final String LOG_TAG = "SimpleTimeDetectorStrategy";
