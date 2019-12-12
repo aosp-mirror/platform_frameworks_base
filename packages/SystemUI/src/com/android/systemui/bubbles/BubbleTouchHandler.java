@@ -64,6 +64,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
     private boolean mMovedEnough;
     private int mTouchSlopSquared;
     private VelocityTracker mVelocityTracker;
+    private Runnable mShowBubbleMenuRunnable;
 
     /** View that was initially touched, when we received the first ACTION_DOWN event. */
     private View mTouchedView;
@@ -133,6 +134,11 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 if (isStack) {
                     mViewPositionOnTouchDown.set(mStack.getStackPosition());
                     mStack.onDragStart();
+                    if (!mStack.isShowingBubbleMenu() && !mStack.isExpanded()) {
+                        mShowBubbleMenuRunnable = mStack::showBubbleMenu;
+                        mStack.postDelayed(mShowBubbleMenuRunnable,
+                                ViewConfiguration.getLongPressTimeout());
+                    }
                 } else if (isFlyout) {
                     mStack.onFlyoutDragStart();
                 } else {
@@ -156,19 +162,13 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 }
 
                 if (mMovedEnough) {
+                    mStack.removeCallbacks(mShowBubbleMenuRunnable);
                     if (isStack) {
                         mStack.onDragged(viewX, viewY);
                     } else if (isFlyout) {
                         mStack.onFlyoutDragged(deltaX);
                     } else {
                         mStack.onBubbleDragged(mTouchedView, viewX, viewY);
-                    }
-                } else {
-                    float touchTime = event.getEventTime() - event.getDownTime();
-                    if (touchTime > ViewConfiguration.getLongPressTimeout() && !mStack.isExpanded()
-                            && BubbleExperimentConfig.allowBubbleScreenshotMenu(mContext)) {
-                        mStack.showBubbleMenu();
-                        return true;
                     }
                 }
 
@@ -196,6 +196,8 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 if (mStack.isShowingBubbleMenu()) {
                     resetForNextGesture();
                     return true;
+                } else {
+                    mStack.removeCallbacks(mShowBubbleMenuRunnable);
                 }
                 trackMovement(event);
                 mVelocityTracker.computeCurrentVelocity(/* maxVelocity */ 1000);

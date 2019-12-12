@@ -1124,36 +1124,33 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     private void sendScreenshotToBubble(Bubble bubble) {
-        // delay allows the bubble menu to disappear before the screenshot
-        // done here because we already have a Handler to delay with.
-        // TODO: Hide bubble + menu UI from screenshots entirely instead of just delaying.
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mScreenshotHelper.takeScreenshot(
-                        android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
-                        true /* hasStatus */,
-                        true /* hasNav */,
-                        mHandler,
-                        new Consumer<Uri>() {
-                            @Override
-                            public void accept(Uri uri) {
-                                if (uri != null) {
-                                    NotificationEntry entry = bubble.getEntry();
-                                    Pair<RemoteInput, Notification.Action> pair = entry.getSbn()
-                                            .getNotification().findRemoteInputActionPair(false);
-                                    RemoteInput remoteInput = pair.first;
-                                    Notification.Action action = pair.second;
-                                    Intent dataIntent = prepareRemoteInputFromData("image/png", uri,
-                                            remoteInput, entry);
-                                    sendRemoteInput(dataIntent, entry, action.actionIntent);
-                                    mBubbleData.setSelectedBubble(bubble);
-                                    mBubbleData.setExpanded(true);
-                                }
+        mScreenshotHelper.takeScreenshot(
+                android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
+                true /* hasStatus */,
+                true /* hasNav */,
+                mHandler,
+                new Consumer<Uri>() {
+                    @Override
+                    public void accept(Uri uri) {
+                        if (uri != null) {
+                            NotificationEntry entry = bubble.getEntry();
+                            Pair<RemoteInput, Notification.Action> pair = entry.getSbn()
+                                    .getNotification().findRemoteInputActionPair(false);
+                            if (pair != null) {
+                                RemoteInput remoteInput = pair.first;
+                                Notification.Action action = pair.second;
+                                Intent dataIntent = prepareRemoteInputFromData("image/png", uri,
+                                        remoteInput, entry);
+                                sendRemoteInput(dataIntent, entry, action.actionIntent);
+                                mBubbleData.setSelectedBubble(bubble);
+                                mBubbleData.setExpanded(true);
+                            } else {
+                                Log.w(TAG, "No RemoteInput found for notification: "
+                                        + entry.getSbn().getKey());
                             }
-                        });
-            }
-        }, 200);
+                        }
+                    }
+                });
     }
 
     private final BubbleScreenshotListener mBubbleScreenshotListener =
