@@ -34,6 +34,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemConfig;
@@ -111,6 +112,16 @@ public class LocationSettingsStore {
         mIgnoreSettingsPackageWhitelist = new StringSetCachedGlobalSetting(context,
                 LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST,
                 () -> SystemConfig.getInstance().getAllowIgnoreLocationSettings(), handler);
+    }
+
+    /** Called when system is ready. */
+    public synchronized void onSystemReady() {
+        mLocationMode.register();
+        mBackgroundThrottleIntervalMs.register();
+        mLocationPackageBlacklist.register();
+        mLocationPackageWhitelist.register();
+        mBackgroundThrottlePackageWhitelist.register();
+        mIgnoreSettingsPackageWhitelist.register();
     }
 
     /**
@@ -300,13 +311,25 @@ public class LocationSettingsStore {
     private abstract static class ObservingSetting extends ContentObserver {
 
         private final CopyOnWriteArrayList<UserSettingChangedListener> mListeners;
+        private boolean mRegistered;
 
-        private ObservingSetting(Context context, String settingName, Handler handler) {
+        private ObservingSetting(Handler handler) {
             super(handler);
             mListeners = new CopyOnWriteArrayList<>();
+        }
+
+        protected boolean isRegistered() {
+            return mRegistered;
+        }
+
+        protected void register(Context context, Uri uri) {
+            if (mRegistered) {
+                return;
+            }
 
             context.getContentResolver().registerContentObserver(
-                    getUriFor(settingName), false, this, UserHandle.USER_ALL);
+                    uri, false, this, UserHandle.USER_ALL);
+            mRegistered = true;
         }
 
         public void addListener(UserSettingChangedListener listener) {
@@ -316,8 +339,6 @@ public class LocationSettingsStore {
         public void removeListener(UserSettingChangedListener listener) {
             mListeners.remove(listener);
         }
-
-        protected abstract Uri getUriFor(String settingName);
 
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
@@ -333,19 +354,18 @@ public class LocationSettingsStore {
         private final String mSettingName;
 
         private IntegerSecureSetting(Context context, String settingName, Handler handler) {
-            super(context, settingName, handler);
+            super(handler);
             mContext = context;
             mSettingName = settingName;
+        }
+
+        private void register() {
+            register(mContext, Settings.Secure.getUriFor(mSettingName));
         }
 
         public int getValueForUser(int defaultValue, int userId) {
             return Settings.Secure.getIntForUser(mContext.getContentResolver(), mSettingName,
                     defaultValue, userId);
-        }
-
-        @Override
-        protected Uri getUriFor(String settingName) {
-            return Settings.Secure.getUriFor(settingName);
         }
     }
 
@@ -354,31 +374,44 @@ public class LocationSettingsStore {
         private final Context mContext;
         private final String mSettingName;
 
-        private int mCachedUserId = UserHandle.USER_NULL;
+        @GuardedBy("this")
+        private int mCachedUserId;
+        @GuardedBy("this")
         private List<String> mCachedValue;
 
         private StringListCachedSecureSetting(Context context, String settingName,
                 Handler handler) {
-            super(context, settingName, handler);
+            super(handler);
             mContext = context;
             mSettingName = settingName;
+
+            mCachedUserId = UserHandle.USER_NULL;
+        }
+
+        public synchronized void register() {
+            register(mContext, Settings.Secure.getUriFor(mSettingName));
         }
 
         public synchronized List<String> getValueForUser(int userId) {
             Preconditions.checkArgument(userId != UserHandle.USER_NULL);
 
+            List<String> value = mCachedValue;
             if (userId != mCachedUserId) {
                 String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                         mSettingName, userId);
                 if (TextUtils.isEmpty(setting)) {
-                    mCachedValue = Collections.emptyList();
+                    value = Collections.emptyList();
                 } else {
-                    mCachedValue = Arrays.asList(setting.split(","));
+                    value = Arrays.asList(setting.split(","));
                 }
-                mCachedUserId = userId;
+
+                if (isRegistered()) {
+                    mCachedUserId = userId;
+                    mCachedValue = value;
+                }
             }
 
-            return mCachedValue;
+            return value;
         }
 
         public synchronized void invalidateForUser(int userId) {
@@ -393,11 +426,6 @@ public class LocationSettingsStore {
             invalidateForUser(userId);
             super.onChange(selfChange, uri, userId);
         }
-
-        @Override
-        protected Uri getUriFor(String settingName) {
-            return Settings.Secure.getUriFor(settingName);
-        }
     }
 
     private static class LongGlobalSetting extends ObservingSetting {
@@ -406,19 +434,18 @@ public class LocationSettingsStore {
         private final String mSettingName;
 
         private LongGlobalSetting(Context context, String settingName, Handler handler) {
-            super(context, settingName, handler);
+            super(handler);
             mContext = context;
             mSettingName = settingName;
+        }
+
+        public void register() {
+            register(mContext, Settings.Global.getUriFor(mSettingName));
         }
 
         public long getValue(long defaultValue) {
             return Settings.Global.getLong(mContext.getContentResolver(), mSettingName,
                     defaultValue);
-        }
-
-        @Override
-        protected Uri getUriFor(String settingName) {
-            return Settings.Global.getUriFor(settingName);
         }
     }
 
@@ -428,29 +455,42 @@ public class LocationSettingsStore {
         private final String mSettingName;
         private final Supplier<ArraySet<String>> mBaseValuesSupplier;
 
+        @GuardedBy("this")
         private boolean mValid;
+        @GuardedBy("this")
         private ArraySet<String> mCachedValue;
 
         private StringSetCachedGlobalSetting(Context context, String settingName,
                 Supplier<ArraySet<String>> baseValuesSupplier, Handler handler) {
-            super(context, settingName, handler);
+            super(handler);
             mContext = context;
             mSettingName = settingName;
             mBaseValuesSupplier = baseValuesSupplier;
+
+            mValid = false;
+        }
+
+        public synchronized void register() {
+            register(mContext, Settings.Global.getUriFor(mSettingName));
         }
 
         public synchronized Set<String> getValue() {
+            ArraySet<String> value = mCachedValue;
             if (!mValid) {
-                mCachedValue = new ArraySet<>(mBaseValuesSupplier.get());
+                value = new ArraySet<>(mBaseValuesSupplier.get());
                 String setting = Settings.Global.getString(mContext.getContentResolver(),
                         mSettingName);
                 if (!TextUtils.isEmpty(setting)) {
-                    mCachedValue.addAll(Arrays.asList(setting.split(",")));
+                    value.addAll(Arrays.asList(setting.split(",")));
                 }
-                mValid = true;
+
+                if (isRegistered()) {
+                    mValid = true;
+                    mCachedValue = value;
+                }
             }
 
-            return mCachedValue;
+            return value;
         }
 
         public synchronized void invalidate() {
@@ -462,11 +502,6 @@ public class LocationSettingsStore {
         public void onChange(boolean selfChange, Uri uri, int userId) {
             invalidate();
             super.onChange(selfChange, uri, userId);
-        }
-
-        @Override
-        protected Uri getUriFor(String settingName) {
-            return Settings.Global.getUriFor(settingName);
         }
     }
 }
