@@ -80,6 +80,7 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.DataUnit;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -156,7 +157,8 @@ public class StorageManager {
     /** {@hide} */
     public static final String PROP_FUSE = "persist.sys.fuse";
     /** {@hide} */
-    public static final String PROP_FUSE_SNAPSHOT = "sys.fuse_snapshot";
+    public static final String PROP_SETTINGS_FUSE = FeatureFlagUtils.PERSIST_PREFIX
+            + FeatureFlagUtils.SETTINGS_FUSE_FLAG;
 
 
     /** {@hide} */
