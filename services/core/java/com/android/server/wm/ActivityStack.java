@@ -3661,8 +3661,9 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         }
 
         final DisplayContent display = getDisplay();
-        final boolean topFocused = mRootActivityContainer.isTopDisplayFocusedStack(this);
-        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "removeChild: task=" + child);
+        if (DEBUG_TASK_MOVEMENT) {
+            Slog.d(TAG_WM, "removeChild: task=" + child + " reason=" + reason);
+        }
 
         super.removeChild(child);
 
@@ -3678,25 +3679,11 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             // Stack is now empty...
           removeIfPossible();
         }
-
-        moveHomeStackToFrontIfNeeded(topFocused, display, reason);
     }
 
     @Override
     void removeChild(WindowContainer child) {
         removeChild(child, "removeChild");
-    }
-
-    void moveHomeStackToFrontIfNeeded(
-            boolean wasTopFocusedStack, DisplayContent display, String reason) {
-        if (!hasChild() && wasTopFocusedStack) {
-            // We only need to adjust focused stack if this stack is in focus and we are not in the
-            // process of moving the task to the top of the stack that will be focused.
-            String myReason = reason + " leftTaskHistoryEmpty";
-            if (!inMultiWindowMode() || adjustFocusToNextFocusableStack(myReason) == null) {
-                display.moveHomeStackToFront(myReason);
-            }
-        }
     }
 
     Task createTask(int taskId, ActivityInfo info, Intent intent,
