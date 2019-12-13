@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,6 +29,9 @@ import android.os.connectivity.WifiBatteryStats;
 
 import com.android.internal.app.IBatteryStats;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * This class provides an API surface for internal system components to report events that are
  * needed for battery usage/estimation and battery blaming for apps.
@@ -39,6 +43,116 @@ import com.android.internal.app.IBatteryStats;
 @SystemApi
 @SystemService(Context.BATTERY_STATS_SERVICE)
 public class BatteryStatsManager {
+    /**
+     * Wifi states.
+     *
+     * @see #noteWifiState(int, String)
+     */
+    /**
+     * Wifi fully off.
+     */
+    public static final int WIFI_STATE_OFF = 0;
+    /**
+     * Wifi connectivity off, but scanning enabled.
+     */
+    public static final int WIFI_STATE_OFF_SCANNING = 1;
+    /**
+     * Wifi on, but no saved infrastructure networks to connect to.
+     */
+    public static final int WIFI_STATE_ON_NO_NETWORKS = 2;
+    /**
+     * Wifi on, but not connected to any infrastructure networks.
+     */
+    public static final int WIFI_STATE_ON_DISCONNECTED = 3;
+    /**
+     * Wifi on and connected to a infrastructure network.
+     */
+    public static final int WIFI_STATE_ON_CONNECTED_STA = 4;
+    /**
+     * Wifi on and connected to a P2P device, but no infrastructure connection to a network.
+     */
+    public static final int WIFI_STATE_ON_CONNECTED_P2P = 5;
+    /**
+     * Wifi on and connected to both a P2P device and infrastructure connection to a network.
+     */
+    public static final int WIFI_STATE_ON_CONNECTED_STA_P2P = 6;
+    /**
+     * SoftAp/Hotspot turned on.
+     */
+    public static final int WIFI_STATE_SOFT_AP = 7;
+
+    /** @hide */
+    public static final int NUM_WIFI_STATES = WIFI_STATE_SOFT_AP + 1;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "WIFI_STATE_" }, value = {
+            WIFI_STATE_OFF,
+            WIFI_STATE_OFF_SCANNING,
+            WIFI_STATE_ON_NO_NETWORKS,
+            WIFI_STATE_ON_DISCONNECTED,
+            WIFI_STATE_ON_CONNECTED_STA,
+            WIFI_STATE_ON_CONNECTED_P2P,
+            WIFI_STATE_ON_CONNECTED_STA_P2P,
+            WIFI_STATE_SOFT_AP
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WifiState {}
+
+    /**
+     * Wifi supplicant daemon states.
+     *
+     * @see android.net.wifi.SupplicantState for detailed description of states.
+     * @see #noteWifiSupplicantStateChanged(int)
+     */
+    /** @see android.net.wifi.SupplicantState#INVALID */
+    public static final int WIFI_SUPPL_STATE_INVALID = 0;
+    /** @see android.net.wifi.SupplicantState#DISCONNECTED*/
+    public static final int WIFI_SUPPL_STATE_DISCONNECTED = 1;
+    /** @see android.net.wifi.SupplicantState#INTERFACE_DISABLED */
+    public static final int WIFI_SUPPL_STATE_INTERFACE_DISABLED = 2;
+    /** @see android.net.wifi.SupplicantState#INACTIVE*/
+    public static final int WIFI_SUPPL_STATE_INACTIVE = 3;
+    /** @see android.net.wifi.SupplicantState#SCANNING*/
+    public static final int WIFI_SUPPL_STATE_SCANNING = 4;
+    /** @see android.net.wifi.SupplicantState#AUTHENTICATING */
+    public static final int WIFI_SUPPL_STATE_AUTHENTICATING = 5;
+    /** @see android.net.wifi.SupplicantState#ASSOCIATING */
+    public static final int WIFI_SUPPL_STATE_ASSOCIATING = 6;
+    /** @see android.net.wifi.SupplicantState#ASSOCIATED */
+    public static final int WIFI_SUPPL_STATE_ASSOCIATED = 7;
+    /** @see android.net.wifi.SupplicantState#FOUR_WAY_HANDSHAKE */
+    public static final int WIFI_SUPPL_STATE_FOUR_WAY_HANDSHAKE = 8;
+    /** @see android.net.wifi.SupplicantState#GROUP_HANDSHAKE */
+    public static final int WIFI_SUPPL_STATE_GROUP_HANDSHAKE = 9;
+    /** @see android.net.wifi.SupplicantState#COMPLETED */
+    public static final int WIFI_SUPPL_STATE_COMPLETED = 10;
+    /** @see android.net.wifi.SupplicantState#DORMANT */
+    public static final int WIFI_SUPPL_STATE_DORMANT = 11;
+    /** @see android.net.wifi.SupplicantState#UNINITIALIZED */
+    public static final int WIFI_SUPPL_STATE_UNINITIALIZED = 12;
+
+    /** @hide */
+    public static final int NUM_WIFI_SUPPL_STATES = WIFI_SUPPL_STATE_UNINITIALIZED + 1;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "WIFI_SUPPL_STATE_" }, value = {
+            WIFI_SUPPL_STATE_INVALID,
+            WIFI_SUPPL_STATE_DISCONNECTED,
+            WIFI_SUPPL_STATE_INTERFACE_DISABLED,
+            WIFI_SUPPL_STATE_INACTIVE,
+            WIFI_SUPPL_STATE_SCANNING,
+            WIFI_SUPPL_STATE_AUTHENTICATING,
+            WIFI_SUPPL_STATE_ASSOCIATING,
+            WIFI_SUPPL_STATE_ASSOCIATED,
+            WIFI_SUPPL_STATE_FOUR_WAY_HANDSHAKE,
+            WIFI_SUPPL_STATE_GROUP_HANDSHAKE,
+            WIFI_SUPPL_STATE_COMPLETED,
+            WIFI_SUPPL_STATE_DORMANT,
+            WIFI_SUPPL_STATE_UNINITIALIZED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WifiSupplState {}
+
     private final IBatteryStats mBatteryStats;
 
     /** @hide */
@@ -91,7 +205,7 @@ public class BatteryStatsManager {
      * @param accessPoint SSID of the network if wifi is connected to STA, else null.
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteWifiState(@BatteryStats.WifiState int newWifiState,
+    public void noteWifiState(@WifiState int newWifiState,
             @Nullable String accessPoint) {
         try {
             mBatteryStats.noteWifiState(newWifiState, accessPoint);
@@ -224,7 +338,7 @@ public class BatteryStatsManager {
      *                   authentication failure.
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void noteWifiSupplicantStateChanged(@BatteryStats.WifiSupplState int newSupplState,
+    public void noteWifiSupplicantStateChanged(@WifiSupplState int newSupplState,
             boolean failedAuth) {
         try {
             mBatteryStats.noteWifiSupplicantStateChanged(newSupplState, failedAuth);
