@@ -485,6 +485,7 @@ public class PackageInfoUtils {
                 pg.backgroundRequestDetailResourceId
         );
         assignSharedFieldsForPackageItemInfo(pgi, pg);
+        pgi.descriptionRes = pg.descriptionRes;
         pgi.priority = pg.priority;
         pgi.requestRes = pg.requestRes;
         pgi.flags = pg.flags;
