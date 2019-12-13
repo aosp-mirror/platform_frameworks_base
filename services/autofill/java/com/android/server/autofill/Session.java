@@ -42,8 +42,6 @@ import android.app.IAssistDataReceiver;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.AutofillOverlay;
 import android.app.assist.AssistStructure.ViewNode;
-import android.app.slice.Slice;
-import android.app.slice.SliceItem;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -72,6 +70,7 @@ import android.service.autofill.FieldClassificationUserData;
 import android.service.autofill.FillContext;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
+import android.service.autofill.InlinePresentation;
 import android.service.autofill.InternalSanitizer;
 import android.service.autofill.InternalValidator;
 import android.service.autofill.SaveInfo;
@@ -83,7 +82,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.Log;
-import android.util.Size;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -2637,9 +2635,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
-        final List<Slice> inlineSuggestionSlices = response.getInlineSuggestionSlices();
-        if (inlineSuggestionSlices != null) {
-            if (requestShowInlineSuggestions(inlineSuggestionSlices, response)) {
+        if (response.supportsInlineSuggestions()) {
+            if (requestShowInlineSuggestions(response)) {
                 //TODO(b/137800469): Add logging instead of bypassing below logic.
                 return;
             }
@@ -2680,10 +2677,22 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /**
      * Returns whether we made a request to show inline suggestions.
      */
-    private boolean requestShowInlineSuggestions(List<Slice> inlineSuggestionSlices,
-            FillResponse response) {
-        final IInlineSuggestionsResponseCallback inlineContentCallback =
-                getInlineSuggestionsResponseCallback();
+    private boolean requestShowInlineSuggestions(FillResponse response) {
+        IInlineSuggestionsResponseCallback inlineContentCallback = null;
+        synchronized (mLock) {
+            if (mInlineSuggestionsResponseCallbackFuture != null) {
+                try {
+                    inlineContentCallback = mInlineSuggestionsResponseCallbackFuture.get(
+                            INLINE_REQUEST_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+                } catch (TimeoutException e) {
+                    Log.w(TAG, "Exception getting inline suggestions callback in time: " + e);
+                } catch (CancellationException e) {
+                    Log.w(TAG, "Inline suggestions callback cancelled");
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
 
         if (inlineContentCallback == null) {
             Log.w(TAG, "Session input method callback is not set yet");
@@ -2696,54 +2705,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return false;
         }
 
+        final int size = datasets.size();
         final ArrayList<InlineSuggestion> inlineSuggestions = new ArrayList<>();
-        final int slicesSize = inlineSuggestionSlices.size();
-        if (datasets.size() < slicesSize) {
-            Log.w(TAG, "Too many slices provided, not enough corresponding datasets");
-            return false;
-        }
 
-        for (int sliceIndex = 0; sliceIndex < slicesSize; sliceIndex++) {
-            Log.i(TAG, "Reading slice-" + sliceIndex + " at requestshowinlinesuggestions");
-            final Slice inlineSuggestionSlice = inlineSuggestionSlices.get(sliceIndex);
-            final List<SliceItem> sliceItems = inlineSuggestionSlice.getItems();
-
-            final int itemsSize = sliceItems.size();
-            int minWidth = -1;
-            int maxWidth = -1;
-            int minHeight = -1;
-            int maxHeight = -1;
-            for (int itemIndex = 0; itemIndex < itemsSize; itemIndex++) {
-                final SliceItem item = sliceItems.get(itemIndex);
-                final String subtype = item.getSubType();
-                switch (item.getSubType()) {
-                    case "SUBTYPE_MIN_WIDTH":
-                        minWidth = item.getInt();
-                        break;
-                    case "SUBTYPE_MAX_WIDTH":
-                        maxWidth = item.getInt();
-                        break;
-                    case "SUBTYPE_MIN_HEIGHT":
-                        minHeight = item.getInt();
-                        break;
-                    case "SUBTYPE_MAX_HEIGHT":
-                        maxHeight = item.getInt();
-                        break;
-                    default:
-                        Log.i(TAG, "unrecognized inline suggestions subtype: " + subtype);
-                }
+        for (int index = 0; index < size; index++) {
+            final Dataset dataset = datasets.get(index);
+            //TODO(b/146453536): Use the proper presentation/spec for currently focused view.
+            final InlinePresentation inlinePresentation = dataset.getFieldInlinePresentation(0);
+            if (inlinePresentation == null) {
+                if (sDebug) Log.d(TAG, "Missing InlinePresentation on dataset=" + dataset);
+                continue;
             }
-
-            if (minWidth < 0 || maxWidth < 0 || minHeight < 0 || maxHeight < 0) {
-                Log.w(TAG, "missing inline suggestion requirements");
-                return false;
-            }
-
-            final InlinePresentationSpec spec = new InlinePresentationSpec.Builder(
-                    new Size(minWidth, minHeight), new Size(maxWidth, maxHeight)).build();
+            final InlinePresentationSpec spec = inlinePresentation.getInlinePresentationSpec();
             final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
                     spec, InlineSuggestionInfo.SOURCE_AUTOFILL, new String[] { "" });
-            final Dataset dataset = datasets.get(sliceIndex);
 
             inlineSuggestions.add(new InlineSuggestion(inlineSuggestionInfo,
                     new IInlineContentProvider.Stub() {
