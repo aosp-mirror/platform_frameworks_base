@@ -1344,7 +1344,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     @Override
     public void onLocaleListChanged() {
         // TODO - We should not have to reload sysUI on locale change
-        makeStatusBarView();
+        // Passing null since result is only needed to notify the IME window of current state
+        makeStatusBarView(/* result= */ null);
     }
 
     /**
