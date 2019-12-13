@@ -57,6 +57,7 @@ import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstallerSession;
+import android.content.pm.IPackageInstallerSessionFileSystemConnector;
 import android.content.pm.InstallationFile;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
@@ -1001,6 +1002,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         mHandler.obtainMessage(MSG_COMMIT).sendToTarget();
+    }
+
+    private class FileSystemConnector extends IPackageInstallerSessionFileSystemConnector.Stub {
+        @Override
+        public void writeData(String name, long offsetBytes, long lengthBytes,
+                ParcelFileDescriptor incomingFd) {
+            if (incomingFd == null) {
+                throw new IllegalArgumentException("incomingFd can't be null");
+            }
+            try {
+                doWriteInternal(name, offsetBytes, lengthBytes, incomingFd);
+            } catch (IOException e) {
+                throw ExceptionUtils.wrap(e);
+            }
+        }
     }
 
     private class ChildStatusIntentReceiver {
@@ -2405,7 +2421,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
-        FilesystemConnector connector = new FilesystemConnector();
+        FileSystemConnector connector = new FileSystemConnector();
 
         FileInfo[] addedFiles = mFiles.stream().filter(
                 file -> sAddedFilter.accept(new File(file.name))).toArray(FileInfo[]::new);
@@ -2430,19 +2446,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    // TODO(b/146080380): implement DataLoader using Incremental infrastructure.
-    class FilesystemConnector {
-        void writeData(FileInfo fileInfo, long offset, long lengthBytes,
-                ParcelFileDescriptor incomingFd) throws IOException {
-            doWriteInternal(fileInfo.name, offset, lengthBytes, incomingFd);
-        }
-    }
-
     static class DataLoader {
         private ParcelFileDescriptor mInFd = null;
-        private FilesystemConnector mConnector = null;
+        private FileSystemConnector mConnector = null;
 
-        void onCreate(FilesystemConnector connector) throws IOException {
+        void onCreate(FileSystemConnector connector) throws IOException {
             mConnector = connector;
         }
 
@@ -2460,14 +2468,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         return false;
                     }
                     ParcelFileDescriptor inFd = ParcelFileDescriptor.dup(mInFd.getFileDescriptor());
-                    mConnector.writeData(fileInfo, 0, fileInfo.lengthBytes, inFd);
+                    mConnector.writeData(fileInfo.name, 0, fileInfo.lengthBytes, inFd);
                 } else {
                     File localFile = new File(filePath);
                     ParcelFileDescriptor incomingFd = null;
                     try {
                         incomingFd = ParcelFileDescriptor.open(localFile,
                                 ParcelFileDescriptor.MODE_READ_ONLY);
-                        mConnector.writeData(fileInfo, 0, localFile.length(), incomingFd);
+                        mConnector.writeData(fileInfo.name, 0, localFile.length(), incomingFd);
                     } finally {
                         IoUtils.closeQuietly(incomingFd);
                     }

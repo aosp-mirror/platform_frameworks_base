@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.incremental.nativeadb;
+package android.content.pm;
 
-import android.service.dataloader.DataLoaderService;
+import android.content.pm.IPackageInstallerSessionFileSystemConnector;
+import android.os.incremental.IncrementalFileSystemControlParcel;
 
-/** This code is used for testing only. */
-public class NativeAdbDataLoaderService extends DataLoaderService {
-    public static final String TAG = "NativeAdbDataLoaderService";
-    static {
-        System.loadLibrary("nativeadbdataloaderservice_jni");
-    }
-
-    @Override
-    public DataLoader onCreateDataLoader() {
-        return null;
-    }
+/**
+ * Wraps info needed for DataLoader to provide data.
+ * @hide
+ */
+parcelable FileSystemControlParcel {
+    // Incremental FS control descriptors.
+    @nullable IncrementalFileSystemControlParcel incremental;
+    // Callback-based installation connector.
+    @nullable IPackageInstallerSessionFileSystemConnector callback;
 }

@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package android.os.incremental;
+package android.content.pm;
 
-import android.os.ParcelFileDescriptor;
+import android.content.pm.NamedParcelFileDescriptor;
 
 /**
- * A named ParcelFileDescriptor.
+ * Class for holding data loader configuration parameters.
  * @hide
  */
-parcelable NamedParcelFileDescriptor {
-    @utf8InCpp String name;
-    ParcelFileDescriptor fd;
+parcelable DataLoaderParamsParcel {
+    @utf8InCpp String packageName;
+    @utf8InCpp String staticArgs;
+    NamedParcelFileDescriptor[] dynamicArgs;
 }

@@ -16,7 +16,7 @@
 
 package android.os.incremental;
 
-import android.os.incremental.IncrementalDataLoaderParamsParcel;
+import android.content.pm.DataLoaderParamsParcel;
 
 /** @hide */
 interface IIncrementalManagerNative {
@@ -32,7 +32,7 @@ interface IIncrementalManagerNative {
      * Opens or creates a storage given a target path and data loader params. Returns the storage ID.
      */
     int openStorage(in @utf8InCpp String path);
-    int createStorage(in @utf8InCpp String path, in IncrementalDataLoaderParamsParcel params, int createMode);
+    int createStorage(in @utf8InCpp String path, in DataLoaderParamsParcel params, int createMode);
     int createLinkedStorage(in @utf8InCpp String path, int otherStorageId, int createMode);
 
     /**
