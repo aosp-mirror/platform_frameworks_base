@@ -427,14 +427,14 @@ public class TelephonyManager {
         int modemCount = 1;
         switch (getMultiSimConfiguration()) {
             case UNKNOWN:
-                ConnectivityManager cm = mContext == null ? null : (ConnectivityManager) mContext
-                        .getSystemService(Context.CONNECTIVITY_SERVICE);
+                modemCount = MODEM_COUNT_SINGLE_MODEM;
                 // check for voice and data support, 0 if not supported
-                if (!isVoiceCapable() && !isSmsCapable() && cm != null
-                        && !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
-                    modemCount = MODEM_COUNT_NO_MODEM;
-                } else {
-                    modemCount = MODEM_COUNT_SINGLE_MODEM;
+                if (!isVoiceCapable() && !isSmsCapable() && mContext != null) {
+                    ConnectivityManager cm = (ConnectivityManager) mContext
+                            .getSystemService(Context.CONNECTIVITY_SERVICE);
+                    if (cm != null && !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
+                        modemCount = MODEM_COUNT_NO_MODEM;
+                    }
                 }
                 break;
             case DSDS:
