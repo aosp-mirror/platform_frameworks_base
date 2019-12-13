@@ -335,9 +335,9 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * is not active, it will be null on that position. Returns empty list on error.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public List<BluetoothDevice> getActiveDevices() {
+    public @NonNull List<BluetoothDevice> getActiveDevices() {
         if (VDBG) log("getActiveDevices()");
         final IBluetoothHearingAid service = getService();
         try {
@@ -559,8 +559,9 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @return the CustomerId of the device
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public long getHiSyncId(BluetoothDevice device) {
+    public long getHiSyncId(@Nullable BluetoothDevice device) {
         if (VDBG) {
             log("getCustomerId(" + device + ")");
         }
