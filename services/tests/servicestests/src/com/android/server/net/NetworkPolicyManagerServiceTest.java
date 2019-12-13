@@ -112,7 +112,7 @@ import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
-import android.net.StringNetworkSpecifier;
+import android.net.TelephonyNetworkSpecifier;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.INetworkManagementService;
@@ -1836,7 +1836,8 @@ public class NetworkPolicyManagerServiceTest {
         if (!roaming) {
             nc.addCapability(NET_CAPABILITY_NOT_ROAMING);
         }
-        nc.setNetworkSpecifier(new StringNetworkSpecifier(String.valueOf(subId)));
+        nc.setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
+                .setSubscriptionId(subId).build());
         return nc;
     }
 
