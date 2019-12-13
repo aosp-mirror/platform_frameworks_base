@@ -4377,6 +4377,7 @@ package android.media.tv {
     method @Nullable public String onHardwareRemoved(android.media.tv.TvInputHardwareInfo);
     method @Nullable public android.media.tv.TvInputInfo onHdmiDeviceAdded(android.hardware.hdmi.HdmiDeviceInfo);
     method @Nullable public String onHdmiDeviceRemoved(android.hardware.hdmi.HdmiDeviceInfo);
+    method public void onHdmiDeviceUpdated(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
   }
 
   public abstract static class TvInputService.RecordingSession {
