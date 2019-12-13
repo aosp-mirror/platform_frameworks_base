@@ -204,10 +204,7 @@ public abstract class AttestationUtils {
                     break;
                 }
                 case USE_INDIVIDUAL_ATTESTATION: {
-                    //TODO: Add the Keymaster tag for requesting the use of individual
-                    //attestation certificate, which should be
-                    //KeymasterDefs.KM_TAG_DEVICE_UNIQUE_ATTESTATION
-                    attestArgs.addBoolean(720);
+                    attestArgs.addBoolean(KeymasterDefs.KM_TAG_DEVICE_UNIQUE_ATTESTATION);
                     break;
                 }
                 default:
