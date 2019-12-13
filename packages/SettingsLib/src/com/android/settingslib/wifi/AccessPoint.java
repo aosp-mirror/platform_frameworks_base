@@ -1395,7 +1395,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mConfig = new WifiConfiguration();
         mConfig.SSID = AccessPoint.convertToQuotedString(ssid);
 
-        if (security == SECURITY_NONE || !getWifiManager().isEasyConnectSupported()) {
+        if (security == SECURITY_NONE) {
             mConfig.allowedKeyManagement.set(KeyMgmt.NONE);
         } else {
             mConfig.allowedKeyManagement.set(KeyMgmt.OWE);
