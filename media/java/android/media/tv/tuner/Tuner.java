@@ -116,6 +116,10 @@ public final class Tuner implements AutoCloseable  {
      */
     public interface FilterCallback {
         /**
+         * Invoked when there are filter events.
+         */
+        void onFilterEvent(FilterEvent[] events);
+        /**
          * Invoked when filter status changed.
          */
         void onFilterStatus(int status);
