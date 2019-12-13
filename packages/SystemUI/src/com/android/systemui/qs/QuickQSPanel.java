@@ -177,7 +177,7 @@ public class QuickQSPanel extends QSPanel {
                 record.tile.removeCallback(record.callback);
             }
             mTileLayout = mMediaTileLayout;
-            setTiles(mHost.getTiles());
+            if (mHost != null) setTiles(mHost.getTiles());
             mTileLayout.setListening(mListening);
             return true;
         } else if (!mMediaPlayer.hasMediaSession()
@@ -190,7 +190,7 @@ public class QuickQSPanel extends QSPanel {
                 record.tile.removeCallback(record.callback);
             }
             mTileLayout = mRegularTileLayout;
-            setTiles(mHost.getTiles());
+            if (mHost != null) setTiles(mHost.getTiles());
             mTileLayout.setListening(mListening);
             return true;
         }
