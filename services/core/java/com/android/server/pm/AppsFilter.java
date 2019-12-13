@@ -16,8 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.content.pm.PackageParser.Component;
-import static android.content.pm.PackageParser.IntentInfo;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
 
@@ -26,7 +24,6 @@ import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ComponentParseUtils;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
@@ -50,9 +47,9 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.FgThread;
+import com.android.server.om.OverlayReferenceMapper;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -109,11 +106,16 @@ public class AppsFilter {
 
     private final FeatureConfig mFeatureConfig;
 
+    private final OverlayReferenceMapper mOverlayReferenceMapper;
+
     AppsFilter(FeatureConfig featureConfig, String[] forceQueryableWhitelist,
-            boolean systemAppsQueryable) {
+            boolean systemAppsQueryable,
+            @Nullable OverlayReferenceMapper.Provider overlayProvider) {
         mFeatureConfig = featureConfig;
         mForceQueryableByDevicePackageNames = forceQueryableWhitelist;
         mSystemAppsQueryable = systemAppsQueryable;
+        mOverlayReferenceMapper = new OverlayReferenceMapper(true /*deferRebuild*/,
+                overlayProvider);
     }
 
     public interface FeatureConfig {
@@ -193,7 +195,7 @@ public class AppsFilter {
             }
         }
         return new AppsFilter(featureConfig, forcedQueryablePackageNames,
-                forceSystemAppsQueryable);
+                forceSystemAppsQueryable, null);
     }
 
     /** Returns true if the querying package may query for the potential target package */
@@ -282,6 +284,7 @@ public class AppsFilter {
 
     public void onSystemReady() {
         mFeatureConfig.onSystemReady();
+        mOverlayReferenceMapper.rebuildIfDeferred();
     }
 
     /**
@@ -338,6 +341,16 @@ public class AppsFilter {
                     }
                 }
             }
+
+            int existingSize = existingSettings.size();
+            ArrayMap<String, AndroidPackage> existingPkgs = new ArrayMap<>(existingSize);
+            for (int index = 0; index < existingSize; index++) {
+                PackageSetting pkgSetting = existingSettings.valueAt(index);
+                if (pkgSetting.pkg != null) {
+                    existingPkgs.put(pkgSetting.name, pkgSetting.pkg);
+                }
+            }
+            mOverlayReferenceMapper.addPkg(newPkgSetting.pkg, existingPkgs);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -381,6 +394,8 @@ public class AppsFilter {
                 addPackage(setting.sharedUser.packages.valueAt(i), existingSettings);
             }
         }
+
+        mOverlayReferenceMapper.removePkg(setting.name);
     }
 
     /**
@@ -397,8 +412,7 @@ public class AppsFilter {
             PackageSetting targetPkgSetting, int userId) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "shouldFilterApplication");
         try {
-            if (!shouldFilterApplicationInternal(callingUid, callingSetting,
-                    targetPkgSetting,
+            if (!shouldFilterApplicationInternal(callingUid, callingSetting, targetPkgSetting,
                     userId)) {
                 return false;
             }
@@ -412,8 +426,8 @@ public class AppsFilter {
         }
     }
 
-    private boolean shouldFilterApplicationInternal(int callingUid,
-            SettingBase callingSetting, PackageSetting targetPkgSetting, int userId) {
+    private boolean shouldFilterApplicationInternal(int callingUid, SettingBase callingSetting,
+            PackageSetting targetPkgSetting, int userId) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "shouldFilterApplicationInternal");
         try {
             final boolean featureEnabled = mFeatureConfig.isGloballyEnabled();
@@ -530,6 +544,29 @@ public class AppsFilter {
                     }
                 }
             }
+
+            if (callingSharedPkgSettings != null) {
+                int size = callingSharedPkgSettings.size();
+                for (int index = 0; index < size; index++) {
+                    PackageSetting pkgSetting = callingSharedPkgSettings.valueAt(index);
+                    if (mOverlayReferenceMapper.isValidActor(targetName, pkgSetting.name)) {
+                        if (DEBUG_LOGGING) {
+                            log(callingPkgSetting, targetPkgSetting,
+                                    "matches shared user of package that acts on target of "
+                                            + "overlay");
+                        }
+                        return false;
+                    }
+                }
+            } else {
+                if (mOverlayReferenceMapper.isValidActor(targetName, callingPkgSetting.name)) {
+                    if (DEBUG_LOGGING) {
+                        log(callingPkgSetting, targetPkgSetting, "acts on target of overlay");
+                    }
+                    return false;
+                }
+            }
+
             return true;
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
