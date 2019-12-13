@@ -37,7 +37,6 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
-import com.android.systemui.statusbar.NotificationUpdateHandler;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinder;
@@ -94,7 +93,6 @@ import javax.inject.Singleton;
 public class NotificationEntryManager implements
         Dumpable,
         NotificationContentInflater.InflationCallback,
-        NotificationUpdateHandler,
         VisualStabilityManager.Callback {
     private static final String TAG = "NotificationEntryMgr";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -346,7 +344,6 @@ public class NotificationEntryManager implements
     }
 
 
-    @Override
     public void removeNotification(String key, RankingMap ranking,
             int reason) {
         removeNotificationInternal(key, ranking, obtainVisibility(key), false /* forceRemove */,
@@ -506,7 +503,6 @@ public class NotificationEntryManager implements
         }
     }
 
-    @Override
     public void addNotification(StatusBarNotification notification, RankingMap ranking) {
         try {
             addNotificationInternal(notification, ranking);
@@ -556,7 +552,6 @@ public class NotificationEntryManager implements
         }
     }
 
-    @Override
     public void updateNotification(StatusBarNotification notification, RankingMap ranking) {
         try {
             updateNotificationInternal(notification, ranking);
@@ -576,7 +571,6 @@ public class NotificationEntryManager implements
         }
     }
 
-    @Override
     public void updateNotificationRanking(RankingMap rankingMap) {
         List<NotificationEntry> entries = new ArrayList<>();
         entries.addAll(getVisibleNotifications());
