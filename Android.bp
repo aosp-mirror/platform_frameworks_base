@@ -1629,12 +1629,15 @@ filegroup {
         "core/java/android/util/Slog.java",
         "core/java/android/util/TimeUtils.java",
         "core/java/com/android/internal/os/SomeArgs.java",
+        "core/java/com/android/internal/util/ArrayUtils.java",
+        "core/java/com/android/internal/util/DumpUtils.java",
+        "core/java/com/android/internal/util/FastXmlSerializer.java",
+        "core/java/com/android/internal/util/HexDump.java",
+        "core/java/com/android/internal/util/IndentingPrintWriter.java",
         "core/java/com/android/internal/util/Preconditions.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
+        "core/java/com/android/internal/util/UserIcons.java",
         "core/java/com/android/internal/util/XmlUtils.java",
-        "core/java/com/android/internal/util/HexDump.java",
-        "core/java/com/android/internal/util/IndentingPrintWriter.java",
-        "core/java/com/android/internal/util/DumpUtils.java"
     ],
 }
