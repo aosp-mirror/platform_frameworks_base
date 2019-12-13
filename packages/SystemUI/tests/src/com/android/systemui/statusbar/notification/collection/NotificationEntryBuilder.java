@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar;
+package com.android.systemui.statusbar.notification.collection;
 
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationChannel;
-import android.app.NotificationManager.Importance;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.os.UserHandle;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.RankingBuilder;
+import com.android.systemui.statusbar.SbnBuilder;
 
 import java.util.ArrayList;
 
@@ -34,6 +35,8 @@ import java.util.ArrayList;
  * and Ranking. Is largely a proxy for the SBN and Ranking builders, but does a little extra magic
  * to make sure the keys match between the two, etc.
  *
+ * Has the ability to set ListEntry properties as well.
+ *
  * Only for use in tests.
  */
 public class NotificationEntryBuilder {
@@ -41,10 +44,35 @@ public class NotificationEntryBuilder {
     private final RankingBuilder mRankingBuilder = new RankingBuilder();
     private StatusBarNotification mSbn = null;
 
+    /* ListEntry properties */
+    private GroupEntry mParent;
+    private int mSection;
+
     public NotificationEntry build() {
         StatusBarNotification sbn = mSbn != null ? mSbn : mSbnBuilder.build();
         mRankingBuilder.setKey(sbn.getKey());
-        return new NotificationEntry(sbn, mRankingBuilder.build());
+        final NotificationEntry entry = new NotificationEntry(sbn, mRankingBuilder.build());
+
+        /* ListEntry properties */
+        entry.setParent(mParent);
+        entry.setSection(mSection);
+        return entry;
+    }
+
+    /**
+     * Sets the parent.
+     */
+    public NotificationEntryBuilder setParent(@Nullable GroupEntry parent) {
+        mParent = parent;
+        return this;
+    }
+
+    /**
+     * Sets the section.
+     */
+    public NotificationEntryBuilder setSection(int section) {
+        mSection = section;
+        return this;
     }
 
     /**
@@ -176,7 +204,7 @@ public class NotificationEntryBuilder {
         return this;
     }
 
-    public NotificationEntryBuilder setImportance(@Importance int importance) {
+    public NotificationEntryBuilder setImportance(@NotificationManager.Importance int importance) {
         mRankingBuilder.setImportance(importance);
         return this;
     }

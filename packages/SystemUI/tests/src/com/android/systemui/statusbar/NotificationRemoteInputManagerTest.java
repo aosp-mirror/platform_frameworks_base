@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInput
 import com.android.systemui.statusbar.NotificationRemoteInputManager.SmartReplyHistoryExtender;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
