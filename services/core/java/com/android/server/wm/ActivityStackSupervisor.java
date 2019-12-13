@@ -2502,8 +2502,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     void scheduleUpdatePictureInPictureModeIfNeeded(Task task, ActivityStack prevStack) {
         final ActivityStack stack = task.getStack();
-        if (prevStack == null || prevStack == stack
-                || (!prevStack.inPinnedWindowingMode() && !stack.inPinnedWindowingMode())) {
+        if ((prevStack == null || (prevStack != stack
+                && !prevStack.inPinnedWindowingMode() && !stack.inPinnedWindowingMode()))) {
             return;
         }
 
