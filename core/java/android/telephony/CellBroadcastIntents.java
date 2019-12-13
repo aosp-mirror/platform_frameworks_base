@@ -26,7 +26,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.util.Log;
 
 /**
  * A static helper class used to send Intents with prepopulated flags.
@@ -75,20 +74,20 @@ public class CellBroadcastIntents {
             @Nullable String receiverAppOp, @Nullable BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
             @Nullable Bundle initialExtras) {
-        Log.d(LOG_TAG, "sendOrderedBroadcastForBackgroundReceivers intent=" + intent.getAction());
         int status = context.checkCallingOrSelfPermission(
                 "android.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS");
         if (status == PackageManager.PERMISSION_DENIED) {
             throw new SecurityException(
                     "Caller does not have permission to send broadcast for background receivers");
         }
-        intent.setFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        Intent backgroundIntent = new Intent(intent);
+        backgroundIntent.setFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         if (user != null) {
-            context.createContextAsUser(user, 0).sendOrderedBroadcast(intent, receiverPermission,
-                    receiverAppOp, resultReceiver, scheduler, initialCode, initialData,
-                    initialExtras);
+            context.createContextAsUser(user, 0).sendOrderedBroadcast(backgroundIntent,
+                    receiverPermission, receiverAppOp, resultReceiver, scheduler, initialCode,
+                    initialData, initialExtras);
         } else {
-            context.sendOrderedBroadcast(intent, receiverPermission,
+            context.sendOrderedBroadcast(backgroundIntent, receiverPermission,
                     receiverAppOp, resultReceiver, scheduler, initialCode, initialData,
                     initialExtras);
         }
