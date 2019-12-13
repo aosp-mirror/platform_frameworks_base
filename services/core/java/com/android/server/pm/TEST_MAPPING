@@ -25,6 +25,14 @@
     },
     {
       "name": "PackageManagerShellCommandTest"
+    },
+    {
+      "name": "GtsSecurityHostTestCases",
+      "options": [
+        {
+          "include-filter": "com.google.android.security.gts.PackageVerifierTest"
+        }
+      ]
     }
   ],
   "postsubmit": [
