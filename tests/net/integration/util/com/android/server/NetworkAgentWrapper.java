@@ -222,7 +222,7 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
 
     @Override
     public Network getNetwork() {
-        return new Network(mNetworkAgent.netId);
+        return mNetworkAgent.network;
     }
 
     public void expectPreventReconnectReceived(long timeoutMs) {
