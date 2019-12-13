@@ -465,7 +465,7 @@ public final class AutoFillUI {
 
         if (mCreateFillUiRunnable != null) {
             if (sDebug) Slog.d(TAG, "start the pending fill UI request..");
-            mCreateFillUiRunnable.run();
+            mHandler.post(mCreateFillUiRunnable);
             mCreateFillUiRunnable = null;
         }
     }
