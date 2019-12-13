@@ -603,6 +603,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_EMERGENCY_ASSISTANCE =
             "android.telephony.action.EMERGENCY_ASSISTANCE";
