@@ -276,7 +276,7 @@ public class TaskEmbedder {
      * @see ActivityView.StateCallback
      * @see #startActivity(Intent)
      */
-    void setListener(TaskEmbedder.Listener listener) {
+    public void setListener(TaskEmbedder.Listener listener) {
         mListener = listener;
         if (mListener != null && isInitialized()) {
             mListener.onInitialized();
