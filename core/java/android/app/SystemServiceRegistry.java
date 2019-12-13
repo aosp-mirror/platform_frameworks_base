@@ -120,6 +120,7 @@ import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
 import android.net.nsd.INsdManager;
 import android.net.nsd.NsdManager;
+import android.net.wifi.WifiCondManager;
 import android.net.wifi.WifiFrameworkInitializer;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
@@ -695,6 +696,14 @@ public final class SystemServiceRegistry {
                 IEthernetManager service = IEthernetManager.Stub.asInterface(b);
                 return new EthernetManager(ctx.getOuterContext(), service);
             }});
+
+        registerService(Context.WIFI_COND_SERVICE, WifiCondManager.class,
+                new CachedServiceFetcher<WifiCondManager>() {
+                    @Override
+                    public WifiCondManager createService(ContextImpl ctx) {
+                        return new WifiCondManager(ctx.getOuterContext());
+                    }
+                });
 
         registerService(Context.WINDOW_SERVICE, WindowManager.class,
                 new CachedServiceFetcher<WindowManager>() {

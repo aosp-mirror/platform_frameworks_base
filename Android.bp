@@ -247,6 +247,7 @@ filegroup {
         ":framework-telephony-sources",
         ":framework-wifi-sources",
         ":framework-wifi-non-updatable-sources",
+	":libwificond_ipc_aidl",
         ":PacProcessor-aidl-sources",
         ":ProxyHandler-aidl-sources",
 
@@ -371,6 +372,9 @@ java_library {
         "com.android.sysprop.apex",
         "PlatformProperties",
     ],
+    aidl: {
+        include_dirs: ["system/connectivity/wificond/aidl"],
+    },
     sdk_version: "core_platform",
     installable: false,
 }

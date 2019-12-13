@@ -3973,6 +3973,17 @@ public abstract class Context {
     public static final String WIFI_SERVICE = "wifi";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.net.wifi.WifiCondManager} for handling management of the Wi-Fi control
+     * daemon.
+     *
+     * @see #getSystemService(String)
+     * @see android.net.wifi.WifiCondManager
+     * @hide
+     */
+    public static final String WIFI_COND_SERVICE = "wificond";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.net.wifi.p2p.WifiP2pManager} for handling management of
      * Wi-Fi peer-to-peer connections.
