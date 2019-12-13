@@ -31,6 +31,9 @@ public class BubbleMenuView extends FrameLayout {
     private FrameLayout mMenu;
     private boolean mShowing = false;
 
+    /** Delay before taking a screenshot once the button is tapped to allow the menu time to hide.*/
+    public static final long SCREENSHOT_DELAY = 200;
+
     public BubbleMenuView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
