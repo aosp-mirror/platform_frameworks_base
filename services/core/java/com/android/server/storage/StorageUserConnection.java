@@ -163,20 +163,6 @@ public final class StorageUserConnection {
         mActiveConnection.close();
     }
 
-    /** Throws an {@link IllegalArgumentException} if {@code path} is not ready for access */
-    public void checkPathReady(String path) {
-        synchronized (mLock) {
-            for (Session session : mSessions.values()) {
-                if (session.upperPath != null && path.startsWith(session.upperPath)) {
-                    if (mActiveConnection.isActiveLocked(session)) {
-                        return;
-                    }
-                }
-            }
-            throw new IllegalStateException("Path not ready " + path);
-        }
-    }
-
     /** Returns all created sessions. */
     public Set<String> getAllSessionIds() {
         synchronized (mLock) {

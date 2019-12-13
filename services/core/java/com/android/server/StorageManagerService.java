@@ -3097,14 +3097,6 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public void mkdirs(String callingPkg, String appPath) {
-        if (mIsFuseEnabled) {
-            // TODO(b/144332951): Calling into Vold is risky because the FUSE daemon can go down
-            // anytime and Vold will hang forever. We should either remove this call
-            // or at least call into the FUSE daemon to mkdir instead
-            Slog.w(TAG, "Not making dir for package " + callingPkg + " with path " + appPath);
-            return;
-        }
-
         final int callingUid = Binder.getCallingUid();
         final int userId = UserHandle.getUserId(callingUid);
         final UserEnvironment userEnv = new UserEnvironment(userId);
