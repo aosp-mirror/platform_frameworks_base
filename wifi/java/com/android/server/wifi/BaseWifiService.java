@@ -226,8 +226,19 @@ public class BaseWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    /** @deprecated use {@link #is5GHzBandSupported} instead */
+    @Deprecated
     public boolean isDualBandSupported() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean is5GHzBandSupported() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean is6GHzBandSupported() {
         throw new UnsupportedOperationException();
     }
 

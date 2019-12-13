@@ -108,7 +108,9 @@ interface IWifiManager
 
     String getCountryCode();
 
-    boolean isDualBandSupported();
+    boolean is5GHzBandSupported();
+
+    boolean is6GHzBandSupported();
 
     boolean needs5GHzToAnyApBandConversion();
 
