@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
-import static android.view.WindowManager.TRANSIT_UNSET;
 
 import static com.android.server.wm.TaskSnapshotController.SNAPSHOT_MODE_APP_THEME;
 import static com.android.server.wm.TaskSnapshotController.SNAPSHOT_MODE_REAL;
@@ -50,8 +49,8 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
     public void testGetClosingApps_closing() {
         final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
                 "closingWindow");
-        closingWindow.mActivityRecord.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
-                true /* performLayout */, false /* isVoiceInteraction */);
+        closingWindow.mActivityRecord.commitVisibility(
+                false /* visible */, true /* performLayout */);
         final ArraySet<ActivityRecord> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mActivityRecord);
         final ArraySet<Task> closingTasks = new ArraySet<>();
@@ -66,10 +65,10 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
                 "closingWindow");
         final WindowState openingWindow = createAppWindow(closingWindow.getTask(),
                 FIRST_APPLICATION_WINDOW, "openingWindow");
-        closingWindow.mActivityRecord.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
-                true /* performLayout */, false /* isVoiceInteraction */);
-        openingWindow.mActivityRecord.commitVisibility(null, true /* visible */, TRANSIT_UNSET,
-                true /* performLayout */, false /* isVoiceInteraction */);
+        closingWindow.mActivityRecord.commitVisibility(
+                false /* visible */, true /* performLayout */);
+        openingWindow.mActivityRecord.commitVisibility(
+                true /* visible */, true /* performLayout */);
         final ArraySet<ActivityRecord> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mActivityRecord);
         final ArraySet<Task> closingTasks = new ArraySet<>();
@@ -81,8 +80,8 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
     public void testGetClosingApps_skipClosingAppsSnapshotTasks() {
         final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
                 "closingWindow");
-        closingWindow.mActivityRecord.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
-                true /* performLayout */, false /* isVoiceInteraction */);
+        closingWindow.mActivityRecord.commitVisibility(
+                false /* visible */, true /* performLayout */);
         final ArraySet<ActivityRecord> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mActivityRecord);
         final ArraySet<Task> closingTasks = new ArraySet<>();

@@ -16,16 +16,20 @@
 
 package com.android.systemui.wm;
 
+import android.annotation.Nullable;
+import android.content.Context;
 import android.content.res.Configuration;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.IDisplayWindowListener;
 import android.view.IDisplayWindowRotationCallback;
 import android.view.IDisplayWindowRotationController;
+import android.view.IWindowManager;
 import android.view.WindowContainerTransaction;
-import android.view.WindowManagerGlobal;
 
 import com.android.systemui.dagger.qualifiers.MainHandler;
 
@@ -45,6 +49,8 @@ public class DisplayWindowController {
     private static final String TAG = "DisplayWindowController";
 
     private final Handler mHandler;
+    private final Context mContext;
+    private final IWindowManager mWmService;
 
     private final ArrayList<OnDisplayWindowRotationController> mRotationControllers =
             new ArrayList<>();
@@ -76,6 +82,14 @@ public class DisplayWindowController {
                 }
             };
 
+    /**
+     * Get's a display by id from DisplayManager.
+     */
+    public Display getDisplay(int displayId) {
+        final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        return displayManager.getDisplay(displayId);
+    }
+
     private final IDisplayWindowListener mDisplayContainerListener =
             new IDisplayWindowListener.Stub() {
                 @Override
@@ -87,6 +101,10 @@ public class DisplayWindowController {
                             }
                             DisplayRecord record = new DisplayRecord();
                             record.mDisplayId = displayId;
+                            Display display = getDisplay(displayId);
+                            record.mContext = (displayId == Display.DEFAULT_DISPLAY) ? mContext
+                                    : mContext.createDisplayContext(display);
+                            record.mDisplayLayout = new DisplayLayout(record.mContext, display);
                             mDisplays.put(displayId, record);
                             for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
                                 mDisplayChangedListeners.get(i).onDisplayAdded(displayId);
@@ -105,6 +123,13 @@ public class DisplayWindowController {
                                         + " display.");
                                 return;
                             }
+                            Display display = getDisplay(displayId);
+                            Context perDisplayContext = mContext;
+                            if (displayId != Display.DEFAULT_DISPLAY) {
+                                perDisplayContext = mContext.createDisplayContext(display);
+                            }
+                            dr.mContext = perDisplayContext.createConfigurationContext(newConfig);
+                            dr.mDisplayLayout = new DisplayLayout(dr.mContext, display);
                             for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
                                 mDisplayChangedListeners.get(i).onDisplayConfigurationChanged(
                                         displayId, newConfig);
@@ -127,16 +152,33 @@ public class DisplayWindowController {
             };
 
     @Inject
-    public DisplayWindowController(@MainHandler Handler mainHandler) {
+    public DisplayWindowController(Context context, @MainHandler Handler mainHandler,
+            IWindowManager wmService) {
         mHandler = mainHandler;
+        mContext = context;
+        mWmService = wmService;
         try {
-            WindowManagerGlobal.getWindowManagerService().registerDisplayWindowListener(
-                    mDisplayContainerListener);
-            WindowManagerGlobal.getWindowManagerService().setDisplayWindowRotationController(
-                    mDisplayRotationController);
+            mWmService.registerDisplayWindowListener(mDisplayContainerListener);
+            mWmService.setDisplayWindowRotationController(mDisplayRotationController);
         } catch (RemoteException e) {
             throw new RuntimeException("Unable to register hierarchy listener");
         }
+    }
+
+    /**
+     * Gets the DisplayLayout associated with a display.
+     */
+    public @Nullable DisplayLayout getDisplayLayout(int displayId) {
+        final DisplayRecord r = mDisplays.get(displayId);
+        return r != null ? r.mDisplayLayout : null;
+    }
+
+    /**
+     * Gets a display-specific context for a display.
+     */
+    public @Nullable Context getDisplayContext(int displayId) {
+        final DisplayRecord r = mDisplays.get(displayId);
+        return r != null ? r.mContext : null;
     }
 
     /**
@@ -184,6 +226,8 @@ public class DisplayWindowController {
 
     private static class DisplayRecord {
         int mDisplayId;
+        Context mContext;
+        DisplayLayout mDisplayLayout;
     }
 
     /**

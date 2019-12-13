@@ -55,8 +55,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.NEEDS_MENU_SET_TRUE;
-import static android.view.WindowManager.LayoutParams.NEEDS_MENU_UNSET;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -3264,38 +3262,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         // Otherwise, we just attach it to the display.
         return mWindowContainers.getSurfaceControl();
-    }
-
-    boolean getNeedsMenu(WindowState top, WindowManagerPolicy.WindowState bottom) {
-        if (top.mAttrs.needsMenuKey != NEEDS_MENU_UNSET) {
-            return top.mAttrs.needsMenuKey == NEEDS_MENU_SET_TRUE;
-        }
-
-        // Used to indicate we have reached the first window in the range we are interested in.
-        mTmpWindow = null;
-
-        // TODO: Figure-out a more efficient way to do this.
-        final WindowState candidate = getWindow(w -> {
-            if (w == top) {
-                // Reached the first window in the range we are interested in.
-                mTmpWindow = w;
-            }
-            if (mTmpWindow == null) {
-                return false;
-            }
-
-            if (w.mAttrs.needsMenuKey != NEEDS_MENU_UNSET) {
-                return true;
-            }
-            // If we reached the bottom of the range of windows we are considering,
-            // assume no menu is needed.
-            if (w == bottom) {
-                return true;
-            }
-            return false;
-        });
-
-        return candidate != null && candidate.mAttrs.needsMenuKey == NEEDS_MENU_SET_TRUE;
     }
 
     void setLayoutNeeded() {

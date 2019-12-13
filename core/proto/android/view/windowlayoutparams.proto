@@ -56,13 +56,6 @@ message WindowLayoutParamsProto {
     optional uint32 input_feature_flags = 19;
     optional int64 user_activity_timeout = 20;
 
-    enum NeedsMenuState {
-        NEEDS_MENU_UNSET = 0;
-        NEEDS_MENU_SET_TRUE = 1;
-        NEEDS_MENU_SET_FALSE = 2;
-    }
-    optional NeedsMenuState needs_menu_key = 22;
-
     optional DisplayProto.ColorMode color_mode = 23;
     optional uint32 flags = 24;
     optional uint32 private_flags = 26;

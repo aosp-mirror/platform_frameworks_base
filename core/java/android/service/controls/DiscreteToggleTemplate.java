@@ -17,6 +17,7 @@
 package android.service.controls;
 
 import android.annotation.NonNull;
+import android.os.Bundle;
 import android.os.Parcel;
 
 import com.android.internal.util.Preconditions;
@@ -33,6 +34,9 @@ import com.android.internal.util.Preconditions;
  * @hide
  */
 public class DiscreteToggleTemplate extends ControlTemplate {
+
+    private static final String KEY_NEGATIVE_BUTTON = "key_negative_button";
+    private static final String KEY_POSITIVE_BUTTON = "key_positive_button";
 
     private final @NonNull ControlButton mNegativeButton;
     private final @NonNull ControlButton mPositiveButton;
@@ -52,10 +56,10 @@ public class DiscreteToggleTemplate extends ControlTemplate {
         mPositiveButton = positiveButton;
     }
 
-    DiscreteToggleTemplate(Parcel in) {
-        super(in);
-        this.mNegativeButton = ControlButton.CREATOR.createFromParcel(in);
-        this.mPositiveButton = ControlButton.CREATOR.createFromParcel(in);
+    DiscreteToggleTemplate(Bundle b) {
+        super(b);
+        mNegativeButton = b.getParcelable(KEY_NEGATIVE_BUTTON);
+        mPositiveButton = b.getParcelable(KEY_POSITIVE_BUTTON);
     }
 
     /**
@@ -89,17 +93,18 @@ public class DiscreteToggleTemplate extends ControlTemplate {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        mNegativeButton.writeToParcel(dest, flags);
-        mPositiveButton.writeToParcel(dest, flags);
+    protected Bundle getDataBundle() {
+        Bundle b = super.getDataBundle();
+        b.putObject(KEY_NEGATIVE_BUTTON, mNegativeButton);
+        b.putObject(KEY_POSITIVE_BUTTON, mPositiveButton);
+        return b;
     }
 
     public static final Creator<DiscreteToggleTemplate> CREATOR =
             new Creator<DiscreteToggleTemplate>() {
                 @Override
                 public DiscreteToggleTemplate createFromParcel(Parcel source) {
-                    return new DiscreteToggleTemplate(source);
+                    return new DiscreteToggleTemplate(source.readBundle());
                 }
 
                 @Override

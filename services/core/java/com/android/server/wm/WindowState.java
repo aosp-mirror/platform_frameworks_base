@@ -1239,11 +1239,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    public boolean getNeedsMenuLw(WindowManagerPolicy.WindowState bottom) {
-        return getDisplayContent().getNeedsMenu(this, bottom);
-    }
-
-    @Override
     public int getSystemUiVisibility() {
         return mSystemUiVisibility;
     }
@@ -1738,28 +1733,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         super.onMovedByResize();
     }
 
-    boolean onAppVisibilityChanged(boolean visible, boolean runningAppAnimation) {
-        boolean changed = false;
-
+    void onAppVisibilityChanged(boolean visible, boolean runningAppAnimation) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = mChildren.get(i);
-            changed |= c.onAppVisibilityChanged(visible, runningAppAnimation);
+            mChildren.get(i).onAppVisibilityChanged(visible, runningAppAnimation);
         }
 
+        final boolean isVisibleNow = isVisibleNow();
         if (mAttrs.type == TYPE_APPLICATION_STARTING) {
             // Starting window that's exiting will be removed when the animation finishes.
             // Mark all relevant flags for that onExitAnimationDone will proceed all the way
             // to actually remove it.
-            if (!visible && isVisibleNow() && mActivityRecord.isAnimating(TRANSITION)) {
+            if (!visible && isVisibleNow && mActivityRecord.isAnimating(TRANSITION)) {
                 mAnimatingExit = true;
                 mRemoveOnExit = true;
                 mWindowRemovalAllowed = true;
             }
-            return changed;
-        }
-
-        final boolean isVisibleNow = isVisibleNow();
-        if (visible != isVisibleNow) {
+        } else if (visible != isVisibleNow) {
             // Run exit animation if:
             // 1. App visibility and WS visibility are different
             // 2. App is not running an animation
@@ -1773,11 +1762,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     accessibilityController.onWindowTransitionLocked(this, winTransit);
                 }
             }
-            changed = true;
             setDisplayLayoutNeeded();
         }
-
-        return changed;
     }
 
     boolean onSetAppExiting() {

@@ -53,7 +53,9 @@ import android.content.RestrictionsManager;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayManager;
 import android.content.pm.CrossProfileApps;
+import android.content.pm.DataLoaderManager;
 import android.content.pm.ICrossProfileApps;
+import android.content.pm.IDataLoaderManager;
 import android.content.pm.IPackageManager;
 import android.content.pm.IShortcutService;
 import android.content.pm.LauncherApps;
@@ -1196,6 +1198,15 @@ public final class SystemServiceRegistry {
                                 Context.BATTERY_STATS_SERVICE);
                         return new BatteryStatsManager(
                                 IBatteryStats.Stub.asInterface(b));
+                    }});
+        registerService(Context.DATA_LOADER_MANAGER_SERVICE, DataLoaderManager.class,
+                new CachedServiceFetcher<DataLoaderManager>() {
+                    @Override
+                    public DataLoaderManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.DATA_LOADER_MANAGER_SERVICE);
+                        return new DataLoaderManager(IDataLoaderManager.Stub.asInterface(b));
                     }});
         //CHECKSTYLE:ON IndentationCheck
 

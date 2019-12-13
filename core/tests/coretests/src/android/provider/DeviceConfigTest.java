@@ -33,9 +33,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /** Tests that ensure appropriate settings are backed up. */
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -488,22 +485,20 @@ public class DeviceConfigTest {
     }
 
     @Test
-    public void setProperties() {
-        Map<String, String> keyValues = new HashMap<>();
-        keyValues.put(KEY, VALUE);
-        keyValues.put(KEY2, VALUE2);
+    public void setProperties() throws DeviceConfig.BadConfigException {
+        Properties properties = new Properties.Builder(NAMESPACE).setString(KEY, VALUE)
+                .setString(KEY2, VALUE2).build();
 
-        DeviceConfig.setProperties(new Properties(NAMESPACE, keyValues));
-        Properties properties = DeviceConfig.getProperties(NAMESPACE);
+        DeviceConfig.setProperties(properties);
+        properties = DeviceConfig.getProperties(NAMESPACE);
         assertThat(properties.getKeyset()).containsExactly(KEY, KEY2);
         assertThat(properties.getString(KEY, DEFAULT_VALUE)).isEqualTo(VALUE);
         assertThat(properties.getString(KEY2, DEFAULT_VALUE)).isEqualTo(VALUE2);
 
-        Map<String, String> newKeyValues = new HashMap<>();
-        newKeyValues.put(KEY, VALUE2);
-        newKeyValues.put(KEY3, VALUE3);
+        properties = new Properties.Builder(NAMESPACE).setString(KEY, VALUE2)
+                .setString(KEY3, VALUE3).build();
 
-        DeviceConfig.setProperties(new Properties(NAMESPACE, newKeyValues));
+        DeviceConfig.setProperties(properties);
         properties = DeviceConfig.getProperties(NAMESPACE);
         assertThat(properties.getKeyset()).containsExactly(KEY, KEY3);
         assertThat(properties.getString(KEY, DEFAULT_VALUE)).isEqualTo(VALUE2);
@@ -514,18 +509,15 @@ public class DeviceConfigTest {
     }
 
     @Test
-    public void setProperties_multipleNamespaces() {
-        Map<String, String> keyValues = new HashMap<>();
-        keyValues.put(KEY, VALUE);
-        keyValues.put(KEY2, VALUE2);
-
-        Map<String, String> keyValues2 = new HashMap<>();
-        keyValues2.put(KEY2, VALUE);
-        keyValues2.put(KEY3, VALUE2);
-
+    public void setProperties_multipleNamespaces() throws DeviceConfig.BadConfigException {
         final String namespace2 = "namespace2";
-        DeviceConfig.setProperties(new Properties(NAMESPACE, keyValues));
-        DeviceConfig.setProperties(new Properties(namespace2, keyValues2));
+        Properties properties1 = new Properties.Builder(NAMESPACE).setString(KEY, VALUE)
+                .setString(KEY2, VALUE2).build();
+        Properties properties2 = new Properties.Builder(namespace2).setString(KEY2, VALUE)
+                .setString(KEY3, VALUE2).build();
+
+        DeviceConfig.setProperties(properties1);
+        DeviceConfig.setProperties(properties2);
 
         Properties properties = DeviceConfig.getProperties(NAMESPACE);
         assertThat(properties.getKeyset()).containsExactly(KEY, KEY2);
@@ -547,6 +539,26 @@ public class DeviceConfigTest {
         deleteViaContentProvider(namespace2, KEY);
         deleteViaContentProvider(namespace2, KEY2);
         deleteViaContentProvider(namespace2, KEY3);
+    }
+
+    @Test
+    public void propertiesBuilder() {
+        boolean booleanValue = true;
+        int intValue = 123;
+        float floatValue = 4.56f;
+        long longValue = -789L;
+        String key4 = "key4";
+        String key5 = "key5";
+
+        Properties properties = new Properties.Builder(NAMESPACE).setString(KEY, VALUE)
+                .setBoolean(KEY2, booleanValue).setInt(KEY3, intValue).setLong(key4, longValue)
+                .setFloat(key5, floatValue).build();
+        assertThat(properties.getNamespace()).isEqualTo(NAMESPACE);
+        assertThat(properties.getString(KEY, "defaultValue")).isEqualTo(VALUE);
+        assertThat(properties.getBoolean(KEY2, false)).isEqualTo(booleanValue);
+        assertThat(properties.getInt(KEY3, 0)).isEqualTo(intValue);
+        assertThat(properties.getLong("key4", 0L)).isEqualTo(longValue);
+        assertThat(properties.getFloat("key5", 0f)).isEqualTo(floatValue);
     }
 
     // TODO(mpape): resolve b/142727848 and re-enable listener tests

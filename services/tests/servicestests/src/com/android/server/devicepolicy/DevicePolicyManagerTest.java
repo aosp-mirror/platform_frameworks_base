@@ -5548,6 +5548,38 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mServiceContext.binder.restoreCallingIdentity(ident);
     }
 
+    public void testGetCrossProfilePackages_notSet_returnsEmpty() {
+        setAsProfileOwner(admin1);
+        assertTrue(dpm.getCrossProfilePackages(admin1).isEmpty());
+    }
+
+    public void testGetCrossProfilePackages_notSet_dpmsReinitialized_returnsEmpty() {
+        setAsProfileOwner(admin1);
+
+        initializeDpms();
+
+        assertTrue(dpm.getCrossProfilePackages(admin1).isEmpty());
+    }
+
+    public void testGetCrossProfilePackages_whenSet_returnsEqual() {
+        setAsProfileOwner(admin1);
+        Set<String> packages = Collections.singleton("TEST_PACKAGE");
+
+        dpm.setCrossProfilePackages(admin1, packages);
+
+        assertEquals(packages, dpm.getCrossProfilePackages(admin1));
+    }
+
+    public void testGetCrossProfilePackages_whenSet_dpmsReinitialized_returnsEqual() {
+        setAsProfileOwner(admin1);
+        Set<String> packages = Collections.singleton("TEST_PACKAGE");
+
+        dpm.setCrossProfilePackages(admin1, packages);
+        initializeDpms();
+
+        assertEquals(packages, dpm.getCrossProfilePackages(admin1));
+    }
+
     // admin1 is the outgoing DPC, adminAnotherPakcage is the incoming one.
     private void assertDeviceOwnershipRevertedWithFakeTransferMetadata() throws Exception {
         writeFakeTransferMetadataFile(UserHandle.USER_SYSTEM,

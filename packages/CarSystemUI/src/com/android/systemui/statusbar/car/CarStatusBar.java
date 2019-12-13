@@ -118,6 +118,7 @@ import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarComponent;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -175,6 +176,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private final Object mQueueLock = new Object();
     private final CarNavigationBarController mCarNavigationBarController;
     private final Lazy<PowerManagerHelper> mPowerManagerHelperLazy;
+    private final ShadeController mShadeController;
     private final CarServiceProvider mCarServiceProvider;
 
     private DeviceProvisionedController mDeviceProvisionedController;
@@ -308,6 +310,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             LightsOutNotifController lightsOutNotifController,
             StatusBarNotificationActivityStarter.Builder
                     statusBarNotificationActivityStarterBuilder,
+            ShadeController shadeController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
             DismissCallbackRegistry dismissCallbackRegistry,
@@ -385,6 +388,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 dividerOptional,
                 lightsOutNotifController,
                 statusBarNotificationActivityStarterBuilder,
+                shadeController,
                 superStatusBarViewFactory,
                 statusBarKeyguardViewManager,
                 viewMediatorCallback,
@@ -392,6 +396,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mScrimController = scrimController;
         mLockscreenLockIconController = lockscreenLockIconController;
         mDeviceProvisionedController = deviceProvisionedController;
+        mShadeController = shadeController;
         mCarServiceProvider = carServiceProvider;
         mPowerManagerHelperLazy = powerManagerHelperLazy;
         mFullscreenUserSwitcherLazy = fullscreenUserSwitcherLazy;
@@ -506,7 +511,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     @Override
                     protected void close() {
                         if (mPanelExpanded) {
-                            animateCollapsePanels();
+                            mShadeController.animateCollapsePanels();
                         }
                     }
                 });
@@ -516,7 +521,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     @Override
                     protected void close() {
                         if (mPanelExpanded) {
-                            animateCollapsePanels();
+                            mShadeController.animateCollapsePanels();
                         }
                     }
                 });
@@ -551,7 +556,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mNotificationClickHandlerFactory.registerClickListener((launchResult, alertEntry) -> {
             if (launchResult == ActivityManager.START_TASK_TO_FRONT
                     || launchResult == ActivityManager.START_SUCCESS) {
-                animateCollapsePanels();
+                mShadeController.animateCollapsePanels();
             }
         });
         CarNotificationListener carNotificationListener = new CarNotificationListener();
@@ -712,25 +717,16 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         setPanelExpanded(true);
     }
 
-    @Override
-    public void animateCollapsePanels(int flags, boolean force, boolean delayed,
-            float speedUpFactor) {
-        super.animateCollapsePanels(flags, force, delayed, speedUpFactor);
-        if (!mPanelExpanded || mNotificationView.getVisibility() == View.INVISIBLE) {
-            return;
-        }
-        mStatusBarWindowController.setStatusBarFocusable(false);
-        mStatusBarWindowViewController.cancelExpandHelper();
-        mStatusBarView.collapsePanel(true /* animate */, delayed, speedUpFactor);
+    public CarNotificationView getCarNotificationView() {
+        return mNotificationView;
+    }
 
-        animateNotificationPanel(mClosingVelocity, true);
+    public float getClosingVelocity() {
+        return mClosingVelocity;
+    }
 
-        if (!mIsTracking) {
-            mStatusBarWindowController.setPanelVisible(false);
-            mNotificationView.setVisibility(View.INVISIBLE);
-        }
-
-        setPanelExpanded(false);
+    public boolean isTracking() {
+        return mIsTracking;
     }
 
     private void maybeCompleteAnimation(MotionEvent event) {
@@ -749,7 +745,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
      * close the notification shade completely with a velocity. If the animation is to close the
      * notification shade this method also makes the view invisible after animation ends.
      */
-    private void animateNotificationPanel(float velocity, boolean isClosing) {
+    void animateNotificationPanel(float velocity, boolean isClosing) {
         float to = 0;
         if (!isClosing) {
             to = mNotificationView.getHeight();

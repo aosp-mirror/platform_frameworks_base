@@ -41,8 +41,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -112,6 +116,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     @Before
     public void setUp() throws Exception {
         mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
+        spyOn(mTaskPersister);
         mDisplay = mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY);
 
         // Set the recent tasks we should use for testing in this class.
@@ -168,6 +173,46 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertThat(mCallbacksRecorder.mAdded).isEmpty();
         assertThat(mCallbacksRecorder.mTrimmed).isEmpty();
         assertThat(mCallbacksRecorder.mRemoved).isEmpty();
+    }
+
+    @Test
+    public void testPersister() {
+        // Add some tasks, ensure the persister is woken
+        mRecentTasks.add(mTasks.get(0));
+        mRecentTasks.add(mTasks.get(1));
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(0)), anyBoolean());
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(1)), anyBoolean());
+        reset(mTaskPersister);
+
+        // Update a task, ensure the persister is woken
+        mRecentTasks.add(mTasks.get(0));
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(0)), anyBoolean());
+        reset(mTaskPersister);
+
+        // Remove some tasks, ensure the persister is woken
+        mRecentTasks.remove(mTasks.get(0));
+        mRecentTasks.remove(mTasks.get(1));
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(0)), anyBoolean());
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(1)), anyBoolean());
+        reset(mTaskPersister);
+    }
+
+    @Test
+    public void testPersisterTrimmed() {
+        mRecentTasks.setOnlyTestVisibleRange();
+
+        // Limit the global maximum number of recent tasks to a fixed size
+        mRecentTasks.setGlobalMaxNumTasks(1 /* globalMaxNumTasks */);
+
+        mRecentTasks.add(mTasks.get(0));
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(0)), anyBoolean());
+        reset(mTaskPersister);
+
+        // Add N+1 tasks to ensure the previous task is trimmed
+        mRecentTasks.add(mTasks.get(1));
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(0)), anyBoolean());
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(1)), anyBoolean());
+        assertTrimmed(mTasks.get(0));
     }
 
     @Test

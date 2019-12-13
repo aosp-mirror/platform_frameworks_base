@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.SystemProperties;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
@@ -39,23 +40,26 @@ import java.util.Locale;
  * To manually view the logs via adb:
  *      adb shell dumpsys activity service com.android.systemui/.SystemUIService \
  *      dependency DumpController <SysuiLogId>
+ *
+ * Logs can be disabled by setting the following SystemProperty and then restarting the device:
+ *      adb shell setprop persist.sysui.log.enabled.<id> true/false && adb reboot
+ *
+ * @param <E> Type of event we'll be logging
  */
-public class SysuiLog implements Dumpable {
+public class SysuiLog<E extends Event> implements Dumpable {
     public static final SimpleDateFormat DATE_FORMAT =
             new SimpleDateFormat("MM-dd HH:mm:ss", Locale.US);
 
-    private final Object mDataLock = new Object();
+    protected final Object mDataLock = new Object();
     private final String mId;
     private final int mMaxLogs;
     protected boolean mEnabled;
     protected boolean mLogToLogcatEnabled;
 
-    @VisibleForTesting protected ArrayDeque<Event> mTimeline;
+    @VisibleForTesting protected ArrayDeque<E> mTimeline;
 
     /**
      * Creates a SysuiLog
-     * To enable or disable logs, set the system property and then restart the device:
-     *      adb shell setprop sysui.log.enabled.<id> true/false && adb reboot
      * @param dumpController where to register this logger's dumpsys
      * @param id user-readable tag for this logger
      * @param maxDebugLogs maximum number of logs to retain when {@link sDebuggable} is true
@@ -79,23 +83,20 @@ public class SysuiLog implements Dumpable {
         dumpController.registerDumpable(mId, this);
     }
 
-    public SysuiLog(DumpController dumpController, String id) {
-        this(dumpController, id, DEFAULT_MAX_DEBUG_LOGS, DEFAULT_MAX_LOGS);
-    }
-
     /**
      * Logs an event to the timeline which can be printed by the dumpsys.
      * May also log to logcat if enabled.
-     * @return true if event was logged, else false
+     * @return the last event that was discarded from the Timeline (can be recycled)
      */
-    public boolean log(Event event) {
+    public E log(E event) {
         if (!mEnabled) {
-            return false;
+            return null;
         }
 
+        E recycledEvent = null;
         synchronized (mDataLock) {
             if (mTimeline.size() >= mMaxLogs) {
-                mTimeline.removeFirst();
+                recycledEvent = mTimeline.removeFirst();
             }
 
             mTimeline.add(event);
@@ -121,13 +122,18 @@ public class SysuiLog implements Dumpable {
                     break;
             }
         }
-        return true;
+
+        if (recycledEvent != null) {
+            recycledEvent.recycle();
+        }
+
+        return recycledEvent;
     }
 
     /**
      * @return user-readable string of the given event with timestamp
      */
-    public String eventToTimestampedString(Event event) {
+    private String eventToTimestampedString(Event event) {
         StringBuilder sb = new StringBuilder();
         sb.append(SysuiLog.DATE_FORMAT.format(event.getTimestamp()));
         sb.append(" ");
@@ -142,9 +148,7 @@ public class SysuiLog implements Dumpable {
         return event.getMessage();
     }
 
-    /**
-     * only call on this method if you have the mDataLock
-     */
+    @GuardedBy("mDataLock")
     private void dumpTimelineLocked(PrintWriter pw) {
         pw.println("\tTimeline:");
 

@@ -1144,6 +1144,7 @@ class RecentTasks {
 
         // Trim the set of tasks to the active set
         trimInactiveRecentTasks();
+        notifyTaskPersisterLocked(task, false /* flush */);
     }
 
     /**

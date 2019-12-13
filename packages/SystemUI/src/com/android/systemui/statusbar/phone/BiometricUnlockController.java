@@ -41,6 +41,7 @@ import com.android.systemui.dagger.qualifiers.MainResources;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -136,6 +137,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final Handler mHandler;
     private final KeyguardBypassController mKeyguardBypassController;
     private PowerManager.WakeLock mWakeLock;
+    private final ShadeController mShadeController;
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final DozeParameters mDozeParameters;
     private final KeyguardStateController mKeyguardStateController;
@@ -159,20 +161,23 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     @Inject
     public BiometricUnlockController(Context context, DozeScrimController dozeScrimController,
             KeyguardViewMediator keyguardViewMediator, ScrimController scrimController,
-            StatusBar statusBar, KeyguardStateController keyguardStateController, Handler handler,
+            StatusBar statusBar, ShadeController shadeController,
+            StatusBarWindowController statusBarWindowController,
+            KeyguardStateController keyguardStateController, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             @MainResources Resources resources,
             KeyguardBypassController keyguardBypassController, DozeParameters dozeParameters,
             MetricsLogger metricsLogger, DumpController dumpController) {
         mContext = context;
         mPowerManager = context.getSystemService(PowerManager.class);
+        mShadeController = shadeController;
         mUpdateMonitor = keyguardUpdateMonitor;
         mDozeParameters = dozeParameters;
         mUpdateMonitor.registerCallback(this);
         mMediaManager = Dependency.get(NotificationMediaManager.class);
         Dependency.get(WakefulnessLifecycle.class).addObserver(mWakefulnessObserver);
         Dependency.get(ScreenLifecycle.class).addObserver(mScreenObserver);
-        mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
+        mStatusBarWindowController = statusBarWindowController;
         mDozeScrimController = dozeScrimController;
         mKeyguardViewMediator = keyguardViewMediator;
         mScrimController = scrimController;
@@ -358,8 +363,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         if (mMode == MODE_SHOW_BOUNCER) {
             mStatusBarKeyguardViewManager.showBouncer(false);
         }
-        mStatusBarKeyguardViewManager.animateCollapsePanels(
-                BIOMETRIC_COLLAPSE_SPEEDUP_FACTOR);
+        mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */,
+                false /* delayed */, BIOMETRIC_COLLAPSE_SPEEDUP_FACTOR);
         mPendingShowBouncer = false;
     }
 

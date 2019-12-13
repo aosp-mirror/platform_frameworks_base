@@ -20,6 +20,7 @@ import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION
 import static android.app.AppOpsManager.MAX_PRIORITY_UID_STATE;
 import static android.app.AppOpsManager.MIN_PRIORITY_UID_STATE;
 import static android.app.AppOpsManager.OP_CAMERA;
+import static android.app.AppOpsManager.OP_COARSE_LOCATION;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
@@ -1640,6 +1641,13 @@ public class AppOpsService extends IAppOpsService.Stub {
         } catch (SecurityException e) {
             Slog.e(TAG, "Cannot setMode", e);
             return;
+        }
+
+        // STOPSHIP: Remove this check once we are sure no one is doing it.
+        if (code == OP_COARSE_LOCATION && mode != AppOpsManager.opToDefaultMode(code)) {
+            Slog.wtf(TAG, "Trying to setMode() instead of setUidMode(), " + "code=" + code
+                    + ", uid=" + uid + ", packageName=" + packageName + ", mode=" + mode
+                    + ", callingUid=" + Binder.getCallingUid(), new RuntimeException());
         }
 
         synchronized (this) {

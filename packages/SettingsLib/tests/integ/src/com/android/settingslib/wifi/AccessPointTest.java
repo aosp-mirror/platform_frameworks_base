@@ -1683,12 +1683,33 @@ public class AccessPointTest {
         assertThat(pskSaeTransitionModeAp.matches(saeScanResult)).isFalse();
     }
 
+    @Test
+    public void testGetSecurityString_oweTransitionMode_shouldReturnCorrectly() {
+        when(mMockContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mMockWifiManager);
+        when(mMockWifiManager.isEnhancedOpenSupported()).thenReturn(true);
+        AccessPoint oweTransitionModeAp = getOweTransitionModeAp();
+
+        assertThat(oweTransitionModeAp.getSecurityString(true /* concise */))
+                .isEqualTo(mContext.getString(R.string.wifi_security_short_none_owe));
+        assertThat(oweTransitionModeAp.getSecurityString(false /* concise */))
+                .isEqualTo(mContext.getString(R.string.wifi_security_none_owe));
+    }
+
     private AccessPoint getPskSaeTransitionModeAp() {
         ScanResult scanResult = createScanResult(AccessPoint.removeDoubleQuotes(TEST_SSID),
                 TEST_BSSID, DEFAULT_RSSI);
         scanResult.capabilities =
                 "[WPA2-FT/PSK-CCMP][RSN-FT/PSK+PSK-SHA256+SAE+FT/SAE-CCMP][ESS][WPS]";
         return new TestAccessPointBuilder(mMockContext)
+                .setScanResults(new ArrayList<ScanResult>(Arrays.asList(scanResult)))
+                .build();
+    }
+
+    private AccessPoint getOweTransitionModeAp() {
+        ScanResult scanResult = createScanResult(AccessPoint.removeDoubleQuotes(TEST_SSID),
+                TEST_BSSID, DEFAULT_RSSI);
+        scanResult.capabilities = "[OWE_TRANSITION]";
+        return new TestAccessPointBuilder(mContext)
                 .setScanResults(new ArrayList<ScanResult>(Arrays.asList(scanResult)))
                 .build();
     }

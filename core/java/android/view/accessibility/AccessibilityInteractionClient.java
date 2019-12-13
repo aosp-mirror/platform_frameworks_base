@@ -223,19 +223,36 @@ public final class AccessibilityInteractionClient
      * @return The {@link AccessibilityWindowInfo}.
      */
     public AccessibilityWindowInfo getWindow(int connectionId, int accessibilityWindowId) {
+        return getWindow(connectionId, accessibilityWindowId, /* bypassCache */ false);
+    }
+
+    /**
+     * Gets the info for a window.
+     *
+     * @param connectionId The id of a connection for interacting with the system.
+     * @param accessibilityWindowId A unique window id. Use
+     *     {@link android.view.accessibility.AccessibilityWindowInfo#ACTIVE_WINDOW_ID}
+     *     to query the currently active window.
+     * @param bypassCache Whether to bypass the cache.
+     * @return The {@link AccessibilityWindowInfo}.
+     */
+    public AccessibilityWindowInfo getWindow(int connectionId, int accessibilityWindowId,
+            boolean bypassCache) {
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
-                AccessibilityWindowInfo window = sAccessibilityCache.getWindow(
-                        accessibilityWindowId);
-                if (window != null) {
-                    if (DEBUG) {
-                        Log.i(LOG_TAG, "Window cache hit");
+                AccessibilityWindowInfo window;
+                if (!bypassCache) {
+                    window = sAccessibilityCache.getWindow(accessibilityWindowId);
+                    if (window != null) {
+                        if (DEBUG) {
+                            Log.i(LOG_TAG, "Window cache hit");
+                        }
+                        return window;
                     }
-                    return window;
-                }
-                if (DEBUG) {
-                    Log.i(LOG_TAG, "Window cache miss");
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "Window cache miss");
+                    }
                 }
                 final long identityToken = Binder.clearCallingIdentity();
                 try {
@@ -244,7 +261,9 @@ public final class AccessibilityInteractionClient
                     Binder.restoreCallingIdentity(identityToken);
                 }
                 if (window != null) {
-                    sAccessibilityCache.addWindow(window);
+                    if (!bypassCache) {
+                        sAccessibilityCache.addWindow(window);
+                    }
                     return window;
                 }
             } else {

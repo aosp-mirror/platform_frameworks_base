@@ -91,7 +91,8 @@ public class MobileSignalController extends SignalController<
     @VisibleForTesting
     boolean mIsShowingIconGracefully = false;
     // Some specific carriers have 5GE network which is special LTE CA network.
-    private static final int NETWORK_TYPE_LTE_CA_5GE = TelephonyManager.MAX_NETWORK_TYPE + 1;
+    private static final int NETWORK_TYPE_LTE_CA_5GE =
+            TelephonyManager.getAllNetworkTypes().length + 1;
 
     // TODO: Reduce number of vars passed in, if we have the NetworkController, probably don't
     // need listener lists anymore.

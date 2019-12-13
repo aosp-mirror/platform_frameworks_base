@@ -19,6 +19,7 @@ package android.service.controls;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Icon;
 import android.os.Parcel;
@@ -33,11 +34,11 @@ import java.lang.annotation.RetentionPolicy;
  * Current state for a {@link Control}.
  *
  * Collects information to render the current state of a {@link Control} as well as possible action
- * that can be performed on it. Some of the information may temporarily override the defaults
- * provided by the corresponding {@link Control}, while this state is being displayed.
- *
- * Additionally, this can be used to modify information related to the corresponding
- * {@link Control}.
+ * that can be performed on it.
+ * <p>
+ * Additionally, this object is used to modify elements from the {@link Control} such as icons,
+ * colors, names and intents. This information will last until it is again modified by a
+ * {@link ControlState}.
  * @hide
  */
 public final class ControlState implements Parcelable {
@@ -74,64 +75,102 @@ public final class ControlState implements Parcelable {
      */
     public static final int STATUS_DISABLED = 3;
 
-    private final @NonNull Control mControl;
+    private final @NonNull String mControlId;
     private final @Status int mStatus;
     private final @NonNull ControlTemplate mControlTemplate;
     private final @NonNull CharSequence mStatusText;
-    private final @Nullable Icon mOverrideIcon;
-    private final @Nullable ColorStateList mOverrideTint;
+    private final @Nullable CharSequence mTitle;
+    private final @Nullable PendingIntent mAppIntent;
+    private final @Nullable Icon mIcon;
+    private final @Nullable ColorStateList mTint;
 
     /**
-     * @param control the {@link Control} this state should be applied to. Can be used to
-     *                       update information about the {@link Control}
+     * @param controlId the identifier of the {@link Control} this object refers to.
      * @param status the current status of the {@link Control}.
-     * @param controlTemplate the template to be used to render the {@link Control}.
-     * @param statusText the text describing the current status.
-     * @param overrideIcon the icon to temporarily override the one provided in
-     *                     {@link Control#getIcon()}. Pass {@code null} to use the icon in
-     *                     {@link Control#getIcon()}.
-     * @param overrideTint the colors to temporarily override those provided in
-     *                            {@link Control#getTint()}. Pass {@code null} to use the colors in
-     *                            {@link Control#getTint()}.
+     * @param controlTemplate the template to be used to render the {@link Control}. This can be
+     *                        of a different
+     *                        {@link android.service.controls.ControlTemplate.TemplateType} than the
+     *                        one defined in {@link Control#getPrimaryType}
+     * @param statusText the user facing text describing the current status.
+     * @param title the title to replace the one set in the {@link Control} or set in the
+     *              last {@link ControlState}. Pass {@code null} to use the last value set for this
+     *              {@link Control}
+     * @param appIntent the {@link PendingIntent} to replace the one set in the {@link Control} or
+     *                  set in the last {@link ControlState}. Pass {@code null} to use the last
+     *                  value set for this {@link Control}.
+     * @param icon the icon to replace the one set in the {@link Control} or set in the last
+     *             {@link ControlState}. Pass {@code null} to use the last value set for this
+     *             {@link Control}.
+     * @param tint the colors to replace those set in the {@link Control} or set in the last
+     *             {@link ControlState}. Pass {@code null} to use the last value set for this
+     *             {@link Control}.
      */
-    public ControlState(@NonNull Control control,
+    public ControlState(@NonNull String controlId,
             int status,
             @NonNull ControlTemplate controlTemplate,
             @NonNull CharSequence statusText,
-            @Nullable Icon overrideIcon,
-            @Nullable ColorStateList overrideTint) {
-        Preconditions.checkNotNull(control);
+            @Nullable CharSequence title,
+            @Nullable PendingIntent appIntent,
+            @Nullable Icon icon,
+            @Nullable ColorStateList tint) {
+        Preconditions.checkNotNull(controlId);
         Preconditions.checkNotNull(controlTemplate);
         Preconditions.checkNotNull(statusText);
-
-        mControl = control;
+        mControlId = controlId;
         mStatus = status;
         mControlTemplate = controlTemplate;
-        mOverrideIcon = overrideIcon;
         mStatusText = statusText;
-        mOverrideTint = overrideTint;
+        mTitle = title;
+        mAppIntent = appIntent;
+        mIcon = icon;
+        mTint = tint;
     }
 
     ControlState(Parcel in) {
-        mControl = Control.CREATOR.createFromParcel(in);
+        mControlId = in.readString();
         mStatus = in.readInt();
         mControlTemplate = ControlTemplate.CREATOR.createFromParcel(in);
         mStatusText = in.readCharSequence();
         if (in.readByte() == 1) {
-            mOverrideIcon = Icon.CREATOR.createFromParcel(in);
+            mTitle = in.readCharSequence();
         } else {
-            mOverrideIcon = null;
+            mTitle = null;
         }
         if (in.readByte() == 1) {
-            mOverrideTint = ColorStateList.CREATOR.createFromParcel(in);
+            mAppIntent = PendingIntent.CREATOR.createFromParcel(in);
         } else {
-            mOverrideTint = null;
+            mAppIntent = null;
+        }
+        if (in.readByte() == 1) {
+            mIcon = Icon.CREATOR.createFromParcel(in);
+        } else {
+            mIcon = null;
+        }
+        if (in.readByte() == 1) {
+            mTint = ColorStateList.CREATOR.createFromParcel(in);
+        } else {
+            mTint = null;
         }
     }
 
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @NonNull
+    public String getControlId() {
+        return mControlId;
+    }
+
+    @Nullable
+    public CharSequence getTitle() {
+        return mTitle;
+    }
+
+    @Nullable
+    public PendingIntent getAppIntent() {
+        return mAppIntent;
     }
 
     @Status
@@ -145,8 +184,8 @@ public final class ControlState implements Parcelable {
     }
 
     @Nullable
-    public Icon getOverrideIcon() {
-        return mOverrideIcon;
+    public Icon getIcon() {
+        return mIcon;
     }
 
     @NonNull
@@ -155,35 +194,35 @@ public final class ControlState implements Parcelable {
     }
 
     @Nullable
-    public ColorStateList getOverrideTint() {
-        return mOverrideTint;
-    }
-
-    @NonNull
-    public Control getControl() {
-        return mControl;
-    }
-
-    @NonNull
-    public String getControlId() {
-        return mControl.getControlId();
+    public ColorStateList getTint() {
+        return mTint;
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        mControl.writeToParcel(dest, flags);
+        dest.writeString(mControlId);
         dest.writeInt(mStatus);
         mControlTemplate.writeToParcel(dest, flags);
         dest.writeCharSequence(mStatusText);
-        if (mOverrideIcon != null) {
+        if (mTitle != null) {
             dest.writeByte((byte) 1);
-            mOverrideIcon.writeToParcel(dest, flags);
+            dest.writeCharSequence(mTitle);
         } else {
             dest.writeByte((byte) 0);
         }
-        if (mOverrideTint != null) {
+        if (mAppIntent != null) {
             dest.writeByte((byte) 1);
-            mOverrideTint.writeToParcel(dest, flags);
+            mAppIntent.writeToParcel(dest, flags);
+        }
+        if (mIcon != null) {
+            dest.writeByte((byte) 1);
+            mIcon.writeToParcel(dest, flags);
+        } else {
+            dest.writeByte((byte) 0);
+        }
+        if (mTint != null) {
+            dest.writeByte((byte) 1);
+            mTint.writeToParcel(dest, flags);
         } else {
             dest.writeByte((byte) 0);
         }
@@ -213,19 +252,22 @@ public final class ControlState implements Parcelable {
      * </ul>
      */
     public static class Builder {
-        private @NonNull Control mControl;
+        private @NonNull String mControlId;
         private @Status int mStatus = STATUS_OK;
         private @NonNull ControlTemplate mControlTemplate = ControlTemplate.NO_TEMPLATE;
         private @NonNull CharSequence mStatusText = "";
-        private @Nullable Icon mOverrideIcon;
-        private @Nullable ColorStateList mOverrideTint;
+        private @Nullable CharSequence mTitle;
+        private @Nullable PendingIntent mAppIntent;
+        private @Nullable Icon mIcon;
+        private @Nullable ColorStateList mTint;
 
         /**
-         * @param control the {@link Control} that the resulting {@link ControlState} refers to.
+         * @param controlId the identifier of the {@link Control} that the resulting
+         *                  {@link ControlState} refers to.
          */
-        public Builder(@NonNull Control control) {
-            Preconditions.checkNotNull(control);
-            mControl = control;
+        public Builder(@NonNull String controlId) {
+            Preconditions.checkNotNull(controlId);
+            mControlId = controlId;
         }
 
         /**
@@ -234,21 +276,24 @@ public final class ControlState implements Parcelable {
          */
         public Builder(@NonNull ControlState controlState) {
             Preconditions.checkNotNull(controlState);
-            mControl = controlState.mControl;
+            mControlId = controlState.mControlId;
+            mStatus = controlState.mStatus;
             mControlTemplate = controlState.mControlTemplate;
-            mOverrideIcon = controlState.mOverrideIcon;
             mStatusText = controlState.mStatusText;
-            mOverrideTint = controlState.mOverrideTint;
+            mTitle = controlState.mTitle;
+            mAppIntent = controlState.mAppIntent;
+            mIcon = controlState.mIcon;
+            mTint = controlState.mTint;
         }
 
 
         /**
-         * @param control the updated {@link Control} information.
+         * @param controlId the identifier of the {@link Control} for the resulting object.
          * @return {@code this}
          */
         @NonNull
-        public Builder setControl(@NonNull Control control) {
-            mControl = control;
+        public Builder setControlId(@NonNull String controlId) {
+            mControlId = controlId;
             return this;
         }
 
@@ -285,24 +330,50 @@ public final class ControlState implements Parcelable {
         }
 
         /**
-         * @param overrideIcon the icon to override the one defined in the corresponding
-         *                            {@code Control}. Pass {@code null} to remove the override.
+         * @param title the title to replace the one defined in the corresponding {@link Control} or
+         *              set by the last {@link ControlState}. Pass {@code null} to keep the last
+         *              value.
          * @return {@code this}
          */
         @NonNull
-        public Builder setOverrideIcon(@Nullable Icon overrideIcon) {
-            mOverrideIcon = overrideIcon;
+        public Builder setTitle(@Nullable CharSequence title) {
+            mTitle = title;
             return this;
         }
 
         /**
-         * @param overrideTint the colors to override the ones defined in the corresponding
-         *                            {@code Control}. Pass {@code null} to remove the override.
+         * @param appIntent the Pending Intent to replace the one defined in the corresponding
+         *                  {@link Control} or set by the last {@link ControlState}. Pass
+         *                  {@code null} to keep the last value.
          * @return {@code this}
          */
         @NonNull
-        public Builder setOverrideTint(@Nullable ColorStateList overrideTint) {
-            mOverrideTint = overrideTint;
+        public Builder setAppIntent(@Nullable PendingIntent appIntent) {
+            mAppIntent = appIntent;
+            return this;
+        }
+
+        /**
+         * @param icon the title to replace the one defined in the corresponding {@link Control} or
+         *             set by the last {@link ControlState}. Pass {@code null} to keep the last
+         *             value.
+         * @return {@code this}
+         */
+        @NonNull
+        public Builder setIcon(@Nullable Icon icon) {
+            mIcon = icon;
+            return this;
+        }
+
+        /**
+         * @param tint the title to replace the one defined in the corresponding {@link Control} or
+         *             set by the last {@link ControlState}. Pass {@code null} to keep the last
+         *             value.
+         * @return {@code this}
+         */
+        @NonNull
+        public Builder setTint(@Nullable ColorStateList tint) {
+            mTint = tint;
             return this;
         }
 
@@ -310,8 +381,8 @@ public final class ControlState implements Parcelable {
          * @return a new {@link ControlState}
          */
         public ControlState build() {
-            return new ControlState(mControl, mStatus, mControlTemplate, mStatusText,
-                    mOverrideIcon, mOverrideTint);
+            return new ControlState(mControlId, mStatus, mControlTemplate, mStatusText,
+                    mTitle, mAppIntent, mIcon, mTint);
         }
     }
 }

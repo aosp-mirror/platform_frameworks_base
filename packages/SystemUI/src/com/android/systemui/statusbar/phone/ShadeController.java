@@ -32,11 +32,23 @@ public interface ShadeController {
      */
     void instantExpandNotificationsPanel();
 
+    /** See {@link #animateCollapsePanels(int, boolean)}. */
+    void animateCollapsePanels();
+
+    /** See {@link #animateCollapsePanels(int, boolean)}. */
+    void animateCollapsePanels(int flags);
+
     /**
      * Collapse the shade animated, showing the bouncer when on {@link StatusBarState#KEYGUARD} or
      * dismissing {@link StatusBar} when on {@link StatusBarState#SHADE}.
      */
     void animateCollapsePanels(int flags, boolean force);
+
+    /** See {@link #animateCollapsePanels(int, boolean)}. */
+    void animateCollapsePanels(int flags, boolean force, boolean delayed);
+
+    /** See {@link #animateCollapsePanels(int, boolean)}. */
+    void animateCollapsePanels(int flags, boolean force, boolean delayed, float speedUpFactor);
 
     /**
      * If the notifications panel is not fully expanded, collapse it animated.
@@ -61,11 +73,9 @@ public interface ShadeController {
     void addPostCollapseAction(Runnable action);
 
     /**
-     * Notify the shade controller that the current user changed
-     *
-     * @param newUserId userId of the new user
+     * Run all of the runnables added by {@link #addPostCollapseAction}.
      */
-    void setLockscreenUser(int newUserId);
+    void runPostCollapseRunnables();
 
     /**
      * If secure with redaction: Show bouncer, go to unlocked shade.

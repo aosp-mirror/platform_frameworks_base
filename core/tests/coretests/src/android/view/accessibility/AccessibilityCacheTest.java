@@ -436,6 +436,22 @@ public class AccessibilityCacheTest {
     }
 
     @Test
+    public void windowsChangedWithWindowsChangeA11yFocusedEvent_dontClearCache() {
+        AccessibilityNodeInfo nodeInfo = getNodeWithA11yAndWindowId(SINGLE_VIEW_ID, WINDOW_ID_1);
+        mAccessibilityCache.add(nodeInfo);
+        AccessibilityEvent event = new AccessibilityEvent(AccessibilityEvent.TYPE_WINDOWS_CHANGED);
+        event.setWindowChanges(AccessibilityEvent.WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED);
+        mAccessibilityCache.onAccessibilityEvent(event);
+        AccessibilityNodeInfo cachedNode = mAccessibilityCache.getNode(WINDOW_ID_1,
+                nodeInfo.getSourceNodeId());
+        try {
+            assertNotNull(cachedNode);
+        } finally {
+            nodeInfo.recycle();
+        }
+    }
+
+    @Test
     public void subTreeChangeEvent_clearsNodeAndChild() {
         AccessibilityEvent event = AccessibilityEvent
                 .obtain(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);

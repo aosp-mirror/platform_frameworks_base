@@ -22,7 +22,9 @@ import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.pm.PackageManager.GET_META_DATA;
 import static android.content.pm.PackageManager.GET_SERVICES;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+import static android.hardware.soundtrigger.SoundTrigger.STATUS_BAD_VALUE;
 import static android.hardware.soundtrigger.SoundTrigger.STATUS_ERROR;
+import static android.hardware.soundtrigger.SoundTrigger.STATUS_NO_INIT;
 import static android.hardware.soundtrigger.SoundTrigger.STATUS_OK;
 import static android.provider.Settings.Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY;
 import static android.provider.Settings.Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT;
@@ -39,9 +41,11 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
+import android.hardware.soundtrigger.ModelParams;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
+import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.hardware.soundtrigger.SoundTrigger.SoundModel;
@@ -681,6 +685,101 @@ public class SoundTriggerService extends SystemService {
                 sEventLogger.log(new SoundTriggerLogger.StringEvent(
                         "getModuleProperties(): " + properties.toString()));
                 return properties;
+            }
+        }
+
+        @Override
+        public int setParameter(ParcelUuid soundModelId,
+                @ModelParams int modelParam, int value) {
+            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+            if (!isInitialized()) return STATUS_NO_INIT;
+            if (DEBUG) {
+                Slog.d(TAG, "setParameter(): id=" + soundModelId
+                        + ", param=" + modelParam
+                        + ", value=" + value);
+            }
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                    "setParameter(): id=" + soundModelId
+                            + ", param=" + modelParam
+                            + ", value=" + value));
+
+            synchronized (mLock) {
+                SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
+                if (soundModel == null) {
+                    Slog.e(TAG, soundModelId + " is not loaded. Loaded models: "
+                            + mLoadedModels.toString());
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent("setParameter(): "
+                            + soundModelId + " is not loaded"));
+
+                    return STATUS_BAD_VALUE;
+                }
+
+                return mSoundTriggerHelper.setParameter(soundModel.uuid, modelParam, value);
+            }
+        }
+
+        @Override
+        public int getParameter(@NonNull ParcelUuid soundModelId,
+                @ModelParams int modelParam)
+                throws UnsupportedOperationException, IllegalArgumentException {
+            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+            if (!isInitialized()) {
+                throw new UnsupportedOperationException("SoundTriggerHelper not initialized");
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "getParameter(): id=" + soundModelId
+                        + ", param=" + modelParam);
+            }
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                    "getParameter(): id=" + soundModelId
+                            + ", param=" + modelParam));
+
+            synchronized (mLock) {
+                SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
+                if (soundModel == null) {
+                    Slog.e(TAG, soundModelId + " is not loaded");
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent("getParameter(): "
+                            + soundModelId + " is not loaded"));
+
+                    throw new IllegalArgumentException("sound model is not loaded");
+                }
+
+                return mSoundTriggerHelper.getParameter(soundModel.uuid, modelParam);
+            }
+        }
+
+        @Override
+        @Nullable
+        public ModelParamRange queryParameter(@NonNull ParcelUuid soundModelId,
+                @ModelParams int modelParam) {
+            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+            if (!isInitialized()) return null;
+            if (DEBUG) {
+                Slog.d(TAG, "queryParameter(): id=" + soundModelId
+                        + ", param=" + modelParam);
+            }
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                    "queryParameter(): id=" + soundModelId
+                            + ", param=" + modelParam));
+
+            synchronized (mLock) {
+                SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
+                if (soundModel == null) {
+                    Slog.e(TAG, soundModelId + " is not loaded");
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                            "queryParameter(): "
+                                    + soundModelId + " is not loaded"));
+
+                    return null;
+                }
+
+                return mSoundTriggerHelper.queryParameter(soundModel.uuid, modelParam);
             }
         }
     }

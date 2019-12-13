@@ -17,4 +17,5 @@ android_test {
     defaults: ["cts_defaults"],
     srcs: ["src/**/*.java"],
     sdk_version: "current",
+    test_suites: ["device-tests"],
 }

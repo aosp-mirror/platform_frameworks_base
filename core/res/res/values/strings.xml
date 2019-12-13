@@ -1011,53 +1011,32 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readContacts">read your contacts</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readContacts" product="tablet">Allows the app to read
-      data about your contacts stored on your tablet, including the frequency
-      with which you\'ve called, emailed, or communicated in other ways with
-      specific individuals. Apps will also have access to the accounts on your
-      tablet that have created contacts. This may include accounts created by
-      apps you have installed. This permission allows apps to save your contact
-      data, and malicious apps may share contact data without your
-      knowledge.</string>
+    <string name="permdesc_readContacts" product="tablet">Allows the app to read data about your contacts stored on your tablet.
+      Apps will also have access to the accounts on your tablet that have created contacts.
+      This may include accounts created by apps you have installed.
+      This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readContacts" product="tv">Allows the app to read
-      data about your contacts stored on your Android TV device, including the frequency
-      with which you\'ve called, emailed, or communicated in other ways with
-      specific individuals. Apps will also have access to the accounts on your
-      Android TV device that have created contacts. This may include accounts
-      created by apps you have installed. This permission allows apps to save
-      your contact data, and malicious apps may share contact data without your
-      knowledge.</string>
+    <string name="permdesc_readContacts" product="tv">Allows the app to read data about your contacts stored on your Android TV device.
+      Apps will also have access to the accounts on your Android TV device that have created contacts.
+      This may include accounts created by apps you have installed.
+      This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readContacts" product="default">Allows the app to
-      read data about your contacts stored on your phone, including the
-      frequency with which you\'ve called, emailed, or communicated in other ways
-      with specific individuals. Apps will also have access to the accounts
-      on your phone that have created contacts. This may include accounts
-      created by apps you have installed. This permission allows apps to
-      save your contact data, and malicious apps may share contact data
-      without your knowledge.</string>
+    <string name="permdesc_readContacts" product="default">Allows the app to read data about your contacts stored on your phone.
+      Apps will also have access to the accounts on your phone that have created contacts.
+      This may include accounts created by apps you have installed.
+      This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_writeContacts">modify your contacts</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeContacts" product="tablet">Allows the app to
-      modify the data about your contacts stored on your tablet, including the
-      frequency with which you\'ve called, emailed, or communicated in other ways
-      with specific contacts. This permission allows apps to delete contact
-      data.</string>
+    <string name="permdesc_writeContacts" product="tablet">Allows the app to modify the data about your contacts stored on your tablet.
+      This permission allows apps to delete contact data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeContacts" product="tv">Allows the app to
-      modify the data about your contacts stored on your Android TV device, including the
-      frequency with which you\'ve called, emailed, or communicated in other ways
-      with specific contacts. This permission allows apps to delete contact
-      data.</string>
+    <string name="permdesc_writeContacts" product="tv">Allows the app to modify the data about your contacts stored on your Android TV device.
+      This permission allows apps to delete contact data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeContacts" product="default">Allows the app to
-    modify the data about your contacts stored on your phone, including the
-    frequency with which you\'ve called, emailed, or communicated in other ways
-    with specific contacts. This permission allows apps to delete contact
-    data.</string>
+    <string name="permdesc_writeContacts" product="default">Allows the app to modify the data about your contacts stored on your phone.
+      This permission allows apps to delete contact data.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCallLog">read call log</string>
@@ -1102,6 +1081,7 @@
     <string name="permdesc_writeCalendar" product="default">This app can add, remove, or change calendar events on your phone. This app can send messages that may appear to come from calendar owners, or change events without notifying their owners.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the applicatfion to do this. -->
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessLocationExtraCommands">access extra location provider commands</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessLocationExtraCommands">Allows the app to access
@@ -1111,21 +1091,17 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessFineLocation">access precise location only in the foreground</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessFineLocation">This app can get your exact location only when it is in the foreground. These location services must be turned on and available on your phone for the app to be able to use them. This may increase battery consumption.</string>
+    <string name="permdesc_accessFineLocation">This app can get your exact location only when it is in the foreground. Location services must be turned on and available on your device for the app to be able to use them. This may increase battery consumption.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessCoarseLocation">access approximate location (network-based) only in the foreground</string>
+    <string name="permlab_accessCoarseLocation">access approximate location only in the foreground</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation" product="tablet">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when when the app is in the foreground. These location services must be turned on and available on your tablet for the app to be able to use them.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation" product="tv">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when when the app is in the foreground. These location services must be turned on and available on your Android TV device for the app to be able to use them.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation" product="default">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when the app is in the foreground. These location services must be turned on and available on your phone for the app to be able to use them.</string>
+    <string name="permdesc_accessCoarseLocation">This app can get your approximate location only when it is in the foreground. Location services must be turned on and available on your device for the app to be able to use them.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessBackgroundLocation">access location in the background</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessBackgroundLocation">If this is granted additionally to the approximate or precise location access the app can access the location while running in the background.</string>
+    <string name="permdesc_accessBackgroundLocation">This app can access location while running in the background, in addition to foreground location access.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_modifyAudioSettings">change your audio settings</string>

@@ -101,6 +101,7 @@ import com.android.internal.util.MemInfoReader;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.Watchdog;
+import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowManagerService;
@@ -277,14 +278,16 @@ public final class ProcessList {
     // LMK_PROCREMOVE <pid>
     // LMK_PROCPURGE
     // LMK_GETKILLCNT
+    // LMK_PROCKILL
     static final byte LMK_TARGET = 0;
     static final byte LMK_PROCPRIO = 1;
     static final byte LMK_PROCREMOVE = 2;
     static final byte LMK_PROCPURGE = 3;
     static final byte LMK_GETKILLCNT = 4;
+    static final byte LMK_PROCKILL = 5; // Note: this is an unsolicated command
 
     // lmkd reconnect delay in msecs
-    private final static long LMDK_RECONNECT_DELAY_MS = 1000;
+    private static final long LMKD_RECONNECT_DELAY_MS = 1000;
 
     /**
      * How long between a process kill and we actually receive its death recipient
@@ -390,6 +393,12 @@ public final class ProcessList {
     ActiveUids mActiveUids;
 
     /**
+     * The listener who is intereted with the lmkd kills.
+     */
+    @GuardedBy("mService")
+    private LmkdKillListener mLmkdKillListener = null;
+
+    /**
      * The currently running isolated processes.
      */
     final SparseArray<ProcessRecord> mIsolatedProcesses = new SparseArray<>();
@@ -404,6 +413,15 @@ public final class ProcessList {
      */
     final ArrayMap<AppZygote, ArrayList<ProcessRecord>> mAppZygoteProcesses =
             new ArrayMap<AppZygote, ArrayList<ProcessRecord>>();
+
+    private PlatformCompat mPlatformCompat = null;
+
+    interface LmkdKillListener {
+        /**
+         * Called when there is a process kill by lmkd.
+         */
+        void onLmkdKillOccurred(int pid, int uid);
+    }
 
     final class IsolatedUidRange {
         @VisibleForTesting
@@ -557,7 +575,8 @@ public final class ProcessList {
 
     final class KillHandler extends Handler {
         static final int KILL_PROCESS_GROUP_MSG = 4000;
-        static final int LMDK_RECONNECT_MSG = 4001;
+        static final int LMKD_RECONNECT_MSG = 4001;
+        static final int LMKD_PROC_KILLED_MSG = 4002;
 
         public KillHandler(Looper looper) {
             super(looper, null, true);
@@ -571,14 +590,17 @@ public final class ProcessList {
                     Process.killProcessGroup(msg.arg1 /* uid */, msg.arg2 /* pid */);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
-                case LMDK_RECONNECT_MSG:
+                case LMKD_RECONNECT_MSG:
                     if (!sLmkdConnection.connect()) {
                         Slog.i(TAG, "Failed to connect to lmkd, retry after " +
-                                LMDK_RECONNECT_DELAY_MS + " ms");
-                        // retry after LMDK_RECONNECT_DELAY_MS
+                                LMKD_RECONNECT_DELAY_MS + " ms");
+                        // retry after LMKD_RECONNECT_DELAY_MS
                         sKillHandler.sendMessageDelayed(sKillHandler.obtainMessage(
-                                KillHandler.LMDK_RECONNECT_MSG), LMDK_RECONNECT_DELAY_MS);
+                                KillHandler.LMKD_RECONNECT_MSG), LMKD_RECONNECT_DELAY_MS);
                     }
+                    break;
+                case LMKD_PROC_KILLED_MSG:
+                    handleLmkdProcKilled(msg.arg1 /* pid */, msg.arg2 /* uid */);
                     break;
 
                 default:
@@ -596,9 +618,11 @@ public final class ProcessList {
         updateOomLevels(0, 0, false);
     }
 
-    void init(ActivityManagerService service, ActiveUids activeUids) {
+    void init(ActivityManagerService service, ActiveUids activeUids,
+            PlatformCompat platformCompat) {
         mService = service;
         mActiveUids = activeUids;
+        mPlatformCompat = platformCompat;
 
         if (sKillHandler == null) {
             sKillThread = new ServiceThread(TAG + ":kill",
@@ -612,13 +636,15 @@ public final class ProcessList {
                             Slog.i(TAG, "Connection with lmkd established");
                             return onLmkdConnect(ostream);
                         }
+
                         @Override
                         public void onDisconnect() {
                             Slog.w(TAG, "Lost connection to lmkd");
                             // start reconnection after delay to let lmkd restart
                             sKillHandler.sendMessageDelayed(sKillHandler.obtainMessage(
-                                    KillHandler.LMDK_RECONNECT_MSG), LMDK_RECONNECT_DELAY_MS);
+                                    KillHandler.LMKD_RECONNECT_MSG), LMKD_RECONNECT_DELAY_MS);
                         }
+
                         @Override
                         public boolean isReplyExpected(ByteBuffer replyBuf,
                                 ByteBuffer dataReceived, int receivedLen) {
@@ -626,6 +652,26 @@ public final class ProcessList {
                             // this is the reply packet we are waiting for
                             return (receivedLen == replyBuf.array().length &&
                                     dataReceived.getInt(0) == replyBuf.getInt(0));
+                        }
+
+                        @Override
+                        public boolean handleUnsolicitedMessage(ByteBuffer dataReceived,
+                                int receivedLen) {
+                            if (receivedLen < 4) {
+                                return false;
+                            }
+                            switch (dataReceived.getInt(0)) {
+                                case LMK_PROCKILL:
+                                    if (receivedLen != 12) {
+                                        return false;
+                                    }
+                                    sKillHandler.obtainMessage(KillHandler.LMKD_PROC_KILLED_MSG,
+                                            dataReceived.getInt(4), dataReceived.getInt(8))
+                                            .sendToTarget();
+                                    return true;
+                                default:
+                                    return false;
+                            }
                         }
                     }
             );
@@ -1303,10 +1349,10 @@ public final class ProcessList {
         if (!sLmkdConnection.isConnected()) {
             // try to connect immediately and then keep retrying
             sKillHandler.sendMessage(
-                sKillHandler.obtainMessage(KillHandler.LMDK_RECONNECT_MSG));
+                    sKillHandler.obtainMessage(KillHandler.LMKD_RECONNECT_MSG));
 
             // wait for connection retrying 3 times (up to 3 seconds)
-            if (!sLmkdConnection.waitForConnection(3 * LMDK_RECONNECT_DELAY_MS)) {
+            if (!sLmkdConnection.waitForConnection(3 * LMKD_RECONNECT_DELAY_MS)) {
                 return false;
             }
         }
@@ -1664,6 +1710,10 @@ public final class ProcessList {
             Slog.wtf(TAG, "startProcessLocked processName:" + app.processName
                     + " with non-zero pid:" + app.pid);
         }
+        app.mDisabledCompatChanges = null;
+        if (mPlatformCompat != null) {
+            app.mDisabledCompatChanges = mPlatformCompat.getDisabledChanges(app.info);
+        }
         final long startSeq = app.startSeq = ++mProcStartSeqCounter;
         app.setStartParams(uid, hostingRecord, seInfo, startTime);
         app.setUsingWrapper(invokeWith != null
@@ -1826,8 +1876,8 @@ public final class ProcessList {
                 startResult = startWebView(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
-                        app.info.dataDir, null, app.info.packageName,
-                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+                        app.info.dataDir, null, app.info.packageName, app.mDisabledCompatChanges,
+                        new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             } else if (hostingRecord.usesAppZygote()) {
                 final AppZygote appZygote = createAppZygoteForProcessIfNeeded(app);
 
@@ -1835,14 +1885,15 @@ public final class ProcessList {
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
-                        /*useUsapPool=*/ false, isTopApp,
-                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+                        /*useUsapPool=*/ false, isTopApp, app.mDisabledCompatChanges,
+                        new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             } else {
                 startResult = Process.start(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, invokeWith, app.info.packageName, isTopApp,
-                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+                        app.mDisabledCompatChanges,
+                        new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             }
             checkSlow(startTime, "startProcess: returned from zygote!");
             return startResult;
@@ -3390,6 +3441,30 @@ public final class ProcessList {
                     }
                 } catch (RemoteException ignored) {
                 }
+            }
+        }
+    }
+
+    void setLmkdKillListener(final LmkdKillListener listener) {
+        synchronized (mService) {
+            mLmkdKillListener = listener;
+        }
+    }
+
+    private void handleLmkdProcKilled(final int pid, final int uid) {
+        // Log only now
+        if (DEBUG_PROCESSES) {
+            Slog.i(TAG, "lmkd kill: pid=" + pid + " uid=" + uid);
+        }
+
+        if (mService == null) {
+            return;
+        }
+        // Notify any interesed party regarding the lmkd kills
+        synchronized (mService) {
+            final LmkdKillListener listener = mLmkdKillListener;
+            if (listener != null) {
+                mService.mHandler.post(()-> listener.onLmkdKillOccurred(pid, uid));
             }
         }
     }

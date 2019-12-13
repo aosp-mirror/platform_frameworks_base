@@ -142,7 +142,7 @@ public class MockingOomAdjusterTests {
         sService.mConstants = new ActivityManagerConstants(sContext, sService,
                 sContext.getMainThreadHandler());
         ProcessList pr = new ProcessList();
-        pr.init(sService, new ActiveUids(sService, false));
+        pr.init(sService, new ActiveUids(sService, false), null);
         setFieldValue(ActivityManagerService.class, sService, "mProcessList",
                 pr);
         setFieldValue(ActivityManagerService.class, sService, "mHandler",

@@ -69,8 +69,11 @@ public class DeviceConfigProxyFake extends DeviceConfigProxy {
         }
 
         for (Pair<Executor, OnPropertiesChangedListener> listener : mListeners) {
-            listener.first.execute(() -> listener.second.onPropertiesChanged(
-                    new Properties(namespace, mProperties.get(namespace))));
+            Properties.Builder propBuilder = new Properties.Builder(namespace);
+            for (String key : mProperties.get(namespace).keySet()) {
+                propBuilder.setString(key, mProperties.get(namespace).get(key));
+            }
+            listener.first.execute(() -> listener.second.onPropertiesChanged(propBuilder.build()));
         }
         return true;
     }
@@ -88,10 +91,12 @@ public class DeviceConfigProxyFake extends DeviceConfigProxy {
 
     private Properties propsForNamespaceAndName(String namespace, String name) {
         if (mProperties.containsKey(namespace) && mProperties.get(namespace).containsKey(name)) {
-            return new Properties(namespace, mProperties.get(namespace));
+            return new Properties.Builder(namespace)
+                    .setString(name, mProperties.get(namespace).get(name)).build();
         }
         if (mDefaultProperties.containsKey(namespace)) {
-            return new Properties(namespace, mDefaultProperties.get(namespace));
+            return new Properties.Builder(namespace)
+                    .setString(name, mDefaultProperties.get(namespace).get(name)).build();
         }
 
         return null;

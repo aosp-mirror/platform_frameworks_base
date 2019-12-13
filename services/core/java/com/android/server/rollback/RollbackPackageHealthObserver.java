@@ -61,7 +61,6 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * {@link PackageHealthObserver} for {@link RollbackManagerService}.
@@ -74,10 +73,6 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     private static final String TAG = "RollbackPackageHealthObserver";
     private static final String NAME = "rollback-observer";
     private static final int INVALID_ROLLBACK_ID = -1;
-    // TODO: make the following values configurable via DeviceConfig
-    private static final long NATIVE_CRASH_POLLING_INTERVAL_MILLIS =
-            TimeUnit.SECONDS.toMillis(30);
-    private static final long NUMBER_OF_NATIVE_CRASH_POLLS = 10;
 
     private final Context mContext;
     private final Handler mHandler;
@@ -85,13 +80,9 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     // Staged rollback ids that have been committed but their session is not yet ready
     @GuardedBy("mPendingStagedRollbackIds")
     private final Set<Integer> mPendingStagedRollbackIds = new ArraySet<>();
-    // this field is initialized in the c'tor and then only accessed from mHandler thread, so
-    // no need to guard with a lock
-    private long mNumberOfNativeCrashPollsRemaining;
 
     RollbackPackageHealthObserver(Context context) {
         mContext = context;
-        mNumberOfNativeCrashPollsRemaining = NUMBER_OF_NATIVE_CRASH_POLLS;
         HandlerThread handlerThread = new HandlerThread("RollbackPackageHealthObserver");
         handlerThread.start();
         mHandler = handlerThread.getThreadHandler();
@@ -102,7 +93,14 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Override
-    public int onHealthCheckFailed(VersionedPackage failedPackage) {
+    public int onHealthCheckFailed(@Nullable VersionedPackage failedPackage,
+            @FailureReasons int failureReason) {
+        // For native crashes, we will roll back any available rollbacks
+        if (failureReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH
+                && !mContext.getSystemService(RollbackManager.class)
+                .getAvailableRollbacks().isEmpty()) {
+            return PackageHealthObserverImpact.USER_IMPACT_MEDIUM;
+        }
         if (getAvailableRollback(failedPackage) == null) {
             // Don't handle the notification, no rollbacks available for the package
             return PackageHealthObserverImpact.USER_IMPACT_NONE;
@@ -113,7 +111,13 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Override
-    public boolean execute(VersionedPackage failedPackage, @FailureReasons int rollbackReason) {
+    public boolean execute(@Nullable VersionedPackage failedPackage,
+            @FailureReasons int rollbackReason) {
+        if (rollbackReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH) {
+            rollbackAll();
+            return true;
+        }
+
         RollbackInfo rollback = getAvailableRollback(failedPackage);
         if (rollback == null) {
             Slog.w(TAG, "Expected rollback but no valid rollback found for package: [ "
@@ -152,7 +156,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         String moduleMetadataPackageName = getModuleMetadataPackageName();
 
         if (!rollbackManager.getAvailableRollbacks().isEmpty()) {
-            scheduleCheckAndMitigateNativeCrashes();
+            // TODO(gavincorkery): Call into Package Watchdog from outside the observer
+            PackageWatchdog.getInstance(mContext).scheduleCheckAndMitigateNativeCrashes();
         }
 
         int rollbackId = popLastStagedRollbackId();
@@ -343,24 +348,6 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         }
     }
 
-    /**
-     * This method should be only called on mHandler thread, since it modifies
-     * {@link #mNumberOfNativeCrashPollsRemaining} and we want to keep this class lock free.
-     */
-    private void checkAndMitigateNativeCrashes() {
-        mNumberOfNativeCrashPollsRemaining--;
-        // Check if native watchdog reported a crash
-        if ("1".equals(SystemProperties.get("sys.init.updatable_crashing"))) {
-            rollbackAll();
-            // we stop polling after an attempt to execute rollback, regardless of whether the
-            // attempt succeeds or not
-        } else {
-            if (mNumberOfNativeCrashPollsRemaining > 0) {
-                mHandler.postDelayed(() -> checkAndMitigateNativeCrashes(),
-                        NATIVE_CRASH_POLLING_INTERVAL_MILLIS);
-            }
-        }
-    }
 
     /**
      * Returns true if the package name is the name of a module.
@@ -456,16 +443,6 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         }
     }
 
-    /**
-     * Since this method can eventually trigger a RollbackManager rollback, it should be called
-     * only once boot has completed {@code onBootCompleted} and not earlier, because the install
-     * session must be entirely completed before we try to rollback.
-     */
-    private void scheduleCheckAndMitigateNativeCrashes() {
-        Slog.i(TAG, "Scheduling " + mNumberOfNativeCrashPollsRemaining + " polls to check "
-                + "and mitigate native crashes");
-        mHandler.post(()->checkAndMitigateNativeCrashes());
-    }
 
     private int mapFailureReasonToMetric(@FailureReasons int failureReason) {
         switch (failureReason) {

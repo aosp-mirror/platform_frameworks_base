@@ -48,7 +48,6 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.RemoteInputController;
@@ -920,12 +919,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void keyguardGoingAway() {
         mStatusBar.keyguardGoingAway();
     }
-
-    public void animateCollapsePanels(float speedUpFactor) {
-        mStatusBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */,
-                false /* delayed */, speedUpFactor);
-    }
-
 
     /**
      * Called when cancel button in bouncer is pressed.

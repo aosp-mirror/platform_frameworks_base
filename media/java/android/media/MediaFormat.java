@@ -46,6 +46,8 @@ import java.util.stream.Collectors;
  * <tr><th>Name</th><th>Value Type</th><th>Description</th></tr>
  * <tr><td>{@link #KEY_MIME}</td><td>String</td><td>The type of the format.</td></tr>
  * <tr><td>{@link #KEY_MAX_INPUT_SIZE}</td><td>Integer</td><td>optional, maximum size of a buffer of input data</td></tr>
+ * <tr><td>{@link #KEY_PIXEL_ASPECT_RATIO_WIDTH}</td><td>Integer</td><td>optional, the pixel aspect ratio width</td></tr>
+ * <tr><td>{@link #KEY_PIXEL_ASPECT_RATIO_HEIGHT}</td><td>Integer</td><td>optional, the pixel aspect ratio height</td></tr>
  * <tr><td>{@link #KEY_BIT_RATE}</td><td>Integer</td><td><b>encoder-only</b>, desired bitrate in bits/second</td></tr>
  * </table>
  *
@@ -270,6 +272,18 @@ public final class MediaFormat {
      * The associated value is an integer
      */
     public static final String KEY_MAX_INPUT_SIZE = "max-input-size";
+
+    /**
+     * A key describing the pixel aspect ratio width.
+     * The associated value is an integer
+     */
+    public static final String KEY_PIXEL_ASPECT_RATIO_WIDTH = "sar-width";
+
+    /**
+     * A key describing the pixel aspect ratio height.
+     * The associated value is an integer
+     */
+    public static final String KEY_PIXEL_ASPECT_RATIO_HEIGHT = "sar-height";
 
     /**
      * A key describing the average bitrate in bits/sec.

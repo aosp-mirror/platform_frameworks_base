@@ -102,7 +102,7 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
                 mDozeLog,
                 mDozeParameters,
                 new CommandQueue(mContext),
-                () -> mShadeController,
+                mShadeController,
                 mDockManager,
                 mView);
         mController.setupExpandedStatusBar();

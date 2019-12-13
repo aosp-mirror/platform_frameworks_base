@@ -250,7 +250,11 @@ final class HdmiCecKeycode {
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_LEFT_UP),
             // No Android keycode defined for CEC_KEYCODE_LEFT_DOWN
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_LEFT_DOWN),
+            // Both KEYCODE_HOME and KEYCODE_MENU keys are sent as CEC_KEYCODE_ROOT_MENU
+            // NOTE that the HOME key is not usually forwarded.
+            // When CEC_KEYCODE_ROOT_MENU is received, it is translated to KEYCODE_HOME
             new KeycodeEntry(KeyEvent.KEYCODE_HOME, CEC_KEYCODE_ROOT_MENU),
+            new KeycodeEntry(KeyEvent.KEYCODE_MENU, CEC_KEYCODE_ROOT_MENU),
             new KeycodeEntry(KeyEvent.KEYCODE_SETTINGS, CEC_KEYCODE_SETUP_MENU),
             new KeycodeEntry(KeyEvent.KEYCODE_TV_CONTENTS_MENU, CEC_KEYCODE_CONTENTS_MENU, false),
             // No Android keycode defined for CEC_KEYCODE_FAVORITE_MENU

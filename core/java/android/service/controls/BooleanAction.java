@@ -18,6 +18,7 @@ package android.service.controls;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.Parcel;
 
 /**
@@ -25,6 +26,8 @@ import android.os.Parcel;
  * @hide
  */
 public final class BooleanAction extends ControlAction {
+
+    private static final String KEY_NEW_STATE = "key_new_state";
 
     private final boolean mNewState;
 
@@ -49,9 +52,9 @@ public final class BooleanAction extends ControlAction {
         mNewState = newValue;
     }
 
-    BooleanAction(Parcel in) {
-        super(in);
-        mNewState = in.readByte() == 1;
+    BooleanAction(Bundle b) {
+        super(b);
+        mNewState = b.getBoolean(KEY_NEW_STATE);
     }
 
     /**
@@ -72,17 +75,17 @@ public final class BooleanAction extends ControlAction {
         return ControlAction.TYPE_BOOLEAN;
     }
 
-
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeByte(mNewState ? (byte) 1 : (byte) 0);
+    protected Bundle getDataBundle() {
+        Bundle b =  super.getDataBundle();
+        b.putBoolean(KEY_NEW_STATE, mNewState);
+        return b;
     }
 
     public static final @NonNull Creator<BooleanAction> CREATOR = new Creator<BooleanAction>() {
         @Override
         public BooleanAction createFromParcel(Parcel source) {
-            return new BooleanAction(source);
+            return new BooleanAction(source.readBundle());
         }
 
         @Override

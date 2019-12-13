@@ -31,7 +31,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
-import com.android.server.timedetector.TimeDetectorStrategy.Callback;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -58,17 +57,16 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
 
     @NonNull private final Handler mHandler;
     @NonNull private final Context mContext;
-    @NonNull private final Callback mCallback;
     @NonNull private final TimeDetectorStrategy mTimeDetectorStrategy;
 
     private static TimeDetectorService create(@NonNull Context context) {
-        TimeDetectorStrategy timeDetector = new SimpleTimeDetectorStrategy();
+        TimeDetectorStrategy timeDetectorStrategy = new TimeDetectorStrategyImpl();
         TimeDetectorStrategyCallbackImpl callback = new TimeDetectorStrategyCallbackImpl(context);
-        timeDetector.initialize(callback);
+        timeDetectorStrategy.initialize(callback);
 
         Handler handler = FgThread.getHandler();
         TimeDetectorService timeDetectorService =
-                new TimeDetectorService(context, handler, callback, timeDetector);
+                new TimeDetectorService(context, handler, timeDetectorStrategy);
 
         // Wire up event listening.
         ContentResolver contentResolver = context.getContentResolver();
@@ -85,10 +83,9 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
 
     @VisibleForTesting
     public TimeDetectorService(@NonNull Context context, @NonNull Handler handler,
-            @NonNull Callback callback, @NonNull TimeDetectorStrategy timeDetectorStrategy) {
+            @NonNull TimeDetectorStrategy timeDetectorStrategy) {
         mContext = Objects.requireNonNull(context);
         mHandler = Objects.requireNonNull(handler);
-        mCallback = Objects.requireNonNull(callback);
         mTimeDetectorStrategy = Objects.requireNonNull(timeDetectorStrategy);
     }
 

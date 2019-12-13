@@ -27,8 +27,8 @@ import android.os.IBinder;
 import android.os.IPullAtomCallback;
 import android.os.IPullAtomResultReceiver;
 import android.os.IStatsCompanionService;
-import android.os.IStatsManager;
 import android.os.IStatsPullerCallback;
+import android.os.IStatsd;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.AndroidException;
@@ -56,7 +56,7 @@ public final class StatsManager {
     private final Context mContext;
 
     @GuardedBy("sLock")
-    private IStatsManager mService;
+    private IStatsd mService;
 
     @GuardedBy("sLock")
     private IStatsCompanionService mStatsCompanion;
@@ -129,7 +129,7 @@ public final class StatsManager {
     public void addConfig(long configKey, byte[] config) throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsManager service = getIStatsManagerLocked();
+                IStatsd service = getIStatsdLocked();
                 // can throw IllegalArgumentException
                 service.addConfiguration(configKey, config, mContext.getOpPackageName());
             } catch (RemoteException e) {
@@ -166,7 +166,7 @@ public final class StatsManager {
     public void removeConfig(long configKey) throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsManager service = getIStatsManagerLocked();
+                IStatsd service = getIStatsdLocked();
                 service.removeConfiguration(configKey, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to connect to statsd when removing configuration");
@@ -227,7 +227,7 @@ public final class StatsManager {
             throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsManager service = getIStatsManagerLocked();
+                IStatsd service = getIStatsdLocked();
                 if (pendingIntent != null) {
                     // Extracts IIntentSender from the PendingIntent and turns it into an IBinder.
                     IBinder intentSender = pendingIntent.getTarget().asBinder();
@@ -281,7 +281,7 @@ public final class StatsManager {
             throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsManager service = getIStatsManagerLocked();
+                IStatsd service = getIStatsdLocked();
                 if (pendingIntent == null) {
                     service.removeDataFetchOperation(configKey, mContext.getOpPackageName());
                 } else {
@@ -319,7 +319,7 @@ public final class StatsManager {
             throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsManager service = getIStatsManagerLocked();
+                IStatsd service = getIStatsdLocked();
                 if (pendingIntent == null) {
                     service.removeActiveConfigsChangedOperation(mContext.getOpPackageName());
                     return new long[0];
@@ -367,7 +367,7 @@ public final class StatsManager {
     public byte[] getReports(long configKey) throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsManager service = getIStatsManagerLocked();
+                IStatsd service = getIStatsdLocked();
                 return service.getData(configKey, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to connect to statsd when getting data");
@@ -404,7 +404,7 @@ public final class StatsManager {
     public byte[] getStatsMetadata() throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsManager service = getIStatsManagerLocked();
+                IStatsd service = getIStatsdLocked();
                 return service.getMetadata(mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to connect to statsd when getting metadata");
@@ -439,7 +439,7 @@ public final class StatsManager {
             throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsManager service = getIStatsManagerLocked();
+                IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
                         Slog.d(TAG, "Failed to find statsd when getting experiment IDs");
@@ -476,7 +476,7 @@ public final class StatsManager {
             throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsManager service = getIStatsManagerLocked();
+                IStatsd service = getIStatsdLocked();
                 if (callback == null) {
                     service.unregisterPullerCallback(atomTag, mContext.getOpPackageName());
                 } else {
@@ -660,11 +660,11 @@ public final class StatsManager {
     }
 
     @GuardedBy("sLock")
-    private IStatsManager getIStatsManagerLocked() throws StatsUnavailableException {
+    private IStatsd getIStatsdLocked() throws StatsUnavailableException {
         if (mService != null) {
             return mService;
         }
-        mService = IStatsManager.Stub.asInterface(ServiceManager.getService("stats"));
+        mService = IStatsd.Stub.asInterface(ServiceManager.getService("stats"));
         if (mService == null) {
             throw new StatsUnavailableException("could not be found");
         }

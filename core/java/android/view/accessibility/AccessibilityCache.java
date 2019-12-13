@@ -69,6 +69,8 @@ public class AccessibilityCache {
     private long mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
     private long mInputFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
 
+    private int mAccessibilityFocusedWindow = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+
     private boolean mIsAllWindowsCached;
 
     // The SparseArray of all {@link AccessibilityWindowInfo}s on all displays.
@@ -164,16 +166,19 @@ public class AccessibilityCache {
             switch (eventType) {
                 case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED: {
                     if (mAccessibilityFocus != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                        refreshCachedNodeLocked(event.getWindowId(), mAccessibilityFocus);
+                        refreshCachedNodeLocked(mAccessibilityFocusedWindow, mAccessibilityFocus);
                     }
                     mAccessibilityFocus = event.getSourceNodeId();
-                    refreshCachedNodeLocked(event.getWindowId(), mAccessibilityFocus);
+                    mAccessibilityFocusedWindow = event.getWindowId();
+                    refreshCachedNodeLocked(mAccessibilityFocusedWindow, mAccessibilityFocus);
                 } break;
 
                 case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED: {
-                    if (mAccessibilityFocus == event.getSourceNodeId()) {
-                        refreshCachedNodeLocked(event.getWindowId(), mAccessibilityFocus);
+                    if (mAccessibilityFocus == event.getSourceNodeId()
+                            && mAccessibilityFocusedWindow == event.getWindowId()) {
+                        refreshCachedNodeLocked(mAccessibilityFocusedWindow, mAccessibilityFocus);
                         mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+                        mAccessibilityFocusedWindow = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
                     }
                 } break;
 
@@ -210,6 +215,13 @@ public class AccessibilityCache {
                 } break;
 
                 case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
+                    if (event.getWindowChanges()
+                            == AccessibilityEvent.WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED) {
+                        // Don't need to clear all cache. Unless the changes are related to
+                        // content, we won't clear all cache here.
+                        refreshCachedWindowLocked(event.getWindowId());
+                        break;
+                    }
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
                     clear();
                 } break;
@@ -241,6 +253,34 @@ public class AccessibilityCache {
         }
         // Weird, we could not refresh. Just evict the entire sub-tree.
         clearSubTreeLocked(windowId, sourceId);
+    }
+
+    private void refreshCachedWindowLocked(int windowId) {
+        if (DEBUG) {
+            Log.i(LOG_TAG, "Refreshing cached window.");
+        }
+
+        if (windowId == AccessibilityWindowInfo.UNDEFINED_WINDOW_ID) {
+            return;
+        }
+
+        final int displayCounts = mWindowCacheByDisplay.size();
+        for (int i = 0; i < displayCounts; i++) {
+            final SparseArray<AccessibilityWindowInfo> windowsOfDisplay =
+                    mWindowCacheByDisplay.valueAt(i);
+            if (windowsOfDisplay == null) {
+                continue;
+            }
+            final AccessibilityWindowInfo window = windowsOfDisplay.get(windowId);
+            if (window == null) {
+                continue;
+            }
+            if (!mAccessibilityNodeRefresher.refreshWindow(window)) {
+                // If we fail to refresh the window, clear all windows.
+                clearWindowCacheLocked();
+            }
+            return;
+        }
     }
 
     /**
@@ -413,8 +453,10 @@ public class AccessibilityCache {
                     refreshCachedNodeLocked(windowId, mAccessibilityFocus);
                 }
                 mAccessibilityFocus = sourceId;
+                mAccessibilityFocusedWindow = windowId;
             } else if (mAccessibilityFocus == sourceId) {
                 mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+                mAccessibilityFocusedWindow = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
             }
             if (clone.isFocused()) {
                 mInputFocus = sourceId;
@@ -439,6 +481,8 @@ public class AccessibilityCache {
 
             mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
             mInputFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+
+            mAccessibilityFocusedWindow = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
         }
     }
 
@@ -653,8 +697,14 @@ public class AccessibilityCache {
 
     // Layer of indirection included to break dependency chain for testing
     public static class AccessibilityNodeRefresher {
+        /** Refresh the given AccessibilityNodeInfo object. */
         public boolean refreshNode(AccessibilityNodeInfo info, boolean bypassCache) {
             return info.refresh(null, bypassCache);
+        }
+
+        /** Refresh the given AccessibilityWindowInfo object. */
+        public boolean refreshWindow(AccessibilityWindowInfo info) {
+            return info.refresh();
         }
     }
 }

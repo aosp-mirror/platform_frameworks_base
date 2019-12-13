@@ -69,7 +69,7 @@ public class TextClassifierTest {
     public String mTextClassifierType;
 
     private static final TextClassificationConstants TC_CONSTANTS =
-            new TextClassificationConstants(() -> "");
+            new TextClassificationConstants();
     private static final LocaleList LOCALES = LocaleList.forLanguageTags("en-US");
     private static final String NO_TYPE = null;
 

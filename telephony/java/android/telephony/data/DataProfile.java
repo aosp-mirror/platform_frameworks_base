@@ -22,7 +22,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Annotation.ApnType;
@@ -31,6 +30,7 @@ import android.telephony.data.ApnSetting.AuthType;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -261,7 +261,7 @@ public final class DataProfile implements Parcelable {
     @Override
     public String toString() {
         return "DataProfile=" + mProfileId + "/" + mProtocolType + "/" + mAuthType
-                + "/" + (Build.IS_USER ? "***/***/***" :
+                + "/" + (TelephonyUtils.IS_USER ? "***/***/***" :
                          (mApn + "/" + mUserName + "/" + mPassword)) + "/" + mType + "/"
                 + mMaxConnectionsTime + "/" + mMaxConnections + "/"
                 + mWaitTime + "/" + mEnabled + "/" + mSupportedApnTypesBitmask + "/"

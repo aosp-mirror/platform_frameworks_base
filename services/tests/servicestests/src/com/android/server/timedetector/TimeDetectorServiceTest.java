@@ -38,8 +38,6 @@ import android.util.TimestampedValue;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.timedetector.TimeDetectorStrategy.Callback;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +50,6 @@ public class TimeDetectorServiceTest {
 
     private Context mMockContext;
     private StubbedTimeDetectorStrategy mStubbedTimeDetectorStrategy;
-    private Callback mMockCallback;
 
     private TimeDetectorService mTimeDetectorService;
     private HandlerThread mHandlerThread;
@@ -68,12 +65,10 @@ public class TimeDetectorServiceTest {
         mHandlerThread.start();
         mTestHandler = new TestHandler(mHandlerThread.getLooper());
 
-        mMockCallback = mock(Callback.class);
         mStubbedTimeDetectorStrategy = new StubbedTimeDetectorStrategy();
 
         mTimeDetectorService = new TimeDetectorService(
-                mMockContext, mTestHandler, mMockCallback,
-                mStubbedTimeDetectorStrategy);
+                mMockContext, mTestHandler, mStubbedTimeDetectorStrategy);
     }
 
     @After
@@ -100,13 +95,13 @@ public class TimeDetectorServiceTest {
 
     @Test
     public void testSuggestManualTime() throws Exception {
-        doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
+        doNothing().when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
 
         ManualTimeSuggestion manualTimeSuggestion = createManualTimeSuggestion();
         mTimeDetectorService.suggestManualTime(manualTimeSuggestion);
         mTestHandler.assertTotalMessagesEnqueued(1);
 
-        verify(mMockContext).enforceCallingPermission(
+        verify(mMockContext).enforceCallingOrSelfPermission(
                 eq(android.Manifest.permission.SET_TIME),
                 anyString());
 

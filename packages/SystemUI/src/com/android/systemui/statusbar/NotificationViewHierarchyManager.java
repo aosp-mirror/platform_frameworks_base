@@ -37,7 +37,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.Utils;
 
@@ -48,8 +47,6 @@ import java.util.Stack;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import dagger.Lazy;
 
 /**
  * NotificationViewHierarchyManager manages updating the view hierarchy of notification views based
@@ -74,9 +71,6 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     protected final VisualStabilityManager mVisualStabilityManager;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final NotificationEntryManager mEntryManager;
-
-    // Lazy
-    private final Lazy<ShadeController> mShadeController;
 
     /**
      * {@code true} if notifications not part of a group should by default be rendered in their
@@ -105,7 +99,6 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             VisualStabilityManager visualStabilityManager,
             StatusBarStateController statusBarStateController,
             NotificationEntryManager notificationEntryManager,
-            Lazy<ShadeController> shadeController,
             KeyguardBypassController bypassController,
             BubbleController bubbleController,
             DynamicPrivacyController privacyController) {
@@ -117,7 +110,6 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarStateController = (SysuiStatusBarStateController) statusBarStateController;
         mEntryManager = notificationEntryManager;
-        mShadeController = shadeController;
         Resources res = context.getResources();
         mAlwaysExpandNonGroupedNotification =
                 res.getBoolean(R.bool.config_alwaysExpandNonGroupedNotifications);

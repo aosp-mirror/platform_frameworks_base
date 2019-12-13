@@ -14,8 +14,24 @@
  * limitations under the License.
  */
 
+package android.hardware.soundtrigger;
+
 /**
- * This package separated from android. because placing classes under android.'s .test/.util
- * may be confused with tests for that actual android subpackage.
- **/
-package test;
+ * Model specific parameters to be used with parameter set and get APIs
+ * {@hide}
+ */
+@Backing(type="int")
+enum ModelParams {
+  /**
+   * Placeholder for invalid model parameter used for returning error or
+   * passing an invalid value.
+   */
+  INVALID = -1,
+  /**
+   * Controls the sensitivity threshold adjustment factor for a given model.
+   * Negative value corresponds to less sensitive model (high threshold) and
+   * a positive value corresponds to a more sensitive model (low threshold).
+   * Default value is 0.
+   */
+  THRESHOLD_FACTOR = 0,
+}

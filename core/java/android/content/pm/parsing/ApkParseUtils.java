@@ -52,7 +52,6 @@ import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
 import android.content.pm.split.SplitAssetLoader;
-import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -93,7 +92,6 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /** @hide */
@@ -289,23 +287,8 @@ public class ApkParseUtils {
                                 + result.getErrorMessage());
             }
 
-            ParsingPackage pkg = result.getResultAndNull();
-            ApkAssets apkAssets = assets.getApkAssets()[0];
-            if (apkAssets.definesOverlayable()) {
-                SparseArray<String> packageNames = assets.getAssignedPackageIdentifiers();
-                int size = packageNames.size();
-                for (int index = 0; index < size; index++) {
-                    String packageName = packageNames.get(index);
-                    Map<String, String> overlayableToActor = assets.getOverlayableMap(packageName);
-                    if (overlayableToActor != null && !overlayableToActor.isEmpty()) {
-                        for (String overlayable : overlayableToActor.keySet()) {
-                            pkg.addOverlayable(overlayable, overlayableToActor.get(overlayable));
-                        }
-                    }
-                }
-            }
-
-            return pkg.setVolumeUuid(volumeUuid)
+            return result.getResultAndNull()
+                    .setVolumeUuid(volumeUuid)
                     .setApplicationVolumeUuid(volumeUuid)
                     .setSigningDetails(SigningDetails.UNKNOWN);
         } catch (PackageParserException e) {

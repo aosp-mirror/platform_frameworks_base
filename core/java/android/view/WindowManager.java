@@ -29,7 +29,6 @@ import static android.view.WindowLayoutParamsProto.HAS_SYSTEM_UI_LISTENERS;
 import static android.view.WindowLayoutParamsProto.HEIGHT;
 import static android.view.WindowLayoutParamsProto.HORIZONTAL_MARGIN;
 import static android.view.WindowLayoutParamsProto.INPUT_FEATURE_FLAGS;
-import static android.view.WindowLayoutParamsProto.NEEDS_MENU_KEY;
 import static android.view.WindowLayoutParamsProto.PREFERRED_REFRESH_RATE;
 import static android.view.WindowLayoutParamsProto.PRIVATE_FLAGS;
 import static android.view.WindowLayoutParamsProto.ROTATION_ANIMATION;
@@ -1948,48 +1947,6 @@ public interface WindowManager extends ViewManager {
         public int privateFlags;
 
         /**
-         * Value for {@link #needsMenuKey} for a window that has not explicitly specified if it
-         * needs {@link #NEEDS_MENU_SET_TRUE} or doesn't need {@link #NEEDS_MENU_SET_FALSE} a menu
-         * key. For this case, we should look at windows behind it to determine the appropriate
-         * value.
-         *
-         * @hide
-         */
-        public static final int NEEDS_MENU_UNSET = 0;
-
-        /**
-         * Value for {@link #needsMenuKey} for a window that has explicitly specified it needs a
-         * menu key.
-         *
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public static final int NEEDS_MENU_SET_TRUE = 1;
-
-        /**
-         * Value for {@link #needsMenuKey} for a window that has explicitly specified it doesn't
-         * needs a menu key.
-         *
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public static final int NEEDS_MENU_SET_FALSE = 2;
-
-        /**
-         * State variable for a window belonging to an activity that responds to
-         * {@link KeyEvent#KEYCODE_MENU} and therefore needs a Menu key. For devices where Menu is a
-         * physical button this variable is ignored, but on devices where the Menu key is drawn in
-         * software it may be hidden unless this variable is set to {@link #NEEDS_MENU_SET_TRUE}.
-         *
-         *  (Note that Action Bars, when available, are the preferred way to offer additional
-         * functions otherwise accessed via an options menu.)
-         *
-         * {@hide}
-         */
-        @UnsupportedAppUsage
-        public int needsMenuKey = NEEDS_MENU_UNSET;
-
-        /**
          * Given a particular set of window manager flags, determine whether
          * such a window may be a target for an input method when it has
          * focus.  In particular, this checks the
@@ -2791,7 +2748,6 @@ public interface WindowManager extends ViewManager {
             out.writeInt(surfaceInsets.bottom);
             out.writeInt(hasManualSurfaceInsets ? 1 : 0);
             out.writeInt(preservePreviousSurfaceInsets ? 1 : 0);
-            out.writeInt(needsMenuKey);
             out.writeLong(accessibilityIdOfAnchor);
             TextUtils.writeToParcel(accessibilityTitle, out, parcelableFlags);
             out.writeInt(mColorMode);
@@ -2849,7 +2805,6 @@ public interface WindowManager extends ViewManager {
             surfaceInsets.bottom = in.readInt();
             hasManualSurfaceInsets = in.readInt() != 0;
             preservePreviousSurfaceInsets = in.readInt() != 0;
-            needsMenuKey = in.readInt();
             accessibilityIdOfAnchor = in.readLong();
             accessibilityTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             mColorMode = in.readInt();
@@ -2890,8 +2845,6 @@ public interface WindowManager extends ViewManager {
         public static final int SURFACE_INSETS_CHANGED = 1<<20;
         /** {@hide} */
         public static final int PREFERRED_REFRESH_RATE_CHANGED = 1 << 21;
-        /** {@hide} */
-        public static final int NEEDS_MENU_KEY_CHANGED = 1 << 22;
         /** {@hide} */
         public static final int PREFERRED_DISPLAY_MODE_ID = 1 << 23;
         /** {@hide} */
@@ -3066,11 +3019,6 @@ public interface WindowManager extends ViewManager {
                 changes |= SURFACE_INSETS_CHANGED;
             }
 
-            if (needsMenuKey != o.needsMenuKey) {
-                needsMenuKey = o.needsMenuKey;
-                changes |= NEEDS_MENU_KEY_CHANGED;
-            }
-
             if (accessibilityIdOfAnchor != o.accessibilityIdOfAnchor) {
                 accessibilityIdOfAnchor = o.accessibilityIdOfAnchor;
                 changes |= ACCESSIBILITY_ANCHOR_CHANGED;
@@ -3224,9 +3172,6 @@ public interface WindowManager extends ViewManager {
                     sb.append(" (!preservePreviousSurfaceInsets)");
                 }
             }
-            if (needsMenuKey == NEEDS_MENU_SET_TRUE) {
-                sb.append(" needsMenuKey");
-            }
             if (mColorMode != COLOR_MODE_DEFAULT) {
                 sb.append(" colorMode=").append(ActivityInfo.colorModeToString(mColorMode));
             }
@@ -3288,7 +3233,6 @@ public interface WindowManager extends ViewManager {
             proto.write(HAS_SYSTEM_UI_LISTENERS, hasSystemUiListeners);
             proto.write(INPUT_FEATURE_FLAGS, inputFeatures);
             proto.write(USER_ACTIVITY_TIMEOUT, userActivityTimeout);
-            proto.write(NEEDS_MENU_KEY, needsMenuKey);
             proto.write(COLOR_MODE, mColorMode);
             proto.write(FLAGS, flags);
             proto.write(PRIVATE_FLAGS, privateFlags);

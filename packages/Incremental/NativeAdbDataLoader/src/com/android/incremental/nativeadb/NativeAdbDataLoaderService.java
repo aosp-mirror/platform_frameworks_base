@@ -13,31 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef STATS_EVENT_H
-#define STATS_EVENT_H
 
-#include <binder/Parcel.h>
-#include <binder/Parcelable.h>
-#include <binder/Status.h>
-#include <vector>
+package com.android.incremental.nativeadb;
 
-namespace android {
-namespace util {
-class StatsEvent : public android::Parcelable {
-    public:
-        StatsEvent();
+import android.service.incremental.IncrementalDataLoaderService;
 
-        StatsEvent(StatsEvent&& in) = default;
+/** This code is used for testing only. */
+public class NativeAdbDataLoaderService extends IncrementalDataLoaderService {
+    public static final String TAG = "NativeAdbDataLoaderService";
+    static {
+        System.loadLibrary("nativeadbdataloaderservice_jni");
+    }
 
-        android::status_t writeToParcel(android::Parcel* out) const;
-
-        android::status_t readFromParcel(const android::Parcel* in);
-
-    private:
-        int mAtomTag;
-        std::vector<uint8_t> mBuffer;
-};
-} // Namespace util
-} // Namespace android
-
-#endif  // STATS_ EVENT_H
+    @Override
+    public DataLoader onCreateDataLoader() {
+        return null;
+    }
+}

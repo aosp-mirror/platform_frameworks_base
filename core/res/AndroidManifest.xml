@@ -3264,13 +3264,6 @@
     <permission android:name="android.permission.BIND_TV_INPUT"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Must be required by an {@link android.service.sms.FinancialSmsService}
-         to ensure that only the system can bind to it.
-         @hide This is not a third-party API (intended for OEMs and system apps).
-    -->
-    <permission android:name="android.permission.BIND_FINANCIAL_SMS_SERVICE"
-                android:protectionLevel="signature" />
-
     <!-- @SystemApi
          Must be required by a {@link com.android.media.tv.remoteprovider.TvRemoteProvider}
          to ensure that only the system can bind to it.

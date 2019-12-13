@@ -273,14 +273,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         public WindowManager.LayoutParams getAttrs();
 
         /**
-         * Return whether this window needs the menu key shown.  Must be called
-         * with window lock held, because it may need to traverse down through
-         * window list to determine the result.
-         * @param bottom The bottom-most window to consider when determining this.
-         */
-        public boolean getNeedsMenuLw(WindowState bottom);
-
-        /**
          * Retrieve the current system UI visibility flags associated with
          * this window.
          */

@@ -39,7 +39,7 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.ShadeControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.Optional;
@@ -82,7 +82,7 @@ abstract class SystemUIDefaultModule {
             KeyguardEnvironmentImpl keyguardEnvironment);
 
     @Binds
-    abstract ShadeController provideShadeController(StatusBar statusBar);
+    abstract ShadeController provideShadeController(ShadeControllerImpl shadeController);
 
     @Singleton
     @Provides

@@ -78,6 +78,7 @@ import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarComponent;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -183,6 +184,7 @@ public class CarStatusBarModule {
             LightsOutNotifController lightsOutNotifController,
             StatusBarNotificationActivityStarter.Builder
                     statusBarNotificationActivityStarterBuilder,
+            ShadeController shadeController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
             DismissCallbackRegistry dismissCallbackRegistry,
@@ -259,6 +261,7 @@ public class CarStatusBarModule {
                 superStatusBarViewFactory,
                 lightsOutNotifController,
                 statusBarNotificationActivityStarterBuilder,
+                shadeController,
                 statusBarKeyguardViewManager,
                 viewMediatorCallback,
                 dismissCallbackRegistry,
