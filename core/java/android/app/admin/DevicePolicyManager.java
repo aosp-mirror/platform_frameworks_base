@@ -2324,6 +2324,11 @@ public class DevicePolicyManager {
 
     /**
      * Activity action: Starts the administrator to show policy compliance for the provisioning.
+     * This action is used any time that the administrator has an opportunity to show policy
+     * compliance before the end of setup wizard. This could happen as part of the admin-integrated
+     * provisioning flow (in which case this gets sent after {@link #ACTION_GET_PROVISIONING_MODE}),
+     * or it could happen during provisioning finalization if the administrator supports
+     * finalization during setup wizard.
      */
     public static final String ACTION_ADMIN_POLICY_COMPLIANCE =
             "android.app.action.ADMIN_POLICY_COMPLIANCE";
