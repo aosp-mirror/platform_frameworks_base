@@ -33,6 +33,5 @@ cc_library_shared {
         "liblog",
         "libnativehelper",
         "libutils",
-        "libincremental_aidl-cpp",
     ],
 }
