@@ -18,7 +18,6 @@ package com.android.server.appop;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.AppOpsManager.NoteOpEvent;
-import static android.app.AppOpsManager.OpEventProxyInfo;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_COARSE_LOCATION;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
@@ -26,6 +25,7 @@ import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
+import static android.app.AppOpsManager.OpEventProxyInfo;
 import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
 import static android.app.AppOpsManager.UID_STATE_CACHED;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
@@ -40,6 +40,8 @@ import static android.app.AppOpsManager.makeKey;
 import static android.app.AppOpsManager.modeToName;
 import static android.app.AppOpsManager.opToName;
 import static android.app.AppOpsManager.resolveFirstUnrestrictedUidState;
+import static android.content.Intent.ACTION_PACKAGE_REMOVED;
+import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 
 import android.Manifest;
@@ -69,6 +71,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.parsing.ComponentParseUtils.ParsedFeature;
 import android.database.ContentObserver;
 import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;
 import android.net.Uri;
@@ -122,6 +126,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
+import com.android.server.SystemServerInitThreadPool;
 
 import libcore.util.EmptyArray;
 
@@ -468,6 +473,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         final UidState uidState;
         final boolean isPrivileged;
 
+        /** Lazily populated cache of featureIds of this package */
+        final @NonNull ArraySet<String> knownFeatureIds = new ArraySet<>();
+
         Ops(String _packageName, UidState _uidState, boolean _isPrivileged) {
             packageName = _packageName;
             uidState = _uidState;
@@ -527,7 +535,7 @@ public class AppOpsService extends IAppOpsService.Stub {
          * <p>Key is {@link AppOpsManager#makeKey}
          */
         @GuardedBy("AppOpsService.this")
-        private @Nullable LongSparseArray<AppOpsManager.NoteOpEvent> mAccessEvents;
+        private @Nullable LongSparseArray<NoteOpEvent> mAccessEvents;
 
         /**
          * Last rejected accesses for each uidState/opFlag combination
@@ -535,7 +543,7 @@ public class AppOpsService extends IAppOpsService.Stub {
          * <p>Key is {@link AppOpsManager#makeKey}
          */
         @GuardedBy("AppOpsService.this")
-        private @Nullable LongSparseArray<AppOpsManager.NoteOpEvent> mRejectEvents;
+        private @Nullable LongSparseArray<NoteOpEvent> mRejectEvents;
 
         /**
          * Currently in progress startOp events
@@ -746,6 +754,56 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
             }
+        }
+
+        /**
+         * Combine {@code a} and {@code b} and return the result. The result might be {@code a}
+         * or {@code b}. If there is an event for the same key in both the later event is retained.
+         */
+        private @Nullable LongSparseArray<NoteOpEvent> add(@Nullable LongSparseArray<NoteOpEvent> a,
+                @Nullable LongSparseArray<NoteOpEvent> b) {
+            if (a == null) {
+                return b;
+            }
+
+            if (b == null) {
+                return a;
+            }
+
+            int numEventsToAdd = b.size();
+            for (int i = 0; i < numEventsToAdd; i++) {
+                long keyOfEventToAdd = b.keyAt(i);
+                NoteOpEvent bEvent = b.valueAt(i);
+                NoteOpEvent aEvent = a.get(keyOfEventToAdd);
+
+                if (aEvent == null || bEvent.noteTime > aEvent.noteTime) {
+                    a.put(keyOfEventToAdd, bEvent);
+                }
+            }
+
+            return a;
+        }
+
+        /**
+         * Add all data from the {@code featureToAdd} to this op.
+         *
+         * <p>If there is an event for the same key in both the later event is retained.
+         * <p>{@code opToAdd} should not be used after this method is called.
+         *
+         * @param opToAdd The op to add
+         */
+        public void add(@NonNull FeatureOp opToAdd) {
+            if (opToAdd.mInProgressEvents != null) {
+                Slog.w(TAG, "Ignoring " + opToAdd.mInProgressEvents.size() + " running app-ops");
+
+                int numInProgressEvents = opToAdd.mInProgressEvents.size();
+                for (int i = 0; i < numInProgressEvents; i++) {
+                    opToAdd.mInProgressEvents.valueAt(i).finish();
+                }
+            }
+
+            mAccessEvents = add(mAccessEvents, opToAdd.mAccessEvents);
+            mRejectEvents = add(mRejectEvents, opToAdd.mRejectEvents);
         }
 
         public boolean isRunning() {
@@ -1038,20 +1096,110 @@ public class AppOpsService extends IAppOpsService.Stub {
         LocalServices.addService(AppOpsManagerInternal.class, mAppOpsManagerInternal);
     }
 
+    /** Handler for work when packages are removed or updated */
+    private BroadcastReceiver mOnPackageUpdatedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            String pkgName = intent.getData().getEncodedSchemeSpecificPart();
+            int uid = intent.getIntExtra(Intent.EXTRA_UID, Process.INVALID_UID);
+
+            if (action.equals(ACTION_PACKAGE_REMOVED) && !intent.hasExtra(EXTRA_REPLACING)) {
+                synchronized (AppOpsService.this) {
+                    UidState uidState = mUidStates.get(uid);
+                    if (uidState == null || uidState.pkgOps == null) {
+                        return;
+                    }
+
+                    Ops removedOps = uidState.pkgOps.remove(pkgName);
+                    if (removedOps != null) {
+                        scheduleFastWriteLocked();
+                    }
+                }
+            } else if (action.equals(Intent.ACTION_PACKAGE_REPLACED)) {
+                AndroidPackage pkg = LocalServices.getService(
+                        PackageManagerInternal.class).getPackage(pkgName);
+                if (pkg == null) {
+                    return;
+                }
+
+                ArrayMap<String, String> dstFeatureIds = new ArrayMap<>();
+                ArraySet<String> featureIds = new ArraySet<>();
+                if (pkg.getFeatures() != null) {
+                    int numFeatures = pkg.getFeatures().size();
+                    for (int featureNum = 0; featureNum < numFeatures; featureNum++) {
+                        ParsedFeature feature = pkg.getFeatures().get(featureNum);
+                        featureIds.add(feature.id);
+
+                        int numInheritFrom = feature.inheritFrom.size();
+                        for (int inheritFromNum = 0; inheritFromNum < numInheritFrom;
+                                inheritFromNum++) {
+                            dstFeatureIds.put(feature.inheritFrom.get(inheritFromNum),
+                                    feature.id);
+                        }
+                    }
+                }
+
+                synchronized (AppOpsService.this) {
+                    UidState uidState = mUidStates.get(uid);
+                    if (uidState == null || uidState.pkgOps == null) {
+                        return;
+                    }
+
+                    Ops ops = uidState.pkgOps.get(pkgName);
+                    if (ops == null) {
+                        return;
+                    }
+
+                    ops.knownFeatureIds.clear();
+                    int numOps = ops.size();
+                    for (int opNum = 0; opNum < numOps; opNum++) {
+                        Op op = ops.valueAt(opNum);
+
+                        int numFeatures = op.mFeatures.size();
+                        for (int featureNum = numFeatures - 1; featureNum >= 0; featureNum--) {
+                            String featureId = op.mFeatures.keyAt(featureNum);
+
+                            if (featureIds.contains(featureId)) {
+                                // feature still exist after upgrade
+                                continue;
+                            }
+
+                            String newFeatureId = dstFeatureIds.get(featureId);
+
+                            FeatureOp newFeatureOp = op.getOrCreateFeature(op, newFeatureId);
+                            newFeatureOp.add(op.mFeatures.valueAt(featureNum));
+                            op.mFeatures.removeAt(featureNum);
+
+                            scheduleFastWriteLocked();
+                        }
+                    }
+                }
+            }
+        }
+    };
+
     public void systemReady() {
         mConstants.startMonitoring(mContext.getContentResolver());
         mHistoricalRegistry.systemReady(mContext.getContentResolver());
 
-        synchronized (this) {
-            boolean changed = false;
-            for (int i = mUidStates.size() - 1; i >= 0; i--) {
-                UidState uidState = mUidStates.valueAt(i);
+        IntentFilter packageUpdateFilter = new IntentFilter();
+        packageUpdateFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        packageUpdateFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        packageUpdateFilter.addDataScheme("package");
 
-                String[] packageNames = getPackagesForUid(uidState.uid);
-                if (ArrayUtils.isEmpty(packageNames)) {
+        mContext.registerReceiver(mOnPackageUpdatedReceiver, packageUpdateFilter);
+
+        synchronized (this) {
+            for (int uidNum = mUidStates.size() - 1; uidNum >= 0; uidNum--) {
+                int uid = mUidStates.keyAt(uidNum);
+                UidState uidState = mUidStates.valueAt(uidNum);
+
+                String[] pkgsInUid = getPackagesForUid(uidState.uid);
+                if (ArrayUtils.isEmpty(pkgsInUid)) {
                     uidState.clear();
-                    mUidStates.removeAt(i);
-                    changed = true;
+                    mUidStates.removeAt(uidNum);
+                    scheduleFastWriteLocked();
                     continue;
                 }
 
@@ -1060,30 +1208,23 @@ public class AppOpsService extends IAppOpsService.Stub {
                     continue;
                 }
 
-                Iterator<Ops> it = pkgs.values().iterator();
-                while (it.hasNext()) {
-                    Ops ops = it.next();
-                    int curUid = -1;
-                    try {
-                        curUid = AppGlobals.getPackageManager().getPackageUid(ops.packageName,
-                                PackageManager.MATCH_UNINSTALLED_PACKAGES,
-                                UserHandle.getUserId(ops.uidState.uid));
-                    } catch (RemoteException ignored) {
-                    }
-                    if (curUid != ops.uidState.uid) {
-                        Slog.i(TAG, "Pruning old package " + ops.packageName
-                                + "/" + ops.uidState + ": new uid=" + curUid);
-                        it.remove();
-                        changed = true;
-                    }
-                }
+                int numPkgs = pkgs.size();
+                for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
+                    String pkg = pkgs.keyAt(pkgNum);
 
-                if (uidState.isDefault()) {
-                    mUidStates.removeAt(i);
+                    String action;
+                    if (!ArrayUtils.contains(pkgsInUid, pkg)) {
+                        action = Intent.ACTION_PACKAGE_REMOVED;
+                    } else {
+                        action = Intent.ACTION_PACKAGE_REPLACED;
+                    }
+
+                    SystemServerInitThreadPool.submit(
+                            () -> mOnPackageUpdatedReceiver.onReceive(mContext, new Intent(action)
+                                    .setData(Uri.fromParts("package", pkg, null))
+                                    .putExtra(Intent.EXTRA_UID, uid)),
+                            "Update app-ops uidState in case package " + pkg + " changed");
                 }
-            }
-            if (changed) {
-                scheduleFastWriteLocked();
             }
         }
 
@@ -1388,7 +1529,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             return Collections.emptyList();
         }
         synchronized (this) {
-            Ops pkgOps = getOpsRawLocked(uid, resolvedPackageName, false /* isPrivileged */,
+            Ops pkgOps = getOpsRawLocked(uid, resolvedPackageName, null, false /* isPrivileged */,
                     false /* edit */);
             if (pkgOps == null) {
                 return null;
@@ -1488,7 +1629,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         op.removeFeaturesWithNoTime();
 
         if (op.mFeatures.size() == 0) {
-            Ops ops = getOpsRawLocked(uid, packageName, false /* isPrivileged */,
+            Ops ops = getOpsRawLocked(uid, packageName, null, false /* isPrivileged */,
                     false /* edit */);
             if (ops != null) {
                 ops.remove(op.op);
@@ -1752,7 +1893,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         boolean isPrivileged;
         try {
-            isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
+            isPrivileged = verifyAndGetIsPrivileged(uid, packageName, null);
         } catch (SecurityException e) {
             Slog.e(TAG, "Cannot setMode", e);
             return;
@@ -1767,7 +1908,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         synchronized (this) {
             UidState uidState = getUidStateLocked(uid, false);
-            Op op = getOpLocked(code, uid, packageName, isPrivileged, true);
+            Op op = getOpLocked(code, uid, packageName, null, isPrivileged, true);
             if (op != null) {
                 if (op.mode != mode) {
                     op.mode = mode;
@@ -2137,7 +2278,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         boolean isPrivileged;
 
         try {
-            isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
+            isPrivileged = verifyAndGetIsPrivileged(uid, packageName, null);
         } catch (SecurityException e) {
             Slog.e(TAG, "checkOperation", e);
             return AppOpsManager.opToDefaultMode(code);
@@ -2147,7 +2288,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             return AppOpsManager.MODE_IGNORED;
         }
         synchronized (this) {
-            if (isOpRestrictedLocked(uid, code, packageName, isPrivileged)) {
+            if (isOpRestrictedLocked(uid, code, packageName, null, isPrivileged)) {
                 return AppOpsManager.MODE_IGNORED;
             }
             code = AppOpsManager.opToSwitch(code);
@@ -2157,7 +2298,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final int rawMode = uidState.opModes.get(code);
                 return raw ? rawMode : uidState.evalMode(code, rawMode);
             }
-            Op op = getOpLocked(code, uid, packageName, false, false);
+            Op op = getOpLocked(code, uid, packageName, null, false, false);
             if (op == null) {
                 return AppOpsManager.opToDefaultMode(code);
             }
@@ -2220,7 +2361,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     public int checkPackage(int uid, String packageName) {
         Objects.requireNonNull(packageName);
         try {
-            verifyAndGetIsPrivileged(uid, packageName);
+            verifyAndGetIsPrivileged(uid, packageName, null);
 
             return AppOpsManager.MODE_ALLOWED;
         } catch (SecurityException ignored) {
@@ -2290,18 +2431,17 @@ public class AppOpsService extends IAppOpsService.Stub {
     private int noteOperationUnchecked(int code, int uid, String packageName, String featureId,
             int proxyUid, String proxyPackageName, @Nullable String proxyFeatureId,
             @OpFlags int flags) {
-        // TODO moltmann: Verify that feature is declared in package
-
         boolean isPrivileged;
         try {
-            isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
+            isPrivileged = verifyAndGetIsPrivileged(uid, packageName, featureId);
         } catch (SecurityException e) {
             Slog.e(TAG, "noteOperation", e);
             return AppOpsManager.MODE_ERRORED;
         }
 
         synchronized (this) {
-            final Ops ops = getOpsRawLocked(uid, packageName, isPrivileged, true /* edit */);
+            final Ops ops = getOpsRawLocked(uid, packageName, featureId, isPrivileged,
+                    true /* edit */);
             if (ops == null) {
                 scheduleOpNotedIfNeededLocked(code, uid, packageName,
                         AppOpsManager.MODE_IGNORED);
@@ -2309,9 +2449,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                         + " package " + packageName);
                 return AppOpsManager.MODE_ERRORED;
             }
-            final Op op = getOpLocked(ops, code, true);
+            final Op op = getOpLocked(ops, code, uid, true);
             final FeatureOp featureOp = op.getOrCreateFeature(op, featureId);
-            if (isOpRestrictedLocked(uid, code, packageName, isPrivileged)) {
+            if (isOpRestrictedLocked(uid, code, packageName, featureId, isPrivileged)) {
                 scheduleOpNotedIfNeededLocked(code, uid, packageName,
                         AppOpsManager.MODE_IGNORED);
                 return AppOpsManager.MODE_IGNORED;
@@ -2339,7 +2479,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     return uidMode;
                 }
             } else {
-                final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, true) : op;
+                final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, uid, true)
+                        : op;
                 final int mode = switchOp.evalMode();
                 if (mode != AppOpsManager.MODE_ALLOWED) {
                     if (DEBUG) Slog.d(TAG, "noteOperation: reject #" + mode + " for code "
@@ -2460,7 +2601,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     public void noteAsyncOp(String callingPackageName, int uid, String packageName, int opCode,
             String featureId, String message) {
         Objects.requireNonNull(message);
-        verifyAndGetIsPrivileged(uid, packageName);
+        verifyAndGetIsPrivileged(uid, packageName, featureId);
 
         verifyIncomingUid(uid);
         verifyIncomingOp(opCode);
@@ -2469,7 +2610,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         long now = System.currentTimeMillis();
 
         if (callingPackageName != null) {
-            verifyAndGetIsPrivileged(callingUid, callingPackageName);
+            verifyAndGetIsPrivileged(callingUid, callingPackageName, featureId);
         }
 
         long token = Binder.clearCallingIdentity();
@@ -2534,7 +2675,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         int uid = Binder.getCallingUid();
         Pair<String, Integer> key = getAsyncNotedOpsKey(packageName, uid);
 
-        verifyAndGetIsPrivileged(uid, packageName);
+        verifyAndGetIsPrivileged(uid, packageName, null);
 
         synchronized (this) {
             RemoteCallbackList<IAppOpsAsyncNotedCallback> callbacks = mAsyncOpWatchers.get(key);
@@ -2564,7 +2705,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         int uid = Binder.getCallingUid();
         Pair<String, Integer> key = getAsyncNotedOpsKey(packageName, uid);
 
-        verifyAndGetIsPrivileged(uid, packageName);
+        verifyAndGetIsPrivileged(uid, packageName, null);
 
         synchronized (this) {
             RemoteCallbackList<IAppOpsAsyncNotedCallback> callbacks = mAsyncOpWatchers.get(key);
@@ -2583,7 +2724,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         int uid = Binder.getCallingUid();
 
-        verifyAndGetIsPrivileged(uid, packageName);
+        verifyAndGetIsPrivileged(uid, packageName, null);
 
         synchronized (this) {
             return mUnforwardedAsyncNotedOps.remove(getAsyncNotedOpsKey(packageName, uid));
@@ -2602,22 +2743,22 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         boolean isPrivileged;
         try {
-            isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
+            isPrivileged = verifyAndGetIsPrivileged(uid, packageName, featureId);
         } catch (SecurityException e) {
             Slog.e(TAG, "startOperation", e);
             return AppOpsManager.MODE_ERRORED;
         }
 
         synchronized (this) {
-            final Ops ops = getOpsRawLocked(uid, resolvedPackageName, isPrivileged,
+            final Ops ops = getOpsRawLocked(uid, resolvedPackageName, featureId, isPrivileged,
                     true /* edit */);
             if (ops == null) {
                 if (DEBUG) Slog.d(TAG, "startOperation: no op for code " + code + " uid " + uid
                         + " package " + resolvedPackageName);
                 return AppOpsManager.MODE_ERRORED;
             }
-            final Op op = getOpLocked(ops, code, true);
-            if (isOpRestrictedLocked(uid, code, resolvedPackageName, isPrivileged)) {
+            final Op op = getOpLocked(ops, code, uid, true);
+            if (isOpRestrictedLocked(uid, code, resolvedPackageName, featureId, isPrivileged)) {
                 return AppOpsManager.MODE_IGNORED;
             }
             final FeatureOp featureOp = op.getOrCreateFeature(op, featureId);
@@ -2639,7 +2780,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     return uidMode;
                 }
             } else {
-                final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, true) : op;
+                final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, uid, true)
+                        : op;
                 final int mode = switchOp.evalMode();
                 if (mode != AppOpsManager.MODE_ALLOWED
                         && (!startIfModeDefault || mode != AppOpsManager.MODE_DEFAULT)) {
@@ -2677,14 +2819,14 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         boolean isPrivileged;
         try {
-            isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
+            isPrivileged = verifyAndGetIsPrivileged(uid, packageName, featureId);
         } catch (SecurityException e) {
             Slog.e(TAG, "Cannot finishOperation", e);
             return;
         }
 
         synchronized (this) {
-            Op op = getOpLocked(code, uid, resolvedPackageName, isPrivileged, true);
+            Op op = getOpLocked(code, uid, resolvedPackageName, featureId, isPrivileged, true);
             if (op == null) {
                 return;
             }
@@ -2915,22 +3057,24 @@ public class AppOpsService extends IAppOpsService.Stub {
      *
      * @param uid The uid the package belongs to
      * @param packageName The package the might belong to the uid
+     * @param featureId The feature in the package or {@code null} if no need to verify
      *
      * @return {@code true} iff the package is privileged
      */
-    private boolean verifyAndGetIsPrivileged(int uid, String packageName) {
+    private boolean verifyAndGetIsPrivileged(int uid, String packageName,
+            @Nullable String featureId) {
         if (uid == Process.ROOT_UID) {
             // For backwards compatibility, don't check package name for root UID.
             return false;
         }
 
-        // Do not check if uid/packageName is already known
+        // Do not check if uid/packageName/featureId is already known
         synchronized (this) {
             UidState uidState = mUidStates.get(uid);
             if (uidState != null && uidState.pkgOps != null) {
                 Ops ops = uidState.pkgOps.get(packageName);
 
-                if (ops != null) {
+                if (ops != null && (featureId == null || ops.knownFeatureIds.contains(featureId))) {
                     return ops.isPrivileged;
                 }
             }
@@ -2940,19 +3084,31 @@ public class AppOpsService extends IAppOpsService.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             int pkgUid;
+            AndroidPackage pkg = LocalServices.getService(PackageManagerInternal.class).getPackage(
+                    packageName);
+            boolean isFeatureIdValid = false;
 
-            ApplicationInfo appInfo = LocalServices.getService(PackageManagerInternal.class)
-                    .getApplicationInfo(packageName, PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                                    | PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS
-                                    | PackageManager.MATCH_UNINSTALLED_PACKAGES
-                                    | PackageManager.MATCH_INSTANT,
-                            Process.SYSTEM_UID, UserHandle.getUserId(uid));
-            if (appInfo != null) {
-                pkgUid = appInfo.uid;
-                isPrivileged = (appInfo.privateFlags
-                        & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
+            if (pkg != null) {
+                if (featureId == null) {
+                    isFeatureIdValid = true;
+                } else {
+                    if (pkg.getFeatures() != null) {
+                        int numFeatures = pkg.getFeatures().size();
+                        for (int i = 0; i < numFeatures; i++) {
+                            if (pkg.getFeatures().get(i).id.equals(featureId)) {
+                                isFeatureIdValid = true;
+                            }
+                        }
+                    }
+                }
+
+                pkgUid = UserHandle.getUid(
+                        UserHandle.getUserId(uid), UserHandle.getAppId(pkg.getUid()));
+                isPrivileged = pkg.isPrivileged();
             } else {
+                // Allow any feature id for resolvable uids
+                isFeatureIdValid = true;
+
                 pkgUid = resolveUid(packageName);
                 if (pkgUid >= 0) {
                     isPrivileged = false;
@@ -2961,6 +3117,12 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (pkgUid != uid) {
                 throw new SecurityException("Specified package " + packageName + " under uid " + uid
                         + " but it is really " + pkgUid);
+            }
+
+            if (!isFeatureIdValid) {
+                // TODO moltmann: Switch from logging to enforcement
+                Slog.e(TAG, "featureId " + featureId + " not declared in manifest of "
+                        + packageName);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2974,12 +3136,14 @@ public class AppOpsService extends IAppOpsService.Stub {
      *
      * @param uid The uid the package belongs to
      * @param packageName The name of the package
+     * @param featureId The feature in the package
      * @param isPrivileged If the package is privilidged (ignored if {@code edit} is false)
      * @param edit If an ops does not exist, create the ops?
 
      * @return
      */
-    private Ops getOpsRawLocked(int uid, String packageName, boolean isPrivileged, boolean edit) {
+    private Ops getOpsRawLocked(int uid, String packageName, @Nullable String featureId,
+            boolean isPrivileged, boolean edit) {
         UidState uidState = getUidStateLocked(uid, edit);
         if (uidState == null) {
             return null;
@@ -2999,6 +3163,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             ops = new Ops(packageName, uidState, isPrivileged);
             uidState.pkgOps.put(packageName, ops);
+        }
+        if (edit && featureId != null) {
+            ops.knownFeatureIds.add(featureId);
         }
         return ops;
     }
@@ -3010,13 +3177,14 @@ public class AppOpsService extends IAppOpsService.Stub {
      *
      * @param uid The uid the of the package
      * @param packageName The package name for which to get the state for
+     * @param featureId The feature in the package
      * @param edit Iff {@code true} create the {@link Ops} object if not yet created
      * @param isPrivileged Whether the package is privileged or not
      *
      * @return The {@link Ops state} of all ops for the package
      */
     private @Nullable Ops getOpsRawNoVerifyLocked(int uid, @NonNull String packageName,
-            boolean edit, boolean isPrivileged) {
+            @Nullable String featureId, boolean edit, boolean isPrivileged) {
         UidState uidState = getUidStateLocked(uid, edit);
         if (uidState == null) {
             return null;
@@ -3037,6 +3205,11 @@ public class AppOpsService extends IAppOpsService.Stub {
             ops = new Ops(packageName, uidState, isPrivileged);
             uidState.pkgOps.put(packageName, ops);
         }
+
+        if (edit && featureId != null) {
+            ops.knownFeatureIds.add(featureId);
+        }
+
         return ops;
     }
 
@@ -3062,6 +3235,7 @@ public class AppOpsService extends IAppOpsService.Stub {
      * @param code The code of the op
      * @param uid The uid the of the package
      * @param packageName The package name for which to get the state for
+     * @param featureId The feature in the package
      * @param isPrivileged Whether the package is privileged or not (only used if {@code edit
      *                     == true})
      * @param edit Iff {@code true} create the {@link Op} object if not yet created
@@ -3069,21 +3243,21 @@ public class AppOpsService extends IAppOpsService.Stub {
      * @return The {@link Op state} of the op
      */
     private @Nullable Op getOpLocked(int code, int uid, @NonNull String packageName,
-            boolean isPrivileged, boolean edit) {
-        Ops ops = getOpsRawNoVerifyLocked(uid, packageName, edit, isPrivileged);
+            @Nullable String featureId, boolean isPrivileged, boolean edit) {
+        Ops ops = getOpsRawNoVerifyLocked(uid, packageName, featureId, edit, isPrivileged);
         if (ops == null) {
             return null;
         }
-        return getOpLocked(ops, code, edit);
+        return getOpLocked(ops, code, uid, edit);
     }
 
-    private Op getOpLocked(Ops ops, int code, boolean edit) {
+    private Op getOpLocked(Ops ops, int code, int uid, boolean edit) {
         Op op = ops.get(code);
         if (op == null) {
             if (!edit) {
                 return null;
             }
-            op = new Op(ops.uidState, ops.packageName, code, ops.uidState.uid);
+            op = new Op(ops.uidState, ops.packageName, code, uid);
             ops.put(code, op);
         }
         if (edit) {
@@ -3101,7 +3275,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private boolean isOpRestrictedLocked(int uid, int code, String packageName,
-            boolean isPrivileged) {
+            @Nullable String featureId, boolean isPrivileged) {
         int userHandle = UserHandle.getUserId(uid);
         final int restrictionSetCount = mOpUserRestrictions.size();
 
@@ -3113,7 +3287,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (AppOpsManager.opAllowSystemBypassRestriction(code)) {
                     // If we are the system, bypass user restrictions for certain codes
                     synchronized (this) {
-                        Ops ops = getOpsRawLocked(uid, packageName, isPrivileged,
+                        Ops ops = getOpsRawLocked(uid, packageName, featureId, isPrivileged,
                                 true /* edit */);
                         if ((ops != null) && ops.isPrivileged) {
                             return false;
@@ -3490,7 +3664,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         out.startTag(null, "uid");
                         out.attribute(null, "n", Integer.toString(pkg.getUid()));
                         synchronized (this) {
-                            Ops ops = getOpsRawLocked(pkg.getUid(), pkg.getPackageName(),
+                            Ops ops = getOpsRawLocked(pkg.getUid(), pkg.getPackageName(), null,
                                     false /* isPrivileged */, false /* edit */);
                             // Should always be present as the list of PackageOps is generated
                             // from Ops.
@@ -4807,7 +4981,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         // TODO moltmann: Allow to check for feature op activeness
         synchronized (AppOpsService.this) {
-            Ops pkgOps = getOpsRawLocked(uid, resolvedPackageName, false, false);
+            Ops pkgOps = getOpsRawLocked(uid, resolvedPackageName, null, false, false);
             if (pkgOps == null) {
                 return false;
             }

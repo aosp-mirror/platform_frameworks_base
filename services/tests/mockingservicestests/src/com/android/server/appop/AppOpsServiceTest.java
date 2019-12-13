@@ -48,6 +48,7 @@ import android.app.AppOpsManager.PackageOps;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.parsing.AndroidPackage;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
@@ -68,6 +69,7 @@ import org.junit.runner.RunWith;
 import org.mockito.quality.Strictness;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -138,11 +140,15 @@ public class AppOpsServiceTest {
                 .spyStatic(Settings.Global.class)
                 .startMocking();
 
-        // Mock LocalServices.getService(PackageManagerInternal.class).getApplicationInfo dependency
+        // Mock LocalServices.getService(PackageManagerInternal.class).getPackage dependency
         // needed by AppOpsService
         PackageManagerInternal mockPackageManagerInternal = mock(PackageManagerInternal.class);
-        when(mockPackageManagerInternal.getApplicationInfo(eq(sMyPackageName), anyInt(), anyInt(),
-                anyInt())).thenReturn(sContext.getApplicationInfo());
+        AndroidPackage mockMyPkg = mock(AndroidPackage.class);
+        when(mockMyPkg.isPrivileged()).thenReturn(false);
+        when(mockMyPkg.getUid()).thenReturn(mMyUid);
+        when(mockMyPkg.getFeatures()).thenReturn(Collections.emptyList());
+
+        when(mockPackageManagerInternal.getPackage(sMyPackageName)).thenReturn(mockMyPkg);
         doReturn(mockPackageManagerInternal).when(
                 () -> LocalServices.getService(PackageManagerInternal.class));
 

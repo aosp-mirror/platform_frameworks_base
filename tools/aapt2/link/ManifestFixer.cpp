@@ -365,6 +365,8 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   });
   manifest_action["instrumentation"]["meta-data"] = meta_data_action;
 
+  manifest_action["feature"];
+  manifest_action["feature"]["inherit-from"];
   manifest_action["original-package"];
   manifest_action["overlay"];
   manifest_action["protected-broadcast"];
