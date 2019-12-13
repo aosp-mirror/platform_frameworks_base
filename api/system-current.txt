@@ -6878,34 +6878,34 @@ package android.provider {
     field public static final int STATUS_NOT_BLOCKED = 0; // 0x0
   }
 
-  public static final class ContactsContract.MetadataSync implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncColumns {
-    field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
-    field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata";
-    field public static final android.net.Uri CONTENT_URI;
-    field public static final String METADATA_AUTHORITY = "com.android.contacts.metadata";
-    field public static final android.net.Uri METADATA_AUTHORITY_URI;
+  @Deprecated public static final class ContactsContract.MetadataSync implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncColumns {
+    field @Deprecated public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
+    field @Deprecated public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata";
+    field @Deprecated public static final android.net.Uri CONTENT_URI;
+    field @Deprecated public static final String METADATA_AUTHORITY = "com.android.contacts.metadata";
+    field @Deprecated public static final android.net.Uri METADATA_AUTHORITY_URI;
   }
 
-  protected static interface ContactsContract.MetadataSyncColumns {
-    field public static final String ACCOUNT_NAME = "account_name";
-    field public static final String ACCOUNT_TYPE = "account_type";
-    field public static final String DATA = "data";
-    field public static final String DATA_SET = "data_set";
-    field public static final String DELETED = "deleted";
-    field public static final String RAW_CONTACT_BACKUP_ID = "raw_contact_backup_id";
+  @Deprecated protected static interface ContactsContract.MetadataSyncColumns {
+    field @Deprecated public static final String ACCOUNT_NAME = "account_name";
+    field @Deprecated public static final String ACCOUNT_TYPE = "account_type";
+    field @Deprecated public static final String DATA = "data";
+    field @Deprecated public static final String DATA_SET = "data_set";
+    field @Deprecated public static final String DELETED = "deleted";
+    field @Deprecated public static final String RAW_CONTACT_BACKUP_ID = "raw_contact_backup_id";
   }
 
-  public static final class ContactsContract.MetadataSyncState implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncStateColumns {
-    field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata_sync_state";
-    field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata_sync_state";
-    field public static final android.net.Uri CONTENT_URI;
+  @Deprecated public static final class ContactsContract.MetadataSyncState implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncStateColumns {
+    field @Deprecated public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata_sync_state";
+    field @Deprecated public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata_sync_state";
+    field @Deprecated public static final android.net.Uri CONTENT_URI;
   }
 
-  protected static interface ContactsContract.MetadataSyncStateColumns {
-    field public static final String ACCOUNT_NAME = "account_name";
-    field public static final String ACCOUNT_TYPE = "account_type";
-    field public static final String DATA_SET = "data_set";
-    field public static final String STATE = "state";
+  @Deprecated protected static interface ContactsContract.MetadataSyncStateColumns {
+    field @Deprecated public static final String ACCOUNT_NAME = "account_name";
+    field @Deprecated public static final String ACCOUNT_TYPE = "account_type";
+    field @Deprecated public static final String DATA_SET = "data_set";
+    field @Deprecated public static final String STATE = "state";
   }
 
   public final class DeviceConfig {
