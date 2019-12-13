@@ -1081,6 +1081,7 @@
     <string name="permdesc_writeCalendar" product="default">This app can add, remove, or change calendar events on your phone. This app can send messages that may appear to come from calendar owners, or change events without notifying their owners.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the applicatfion to do this. -->
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessLocationExtraCommands">access extra location provider commands</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessLocationExtraCommands">Allows the app to access
@@ -1090,23 +1091,17 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessFineLocation">access precise location only in the foreground</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessFineLocation">This app can get your exact location only when it is in the foreground. These location services must be turned on and available on your phone for the app to be able to use them. This may increase battery consumption.</string>
+    <string name="permdesc_accessFineLocation">This app can get your exact location only when it is in the foreground. Location services must be turned on and available on your device for the app to be able to use them. This may increase battery consumption.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessCoarseLocation">access approximate location (network-based) only in the foreground</string>
+    <string name="permlab_accessCoarseLocation">access approximate location only in the foreground</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation" product="tablet">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when when the app is in the foreground. These location services must be turned on and available on your tablet for the app to be able to use them.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation" product="tv">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when when the app is in the foreground. These location services must be turned on and available on your Android TV device for the app to be able to use them.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation" product="automotive">This app can get your approximate location only when it is in the foreground. These location services must be turned on and available on your car for the app to be able to use them.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation" product="default">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when the app is in the foreground. These location services must be turned on and available on your phone for the app to be able to use them.</string>
+    <string name="permdesc_accessCoarseLocation">This app can get your approximate location only when it is in the foreground. Location services must be turned on and available on your device for the app to be able to use them.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessBackgroundLocation">access location in the background</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessBackgroundLocation">If this is granted additionally to the approximate or precise location access the app can access the location while running in the background.</string>
+    <string name="permdesc_accessBackgroundLocation">This app can access location while running in the background, in addition to foreground location access.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_modifyAudioSettings">change your audio settings</string>
