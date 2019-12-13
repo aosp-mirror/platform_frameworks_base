@@ -2315,43 +2315,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final Region region = inputWindowHandle.touchableRegion;
         setTouchableRegionCropIfNeeded(inputWindowHandle);
 
-        if (modal && mActivityRecord != null) {
-            // Limit the outer touch to the activity stack region.
+        if (modal) {
             flags |= FLAG_NOT_TOUCH_MODAL;
-            // If the inner bounds of letterbox is available, then it will be used as the touchable
-            // region so it won't cover the touchable letterbox and the touch events can slip to
-            // activity from letterbox.
-            mActivityRecord.getLetterboxInnerBounds(mTmpRect);
-            if (mTmpRect.isEmpty()) {
-                // If this is a modal window we need to dismiss it if it's not full screen and the
-                // touch happens outside of the frame that displays the content. This means we need
-                // to intercept touches outside of that window. The dim layer user associated with
-                // the window (task or stack) will give us the good bounds, as they would be used to
-                // display the dim layer.
-                final Task task = getTask();
-                if (task != null) {
-                    task.getDimBounds(mTmpRect);
-                } else {
-                    getStack().getDimBounds(mTmpRect);
-                }
-            }
-            if (inFreeformWindowingMode()) {
-                // For freeform windows we the touch region to include the whole surface for the
-                // shadows.
-                final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
-                final int delta = WindowManagerService.dipToPixel(
-                        RESIZE_HANDLE_WIDTH_IN_DP, displayMetrics);
-                mTmpRect.inset(-delta, -delta);
-            }
-            region.set(mTmpRect);
-            cropRegionToStackBoundsIfNeeded(region);
-            subtractTouchExcludeRegionIfNeeded(region);
-        } else if (modal && mTapExcludeRegionHolder != null) {
-            final Region touchExcludeRegion = Region.obtain();
-            amendTapExcludeRegion(touchExcludeRegion);
-            if (!touchExcludeRegion.isEmpty()) {
-                // Remove touch modal because there are some areas that cannot be touched.
-                flags |= FLAG_NOT_TOUCH_MODAL;
+            if (mActivityRecord != null) {
+                // Limit the outer touch to the activity stack region.
+                updateRegionForModalActivityWindow(region);
+            } else {
                 // Give it a large touchable region at first because it was touch modal. The window
                 // might be moved on the display, so the touchable region should be large enough to
                 // ensure it covers the whole display, no matter where it is moved.
@@ -2359,15 +2328,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 final int dw = mTmpRect.width();
                 final int dh = mTmpRect.height();
                 region.set(-dw, -dh, dw + dw, dh + dh);
-                // Subtract the area that cannot be touched.
-                region.op(touchExcludeRegion, Region.Op.DIFFERENCE);
-                inputWindowHandle.setTouchableRegionCrop(null);
             }
-            touchExcludeRegion.recycle();
+            subtractTouchExcludeRegionIfNeeded(region);
         } else {
-            // Not modal or full screen modal
+            // Not modal
             getTouchableRegion(region);
         }
+
         // Translate to surface based coordinates.
         region.translate(-mWindowFrames.mFrame.left, -mWindowFrames.mFrame.top);
 
@@ -2381,6 +2348,41 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         return flags;
+    }
+
+    /**
+     * Updates the region for a window in an Activity that was a touch modal. This will limit
+     * the outer touch to the activity stack region.
+     * @param outRegion The region to update.
+     */
+    private void updateRegionForModalActivityWindow(Region outRegion) {
+        // If the inner bounds of letterbox is available, then it will be used as the
+        // touchable region so it won't cover the touchable letterbox and the touch
+        // events can slip to activity from letterbox.
+        mActivityRecord.getLetterboxInnerBounds(mTmpRect);
+        if (mTmpRect.isEmpty()) {
+            // If this is a modal window we need to dismiss it if it's not full screen
+            // and the touch happens outside of the frame that displays the content. This
+            // means we need to intercept touches outside of that window. The dim layer
+            // user associated with the window (task or stack) will give us the good
+            // bounds, as they would be used to display the dim layer.
+            final Task task = getTask();
+            if (task != null) {
+                task.getDimBounds(mTmpRect);
+            } else {
+                getStack().getDimBounds(mTmpRect);
+            }
+        }
+        if (inFreeformWindowingMode()) {
+            // For freeform windows, we need the touch region to include the whole
+            // surface for the shadows.
+            final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
+            final int delta = WindowManagerService.dipToPixel(
+                    RESIZE_HANDLE_WIDTH_IN_DP, displayMetrics);
+            mTmpRect.inset(-delta, -delta);
+        }
+        outRegion.set(mTmpRect);
+        cropRegionToStackBoundsIfNeeded(outRegion);
     }
 
     void checkPolicyVisibilityChange() {
