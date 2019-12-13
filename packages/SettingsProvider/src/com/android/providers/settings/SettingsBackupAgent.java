@@ -28,7 +28,7 @@ import android.database.Cursor;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.Uri;
-import android.net.wifi.WifiConfiguration;
+import android.net.wifi.SoftApConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
@@ -875,32 +875,23 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     }
 
     private byte[] getSoftAPConfiguration() {
-        try {
-            return mWifiManager.getWifiApConfiguration().getBytesForBackup();
-        } catch (IOException ioe) {
-            Log.e(TAG, "Failed to marshal SoftAPConfiguration" + ioe.getMessage());
-            return new byte[0];
-        }
+        return mWifiManager.retrieveSoftApBackupData();
     }
 
     private void restoreSoftApConfiguration(byte[] data) {
-        try {
-            WifiConfiguration config = WifiConfiguration
-                    .getWifiConfigFromBackup(new DataInputStream(new ByteArrayInputStream(data)));
-            if (DEBUG) Log.d(TAG, "Successfully unMarshaled WifiConfiguration ");
-            int originalApBand = config.apBand;
-            mWifiManager.setWifiApConfiguration(config);
+        SoftApConfiguration config = mWifiManager.restoreSoftApBackupData(data);
+        if (config != null) {
+            int originalApBand = config.getBand();
+            if (DEBUG) Log.d(TAG, "Successfully unMarshaled SoftApConfiguration ");
 
             // Depending on device hardware, we may need to notify the user of a setting change for
             // the apBand preference
             boolean dualMode = mWifiManager.isDualModeSupported();
-            int storedApBand = mWifiManager.getWifiApConfiguration().apBand;
+            int storedApBand = mWifiManager.getSoftApConfiguration().getBand();
             if (dualMode && storedApBand != originalApBand) {
                 Log.d(TAG, "restored ap configuration requires a conversion, notify the user");
                 WifiSoftApBandChangedNotifier.notifyUserOfApBandConversion(this);
             }
-        } catch (IOException | BackupUtils.BadVersionException e) {
-            Log.e(TAG, "Failed to unMarshal SoftAPConfiguration " + e.getMessage());
         }
     }
 
