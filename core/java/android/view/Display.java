@@ -21,6 +21,7 @@ import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.KeyguardManager;
@@ -853,6 +854,31 @@ public final class Display {
             updateDisplayInfoLocked();
             final Display.Mode[] modes = mDisplayInfo.supportedModes;
             return Arrays.copyOf(modes, modes.length);
+        }
+    }
+
+    /**
+     * <p> Returns true if the connected display can be switched into a mode with minimal
+     * post processing. </p>
+     *
+     * <p> If the Display sink is connected via HDMI, this method will return true if the
+     * display supports either Auto Low Latency Mode or Game Content Type.
+     *
+     * <p> If the Display sink has an internal connection or uses some other protocol than
+     * HDMI, this method will return true if the sink can be switched into an
+     * implementation-defined low latency image processing mode. </p>
+     *
+     * <p> The ability to switch to a mode with minimal post processing may be disabled
+     * by a user setting in the system settings menu. In that case, this method returns
+     * false. </p>
+     *
+     * @see android.view.Window#setPreferMinimalPostProcessing
+     */
+    @SuppressLint("VisiblySynchronized")
+    public boolean isMinimalPostProcessingSupported() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.minimalPostProcessingSupported;
         }
     }
 
