@@ -23,7 +23,7 @@ import android.telephony.Rlog;
 import android.util.SparseIntArray;
 
 import com.android.internal.telephony.cdma.sms.UserData;
-import com.android.internal.util.XmlUtils;
+import com.android.internal.telephony.util.XmlUtils;
 
 import dalvik.annotation.compat.UnsupportedAppUsage;
 
