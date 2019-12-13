@@ -18,12 +18,34 @@
 -->
 
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
-    <com.android.keyguard.AlphaOptimizedImageButton
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/car_nav_button_icon"
-        android:layout_height="wrap_content"
-        android:layout_width="@dimen/car_navigation_button_width"
-        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
         android:animateLayoutChanges="true"
-        android:scaleType="fitCenter">
-    </com.android.keyguard.AlphaOptimizedImageButton>
+        android:orientation="vertical">
+
+        <com.android.keyguard.AlphaOptimizedImageButton
+            android:id="@+id/car_nav_button_icon_image"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:animateLayoutChanges="true"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter">
+        </com.android.keyguard.AlphaOptimizedImageButton>
+
+        <com.android.keyguard.AlphaOptimizedImageButton
+            android:id="@+id/car_nav_button_more_icon"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:animateLayoutChanges="true"
+            android:src="@drawable/car_ic_arrow"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter">
+        </com.android.keyguard.AlphaOptimizedImageButton>
+
+    </LinearLayout>
 </merge>

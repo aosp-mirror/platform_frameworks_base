@@ -24,28 +24,25 @@ import com.android.systemui.shared.system.TaskStackChangeListener;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import dagger.Lazy;
-
 /**
  * An implementation of TaskStackChangeListener, that listens for changes in the system
  * task stack and notifies the navigation bar.
  */
 @Singleton
-class FacetButtonTaskStackListener extends TaskStackChangeListener {
-    private static final String TAG = FacetButtonTaskStackListener.class.getSimpleName();
+class ButtonSelectionStateListener extends TaskStackChangeListener {
+    private static final String TAG = ButtonSelectionStateListener.class.getSimpleName();
 
-    private final Lazy<CarFacetButtonController> mFacetButtonControllerLazy;
+    private final ButtonSelectionStateController mButtonSelectionStateController;
 
     @Inject
-    FacetButtonTaskStackListener(
-            Lazy<CarFacetButtonController> carFacetButtonControllerLazy) {
-        mFacetButtonControllerLazy = carFacetButtonControllerLazy;
+    ButtonSelectionStateListener(ButtonSelectionStateController carNavigationButtonController) {
+        mButtonSelectionStateController = carNavigationButtonController;
     }
 
     @Override
     public void onTaskStackChanged() {
         try {
-            mFacetButtonControllerLazy.get().taskChanged(
+            mButtonSelectionStateController.taskChanged(
                     ActivityTaskManager.getService().getAllStackInfos());
         } catch (Exception e) {
             Log.e(TAG, "Getting StackInfo from activity manager failed", e);
@@ -55,7 +52,7 @@ class FacetButtonTaskStackListener extends TaskStackChangeListener {
     @Override
     public void onTaskDisplayChanged(int taskId, int newDisplayId) {
         try {
-            mFacetButtonControllerLazy.get().taskChanged(
+            mButtonSelectionStateController.taskChanged(
                     ActivityTaskManager.getService().getAllStackInfos());
         } catch (Exception e) {
             Log.e(TAG, "Getting StackInfo from activity manager failed", e);

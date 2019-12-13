@@ -37,7 +37,7 @@ public class CarNavigationBarController {
 
     private final Context mContext;
     private final NavigationBarViewFactory mNavigationBarViewFactory;
-    private final Lazy<CarFacetButtonController> mCarFacetButtonControllerLazy;
+    private final ButtonSelectionStateController mButtonSelectionStateController;
     private final Lazy<HvacController> mHvacControllerLazy;
 
     private boolean mShowBottom;
@@ -58,11 +58,11 @@ public class CarNavigationBarController {
     @Inject
     public CarNavigationBarController(Context context,
             NavigationBarViewFactory navigationBarViewFactory,
-            Lazy<CarFacetButtonController> carFacetButtonControllerLazy,
+            ButtonSelectionStateController buttonSelectionStateController,
             Lazy<HvacController> hvacControllerLazy) {
         mContext = context;
         mNavigationBarViewFactory = navigationBarViewFactory;
-        mCarFacetButtonControllerLazy = carFacetButtonControllerLazy;
+        mButtonSelectionStateController = buttonSelectionStateController;
         mHvacControllerLazy = hvacControllerLazy;
 
         // Read configuration.
@@ -175,7 +175,7 @@ public class CarNavigationBarController {
             NotificationsShadeController notifShadeController) {
         view.setStatusBarWindowTouchListener(statusBarTouchListener);
         view.setNotificationsPanelController(notifShadeController);
-        mCarFacetButtonControllerLazy.get().addAllFacetButtons(view);
+        mButtonSelectionStateController.addAllButtonsWithSelectionState(view);
         mHvacControllerLazy.get().addTemperatureViewToController(view);
     }
 
