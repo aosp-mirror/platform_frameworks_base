@@ -17,16 +17,11 @@
 java_library {
     name: "frameworks-base-testutils",
 
-    srcs: [
-        "java/**/*.java",
-        "java/**/*.kt",
-    ],
+    srcs: ["java/**/*.java"],
 
     static_libs: [
         "junit",
         "hamcrest-library",
-        "truth-prebuilt",
-        "mockito-target-minus-junit4",
     ],
 
     libs: [

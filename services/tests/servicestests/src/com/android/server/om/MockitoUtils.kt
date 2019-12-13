@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package test.util
+package com.android.server.om
 
 import org.mockito.Answers
 import org.mockito.Mockito
@@ -22,6 +22,8 @@ import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.mockito.stubbing.Stubber
 
+// TODO(chiuwinson): Move this entire file to a shared utility module
+// TODO(b/135203078): De-dupe utils added for overlays vs package refactor
 object MockitoUtils {
     val ANSWER_THROWS = Answer<Any?> {
         when (val name = it.method.name) {

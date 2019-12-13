@@ -24,8 +24,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.testng.Assert.assertThrows
-import test.util.mockThrowOnUnmocked
-import test.util.whenever
 
 @RunWith(Parameterized::class)
 class OverlayReferenceMapperTests {
