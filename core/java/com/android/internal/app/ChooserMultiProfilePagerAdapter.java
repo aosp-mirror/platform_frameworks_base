@@ -102,8 +102,17 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
 
     @Override
     @VisibleForTesting
-    public ChooserListAdapter getCurrentListAdapter() {
+    public ChooserListAdapter getActiveListAdapter() {
         return getAdapterForIndex(getCurrentPage()).getListAdapter();
+    }
+
+    @Override
+    @VisibleForTesting
+    public ChooserListAdapter getInactiveListAdapter() {
+        if (getCount() == 1) {
+            return null;
+        }
+        return getAdapterForIndex(1 - getCurrentPage()).getListAdapter();
     }
 
     @Override

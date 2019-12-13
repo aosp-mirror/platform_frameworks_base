@@ -351,12 +351,12 @@ public class ResolverListAdapter extends BaseAdapter {
      * determine the layout known. We therefore can't update the UI inline and post to the
      * handler thread to update after the current task is finished.
      */
-    private void postListReadyRunnable() {
+    void postListReadyRunnable() {
         if (mPostListReadyRunnable == null) {
             mPostListReadyRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    mResolverListCommunicator.onPostListReady();
+                    mResolverListCommunicator.onPostListReady(ResolverListAdapter.this);
                     mPostListReadyRunnable = null;
                 }
             };
@@ -599,7 +599,7 @@ public class ResolverListAdapter extends BaseAdapter {
 
         Intent getReplacementIntent(ActivityInfo activityInfo, Intent defIntent);
 
-        void onPostListReady();
+        void onPostListReady(ResolverListAdapter listAdapter);
 
         void sendVoiceChoicesIfNeeded();
 

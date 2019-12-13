@@ -48,7 +48,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
     private UsageStatsManager mUsm;
 
     ChooserListAdapter getAdapter() {
-        return mChooserMultiProfilePagerAdapter.getCurrentListAdapter();
+        return mChooserMultiProfilePagerAdapter.getActiveListAdapter();
     }
 
     boolean getIsSelected() { return mIsSuccessfullySelected; }

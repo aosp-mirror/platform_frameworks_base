@@ -55,6 +55,12 @@
                   android:layout_centerHorizontal="true"/>
     </RelativeLayout>
 
+    <FrameLayout
+        android:id="@+id/content_preview_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
     <com.android.internal.widget.ViewPager
         android:id="@+id/profile_pager"
         android:layout_width="match_parent"
