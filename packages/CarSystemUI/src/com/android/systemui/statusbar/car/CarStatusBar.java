@@ -37,6 +37,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -106,6 +107,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.volume.VolumeUI;
@@ -389,6 +391,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
         // Policy
         mZenController = Dependency.get(ZenModeController.class);
+        if (Build.IS_USERDEBUG) {
+            mNetworkController = Dependency.get(NetworkController.class);
+        }
 
         // Icon
         mIconController = Dependency.get(StatusBarIconController.class);
@@ -642,7 +647,11 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mCarUxRestrictionManagerWrapper = new CarUxRestrictionManagerWrapper();
 
         mNotificationDataManager = new NotificationDataManager();
-        mNotificationDataManager.setOnUnseenCountUpdateListener(this::onUnseenCountUpdate);
+        mNotificationDataManager.setOnUnseenCountUpdateListener(() -> {
+            if (mNavigationBarView != null && mNotificationDataManager != null) {
+                onUseenCountUpdate(mNotificationDataManager.getUnseenNotificationCount());
+            }
+        });
 
         mEnableHeadsUpNotificationWhenNotificationShadeOpen = mContext.getResources().getBoolean(
                 R.bool.config_enableHeadsUpNotificationWhenNotificationShadeOpen);
@@ -768,25 +777,22 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     }
 
     /**
-     * This method is called whenever there is an update to the number of unseen notifications.
-     * This method can be extended by OEMs to customize the desired logic.
+     * This method is automatically called whenever there is an update to the number of unseen
+     * notifications. This method can be extended by OEMs to customize the desired logic.
      */
-    protected void onUnseenCountUpdate() {
-        if (mNavigationBarView != null && mNotificationDataManager != null) {
-            Boolean hasUnseen =
-                    mNotificationDataManager.getUnseenNotificationCount() > 0;
+    protected void onUseenCountUpdate(int unseenNotificationCount) {
+        boolean hasUnseen = unseenNotificationCount > 0;
 
-            if (mNavigationBarView != null) {
-                mNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-            }
+        if (mNavigationBarView != null) {
+            mNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
+        }
 
-            if (mLeftNavigationBarView != null) {
-                mLeftNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-            }
+        if (mLeftNavigationBarView != null) {
+            mLeftNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
+        }
 
-            if (mRightNavigationBarView != null) {
-                mRightNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-            }
+        if (mRightNavigationBarView != null) {
+            mRightNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
         }
     }
 
