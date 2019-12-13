@@ -2601,33 +2601,6 @@ public interface WindowManager extends ViewManager {
         public long hideTimeoutMilliseconds = -1;
 
         /**
-         * Indicates whether this window wants the connected display to do minimal post processing
-         * on the produced image or video frames. This will only be requested if the window is
-         * visible on the screen.
-         *
-         * <p>This setting should be used when low latency has a higher priority than image
-         * enhancement processing (e.g. for games or video conferencing).
-         *
-         * <p>If the Display sink is connected via HDMI, the device will begin to send infoframes
-         * with Auto Low Latency Mode enabled and Game Content Type. This will switch the connected
-         * display to a minimal image processing mode (if available), which reduces latency,
-         * improving the user experience for gaming or video conferencing applications. For more
-         * information, see HDMI 2.1 specification.
-         *
-         * <p>If the Display sink has an internal connection or uses some other protocol than HDMI,
-         * effects may be similar but implementation-defined.
-         *
-         * <p>The ability to switch to a mode with minimal post proessing may be disabled by a user
-         * setting in the system settings menu. In that case, this field is ignored and the display
-         * will remain in its current mode.
-         *
-         * @see android.content.pm.ActivityInfo#preferMinimalPostProcessing
-         * @see android.view.Display#isMinimalPostProcessingSupported
-         * @see android.view.Window#setPreferMinimalPostProcessing
-         */
-        public boolean preferMinimalPostProcessing = false;
-
-        /**
          * The color mode requested by this window. The target display may
          * not be able to honor the request. When the color mode is not set
          * to {@link ActivityInfo#COLOR_MODE_DEFAULT}, it might override the
@@ -2810,7 +2783,6 @@ public interface WindowManager extends ViewManager {
             out.writeLong(hideTimeoutMilliseconds);
             out.writeInt(insetsFlags.appearance);
             out.writeInt(insetsFlags.behavior);
-            out.writeBoolean(preferMinimalPostProcessing);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<LayoutParams> CREATOR
@@ -2869,7 +2841,6 @@ public interface WindowManager extends ViewManager {
             hideTimeoutMilliseconds = in.readLong();
             insetsFlags.appearance = in.readInt();
             insetsFlags.behavior = in.readInt();
-            preferMinimalPostProcessing = in.readBoolean();
         }
 
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -2917,8 +2888,6 @@ public interface WindowManager extends ViewManager {
         public static final int COLOR_MODE_CHANGED = 1 << 26;
         /** {@hide} */
         public static final int INSET_FLAGS_CHANGED = 1 << 27;
-        /** {@hide} */
-        public static final int MINIMAL_POST_PROCESSING_PREFERENCE_CHANGED = 1 << 28;
 
         // internal buffer to backup/restore parameters under compatibility mode.
         private int[] mCompatibilityParamsBackup = null;
@@ -3104,11 +3073,6 @@ public interface WindowManager extends ViewManager {
                 changes |= COLOR_MODE_CHANGED;
             }
 
-            if (preferMinimalPostProcessing != o.preferMinimalPostProcessing) {
-                preferMinimalPostProcessing = o.preferMinimalPostProcessing;
-                changes |= MINIMAL_POST_PROCESSING_PREFERENCE_CHANGED;
-            }
-
             // This can't change, it's only set at window creation time.
             hideTimeoutMilliseconds = o.hideTimeoutMilliseconds;
 
@@ -3250,10 +3214,6 @@ public interface WindowManager extends ViewManager {
             }
             if (mColorMode != COLOR_MODE_DEFAULT) {
                 sb.append(" colorMode=").append(ActivityInfo.colorModeToString(mColorMode));
-            }
-            if (preferMinimalPostProcessing) {
-                sb.append(" preferMinimalPostProcessing=");
-                sb.append(preferMinimalPostProcessing);
             }
             sb.append(System.lineSeparator());
             sb.append(prefix).append("  fl=").append(

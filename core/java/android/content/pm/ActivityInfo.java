@@ -290,34 +290,6 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public int colorMode = COLOR_MODE_DEFAULT;
 
     /**
-     * Indicates whether the activity wants the connected display to do minimal post processing on
-     * the produced image or video frames. This will only be requested if this activity's main
-     * window is visible on the screen.
-     *
-     * <p>This setting should be used when low latency has a higher priority than image enhancement
-     * processing (e.g. for games or video conferencing).
-     *
-     * <p>If the Display sink is connected via HDMI, the device will begin to send infoframes with
-     * Auto Low Latency Mode enabled and Game Content Type. This will switch the connected display
-     * to a minimal image processing mode (if available), which reduces latency, improving the user
-     * experience for gaming or video conferencing applications. For more information, see HDMI 2.1
-     * specification.
-     *
-     * <p>If the Display sink has an internal connection or uses some other protocol than HDMI,
-     * effects may be similar but implementation-defined.
-     *
-     * <p>The ability to switch to a mode with minimal post proessing may be disabled by a user
-     * setting in the system settings menu. In that case, this field is ignored and the display will
-     * remain in its current mode.
-     *
-     * <p>Set from attribute {@link android.R.attr#preferMinimalPostProcessing}.
-     *
-     * @see android.view.WindowManager.LayoutParams#preferMinimalPostProcessing
-     * @see android.view.Display#isMinimalPostProcessingSupported
-     */
-    public boolean preferMinimalPostProcessing = false;
-
-    /**
      * Bit in {@link #flags} indicating whether this activity is able to
      * run in multiple processes.  If
      * true, the system may instantiate it in the some process as the
@@ -1032,7 +1004,6 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         requestedVrComponent = orig.requestedVrComponent;
         rotationAnimation = orig.rotationAnimation;
         colorMode = orig.colorMode;
-        preferMinimalPostProcessing = orig.preferMinimalPostProcessing;
         maxAspectRatio = orig.maxAspectRatio;
         minAspectRatio = orig.minAspectRatio;
     }
@@ -1260,7 +1231,6 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeInt(colorMode);
         dest.writeFloat(maxAspectRatio);
         dest.writeFloat(minAspectRatio);
-        dest.writeBoolean(preferMinimalPostProcessing);
     }
 
     /**
@@ -1379,7 +1349,6 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         colorMode = source.readInt();
         maxAspectRatio = source.readFloat();
         minAspectRatio = source.readFloat();
-        preferMinimalPostProcessing = source.readBoolean();
     }
 
     /**

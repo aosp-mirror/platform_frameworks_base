@@ -1174,34 +1174,6 @@ static jobject nativeGetHdrCapabilities(JNIEnv* env, jclass clazz, jobject token
             capabilities.getDesiredMaxAverageLuminance(), capabilities.getDesiredMinLuminance());
 }
 
-static jboolean nativeGetAutoLowLatencyModeSupport(JNIEnv* env, jclass clazz, jobject tokenObject) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
-    if (token == NULL) return NULL;
-
-    return SurfaceComposerClient::getAutoLowLatencyModeSupport(token);
-}
-
-static jboolean nativeGetGameContentTypeSupport(JNIEnv* env, jclass clazz, jobject tokenObject) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
-    if (token == NULL) return NULL;
-
-    return SurfaceComposerClient::getGameContentTypeSupport(token);
-}
-
-static void nativeSetAutoLowLatencyMode(JNIEnv* env, jclass clazz, jobject tokenObject, jboolean on) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
-    if (token == NULL) return;
-
-    SurfaceComposerClient::setAutoLowLatencyMode(token, on);
-}
-
-static void nativeSetGameContentType(JNIEnv* env, jclass clazz, jobject tokenObject, jboolean on) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
-    if (token == NULL) return;
-
-    SurfaceComposerClient::setGameContentType(token, on);
-}
-
 static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel == NULL) {
@@ -1402,14 +1374,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetActiveColorMode},
     {"nativeSetActiveColorMode", "(Landroid/os/IBinder;I)Z",
             (void*)nativeSetActiveColorMode},
-    {"nativeGetAutoLowLatencyModeSupport", "(Landroid/os/IBinder;)Z",
-            (void*)nativeGetAutoLowLatencyModeSupport },
-    {"nativeSetAutoLowLatencyMode", "(Landroid/os/IBinder;Z)V",
-            (void*)nativeSetAutoLowLatencyMode },
-    {"nativeGetGameContentTypeSupport", "(Landroid/os/IBinder;)Z",
-            (void*)nativeGetGameContentTypeSupport },
-    {"nativeSetGameContentType", "(Landroid/os/IBinder;Z)V",
-            (void*)nativeSetGameContentType },
     {"nativeGetCompositionDataspaces", "()[I",
             (void*)nativeGetCompositionDataspaces},
     {"nativeGetHdrCapabilities", "(Landroid/os/IBinder;)Landroid/view/Display$HdrCapabilities;",
