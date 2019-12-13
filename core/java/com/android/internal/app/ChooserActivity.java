@@ -362,9 +362,7 @@ public class ChooserActivity extends ResolverActivity implements
                 Log.i(TAG, "Hiding image preview area. Timed out waiting for preview to load"
                         + " within " + mImageLoadTimeoutMillis + "ms.");
                 collapseParentView();
-                if (mChooserMultiProfilePagerAdapter.getCurrentRootAdapter() != null) {
-                    mChooserMultiProfilePagerAdapter.getCurrentRootAdapter().hideContentPreview();
-                }
+                hideContentPreview();
                 mHideParentOnFail = false;
             }
         }
@@ -431,14 +429,14 @@ public class ChooserActivity extends ResolverActivity implements
                 logDirectShareTargetReceived(
                         MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_CHOOSER_SERVICE);
                 sendVoiceChoicesIfNeeded();
-                mChooserMultiProfilePagerAdapter.getCurrentListAdapter()
+                mChooserMultiProfilePagerAdapter.getActiveListAdapter()
                         .completeServiceTargetLoading();
             }
         }
 
         @Override
         public void handleMessage(Message msg) {
-            if (mChooserMultiProfilePagerAdapter.getCurrentListAdapter() == null || isDestroyed()) {
+            if (mChooserMultiProfilePagerAdapter.getActiveListAdapter() == null || isDestroyed()) {
                 return;
             }
 
@@ -455,7 +453,7 @@ public class ChooserActivity extends ResolverActivity implements
                     if (sri.resultTargets != null) {
                         // TODO(arangelov): Instead of using getCurrentListAdapter(), pass the
                         // profileId as part of the message.
-                        mChooserMultiProfilePagerAdapter.getCurrentListAdapter().addServiceResults(
+                        mChooserMultiProfilePagerAdapter.getActiveListAdapter().addServiceResults(
                                 sri.originalTarget, sri.resultTargets, TARGET_TYPE_CHOOSER_TARGET);
                     }
                     unbindService(sri.connection);
@@ -479,14 +477,14 @@ public class ChooserActivity extends ResolverActivity implements
                         Log.d(TAG, "LIST_VIEW_UPDATE_MESSAGE; ");
                     }
 
-                    mChooserMultiProfilePagerAdapter.getCurrentListAdapter().refreshListView();
+                    mChooserMultiProfilePagerAdapter.getActiveListAdapter().refreshListView();
                     break;
 
                 case SHORTCUT_MANAGER_SHARE_TARGET_RESULT:
                     if (DEBUG) Log.d(TAG, "SHORTCUT_MANAGER_SHARE_TARGET_RESULT");
                     final ServiceResultInfo resultInfo = (ServiceResultInfo) msg.obj;
                     if (resultInfo.resultTargets != null) {
-                        mChooserMultiProfilePagerAdapter.getCurrentListAdapter().addServiceResults(
+                        mChooserMultiProfilePagerAdapter.getActiveListAdapter().addServiceResults(
                                 resultInfo.originalTarget, resultInfo.resultTargets, msg.arg1);
                     }
                     break;
@@ -646,7 +644,7 @@ public class ChooserActivity extends ResolverActivity implements
                 if (isFinishing() || isDestroyed()) {
                     return;
                 }
-                if (mChooserMultiProfilePagerAdapter.getCurrentListAdapter().getCount() == 0) {
+                if (mChooserMultiProfilePagerAdapter.getActiveListAdapter().getCount() == 0) {
                     return;
                 }
                 if (resultList.isEmpty()) {
@@ -654,12 +652,12 @@ public class ChooserActivity extends ResolverActivity implements
                     //TODO(arangelov) queryDirectShareTargets indirectly uses mIntents.
                     // Investigate implications for work tab.
                     queryDirectShareTargets(
-                            mChooserMultiProfilePagerAdapter.getCurrentListAdapter(), true);
+                            mChooserMultiProfilePagerAdapter.getActiveListAdapter(), true);
                     return;
                 }
                 final List<DisplayResolveInfo> driList =
                         getDisplayResolveInfos(
-                                mChooserMultiProfilePagerAdapter.getCurrentListAdapter());
+                                mChooserMultiProfilePagerAdapter.getActiveListAdapter());
                 final List<ShortcutManager.ShareShortcutInfo> shareShortcutInfos =
                         new ArrayList<>();
                 for (AppTarget appTarget : resultList) {
@@ -809,7 +807,7 @@ public class ChooserActivity extends ResolverActivity implements
 
     @Override
     protected boolean postRebuildList(boolean rebuildCompleted) {
-        mChooserMultiProfilePagerAdapter.getCurrentRootAdapter().maybeLogActionShareWithPreview();
+        updateContentPreview();
         return postRebuildListInternal(rebuildCompleted);
     }
 
@@ -862,7 +860,7 @@ public class ChooserActivity extends ResolverActivity implements
             public void onSomePackagesChanged() {
                 // TODO(arangelov): Dispatch this to all adapters when we have the helper methods
                 // in a follow-up CL
-                mChooserMultiProfilePagerAdapter.getCurrentListAdapter().handlePackagesChanged();
+                mChooserMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
                 updateProfileViewButton();
             }
         };
@@ -950,6 +948,12 @@ public class ChooserActivity extends ResolverActivity implements
             params.width = width;
             view.setLayoutParams(params);
         }
+    }
+
+    private ViewGroup createContentPreviewView(ViewGroup parent) {
+        Intent targetIntent = getTargetIntent();
+        int previewType = findPreferredContentPreview(targetIntent, getContentResolver());
+        return displayContentPreview(previewType, targetIntent, getLayoutInflater(), parent);
     }
 
     private ViewGroup displayContentPreview(@ContentPreviewType int previewType,
@@ -1319,7 +1323,7 @@ public class ChooserActivity extends ResolverActivity implements
     public void onPrepareAdapterView(ResolverListAdapter adapter) {
         mChooserMultiProfilePagerAdapter.getCurrentAdapterView().setVisibility(View.VISIBLE);
         if (mCallerChooserTargets != null && mCallerChooserTargets.length > 0) {
-            mChooserMultiProfilePagerAdapter.getCurrentListAdapter().addServiceResults(
+            mChooserMultiProfilePagerAdapter.getActiveListAdapter().addServiceResults(
                     /* origTarget */ null,
                     Lists.newArrayList(mCallerChooserTargets),
                     TARGET_TYPE_DEFAULT);
@@ -1404,7 +1408,7 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     public void startSelected(int which, boolean always, boolean filtered) {
         ChooserListAdapter currentListAdapter =
-                mChooserMultiProfilePagerAdapter.getCurrentListAdapter();
+                mChooserMultiProfilePagerAdapter.getActiveListAdapter();
         TargetInfo targetInfo = currentListAdapter
                 .targetInfoForPosition(which, filtered);
         if (targetInfo != null && targetInfo instanceof NotSelectableTargetInfo) {
@@ -1487,7 +1491,7 @@ public class ChooserActivity extends ResolverActivity implements
         String targetPackageName =
                 targetInfo.getChooserTarget().getComponentName().getPackageName();
         ChooserListAdapter currentListAdapter =
-                mChooserMultiProfilePagerAdapter.getCurrentListAdapter();
+                mChooserMultiProfilePagerAdapter.getActiveListAdapter();
         int maxRankedResults = Math.min(currentListAdapter.mDisplayList.size(),
                 MAX_LOG_RANK_POSITION);
 
@@ -1841,7 +1845,7 @@ public class ChooserActivity extends ResolverActivity implements
             Intent targetIntent = getTargetIntent();
             if (ri != null && ri.activityInfo != null && targetIntent != null) {
                 ChooserListAdapter currentListAdapter =
-                        mChooserMultiProfilePagerAdapter.getCurrentListAdapter();
+                        mChooserMultiProfilePagerAdapter.getActiveListAdapter();
                 if (currentListAdapter != null) {
                     currentListAdapter.updateModel(info.getResolvedComponentName());
                     currentListAdapter.updateChooserCounts(ri.activityInfo.packageName, getUserId(),
@@ -2146,8 +2150,7 @@ public class ChooserActivity extends ResolverActivity implements
                 final int bottomInset = mSystemWindowInsets != null
                                             ? mSystemWindowInsets.bottom : 0;
                 int offset = bottomInset;
-                int rowsToShow = gridAdapter.getContentPreviewRowCount()
-                        + gridAdapter.getProfileRowCount()
+                int rowsToShow = gridAdapter.getProfileRowCount()
                         + gridAdapter.getServiceTargetRowCount()
                         + gridAdapter.getCallerAndRankedTargetRowCount();
 
@@ -2159,11 +2162,15 @@ public class ChooserActivity extends ResolverActivity implements
 
                 // still zero? then use a default height and leave, which
                 // can happen when there are no targets to show
-                if (rowsToShow == 0) {
+                if (rowsToShow == 0 && !shouldShowContentPreview()) {
                     offset += getResources().getDimensionPixelSize(
                             R.dimen.chooser_max_collapsed_height);
                     mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
                     return;
+                }
+
+                if (shouldShowContentPreview()) {
+                    offset += findViewById(R.id.content_preview_container).getHeight();
                 }
 
                 int directShareHeight = 0;
@@ -2216,13 +2223,13 @@ public class ChooserActivity extends ResolverActivity implements
     @Override // ResolverListCommunicator
     public void onHandlePackagesChanged() {
         mServicesRequested.clear();
-        mChooserMultiProfilePagerAdapter.getCurrentListAdapter().notifyDataSetChanged();
+        mChooserMultiProfilePagerAdapter.getActiveListAdapter().notifyDataSetChanged();
         super.onHandlePackagesChanged();
     }
 
     @Override // SelectableTargetInfoCommunicator
     public ActivityInfoPresentationGetter makePresentationGetter(ActivityInfo info) {
-        return mChooserMultiProfilePagerAdapter.getCurrentListAdapter().makePresentationGetter(info);
+        return mChooserMultiProfilePagerAdapter.getActiveListAdapter().makePresentationGetter(info);
     }
 
     @Override // SelectableTargetInfoCommunicator
@@ -2244,22 +2251,21 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     @Override
-    public void onListRebuilt() {
-        final ChooserListAdapter currentListAdapter =
-                mChooserMultiProfilePagerAdapter.getCurrentListAdapter();
-        if (currentListAdapter.mDisplayList == null
-                || currentListAdapter.mDisplayList.isEmpty()) {
-            currentListAdapter.notifyDataSetChanged();
+    public void onListRebuilt(ResolverListAdapter listAdapter) {
+        ChooserListAdapter chooserListAdapter = (ChooserListAdapter) listAdapter;
+        if (chooserListAdapter.mDisplayList == null
+                || chooserListAdapter.mDisplayList.isEmpty()) {
+            chooserListAdapter.notifyDataSetChanged();
         } else {
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... voids) {
-                    currentListAdapter.updateAlphabeticalList();
+                    chooserListAdapter.updateAlphabeticalList();
                     return null;
                 }
                 @Override
                 protected void onPostExecute(Void aVoid) {
-                    currentListAdapter.notifyDataSetChanged();
+                    chooserListAdapter.notifyDataSetChanged();
                 }
             }.execute();
         }
@@ -2275,14 +2281,14 @@ public class ChooserActivity extends ResolverActivity implements
                 Log.d(TAG, "querying direct share targets from ShortcutManager");
             }
 
-            queryDirectShareTargets(currentListAdapter, false);
+            queryDirectShareTargets(chooserListAdapter, false);
         }
         if (USE_CHOOSER_TARGET_SERVICE_FOR_DIRECT_TARGETS) {
             if (DEBUG) {
                 Log.d(TAG, "List built querying services");
             }
 
-            queryTargetServices(currentListAdapter);
+            queryTargetServices(chooserListAdapter);
         }
     }
 
@@ -2304,10 +2310,43 @@ public class ChooserActivity extends ResolverActivity implements
         return false;
     }
 
+    private boolean shouldShowContentPreview() {
+        return mMultiProfilePagerAdapter.getActiveListAdapter().getCount() > 0
+                && isSendAction(getTargetIntent());
+    }
+
+    private void updateContentPreview() {
+        if (shouldShowContentPreview()) {
+            showContentPreview();
+        } else {
+            hideContentPreview();
+        }
+    }
+
+    private void showContentPreview() {
+        ViewGroup contentPreviewContainer = findViewById(R.id.content_preview_container);
+        contentPreviewContainer.setVisibility(View.VISIBLE);
+        ViewGroup contentPreviewView = createContentPreviewView(contentPreviewContainer);
+        contentPreviewContainer.addView(contentPreviewView);
+        logActionShareWithPreview();
+    }
+
+    private void hideContentPreview() {
+        ViewGroup contentPreviewContainer = findViewById(R.id.content_preview_container);
+        contentPreviewContainer.removeAllViews();
+        contentPreviewContainer.setVisibility(View.GONE);
+    }
+
+    private void logActionShareWithPreview() {
+        Intent targetIntent = getTargetIntent();
+        int previewType = findPreferredContentPreview(targetIntent, getContentResolver());
+        getMetricsLogger().write(new LogMaker(MetricsEvent.ACTION_SHARE_WITH_PREVIEW)
+                .setSubtype(previewType));
+    }
+
     /**
      * Used to bind types of individual item including
      * {@link ChooserGridAdapter#VIEW_TYPE_NORMAL},
-     * {@link ChooserGridAdapter#VIEW_TYPE_CONTENT_PREVIEW},
      * {@link ChooserGridAdapter#VIEW_TYPE_PROFILE},
      * and {@link ChooserGridAdapter#VIEW_TYPE_AZ_LABEL}.
      */
@@ -2323,7 +2362,7 @@ public class ChooserActivity extends ResolverActivity implements
                         false/* always */, true/* filterd */));
                 itemView.setOnLongClickListener(v -> {
                     showTargetDetails(
-                            mChooserMultiProfilePagerAdapter.getCurrentListAdapter()
+                            mChooserMultiProfilePagerAdapter.getActiveListAdapter()
                                     .resolveInfoForPosition(mListPosition, /* filtered */ true));
                     return true;
                 });
@@ -2368,15 +2407,13 @@ public class ChooserActivity extends ResolverActivity implements
         private int mChooserTargetWidth = 0;
         private boolean mShowAzLabelIfPoss;
 
-        private boolean mHideContentPreview = false;
         private boolean mLayoutRequested = false;
 
         private static final int VIEW_TYPE_DIRECT_SHARE = 0;
         private static final int VIEW_TYPE_NORMAL = 1;
-        private static final int VIEW_TYPE_CONTENT_PREVIEW = 2;
-        private static final int VIEW_TYPE_PROFILE = 3;
-        private static final int VIEW_TYPE_AZ_LABEL = 4;
-        private static final int VIEW_TYPE_CALLER_AND_RANK = 5;
+        private static final int VIEW_TYPE_PROFILE = 2;
+        private static final int VIEW_TYPE_AZ_LABEL = 3;
+        private static final int VIEW_TYPE_CALLER_AND_RANK = 4;
 
         private static final int MAX_TARGETS_PER_ROW_PORTRAIT = 4;
         private static final int MAX_TARGETS_PER_ROW_LANDSCAPE = 8;
@@ -2433,12 +2470,6 @@ public class ChooserActivity extends ResolverActivity implements
             return maxTargets;
         }
 
-        public void hideContentPreview() {
-            mHideContentPreview = true;
-            mLayoutRequested = true;
-            notifyDataSetChanged();
-        }
-
         public boolean consumeLayoutRequest() {
             boolean oldValue = mLayoutRequested;
             mLayoutRequested = false;
@@ -2447,8 +2478,7 @@ public class ChooserActivity extends ResolverActivity implements
 
         public int getRowCount() {
             return (int) (
-                    getContentPreviewRowCount()
-                            + getProfileRowCount()
+                    getProfileRowCount()
                             + getServiceTargetRowCount()
                             + getCallerAndRankedTargetRowCount()
                             + getAzLabelRowCount()
@@ -2456,19 +2486,6 @@ public class ChooserActivity extends ResolverActivity implements
                             (float) mChooserListAdapter.getAlphaTargetCount()
                                     / getMaxTargetsPerRow())
             );
-        }
-
-        public int getContentPreviewRowCount() {
-            if (!isSendAction(getTargetIntent())) {
-                return 0;
-            }
-
-            if (mHideContentPreview || mChooserListAdapter == null
-                    || mChooserListAdapter.getCount() == 0) {
-                return 0;
-            }
-
-            return 1;
         }
 
         public int getProfileRowCount() {
@@ -2499,8 +2516,7 @@ public class ChooserActivity extends ResolverActivity implements
         @Override
         public int getItemCount() {
             return (int) (
-                    getContentPreviewRowCount()
-                            + getProfileRowCount()
+                    getProfileRowCount()
                             + getServiceTargetRowCount()
                             + getCallerAndRankedTargetRowCount()
                             + getAzLabelRowCount()
@@ -2511,8 +2527,6 @@ public class ChooserActivity extends ResolverActivity implements
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             switch (viewType) {
-                case VIEW_TYPE_CONTENT_PREVIEW:
-                    return new ItemViewHolder(createContentPreviewView(parent), false);
                 case VIEW_TYPE_PROFILE:
                     return new ItemViewHolder(createProfileView(parent), false);
                 case VIEW_TYPE_AZ_LABEL:
@@ -2547,10 +2561,7 @@ public class ChooserActivity extends ResolverActivity implements
         public int getItemViewType(int position) {
             int count;
 
-            int countSum = (count = getContentPreviewRowCount());
-            if (count > 0 && position < countSum) return VIEW_TYPE_CONTENT_PREVIEW;
-
-            countSum += (count = getProfileRowCount());
+            int countSum = (count = getProfileRowCount());
             if (count > 0 && position < countSum) return VIEW_TYPE_PROFILE;
 
             countSum += (count = getServiceTargetRowCount());
@@ -2567,12 +2578,6 @@ public class ChooserActivity extends ResolverActivity implements
 
         public int getTargetType(int position) {
             return mChooserListAdapter.getPositionTargetType(getListPosition(position));
-        }
-
-        private ViewGroup createContentPreviewView(ViewGroup parent) {
-            Intent targetIntent = getTargetIntent();
-            int previewType = findPreferredContentPreview(targetIntent, getContentResolver());
-            return displayContentPreview(previewType, targetIntent, mLayoutInflater, parent);
         }
 
         private View createProfileView(ViewGroup parent) {
@@ -2770,7 +2775,7 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         int getListPosition(int position) {
-            position -= getContentPreviewRowCount() + getProfileRowCount();
+            position -= getProfileRowCount();
 
             final int serviceCount = mChooserListAdapter.getServiceTargetCount();
             final int serviceRows = (int) Math.ceil((float) serviceCount
@@ -2812,16 +2817,6 @@ public class ChooserActivity extends ResolverActivity implements
 
         public ChooserListAdapter getListAdapter() {
             return mChooserListAdapter;
-        }
-
-        void maybeLogActionShareWithPreview() {
-            if (getContentPreviewRowCount() == 0) {
-                return;
-            }
-            Intent targetIntent = getTargetIntent();
-            int previewType = findPreferredContentPreview(targetIntent, getContentResolver());
-            getMetricsLogger().write(new LogMaker(MetricsEvent.ACTION_SHARE_WITH_PREVIEW)
-                    .setSubtype(previewType));
         }
 
         boolean shouldCellSpan(int position) {
@@ -3010,7 +3005,7 @@ public class ChooserActivity extends ResolverActivity implements
 
                 // only expand if we have more than maxTargetsPerRow, and delay that decision
                 // until they start to scroll
-                if (mChooserMultiProfilePagerAdapter.getCurrentListAdapter()
+                if (mChooserMultiProfilePagerAdapter.getActiveListAdapter()
                         .getSelectableServiceTargetCount() <= maxTargetsPerRow) {
                     mHideDirectShareExpansion = true;
                     return;

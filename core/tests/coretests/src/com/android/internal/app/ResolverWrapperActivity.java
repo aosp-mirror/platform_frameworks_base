@@ -46,7 +46,7 @@ public class ResolverWrapperActivity extends ResolverActivity {
     }
 
     ResolverWrapperAdapter getAdapter() {
-        return (ResolverWrapperAdapter) mMultiProfilePagerAdapter.getCurrentListAdapter();
+        return (ResolverWrapperAdapter) mMultiProfilePagerAdapter.getActiveListAdapter();
     }
 
     @Override

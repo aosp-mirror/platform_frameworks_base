@@ -87,13 +87,22 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
 
     @Override
     @VisibleForTesting
-    public ResolverListAdapter getCurrentListAdapter() {
+    public ResolverListAdapter getActiveListAdapter() {
         return getAdapterForIndex(getCurrentPage());
     }
 
     @Override
+    @VisibleForTesting
+    public ResolverListAdapter getInactiveListAdapter() {
+        if (getCount() == 1) {
+            return null;
+        }
+        return getAdapterForIndex(1 - getCurrentPage());
+    }
+
+    @Override
     ResolverListAdapter getCurrentRootAdapter() {
-        return getCurrentListAdapter();
+        return getActiveListAdapter();
     }
 
     @Override
