@@ -644,6 +644,10 @@ public class BiometricService extends SystemService {
                 return;
             }
 
+            if (!Utils.isValidAuthenticatorConfig(bundle)) {
+                throw new SecurityException("Invalid authenticator configuration");
+            }
+
             Utils.combineAuthenticatorBundles(bundle);
 
             // Check the usage of this in system server. Need to remove this check if it becomes a
@@ -688,12 +692,18 @@ public class BiometricService extends SystemService {
         public int canAuthenticate(String opPackageName, int userId,
                 @Authenticators.Types int authenticators) {
             Slog.d(TAG, "canAuthenticate: User=" + userId
-                    + ", Caller=" + UserHandle.getCallingUserId());
+                    + ", Caller=" + UserHandle.getCallingUserId()
+                    + ", Authenticators=" + authenticators);
 
             if (userId != UserHandle.getCallingUserId()) {
                 checkInternalPermission();
             } else {
                 checkPermission();
+            }
+
+
+            if (!Utils.isValidAuthenticatorConfig(authenticators)) {
+                throw new SecurityException("Invalid authenticator configuration");
             }
 
             final Bundle bundle = new Bundle();
@@ -969,7 +979,7 @@ public class BiometricService extends SystemService {
         int firstHwAvailable = TYPE_NONE;
         for (AuthenticatorWrapper authenticator : mAuthenticators) {
             final int actualStrength = authenticator.getActualStrength();
-            final int requestedStrength = Utils.getBiometricStrength(bundle);
+            final int requestedStrength = Utils.getPublicBiometricStrength(bundle);
             if (Utils.isAtLeastStrength(actualStrength, requestedStrength)) {
                 hasSufficientStrength = true;
                 modality = authenticator.modality;

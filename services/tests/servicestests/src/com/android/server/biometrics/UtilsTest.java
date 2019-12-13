@@ -125,18 +125,17 @@ public class UtilsTest {
 
         int authenticators = Integer.MAX_VALUE;
         assertEquals(Authenticators.BIOMETRIC_WEAK,
-                Utils.getBiometricStrength(authenticators));
+                Utils.getPublicBiometricStrength(authenticators));
 
         Bundle bundle = new Bundle();
         bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-        assertEquals(Authenticators.BIOMETRIC_WEAK, Utils.getBiometricStrength(bundle));
+        assertEquals(Authenticators.BIOMETRIC_WEAK, Utils.getPublicBiometricStrength(bundle));
     }
 
     @Test
     public void testIsBiometricAllowed() {
         // Only the lowest 8 bits (BIOMETRIC_WEAK mask) are allowed to integrate with the
         // Biometric APIs
-        final int lastBiometricPosition = 10;
         Bundle bundle = new Bundle();
         for (int i = 0; i <= 7; i++) {
             int authenticators = 1 << i;
@@ -144,11 +143,46 @@ public class UtilsTest {
             assertTrue(Utils.isBiometricAllowed(bundle));
         }
 
-        // The rest of the bits are not allowed to integrate with BiometricPrompt
+        // The rest of the bits are not allowed to integrate with the public APIs
         for (int i = 8; i < 32; i++) {
             int authenticators = 1 << i;
             bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
             assertFalse(Utils.isBiometricAllowed(bundle));
+        }
+    }
+
+    @Test
+    public void testIsValidAuthenticatorConfig() {
+        assertTrue(Utils.isValidAuthenticatorConfig(Authenticators.EMPTY_SET));
+
+        assertTrue(Utils.isValidAuthenticatorConfig(Authenticators.BIOMETRIC_STRONG));
+
+        assertTrue(Utils.isValidAuthenticatorConfig(Authenticators.BIOMETRIC_WEAK));
+
+        assertTrue(Utils.isValidAuthenticatorConfig(Authenticators.DEVICE_CREDENTIAL));
+
+        assertTrue(Utils.isValidAuthenticatorConfig(Authenticators.DEVICE_CREDENTIAL
+                | Authenticators.BIOMETRIC_STRONG));
+
+        assertTrue(Utils.isValidAuthenticatorConfig(Authenticators.DEVICE_CREDENTIAL
+                | Authenticators.BIOMETRIC_WEAK));
+
+        assertFalse(Utils.isValidAuthenticatorConfig(Authenticators.BIOMETRIC_CONVENIENCE));
+
+        assertFalse(Utils.isValidAuthenticatorConfig(Authenticators.BIOMETRIC_CONVENIENCE
+                | Authenticators.DEVICE_CREDENTIAL));
+
+        assertFalse(Utils.isValidAuthenticatorConfig(Authenticators.BIOMETRIC_MAX_STRENGTH));
+
+        assertFalse(Utils.isValidAuthenticatorConfig(Authenticators.BIOMETRIC_MIN_STRENGTH));
+
+        // The rest of the bits are not allowed to integrate with the public APIs
+        for (int i = 8; i < 32; i++) {
+            final int authenticator = 1 << i;
+            if (authenticator == Authenticators.DEVICE_CREDENTIAL) {
+                continue;
+            }
+            assertFalse(Utils.isValidAuthenticatorConfig(1 << i));
         }
     }
 

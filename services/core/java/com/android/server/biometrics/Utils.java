@@ -87,28 +87,35 @@ public class Utils {
     }
 
     /**
+     * Checks if any of the publicly defined strengths are set.
+     *
      * @param authenticators composed of one or more values from {@link Authenticators}
      * @return minimal allowed biometric strength or 0 if biometric authentication is not allowed.
      */
-    public static int getBiometricStrength(@Authenticators.Types int authenticators) {
+    public static int getPublicBiometricStrength(@Authenticators.Types int authenticators) {
         // Only biometrics WEAK and above are allowed to integrate with the public APIs.
         return authenticators & Authenticators.BIOMETRIC_WEAK;
     }
 
     /**
+     * Checks if any of the publicly defined strengths are set.
+     *
      * @param bundle should be first processed by {@link #combineAuthenticatorBundles(Bundle)}
      * @return minimal allowed biometric strength or 0 if biometric authentication is not allowed.
      */
-    public static int getBiometricStrength(Bundle bundle) {
-        return getBiometricStrength(bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
+    public static int getPublicBiometricStrength(Bundle bundle) {
+        return getPublicBiometricStrength(
+                bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
     }
 
     /**
+     * Checks if any of the publicly defined strengths are set.
+     *
      * @param bundle should be first processed by {@link #combineAuthenticatorBundles(Bundle)}
      * @return true if biometric authentication is allowed.
      */
     public static boolean isBiometricAllowed(Bundle bundle) {
-        return getBiometricStrength(bundle) != 0;
+        return getPublicBiometricStrength(bundle) != 0;
     }
 
     /**
@@ -119,6 +126,55 @@ public class Utils {
     public static boolean isAtLeastStrength(int sensorStrength, int requestedStrength) {
         // If the authenticator contains bits outside of the requested strength, it is too weak.
         return (~requestedStrength & sensorStrength) == 0;
+    }
+
+    /**
+     * Checks if the authenticator configuration is a valid combination of the public APIs
+     * @param bundle
+     * @return
+     */
+    public static boolean isValidAuthenticatorConfig(Bundle bundle) {
+        final int authenticators = bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
+        return isValidAuthenticatorConfig(authenticators);
+    }
+
+    /**
+     * Checks if the authenticator configuration is a valid combination of the public APIs
+     * @param authenticators
+     * @return
+     */
+    public static boolean isValidAuthenticatorConfig(int authenticators) {
+        // The caller is not required to set the authenticators. But if they do, check the below.
+        if (authenticators == 0) {
+            return true;
+        }
+
+        // Check if any of the non-biometric and non-credential bits are set. If so, this is
+        // invalid.
+        final int testBits = ~(Authenticators.DEVICE_CREDENTIAL
+                | Authenticators.BIOMETRIC_MIN_STRENGTH);
+        if ((authenticators & testBits) != 0) {
+            Slog.e(BiometricService.TAG, "Non-biometric, non-credential bits found."
+                    + " Authenticators: " + authenticators);
+            return false;
+        }
+
+        // Check that biometrics bits are either NONE, WEAK, or STRONG. If NONE, DEVICE_CREDENTIAL
+        // should be set.
+        final int biometricBits = authenticators & Authenticators.BIOMETRIC_MIN_STRENGTH;
+        if (biometricBits == Authenticators.EMPTY_SET
+                && isDeviceCredentialAllowed(authenticators)) {
+            return true;
+        } else if (biometricBits == Authenticators.BIOMETRIC_STRONG) {
+            return true;
+        } else if (biometricBits == Authenticators.BIOMETRIC_WEAK) {
+            return true;
+        }
+
+        Slog.e(BiometricService.TAG, "Unsupported biometric flags. Authenticators: "
+                + authenticators);
+        // Non-supported biometric flags are being used
+        return false;
     }
 
     /**
