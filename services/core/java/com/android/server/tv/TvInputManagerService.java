@@ -2943,6 +2943,16 @@ public final class TvInputManagerService extends SystemService {
                 if (state != null) {
                     setStateLocked(inputId, state, mCurrentUserId);
                 }
+                UserState userState = getOrCreateUserStateLocked(mCurrentUserId);
+                // Broadcast the event to all hardware inputs.
+                for (ServiceState serviceState : userState.serviceStateMap.values()) {
+                    if (!serviceState.isHardware || serviceState.service == null) continue;
+                    try {
+                        serviceState.service.notifyHdmiDeviceUpdated(deviceInfo);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in notifyHdmiDeviceUpdated", e);
+                    }
+                }
             }
         }
     }
