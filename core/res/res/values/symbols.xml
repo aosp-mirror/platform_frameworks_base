@@ -3027,6 +3027,10 @@
   <java-symbol type="id" name="notification_action_list_margin_target" />
   <java-symbol type="dimen" name="notification_action_disabled_alpha" />
 
+  <!-- Override Wake Key Behavior When Screen is Off -->
+  <java-symbol type="bool" name="config_wakeOnDpadKeyPress" />
+  <java-symbol type="bool" name="config_wakeOnAssistKeyPress" />
+
   <!-- Pinner Service -->
   <java-symbol type="array" name="config_defaultPinnerServiceFiles" />
   <java-symbol type="bool" name="config_pinnerCameraApp" />

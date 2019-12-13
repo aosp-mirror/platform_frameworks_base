@@ -4331,4 +4331,9 @@
     <!-- Boolean indicating whether frameworks needs to reset cell broadcast geo-fencing
          check after reboot or airplane mode toggling -->
     <bool translatable="false" name="reset_geo_fencing_check_after_boot_or_apm">false</bool>
+
+    <!-- Screen Wake Keys
+         Determines whether the specified key groups can be used to wake up the device. -->
+    <bool name="config_wakeOnDpadKeyPress">true</bool>
+    <bool name="config_wakeOnAssistKeyPress">true</bool>
 </resources>
