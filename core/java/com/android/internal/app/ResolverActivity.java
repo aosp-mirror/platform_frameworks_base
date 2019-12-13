@@ -36,7 +36,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -780,12 +779,9 @@ public class ResolverActivity extends Activity implements
         ActivityInfo activityInfo = ri.activityInfo;
 
         boolean hasRecordPermission =
-                PermissionChecker.checkPermissionForPreflight(
-                        getApplicationContext(),
-                        android.Manifest.permission.RECORD_AUDIO, -1,
-                        activityInfo.applicationInfo.uid,
+                mPm.checkPermission(android.Manifest.permission.RECORD_AUDIO,
                         activityInfo.packageName)
-                        == android.content.pm.PackageManager.PERMISSION_GRANTED;
+                    == android.content.pm.PackageManager.PERMISSION_GRANTED;
 
         if (!hasRecordPermission) {
             // OK, we know the record permission, is this a capture device
