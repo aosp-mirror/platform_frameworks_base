@@ -479,8 +479,14 @@ public final class BinderProxy implements IBinder {
             // For now, avoid spamming the log by disabling after we've logged
             // about this interface at least once
             mWarnOnBlocking = false;
-            Log.w(Binder.TAG, "Outgoing transactions from this process must be FLAG_ONEWAY",
-                    new Throwable());
+            if (Build.IS_USERDEBUG) {
+                // Log this as a WTF on userdebug builds.
+                Log.wtf(Binder.TAG, "Outgoing transactions from this process must be FLAG_ONEWAY",
+                        new Throwable());
+            } else {
+                Log.w(Binder.TAG, "Outgoing transactions from this process must be FLAG_ONEWAY",
+                        new Throwable());
+            }
         }
 
         final boolean tracingEnabled = Binder.isTracingEnabled();
