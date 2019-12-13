@@ -414,13 +414,13 @@ public class ResolverActivity extends Activity {
             mFooterSpacer.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,
                                                                        mSystemWindowInsets.bottom));
             ((ListView) mAdapterView).addFooterView(mFooterSpacer);
-        } else {
-            View emptyView = findViewById(R.id.empty);
-            if (emptyView != null) {
-                emptyView.setPadding(0, 0, 0, mSystemWindowInsets.bottom
-                                     + getResources().getDimensionPixelSize(
-                                             R.dimen.chooser_edge_margin_normal) * 2);
-            }
+        }
+
+        View emptyView = findViewById(R.id.empty);
+        if (emptyView != null) {
+            emptyView.setPadding(0, 0, 0, mSystemWindowInsets.bottom
+                                 + getResources().getDimensionPixelSize(
+                                         R.dimen.chooser_edge_margin_normal) * 2);
         }
 
         return insets.consumeSystemWindowInsets();
