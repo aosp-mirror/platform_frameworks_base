@@ -322,7 +322,7 @@ public final class ClockManager {
             mClocks.put(plugin.getClass().getName(), plugin);
             mClockInfo.add(ClockInfo.builder()
                     .setName(plugin.getName())
-                    .setTitle(plugin.getTitle())
+                    .setTitle(plugin::getTitle)
                     .setId(id)
                     .setThumbnail(plugin::getThumbnail)
                     .setPreview(() -> plugin.getPreview(mWidth, mHeight))
