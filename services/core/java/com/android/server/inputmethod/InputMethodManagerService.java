@@ -1792,10 +1792,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("mMethodMap")
     private void onCreateInlineSuggestionsRequestLocked(ComponentName componentName,
             AutofillId autofillId, IInlineSuggestionsRequestCallback callback) {
-        if (mCurMethod != null) {
-            executeOrSendMessage(mCurMethod,
-                    mCaller.obtainMessageOOOO(MSG_INLINE_SUGGESTIONS_REQUEST, mCurMethod,
-                            componentName, autofillId, callback));
+
+        final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
+        try {
+            if (imi != null && imi.isInlineSuggestionsEnabled() && mCurMethod != null) {
+                executeOrSendMessage(mCurMethod,
+                        mCaller.obtainMessageOOOO(MSG_INLINE_SUGGESTIONS_REQUEST, mCurMethod,
+                                componentName, autofillId, callback));
+            } else {
+                callback.onInlineSuggestionsUnsupported();
+            }
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException calling onCreateInlineSuggestionsRequest(): " + e);
         }
     }
 

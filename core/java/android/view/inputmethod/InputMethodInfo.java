@@ -58,6 +58,7 @@ import java.util.List;
  * @attr ref android.R.styleable#InputMethod_settingsActivity
  * @attr ref android.R.styleable#InputMethod_isDefault
  * @attr ref android.R.styleable#InputMethod_supportsSwitchingToNextInputMethod
+ * @attr ref android.R.styleable#InputMethod_supportsInlineSuggestions
  */
 public final class InputMethodInfo implements Parcelable {
     static final String TAG = "InputMethodInfo";
@@ -111,6 +112,11 @@ public final class InputMethodInfo implements Parcelable {
     private final boolean mSupportsSwitchingToNextInputMethod;
 
     /**
+     * The flag whether this IME supports inline suggestions.
+     */
+    private final boolean mInlineSuggestionsEnabled;
+
+    /**
      * @param service the {@link ResolveInfo} corresponds in which the IME is implemented.
      * @return a unique ID to be returned by {@link #getId()}. We have used
      *         {@link ComponentName#flattenToShortString()} for this purpose (and it is already
@@ -152,6 +158,7 @@ public final class InputMethodInfo implements Parcelable {
         mId = computeId(service);
         boolean isAuxIme = true;
         boolean supportsSwitchingToNextInputMethod = false; // false as default
+        boolean inlineSuggestionsEnabled = false; // false as default
         mForceDefault = false;
 
         PackageManager pm = context.getPackageManager();
@@ -193,6 +200,8 @@ public final class InputMethodInfo implements Parcelable {
             supportsSwitchingToNextInputMethod = sa.getBoolean(
                     com.android.internal.R.styleable.InputMethod_supportsSwitchingToNextInputMethod,
                     false);
+            inlineSuggestionsEnabled = sa.getBoolean(
+                    com.android.internal.R.styleable.InputMethod_supportsInlineSuggestions, false);
             sa.recycle();
 
             final int depth = parser.getDepth();
@@ -263,6 +272,7 @@ public final class InputMethodInfo implements Parcelable {
         mIsDefaultResId = isDefaultResId;
         mIsAuxIme = isAuxIme;
         mSupportsSwitchingToNextInputMethod = supportsSwitchingToNextInputMethod;
+        mInlineSuggestionsEnabled = inlineSuggestionsEnabled;
         mIsVrOnly = isVrOnly;
     }
 
@@ -272,6 +282,7 @@ public final class InputMethodInfo implements Parcelable {
         mIsDefaultResId = source.readInt();
         mIsAuxIme = source.readInt() == 1;
         mSupportsSwitchingToNextInputMethod = source.readInt() == 1;
+        mInlineSuggestionsEnabled = source.readInt() == 1;
         mIsVrOnly = source.readBoolean();
         mService = ResolveInfo.CREATOR.createFromParcel(source);
         mSubtypes = new InputMethodSubtypeArray(source);
@@ -286,7 +297,7 @@ public final class InputMethodInfo implements Parcelable {
         this(buildDummyResolveInfo(packageName, className, label), false /* isAuxIme */,
                 settingsActivity, null /* subtypes */, 0 /* isDefaultResId */,
                 false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */,
-                false /* isVrOnly */);
+                false /* inlineSuggestionsEnabled */, false /* isVrOnly */);
     }
 
     /**
@@ -297,7 +308,8 @@ public final class InputMethodInfo implements Parcelable {
             String settingsActivity, List<InputMethodSubtype> subtypes, int isDefaultResId,
             boolean forceDefault) {
         this(ri, isAuxIme, settingsActivity, subtypes, isDefaultResId, forceDefault,
-                true /* supportsSwitchingToNextInputMethod */, false /* isVrOnly */);
+                true /* supportsSwitchingToNextInputMethod */, false /* inlineSuggestionsEnabled */,
+                false /* isVrOnly */);
     }
 
     /**
@@ -307,6 +319,18 @@ public final class InputMethodInfo implements Parcelable {
     public InputMethodInfo(ResolveInfo ri, boolean isAuxIme, String settingsActivity,
             List<InputMethodSubtype> subtypes, int isDefaultResId, boolean forceDefault,
             boolean supportsSwitchingToNextInputMethod, boolean isVrOnly) {
+        this(ri, isAuxIme, settingsActivity, subtypes, isDefaultResId, forceDefault,
+                supportsSwitchingToNextInputMethod, false /* inlineSuggestionsEnabled */, isVrOnly);
+    }
+
+    /**
+     * Temporary API for creating a built-in input method for test.
+     * @hide
+     */
+    public InputMethodInfo(ResolveInfo ri, boolean isAuxIme, String settingsActivity,
+            List<InputMethodSubtype> subtypes, int isDefaultResId, boolean forceDefault,
+            boolean supportsSwitchingToNextInputMethod, boolean inlineSuggestionsEnabled,
+            boolean isVrOnly) {
         final ServiceInfo si = ri.serviceInfo;
         mService = ri;
         mId = new ComponentName(si.packageName, si.name).flattenToShortString();
@@ -316,6 +340,7 @@ public final class InputMethodInfo implements Parcelable {
         mSubtypes = new InputMethodSubtypeArray(subtypes);
         mForceDefault = forceDefault;
         mSupportsSwitchingToNextInputMethod = supportsSwitchingToNextInputMethod;
+        mInlineSuggestionsEnabled = inlineSuggestionsEnabled;
         mIsVrOnly = isVrOnly;
     }
 
@@ -467,7 +492,8 @@ public final class InputMethodInfo implements Parcelable {
         pw.println(prefix + "mId=" + mId
                 + " mSettingsActivityName=" + mSettingsActivityName
                 + " mIsVrOnly=" + mIsVrOnly
-                + " mSupportsSwitchingToNextInputMethod=" + mSupportsSwitchingToNextInputMethod);
+                + " mSupportsSwitchingToNextInputMethod=" + mSupportsSwitchingToNextInputMethod
+                + " mInlineSuggestionsEnabled=" + mInlineSuggestionsEnabled);
         pw.println(prefix + "mIsDefaultResId=0x"
                 + Integer.toHexString(mIsDefaultResId));
         pw.println(prefix + "Service:");
@@ -528,6 +554,14 @@ public final class InputMethodInfo implements Parcelable {
     }
 
     /**
+     * @return true if this input method supports inline suggestions.
+     * @hide
+     */
+    public boolean isInlineSuggestionsEnabled() {
+        return mInlineSuggestionsEnabled;
+    }
+
+    /**
      * Used to package this object into a {@link Parcel}.
      *
      * @param dest The {@link Parcel} to be written.
@@ -540,6 +574,7 @@ public final class InputMethodInfo implements Parcelable {
         dest.writeInt(mIsDefaultResId);
         dest.writeInt(mIsAuxIme ? 1 : 0);
         dest.writeInt(mSupportsSwitchingToNextInputMethod ? 1 : 0);
+        dest.writeInt(mInlineSuggestionsEnabled ? 1 : 0);
         dest.writeBoolean(mIsVrOnly);
         mService.writeToParcel(dest, flags);
         mSubtypes.writeToParcel(dest);

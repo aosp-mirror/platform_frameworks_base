@@ -323,7 +323,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mInlineSuggestionsResponseCallbackFuture;
 
     @Nullable
-    private InlineSuggestionsRequestCallback mInlineSuggestionsRequestCallback;
+    private InlineSuggestionsRequestCallbackImpl mInlineSuggestionsRequestCallback;
 
     private static final int INLINE_REQUEST_TIMEOUT_MS = 1000;
 
@@ -624,9 +624,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /**
      * Returns whether inline suggestions are enabled for Autofill.
      */
-    // TODO(b/137800469): Implement this
     private boolean isInlineSuggestionsEnabled() {
-        return true;
+        return mService.isInlineSuggestionsEnabled();
     }
 
     /**
@@ -639,7 +638,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mInlineSuggestionsResponseCallbackFuture = new CompletableFuture<>();
 
             if (mInlineSuggestionsRequestCallback == null) {
-                mInlineSuggestionsRequestCallback = new InlineSuggestionsRequestCallback(this);
+                mInlineSuggestionsRequestCallback = new InlineSuggestionsRequestCallbackImpl(this);
             }
 
             mInputMethodManagerInternal.onCreateInlineSuggestionsRequest(
@@ -649,11 +648,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         requestNewFillResponseLocked(viewState, newState, flags);
     }
 
-    private static final class InlineSuggestionsRequestCallback
+    private static final class InlineSuggestionsRequestCallbackImpl
             extends IInlineSuggestionsRequestCallback.Stub {
         private final WeakReference<Session> mSession;
 
-        private InlineSuggestionsRequestCallback(Session session) {
+        private InlineSuggestionsRequestCallbackImpl(Session session) {
             mSession = new WeakReference<>(session);
         }
 
