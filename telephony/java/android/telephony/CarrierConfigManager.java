@@ -100,6 +100,16 @@ public class CarrierConfigManager {
             KEY_CARRIER_VOLTE_PROVISIONED_BOOL = "carrier_volte_provisioned_bool";
 
     /**
+     * Boolean indicating the Supplementary Services(SS) is disable when airplane mode on in the
+     * Call Settings menu.
+     * {@code true}: SS is disable when airplane mode on.
+     * {@code false}: SS is enable when airplane mode on.
+     * The default value for this key is {@code false}
+     */
+    public static final String KEY_DISABLE_SUPPLEMENTARY_SERVICES_IN_AIRPLANE_MODE_BOOL =
+            "disable_supplementary_services_in_airplane_mode_bool";
+
+    /**
      * Boolean indicating if the "Call forwarding" item is visible in the Call Settings menu.
      * true means visible. false means gone.
      * @hide
@@ -3412,6 +3422,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CALL_FORWARDING_WHEN_UNREACHABLE_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL, true);
+        sDefaults.putBoolean(KEY_DISABLE_SUPPLEMENTARY_SERVICES_IN_AIRPLANE_MODE_BOOL, false);
         sDefaults.putBoolean(KEY_IGNORE_SIM_NETWORK_LOCKED_EVENTS_BOOL, false);
         sDefaults.putBoolean(KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL, false);
         sDefaults.putBoolean(KEY_OPERATOR_SELECTION_EXPAND_BOOL, true);
