@@ -243,11 +243,12 @@ public final class ClockManager {
         mPreviewClocks.reloadCurrentClock();
         mListeners.forEach((listener, clocks) -> {
             clocks.reloadCurrentClock();
-            ClockPlugin clock = clocks.getCurrentClock();
-            if (clock instanceof DefaultClockController) {
-                listener.onClockChanged(null);
+            final ClockPlugin clock = clocks.getCurrentClock();
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                listener.onClockChanged(clock instanceof DefaultClockController ? null : clock);
             } else {
-                listener.onClockChanged(clock);
+                mMainHandler.post(() -> listener.onClockChanged(
+                        clock instanceof DefaultClockController ? null : clock));
             }
         });
     }
