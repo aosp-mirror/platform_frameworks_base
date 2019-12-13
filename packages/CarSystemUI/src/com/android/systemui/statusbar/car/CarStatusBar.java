@@ -1341,6 +1341,12 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mScrimController.setScrimBehindDrawable(mNotificationPanelBackground);
     }
 
+    @Override
+    public void onLocaleListChanged() {
+        // TODO - We should not have to reload sysUI on locale change
+        makeStatusBarView();
+    }
+
     /**
      * Returns the {@link Drawable} that represents the wallpaper that the user has currently set.
      */
