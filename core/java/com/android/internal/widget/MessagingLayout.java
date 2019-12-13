@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.app.Notification;
 import android.app.Person;
+import android.app.RemoteInputHistoryItem;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -161,8 +162,9 @@ public class MessagingLayout extends FrameLayout implements ImageMessageConsumer
         if (headerText != null) {
             mConversationTitle = headerText.getText();
         }
-        addRemoteInputHistoryToMessages(newMessages,
-                extras.getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY));
+        RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
+                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+        addRemoteInputHistoryToMessages(newMessages, history);
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
         bind(newMessages, newHistoricMessages, showSpinner);
@@ -175,14 +177,18 @@ public class MessagingLayout extends FrameLayout implements ImageMessageConsumer
 
     private void addRemoteInputHistoryToMessages(
             List<Notification.MessagingStyle.Message> newMessages,
-            CharSequence[] remoteInputHistory) {
+            RemoteInputHistoryItem[] remoteInputHistory) {
         if (remoteInputHistory == null || remoteInputHistory.length == 0) {
             return;
         }
         for (int i = remoteInputHistory.length - 1; i >= 0; i--) {
-            CharSequence message = remoteInputHistory[i];
-            newMessages.add(new Notification.MessagingStyle.Message(
-                    message, 0, (Person) null, true /* remoteHistory */));
+            RemoteInputHistoryItem historyMessage = remoteInputHistory[i];
+            Notification.MessagingStyle.Message message = new Notification.MessagingStyle.Message(
+                    historyMessage.getText(), 0, (Person) null, true /* remoteHistory */);
+            if (historyMessage.getUri() != null) {
+                message.setData(historyMessage.getMimeType(), historyMessage.getUri());
+            }
+            newMessages.add(message);
         }
     }
 

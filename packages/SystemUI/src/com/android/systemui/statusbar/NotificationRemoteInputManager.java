@@ -25,8 +25,10 @@ import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
+import android.app.RemoteInputHistoryItem;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -345,7 +347,8 @@ public class NotificationRemoteInputManager implements Dumpable {
         });
         mSmartReplyController.setCallback((entry, reply) -> {
             StatusBarNotification newSbn =
-                    rebuildNotificationWithRemoteInput(entry, reply, true /* showSpinner */);
+                    rebuildNotificationWithRemoteInput(entry, reply, true /* showSpinner */,
+                            null /* mimeType */, null /* uri */);
             mEntryManager.updateNotification(newSbn, null /* ranking */);
         });
     }
@@ -527,28 +530,36 @@ public class NotificationRemoteInputManager implements Dumpable {
     StatusBarNotification rebuildNotificationForCanceledSmartReplies(
             NotificationEntry entry) {
         return rebuildNotificationWithRemoteInput(entry, null /* remoteInputTest */,
-                false /* showSpinner */);
+                false /* showSpinner */, null /* mimeType */, null /* uri */);
     }
 
     @VisibleForTesting
     StatusBarNotification rebuildNotificationWithRemoteInput(NotificationEntry entry,
-            CharSequence remoteInputText, boolean showSpinner) {
+            CharSequence remoteInputText, boolean showSpinner, String mimeType, Uri uri) {
         StatusBarNotification sbn = entry.getSbn();
 
         Notification.Builder b = Notification.Builder
                 .recoverBuilder(mContext, sbn.getNotification().clone());
-        if (remoteInputText != null) {
-            CharSequence[] oldHistory = sbn.getNotification().extras
-                    .getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY);
-            CharSequence[] newHistory;
-            if (oldHistory == null) {
-                newHistory = new CharSequence[1];
+        if (remoteInputText != null || uri != null) {
+            RemoteInputHistoryItem[] oldHistoryItems = (RemoteInputHistoryItem[])
+                    sbn.getNotification().extras.getParcelableArray(
+                            Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+            RemoteInputHistoryItem[] newHistoryItems;
+
+            if (oldHistoryItems == null) {
+                newHistoryItems = new RemoteInputHistoryItem[1];
             } else {
-                newHistory = new CharSequence[oldHistory.length + 1];
-                System.arraycopy(oldHistory, 0, newHistory, 1, oldHistory.length);
+                newHistoryItems = new RemoteInputHistoryItem[oldHistoryItems.length + 1];
+                System.arraycopy(oldHistoryItems, 0, newHistoryItems, 1, oldHistoryItems.length);
             }
-            newHistory[0] = String.valueOf(remoteInputText);
-            b.setRemoteInputHistory(newHistory);
+            RemoteInputHistoryItem newItem;
+            if (uri != null) {
+                newItem = new RemoteInputHistoryItem(mimeType, uri, remoteInputText);
+            } else {
+                newItem = new RemoteInputHistoryItem(remoteInputText);
+            }
+            newHistoryItems[0] = newItem;
+            b.setRemoteInputHistory(newHistoryItems);
         }
         b.setShowRemoteInputSpinner(showSpinner);
         b.setHideSmartReplies(true);
@@ -631,8 +642,11 @@ public class NotificationRemoteInputManager implements Dumpable {
                 if (TextUtils.isEmpty(remoteInputText)) {
                     remoteInputText = entry.remoteInputTextWhenReset;
                 }
+                String remoteInputMimeType = entry.remoteInputMimeType;
+                Uri remoteInputUri = entry.remoteInputUri;
                 StatusBarNotification newSbn = rebuildNotificationWithRemoteInput(entry,
-                        remoteInputText, false /* showSpinner */);
+                        remoteInputText, false /* showSpinner */, remoteInputMimeType,
+                        remoteInputUri);
                 entry.onRemoteInputInserted();
 
                 if (newSbn == null) {

@@ -10,7 +10,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.app.RemoteInputHistoryItem;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -150,13 +152,30 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testRebuildWithRemoteInput_noExistingInput_image() {
+        Uri uri = mock(Uri.class);
+        String mimeType  = "image/jpeg";
+        String text = "image inserted";
+        StatusBarNotification newSbn =
+                mRemoteInputManager.rebuildNotificationWithRemoteInput(
+                        mEntry, text, false, mimeType, uri);
+        RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
+                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+        assertEquals(1, messages.length);
+        assertEquals(text, messages[0].getText());
+        assertEquals(mimeType, messages[0].getMimeType());
+        assertEquals(uri, messages[0].getUri());
+    }
+
+    @Test
     public void testRebuildWithRemoteInput_noExistingInputNoSpinner() {
         StatusBarNotification newSbn =
-                mRemoteInputManager.rebuildNotificationWithRemoteInput(mEntry, "A Reply", false);
-        CharSequence[] messages = newSbn.getNotification().extras
-                .getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY);
+                mRemoteInputManager.rebuildNotificationWithRemoteInput(
+                        mEntry, "A Reply", false, null, null);
+        RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
+                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
         assertEquals(1, messages.length);
-        assertEquals("A Reply", messages[0]);
+        assertEquals("A Reply", messages[0].getText());
         assertFalse(newSbn.getNotification().extras
                 .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
         assertTrue(newSbn.getNotification().extras
@@ -166,11 +185,12 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Test
     public void testRebuildWithRemoteInput_noExistingInputWithSpinner() {
         StatusBarNotification newSbn =
-                mRemoteInputManager.rebuildNotificationWithRemoteInput(mEntry, "A Reply", true);
-        CharSequence[] messages = newSbn.getNotification().extras
-                .getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY);
+                mRemoteInputManager.rebuildNotificationWithRemoteInput(
+                        mEntry, "A Reply", true, null, null);
+        RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
+                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
         assertEquals(1, messages.length);
-        assertEquals("A Reply", messages[0]);
+        assertEquals("A Reply", messages[0].getText());
         assertTrue(newSbn.getNotification().extras
                 .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
         assertTrue(newSbn.getNotification().extras
@@ -181,18 +201,45 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     public void testRebuildWithRemoteInput_withExistingInput() {
         // Setup a notification entry with 1 remote input.
         StatusBarNotification newSbn =
-                mRemoteInputManager.rebuildNotificationWithRemoteInput(mEntry, "A Reply", false);
+                mRemoteInputManager.rebuildNotificationWithRemoteInput(
+                        mEntry, "A Reply", false, null, null);
         NotificationEntry entry = new NotificationEntryBuilder()
                 .setSbn(newSbn)
                 .build();
 
         // Try rebuilding to add another reply.
-        newSbn = mRemoteInputManager.rebuildNotificationWithRemoteInput(entry, "Reply 2", true);
-        CharSequence[] messages = newSbn.getNotification().extras
-                .getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY);
+        newSbn = mRemoteInputManager.rebuildNotificationWithRemoteInput(
+                entry, "Reply 2", true, null, null);
+        RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
+                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
         assertEquals(2, messages.length);
-        assertEquals("Reply 2", messages[0]);
-        assertEquals("A Reply", messages[1]);
+        assertEquals("Reply 2", messages[0].getText());
+        assertEquals("A Reply", messages[1].getText());
+    }
+
+    @Test
+    public void testRebuildWithRemoteInput_withExistingInput_image() {
+        // Setup a notification entry with 1 remote input.
+        Uri uri = mock(Uri.class);
+        String mimeType  = "image/jpeg";
+        String text = "image inserted";
+        StatusBarNotification newSbn =
+                mRemoteInputManager.rebuildNotificationWithRemoteInput(
+                        mEntry, text, false, mimeType, uri);
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setSbn(newSbn)
+                .build();
+
+        // Try rebuilding to add another reply.
+        newSbn = mRemoteInputManager.rebuildNotificationWithRemoteInput(
+                entry, "Reply 2", true, null, null);
+        RemoteInputHistoryItem[] messages = (RemoteInputHistoryItem[]) newSbn.getNotification()
+                .extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+        assertEquals(2, messages.length);
+        assertEquals("Reply 2", messages[0].getText());
+        assertEquals(text, messages[1].getText());
+        assertEquals(mimeType, messages[1].getMimeType());
+        assertEquals(uri, messages[1].getUri());
     }
 
     @Test
