@@ -15,17 +15,14 @@
  */
 package android.telephony;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.PersistableBundle;
-
 import android.telephony.Annotation.DataFailureCause;
-import com.android.internal.util.ArrayUtils;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import com.android.internal.telephony.util.ArrayUtils;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
