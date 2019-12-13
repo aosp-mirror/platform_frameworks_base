@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <configuration description="Runs Frameworks Wifi API Tests.">
-    <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="test-file-name" value="FrameworksWifiApiTests.apk" />
     </target_preparer>
 
