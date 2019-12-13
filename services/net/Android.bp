@@ -1,8 +1,15 @@
+filegroup {
+    name: "services.net-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
 java_library_static {
     name: "services.net",
     srcs: [
         ":net-module-utils-srcs",
-        "java/**/*.java",
+        ":services.net-sources",
         ":tethering-manager",
     ],
     static_libs: [
@@ -23,4 +30,5 @@ filegroup {
         "java/android/net/util/NetdService.java",
         "java/android/net/util/NetworkConstants.java",
     ],
+    visibility: ["//frameworks/base/packages/Tethering"],
 }

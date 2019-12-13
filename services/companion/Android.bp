@@ -1,5 +1,12 @@
+filegroup {
+    name: "services.companion-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
 java_library_static {
     name: "services.companion",
-    srcs: ["java/**/*.java"],
+    srcs: [":services.companion-sources"],
     libs: ["services.core"],
 }
