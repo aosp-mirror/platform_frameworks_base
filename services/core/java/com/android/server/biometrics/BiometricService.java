@@ -764,6 +764,31 @@ public class BiometricService extends SystemService {
                     + " Modality: " + modality
                     + " Strength: " + strength);
 
+            if (strength != Authenticators.BIOMETRIC_STRONG
+                    && strength != Authenticators.BIOMETRIC_WEAK) {
+                throw new IllegalStateException("Unsupported strength");
+            }
+
+            for (AuthenticatorWrapper wrapper : mAuthenticators) {
+                if (wrapper.id == id) {
+                    throw new IllegalStateException("Cannot register duplicate authenticator");
+                }
+            }
+
+            // This happens infrequently enough, not worth caching.
+            final String[] configs = mInjector.getConfiguration(getContext());
+            boolean idFound = false;
+            for (int i = 0; i < configs.length; i++) {
+                SensorConfig config = new SensorConfig(configs[i]);
+                if (config.mId == id) {
+                    idFound = true;
+                    break;
+                }
+            }
+            if (!idFound) {
+                throw new IllegalStateException("Cannot register unknown id");
+            }
+
             mAuthenticators.add(new AuthenticatorWrapper(id, modality, strength, authenticator));
         }
 
@@ -885,6 +910,16 @@ public class BiometricService extends SystemService {
         public BiometricStrengthController getBiometricStrengthController(
                 BiometricService service) {
             return new BiometricStrengthController(service);
+        }
+
+        /**
+         * Allows to test with various device sensor configurations.
+         * @param context System Server context
+         * @return the sensor configuration from core/res/res/values/config.xml
+         */
+        @VisibleForTesting
+        public String[] getConfiguration(Context context) {
+            return context.getResources().getStringArray(R.array.config_biometric_sensors);
         }
     }
 

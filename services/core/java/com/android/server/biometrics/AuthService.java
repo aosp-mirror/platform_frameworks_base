@@ -181,18 +181,15 @@ public class AuthService extends SystemService {
         final PackageManager pm = context.getPackageManager();
     }
 
-    /**
-     * @param id must be unique per device
-     * @param modality one of {@link BiometricAuthenticator} types
-     * @param strength as defined in {@link Authenticators}
-     */
-    private void registerAuthenticator(int id, int modality, int strength) throws RemoteException {
+    private void registerAuthenticator(SensorConfig config) throws RemoteException {
 
-        Slog.d(TAG, "Registering ID: " + id + " Modality: " + modality + " Strength: " + strength);
+        Slog.d(TAG, "Registering ID: " + config.mId
+                + " Modality: " + config.mModality
+                + " Strength: " + config.mStrength);
 
         final IBiometricAuthenticator.Stub authenticator;
 
-        switch (modality) {
+        switch (config.mModality) {
             case TYPE_FINGERPRINT:
                 authenticator = new FingerprintAuthenticator(IFingerprintService.Stub.asInterface(
                         ServiceManager.getService(Context.FINGERPRINT_SERVICE)));
@@ -209,11 +206,12 @@ public class AuthService extends SystemService {
                 break;
 
             default:
-                Slog.e(TAG, "Unknown modality: " + modality);
+                Slog.e(TAG, "Unknown modality: " + config.mModality);
                 return;
         }
 
-        mBiometricService.registerAuthenticator(id, modality, strength, authenticator);
+        mBiometricService.registerAuthenticator(config.mId, config.mModality, config.mStrength,
+                authenticator);
     }
 
     @Override
@@ -223,13 +221,8 @@ public class AuthService extends SystemService {
         final String[] configs = mInjector.getConfiguration(getContext());
 
         for (int i = 0; i < configs.length; i++) {
-            String[] elems = configs[i].split(":");
-            final int id = Integer.parseInt(elems[0]);
-            final int modality = Integer.parseInt(elems[1]);
-            final int strength = Integer.parseInt(elems[2]);
-
             try {
-                registerAuthenticator(id, modality, strength);
+                registerAuthenticator(new SensorConfig(configs[i]));
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
             }

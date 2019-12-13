@@ -128,6 +128,14 @@ public class BiometricServiceTest {
                 .thenReturn(ERROR_NOT_RECOGNIZED);
         when(mResources.getString(R.string.biometric_error_user_canceled))
                 .thenReturn(ERROR_USER_CANCELED);
+
+        final String[] config = {
+                "0:2:15",  // ID0:Fingerprint:Strong
+                "1:8:15",  // ID1:Face:Strong
+                "2:4:255", // ID2:Iris:Weak
+        };
+
+        when(mInjector.getConfiguration(any())).thenReturn(config);
     }
 
     @Test
@@ -1152,6 +1160,56 @@ public class BiometricServiceTest {
                 eq(TEST_PACKAGE_NAME));
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testRegistrationWithDuplicateId_throwsIllegalStateException() throws Exception {
+        mBiometricService = new BiometricService(mContext, mInjector);
+        mBiometricService.onStart();
+
+        mBiometricService.mImpl.registerAuthenticator(
+                0 /* id */, 2 /* modality */, 15 /* strength */,
+                mFingerprintAuthenticator);
+        mBiometricService.mImpl.registerAuthenticator(
+                0 /* id */, 2 /* modality */, 15 /* strength */,
+                mFingerprintAuthenticator);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testRegistrationWithUnknownId_throwsIllegalStateException() throws Exception {
+        mBiometricService = new BiometricService(mContext, mInjector);
+        mBiometricService.onStart();
+
+        mBiometricService.mImpl.registerAuthenticator(
+                100 /* id */, 2 /* modality */, 15 /* strength */,
+                mFingerprintAuthenticator);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testRegistrationWithUnsupportedStrength_throwsIllegalStateException()
+            throws Exception {
+        mBiometricService = new BiometricService(mContext, mInjector);
+        mBiometricService.onStart();
+
+        // Only STRONG and WEAK are supported. Let's enforce that CONVENIENCE cannot be
+        // registered. If there is a compelling reason, we can remove this constraint.
+        mBiometricService.mImpl.registerAuthenticator(
+                0 /* id */, 2 /* modality */,
+                Authenticators.BIOMETRIC_CONVENIENCE /* strength */,
+                mFingerprintAuthenticator);
+    }
+
+    @Test
+    public void testRegistrationHappyPath_isOk() throws Exception {
+        // This is being tested in many of the other cases, but here's the base case.
+        mBiometricService = new BiometricService(mContext, mInjector);
+        mBiometricService.onStart();
+
+        for (String s : mInjector.getConfiguration(null)) {
+            SensorConfig config = new SensorConfig(s);
+            mBiometricService.mImpl.registerAuthenticator(config.mId, config.mModality,
+                    config.mStrength, mFingerprintAuthenticator);
+        }
+    }
+
     // Helper methods
 
     private int invokeCanAuthenticate(BiometricService service, int authenticators)
@@ -1163,6 +1221,7 @@ public class BiometricServiceTest {
         setupAuthForOnly(modality, strength, true /* enrolled */);
     }
 
+    // TODO: Reconcile the registration strength with the injector
     private void setupAuthForOnly(int modality, int strength, boolean enrolled) throws Exception {
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
@@ -1180,7 +1239,7 @@ public class BiometricServiceTest {
         if ((modality & BiometricAuthenticator.TYPE_FACE) != 0) {
             when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(enrolled);
             when(mFaceAuthenticator.isHardwareDetected(any())).thenReturn(true);
-            mBiometricService.mImpl.registerAuthenticator(0 /* id */, modality, strength,
+            mBiometricService.mImpl.registerAuthenticator(1 /* id */, modality, strength,
                     mFaceAuthenticator);
         }
     }
@@ -1210,7 +1269,7 @@ public class BiometricServiceTest {
             if ((modality & BiometricAuthenticator.TYPE_FACE) != 0) {
                 when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
                 when(mFaceAuthenticator.isHardwareDetected(any())).thenReturn(true);
-                mBiometricService.mImpl.registerAuthenticator(0 /* id */, modality, strength,
+                mBiometricService.mImpl.registerAuthenticator(1 /* id */, modality, strength,
                         mFaceAuthenticator);
             }
         }
