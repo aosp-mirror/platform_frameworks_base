@@ -6639,6 +6639,21 @@ package android.os {
     field public static final int STATUS_WAITING_REBOOT = 5; // 0x5
   }
 
+  public class TelephonyServiceManager {
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyServiceRegisterer();
+  }
+
+  public static class TelephonyServiceManager.ServiceNotFoundException extends java.lang.Exception {
+    ctor public TelephonyServiceManager.ServiceNotFoundException(@NonNull String);
+  }
+
+  public final class TelephonyServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+    method @NonNull public android.os.IBinder getOrThrow() throws android.os.TelephonyServiceManager.ServiceNotFoundException;
+    method public void register(@NonNull android.os.IBinder);
+    method @Nullable public android.os.IBinder tryGet();
+  }
+
   public class UpdateEngine {
     ctor public UpdateEngine();
     method public void applyPayload(String, long, long, String[]);
@@ -9580,6 +9595,7 @@ package android.telephony {
 
   public class TelephonyFrameworkInitializer {
     method public static void registerServiceWrappers();
+    method public static void setTelephonyServiceManager(@NonNull android.os.TelephonyServiceManager);
   }
 
   public final class TelephonyHistogram implements android.os.Parcelable {

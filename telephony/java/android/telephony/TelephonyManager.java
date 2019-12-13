@@ -5161,7 +5161,8 @@ public class TelephonyManager {
     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private ITelephony getITelephony() {
-        return ITelephony.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_SERVICE));
+        return ITelephony.Stub.asInterface(TelephonyFrameworkInitializer
+                .getTelephonyServiceManager().getTelephonyServiceRegisterer().get());
     }
 
     private ITelephonyRegistry getTelephonyRegistry() {
