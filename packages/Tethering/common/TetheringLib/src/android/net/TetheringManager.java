@@ -17,6 +17,7 @@ package android.net;
 
 import static android.Manifest.permission.NETWORK_STACK;
 import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
+import static android.net.ConnectivityManager.TETHER_ERROR_SERVICE_UNAVAIL;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -175,6 +176,10 @@ public class TetheringManager {
      */
     @Deprecated
     public int tether(@NonNull String iface) {
+        if (mConnector == null) {
+            Slog.wtf(TAG, "Tethering not ready yet");
+            return TETHER_ERROR_SERVICE_UNAVAIL;
+        }
         try {
             mConnector.tether(iface);
         } catch (RemoteException e) {
@@ -191,6 +196,10 @@ public class TetheringManager {
      */
     @Deprecated
     public int untether(@NonNull String iface) {
+        if (mConnector == null) {
+            Slog.wtf(TAG, "Tethering not ready yet");
+            return TETHER_ERROR_SERVICE_UNAVAIL;
+        }
         try {
             mConnector.untether(iface);
         } catch (RemoteException e) {
@@ -210,6 +219,10 @@ public class TetheringManager {
      */
     @Deprecated
     public int setUsbTethering(boolean enable) {
+        if (mConnector == null) {
+            Slog.wtf(TAG, "Tethering not ready yet");
+            return TETHER_ERROR_SERVICE_UNAVAIL;
+        }
         try {
             mConnector.setUsbTethering(enable);
         } catch (RemoteException e) {
@@ -227,6 +240,10 @@ public class TetheringManager {
     // TODO: improve the usage of ResultReceiver, b/145096122
     public void startTethering(int type, @NonNull ResultReceiver receiver,
             boolean showProvisioningUi) {
+        if (mConnector == null) {
+            Slog.wtf(TAG, "Tethering not ready yet");
+            return;
+        }
         try {
             mConnector.startTethering(type, receiver, showProvisioningUi);
         } catch (RemoteException e) {
@@ -241,6 +258,10 @@ public class TetheringManager {
      * {@hide}
      */
     public void stopTethering(int type) {
+        if (mConnector == null) {
+            Slog.wtf(TAG, "Tethering not ready yet");
+            return;
+        }
         try {
             mConnector.stopTethering(type);
         } catch (RemoteException e) {
@@ -258,6 +279,10 @@ public class TetheringManager {
     // TODO: improve the usage of ResultReceiver, b/145096122
     public void requestLatestTetheringEntitlementResult(int type, @NonNull ResultReceiver receiver,
             boolean showEntitlementUi) {
+        if (mConnector == null) {
+            Slog.wtf(TAG, "Tethering not ready yet");
+            return;
+        }
         try {
             mConnector.requestLatestTetheringEntitlementResult(type, receiver, showEntitlementUi);
         } catch (RemoteException e) {
