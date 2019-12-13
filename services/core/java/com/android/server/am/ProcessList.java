@@ -253,14 +253,16 @@ public final class ProcessList {
     // LMK_PROCREMOVE <pid>
     // LMK_PROCPURGE
     // LMK_GETKILLCNT
+    // LMK_PROCKILL
     static final byte LMK_TARGET = 0;
     static final byte LMK_PROCPRIO = 1;
     static final byte LMK_PROCREMOVE = 2;
     static final byte LMK_PROCPURGE = 3;
     static final byte LMK_GETKILLCNT = 4;
+    static final byte LMK_PROCKILL = 5; // Note: this is an unsolicated command
 
     // lmkd reconnect delay in msecs
-    private static final long LMDK_RECONNECT_DELAY_MS = 1000;
+    private static final long LMKD_RECONNECT_DELAY_MS = 1000;
 
     ActivityManagerService mService = null;
 
@@ -356,6 +358,12 @@ public final class ProcessList {
     ActiveUids mActiveUids;
 
     /**
+     * The listener who is intereted with the lmkd kills.
+     */
+    @GuardedBy("mService")
+    private LmkdKillListener mLmkdKillListener = null;
+
+    /**
      * The currently running isolated processes.
      */
     final SparseArray<ProcessRecord> mIsolatedProcesses = new SparseArray<>();
@@ -372,6 +380,13 @@ public final class ProcessList {
             new ArrayMap<AppZygote, ArrayList<ProcessRecord>>();
 
     private PlatformCompat mPlatformCompat = null;
+
+    interface LmkdKillListener {
+        /**
+         * Called when there is a process kill by lmkd.
+         */
+        void onLmkdKillOccurred(int pid, int uid);
+    }
 
     final class IsolatedUidRange {
         @VisibleForTesting
@@ -525,7 +540,8 @@ public final class ProcessList {
 
     final class KillHandler extends Handler {
         static final int KILL_PROCESS_GROUP_MSG = 4000;
-        static final int LMDK_RECONNECT_MSG = 4001;
+        static final int LMKD_RECONNECT_MSG = 4001;
+        static final int LMKD_PROC_KILLED_MSG = 4002;
 
         public KillHandler(Looper looper) {
             super(looper, null, true);
@@ -539,14 +555,17 @@ public final class ProcessList {
                     Process.killProcessGroup(msg.arg1 /* uid */, msg.arg2 /* pid */);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
-                case LMDK_RECONNECT_MSG:
+                case LMKD_RECONNECT_MSG:
                     if (!sLmkdConnection.connect()) {
                         Slog.i(TAG, "Failed to connect to lmkd, retry after "
-                                + LMDK_RECONNECT_DELAY_MS + " ms");
-                        // retry after LMDK_RECONNECT_DELAY_MS
+                                + LMKD_RECONNECT_DELAY_MS + " ms");
+                        // retry after LMKD_RECONNECT_DELAY_MS
                         sKillHandler.sendMessageDelayed(sKillHandler.obtainMessage(
-                                KillHandler.LMDK_RECONNECT_MSG), LMDK_RECONNECT_DELAY_MS);
+                                KillHandler.LMKD_RECONNECT_MSG), LMKD_RECONNECT_DELAY_MS);
                     }
+                    break;
+                case LMKD_PROC_KILLED_MSG:
+                    handleLmkdProcKilled(msg.arg1 /* pid */, msg.arg2 /* uid */);
                     break;
 
                 default:
@@ -587,7 +606,7 @@ public final class ProcessList {
                             Slog.w(TAG, "Lost connection to lmkd");
                             // start reconnection after delay to let lmkd restart
                             sKillHandler.sendMessageDelayed(sKillHandler.obtainMessage(
-                                    KillHandler.LMDK_RECONNECT_MSG), LMDK_RECONNECT_DELAY_MS);
+                                    KillHandler.LMKD_RECONNECT_MSG), LMKD_RECONNECT_DELAY_MS);
                         }
                         @Override
                         public boolean isReplyExpected(ByteBuffer replyBuf,
@@ -596,6 +615,26 @@ public final class ProcessList {
                             // this is the reply packet we are waiting for
                             return (receivedLen == replyBuf.array().length
                                     && dataReceived.getInt(0) == replyBuf.getInt(0));
+                        }
+
+                        @Override
+                        public boolean handleUnsolicitedMessage(ByteBuffer dataReceived,
+                                int receivedLen) {
+                            if (receivedLen < 4) {
+                                return false;
+                            }
+                            switch (dataReceived.getInt(0)) {
+                                case LMK_PROCKILL:
+                                    if (receivedLen != 12) {
+                                        return false;
+                                    }
+                                    sKillHandler.obtainMessage(KillHandler.LMKD_PROC_KILLED_MSG,
+                                            dataReceived.getInt(4), dataReceived.getInt(8))
+                                            .sendToTarget();
+                                    return true;
+                                default:
+                                    return false;
+                            }
                         }
                     }
             );
@@ -1279,10 +1318,10 @@ public final class ProcessList {
         if (!sLmkdConnection.isConnected()) {
             // try to connect immediately and then keep retrying
             sKillHandler.sendMessage(
-                    sKillHandler.obtainMessage(KillHandler.LMDK_RECONNECT_MSG));
+                    sKillHandler.obtainMessage(KillHandler.LMKD_RECONNECT_MSG));
 
             // wait for connection retrying 3 times (up to 3 seconds)
-            if (!sLmkdConnection.waitForConnection(3 * LMDK_RECONNECT_DELAY_MS)) {
+            if (!sLmkdConnection.waitForConnection(3 * LMKD_RECONNECT_DELAY_MS)) {
                 return false;
             }
         }
@@ -3190,6 +3229,30 @@ public final class ProcessList {
                 continue;
             }
             mService.doStopUidLocked(uidRec.uid, uidRec);
+        }
+    }
+
+    void setLmkdKillListener(final LmkdKillListener listener) {
+        synchronized (mService) {
+            mLmkdKillListener = listener;
+        }
+    }
+
+    private void handleLmkdProcKilled(final int pid, final int uid) {
+        // Log only now
+        if (DEBUG_PROCESSES) {
+            Slog.i(TAG, "lmkd kill: pid=" + pid + " uid=" + uid);
+        }
+
+        if (mService == null) {
+            return;
+        }
+        // Notify any interesed party regarding the lmkd kills
+        synchronized (mService) {
+            final LmkdKillListener listener = mLmkdKillListener;
+            if (listener != null) {
+                mService.mHandler.post(()-> listener.onLmkdKillOccurred(pid, uid));
+            }
         }
     }
 }

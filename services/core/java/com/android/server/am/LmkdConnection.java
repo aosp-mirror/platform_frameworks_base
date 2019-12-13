@@ -44,7 +44,7 @@ public class LmkdConnection {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "LmkdConnection" : TAG_AM;
 
     // lmkd reply max size in bytes
-    private static final int LMKD_REPLY_MAX_SIZE = 8;
+    private static final int LMKD_REPLY_MAX_SIZE = 12;
 
     // connection listener interface
     interface LmkdConnectionListener {
@@ -62,6 +62,15 @@ public class LmkdConnection {
          */
         boolean isReplyExpected(ByteBuffer replyBuf, ByteBuffer dataReceived,
                 int receivedLen);
+
+        /**
+         * Handle the received message if it's unsolicited.
+         *
+         * @param dataReceived The buffer holding received data
+         * @param receivedLen Size of the data received
+         * @return True if the message has been handled correctly, false otherwise.
+         */
+        boolean handleUnsolicitedMessage(ByteBuffer dataReceived, int receivedLen);
     }
 
     private final MessageQueue mMsgQueue;
@@ -185,17 +194,17 @@ public class LmkdConnection {
                         mReplyBuf.rewind();
                         // wakeup the waiting thread
                         mReplyBufLock.notifyAll();
-                    } else {
-                        // received asynchronous or unexpected packet
+                    } else if (!mListener.handleUnsolicitedMessage(mInputBuf, len)) {
+                        // received unexpected packet
                         // treat this as an error
                         mReplyBuf = null;
                         mReplyBufLock.notifyAll();
-                        Slog.e(TAG, "Received unexpected packet from lmkd");
+                        Slog.e(TAG, "Received an unexpected packet from lmkd");
                     }
-                } else {
+                } else if (!mListener.handleUnsolicitedMessage(mInputBuf, len)) {
                     // received asynchronous communication from lmkd
-                    // we don't support this yet
-                    Slog.w(TAG, "Received an asynchronous packet from lmkd");
+                    // but we don't recognize it.
+                    Slog.w(TAG, "Received an unexpected packet from lmkd");
                 }
             }
         }
