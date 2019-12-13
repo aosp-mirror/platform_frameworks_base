@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 The Android Open Source Project
+// Copyright (C) 2019 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-android_test {
-    name: "UsbTests",
-    srcs: ["**/*.java"],
+android_library {
+    name: "UsbManagerTestLib",
+    srcs: ["src/**/*.java"],
     static_libs: [
         "frameworks-base-testutils",
         "androidx.test.rules",
@@ -26,10 +26,9 @@ android_test {
         "services.net",
         "services.usb",
         "truth-prebuilt",
-        "UsbManagerTestLib",
+        "androidx.core_core",
     ],
-    jni_libs: ["libdexmakerjvmtiagent"],
-    certificate: "platform",
-    platform_apis: true,
-    test_suites: ["device-tests"],
+    libs: [
+        "android.test.mock",
+    ],
 }
