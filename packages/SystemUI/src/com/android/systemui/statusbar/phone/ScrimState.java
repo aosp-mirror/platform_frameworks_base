@@ -139,7 +139,7 @@ public enum ScrimState {
     PULSING(5) {
         @Override
         public void prepare(ScrimState previousState) {
-            mFrontAlpha = mAodFrontScrimAlpha;
+            mFrontAlpha = 0f;
             mBubbleAlpha = 0f;
             mBehindTint = Color.BLACK;
             mFrontTint = Color.BLACK;
