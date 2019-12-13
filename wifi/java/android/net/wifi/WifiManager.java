@@ -4686,10 +4686,13 @@ public class WifiManager {
     }
 
     /**
-     * Retrieve the soft ap config data to be backed to save current config data.
+     * Returns a byte stream representing the data that needs to be backed up to save the
+     * current soft ap config data.
+     *
+     * This soft ap config can be restored by calling {@link #restoreSoftApBackupData(byte[])}
      * @hide
      */
-    @Nullable
+    @NonNull
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public byte[] retrieveSoftApBackupData() {
@@ -4701,15 +4704,17 @@ public class WifiManager {
     }
 
     /**
-     * Restore soft ap config from the backed up data.
+     * Returns soft ap config from the backed up data.
+     * @param data byte stream in the same format produced by {@link #retrieveSoftApBackupData()}
+     *
      * @hide
      */
     @Nullable
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void restoreSoftApBackupData(@NonNull byte[] data) {
+    public SoftApConfiguration restoreSoftApBackupData(@NonNull byte[] data) {
         try {
-            mService.restoreSoftApBackupData(data);
+            return mService.restoreSoftApBackupData(data);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -28,7 +28,6 @@ import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.IOnWifiActivityEnergyInfoListener;
 import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.IScanResultsCallback;
-import android.net.wifi.IScanResultsListener;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ISuggestionConnectionStatusListener;
 import android.net.wifi.ITrafficStateCallback;
@@ -414,7 +413,7 @@ public class BaseWifiService extends IWifiManager.Stub {
     }
 
     @Override
-    public void restoreSoftApBackupData(byte[] data) {
+    public SoftApConfiguration restoreSoftApBackupData(byte[] data) {
         throw new UnsupportedOperationException();
     }
 
