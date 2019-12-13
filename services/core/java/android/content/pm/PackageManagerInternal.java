@@ -133,6 +133,12 @@ public abstract class PackageManagerInternal {
             @PackageInfoFlags int flags, int filterCallingUid, int userId);
 
     /**
+     * Retrieve CE data directory inode number of an application.
+     * Return 0 if there's error.
+     */
+    public abstract long getCeDataInode(String packageName, int userId);
+
+    /**
      * Return a List of all application packages that are installed on the
      * device, for a specific user. If flag GET_UNINSTALLED_PACKAGES has been
      * set, a list of all applications including those deleted with
