@@ -555,7 +555,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private RemoteAnimationDefinition mRemoteAnimationDefinition;
 
-    private AnimatingActivityRegistry mAnimatingActivityRegistry;
+    AnimatingActivityRegistry mAnimatingActivityRegistry;
 
     private Task mLastParent;
 
@@ -3089,7 +3089,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "Removing app %s delayed=%b animation=%s animating=%b", this, delayed,
-                getAnimation(), isAnimating(TRANSITION));
+                getAnimation(), isAnimating(PARENTS | TRANSITION));
 
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "removeAppToken: %s"
                 + " delayed=%b Callers=%s", this, delayed, Debug.getCallers(4));
@@ -3101,7 +3101,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If this window was animating, then we need to ensure that the app transition notifies
         // that animations have completed in DisplayContent.handleAnimatingStoppedAndTransition(),
         // so add to that list now
-        if (isAnimating(TRANSITION)) {
+        if (isAnimating(PARENTS | TRANSITION)) {
             getDisplayContent().mNoAnimationNotifyOnTransitionFinished.add(token);
         }
 
@@ -3437,7 +3437,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         color mode set to avoid jank in the middle of the transition.
      */
     boolean canShowWindows() {
-        return allDrawn && !(isAnimating() && hasNonDefaultColorWindow());
+        return allDrawn && !(isAnimating(PARENTS) && hasNonDefaultColorWindow());
     }
 
     /**
@@ -5345,13 +5345,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!allDrawn && w.mightAffectAllDrawn()) {
             if (DEBUG_VISIBILITY || WM_DEBUG_ORIENTATION.isLogToLogcat()) {
                 Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()
-                        + ", isAnimationSet=" + isAnimating(TRANSITION));
+                        + ", isAnimationSet=" + isAnimating(PARENTS | TRANSITION));
                 if (!w.isDrawnLw()) {
                     Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceController
                             + " pv=" + w.isVisibleByPolicy()
                             + " mDrawState=" + winAnimator.drawStateToString()
                             + " ph=" + w.isParentWindowHidden() + " th=" + mVisibleRequested
-                            + " a=" + isAnimating(TRANSITION));
+                            + " a=" + isAnimating(PARENTS | TRANSITION));
                 }
             }
 
@@ -5952,7 +5952,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void prepareSurfaces() {
-        final boolean show = isVisible() || isAnimating();
+        final boolean show = isVisible() || isAnimating(PARENTS);
 
         if (mSurfaceControl != null) {
             if (show && !mLastSurfaceShowing) {
@@ -5980,7 +5980,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void attachThumbnailAnimation() {
-        if (!isAnimating()) {
+        if (!isAnimating(PARENTS)) {
             return;
         }
         final GraphicBuffer thumbnailHeader =
@@ -6000,7 +6000,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * {@link android.app.ActivityOptions#ANIM_OPEN_CROSS_PROFILE_APPS} animation.
      */
     void attachCrossProfileAppsThumbnailAnimation() {
-        if (!isAnimating()) {
+        if (!isAnimating(PARENTS)) {
             return;
         }
         clearThumbnail();
@@ -7512,7 +7512,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         super.dumpDebug(proto, WINDOW_TOKEN, logLevel);
         proto.write(LAST_SURFACE_SHOWING, mLastSurfaceShowing);
         proto.write(IS_WAITING_FOR_TRANSITION_START, isWaitingForTransitionStart());
-        proto.write(IS_ANIMATING, isAnimating());
+        proto.write(IS_ANIMATING, isAnimating(PARENTS));
         if (mThumbnail != null){
             mThumbnail.dumpDebug(proto, THUMBNAIL);
         }

@@ -3360,7 +3360,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // to look at all windows below the current target that are in this app, finding the
                 // highest visible one in layering.
                 WindowState highestTarget = null;
-                if (activity.isAnimating(TRANSITION)) {
+                if (activity.isAnimating(PARENTS | TRANSITION)) {
                     highestTarget = activity.getHighestAnimLayerWindow(curTarget);
                 }
 

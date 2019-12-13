@@ -94,6 +94,7 @@ import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -2555,6 +2556,16 @@ class Task extends WindowContainer<WindowContainer> {
         return getAppAnimationLayer(ANIMATION_LAYER_HOME);
     }
 
+    @Override
+    Rect getAnimationBounds(int appStackClipMode) {
+        // TODO(b/131661052): we should remove appStackClipMode with hierarchical animations.
+        if (appStackClipMode == STACK_CLIP_BEFORE_ANIM && getStack() != null) {
+            // Using the stack bounds here effectively applies the clipping before animation.
+            return getStack().getBounds();
+        }
+        return super.getAnimationBounds(appStackClipMode);
+    }
+
     boolean shouldAnimate() {
         // Don't animate while the task runs recents animation but only if we are in the mode
         // where we cancel with deferred screenshot, which means that the controller has
@@ -2565,6 +2576,18 @@ class Task extends WindowContainer<WindowContainer> {
             return false;
         }
         return true;
+    }
+
+    @Override
+    protected void onAnimationFinished() {
+        super.onAnimationFinished();
+        // TODO(b/142617871): we may need to add animation type parameter on onAnimationFinished to
+        //  identify if the callback is for launch animation finish and then calling
+        //  activity#onAnimationFinished.
+        final ActivityRecord activity = getTopMostActivity();
+        if (activity != null) {
+            activity.onAnimationFinished();
+        }
     }
 
     @Override
@@ -2594,7 +2617,7 @@ class Task extends WindowContainer<WindowContainer> {
     @Override
     RemoteAnimationTarget createRemoteAnimationTarget(
             RemoteAnimationController.RemoteAnimationRecord record) {
-        final ActivityRecord activity = getTopVisibleActivity();
+        final ActivityRecord activity = getTopMostActivity();
         return activity != null ? activity.createRemoteAnimationTarget(record) : null;
     }
 
