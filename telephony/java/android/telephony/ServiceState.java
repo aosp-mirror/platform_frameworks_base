@@ -964,7 +964,7 @@ public class ServiceState implements Parcelable {
                 rtString = "LTE_CA";
                 break;
             case RIL_RADIO_TECHNOLOGY_NR:
-                rtString = "LTE_NR";
+                rtString = "NR_SA";
                 break;
             default:
                 rtString = "Unexpected";
@@ -1535,8 +1535,9 @@ public class ServiceState implements Parcelable {
                 return AccessNetworkType.CDMA2000;
             case RIL_RADIO_TECHNOLOGY_LTE:
             case RIL_RADIO_TECHNOLOGY_LTE_CA:
-            case RIL_RADIO_TECHNOLOGY_NR:
                 return AccessNetworkType.EUTRAN;
+            case RIL_RADIO_TECHNOLOGY_NR:
+                return AccessNetworkType.NGRAN;
             case RIL_RADIO_TECHNOLOGY_IWLAN:
                 return AccessNetworkType.IWLAN;
             case RIL_RADIO_TECHNOLOGY_UNKNOWN:
