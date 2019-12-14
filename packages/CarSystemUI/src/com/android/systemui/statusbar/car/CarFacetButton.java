@@ -110,6 +110,7 @@ public class CarFacetButton extends LinearLayout {
                 mComponentNames = componentNameString.split(FACET_FILTER_DELIMITER);
             }
 
+            intent.putExtra(EXTRA_FACET_LAUNCH_PICKER, mSelected);
             setOnClickListener(getButtonClickListener(intent));
 
             if (longPressIntentString != null) {
@@ -124,10 +125,7 @@ public class CarFacetButton extends LinearLayout {
 
     /** Defines the behavior of a button click. */
     protected OnClickListener getButtonClickListener(Intent toSend) {
-        return v -> {
-            toSend.putExtra(EXTRA_FACET_LAUNCH_PICKER, mSelected);
-            mContext.startActivityAsUser(toSend, UserHandle.CURRENT);
-        };
+        return v -> mContext.startActivityAsUser(toSend, UserHandle.CURRENT);
     }
 
     /** Defines the behavior of a long click. */
