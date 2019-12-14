@@ -35,7 +35,6 @@ import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
-import android.app.job.JobService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -148,10 +147,11 @@ public class SubscriptionManager {
      * <p>
      * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
      * subscription wfc enabled {@link ImsMmTelManager#isVoWiFiSettingEnabled()}
-     * while your app is running. You can also use a {@link JobService} to ensure your app
+     * while your app is running. You can also use a {@link android.app.job.JobService}
+     * to ensure your app
      * is notified of changes to the {@link Uri} even when it is not running.
-     * Note, however, that using a {@link JobService} does not guarantee timely delivery of
-     * updates to the {@link Uri}.
+     * Note, however, that using a {@link android.app.job.JobService} does not guarantee timely
+     * delivery of updates to the {@link Uri}.
      * To be notified of changes to a specific subId, append subId to the URI
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
@@ -168,10 +168,10 @@ public class SubscriptionManager {
      * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
      * subscription advanced calling enabled
      * {@link ImsMmTelManager#isAdvancedCallingSettingEnabled()} while your app is running.
-     * You can also use a {@link JobService} to ensure your app is notified of changes to the
-     * {@link Uri} even when it is not running.
-     * Note, however, that using a {@link JobService} does not guarantee timely delivery of
-     * updates to the {@link Uri}.
+     * You can also use a {@link android.app.job.JobService} to ensure your app is notified of
+     * changes to the {@link Uri} even when it is not running.
+     * Note, however, that using a {@link android.app.job.JobService} does not guarantee timely
+     * delivery of updates to the {@link Uri}.
      * To be notified of changes to a specific subId, append subId to the URI
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
@@ -187,10 +187,10 @@ public class SubscriptionManager {
      * <p>
      * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
      * subscription wfc mode {@link ImsMmTelManager#getVoWiFiModeSetting()}
-     * while your app is running. You can also use a {@link JobService} to ensure your app
-     * is notified of changes to the {@link Uri} even when it is not running.
-     * Note, however, that using a {@link JobService} does not guarantee timely delivery of
-     * updates to the {@link Uri}.
+     * while your app is running. You can also use a {@link android.app.job.JobService} to ensure
+     * your app is notified of changes to the {@link Uri} even when it is not running.
+     * Note, however, that using a {@link android.app.job.JobService} does not guarantee timely
+     * delivery of updates to the {@link Uri}.
      * To be notified of changes to a specific subId, append subId to the URI
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
@@ -205,10 +205,10 @@ public class SubscriptionManager {
      * <p>
      * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
      * subscription wfc roaming mode {@link ImsMmTelManager#getVoWiFiRoamingModeSetting()}
-     * while your app is running. You can also use a {@link JobService} to ensure your app
-     * is notified of changes to the {@link Uri} even when it is not running.
-     * Note, however, that using a {@link JobService} does not guarantee timely delivery of
-     * updates to the {@link Uri}.
+     * while your app is running. You can also use a {@link android.app.job.JobService}
+     * to ensure your app is notified of changes to the {@link Uri} even when it is not running.
+     * Note, however, that using a {@link android.app.job.JobService} does not guarantee timely
+     * delivery of updates to the {@link Uri}.
      * To be notified of changes to a specific subId, append subId to the URI
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
@@ -225,10 +225,10 @@ public class SubscriptionManager {
      * <p>
      * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
      * subscription vt enabled {@link ImsMmTelManager#isVtSettingEnabled()}
-     * while your app is running. You can also use a {@link JobService} to ensure your app
-     * is notified of changes to the {@link Uri} even when it is not running.
-     * Note, however, that using a {@link JobService} does not guarantee timely delivery of
-     * updates to the {@link Uri}.
+     * while your app is running. You can also use a {@link android.app.job.JobService} to ensure
+     * your app is notified of changes to the {@link Uri} even when it is not running.
+     * Note, however, that using a {@link android.app.job.JobService} does not guarantee timely
+     * delivery of updates to the {@link Uri}.
      * To be notified of changes to a specific subId, append subId to the URI
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
@@ -244,10 +244,10 @@ public class SubscriptionManager {
      * <p>
      * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
      * subscription wfc roaming enabled {@link ImsMmTelManager#isVoWiFiRoamingSettingEnabled()}
-     * while your app is running. You can also use a {@link JobService} to ensure your app
-     * is notified of changes to the {@link Uri} even when it is not running.
-     * Note, however, that using a {@link JobService} does not guarantee timely delivery of
-     * updates to the {@link Uri}.
+     * while your app is running. You can also use a {@link android.app.job.JobService} to ensure
+     * your app is notified of changes to the {@link Uri} even when it is not running.
+     * Note, however, that using a {@link android.app.job.JobService} does not guarantee timely
+     * delivery of updates to the {@link Uri}.
      * To be notified of changes to a specific subId, append subId to the URI
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
