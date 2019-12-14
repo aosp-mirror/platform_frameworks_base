@@ -1388,7 +1388,9 @@ public class ResolverActivity extends Activity implements
 
     @Override // ResolverListCommunicator
     public void onHandlePackagesChanged() {
-        if (mMultiProfilePagerAdapter.getActiveListAdapter().getCount() == 0) {
+        ResolverListAdapter activeListAdapter = mMultiProfilePagerAdapter.getActiveListAdapter();
+        activeListAdapter.rebuildList();
+        if (activeListAdapter.getCount() == 0) {
             // We no longer have any items...  just finish the activity.
             finish();
         }

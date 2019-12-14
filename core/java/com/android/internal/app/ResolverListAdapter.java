@@ -113,7 +113,6 @@ public class ResolverListAdapter extends BaseAdapter {
     }
 
     public void handlePackagesChanged() {
-        rebuildList();
         mResolverListCommunicator.onHandlePackagesChanged();
     }
 
