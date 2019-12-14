@@ -26,7 +26,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.android.internal.telephony.IApnSourceService;
+import android.service.carrier.IApnSourceService;
 
 import java.util.List;
 
