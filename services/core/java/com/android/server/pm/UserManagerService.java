@@ -579,15 +579,6 @@ public class UserManagerService extends IUserManager.Stub {
             applyUserRestrictionsLR(UserHandle.USER_SYSTEM);
         }
 
-        UserInfo currentGuestUser = findCurrentGuestUser();
-        if (currentGuestUser != null && !hasUserRestriction(
-                UserManager.DISALLOW_CONFIG_WIFI, currentGuestUser.id)) {
-            // If a guest user currently exists, apply the DISALLOW_CONFIG_WIFI option
-            // to it, in case this guest was created in a previous version where this
-            // user restriction was not a default guest restriction.
-            setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, currentGuestUser.id);
-        }
-
         mContext.registerReceiver(mDisableQuietModeCallback,
                 new IntentFilter(ACTION_DISABLE_QUIET_MODE_AFTER_UNLOCK),
                 null, mHandler);
@@ -1118,11 +1109,6 @@ public class UserManagerService extends IUserManager.Stub {
             info.flags ^= UserInfo.FLAG_ADMIN;
             writeUserLP(getUserDataLU(info.id));
         }
-
-        // Remove non-admin restrictions.
-        // Keep synchronized with createUserEvenWhenDisallowed.
-        setUserRestriction(UserManager.DISALLOW_SMS, false, userId);
-        setUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, false, userId);
     }
 
     /**
@@ -1602,10 +1588,12 @@ public class UserManagerService extends IUserManager.Stub {
     private void initDefaultGuestRestrictions() {
         synchronized (mGuestRestrictions) {
             if (mGuestRestrictions.isEmpty()) {
-                mGuestRestrictions.putBoolean(UserManager.DISALLOW_CONFIG_WIFI, true);
-                mGuestRestrictions.putBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true);
-                mGuestRestrictions.putBoolean(UserManager.DISALLOW_OUTGOING_CALLS, true);
-                mGuestRestrictions.putBoolean(UserManager.DISALLOW_SMS, true);
+                UserTypeDetails guestType = mUserTypes.get(UserManager.USER_TYPE_FULL_GUEST);
+                if (guestType == null) {
+                    Slog.wtf(LOG_TAG, "Can't set default guest restrictions: type doesn't exist.");
+                    return;
+                }
+                guestType.addDefaultRestrictionsTo(mGuestRestrictions);
             }
         }
     }
@@ -2494,6 +2482,12 @@ public class UserManagerService extends IUserManager.Stub {
                         mDevicePolicyLocalUserRestrictions, mDevicePolicyGlobalUserRestrictions
                 );
             }
+            // DISALLOW_CONFIG_WIFI was made a default guest restriction some time during version 6.
+            final UserInfo currentGuestUser = findCurrentGuestUser();
+            if (currentGuestUser != null && !hasUserRestriction(
+                    UserManager.DISALLOW_CONFIG_WIFI, currentGuestUser.id)) {
+                setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, currentGuestUser.id);
+            }
             userVersion = 7;
         }
 
@@ -3245,12 +3239,15 @@ public class UserManagerService extends IUserManager.Stub {
                 writeUserLP(userData);
             }
             updateUserIds();
+
             Bundle restrictions = new Bundle();
-            // TODO(b/142482943): Generalize this using UserTypeDetails default restrictions.
             if (isGuest) {
+                // Guest default restrictions can be modified via setDefaultGuestRestrictions.
                 synchronized (mGuestRestrictions) {
                     restrictions.putAll(mGuestRestrictions);
                 }
+            } else {
+                userTypeDetails.addDefaultRestrictionsTo(restrictions);
             }
             synchronized (mRestrictionsLock) {
                 mBaseUserRestrictions.append(userId, restrictions);
@@ -4666,14 +4663,8 @@ public class UserManagerService extends IUserManager.Stub {
         @Override
         public UserInfo createUserEvenWhenDisallowed(String name, @NonNull String userType,
                 @UserInfoFlag int flags, String[] disallowedPackages) {
-            UserInfo user = createUserInternalUnchecked(name, userType, flags,
+            return createUserInternalUnchecked(name, userType, flags,
                     UserHandle.USER_NULL, /* preCreated= */ false, disallowedPackages);
-            // Keep this in sync with UserManager.createUser
-            if (user != null && !user.isAdmin() && !user.isDemo()) {
-                setUserRestriction(UserManager.DISALLOW_SMS, true, user.id);
-                setUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, true, user.id);
-            }
-            return user;
         }
 
         @Override

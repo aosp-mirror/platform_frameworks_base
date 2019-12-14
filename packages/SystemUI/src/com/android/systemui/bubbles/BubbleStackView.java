@@ -1731,17 +1731,18 @@ public class BubbleStackView extends FrameLayout {
      */
     public void showBubbleMenu() {
         PointF currentPos = mStackAnimationController.getStackPosition();
-        float yPos = currentPos.y;
-        float xPos = currentPos.x;
-        if (mStackAnimationController.isStackOnLeftSide()) {
-            xPos += mBubbleSize;
-        } else {
-            //TODO: Use the width of the menu instead of this fixed offset. Offset used for now
-            // because menu width isn't correct the first time the menu is shown.
-            xPos -= mBubbleMenuOffset;
-        }
+        mBubbleMenuView.setVisibility(View.INVISIBLE);
+        post(() -> {
+            float yPos = currentPos.y;
+            float xPos = currentPos.x;
+            if (mStackAnimationController.isStackOnLeftSide()) {
+                xPos += mBubbleSize;
+            } else {
+                xPos -= mBubbleMenuView.getMenuView().getWidth();
+            }
 
-        mBubbleMenuView.show(xPos, yPos);
+            mBubbleMenuView.show(xPos, yPos);
+        });
     }
 
     /**
@@ -1762,6 +1763,12 @@ public class BubbleStackView extends FrameLayout {
      * Take a screenshot and send it to the specified bubble.
      */
     public void sendScreenshotToBubble(Bubble bubble) {
-        mBubbleScreenshotListener.onBubbleScreenshot(bubble);
+        hideBubbleMenu();
+        // delay allows the bubble menu to disappear before the screenshot
+        // done here because we already have a Handler to delay with.
+        // TODO: Hide bubble + menu UI from screenshots entirely instead of just delaying.
+        postDelayed(() -> {
+            mBubbleScreenshotListener.onBubbleScreenshot(bubble);
+        }, BubbleMenuView.SCREENSHOT_DELAY);
     }
 }

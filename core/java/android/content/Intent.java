@@ -1728,6 +1728,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final String EXTRA_ORIGINATING_UID
             = "android.intent.extra.ORIGINATING_UID";
 

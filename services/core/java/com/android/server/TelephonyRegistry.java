@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.telephony.SubscriptionManager.INVALID_SIM_SLOT_INDEX;
 import static android.telephony.TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED;
 import static android.telephony.TelephonyRegistryManager.SIM_ACTIVATION_TYPE_DATA;
 import static android.telephony.TelephonyRegistryManager.SIM_ACTIVATION_TYPE_VOICE;
@@ -59,6 +60,7 @@ import android.telephony.PreciseDisconnectCause;
 import android.telephony.Rlog;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
@@ -97,7 +99,7 @@ import java.util.NoSuchElementException;
  * and 15973975 by saving the phoneId of the registrant and then using the
  * phoneId when deciding to to make a callback. This is necessary because
  * a subId changes from to a dummy value when a SIM is removed and thus won't
- * compare properly. Because SubscriptionManager.getPhoneId(int subId) handles
+ * compare properly. Because getPhoneIdFromSubId(int subId) handles
  * the dummy value conversion we properly do the callbacks.
  *
  * Eventually we may want to remove the notion of dummy value but for now this
@@ -131,7 +133,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
-        int phoneId = SubscriptionManager.INVALID_PHONE_INDEX;
+        int phoneId = SubscriptionManager.INVALID_SIM_SLOT_INDEX;
 
         boolean matchPhoneStateListenerEvent(int events) {
             return (callback != null) && ((events & this.events) != 0);
@@ -231,7 +233,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int mDefaultSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
-    private int mDefaultPhoneId = SubscriptionManager.INVALID_PHONE_INDEX;
+    private int mDefaultPhoneId = SubscriptionManager.INVALID_SIM_SLOT_INDEX;
 
     private int[] mRingingCallState;
 
@@ -358,7 +360,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         SubscriptionManager.getDefaultSubscriptionId());
                 int newDefaultPhoneId = intent.getIntExtra(
                         SubscriptionManager.EXTRA_SLOT_INDEX,
-                        SubscriptionManager.getPhoneId(newDefaultSubId));
+                        getPhoneIdFromSubId(newDefaultSubId));
                 if (DBG) {
                     log("onReceive:current mDefaultSubId=" + mDefaultSubId
                             + " current mDefaultPhoneId=" + mDefaultPhoneId
@@ -768,7 +770,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 return;
             }
 
-            int phoneId = SubscriptionManager.getPhoneId(subId);
+            int phoneId = getPhoneIdFromSubId(subId);
             synchronized (mRecords) {
                 // register
                 IBinder b = callback.asBinder();
@@ -1099,7 +1101,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // Called only by Telecomm to communicate call state across different phone accounts. So
         // there is no need to add a valid subId or slotId.
         broadcastCallStateChanged(state, phoneNumber,
-                SubscriptionManager.INVALID_PHONE_INDEX,
+                SubscriptionManager.INVALID_SIM_SLOT_INDEX,
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID);
     }
 
@@ -1324,7 +1326,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             mCarrierNetworkChangeState = active;
             for (int subId : subIds) {
-                int phoneId = SubscriptionManager.getPhoneId(subId);
+                int phoneId = getPhoneIdFromSubId(subId);
 
                 if (VDBG) {
                     log("notifyCarrierNetworkChange: active=" + active + "subId: " + subId);
@@ -1357,7 +1359,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             log("notifyCellInfoForSubscriber: subId=" + subId
                 + " cellInfo=" + cellInfo);
         }
-        int phoneId = SubscriptionManager.getPhoneId(subId);
+        int phoneId = getPhoneIdFromSubId(subId);
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 mCellInfo.set(phoneId, cellInfo);
@@ -1448,7 +1450,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             log("notifyCallForwardingChangedForSubscriber: subId=" + subId
                 + " cfi=" + cfi);
         }
-        int phoneId = SubscriptionManager.getPhoneId(subId);
+        int phoneId = getPhoneIdFromSubId(subId);
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 mCallForwarding[phoneId] = cfi;
@@ -1476,7 +1478,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyDataActivity()" )) {
             return;
         }
-        int phoneId = SubscriptionManager.getPhoneId(subId);
+        int phoneId = getPhoneIdFromSubId(subId);
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 mDataActivity[phoneId] = state;
@@ -1627,7 +1629,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             log("notifyCellLocationForSubscriber: subId=" + subId
                 + " cellLocation=" + cellLocation);
         }
-        int phoneId = SubscriptionManager.getPhoneId(subId);
+        int phoneId = getPhoneIdFromSubId(subId);
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 mCellLocation[phoneId] = cellLocation;
@@ -1655,7 +1657,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyOtaspChanged()" )) {
             return;
         }
-        int phoneId = SubscriptionManager.getPhoneId(subId);
+        int phoneId = getPhoneIdFromSubId(subId);
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 mOtaspMode[phoneId] = otaspMode;
@@ -1759,7 +1761,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyImsCallDisconnectCause()")) {
             return;
         }
-        int phoneId = SubscriptionManager.getPhoneId(subId);
+        int phoneId = getPhoneIdFromSubId(subId);
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 mImsReasonInfo.set(phoneId, imsReasonInfo);
@@ -1819,7 +1821,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (VDBG) {
             log("notifySrvccStateChanged: subId=" + subId + " srvccState=" + state);
         }
-        int phoneId = SubscriptionManager.getPhoneId(subId);
+        int phoneId = getPhoneIdFromSubId(subId);
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 mSrvccState[phoneId] = state;
@@ -2227,7 +2229,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
         }
         // If the phoneId is invalid, the broadcast is for overall call state.
-        if (phoneId != SubscriptionManager.INVALID_PHONE_INDEX) {
+        if (phoneId != SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
             intent.putExtra(PHONE_CONSTANTS_SLOT_KEY, phoneId);
             intent.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, phoneId);
         }
@@ -2699,5 +2701,19 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     /** Returns a new CallQuality object with default values. */
     private static CallQuality createCallQuality() {
         return new CallQuality(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    }
+
+    private int getPhoneIdFromSubId(int subId) {
+        SubscriptionManager subManager = (SubscriptionManager)
+                mContext.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+        if (subManager == null) return INVALID_SIM_SLOT_INDEX;
+
+        if (subId == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID) {
+            subId = SubscriptionManager.getDefaultSubscriptionId();
+        }
+
+        SubscriptionInfo info = subManager.getActiveSubscriptionInfo(subId);
+        if (info == null) return INVALID_SIM_SLOT_INDEX;
+        return info.getSimSlotIndex();
     }
 }

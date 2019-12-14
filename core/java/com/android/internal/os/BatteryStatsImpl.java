@@ -16,6 +16,9 @@
 
 package com.android.internal.os;
 
+import static android.os.BatteryStatsManager.NUM_WIFI_STATES;
+import static android.os.BatteryStatsManager.NUM_WIFI_SUPPL_STATES;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;

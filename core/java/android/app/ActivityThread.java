@@ -112,6 +112,7 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.TelephonyServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.permission.IPermissionManager;
@@ -128,6 +129,7 @@ import android.security.net.config.NetworkSecurityConfigProvider;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.system.StructStat;
+import android.telephony.TelephonyFrameworkInitializer;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -7432,6 +7434,9 @@ public final class ActivityThread extends ClientTransactionHandler {
         final File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());
         TrustedCertificateStore.setDefaultUserDirectory(configDir);
 
+        // Call per-process mainline module initialization.
+        initializeMainlineModules();
+
         Process.setArgV0("<pre-initialized>");
 
         Looper.prepareMainLooper();
@@ -7464,6 +7469,14 @@ public final class ActivityThread extends ClientTransactionHandler {
         Looper.loop();
 
         throw new RuntimeException("Main thread loop unexpectedly exited");
+    }
+
+    /**
+     * Call various initializer APIs in mainline modules that need to be called when each process
+     * starts.
+     */
+    public static void initializeMainlineModules() {
+        TelephonyFrameworkInitializer.setTelephonyServiceManager(new TelephonyServiceManager());
     }
 
     private void purgePendingResources() {

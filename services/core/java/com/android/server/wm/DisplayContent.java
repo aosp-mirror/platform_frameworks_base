@@ -167,6 +167,7 @@ import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -174,6 +175,7 @@ import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.ISystemGestureExclusionListener;
+import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputWindowHandle;
@@ -563,6 +565,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /** Corner radius that windows should have in order to match the display. */
     private final float mWindowCornerRadius;
 
+    private final SparseArray<ShellRoot> mShellRoots = new SparseArray<>();
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final ActivityRecord activity = w.mActivityRecord;
@@ -740,6 +744,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         // Update effect.
         w.mObscured = mTmpApplySurfaceChangesTransactionState.obscured;
+
         if (!mTmpApplySurfaceChangesTransactionState.obscured) {
             final boolean isDisplayed = w.isDisplayedLw();
 
@@ -770,6 +775,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     mTmpApplySurfaceChangesTransactionState.preferredRefreshRate
                             = w.mAttrs.preferredRefreshRate;
                 }
+
+                mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing
+                        |= w.mAttrs.preferMinimalPostProcessing;
+
                 final int preferredModeId = getDisplayPolicy().getRefreshRatePolicy()
                         .getPreferredModeId(w);
                 if (mTmpApplySurfaceChangesTransactionState.preferredModeId == 0
@@ -1015,6 +1024,37 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             token.setExiting();
         }
         return token;
+    }
+
+    SurfaceControl addShellRoot(@NonNull IWindow client, int windowType) {
+        ShellRoot root = mShellRoots.get(windowType);
+        if (root != null) {
+            if (root.getClient() == client) {
+                return root.getSurfaceControl();
+            }
+            root.clear();
+            mShellRoots.remove(windowType);
+        }
+        root = new ShellRoot(client, this, windowType);
+        SurfaceControl rootLeash = root.getSurfaceControl();
+        if (rootLeash == null) {
+            // Root didn't finish initializing, so don't add it.
+            root.clear();
+            return null;
+        }
+        mShellRoots.put(windowType, root);
+        SurfaceControl out = new SurfaceControl();
+        out.copyFrom(rootLeash);
+        return out;
+    }
+
+    void removeShellRoot(int windowType) {
+        ShellRoot root = mShellRoots.get(windowType);
+        if (root == null) {
+            return;
+        }
+        root.clear();
+        mShellRoots.remove(windowType);
     }
 
     /** Changes the display the input window token is housed on to this one. */
@@ -3585,6 +3625,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mLastHasContent,
                 mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,
                 mTmpApplySurfaceChangesTransactionState.preferredModeId,
+                mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing,
                 true /* inTraversal, must call performTraversalInTrans... below */);
 
         final boolean wallpaperVisible = mWallpaperController.isWallpaperVisible();
@@ -3888,6 +3929,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         boolean displayHasContent;
         boolean obscured;
         boolean syswin;
+        boolean preferMinimalPostProcessing;
         float preferredRefreshRate;
         int preferredModeId;
 
@@ -3895,6 +3937,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             displayHasContent = false;
             obscured = false;
             syswin = false;
+            preferMinimalPostProcessing = false;
             preferredRefreshRate = 0;
             preferredModeId = 0;
         }

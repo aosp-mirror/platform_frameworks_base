@@ -51,16 +51,16 @@ import android.os.RemoteException;
 import android.os.WorkSource;
 import android.os.connectivity.WifiActivityEnergyInfo;
 import android.text.TextUtils;
+import android.util.CloseGuard;
 import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
-import dalvik.system.CloseGuard;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -2156,8 +2156,6 @@ public class WifiManager {
     /** @hide */
     public static final long WIFI_FEATURE_INFRA            = 0x0001L;  // Basic infrastructure mode
     /** @hide */
-    public static final long WIFI_FEATURE_INFRA_5G         = 0x0002L;  // Support for 5 GHz Band
-    /** @hide */
     public static final long WIFI_FEATURE_PASSPOINT        = 0x0004L;  // Support for GAS/ANQP
     /** @hide */
     public static final long WIFI_FEATURE_P2P              = 0x0008L;  // Wifi-Direct
@@ -2227,8 +2225,6 @@ public class WifiManager {
     public static final long WIFI_FEATURE_MBO              = 0x800000000L; // MBO Support
     /** @hide */
     public static final long WIFI_FEATURE_OCE              = 0x1000000000L; // OCE Support
-    /** @hide */
-    public static final long WIFI_FEATURE_INFRA_6G         = 0x2000000000L; // Support 6 GHz band
 
     private long getSupportedFeatures() {
         try {
@@ -2242,22 +2238,7 @@ public class WifiManager {
         return (getSupportedFeatures() & feature) == feature;
     }
 
-    /**
-     * @return true if this adapter supports 5 GHz band
-     */
-    public boolean is5GHzBandSupported() {
-        return isFeatureSupported(WIFI_FEATURE_INFRA_5G);
-    }
-
-    /**
-     * @return true if the device supports operating in the 6 GHz band and Wi-Fi is enabled,
-     *         false otherwise.
-     */
-    public boolean is6GHzBandSupported() {
-        return isFeatureSupported(WIFI_FEATURE_INFRA_6G);
-    }
-
-    /**
+   /**
      * @return true if this adapter supports Passpoint
      * @hide
      */
@@ -2376,6 +2357,30 @@ public class WifiManager {
     @SystemApi
     public boolean isApMacRandomizationSupported() {
         return isFeatureSupported(WIFI_FEATURE_AP_RAND_MAC);
+    }
+
+    /**
+     * Check if the chipset supports 5GHz band.
+     * @return {@code true} if supported, {@code false} otherwise.
+     */
+    public boolean is5GHzBandSupported() {
+        try {
+            return mService.is5GHzBandSupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Check if the chipset supports 6GHz band.
+     * @return {@code true} if supported, {@code false} otherwise.
+     */
+    public boolean is6GHzBandSupported() {
+        try {
+            return mService.is6GHzBandSupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2586,21 +2591,6 @@ public class WifiManager {
     public String getCountryCode() {
         try {
             return mService.getCountryCode();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Check if the chipset supports dual frequency band (2.4 GHz and 5 GHz).
-     * No permissions are required to call this method.
-     * @return {@code true} if supported, {@code false} otherwise.
-     * @hide
-     */
-    @SystemApi
-    public boolean isDualBandSupported() {
-        try {
-            return mService.isDualBandSupported();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3574,7 +3564,7 @@ public class WifiManager {
      */
     public class LocalOnlyHotspotReservation implements AutoCloseable {
 
-        private final CloseGuard mCloseGuard = CloseGuard.get();
+        private final CloseGuard mCloseGuard = new CloseGuard();
         private final WifiConfiguration mConfig;
         private boolean mClosed = false;
 
@@ -3601,6 +3591,8 @@ public class WifiManager {
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to stop Local Only Hotspot.");
+            } finally {
+                Reference.reachabilityFence(this);
             }
         }
 
@@ -3725,7 +3717,7 @@ public class WifiManager {
      * @hide
      */
     public class LocalOnlyHotspotSubscription implements AutoCloseable {
-        private final CloseGuard mCloseGuard = CloseGuard.get();
+        private final CloseGuard mCloseGuard = new CloseGuard();
 
         /** @hide */
         @VisibleForTesting
@@ -3740,6 +3732,8 @@ public class WifiManager {
                 mCloseGuard.close();
             } catch (Exception e) {
                 Log.e(TAG, "Failed to unregister LocalOnlyHotspotObserver.");
+            } finally {
+                Reference.reachabilityFence(this);
             }
         }
 
@@ -4686,10 +4680,13 @@ public class WifiManager {
     }
 
     /**
-     * Retrieve the soft ap config data to be backed to save current config data.
+     * Returns a byte stream representing the data that needs to be backed up to save the
+     * current soft ap config data.
+     *
+     * This soft ap config can be restored by calling {@link #restoreSoftApBackupData(byte[])}
      * @hide
      */
-    @Nullable
+    @NonNull
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public byte[] retrieveSoftApBackupData() {
@@ -4701,15 +4698,17 @@ public class WifiManager {
     }
 
     /**
-     * Restore soft ap config from the backed up data.
+     * Returns soft ap config from the backed up data.
+     * @param data byte stream in the same format produced by {@link #retrieveSoftApBackupData()}
+     *
      * @hide
      */
     @Nullable
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void restoreSoftApBackupData(@NonNull byte[] data) {
+    public SoftApConfiguration restoreSoftApBackupData(@NonNull byte[] data) {
         try {
-            mService.restoreSoftApBackupData(data);
+            return mService.restoreSoftApBackupData(data);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

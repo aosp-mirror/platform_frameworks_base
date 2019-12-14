@@ -3051,6 +3051,10 @@
       <public name="accessibilitySystemActionLockScreen" />
       <public name="accessibilitySystemActionTakeScreenshot" />
     </public-group>
+
+    <public-group type="attr" first-id="0x0101060c">
+      <public name="preferMinimalPostProcessing"/>
+    </public-group>
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE
 

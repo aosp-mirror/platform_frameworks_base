@@ -627,11 +627,13 @@ public class ComponentResolver {
         final int providersSize = ArrayUtils.size(pkg.getProviders());
         StringBuilder r = null;
         for (int i = 0; i < providersSize; i++) {
-            EffectiveProvider p = new EffectiveProvider(pkg.getProviders().get(i));
+            ParsedProvider p = pkg.getProviders().get(i);
             mProviders.addProvider(p);
             if (p.getAuthority() != null) {
                 String[] names = p.getAuthority().split(";");
-                p.setEffectiveAuthority(null);
+
+                // TODO(b/135203078): Remove this mutation
+                p.setAuthority(null);
                 for (int j = 0; j < names.length; j++) {
                     if (j == 1 && p.isSyncable()) {
                         // We only want the first authority for a provider to possibly be
@@ -641,15 +643,15 @@ public class ComponentResolver {
                         // to a provider that we don't want to change.
                         // Only do this for the second authority since the resulting provider
                         // object can be the same for all future authorities for this provider.
-                        p = new EffectiveProvider(p);
-                        p.setEffectiveSyncable(false);
+                        p = new ParsedProvider(p);
+                        p.setSyncable(false);
                     }
                     if (!mProvidersByAuthority.containsKey(names[j])) {
                         mProvidersByAuthority.put(names[j], p);
                         if (p.getAuthority() == null) {
-                            p.setEffectiveAuthority(names[j]);
+                            p.setAuthority(names[j]);
                         } else {
-                            p.setEffectiveAuthority(p.getAuthority() + ";" + names[j]);
+                            p.setAuthority(p.getAuthority() + ";" + names[j]);
                         }
                         if (DEBUG_PACKAGE_SCANNING && chatty) {
                             Log.d(TAG, "Registered content provider: " + names[j]
@@ -2111,37 +2113,6 @@ public class ComponentResolver {
         @Override
         public Iterator<IntentFilter.AuthorityEntry> generate(ParsedActivityIntentInfo info) {
             return info.authoritiesIterator();
-        }
-    }
-
-    // TODO(b/135203078): Document or remove this if possible.
-    class EffectiveProvider extends ParsedProvider {
-
-        private String mEffectiveAuthority;
-        private boolean mEffectiveSyncable;
-
-        public EffectiveProvider(ParsedProvider parsedProvider) {
-            this.setFrom(parsedProvider);
-            this.mEffectiveAuthority = parsedProvider.getAuthority();
-            this.mEffectiveSyncable = parsedProvider.isSyncable();
-        }
-
-        public void setEffectiveAuthority(String authority) {
-            this.mEffectiveAuthority = authority;
-        }
-
-        public void setEffectiveSyncable(boolean syncable) {
-            this.mEffectiveSyncable = syncable;
-        }
-
-        @Override
-        public String getAuthority() {
-            return mEffectiveAuthority;
-        }
-
-        @Override
-        public boolean isSyncable() {
-            return mEffectiveSyncable;
         }
     }
 }

@@ -16,15 +16,13 @@ apex {
     name: "com.android.os.statsd",
     defaults: ["com.android.os.statsd-defaults"],
     manifest: "apex_manifest.json",
-
-
 }
 
 apex_defaults {
     // libc.so and libcutils.so are included in the apex
     // native_shared_libs: ["libc", "libcutils"],
     // binaries: ["vold"],
-    // java_libs: ["core-all"],
+    java_libs: ["service-statsd"],
     // prebuilts: ["my_prebuilt"],
     name: "com.android.os.statsd-defaults",
     key: "com.android.os.statsd.key",

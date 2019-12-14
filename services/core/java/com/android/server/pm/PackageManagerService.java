@@ -13487,10 +13487,12 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "restore", token);
             try {
-                if (bm.isBackupServiceActive(userId)) {
+                if (bm.isUserReadyForBackup(userId)) {
                     bm.restoreAtInstallForUser(
                             userId, res.pkg.getAppInfoPackageName(), token);
                 } else {
+                    Slog.w(TAG, "User " + userId + " is not ready. Restore at install "
+                            + "didn't take place.");
                     return false;
                 }
             } catch (RemoteException e) {
@@ -14144,7 +14146,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     verification.putExtra(PackageManager.EXTRA_VERIFICATION_ID, verificationId);
 
                     verification.putExtra(PackageManager.EXTRA_VERIFICATION_INSTALLER_PACKAGE,
-                            installSource.installerPackageName);
+                            installSource.initiatingPackageName);
 
                     verification.putExtra(PackageManager.EXTRA_VERIFICATION_INSTALL_FLAGS,
                             installFlags);
@@ -15707,7 +15709,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 // TODO(patb): create a more descriptive reason than unknown in future release
                 // mark all non-failure installs as UNKNOWN so we do not treat them as success
                 for (InstallRequest request : requests) {
-                    request.installResult.freezer.close();
+                    if (request.installResult.freezer != null) {
+                        request.installResult.freezer.close();
+                    }
                     if (request.installResult.returnCode == PackageManager.INSTALL_SUCCEEDED) {
                         request.installResult.returnCode = PackageManager.INSTALL_UNKNOWN;
                     }

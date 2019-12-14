@@ -1770,7 +1770,8 @@ public class PackageInstaller {
          * @param installerPackageName name of the installer package
          * {@hide}
          */
-        public void setInstallerPackageName(String installerPackageName) {
+        @TestApi
+        public void setInstallerPackageName(@Nullable String installerPackageName) {
             this.installerPackageName = installerPackageName;
         }
 

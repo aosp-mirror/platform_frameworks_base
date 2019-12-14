@@ -278,26 +278,12 @@ public class UserManagerTest extends AndroidTestCase {
     @MediumTest
     public void testSetUserAdmin() throws Exception {
         UserInfo userInfo = createUser("SecondaryUser", /*flags=*/ 0);
-
-        // Assert user is not admin and has SMS and calls restrictions.
         assertFalse(userInfo.isAdmin());
-        assertTrue(mUserManager.hasUserRestriction(UserManager.DISALLOW_SMS,
-                userInfo.getUserHandle()));
-        assertTrue(mUserManager.hasUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS,
-                userInfo.getUserHandle()));
 
-        // Assign admin privileges.
         mUserManager.setUserAdmin(userInfo.id);
 
-        // Refresh.
         userInfo = mUserManager.getUserInfo(userInfo.id);
-
-        // Verify user became admin and SMS and call restrictions are lifted.
         assertTrue(userInfo.isAdmin());
-        assertFalse(mUserManager.hasUserRestriction(UserManager.DISALLOW_SMS,
-                userInfo.getUserHandle()));
-        assertFalse(mUserManager.hasUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS,
-                userInfo.getUserHandle()));
     }
 
     @MediumTest
@@ -628,6 +614,21 @@ public class UserManagerTest extends AndroidTestCase {
         assertEquals(stored.getBoolean(UserManager.DISALLOW_CONFIG_WIFI), false);
         assertEquals(stored.getBoolean(UserManager.DISALLOW_UNINSTALL_APPS), false);
         assertEquals(stored.getBoolean(UserManager.DISALLOW_INSTALL_APPS), true);
+    }
+
+    @MediumTest
+    public void testDefaultRestrictionsApplied() throws Exception {
+        final UserInfo userInfo = createUser("Useroid", UserManager.USER_TYPE_FULL_SECONDARY, 0);
+        final UserTypeDetails userTypeDetails =
+                UserTypeFactory.getUserTypes().get(UserManager.USER_TYPE_FULL_SECONDARY);
+        final Bundle expectedRestrictions = userTypeDetails.getDefaultRestrictions();
+        // Note this can fail if DO unset those restrictions.
+        for (String restriction : expectedRestrictions.keySet()) {
+            if (expectedRestrictions.getBoolean(restriction)) {
+                assertTrue(
+                        mUserManager.hasUserRestriction(restriction, UserHandle.of(userInfo.id)));
+            }
+        }
     }
 
     @MediumTest

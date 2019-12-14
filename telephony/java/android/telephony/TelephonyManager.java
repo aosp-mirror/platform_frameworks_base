@@ -605,6 +605,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_EMERGENCY_ASSISTANCE =
             "android.telephony.action.EMERGENCY_ASSISTANCE";
@@ -5161,7 +5162,8 @@ public class TelephonyManager {
     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private ITelephony getITelephony() {
-        return ITelephony.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_SERVICE));
+        return ITelephony.Stub.asInterface(TelephonyFrameworkInitializer
+                .getTelephonyServiceManager().getTelephonyServiceRegisterer().get());
     }
 
     private ITelephonyRegistry getTelephonyRegistry() {

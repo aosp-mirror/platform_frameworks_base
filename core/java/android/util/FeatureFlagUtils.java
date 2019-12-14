@@ -59,6 +59,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_WIFITRACKER2, "false");
         DEFAULT_FLAGS.put("settings_work_profile", "true");
         DEFAULT_FLAGS.put("settings_controller_loading_enhancement", "false");
+        DEFAULT_FLAGS.put("settings_conditionals", "false");
     }
 
     /**

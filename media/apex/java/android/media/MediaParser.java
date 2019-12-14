@@ -102,7 +102,8 @@ import java.util.Map;
  *     public void onSeekMap(int i, @NonNull MediaFormat mediaFormat) { \/* Do nothing. *\/ }
  *
  *     \@Override
- *     public void onFormat(int i, @NonNull MediaFormat mediaFormat) {
+ *     public void onTrackData(int i, @NonNull TrackData trackData) {
+ *       MediaFormat mediaFormat = trackData.mediaFormat;
  *       if (videoTrackIndex == -1 && mediaFormat
  *           .getString(MediaFormat.KEY_MIME, \/* defaultValue= *\/ "").startsWith("video/")) {
  *         videoTrackIndex = i;
@@ -197,6 +198,24 @@ public final class MediaParser {
         public Pair<SeekPoint, SeekPoint> getSeekPoints(long timeUs) {
             SeekPoints seekPoints = mExoPlayerSeekMap.getSeekPoints(timeUs);
             return new Pair<>(toSeekPoint(seekPoints.first), toSeekPoint(seekPoints.second));
+        }
+    }
+
+    /** Holds information associated with a track. */
+    public static final class TrackData {
+
+        /** Holds {@link MediaFormat} information for the track. */
+        @NonNull public final MediaFormat mediaFormat;
+
+        /**
+         * Holds {@link DrmInitData} necessary to acquire keys associated with the track, or null if
+         * the track has no encryption data.
+         */
+        @Nullable public final DrmInitData drmInitData;
+
+        private TrackData(MediaFormat mediaFormat, DrmInitData drmInitData) {
+            this.mediaFormat = mediaFormat;
+            this.drmInitData = drmInitData;
         }
     }
 
@@ -308,12 +327,12 @@ public final class MediaParser {
         void onTracksFound(int numberOfTracks);
 
         /**
-         * Called when the {@link MediaFormat} of the track is extracted from the stream.
+         * Called when new {@link TrackData} is extracted from the stream.
          *
-         * @param trackIndex The index of the track for which the {@link MediaFormat} was found.
-         * @param format The extracted {@link MediaFormat}.
+         * @param trackIndex The index of the track for which the {@link TrackData} was extracted.
+         * @param trackData The extracted {@link TrackData}.
          */
-        void onFormat(int trackIndex, @NonNull MediaFormat format);
+        void onTrackData(int trackIndex, @NonNull TrackData trackData);
 
         /**
          * Called to write sample data to the output.
@@ -674,7 +693,10 @@ public final class MediaParser {
 
         @Override
         public void format(Format format) {
-            mOutputConsumer.onFormat(mTrackIndex, toMediaFormat(format));
+            mOutputConsumer.onTrackData(
+                    mTrackIndex,
+                    new TrackData(
+                            toMediaFormat(format), toFrameworkDrmInitData(format.drmInitData)));
         }
 
         @Override
@@ -844,6 +866,12 @@ public final class MediaParser {
     private static int toFrameworkFlags(int flags) {
         // TODO: Implement.
         return 0;
+    }
+
+    private static DrmInitData toFrameworkDrmInitData(
+            com.google.android.exoplayer2.drm.DrmInitData drmInitData) {
+        // TODO: Implement.
+        return null;
     }
 
     private static MediaCodec.CryptoInfo toCryptoInfo(TrackOutput.CryptoData encryptionData) {

@@ -163,8 +163,7 @@ public class CarrierTextController {
     public CarrierTextController(Context context, CharSequence separator, boolean showAirplaneMode,
             boolean showMissingSim) {
         mContext = context;
-        mIsEmergencyCallCapable = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_voice_capable);
+        mIsEmergencyCallCapable = getTelephonyManager().isVoiceCapable();
 
         mShowAirplaneMode = showAirplaneMode;
         mShowMissingSim = showMissingSim;

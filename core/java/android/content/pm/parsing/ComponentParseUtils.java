@@ -768,6 +768,10 @@ public class ComponentParseUtils {
         protected PatternMatcher[] uriPermissionPatterns;
         protected PathPermission[] pathPermissions;
 
+        public ParsedProvider(ParsedProvider other) {
+            this.setFrom(other);
+        }
+
         protected void setFrom(ParsedProvider other) {
             super.setFrom(other);
             this.exported = other.exported;
@@ -821,6 +825,10 @@ public class ComponentParseUtils {
 
         public String getAuthority() {
             return authority;
+        }
+
+        public void setSyncable(boolean isSyncable) {
+            this.isSyncable = isSyncable;
         }
 
         public boolean isSyncable() {

@@ -722,6 +722,7 @@ package android.content {
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
     field @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public static final String ACTION_MANAGE_DEFAULT_APP = "android.intent.action.MANAGE_DEFAULT_APP";
     field public static final String ACTION_ROLLBACK_COMMITTED = "android.intent.action.ROLLBACK_COMMITTED";
+    field public static final String EXTRA_ORIGINATING_UID = "android.intent.extra.ORIGINATING_UID";
     field public static final String EXTRA_ROLE_NAME = "android.intent.extra.ROLE_NAME";
   }
 
@@ -753,6 +754,7 @@ package android.content.pm {
     method public void setEnableRollback(boolean);
     method @RequiresPermission("android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS") public void setGrantedRuntimePermissions(String[]);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setInstallAsApex();
+    method public void setInstallerPackageName(@Nullable String);
     method public void setRequestDowngrade(boolean);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setStaged();
   }

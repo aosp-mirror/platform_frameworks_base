@@ -248,6 +248,7 @@
   <java-symbol type="id" name="overlay" />
   <java-symbol type="id" name="app_ops" />
   <java-symbol type="id" name="profile_pager" />
+  <java-symbol type="id" name="content_preview_container" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -440,6 +441,7 @@
   <java-symbol type="integer" name="config_multiuserMaxRunningUsers" />
   <java-symbol type="bool" name="config_multiuserDelayUserDataLocking" />
   <java-symbol type="integer" name="config_userTypePackageWhitelistMode"/>
+  <java-symbol type="xml" name="config_user_types" />
   <java-symbol type="integer" name="config_safe_media_volume_index" />
   <java-symbol type="integer" name="config_safe_media_volume_usb_mB" />
   <java-symbol type="integer" name="config_mobile_mtu" />

@@ -1305,6 +1305,7 @@ package android.app.usage {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getAppStandbyBucket(String);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public java.util.Map<java.lang.String,java.lang.Integer> getAppStandbyBuckets();
     method public int getUsageSource();
+    method @RequiresPermission(android.Manifest.permission.BIND_CARRIER_SERVICES) public void onCarrierPrivilegedAppsChanged();
     method @RequiresPermission(allOf={android.Manifest.permission.SUSPEND_APPS, android.Manifest.permission.OBSERVE_APP_USAGE}) public void registerAppUsageLimitObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @Nullable android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerAppUsageObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, @NonNull android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerUsageSessionObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @NonNull android.app.PendingIntent, @Nullable android.app.PendingIntent);
@@ -1475,7 +1476,9 @@ package android.bluetooth {
   }
 
   public final class BluetoothHearingAid implements android.bluetooth.BluetoothProfile {
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH) public java.util.List<android.bluetooth.BluetoothDevice> getActiveDevices();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public long getHiSyncId(@Nullable android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
   }
 
@@ -4377,6 +4380,7 @@ package android.media.tv {
     method @Nullable public String onHardwareRemoved(android.media.tv.TvInputHardwareInfo);
     method @Nullable public android.media.tv.TvInputInfo onHdmiDeviceAdded(android.hardware.hdmi.HdmiDeviceInfo);
     method @Nullable public String onHdmiDeviceRemoved(android.hardware.hdmi.HdmiDeviceInfo);
+    method public void onHdmiDeviceUpdated(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
   }
 
   public abstract static class TvInputService.RecordingSession {
@@ -5668,7 +5672,6 @@ package android.net.wifi {
     method public boolean isApMacRandomizationSupported();
     method public boolean isConnectedMacRandomizationSupported();
     method @Deprecated public boolean isDeviceToDeviceRttSupported();
-    method public boolean isDualBandSupported();
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public boolean isDualModeSupported();
     method public boolean isPortableHotspotSupported();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public boolean isWifiApEnabled();
@@ -5681,10 +5684,10 @@ package android.net.wifi {
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void registerTrafficStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.TrafficStateCallback);
     method @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE) public void removeOnWifiUsabilityStatsListener(@NonNull android.net.wifi.WifiManager.OnWifiUsabilityStatsListener);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void restoreBackupData(@NonNull byte[]);
-    method @Nullable @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void restoreSoftApBackupData(@NonNull byte[]);
+    method @Nullable @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public android.net.wifi.SoftApConfiguration restoreSoftApBackupData(@NonNull byte[]);
     method @Deprecated @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void restoreSupplicantBackupData(@NonNull byte[], @NonNull byte[]);
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public byte[] retrieveBackupData();
-    method @Nullable @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public byte[] retrieveSoftApBackupData();
+    method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public byte[] retrieveSoftApBackupData();
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void save(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission(android.Manifest.permission.WIFI_SET_DEVICE_MOBILITY_STATE) public void setDeviceMobilityState(int);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public boolean setSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
@@ -6224,6 +6227,27 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiScanStoppedFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiState(int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiSupplicantStateChanged(int, boolean);
+    field public static final int WIFI_STATE_OFF = 0; // 0x0
+    field public static final int WIFI_STATE_OFF_SCANNING = 1; // 0x1
+    field public static final int WIFI_STATE_ON_CONNECTED_P2P = 5; // 0x5
+    field public static final int WIFI_STATE_ON_CONNECTED_STA = 4; // 0x4
+    field public static final int WIFI_STATE_ON_CONNECTED_STA_P2P = 6; // 0x6
+    field public static final int WIFI_STATE_ON_DISCONNECTED = 3; // 0x3
+    field public static final int WIFI_STATE_ON_NO_NETWORKS = 2; // 0x2
+    field public static final int WIFI_STATE_SOFT_AP = 7; // 0x7
+    field public static final int WIFI_SUPPL_STATE_ASSOCIATED = 7; // 0x7
+    field public static final int WIFI_SUPPL_STATE_ASSOCIATING = 6; // 0x6
+    field public static final int WIFI_SUPPL_STATE_AUTHENTICATING = 5; // 0x5
+    field public static final int WIFI_SUPPL_STATE_COMPLETED = 10; // 0xa
+    field public static final int WIFI_SUPPL_STATE_DISCONNECTED = 1; // 0x1
+    field public static final int WIFI_SUPPL_STATE_DORMANT = 11; // 0xb
+    field public static final int WIFI_SUPPL_STATE_FOUR_WAY_HANDSHAKE = 8; // 0x8
+    field public static final int WIFI_SUPPL_STATE_GROUP_HANDSHAKE = 9; // 0x9
+    field public static final int WIFI_SUPPL_STATE_INACTIVE = 3; // 0x3
+    field public static final int WIFI_SUPPL_STATE_INTERFACE_DISABLED = 2; // 0x2
+    field public static final int WIFI_SUPPL_STATE_INVALID = 0; // 0x0
+    field public static final int WIFI_SUPPL_STATE_SCANNING = 4; // 0x4
+    field public static final int WIFI_SUPPL_STATE_UNINITIALIZED = 12; // 0xc
   }
 
   public class Binder implements android.os.IBinder {
@@ -6613,6 +6637,21 @@ package android.os {
     field public static final int STATUS_WAITING_DOWNLOAD = 2; // 0x2
     field public static final int STATUS_WAITING_INSTALL = 4; // 0x4
     field public static final int STATUS_WAITING_REBOOT = 5; // 0x5
+  }
+
+  public class TelephonyServiceManager {
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyServiceRegisterer();
+  }
+
+  public static class TelephonyServiceManager.ServiceNotFoundException extends java.lang.Exception {
+    ctor public TelephonyServiceManager.ServiceNotFoundException(@NonNull String);
+  }
+
+  public final class TelephonyServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+    method @NonNull public android.os.IBinder getOrThrow() throws android.os.TelephonyServiceManager.ServiceNotFoundException;
+    method public void register(@NonNull android.os.IBinder);
+    method @Nullable public android.os.IBinder tryGet();
   }
 
   public class UpdateEngine {
@@ -9516,6 +9555,7 @@ package android.telephony {
   }
 
   public class SubscriptionInfo implements android.os.Parcelable {
+    method public boolean areUiccApplicationsEnabled();
     method @Nullable public java.util.List<android.telephony.UiccAccessRule> getAccessRules();
     method public int getProfileClass();
     method public boolean isGroupDisabled();
@@ -9555,6 +9595,7 @@ package android.telephony {
 
   public class TelephonyFrameworkInitializer {
     method public static void registerServiceWrappers();
+    method public static void setTelephonyServiceManager(@NonNull android.os.TelephonyServiceManager);
   }
 
   public final class TelephonyHistogram implements android.os.Parcelable {
@@ -9685,6 +9726,7 @@ package android.telephony {
     method public void updateServiceLocation();
     method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void updateTestOtaEmergencyNumberDbFilePath(@NonNull String);
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final String ACTION_ANOMALY_REPORTED = "android.telephony.action.ANOMALY_REPORTED";
+    field public static final String ACTION_EMERGENCY_ASSISTANCE = "android.telephony.action.EMERGENCY_ASSISTANCE";
     field public static final String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
     field public static final String ACTION_SIM_CARD_STATE_CHANGED = "android.telephony.action.SIM_CARD_STATE_CHANGED";
     field public static final String ACTION_SIM_SLOT_STATUS_CHANGED = "android.telephony.action.SIM_SLOT_STATUS_CHANGED";

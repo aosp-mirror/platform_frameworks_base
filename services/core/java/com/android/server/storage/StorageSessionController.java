@@ -308,34 +308,6 @@ public final class StorageSessionController {
     }
 
     /**
-     * Throws an {@link IllegalStateException} if {@code path} is not ready to be accessed by
-     * {@code userId}.
-     */
-    // TODO(b/144332951): This is not used because it is racy. Right after checking a path
-    // we can call into vold with that path and the FUSE daemon can go down. Improve or remove
-    public void checkPathReadyForUser(int userId, String path) {
-        if (!mIsFuseEnabled) {
-            return;
-        }
-
-        if (mIsResetting) {
-            throw new IllegalStateException("Connection resetting for user " + userId
-                    + " with path " + path);
-        }
-
-        StorageUserConnection connection = null;
-        synchronized (mLock) {
-            connection = mConnections.get(userId);
-        }
-
-        if (connection == null) {
-            throw new IllegalStateException("Connection not ready for user " + userId
-                    + " with path " + path);
-        }
-        connection.checkPathReady(path);
-    }
-
-    /**
      * Returns {@code true} if {@code vol} is an emulated or public volume,
      * {@code false} otherwise
      **/

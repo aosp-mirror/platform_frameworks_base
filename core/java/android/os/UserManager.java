@@ -2391,19 +2391,11 @@ public class UserManager {
      */
     public @Nullable UserInfo createUser(@Nullable String name, @NonNull String userType,
             @UserInfoFlag int flags) {
-        UserInfo user = null;
         try {
-            user = mService.createUser(name, userType, flags);
-            // TODO: Keep this in sync with
-            // UserManagerService.LocalService.createUserEvenWhenDisallowed
-            if (user != null && !user.isAdmin() && !user.isDemo()) {
-                mService.setUserRestriction(DISALLOW_SMS, true, user.id);
-                mService.setUserRestriction(DISALLOW_OUTGOING_CALLS, true, user.id);
-            }
+            return mService.createUser(name, userType, flags);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
-        return user;
     }
 
     /**
@@ -2748,8 +2740,7 @@ public class UserManager {
     /**
      * Assigns admin privileges to the user, if such a user exists.
      *
-     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} and
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permissions.
+     * <p>Note that this does not alter the user's pre-existing user restrictions.
      *
      * @param userId the id of the user to become admin
      * @hide
