@@ -480,6 +480,137 @@ TEST(AtomMatcherTest, TestWriteAtomToProto) {
     EXPECT_EQ(999, atom.num_results());
 }
 
+/*
+ * Test two Matchers is not a subset of one Matcher.
+ * Test one Matcher is subset of two Matchers.
+ */
+TEST(AtomMatcherTest, TestSubsetDimensions1) {
+    // Initialize first set of matchers
+    FieldMatcher matcher1;
+    matcher1.set_field(10);
+
+    FieldMatcher* child = matcher1.add_child();
+    child->set_field(1);
+    child->set_position(Position::ALL);
+    child->add_child()->set_field(1);
+    child->add_child()->set_field(2);
+
+    vector<Matcher> matchers1;
+    translateFieldMatcher(matcher1, &matchers1);
+    EXPECT_EQ(2, matchers1.size());
+
+    // Initialize second set of matchers
+    FieldMatcher matcher2;
+    matcher2.set_field(10);
+
+    child = matcher2.add_child();
+    child->set_field(1);
+    child->set_position(Position::ALL);
+    child->add_child()->set_field(1);
+
+    vector<Matcher> matchers2;
+    translateFieldMatcher(matcher2, &matchers2);
+    EXPECT_EQ(1, matchers2.size());
+
+    EXPECT_FALSE(subsetDimensions(matchers1, matchers2));
+    EXPECT_TRUE(subsetDimensions(matchers2, matchers1));
+}
+/*
+ * Test not a subset with one matching Matcher, one non-matching Matcher.
+ */
+TEST(AtomMatcherTest, TestSubsetDimensions2) {
+    // Initialize first set of matchers
+    FieldMatcher matcher1;
+    matcher1.set_field(10);
+
+    FieldMatcher* child = matcher1.add_child();
+    child->set_field(1);
+
+    child = matcher1.add_child();
+    child->set_field(2);
+
+    vector<Matcher> matchers1;
+    translateFieldMatcher(matcher1, &matchers1);
+
+    // Initialize second set of matchers
+    FieldMatcher matcher2;
+    matcher2.set_field(10);
+
+    child = matcher2.add_child();
+    child->set_field(1);
+
+    child = matcher2.add_child();
+    child->set_field(3);
+
+    vector<Matcher> matchers2;
+    translateFieldMatcher(matcher2, &matchers2);
+
+    EXPECT_FALSE(subsetDimensions(matchers1, matchers2));
+}
+
+/*
+ * Test not a subset if parent field is not equal.
+ */
+TEST(AtomMatcherTest, TestSubsetDimensions3) {
+    // Initialize first set of matchers
+    FieldMatcher matcher1;
+    matcher1.set_field(10);
+
+    FieldMatcher* child = matcher1.add_child();
+    child->set_field(1);
+
+    vector<Matcher> matchers1;
+    translateFieldMatcher(matcher1, &matchers1);
+
+    // Initialize second set of matchers
+    FieldMatcher matcher2;
+    matcher2.set_field(5);
+
+    child = matcher2.add_child();
+    child->set_field(1);
+
+    vector<Matcher> matchers2;
+    translateFieldMatcher(matcher2, &matchers2);
+
+    EXPECT_FALSE(subsetDimensions(matchers1, matchers2));
+}
+
+/*
+ * Test is subset with two matching Matchers.
+ */
+TEST(AtomMatcherTest, TestSubsetDimensions4) {
+    // Initialize first set of matchers
+    FieldMatcher matcher1;
+    matcher1.set_field(10);
+
+    FieldMatcher* child = matcher1.add_child();
+    child->set_field(1);
+
+    child = matcher1.add_child();
+    child->set_field(2);
+
+    vector<Matcher> matchers1;
+    translateFieldMatcher(matcher1, &matchers1);
+
+    // Initialize second set of matchers
+    FieldMatcher matcher2;
+    matcher2.set_field(10);
+
+    child = matcher2.add_child();
+    child->set_field(1);
+
+    child = matcher2.add_child();
+    child->set_field(2);
+
+    child = matcher2.add_child();
+    child->set_field(3);
+
+    vector<Matcher> matchers2;
+    translateFieldMatcher(matcher2, &matchers2);
+
+    EXPECT_TRUE(subsetDimensions(matchers1, matchers2));
+    EXPECT_FALSE(subsetDimensions(matchers2, matchers1));
+}
 
 }  // namespace statsd
 }  // namespace os
