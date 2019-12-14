@@ -150,19 +150,12 @@ public class NotificationUsageStats {
             stats.numPostedByApp++;
             stats.updateInterarrivalEstimate(now);
             stats.countApiUse(notification);
-            stats.numUndecoratedRemoteViews += (isUndecoratedRemoteView(notification) ? 1 : 0);
+            stats.numUndecoratedRemoteViews += (notification.hasUndecoratedRemoteView() ? 1 : 0);
         }
         releaseAggregatedStatsLocked(aggregatedStatsArray);
         if (ENABLE_SQLITE_LOG) {
             mSQLiteLog.logPosted(notification);
         }
-    }
-
-    /**
-     * Does this notification use RemoveViews without a platform decoration?
-     */
-    protected static boolean isUndecoratedRemoteView(NotificationRecord notification) {
-        return (notification.getNotification().getNotificationStyle() == null);
     }
 
     /**
@@ -1287,7 +1280,7 @@ public class NotificationUsageStats {
             } else {
                 putPosttimeVisibility(r, cv);
             }
-            cv.put(COL_UNDECORATED, (isUndecoratedRemoteView(r) ? 1 : 0));
+            cv.put(COL_UNDECORATED, (r.hasUndecoratedRemoteView() ? 1 : 0));
             SQLiteDatabase db = mHelper.getWritableDatabase();
             if (db.insert(TAB_LOG, null, cv) < 0) {
                 Log.wtf(TAG, "Error while trying to insert values: " + cv);
