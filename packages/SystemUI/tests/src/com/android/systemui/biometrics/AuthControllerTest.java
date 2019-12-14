@@ -279,20 +279,14 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testDismissWithoutCallbackInvoked_whenSystemRequested() {
-        showDialog(Authenticators.BIOMETRIC_WEAK, BiometricPrompt.TYPE_FACE);
-        mAuthController.hideAuthenticationDialog();
-        verify(mDialog1).dismissFromSystemServer();
-    }
-
-    @Test
-    public void testClientNotified_whenDismissedBySystemServer() {
+    public void testHideAuthenticationDialog_invokesDismissFromSystemServer() {
         showDialog(Authenticators.BIOMETRIC_WEAK, BiometricPrompt.TYPE_FACE);
         mAuthController.hideAuthenticationDialog();
         verify(mDialog1).dismissFromSystemServer();
 
-        assertNotNull(mAuthController.mCurrentDialog);
-        assertNotNull(mAuthController.mReceiver);
+        // In this case, BiometricService sends the error to the client immediately, without
+        // doing a round trip to SystemUI.
+        assertNull(mAuthController.mCurrentDialog);
     }
 
     // Corner case tests

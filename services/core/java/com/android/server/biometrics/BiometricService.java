@@ -1240,13 +1240,16 @@ public class BiometricService extends SystemService {
                         // SystemUI handles transition from biometric to device credential.
                         mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
                         mStatusBarService.onBiometricError(modality, error, vendorCode);
+                    } else if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
+                        mStatusBarService.hideAuthenticationDialog();
+                        // TODO: If multiple authenticators are simultaneously running, this will
+                        // need to be modified. Send the error to the client here, instead of doing
+                        // a round trip to SystemUI.
+                        mCurrentAuthSession.mClientReceiver.onError(modality, error, vendorCode);
+                        mCurrentAuthSession = null;
                     } else {
                         mCurrentAuthSession.mState = STATE_ERROR_PENDING_SYSUI;
-                        if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
-                            mStatusBarService.hideAuthenticationDialog();
-                        } else {
-                            mStatusBarService.onBiometricError(modality, error, vendorCode);
-                        }
+                        mStatusBarService.onBiometricError(modality, error, vendorCode);
                     }
                 } else if (mCurrentAuthSession.mState == STATE_AUTH_PAUSED) {
                     // In the "try again" state, we should forward canceled errors to

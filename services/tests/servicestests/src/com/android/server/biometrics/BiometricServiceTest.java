@@ -498,49 +498,6 @@ public class BiometricServiceTest {
     }
 
     @Test
-    public void testErrorCanceled_whenAuthenticating_notifiesSystemUIAndClient() throws
-            Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
-        invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, null /* authenticators */);
-
-        // Create a new pending auth session but don't start it yet. HAL contract is that previous
-        // one must get ERROR_CANCELED. Simulate that here by creating the pending auth session,
-        // sending ERROR_CANCELED to the current auth session, and then having the second one
-        // onReadyForAuthentication.
-        invokeAuthenticate(mBiometricService.mImpl, mReceiver2, false /* requireConfirmation */,
-                null /* authenticators */);
-        waitForIdle();
-
-        assertEquals(mBiometricService.mCurrentAuthSession.mState,
-                BiometricService.STATE_AUTH_STARTED);
-        mBiometricService.mInternalReceiver.onError(
-                getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
-                BiometricAuthenticator.TYPE_FINGERPRINT,
-                BiometricConstants.BIOMETRIC_ERROR_CANCELED, 0 /* vendorCode */);
-        waitForIdle();
-
-        // Auth session doesn't become null until SystemUI responds that the animation is completed
-        assertNotNull(mBiometricService.mCurrentAuthSession);
-        // ERROR_CANCELED is not sent until SystemUI responded that animation is completed
-        verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
-        verify(mReceiver2, never()).onError(anyInt(), anyInt(), anyInt());
-
-        // SystemUI dialog closed
-        verify(mBiometricService.mStatusBarService).hideAuthenticationDialog();
-
-        // After SystemUI notifies that the animation has completed
-        mBiometricService.mInternalReceiver
-                .onDialogDismissed(BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED);
-        waitForIdle();
-        verify(mReceiver1).onError(
-                eq(BiometricAuthenticator.TYPE_FINGERPRINT),
-                eq(BiometricConstants.BIOMETRIC_ERROR_CANCELED),
-                eq(0 /* vendorCode */));
-        assertNull(mBiometricService.mCurrentAuthSession);
-    }
-
-    @Test
     public void testErrorHalTimeout_whenAuthenticating_entersPausedState() throws Exception {
         setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
@@ -957,6 +914,29 @@ public class BiometricServiceTest {
                 .onBiometricHelp(eq(FINGERPRINT_ACQUIRED_SENSOR_DIRTY));
         assertEquals(mBiometricService.mCurrentAuthSession.mState,
                 BiometricService.STATE_AUTH_STARTED);
+    }
+
+    @Test
+    public void testCancel_whenAuthenticating() throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
+        invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
+                false /* requireConfirmation */, null /* authenticators */);
+
+        mBiometricService.mImpl.cancelAuthentication(mBiometricService.mCurrentAuthSession.mToken,
+                TEST_PACKAGE_NAME);
+        waitForIdle();
+
+        // Pretend that the HAL has responded to cancel with ERROR_CANCELED
+        mBiometricService.mInternalReceiver.onError(getCookieForCurrentSession(
+                mBiometricService.mCurrentAuthSession), BiometricAuthenticator.TYPE_FINGERPRINT,
+                BiometricConstants.BIOMETRIC_ERROR_CANCELED, 0 /* vendorCode */);
+        waitForIdle();
+
+        // Hides system dialog and invokes the onError callback
+        verify(mReceiver1).onError(eq(BiometricAuthenticator.TYPE_FINGERPRINT),
+                eq(BiometricConstants.BIOMETRIC_ERROR_CANCELED),
+                eq(0 /* vendorCode */));
+        verify(mBiometricService.mStatusBarService).hideAuthenticationDialog();
     }
 
     @Test

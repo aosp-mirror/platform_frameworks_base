@@ -341,6 +341,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         if (DEBUG) Log.d(TAG, "hideAuthenticationDialog");
 
         mCurrentDialog.dismissFromSystemServer();
+
+        // BiometricService will have already sent the callback to the client in this case.
+        // This avoids a round trip to SystemUI. So, just dismiss the dialog and we're done.
+        mCurrentDialog = null;
     }
 
     private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {
