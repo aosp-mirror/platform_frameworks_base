@@ -122,6 +122,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.init.NewNotifPipeline;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
@@ -247,6 +248,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private DismissCallbackRegistry mDismissCallbackRegistry;
     @Mock private ScreenPinningRequest mScreenPinningRequest;
     @Mock private NotificationEntryManager mEntryManager;
+    @Mock private NotificationContentInflater mNotificationContentInflater;
     @Mock private LockscreenLockIconController mLockscreenLockIconController;
     @Mock private StatusBarNotificationActivityStarter.Builder
             mStatusBarNotificationActivityStarterBuilder;
@@ -356,6 +358,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotificationGutsManager,
                 notificationLogger,
                 mEntryManager,
+                mNotificationContentInflater,
                 mNotificationInterruptionStateProvider,
                 mNotificationViewHierarchyManager,
                 mKeyguardViewMediator,
