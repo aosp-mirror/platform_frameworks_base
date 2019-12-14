@@ -184,14 +184,6 @@ public final class DisplayInfo implements Parcelable {
     public Display.HdrCapabilities hdrCapabilities;
 
     /**
-     * Indicates whether the display can be switched into a mode with minimal post
-     * processing.
-     *
-     * @see android.view.Display#isMinimalPostProcessingSupported
-     */
-    public boolean minimalPostProcessingSupported;
-
-    /**
      * The logical display density which is the basis for density-independent
      * pixels.
      */
@@ -313,7 +305,6 @@ public final class DisplayInfo implements Parcelable {
                 && colorMode == other.colorMode
                 && Arrays.equals(supportedColorModes, other.supportedColorModes)
                 && Objects.equals(hdrCapabilities, other.hdrCapabilities)
-                && minimalPostProcessingSupported == other.minimalPostProcessingSupported
                 && logicalDensityDpi == other.logicalDensityDpi
                 && physicalXDpi == other.physicalXDpi
                 && physicalYDpi == other.physicalYDpi
@@ -355,7 +346,6 @@ public final class DisplayInfo implements Parcelable {
         supportedColorModes = Arrays.copyOf(
                 other.supportedColorModes, other.supportedColorModes.length);
         hdrCapabilities = other.hdrCapabilities;
-        minimalPostProcessingSupported = other.minimalPostProcessingSupported;
         logicalDensityDpi = other.logicalDensityDpi;
         physicalXDpi = other.physicalXDpi;
         physicalYDpi = other.physicalYDpi;
@@ -398,7 +388,6 @@ public final class DisplayInfo implements Parcelable {
             supportedColorModes[i] = source.readInt();
         }
         hdrCapabilities = source.readParcelable(null);
-        minimalPostProcessingSupported = source.readBoolean();
         logicalDensityDpi = source.readInt();
         physicalXDpi = source.readFloat();
         physicalYDpi = source.readFloat();
@@ -441,7 +430,6 @@ public final class DisplayInfo implements Parcelable {
             dest.writeInt(supportedColorModes[i]);
         }
         dest.writeParcelable(hdrCapabilities, flags);
-        dest.writeBoolean(minimalPostProcessingSupported);
         dest.writeInt(logicalDensityDpi);
         dest.writeFloat(physicalXDpi);
         dest.writeFloat(physicalYDpi);

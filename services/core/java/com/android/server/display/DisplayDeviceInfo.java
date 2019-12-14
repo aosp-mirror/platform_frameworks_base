@@ -207,16 +207,6 @@ final class DisplayDeviceInfo {
     public Display.HdrCapabilities hdrCapabilities;
 
     /**
-     * Indicates whether this display supports Auto Low Latency Mode.
-     */
-    public boolean allmSupported;
-
-    /**
-     * Indicates whether this display suppors Game content type.
-     */
-    public boolean gameContentTypeSupported;
-
-    /**
      * The nominal apparent density of the display in DPI used for layout calculations.
      * This density is sensitive to the viewing distance.  A big TV and a tablet may have
      * the same apparent density even though the pixels on the TV are much bigger than
@@ -347,8 +337,6 @@ final class DisplayDeviceInfo {
                 || !Arrays.equals(supportedModes, other.supportedModes)
                 || !Arrays.equals(supportedColorModes, other.supportedColorModes)
                 || !Objects.equals(hdrCapabilities, other.hdrCapabilities)
-                || allmSupported != other.allmSupported
-                || gameContentTypeSupported != other.gameContentTypeSupported
                 || densityDpi != other.densityDpi
                 || xDpi != other.xDpi
                 || yDpi != other.yDpi
@@ -383,8 +371,6 @@ final class DisplayDeviceInfo {
         colorMode = other.colorMode;
         supportedColorModes = other.supportedColorModes;
         hdrCapabilities = other.hdrCapabilities;
-        allmSupported = other.allmSupported;
-        gameContentTypeSupported = other.gameContentTypeSupported;
         densityDpi = other.densityDpi;
         xDpi = other.xDpi;
         yDpi = other.yDpi;
@@ -414,8 +400,6 @@ final class DisplayDeviceInfo {
         sb.append(", colorMode ").append(colorMode);
         sb.append(", supportedColorModes ").append(Arrays.toString(supportedColorModes));
         sb.append(", HdrCapabilities ").append(hdrCapabilities);
-        sb.append(", allmSupported ").append(allmSupported);
-        sb.append(", gameContentTypeSupported ").append(gameContentTypeSupported);
         sb.append(", density ").append(densityDpi);
         sb.append(", ").append(xDpi).append(" x ").append(yDpi).append(" dpi");
         sb.append(", appVsyncOff ").append(appVsyncOffsetNanos);
