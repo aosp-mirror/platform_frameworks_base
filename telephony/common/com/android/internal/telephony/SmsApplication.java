@@ -305,7 +305,7 @@ public final class SmsApplication {
                 Uri.fromParts(SCHEME_SMSTO, "", null));
         List<ResolveInfo> respondServices = packageManager.queryIntentServicesAsUser(intent,
                 PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.getUserHandleForUid(userId));
+                UserHandle.of(userId));
         for (ResolveInfo resolveInfo : respondServices) {
             final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             if (serviceInfo == null) {
