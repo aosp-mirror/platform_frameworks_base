@@ -480,6 +480,7 @@ public interface RILConstants {
     int RIL_REQUEST_STOP_KEEPALIVE = 145;
     int RIL_REQUEST_ENABLE_MODEM = 146;
     int RIL_REQUEST_GET_MODEM_STATUS = 147;
+    int RIL_REQUEST_CDMA_SEND_SMS_EXPECT_MORE = 148;
 
     /* The following requests are not defined in RIL.h */
     int RIL_REQUEST_HAL_NON_RIL_BASE = 200;
