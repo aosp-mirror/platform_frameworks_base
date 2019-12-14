@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"ਸੈਟਿੰਗਾਂ ਸਟੋਰੇਜ"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"ਤੁਹਾਡੀਆਂ ਹੌਟਸਪੌਟ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲਾਅ"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"ਤੁਹਾਡਾ ਹੌਟਸਪੌਟ ਬੈਂਡ ਬਦਲ ਗਿਆ ਹੈ।"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"ਇਹ ਡੀਵਾਈਸ ਸਿਰਫ਼ 5GHz ਦੀ ਤੁਹਾਡੀ ਤਰਜੀਹ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦਾ ਹੈ। ਇਸਦੀ ਬਜਾਏ, ਇਹ ਡੀਵਾਈਸ ਉਪਲਬਧ ਹੋਣ \'ਤੇ 5GHz ਬੈਂਡ ਵਰਤੇਗਾ।"</string>
 </resources>

@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"സംഭരണ ക്രമീകരണം"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"നിങ്ങളുടെ ഹോട്ട്‌സ്‌പോട്ട് ക്രമീകരണത്തിൽ വരുത്തിയ മാറ്റങ്ങൾ"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"നിങ്ങളുടെ ഹോട്ട്‌സ്‌പോട്ട് ബാൻഡ് മാറിയിരിക്കുന്നു."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"നിങ്ങളുടെ മുൻഗണനയനുസരിച്ചുള്ള, 5GHz മാത്രം എന്നത് ഈ ഉപകരണം പിന്തുണയ്ക്കുന്നില്ല. പകരം, 5GHz ബാൻഡ് ലഭ്യമാകുമ്പോൾ അത് ഉപയോഗിക്കും."</string>
 </resources>

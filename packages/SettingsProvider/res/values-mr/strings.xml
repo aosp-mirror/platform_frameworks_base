@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"सेटिंग्ज संचयन"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"तुमच्या हॉटस्पॉट सेटिंग्जमधील बदल"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"तुमचा हॉटस्पॉट बँड बदलला गेला आहे."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"हे डिव्हाइस फक्त ५GHz च्या तुमच्या प्राधान्याला सपोर्ट करत नाही. त्याऐवजी, उपलब्ध असेल तेव्हा हे डिव्हाइस ५GHz बँड वापरेल."</string>
 </resources>

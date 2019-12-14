@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"সেটিংস স্টোরেজ"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"আপনার হটস্পট সেটিংসে করা পরিবর্তনগুলি"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"আপনার হটস্পট ব্যান্ড পরিবর্তন করা হয়েছে।"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"এই ডিভাইসটি শুধুমাত্র 5GHz এর জন্য আপনার পছন্দ সমর্থন করে না। পরিবর্তে, এই ডিভাইসটি 5GHz ব্যান্ড ব্যবহার করবে।"</string>
 </resources>

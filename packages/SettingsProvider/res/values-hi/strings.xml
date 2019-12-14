@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"सेटिंग मेमोरी"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"आपकी हॉटस्पॉट की सेटिंग में किए गए बदलाव"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"आपका हॉटस्पॉट का बैंड बदल दिया गया है."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"इस डिवाइस पर आप \'सिर्फ़ 5 गीगाहर्ट्ज़\' वाला विकल्प नहीं चुन सकते. इसके बजाय, 5 गीगाहर्ट्ज़ बैंड उपलब्ध होने पर यह डिवाइस उसका इस्तेमाल करेगा."</string>
 </resources>
