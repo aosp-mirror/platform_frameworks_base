@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony;
+package android.service.carrier;
 
 import android.content.ContentValues;
 
+/** @hide */
 interface IApnSourceService {
     /** Retreive APNs. */
     ContentValues[] getApns(int subId);
