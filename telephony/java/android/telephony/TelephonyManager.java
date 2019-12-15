@@ -9679,7 +9679,8 @@ public class TelephonyManager {
      * {@link android.telephony.ModemActivityInfo} object.
      * @hide
      */
-    public void requestModemActivityInfo(ResultReceiver result) {
+    @SystemApi
+    public void requestModemActivityInfo(@NonNull ResultReceiver result) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
