@@ -52,11 +52,13 @@ import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.metrics.LogMaker;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.StatusBarNotification;
+import android.widget.RemoteViews;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -114,7 +116,9 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
         when(mMockContext.getResources()).thenReturn(getContext().getResources());
         when(mMockContext.getPackageManager()).thenReturn(mPm);
-        when(mMockContext.getApplicationInfo()).thenReturn(new ApplicationInfo());
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.targetSdkVersion = Build.VERSION_CODES.O;
+        when(mMockContext.getApplicationInfo()).thenReturn(appInfo);
     }
 
     private StatusBarNotification getNotification(String pkg, boolean noisy, boolean defaultSound,
@@ -162,6 +166,28 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
         if(group != null) {
             builder.setGroup(group);
+        }
+
+        Notification n = builder.build();
+        return new StatusBarNotification(pkg, pkg, id1, tag1, uid, uid, n, mUser, null, uid);
+    }
+
+    private StatusBarNotification getStyledNotification(boolean customContent, boolean customBig,
+            boolean customHeadsUp, Notification.Style style) {
+        final Builder builder = new Builder(mMockContext)
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+        if (style != null) {
+            builder.setStyle(style);
+        }
+        if (customContent) {
+            builder.setCustomContentView(mock(RemoteViews.class));
+        }
+        if (customBig) {
+            builder.setCustomBigContentView(mock(RemoteViews.class));
+        }
+        if (customHeadsUp) {
+            builder.setCustomHeadsUpContentView(mock(RemoteViews.class));
         }
 
         Notification n = builder.build();
@@ -998,5 +1024,75 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.calculateImportance();
 
         assertEquals(IMPORTANCE_LOW, record.getImportance());
+    }
+
+    @Test
+    public void testHasUndecoratedRemoteViews_NoRemoteViews() {
+        StatusBarNotification sbn = getStyledNotification(false, false, false, null);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertFalse("false positive detection", record.hasUndecoratedRemoteView());
+    }
+
+    @Test
+    public void testHasUndecoratedRemoteViews_NoRemoteViewsWithStyle() {
+        StatusBarNotification sbn = getStyledNotification(false, false, false,
+                new Notification.BigPictureStyle());
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertFalse("false positive detection", record.hasUndecoratedRemoteView());
+    }
+
+    @Test
+    public void testHasUndecoratedRemoteViews_UndecoratedContent() {
+        StatusBarNotification sbn = getStyledNotification(true, false, false, null);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertTrue("false negative detection", record.hasUndecoratedRemoteView());
+    }
+
+
+    @Test
+    public void testHasUndecoratedRemoteViews_UndecoratedBig() {
+        StatusBarNotification sbn = getStyledNotification(false, true, false, null);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertTrue("false negative detection", record.hasUndecoratedRemoteView());
+    }
+
+
+    @Test
+    public void testHasUndecoratedRemoteViews_UndecoratedHeadsup() {
+        StatusBarNotification sbn = getStyledNotification(false, false, true, null);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertTrue("false negative detection", record.hasUndecoratedRemoteView());
+    }
+
+    @Test
+    public void testHasUndecoratedRemoteViews_DecoratedRemoteViews() {
+        StatusBarNotification sbn = getStyledNotification(true, true, true,
+                new Notification.DecoratedCustomViewStyle());
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertFalse("false positive detection", record.hasUndecoratedRemoteView());
+    }
+
+    @Test
+    public void testHasUndecoratedRemoteViews_DecoratedMediaRemoteViews() {
+        StatusBarNotification sbn = getStyledNotification(true, true, true,
+                new Notification.DecoratedMediaCustomViewStyle());
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertFalse("false positive detection", record.hasUndecoratedRemoteView());
+    }
+
+    @Test
+    public void testHasUndecoratedRemoteViews_UndecoratedWrongStyle() {
+        StatusBarNotification sbn = getStyledNotification(true, true, true,
+                new Notification.BigPictureStyle());
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertTrue("false negative detection", record.hasUndecoratedRemoteView());
     }
 }
