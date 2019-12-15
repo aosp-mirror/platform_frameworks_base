@@ -89,16 +89,6 @@ public class WifiScanner {
     /** 6 GHz band */
     public static final int WIFI_BAND_6_GHZ = 1 << WIFI_BAND_INDEX_6_GHZ;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"WIFI_BAND_"}, value = {
-            WIFI_BAND_UNSPECIFIED,
-            WIFI_BAND_24_GHZ,
-            WIFI_BAND_5_GHZ,
-            WIFI_BAND_5_GHZ_DFS_ONLY,
-            WIFI_BAND_6_GHZ})
-    public @interface WifiBandBasic {}
-
     /**
      * Combination of bands
      * Note that those are only the common band combinations,
@@ -249,14 +239,6 @@ public class WifiScanner {
      */
     public static final int REPORT_EVENT_NO_BATCH = (1 << 2);
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"SCAN_TYPE_"}, value = {
-            SCAN_TYPE_LOW_LATENCY,
-            SCAN_TYPE_LOW_POWER,
-            SCAN_TYPE_HIGH_ACCURACY})
-    public @interface ScanType {}
-
     /**
      * Optimize the scan for lower latency.
      * @see ScanSettings#type
@@ -354,7 +336,7 @@ public class WifiScanner {
          * {@link #SCAN_TYPE_HIGH_ACCURACY}.
          * Default value: {@link #SCAN_TYPE_LOW_LATENCY}.
          */
-        @ScanType
+        @WifiAnnotations.ScanType
         @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
         public int type = SCAN_TYPE_LOW_LATENCY;
         /**

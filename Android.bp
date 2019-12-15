@@ -223,6 +223,7 @@ filegroup {
         ":framework-telecomm-sources",
         ":framework-telephony-common-sources",
         ":framework-telephony-sources",
+        ":framework-wifi-annotations",
         ":framework-wifi-non-updatable-sources",
         ":PacProcessor-aidl-sources",
         ":ProxyHandler-aidl-sources",
@@ -400,7 +401,7 @@ java_defaults {
 
 filegroup {
     name: "framework-jarjar-rules",
-    srcs: ["jarjar_rules_hidl.txt"],
+    srcs: ["framework-jarjar-rules.txt"],
 }
 
 filegroup {

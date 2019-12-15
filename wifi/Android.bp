@@ -38,6 +38,11 @@ filegroup {
     ],
 }
 
+filegroup {
+    name: "framework-wifi-annotations",
+    srcs: ["java/android/net/wifi/WifiAnnotations.java"],
+}
+
 java_library {
     name: "framework-wifi",
     sdk_version: "core_platform", // TODO(b/140299412) should be core_current
