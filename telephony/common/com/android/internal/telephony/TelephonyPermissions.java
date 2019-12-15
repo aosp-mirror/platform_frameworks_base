@@ -604,9 +604,14 @@ public final class TelephonyPermissions {
     }
 
     private static int getCarrierPrivilegeStatus(Context context, int subId, int uid) {
-        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(
                 Context.TELEPHONY_SERVICE);
-        return telephonyManager.createForSubscriptionId(subId).getCarrierPrivilegeStatus(uid);
+            return telephonyManager.createForSubscriptionId(subId).getCarrierPrivilegeStatus(uid);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**

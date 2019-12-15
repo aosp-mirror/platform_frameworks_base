@@ -217,7 +217,9 @@ filegroup {
         // TODO(b/146011398) package android.net.wifi is now split amongst 2 jars: framework.jar and
         // framework-wifi.jar. This is not a good idea, should move WifiNetworkScoreCache
         // to a separate package.
-        "wifi/java/android/net/wifi/WifiNetworkScoreCache.java"
+        "wifi/java/android/net/wifi/WifiNetworkScoreCache.java",
+        "wifi/java/android/net/wifi/WifiCondManager.java",
+        "wifi/java/android/net/wifi/wificond/*.java",
     ],
 }
 
@@ -247,6 +249,7 @@ filegroup {
         ":framework-telephony-sources",
         ":framework-wifi-sources",
         ":framework-wifi-non-updatable-sources",
+	":libwificond_ipc_aidl",
         ":PacProcessor-aidl-sources",
         ":ProxyHandler-aidl-sources",
 
@@ -371,6 +374,9 @@ java_library {
         "com.android.sysprop.apex",
         "PlatformProperties",
     ],
+    aidl: {
+        include_dirs: ["system/connectivity/wificond/aidl"],
+    },
     sdk_version: "core_platform",
     installable: false,
 }

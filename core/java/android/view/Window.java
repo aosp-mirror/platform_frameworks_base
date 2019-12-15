@@ -1197,44 +1197,6 @@ public abstract class Window {
     }
 
     /**
-     * If {@code isPreferred} is true, this method requests that the connected display does minimal
-     * post processing when this window is visible on the screen. Otherwise, it requests that the
-     * display switches back to standard image processing.
-     *
-     * <p> By default, the display does not do minimal post processing and if this is desired, this
-     * method should not be used. It should be used with {@code isPreferred=true} when low
-     * latency has a higher priority than image enhancement processing (e.g. for games or video
-     * conferencing). The display will automatically go back into standard image processing mode
-     * when no window requesting minimal posst processing is visible on screen anymore.
-     * {@code setPreferMinimalPostProcessing(false)} can be used if
-     * {@code setPreferMinimalPostProcessing(true)} was previously called for this window and
-     * minimal post processing is no longer required.
-     *
-     * <p>If the Display sink is connected via HDMI, the device will begin to send infoframes with
-     * Auto Low Latency Mode enabled and Game Content Type. This will switch the connected display
-     * to a minimal image processing mode (if available), which reduces latency, improving the user
-     * experience for gaming or video conferencing applications. For more information, see HDMI 2.1
-     * specification.
-     *
-     * <p>If the Display sink has an internal connection or uses some other protocol than HDMI,
-     * effects may be similar but implementation-defined.
-     *
-     * <p>The ability to switch to a mode with minimal post proessing may be disabled by a user
-     * setting in the system settings menu. In that case, this method does nothing.
-     *
-     * @see android.content.pm.ActivityInfo#preferMinimalPostProcessing
-     * @see android.view.Display#isMinimalPostProcessingSupported
-     * @see android.view.WindowManager.LayoutParams#preferMinimalPostProcessing
-     *
-     * @param isPreferred Indicates whether minimal post processing is preferred for this window
-     *                    ({@code isPreferred=true}) or not ({@code isPreferred=false}).
-     */
-    public void setPreferMinimalPostProcessing(boolean isPreferred) {
-        mWindowAttributes.preferMinimalPostProcessing = isPreferred;
-        dispatchWindowAttributesChanged(mWindowAttributes);
-    }
-
-    /**
      * Returns the requested color mode of the window, one of
      * {@link ActivityInfo#COLOR_MODE_DEFAULT}, {@link ActivityInfo#COLOR_MODE_WIDE_COLOR_GAMUT}
      * or {@link ActivityInfo#COLOR_MODE_HDR}. If {@link ActivityInfo#COLOR_MODE_WIDE_COLOR_GAMUT}

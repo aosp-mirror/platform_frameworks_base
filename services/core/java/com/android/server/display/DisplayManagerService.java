@@ -569,23 +569,6 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void setPreferMinimalPostProcessingLocked(int displayId, boolean isPreferred) {
-        LogicalDisplay display = mLogicalDisplays.get(displayId);
-        if (display != null) {
-            DisplayDeviceInfo info =
-                    display.getPrimaryDisplayDeviceLocked().getDisplayDeviceInfoLocked();
-
-            if (info.allmSupported) {
-                display.setAutoLowLatencyMode(isPreferred);
-            }
-            if (info.gameContentTypeSupported) {
-                display.setGameContentType(isPreferred);
-            }
-
-            scheduleTraversalLocked(false);
-        }
-    }
-
     private DisplayInfo getDisplayInfoInternal(int displayId, int callingUid) {
         synchronized (mSyncRoot) {
             LogicalDisplay display = mLogicalDisplays.get(displayId);
@@ -1209,8 +1192,7 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void setDisplayPropertiesInternal(int displayId, boolean hasContent,
-            float requestedRefreshRate, int requestedModeId, boolean preferMinimalPostProcessing,
-            boolean inTraversal) {
+            float requestedRefreshRate, int requestedModeId, boolean inTraversal) {
         synchronized (mSyncRoot) {
             LogicalDisplay display = mLogicalDisplays.get(displayId);
             if (display == null) {
@@ -1233,8 +1215,6 @@ public final class DisplayManagerService extends SystemService {
             }
             mDisplayModeDirector.getAppRequestObserver().setAppRequestedMode(
                     displayId, requestedModeId);
-
-            setPreferMinimalPostProcessingLocked(displayId, preferMinimalPostProcessing);
         }
     }
 
@@ -2363,7 +2343,6 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private final class LocalService extends DisplayManagerInternal {
-
         @Override
         public void initPowerManagement(final DisplayPowerCallbacks callbacks, Handler handler,
                 SensorManager sensorManager) {
@@ -2452,10 +2431,9 @@ public final class DisplayManagerService extends SystemService {
 
         @Override
         public void setDisplayProperties(int displayId, boolean hasContent,
-                float requestedRefreshRate, int requestedMode, boolean preferMinimalPostProcessing,
-                boolean inTraversal) {
+                float requestedRefreshRate, int requestedMode, boolean inTraversal) {
             setDisplayPropertiesInternal(displayId, hasContent, requestedRefreshRate,
-                    requestedMode, preferMinimalPostProcessing, inTraversal);
+                    requestedMode, inTraversal);
         }
 
         @Override

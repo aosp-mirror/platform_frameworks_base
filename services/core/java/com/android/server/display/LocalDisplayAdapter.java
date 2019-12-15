@@ -181,10 +181,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mActiveColorMode;
         private boolean mActiveColorModeInvalid;
         private Display.HdrCapabilities mHdrCapabilities;
-        private boolean mAllmSupported;
-        private boolean mGameContentTypeSupported;
-        private boolean mAllmRequested;
-        private boolean mGameContentTypeRequested;
         private boolean mSidekickActive;
         private SidekickInternal mSidekickInternal;
 
@@ -208,8 +204,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mBacklight = null;
             }
             mHdrCapabilities = SurfaceControl.getHdrCapabilities(displayToken);
-            mAllmSupported = SurfaceControl.getAutoLowLatencyModeSupport(displayToken);
-            mGameContentTypeSupported = SurfaceControl.getGameContentTypeSupport(displayToken);
         }
 
         @Override
@@ -403,8 +397,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.defaultModeId = mDefaultModeId;
                 mInfo.supportedModes = getDisplayModes(mSupportedModes);
                 mInfo.colorMode = mActiveColorMode;
-                mInfo.allmSupported = mAllmSupported;
-                mInfo.gameContentTypeSupported = mGameContentTypeSupported;
                 mInfo.supportedColorModes =
                         new int[mSupportedColorModes.size()];
                 for (int i = 0; i < mSupportedColorModes.size(); i++) {
@@ -775,40 +767,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void setAutoLowLatencyModeLocked(boolean on) {
-            if (mAllmRequested == on) {
-                return;
-            }
-
-            mAllmRequested = on;
-
-            if (!mAllmSupported) {
-                Slog.d(TAG, "Unable to set ALLM because the connected display "
-                        + "does not support ALLM.");
-                return;
-            }
-
-            SurfaceControl.setAutoLowLatencyMode(getDisplayTokenLocked(), on);
-        }
-
-        @Override
-        public void setGameContentTypeLocked(boolean on) {
-            if (mGameContentTypeRequested == on) {
-                return;
-            }
-
-            mGameContentTypeRequested = on;
-
-            if (!mGameContentTypeSupported) {
-                Slog.d(TAG, "Unable to set game content type because the connected "
-                        + "display does not support game content type.");
-                return;
-            }
-
-            SurfaceControl.setGameContentType(getDisplayTokenLocked(), on);
-        }
-
-        @Override
         public void dumpLocked(PrintWriter pw) {
             super.dumpLocked(pw);
             pw.println("mPhysicalDisplayId=" + mPhysicalDisplayId);
@@ -824,10 +782,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             pw.println("mState=" + Display.stateToString(mState));
             pw.println("mBrightness=" + mBrightness);
             pw.println("mBacklight=" + mBacklight);
-            pw.println("mAllmSupported=" + mAllmSupported);
-            pw.println("mAllmRequested=" + mAllmRequested);
-            pw.println("mGameContentTypeSupported" + mGameContentTypeSupported);
-            pw.println("mGameContentTypeRequested" + mGameContentTypeRequested);
             pw.println("mDisplayInfos=");
             for (int i = 0; i < mDisplayInfos.length; i++) {
                 pw.println("  " + mDisplayInfos[i]);
