@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"ছেটিংছসমূহৰ সঞ্চয়াগাৰ"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"আপোনাৰ হটস্পট ছেটিংসমূহত হোৱা সালসলনিসমূহ"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"আপোনাৰ হটস্পটৰ বেণ্ড সলনি কৰা হৈছে।"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"আপোনাৰ কেৱল ৫ গিগাহাৰ্টজৰ প্ৰতি অগ্ৰাধিকাৰ এই ডিভাচইচটোৱে সমৰ্থন নকৰে। ইয়াৰ পৰিৱৰ্তে, ডিভাচইচটোৱে যেতিয়া ৫ গিগাহাৰ্টজ বেণ্ড উপলব্ধ হ’ব তেতিয়া তাক ব্যৱহাৰ কৰিব।"</string>
 </resources>

@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"កំណត់​ការ​ផ្ទុក"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"ប្ដូរ​ទៅ​ការ​កំណត់​ហតស្ប៉ត​របស់អ្នក"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"កម្រិតបញ្ជូន​ហតស្ប៉ត​របស់​អ្នកបាន​ផ្លាស់ប្ដូរ។"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"ឧបករណ៍នេះ​មិនស្គាល់​ចំណូលចិត្ត​របស់អ្នក​សម្រាប់តែ 5GHz ប៉ុណ្ណោះ។ ផ្ទុយមកវិញ ឧបករណ៍នេះ​នឹងប្រើ​កម្រិតបញ្ជូន 5GHz នៅពេល​ដែលអាច​ប្រើបាន។"</string>
 </resources>

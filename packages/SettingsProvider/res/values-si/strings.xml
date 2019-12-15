@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"සැකසීම් ගබඩාව"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"ඔබගේ හොට්ස්පොට් සැකසීම්වලට වෙනස් කිරීම්"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"ඔබගේ හොට්ස්පොට් කලාපය වෙනස් වී ඇත."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"මෙම උපාංගය 5GHz සඳහා ඔබේ මනාපවලට සහාය නොදක්වයි. ඒ වෙනුවට, මෙම උපාංගය ලබා ගත හැකි විට 5GHz කලාපය භාවිතා කරනු ඇත."</string>
 </resources>

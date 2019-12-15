@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"設定儲存空間"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"無線基地台設定變更"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"你的無線基地台頻帶已變更。"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"這部裝置不支援你的偏好設定 (僅限 5GHz)，而是會在 5GHz 可用時使用該頻帶。"</string>
 </resources>

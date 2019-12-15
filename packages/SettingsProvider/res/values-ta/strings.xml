@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"அமைப்புகளின் சேமிப்பிடம்"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"உங்கள் ஹாட்ஸ்பாட் அமைப்புகளில் செய்யப்பட்டுள்ள மாற்றங்கள்"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"உங்கள் ஹாட்ஸ்பாட்டின் அலைவரிசை வரம்பு மாறிவிட்டது."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"இந்தச் சாதனத்தில், ’5GHz மட்டும்’ எனும் முன்னுரிமைத் தேர்வு ஆதரிக்கப்படவில்லை. எனினும் 5GHz அலைவரிசை வரம்பிற்குள் இருக்கும்போது சாதனம் அதைப் பயன்படுத்திக்கொள்ளும்."</string>
 </resources>
