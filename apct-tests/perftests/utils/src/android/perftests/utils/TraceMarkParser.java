@@ -40,6 +40,8 @@ public class TraceMarkParser {
 
     private final Predicate<TraceMarkLine> mTraceLineFilter;
 
+    private static final long MICROS_PER_SECOND = 1000L * 1000L;
+
     public TraceMarkParser(Predicate<TraceMarkLine> traceLineFilter) {
         mTraceLineFilter = traceLineFilter;
     }
@@ -116,13 +118,19 @@ public class TraceMarkParser {
         }
     }
 
+    public void reset() {
+        mSlicesMap.clear();
+        mDepthMap.clear();
+        mPendingStarts.clear();
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         forAllSlices((key, slices) -> {
             double totalMs = 0;
             for (TraceMarkSlice s : slices) {
-                totalMs += s.getDurarionInSeconds() * 1000;
+                totalMs += s.getDurationInSeconds() * 1000;
             }
             sb.append(key).append(" count=").append(slices.size()).append(" avg=")
                     .append(totalMs / slices.size()).append("ms\n");
@@ -134,6 +142,10 @@ public class TraceMarkParser {
         return sb.toString();
     }
 
+    static double microsecondToSeconds(long ms) {
+        return (ms * 1.0d) / MICROS_PER_SECOND;
+    }
+
     public static class TraceMarkSlice {
         public final TraceMarkLine begin;
         public final TraceMarkLine end;
@@ -143,7 +155,11 @@ public class TraceMarkParser {
             this.end = end;
         }
 
-        public double getDurarionInSeconds() {
+        public double getDurationInSeconds() {
+            return microsecondToSeconds(end.timestamp - begin.timestamp);
+        }
+
+        public long getDurationInMicroseconds() {
             return end.timestamp - begin.timestamp;
         }
     }
@@ -164,7 +180,7 @@ public class TraceMarkParser {
         static final char SYNC_END = 'E';
 
         public final String taskPid;
-        public final double timestamp;
+        public final long timestamp; // in microseconds
         public final String name;
         public final boolean isAsync;
         public final boolean isBegin;
@@ -179,7 +195,7 @@ public class TraceMarkParser {
             if (timeBegin < 0) {
                 throw new IllegalArgumentException("Timestamp start not found");
             }
-            timestamp = Double.parseDouble(rawLine.substring(timeBegin, timeEnd));
+            timestamp = parseMicroseconds(rawLine.substring(timeBegin, timeEnd));
             isAsync = type == ASYNC_START || type == ASYNC_FINISH;
             isBegin = type == ASYNC_START || type == SYNC_BEGIN;
 
@@ -223,9 +239,29 @@ public class TraceMarkParser {
             return null;
         }
 
+        /**
+         * Parse the timestamp from atrace output, the format will be like:
+         * 84962.920719  where the decimal part will be always exactly 6 digits.
+         * ^^^^^ ^^^^^^
+         * |     |
+         * sec   microsec
+         */
+        static long parseMicroseconds(String line) {
+            int end = line.length();
+            long t = 0;
+            for (int i = 0; i < end; i++) {
+                char c = line.charAt(i);
+                if (c >= '0' && c <= '9') {
+                    t = t * 10 + (c - '0');
+                }
+            }
+            return t;
+        }
+
         @Override
         public String toString() {
-            return "TraceMarkLine{pid=" + taskPid + " time=" + timestamp + " name=" + name
+            return "TraceMarkLine{pid=" + taskPid + " time="
+                    + microsecondToSeconds(timestamp) + " name=" + name
                     + " async=" + isAsync + " begin=" + isBegin + "}";
         }
     }
