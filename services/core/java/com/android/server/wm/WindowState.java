@@ -1726,6 +1726,39 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && isDrawnLw() && !isAnimating(TRANSITION | PARENTS);
     }
 
+    /** @see WindowManagerInternal#waitForAllWindowsDrawn */
+    void requestDrawIfNeeded(List<WindowState> outWaitingForDrawn) {
+        if (!isVisible()) {
+            return;
+        }
+        if (mActivityRecord != null) {
+            if (mActivityRecord.allDrawn) {
+                // The allDrawn of activity is reset when the visibility is changed to visible, so
+                // the content should be ready if allDrawn is set.
+                return;
+            }
+            if (mAttrs.type == TYPE_APPLICATION_STARTING) {
+                if (isDrawnLw()) {
+                    // Unnecessary to redraw a drawn starting window.
+                    return;
+                }
+            } else if (mActivityRecord.startingWindow != null) {
+                // If the activity has an active starting window, there is no need to wait for the
+                // main window.
+                return;
+            }
+        } else if (!mPolicy.isKeyguardHostWindow(mAttrs)) {
+            return;
+            // Always invalidate keyguard host window to make sure it shows the latest content
+            // because its visibility may not be changed.
+        }
+
+        mWinAnimator.mDrawState = DRAW_PENDING;
+        // Force add to {@link WindowManagerService#mResizingWindows}.
+        resetLastContentInsets();
+        outWaitingForDrawn.add(this);
+    }
+
     @Override
     void onMovedByResize() {
         ProtoLog.d(WM_DEBUG_RESIZE, "onMovedByResize: Moving %s", this);

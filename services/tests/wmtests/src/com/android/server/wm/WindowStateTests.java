@@ -32,7 +32,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
@@ -81,7 +83,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Tests for the {@link WindowState} class.
@@ -518,6 +522,31 @@ public class WindowStateTests extends WindowTestsBase {
         window.switchUser(mWm.mCurrentUserId);
         assertTrue(window.isVisible());
         assertTrue(window.isVisibleByPolicy());
+    }
+
+    @Test
+    public void testRequestDrawIfNeeded() {
+        final WindowState startingApp = createWindow(null /* parent */,
+                TYPE_BASE_APPLICATION, "startingApp");
+        final WindowState startingWindow = createWindow(null /* parent */,
+                TYPE_APPLICATION_STARTING, startingApp.mToken, "starting");
+        startingApp.mActivityRecord.startingWindow = startingWindow;
+        final WindowState keyguardHostWindow = mStatusBarWindow;
+        final WindowState allDrawnApp = mAppWindow;
+        allDrawnApp.mActivityRecord.allDrawn = true;
+
+        // The waiting list is used to ensure the content is ready when turning on screen.
+        final List<WindowState> outWaitingForDrawn = mDisplayContent.mWaitingForDrawn;
+        final List<WindowState> visibleWindows = Arrays.asList(mChildAppWindowAbove,
+                keyguardHostWindow, allDrawnApp, startingApp, startingWindow);
+        visibleWindows.forEach(w -> {
+            w.mHasSurface = true;
+            w.requestDrawIfNeeded(outWaitingForDrawn);
+        });
+
+        // Keyguard host window should be always contained. The drawn app or app with starting
+        // window are unnecessary to draw.
+        assertEquals(Arrays.asList(keyguardHostWindow, startingWindow), outWaitingForDrawn);
     }
 
     @Test
