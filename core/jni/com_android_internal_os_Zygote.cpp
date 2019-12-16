@@ -74,6 +74,7 @@
 #include <android-base/strings.h>
 #include <android-base/unique_fd.h>
 #include <bionic/malloc.h>
+#include <bionic/page.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
 #include <cutils/sockets.h>
@@ -1389,9 +1390,14 @@ static int DisableExecuteOnly(struct dl_phdr_info* info,
                               void* data [[maybe_unused]]) {
   // Search for any execute-only segments and mark them read+execute.
   for (int i = 0; i < info->dlpi_phnum; i++) {
-    if ((info->dlpi_phdr[i].p_type == PT_LOAD) && (info->dlpi_phdr[i].p_flags == PF_X)) {
-      mprotect(reinterpret_cast<void*>(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr),
-               info->dlpi_phdr[i].p_memsz, PROT_READ | PROT_EXEC);
+    const auto& phdr = info->dlpi_phdr[i];
+    if ((phdr.p_type == PT_LOAD) && (phdr.p_flags == PF_X)) {
+      auto addr = reinterpret_cast<void*>(info->dlpi_addr + PAGE_START(phdr.p_vaddr));
+      size_t len = PAGE_OFFSET(phdr.p_vaddr) + phdr.p_memsz;
+      if (mprotect(addr, len, PROT_READ | PROT_EXEC) == -1) {
+        ALOGE("mprotect(%p, %zu, PROT_READ | PROT_EXEC) failed: %m", addr, len);
+        return -1;
+      }
     }
   }
   // Return non-zero to exit dl_iterate_phdr.
