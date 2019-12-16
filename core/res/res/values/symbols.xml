@@ -3775,4 +3775,9 @@
   <!-- For contacts provider. -->
   <java-symbol type="string" name="config_rawContactsLocalAccountName" />
   <java-symbol type="string" name="config_rawContactsLocalAccountType" />
+
+  <!-- Assistant handles -->
+  <java-symbol type="dimen" name="assist_handle_shadow_radius" />
+
+
 </resources>
