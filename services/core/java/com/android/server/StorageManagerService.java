@@ -118,6 +118,7 @@ import android.sysprop.VoldProperties;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DataUnit;
 import android.util.FeatureFlagUtils;
@@ -3161,16 +3162,20 @@ class StorageManagerService extends IStorageManager.Stub
         final boolean forWrite = (flags & StorageManager.FLAG_FOR_WRITE) != 0;
         final boolean realState = (flags & StorageManager.FLAG_REAL_STATE) != 0;
         final boolean includeInvisible = (flags & StorageManager.FLAG_INCLUDE_INVISIBLE) != 0;
+        final boolean includeRecent = (flags & StorageManager.FLAG_INCLUDE_RECENT) != 0;
 
         // Report all volumes as unmounted until we've recorded that user 0 has unlocked. There
         // are no guarantees that callers will see a consistent view of the volume before that
         // point
         final boolean systemUserUnlocked = isSystemUnlocked(UserHandle.USER_SYSTEM);
 
+        final boolean userIsDemo;
         final boolean userKeyUnlocked;
         final boolean storagePermission;
         final long token = Binder.clearCallingIdentity();
         try {
+            userIsDemo = LocalServices.getService(UserManagerInternal.class)
+                    .getUserInfo(userId).isDemo();
             userKeyUnlocked = isUserKeyUnlocked(userId);
             storagePermission = mStorageManagerInternal.hasExternalStorage(uid, packageName);
         } finally {
@@ -3180,6 +3185,7 @@ class StorageManagerService extends IStorageManager.Stub
         boolean foundPrimary = false;
 
         final ArrayList<StorageVolume> res = new ArrayList<>();
+        final ArraySet<String> resUuids = new ArraySet<>();
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
@@ -3222,7 +3228,43 @@ class StorageManagerService extends IStorageManager.Stub
                 } else {
                     res.add(userVol);
                 }
+                resUuids.add(userVol.getUuid());
             }
+
+            if (includeRecent) {
+                final long lastWeek = System.currentTimeMillis() - DateUtils.WEEK_IN_MILLIS;
+                for (int i = 0; i < mRecords.size(); i++) {
+                    final VolumeRecord rec = mRecords.valueAt(i);
+
+                    // Skip if we've already included it above
+                    if (resUuids.contains(rec.fsUuid)) continue;
+
+                    // Treat as recent if mounted within the last week
+                    if (rec.lastSeenMillis > 0 && rec.lastSeenMillis < lastWeek) {
+                        final StorageVolume userVol = rec.buildStorageVolume(mContext);
+                        res.add(userVol);
+                        resUuids.add(userVol.getUuid());
+                    }
+                }
+            }
+        }
+
+        // Synthesize a volume for preloaded media under demo users, so that
+        // it's scanned into MediaStore
+        if (userIsDemo) {
+            final String id = "demo";
+            final File path = Environment.getDataPreloadsMediaDirectory();
+            final boolean primary = false;
+            final boolean removable = false;
+            final boolean emulated = true;
+            final boolean allowMassStorage = false;
+            final long maxFileSize = 0;
+            final UserHandle user = new UserHandle(userId);
+            final String envState = Environment.MEDIA_MOUNTED_READ_ONLY;
+            final String description = mContext.getString(android.R.string.unknownName);
+
+            res.add(new StorageVolume(id, path, path, description, primary, removable,
+                    emulated, allowMassStorage, maxFileSize, user, id, envState));
         }
 
         if (!foundPrimary) {

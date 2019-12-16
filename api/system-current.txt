@@ -6365,6 +6365,7 @@ package android.os {
   }
 
   public class Environment {
+    method @NonNull public static java.util.Collection<java.io.File> getInternalMediaDirectories();
     method @NonNull public static java.io.File getOdmDirectory();
     method @NonNull public static java.io.File getOemDirectory();
     method @NonNull public static java.io.File getProductDirectory();
@@ -7253,8 +7254,8 @@ package android.provider {
   }
 
   public final class MediaStore {
-    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE) public static java.util.Set<java.lang.String> getRecentExternalVolumeNames(@NonNull android.content.Context);
-    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE) public static java.util.Collection<java.io.File> getVolumeScanPaths(@NonNull String) throws java.io.FileNotFoundException;
+    method @NonNull public static android.net.Uri scanFile(@NonNull android.content.ContentResolver, @NonNull java.io.File);
+    method public static void scanVolume(@NonNull android.content.ContentResolver, @NonNull String);
   }
 
   public abstract class SearchIndexableData {

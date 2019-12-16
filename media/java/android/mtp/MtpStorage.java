@@ -41,11 +41,7 @@ public class MtpStorage {
         mDescription = volume.getDescription(null);
         mRemovable = volume.isRemovable();
         mMaxFileSize = volume.getMaxFileSize();
-        if (volume.isPrimary()) {
-            mVolumeName = MediaStore.VOLUME_EXTERNAL_PRIMARY;
-        } else {
-            mVolumeName = volume.getNormalizedUuid();
-        }
+        mVolumeName = volume.getMediaStoreVolumeName();
     }
 
     /**

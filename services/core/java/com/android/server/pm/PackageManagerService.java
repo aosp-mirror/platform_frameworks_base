@@ -17962,14 +17962,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             mPermissionManager.resetRuntimePermissions(pkg, nextUserId);
-            // Also delete contributed media, when requested
-            if ((flags & PackageManager.DELETE_CONTRIBUTED_MEDIA) != 0) {
-                try {
-                    MediaStore.deleteContributedMedia(mContext, ps.name, UserHandle.of(nextUserId));
-                } catch (IOException e) {
-                    Slog.w(TAG, "Failed to delete contributed media for " + ps.name, e);
-                }
-            }
         }
 
         if (outInfo != null) {

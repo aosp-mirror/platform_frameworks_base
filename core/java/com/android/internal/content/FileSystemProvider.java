@@ -259,7 +259,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
                 throw new IllegalStateException("Failed to touch " + file + ": " + e);
             }
         }
-        MediaStore.scanFile(getContext(), file);
+        MediaStore.scanFile(getContext().getContentResolver(), file);
 
         return childId;
     }
@@ -316,10 +316,10 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
     private void moveInMediaStore(@Nullable File oldVisibleFile, @Nullable File newVisibleFile) {
         if (oldVisibleFile != null) {
-            MediaStore.scanFile(getContext(), oldVisibleFile);
+            MediaStore.scanFile(getContext().getContentResolver(), oldVisibleFile);
         }
         if (newVisibleFile != null) {
-            MediaStore.scanFile(getContext(), newVisibleFile);
+            MediaStore.scanFile(getContext().getContentResolver(), newVisibleFile);
         }
     }
 

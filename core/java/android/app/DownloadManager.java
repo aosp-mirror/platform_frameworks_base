@@ -1314,8 +1314,8 @@ public class DownloadManager {
 
         // TODO: DownloadProvider.update() should take care of updating corresponding
         // MediaProvider entries.
-        MediaStore.scanFile(context, before);
-        MediaStore.scanFile(context, after);
+        MediaStore.scanFile(mResolver, before);
+        MediaStore.scanFile(mResolver, after);
 
         final ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_TITLE, displayName);

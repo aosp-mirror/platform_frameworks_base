@@ -33,14 +33,13 @@ import android.graphics.ImageDecoder;
 import android.graphics.ImageDecoder.ImageInfo;
 import android.graphics.ImageDecoder.Source;
 import android.graphics.Matrix;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.CancellationSignal;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore.ThumbnailConstants;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Size;
 
@@ -77,15 +76,7 @@ public class ThumbnailUtils {
     public static final int OPTIONS_RECYCLE_INPUT = 0x2;
 
     private static Size convertKind(int kind) {
-        if (kind == ThumbnailConstants.MICRO_KIND) {
-            return Point.convert(ThumbnailConstants.MICRO_SIZE);
-        } else if (kind == ThumbnailConstants.FULL_SCREEN_KIND) {
-            return Point.convert(ThumbnailConstants.FULL_SCREEN_SIZE);
-        } else if (kind == ThumbnailConstants.MINI_KIND) {
-            return Point.convert(ThumbnailConstants.MINI_SIZE);
-        } else {
-            throw new IllegalArgumentException("Unsupported kind: " + kind);
-        }
+        return MediaStore.Images.Thumbnails.getKindSize(kind);
     }
 
     private static class Resizer implements ImageDecoder.OnHeaderDecodedListener {
