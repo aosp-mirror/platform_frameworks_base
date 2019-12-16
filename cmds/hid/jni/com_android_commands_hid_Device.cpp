@@ -27,12 +27,13 @@
 #include <cstring>
 #include <memory>
 
+#include <android/log.h>
+#include <android/looper.h>
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
-#include <android/looper.h>
-#include <android/log.h>
 
 #include <android-base/stringprintf.h>
 
@@ -49,6 +50,7 @@ static const char* UHID_PATH = "/dev/uhid";
 static struct {
     jmethodID onDeviceOpen;
     jmethodID onDeviceGetReport;
+    jmethodID onDeviceOutput;
     jmethodID onDeviceError;
 } gDeviceCallbackClassInfo;
 
@@ -62,6 +64,18 @@ static void checkAndClearException(JNIEnv* env, const char* methodName) {
         LOGE("An exception was thrown by callback '%s'.", methodName);
         env->ExceptionClear();
     }
+}
+
+static ScopedLocalRef<jbyteArray> toJbyteArray(JNIEnv* env, const std::vector<uint8_t>& vector) {
+    ScopedLocalRef<jbyteArray> array(env, env->NewByteArray(vector.size()));
+    if (array.get() == nullptr) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", nullptr);
+        return array;
+    }
+    static_assert(sizeof(char) == sizeof(uint8_t));
+    env->SetByteArrayRegion(array.get(), 0, vector.size(),
+                            reinterpret_cast<const signed char*>(vector.data()));
+    return array;
 }
 
 static std::string toString(const std::vector<uint8_t>& data) {
@@ -99,6 +113,13 @@ void DeviceCallback::onDeviceGetReport(uint32_t requestId, uint8_t reportId) {
     env->CallVoidMethod(mCallbackObject, gDeviceCallbackClassInfo.onDeviceGetReport,
             requestId, reportId);
     checkAndClearException(env, "onDeviceGetReport");
+}
+
+void DeviceCallback::onDeviceOutput(const std::vector<uint8_t>& data) {
+    JNIEnv* env = getJNIEnv();
+    env->CallVoidMethod(mCallbackObject, gDeviceCallbackClassInfo.onDeviceOutput,
+                        toJbyteArray(env, data).get());
+    checkAndClearException(env, "onDeviceOutput");
 }
 
 JNIEnv* DeviceCallback::getJNIEnv() {
@@ -240,6 +261,12 @@ int Device::handleEvents(int events) {
                  set_report.rnum, toString(data).c_str());
             break;
         }
+        case UHID_OUTPUT: {
+            struct uhid_output_req& output = ev.u.output;
+            std::vector<uint8_t> data(output.data, output.data + output.size);
+            mDeviceCallback->onDeviceOutput(data);
+            break;
+        }
         default: {
             LOGI("Unhandled event type: %" PRIu32, ev.type);
             break;
@@ -332,6 +359,8 @@ int register_com_android_commands_hid_Device(JNIEnv* env) {
             env->GetMethodID(clazz, "onDeviceOpen", "()V");
     uhid::gDeviceCallbackClassInfo.onDeviceGetReport =
             env->GetMethodID(clazz, "onDeviceGetReport", "(II)V");
+    uhid::gDeviceCallbackClassInfo.onDeviceOutput =
+            env->GetMethodID(clazz, "onDeviceOutput", "([B)V");
     uhid::gDeviceCallbackClassInfo.onDeviceError =
             env->GetMethodID(clazz, "onDeviceError", "()V");
     if (uhid::gDeviceCallbackClassInfo.onDeviceOpen == NULL ||
