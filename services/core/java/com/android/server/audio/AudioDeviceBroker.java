@@ -600,17 +600,9 @@ import java.io.PrintWriter;
         sendMsgNoDelay(MSG_REPORT_NEW_ROUTES, SENDMSG_NOOP);
     }
 
-    /*package*/ void cancelA2dpDockTimeout() {
-        mBrokerHandler.removeMessages(MSG_IL_BTA2DP_DOCK_TIMEOUT);
-    }
-
     /*package*/ void postA2dpActiveDeviceChange(
                     @NonNull BtHelper.BluetoothA2dpDeviceInfo btDeviceInfo) {
         sendLMsgNoDelay(MSG_L_A2DP_ACTIVE_DEVICE_CHANGE, SENDMSG_QUEUE, btDeviceInfo);
-    }
-
-    /*package*/ boolean hasScheduledA2dpDockTimeout() {
-        return mBrokerHandler.hasMessages(MSG_IL_BTA2DP_DOCK_TIMEOUT);
     }
 
     // must be called synchronized on mConnectedDevices
@@ -621,8 +613,8 @@ import java.io.PrintWriter;
                         new BtHelper.BluetoothA2dpDeviceInfo(btDevice)));
     }
 
-    /*package*/ void setA2dpDockTimeout(String address, int a2dpCodec, int delayMs) {
-        sendILMsg(MSG_IL_BTA2DP_DOCK_TIMEOUT, SENDMSG_QUEUE, a2dpCodec, address, delayMs);
+    /*package*/ void setA2dpTimeout(String address, int a2dpCodec, int delayMs) {
+        sendILMsg(MSG_IL_BTA2DP_TIMEOUT, SENDMSG_QUEUE, a2dpCodec, address, delayMs);
     }
 
     /*package*/ void setAvrcpAbsoluteVolumeSupported(boolean supported) {
@@ -781,7 +773,7 @@ import java.io.PrintWriter;
                         }
                     }
                     break;
-                case MSG_IL_BTA2DP_DOCK_TIMEOUT:
+                case MSG_IL_BTA2DP_TIMEOUT:
                     // msg.obj  == address of BTA2DP device
                     synchronized (mDeviceStateLock) {
                         mDeviceInventory.onMakeA2dpDeviceUnavailableNow((String) msg.obj, msg.arg1);
@@ -945,7 +937,7 @@ import java.io.PrintWriter;
     private static final int MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE = 7;
     private static final int MSG_IL_SET_HEARING_AID_CONNECTION_STATE = 8;
     private static final int MSG_BT_HEADSET_CNCT_FAILED = 9;
-    private static final int MSG_IL_BTA2DP_DOCK_TIMEOUT = 10;
+    private static final int MSG_IL_BTA2DP_TIMEOUT = 10;
     private static final int MSG_L_A2DP_DEVICE_CONFIG_CHANGE = 11;
     private static final int MSG_BROADCAST_AUDIO_BECOMING_NOISY = 12;
     private static final int MSG_REPORT_NEW_ROUTES = 13;
@@ -981,7 +973,7 @@ import java.io.PrintWriter;
             case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED:
             case MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE:
             case MSG_IL_SET_HEARING_AID_CONNECTION_STATE:
-            case MSG_IL_BTA2DP_DOCK_TIMEOUT:
+            case MSG_IL_BTA2DP_TIMEOUT:
             case MSG_L_A2DP_DEVICE_CONFIG_CHANGE:
             case MSG_TOGGLE_HDMI:
             case MSG_L_A2DP_ACTIVE_DEVICE_CHANGE:
@@ -1071,7 +1063,7 @@ import java.io.PrintWriter;
                 case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED:
                 case MSG_IL_SET_HEARING_AID_CONNECTION_STATE:
                 case MSG_L_SET_WIRED_DEVICE_CONNECTION_STATE:
-                case MSG_IL_BTA2DP_DOCK_TIMEOUT:
+                case MSG_IL_BTA2DP_TIMEOUT:
                 case MSG_L_A2DP_DEVICE_CONFIG_CHANGE:
                 case MSG_L_A2DP_ACTIVE_DEVICE_CHANGE:
                     if (sLastDeviceConnectMsgTime >= time) {
