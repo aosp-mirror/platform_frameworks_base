@@ -24,6 +24,7 @@ import static android.system.OsConstants.EPIPE;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -42,6 +43,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
@@ -83,6 +86,30 @@ public class SoundTrigger {
      *
      ****************************************************************************/
     public static final class ModuleProperties implements Parcelable {
+
+        /**
+         * Bit field values of AudioCapabilities supported by the implemented HAL
+         * driver.
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = true, prefix = { "AUDIO_CAPABILITY_" }, value = {
+                CAPABILITY_ECHO_CANCELLATION,
+                CAPABILITY_NOISE_SUPPRESSION
+        })
+        public @interface AudioCapabilities {}
+
+        /**
+         * If set the underlying module supports AEC.
+         * Describes bit field {@link ModuleProperties#audioCapabilities}
+         */
+        public static final int CAPABILITY_ECHO_CANCELLATION = 0x1;
+        /**
+         * If set, the underlying module supports noise suppression.
+         * Describes bit field {@link ModuleProperties#audioCapabilities}
+         */
+        public static final int CAPABILITY_NOISE_SUPPRESSION = 0x2;
+
         /** Unique module ID provided by the native service */
         public final int id;
 
@@ -137,12 +164,19 @@ public class SoundTrigger {
          * recognition callback event */
         public final boolean returnsTriggerInEvent;
 
+        /**
+         * Bit field encoding of the AudioCapabilities
+         * supported by the firmware.
+         */
+        @AudioCapabilities
+        public final int audioCapabilities;
+
         ModuleProperties(int id, @NonNull String implementor, @NonNull String description,
                 @NonNull String uuid, int version, @NonNull String supportedModelArch,
                 int maxSoundModels, int maxKeyphrases, int maxUsers, int recognitionModes,
                 boolean supportsCaptureTransition, int maxBufferMs,
                 boolean supportsConcurrentCapture, int powerConsumptionMw,
-                boolean returnsTriggerInEvent) {
+                boolean returnsTriggerInEvent, int audioCapabilities) {
             this.id = id;
             this.implementor = requireNonNull(implementor);
             this.description = requireNonNull(description);
@@ -158,6 +192,7 @@ public class SoundTrigger {
             this.supportsConcurrentCapture = supportsConcurrentCapture;
             this.powerConsumptionMw = powerConsumptionMw;
             this.returnsTriggerInEvent = returnsTriggerInEvent;
+            this.audioCapabilities = audioCapabilities;
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<ModuleProperties> CREATOR
@@ -187,10 +222,11 @@ public class SoundTrigger {
             boolean supportsConcurrentCapture = in.readByte() == 1;
             int powerConsumptionMw = in.readInt();
             boolean returnsTriggerInEvent = in.readByte() == 1;
+            int audioCapabilities = in.readInt();
             return new ModuleProperties(id, implementor, description, uuid, version,
                     supportedModelArch, maxSoundModels, maxKeyphrases, maxUsers, recognitionModes,
                     supportsCaptureTransition, maxBufferMs, supportsConcurrentCapture,
-                    powerConsumptionMw, returnsTriggerInEvent);
+                    powerConsumptionMw, returnsTriggerInEvent, audioCapabilities);
         }
 
         @Override
@@ -210,6 +246,7 @@ public class SoundTrigger {
             dest.writeByte((byte) (supportsConcurrentCapture ? 1 : 0));
             dest.writeInt(powerConsumptionMw);
             dest.writeByte((byte) (returnsTriggerInEvent ? 1 : 0));
+            dest.writeInt(audioCapabilities);
         }
 
         @Override
@@ -227,7 +264,8 @@ public class SoundTrigger {
                     + ", supportsCaptureTransition=" + supportsCaptureTransition + ", maxBufferMs="
                     + maxBufferMs + ", supportsConcurrentCapture=" + supportsConcurrentCapture
                     + ", powerConsumptionMw=" + powerConsumptionMw
-                    + ", returnsTriggerInEvent=" + returnsTriggerInEvent + "]";
+                    + ", returnsTriggerInEvent=" + returnsTriggerInEvent
+                    + ", audioCapabilities=" + audioCapabilities + "]";
         }
     }
 
@@ -1049,13 +1087,27 @@ public class SoundTrigger {
         @NonNull
         public final byte[] data;
 
-        @UnsupportedAppUsage
+        /**
+         * Bit field encoding of the AudioCapabilities
+         * supported by the firmware.
+         */
+        @ModuleProperties.AudioCapabilities
+        public final int audioCapabilities;
+
         public RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
-                @Nullable KeyphraseRecognitionExtra[] keyphrases, @Nullable byte[] data) {
+                @Nullable KeyphraseRecognitionExtra[] keyphrases, @Nullable byte[] data,
+                int audioCapabilities) {
             this.captureRequested = captureRequested;
             this.allowMultipleTriggers = allowMultipleTriggers;
             this.keyphrases = keyphrases != null ? keyphrases : new KeyphraseRecognitionExtra[0];
             this.data = data != null ? data : new byte[0];
+            this.audioCapabilities = audioCapabilities;
+        }
+
+        @UnsupportedAppUsage
+        public RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
+                @Nullable KeyphraseRecognitionExtra[] keyphrases, @Nullable byte[] data) {
+            this(captureRequested, allowMultipleTriggers, keyphrases, data, 0);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<RecognitionConfig> CREATOR
@@ -1075,7 +1127,9 @@ public class SoundTrigger {
             KeyphraseRecognitionExtra[] keyphrases =
                     in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
             byte[] data = in.readBlob();
-            return new RecognitionConfig(captureRequested, allowMultipleTriggers, keyphrases, data);
+            int audioCapabilities = in.readInt();
+            return new RecognitionConfig(captureRequested, allowMultipleTriggers, keyphrases, data,
+                    audioCapabilities);
         }
 
         @Override
@@ -1084,6 +1138,7 @@ public class SoundTrigger {
             dest.writeByte((byte) (allowMultipleTriggers ? 1 : 0));
             dest.writeTypedArray(keyphrases, flags);
             dest.writeBlob(data);
+            dest.writeInt(audioCapabilities);
         }
 
         @Override
@@ -1095,7 +1150,8 @@ public class SoundTrigger {
         public String toString() {
             return "RecognitionConfig [captureRequested=" + captureRequested
                     + ", allowMultipleTriggers=" + allowMultipleTriggers + ", keyphrases="
-                    + Arrays.toString(keyphrases) + ", data=" + Arrays.toString(data) + "]";
+                    + Arrays.toString(keyphrases) + ", data=" + Arrays.toString(data)
+                    + ", audioCapabilities=" + Integer.toHexString(audioCapabilities) + "]";
         }
     }
 

@@ -401,10 +401,10 @@ class SoundTriggerModule {
                     notifyAbort();
                     return;
                 }
-                android.hardware.soundtrigger.V2_1.ISoundTriggerHw.RecognitionConfig hidlConfig =
+                android.hardware.soundtrigger.V2_3.RecognitionConfig hidlConfig =
                         ConversionUtil.aidl2hidlRecognitionConfig(config);
-                hidlConfig.header.captureDevice = mSession.mDeviceHandle;
-                hidlConfig.header.captureHandle = mSession.mIoHandle;
+                hidlConfig.base.header.captureDevice = mSession.mDeviceHandle;
+                hidlConfig.base.header.captureHandle = mSession.mIoHandle;
                 mHalService.startRecognition(mHandle, hidlConfig, this, 0);
                 setState(ModelState.ACTIVE);
             }
