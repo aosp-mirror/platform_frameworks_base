@@ -251,6 +251,9 @@ enum Action {
     // ACTION: Create a Settings shortcut item.
     ACTION_SETTINGS_CREATE_SHORTCUT = 829;
 
+    // ACTION: A tile in Settings information architecture is clicked
+    ACTION_SETTINGS_TILE_CLICK = 830;
+
     // ACTION: Settings advanced button is expanded
     ACTION_SETTINGS_ADVANCED_BUTTON_EXPAND = 834;
 
