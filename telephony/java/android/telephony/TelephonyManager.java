@@ -2373,7 +2373,14 @@ public class TelephonyManager {
      * @return the lowercase 2 character ISO-3166 country code, or empty string if not available.
      */
     public String getNetworkCountryIso() {
-        return getNetworkCountryIso(getPhoneId());
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) return "";
+            return telephony.getNetworkCountryIsoForPhone(getPhoneId(),
+                    null /* no permission check */);
+        } catch (RemoteException ex) {
+            return "";
+        }
     }
 
     /**
@@ -2401,6 +2408,7 @@ public class TelephonyManager {
     @SystemApi
     @TestApi
     @NonNull
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getNetworkCountryIso(int slotIndex) {
         try {
             if (!SubscriptionManager.isValidSlotIndex(slotIndex)) {
@@ -2409,7 +2417,7 @@ public class TelephonyManager {
 
             ITelephony telephony = getITelephony();
             if (telephony == null) return "";
-            return telephony.getNetworkCountryIsoForPhone(slotIndex);
+            return telephony.getNetworkCountryIsoForPhone(slotIndex, getOpPackageName());
         } catch (RemoteException ex) {
             return "";
         }
