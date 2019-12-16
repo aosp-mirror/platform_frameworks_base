@@ -413,6 +413,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
             handleSetListening(false);
         }
         mCallbacks.clear();
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     protected void checkIfRestrictionEnforcedByAdminOnly(State state, String userRestriction) {
