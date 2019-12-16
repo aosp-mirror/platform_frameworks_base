@@ -27,8 +27,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.net.LinkProperties.CompareResult;
 import android.net.LinkProperties.ProvisioningChange;
+import android.net.util.LinkPropertiesUtils.CompareResult;
 import android.system.OsConstants;
 import android.util.ArraySet;
 
