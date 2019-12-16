@@ -288,6 +288,7 @@ filegroup {
     name: "framework-updatable-sources",
     srcs: [
         ":framework-sdkext-sources",
+        ":framework-statsd-sources",
         ":updatable-media-srcs",
     ]
 }
@@ -449,6 +450,10 @@ java_library {
     name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
+    libs: [
+        // TODO(b/146167933): Use framework-statsd-stubs
+        "framework-statsd",
+    ],
     installable: true,
     javac_shard_size: 150,
     required: [
@@ -485,6 +490,8 @@ java_library {
     static_libs: [
         "framework-minus-apex",
         "framework-sdkext-stubs-systemapi",
+        // TODO(b/146167933): Use framework-statsd-stubs instead.
+        "framework-statsd",
         // TODO(jiyong): add more stubs for APEXes here
     ],
     sdk_version: "core_platform",

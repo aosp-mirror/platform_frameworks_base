@@ -1,0 +1,67 @@
+// Copyright (C) 2019 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+filegroup {
+    name: "framework-statsd-sources",
+    srcs: [
+    "java/**/*.java",
+    ],
+    path: "java",
+}
+
+java_library {
+    name: "framework-statsd",
+    installable: true,
+    // TODO(b/146209659): Use system_current instead.
+    sdk_version: "core_platform",
+    srcs: [
+        ":framework-statsd-sources",
+    ],
+    permitted_packages: [
+        "android.app",
+        "android.util",
+    ],
+    libs: [
+        "framework-annotations-lib",
+        // TODO(b/146230220): Use framework-system-stubs instead.
+        "android_system_stubs_current",
+    ],
+    // TODO:(b/146210774): Add apex_available field.
+}
+
+droidstubs {
+    name: "framework-statsd-stubs-docs",
+    defaults: [
+        "framework-module-stubs-defaults-publicapi"
+    ],
+    srcs: [
+        ":framework-statsd-sources",
+    ],
+    libs: [
+        "framework-all",
+    ],
+    sdk_version: "core_platform",
+}
+
+// TODO(b/146167933): Use these stubs in frameworks/base/Android.bp
+java_library {
+    name: "framework-statsd-stubs",
+    srcs: [
+        ":framework-statsd-stubs-docs",
+    ],
+    libs: [
+        "framework-all",
+    ],
+    sdk_version: "core_platform",
+}
