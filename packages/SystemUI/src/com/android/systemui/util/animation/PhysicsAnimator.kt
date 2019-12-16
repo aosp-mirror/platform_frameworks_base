@@ -27,6 +27,9 @@ import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.systemui.util.animation.PhysicsAnimator.Companion.getInstance
 import java.util.WeakHashMap
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Extension function for all objects which will return a PhysicsAnimator instance for that object.
@@ -34,6 +37,15 @@ import java.util.WeakHashMap
 val <T : View> T.physicsAnimator: PhysicsAnimator<T> get() { return getInstance(this) }
 
 private const val TAG = "PhysicsAnimator"
+
+private val UNSET = -Float.MAX_VALUE
+
+/**
+ * [FlingAnimation] multiplies the friction set via [FlingAnimation.setFriction] by 4.2f, which is
+ * where this number comes from. We use it in [PhysicsAnimator.flingThenSpring] to calculate the
+ * minimum velocity for a fling to reach a certain value, given the fling's friction.
+ */
+private const val FLING_FRICTION_SCALAR_MULTIPLIER = 4.2f
 
 typealias EndAction = () -> Unit
 
@@ -236,6 +248,71 @@ class PhysicsAnimator<T> private constructor (val target: T) {
     }
 
     /**
+     * Flings a property using the given start velocity. If the fling animation reaches the min/max
+     * bounds (from the [flingConfig]) with velocity remaining, it'll overshoot it and spring back.
+     *
+     * If the object is already out of the fling bounds, it will immediately spring back within
+     * bounds.
+     *
+     * This is useful for animating objects that are bounded by constraints such as screen edges,
+     * since otherwise the fling animation would end abruptly upon reaching the min/max bounds.
+     *
+     * @param property The property to animate.
+     * @param startVelocity The velocity, in pixels/second, with which to start the fling. If the
+     * object is already outside the fling bounds, this velocity will be used as the start velocity
+     * of the spring that will spring it back within bounds.
+     * @param flingMustReachMinOrMax If true, the fling animation is guaranteed to reach either its
+     * minimum bound (if [startVelocity] is negative) or maximum bound (if it's positive). The
+     * animator will use startVelocity if it's sufficient, or add more velocity if necessary. This
+     * is useful when fling's deceleration-based physics are preferable to the acceleration-based
+     * forces used by springs - typically, when you're allowing the user to move an object somewhere
+     * on the screen, but it needs to be along an edge.
+     * @param flingConfig The configuration to use for the fling portion of the animation.
+     * @param springConfig The configuration to use for the spring portion of the animation.
+     */
+    @JvmOverloads
+    fun flingThenSpring(
+        property: FloatPropertyCompat<in T>,
+        startVelocity: Float,
+        flingConfig: FlingConfig,
+        springConfig: SpringConfig,
+        flingMustReachMinOrMax: Boolean = false
+    ): PhysicsAnimator<T> {
+        val flingConfigCopy = flingConfig.copy()
+        val springConfigCopy = springConfig.copy()
+        val toAtLeast = if (startVelocity < 0) flingConfig.min else flingConfig.max
+
+        // If the fling needs to reach min/max, calculate the velocity required to do so and use
+        // that if the provided start velocity is not sufficient.
+        if (flingMustReachMinOrMax &&
+                toAtLeast != -Float.MAX_VALUE && toAtLeast != Float.MAX_VALUE) {
+            val distanceToDestination = toAtLeast - property.getValue(target)
+
+            // The minimum velocity required for the fling to end up at the given destination,
+            // taking the provided fling friction value.
+            val velocityToReachDestination = distanceToDestination *
+                    (flingConfig.friction * FLING_FRICTION_SCALAR_MULTIPLIER)
+
+            // Try to use the provided start velocity, but use the required velocity to reach the
+            // destination if the provided velocity is insufficient.
+            val sufficientVelocity =
+                    if (distanceToDestination < 0)
+                        min(velocityToReachDestination, startVelocity)
+                    else
+                        max(velocityToReachDestination, startVelocity)
+
+            flingConfigCopy.startVelocity = sufficientVelocity
+            springConfigCopy.finalPosition = toAtLeast
+        } else {
+            flingConfigCopy.startVelocity = startVelocity
+        }
+
+        flingConfigs[property] = flingConfigCopy
+        springConfigs[property] = springConfigCopy
+        return this
+    }
+
+    /**
      * Adds a listener that will be called whenever any property on the animated object is updated.
      * This will be called on every animation frame, with the current value of the animated object
      * and the new property values.
@@ -246,7 +323,7 @@ class PhysicsAnimator<T> private constructor (val target: T) {
     }
 
     /**
-     * Adds a listener that will be called whenever a property's animation ends. This is useful if
+     * Adds a listener that will be called when a property stops animating. This is useful if
      * you care about a specific property ending, or want to use the end value/end velocity from a
      * particular property's animation. If you just want to run an action when all property
      * animations have ended, use [withEndActions].
@@ -311,6 +388,114 @@ class PhysicsAnimator<T> private constructor (val target: T) {
                     "your test setup.")
         }
 
+        // Functions that will actually start the animations. These are run after we build and add
+        // the InternalListener, since some animations might update/end immediately and we don't
+        // want to miss those updates.
+        val animationStartActions = ArrayList<() -> Unit>()
+
+        for (animatedProperty in getAnimatedProperties()) {
+            val flingConfig = flingConfigs[animatedProperty]
+            val springConfig = springConfigs[animatedProperty]
+
+            // The property's current value on the object.
+            val currentValue = animatedProperty.getValue(target)
+
+            // Start by checking for a fling configuration. If one is present, we're either flinging
+            // or flinging-then-springing. Either way, we'll want to start the fling first.
+            if (flingConfig != null) {
+                animationStartActions.add {
+                    // When the animation is starting, adjust the min/max bounds to include the
+                    // current value of the property, if necessary. This is required to allow a
+                    // fling to bring an out-of-bounds object back into bounds. For example, if an
+                    // object was dragged halfway off the left side of the screen, but then flung to
+                    // the right, we don't want the animation to end instantly just because the
+                    // object started out of bounds. If the fling is in the direction that would
+                    // take it farther out of bounds, it will end instantly as expected.
+                    flingConfig.apply {
+                        min = min(currentValue, this.min)
+                        max = max(currentValue, this.max)
+                    }
+
+                    // Apply the configuration and start the animation.
+                    getFlingAnimation(animatedProperty)
+                            .also { flingConfig.applyToAnimation(it) }
+                            .start()
+                }
+            }
+
+            // Check for a spring configuration. If one is present, we're either springing, or
+            // flinging-then-springing.
+            if (springConfig != null) {
+
+                // If there is no corresponding fling config, we're only springing.
+                if (flingConfig == null) {
+                    // Apply the configuration and start the animation.
+                    val springAnim = getSpringAnimation(animatedProperty)
+                    springConfig.applyToAnimation(springAnim)
+                    animationStartActions.add(springAnim::start)
+                } else {
+                    // If there's a corresponding fling config, we're flinging-then-springing. Save
+                    // the fling's original bounds so we can spring to them when the fling ends.
+                    val flingMin = flingConfig.min
+                    val flingMax = flingConfig.max
+
+                    // Add an end listener that will start the spring when the fling ends.
+                    endListeners.add(0, object : EndListener<T> {
+                        override fun onAnimationEnd(
+                            target: T,
+                            property: FloatPropertyCompat<in T>,
+                            wasFling: Boolean,
+                            canceled: Boolean,
+                            finalValue: Float,
+                            finalVelocity: Float,
+                            allRelevantPropertyAnimsEnded: Boolean
+                        ) {
+                            // If this isn't the relevant property, it wasn't a fling, or the fling
+                            // was explicitly cancelled, don't spring.
+                            if (property != animatedProperty || !wasFling || canceled) {
+                                return
+                            }
+
+                            val endedWithVelocity = abs(finalVelocity) > 0
+
+                            // If the object was out of bounds when the fling animation started, it
+                            // will immediately end. In that case, we'll spring it back in bounds.
+                            val endedOutOfBounds = finalValue !in flingMin..flingMax
+
+                            // If the fling ended either out of bounds or with remaining velocity,
+                            // it's time to spring.
+                            if (endedWithVelocity || endedOutOfBounds) {
+                                springConfig.startVelocity = finalVelocity
+
+                                // If the spring's final position isn't set, this is a
+                                // flingThenSpring where flingMustReachMinOrMax was false. We'll
+                                // need to set the spring's final position here.
+                                if (springConfig.finalPosition == UNSET) {
+                                    if (endedWithVelocity) {
+                                        // If the fling ended with negative velocity, that means it
+                                        // hit the min bound, so spring to that bound (and vice
+                                        // versa).
+                                        springConfig.finalPosition =
+                                                if (finalVelocity < 0) flingMin else flingMax
+                                    } else if (endedOutOfBounds) {
+                                        // If the fling ended out of bounds, spring it to the
+                                        // nearest bound.
+                                        springConfig.finalPosition =
+                                                if (finalValue < flingMin) flingMin else flingMax
+                                    }
+                                }
+
+                                // Apply the configuration and start the spring animation.
+                                getSpringAnimation(animatedProperty)
+                                        .also { springConfig.applyToAnimation(it) }
+                                        .start()
+                            }
+                        }
+                    })
+                }
+            }
+        }
+
         // Add an internal listener that will dispatch animation events to the provided listeners.
         internalListeners.add(InternalListener(
                 getAnimatedProperties(),
@@ -318,24 +503,10 @@ class PhysicsAnimator<T> private constructor (val target: T) {
                 ArrayList(endListeners),
                 ArrayList(endActions)))
 
-        for ((property, config) in flingConfigs) {
-            val currentValue = property.getValue(target)
-
-            // If the fling is already out of bounds, don't start it.
-            if (currentValue <= config.min || currentValue >= config.max) {
-                continue
-            }
-
-            val flingAnim = getFlingAnimation(property)
-            config.applyToAnimation(flingAnim)
-            flingAnim.start()
-        }
-
-        for ((property, config) in springConfigs) {
-            val springAnim = getSpringAnimation(property)
-            config.applyToAnimation(springAnim)
-            springAnim.start()
-        }
+        // Actually start the DynamicAnimations. This is delayed until after the InternalListener is
+        // constructed and added so that we don't miss the end listener firing for any animations
+        // that immediately end.
+        animationStartActions.forEach { it.invoke() }
 
         clearAnimator()
     }
@@ -381,7 +552,10 @@ class PhysicsAnimator<T> private constructor (val target: T) {
         }
         anim.addEndListener { _, canceled, value, velocity ->
             internalListeners.removeAll {
-                it.onInternalAnimationEnd(property, canceled, value, velocity) } }
+                it.onInternalAnimationEnd(
+                        property, canceled, value, velocity, anim is FlingAnimation)
+            }
+        }
         return anim
     }
 
@@ -434,7 +608,8 @@ class PhysicsAnimator<T> private constructor (val target: T) {
             property: FloatPropertyCompat<in T>,
             canceled: Boolean,
             finalValue: Float,
-            finalVelocity: Float
+            finalVelocity: Float,
+            isFling: Boolean
         ): Boolean {
 
             // If this property animation isn't relevant to this listener, ignore it.
@@ -461,7 +636,15 @@ class PhysicsAnimator<T> private constructor (val target: T) {
 
             val allEnded = !arePropertiesAnimating(properties)
             endListeners.forEach {
-                it.onAnimationEnd(target, property, canceled, finalValue, finalVelocity, allEnded) }
+                it.onAnimationEnd(
+                        target, property, isFling, canceled, finalValue, finalVelocity,
+                        allEnded)
+
+                // Check that the end listener didn't restart this property's animation.
+                if (isPropertyAnimating(property)) {
+                    return false
+                }
+            }
 
             // If all of the animations that this listener cares about have ended, run the end
             // actions unless the animation was canceled.
@@ -524,15 +707,15 @@ class PhysicsAnimator<T> private constructor (val target: T) {
     data class SpringConfig internal constructor(
         internal var stiffness: Float,
         internal var dampingRatio: Float,
-        internal var startVel: Float = 0f,
-        internal var finalPosition: Float = -Float.MAX_VALUE
+        internal var startVelocity: Float = 0f,
+        internal var finalPosition: Float = UNSET
     ) {
 
         constructor() :
                 this(defaultSpring.stiffness, defaultSpring.dampingRatio)
 
         constructor(stiffness: Float, dampingRatio: Float) :
-                this(stiffness = stiffness, dampingRatio = dampingRatio, startVel = 0f)
+                this(stiffness = stiffness, dampingRatio = dampingRatio, startVelocity = 0f)
 
         /** Apply these configuration settings to the given SpringAnimation. */
         internal fun applyToAnimation(anim: SpringAnimation) {
@@ -543,7 +726,7 @@ class PhysicsAnimator<T> private constructor (val target: T) {
                 finalPosition = this@SpringConfig.finalPosition
             }
 
-            if (startVel != 0f) anim.setStartVelocity(startVel)
+            if (startVelocity != 0f) anim.setStartVelocity(startVelocity)
         }
     }
 
@@ -556,7 +739,7 @@ class PhysicsAnimator<T> private constructor (val target: T) {
         internal var friction: Float,
         internal var min: Float,
         internal var max: Float,
-        internal var startVel: Float
+        internal var startVelocity: Float
     ) {
 
         constructor() : this(defaultFling.friction)
@@ -565,7 +748,7 @@ class PhysicsAnimator<T> private constructor (val target: T) {
                 this(friction, defaultFling.min, defaultFling.max)
 
         constructor(friction: Float, min: Float, max: Float) :
-                this(friction, min, max, startVel = 0f)
+                this(friction, min, max, startVelocity = 0f)
 
         /** Apply these configuration settings to the given FlingAnimation. */
         internal fun applyToAnimation(anim: FlingAnimation) {
@@ -573,7 +756,7 @@ class PhysicsAnimator<T> private constructor (val target: T) {
                 friction = this@FlingConfig.friction
                 setMinValue(min)
                 setMaxValue(max)
-                setStartVelocity(startVel)
+                setStartVelocity(startVelocity)
             }
         }
     }
@@ -626,6 +809,10 @@ class PhysicsAnimator<T> private constructor (val target: T) {
          *
          * @param target The animated object itself.
          * @param property The property whose animation has just ended.
+         * @param wasFling Whether this property ended after a fling animation (as opposed to a
+         * spring animation). If this property was animated via [flingThenSpring], this will be true
+         * if the fling animation did not reach the min/max bounds, decelerating to a stop
+         * naturally. It will be false if it hit the bounds and was sprung back.
          * @param canceled Whether the animation was explicitly canceled before it naturally ended.
          * @param finalValue The final value of the animated property.
          * @param finalVelocity The final velocity (in pixels per second) of the ended animation.
@@ -663,6 +850,7 @@ class PhysicsAnimator<T> private constructor (val target: T) {
         fun onAnimationEnd(
             target: T,
             property: FloatPropertyCompat<in T>,
+            wasFling: Boolean,
             canceled: Boolean,
             finalValue: Float,
             finalVelocity: Float,
