@@ -2797,6 +2797,18 @@
         <item>353</item>
     </string-array>
 
+    <!-- Ims supported call barring MMI code -->
+    <string-array translatable="false" name="config_callBarringMMI_for_ims">
+        <item>33</item>
+        <item>331</item>
+        <item>332</item>
+        <item>35</item>
+        <item>351</item>
+        <item>330</item>
+        <item>333</item>
+        <item>353</item>
+    </string-array>
+
     <!-- Override the default detection behavior for the framework method
          android.view.ViewConfiguration#hasPermanentMenuKey().
          Valid settings are:
