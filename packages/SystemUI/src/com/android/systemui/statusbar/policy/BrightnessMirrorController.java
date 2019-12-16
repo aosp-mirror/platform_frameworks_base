@@ -24,7 +24,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.NotificationPanelView;
+import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 
 import java.util.Objects;
@@ -38,16 +38,17 @@ public class BrightnessMirrorController
 
     private final StatusBarWindowView mStatusBarWindow;
     private final Consumer<Boolean> mVisibilityCallback;
-    private final NotificationPanelView mNotificationPanel;
+    private final NotificationPanelViewController mNotificationPanel;
     private final ArraySet<BrightnessMirrorListener> mBrightnessMirrorListeners = new ArraySet<>();
     private final int[] mInt2Cache = new int[2];
     private View mBrightnessMirror;
 
     public BrightnessMirrorController(StatusBarWindowView statusBarWindow,
+            NotificationPanelViewController notificationPanelViewController,
             @NonNull Consumer<Boolean> visibilityCallback) {
         mStatusBarWindow = statusBarWindow;
         mBrightnessMirror = statusBarWindow.findViewById(R.id.brightness_mirror);
-        mNotificationPanel = statusBarWindow.findViewById(R.id.notification_panel);
+        mNotificationPanel = notificationPanelViewController;
         mNotificationPanel.setPanelAlphaEndAction(() -> {
             mBrightnessMirror.setVisibility(View.INVISIBLE);
         });

@@ -133,7 +133,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     protected LockPatternUtils mLockPatternUtils;
     protected ViewMediatorCallback mViewMediatorCallback;
     protected StatusBar mStatusBar;
-    private NotificationPanelView mNotificationPanelView;
+    private NotificationPanelViewController mNotificationPanelViewController;
     private BiometricUnlockController mBiometricUnlockController;
 
     private ViewGroup mContainer;
@@ -224,7 +224,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public void registerStatusBar(StatusBar statusBar,
             ViewGroup container,
-            NotificationPanelView notificationPanelView,
+            NotificationPanelViewController notificationPanelViewController,
             BiometricUnlockController biometricUnlockController,
             DismissCallbackRegistry dismissCallbackRegistry,
             ViewGroup lockIconContainer, View notificationContainer,
@@ -239,8 +239,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mBouncer = SystemUIFactory.getInstance().createKeyguardBouncer(mContext,
                 mViewMediatorCallback, mLockPatternUtils, container, dismissCallbackRegistry,
                 mExpansionCallback, mKeyguardStateController, falsingManager, bypassController);
-        mNotificationPanelView = notificationPanelView;
-        notificationPanelView.addExpansionListener(this);
+        mNotificationPanelViewController = notificationPanelViewController;
+        notificationPanelViewController.addExpansionListener(this);
         mBypassController = bypassController;
         mNotificationContainer = notificationContainer;
     }
@@ -253,7 +253,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         // • The user quickly taps on the display and we show "swipe up to unlock."
         // • Keyguard will be dismissed by an action. a.k.a: FLAG_DISMISS_KEYGUARD_ACTIVITY
         // • Full-screen user switcher is displayed.
-        if (mNotificationPanelView.isUnlockHintRunning()) {
+        if (mNotificationPanelViewController.isUnlockHintRunning()) {
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
         } else if (bouncerNeedsScrimming()) {
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
@@ -284,7 +284,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             return;
         }
         boolean keyguardWithoutQs = mStatusBarStateController.getState() == StatusBarState.KEYGUARD
-                && !mNotificationPanelView.isQsExpanded();
+                && !mNotificationPanelViewController.isQsExpanded();
         boolean lockVisible = (mBouncer.isShowing() || keyguardWithoutQs)
                 && !mBouncer.isAnimatingAway() && !mKeyguardStateController.isKeyguardFadingAway();
 
@@ -555,7 +555,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         } else if (finishRunnable != null) {
             finishRunnable.run();
         }
-        mNotificationPanelView.blockExpansionForCurrentTouch();
+        mNotificationPanelViewController.blockExpansionForCurrentTouch();
         updateLockIcon();
     }
 
@@ -609,7 +609,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             hideBouncer(true /* destroyView */);
             if (wakeUnlockPulsing) {
                 if (needsFading) {
-                    ViewGroupFadeHelper.fadeOutAllChildrenExcept(mNotificationPanelView,
+                    ViewGroupFadeHelper.fadeOutAllChildrenExcept(
+                            mNotificationPanelViewController.getView(),
                             mNotificationContainer,
                             fadeoutDuration,
                                     () -> {
@@ -625,7 +626,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 if (!staying) {
                     mStatusBarWindowController.setKeyguardFadingAway(true);
                     if (needsFading) {
-                        ViewGroupFadeHelper.fadeOutAllChildrenExcept(mNotificationPanelView,
+                        ViewGroupFadeHelper.fadeOutAllChildrenExcept(
+                                mNotificationPanelViewController.getView(),
                                 mNotificationContainer,
                                 fadeoutDuration,
                                 () -> {
@@ -684,7 +686,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void onKeyguardFadedAway() {
         mContainer.postDelayed(() -> mStatusBarWindowController.setKeyguardFadingAway(false),
                 100);
-        ViewGroupFadeHelper.reset(mNotificationPanelView);
+        ViewGroupFadeHelper.reset(mNotificationPanelViewController.getView());
         mStatusBar.finishKeyguardFadingAway();
         mBiometricUnlockController.finishKeyguardFadingAway();
         WindowManagerGlobal.getInstance().trimMemory(

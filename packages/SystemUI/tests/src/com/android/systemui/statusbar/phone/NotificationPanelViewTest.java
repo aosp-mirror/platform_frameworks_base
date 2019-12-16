@@ -16,9 +16,13 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -26,37 +30,44 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.StatusBarManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.hardware.biometrics.BiometricSourceType;
+import android.os.PowerManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.KeyguardStatusView;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.util.LatencyTracker;
+import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.SystemUIFactory;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
-import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -70,6 +81,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 
 import java.util.function.Consumer;
 
@@ -84,8 +96,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private SysuiStatusBarStateController mStatusBarStateController;
     @Mock
     private NotificationStackScrollLayout mNotificationStackScrollLayout;
-    @Mock
-    private KeyguardStatusView mKeyguardStatusView;
     @Mock
     private KeyguardBottomAreaView mKeyguardBottomArea;
     @Mock
@@ -109,27 +119,89 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private PanelBar mPanelBar;
     @Mock
-    private KeyguardAffordanceHelper mAffordanceHelper;
-    @Mock
     private KeyguardUpdateMonitor mUpdateMonitor;
     @Mock
     private FalsingManager mFalsingManager;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
-    @Mock private DozeParameters mDozeParameters;
-    private NotificationPanelView mNotificationPanelView;
+    @Mock
+    private DozeParameters mDozeParameters;
+    @Mock
+    private NotificationPanelView mView;
+    @Mock
+    private InjectionInflationController mInjectionInflationController;
+    @Mock
+    private DynamicPrivacyController mDynamicPrivacyController;
+    @Mock
+    private PluginManager mPluginManager;
+    @Mock
+    private ShadeController mShadeController;
+    @Mock
+    private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
+    @Mock
+    private NotificationEntryManager mNotificationEntryManager;
+    @Mock
+    private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private DozeLog mDozeLog;
+    @Mock
+    private CommandQueue mCommandQueue;
+    @Mock
+    private VibratorHelper mVibratorHelper;
+    @Mock
+    private LatencyTracker mLatencyTracker;
+    @Mock
+    private PowerManager mPowerManager;
+    @Mock
+    private AccessibilityManager mAccessibilityManager;
+    @Mock
+    private MetricsLogger mMetricsLogger;
+    @Mock
+    private ActivityManager mActivityManager;
+    @Mock
+    private Resources mResources;
+    @Mock
+    private Configuration mConfiguration;
+    private DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+    @Mock
+    private KeyguardClockSwitch mKeyguardClockSwitch;
+    private PanelViewController.TouchHandler mTouchHandler;
+    @Mock
+    private ZenModeController mZenModeController;
+    @Mock
+    private ConfigurationController mConfigurationController;
+    private FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
+
+    private NotificationPanelViewController mNotificationPanelViewController;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        when(mHeadsUpCallback.getContext()).thenReturn(mContext);
+        when(mView.getResources()).thenReturn(mResources);
+        when(mResources.getConfiguration()).thenReturn(mConfiguration);
+        mConfiguration.orientation = ORIENTATION_PORTRAIT;
+        when(mResources.getDisplayMetrics()).thenReturn(mDisplayMetrics);
+        mDisplayMetrics.density = 100;
+        when(mResources.getBoolean(R.bool.config_enableNotificationShadeDrag)).thenReturn(true);
+        when(mView.getContext()).thenReturn(getContext());
+        when(mView.findViewById(R.id.keyguard_clock_container)).thenReturn(mKeyguardClockSwitch);
+        when(mView.findViewById(R.id.notification_stack_scroller))
+                .thenReturn(mNotificationStackScrollLayout);
         when(mNotificationStackScrollLayout.getHeight()).thenReturn(1000);
         when(mNotificationStackScrollLayout.getHeadsUpCallback()).thenReturn(mHeadsUpCallback);
-        when(mHeadsUpCallback.getContext()).thenReturn(mContext);
-        mDependency.injectTestDependency(StatusBarStateController.class,
-                mStatusBarStateController);
-        mDependency.injectTestDependency(KeyguardUpdateMonitor.class, mUpdateMonitor);
-        mDependency.injectMockDependency(ConfigurationController.class);
-        mDependency.injectMockDependency(ZenModeController.class);
+        when(mView.findViewById(R.id.keyguard_bottom_area)).thenReturn(mKeyguardBottomArea);
+        when(mKeyguardBottomArea.getLeftView()).thenReturn(mock(KeyguardAffordanceView.class));
+        when(mKeyguardBottomArea.getRightView()).thenReturn(mock(KeyguardAffordanceView.class));
+        when(mView.findViewById(R.id.big_clock_container)).thenReturn(mBigClockContainer);
+        when(mView.findViewById(R.id.qs_frame)).thenReturn(mQsFrame);
+        mFlingAnimationUtilsBuilder = new FlingAnimationUtils.Builder(mDisplayMetrics);
+
+        doAnswer((Answer<Void>) invocation -> {
+            mTouchHandler = invocation.getArgument(0);
+            return null;
+        }).when(mView).setOnTouchListener(any(PanelViewController.TouchHandler.class));
+
         NotificationWakeUpCoordinator coordinator =
                 new NotificationWakeUpCoordinator(
                         mock(HeadsUpManagerPhone.class),
@@ -143,18 +215,26 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mock(NotificationRoundnessManager.class),
                 mStatusBarStateController,
                 new FalsingManagerFake());
-        mNotificationPanelView = new TestableNotificationPanelView(coordinator, expansionHandler,
-                mKeyguardBypassController, mStatusBarStateController);
-        mNotificationPanelView.setHeadsUpManager(mHeadsUpManager);
-        mNotificationPanelView.setBar(mPanelBar);
-
-        when(mKeyguardBottomArea.getLeftView()).thenReturn(mock(KeyguardAffordanceView.class));
-        when(mKeyguardBottomArea.getRightView()).thenReturn(mock(KeyguardAffordanceView.class));
+        mNotificationPanelViewController = new NotificationPanelViewController(mView,
+                mInjectionInflationController,
+                coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
+                mFalsingManager, mPluginManager, mShadeController,
+                mNotificationLockscreenUserManager, mNotificationEntryManager,
+                mKeyguardStateController, mStatusBarStateController, mDozeLog,
+                mDozeParameters, mCommandQueue, mVibratorHelper,
+                mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
+                mMetricsLogger, mActivityManager, mZenModeController, mConfigurationController,
+                mFlingAnimationUtilsBuilder);
+        mNotificationPanelViewController.initDependencies(mStatusBar, mGroupManager,
+                mNotificationShelf, mNotificationAreaController, mScrimController);
+        mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
+        mNotificationPanelViewController.setBar(mPanelBar);
     }
 
     @Test
     public void testSetDozing_notifiesNsslAndStateController() {
-        mNotificationPanelView.setDozing(true /* dozing */, true /* animate */, null /* touch */);
+        mNotificationPanelViewController.setDozing(true /* dozing */, true /* animate */,
+                null /* touch */);
         InOrder inOrder = inOrder(mNotificationStackScrollLayout, mStatusBarStateController);
         inOrder.verify(mNotificationStackScrollLayout).setDozing(eq(true), eq(true), eq(null));
         inOrder.verify(mStatusBarStateController).setDozeAmount(eq(1f), eq(true));
@@ -162,103 +242,63 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
     @Test
     public void testSetExpandedHeight() {
-        mNotificationPanelView.setExpandedHeight(200);
-        assertThat((int) mNotificationPanelView.getExpandedHeight()).isEqualTo(200);
+        mNotificationPanelViewController.setExpandedHeight(200);
+        assertThat((int) mNotificationPanelViewController.getExpandedHeight()).isEqualTo(200);
     }
 
     @Test
     public void testAffordanceLaunchingListener() {
         Consumer<Boolean> listener = spy((showing) -> { });
-        mNotificationPanelView.setExpandedFraction(1f);
-        mNotificationPanelView.setLaunchAffordanceListener(listener);
-        mNotificationPanelView.launchCamera(false /* animate */,
+        mNotificationPanelViewController.setExpandedFraction(1f);
+        mNotificationPanelViewController.setLaunchAffordanceListener(listener);
+        mNotificationPanelViewController.launchCamera(false /* animate */,
                 StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP);
         verify(listener).accept(eq(true));
 
-        mNotificationPanelView.onAffordanceLaunchEnded();
+        mNotificationPanelViewController.onAffordanceLaunchEnded();
         verify(listener).accept(eq(false));
     }
 
     @Test
     public void testOnTouchEvent_expansionCanBeBlocked() {
-        mNotificationPanelView.onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+        onTouchEvent(MotionEvent.obtain(0L /* downTime */,
                 0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
                 0 /* metaState */));
-        mNotificationPanelView.onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+        onTouchEvent(MotionEvent.obtain(0L /* downTime */,
                 0L /* eventTime */, MotionEvent.ACTION_MOVE, 0f /* x */, 200f /* y */,
                 0 /* metaState */));
-        assertThat((int) mNotificationPanelView.getExpandedHeight()).isEqualTo(200);
-        assertThat(mNotificationPanelView.isTrackingBlocked()).isFalse();
+        assertThat((int) mNotificationPanelViewController.getExpandedHeight()).isEqualTo(200);
+        assertThat(mNotificationPanelViewController.isTrackingBlocked()).isFalse();
 
-        mNotificationPanelView.blockExpansionForCurrentTouch();
-        mNotificationPanelView.onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+        mNotificationPanelViewController.blockExpansionForCurrentTouch();
+        onTouchEvent(MotionEvent.obtain(0L /* downTime */,
                 0L /* eventTime */, MotionEvent.ACTION_MOVE, 0f /* x */, 300f /* y */,
                 0 /* metaState */));
         // Expansion should not have changed because it was blocked
-        assertThat((int) mNotificationPanelView.getExpandedHeight()).isEqualTo(200);
-        assertThat(mNotificationPanelView.isTrackingBlocked()).isTrue();
+        assertThat((int) mNotificationPanelViewController.getExpandedHeight()).isEqualTo(200);
+        assertThat(mNotificationPanelViewController.isTrackingBlocked()).isTrue();
 
-        mNotificationPanelView.onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+        onTouchEvent(MotionEvent.obtain(0L /* downTime */,
                 0L /* eventTime */, MotionEvent.ACTION_UP, 0f /* x */, 300f /* y */,
                 0 /* metaState */));
-        assertThat(mNotificationPanelView.isTrackingBlocked()).isFalse();
+        assertThat(mNotificationPanelViewController.isTrackingBlocked()).isFalse();
     }
 
     @Test
     public void testKeyguardStatusBarVisibility_hiddenForBypass() {
         when(mUpdateMonitor.shouldListenForFace()).thenReturn(true);
-        mNotificationPanelView.mKeyguardUpdateCallback.onBiometricRunningStateChanged(true,
-                BiometricSourceType.FACE);
+        mNotificationPanelViewController.mKeyguardUpdateCallback.onBiometricRunningStateChanged(
+                true, BiometricSourceType.FACE);
         verify(mKeyguardStatusBar, never()).setVisibility(View.VISIBLE);
 
         when(mKeyguardBypassController.getBypassEnabled()).thenReturn(true);
-        mNotificationPanelView.mKeyguardUpdateCallback.onFinishedGoingToSleep(0);
-        mNotificationPanelView.mKeyguardUpdateCallback.onBiometricRunningStateChanged(true,
-                BiometricSourceType.FACE);
+        mNotificationPanelViewController.mKeyguardUpdateCallback.onFinishedGoingToSleep(0);
+        mNotificationPanelViewController.mKeyguardUpdateCallback.onBiometricRunningStateChanged(
+                true, BiometricSourceType.FACE);
         verify(mKeyguardStatusBar, never()).setVisibility(View.VISIBLE);
     }
 
-    private class TestableNotificationPanelView extends NotificationPanelView {
-        TestableNotificationPanelView(NotificationWakeUpCoordinator coordinator,
-                PulseExpansionHandler expansionHandler,
-                KeyguardBypassController bypassController,
-                SysuiStatusBarStateController statusBarStateController) {
-            super(
-                    NotificationPanelViewTest.this.mContext,
-                    null,
-                    new InjectionInflationController(
-                            SystemUIFactory.getInstance().getRootComponent()),
-                    coordinator,
-                    expansionHandler,
-                    mock(DynamicPrivacyController.class),
-                    bypassController,
-                    mFalsingManager,
-                    mock(PluginManager.class),
-                    mock(ShadeController.class),
-                    mock(NotificationLockscreenUserManager.class),
-                    new NotificationEntryManager(
-                            mock(NotifLog.class),
-                            mock(NotificationGroupManager.class),
-                            mock(NotificationRankingManager.class),
-                            mock(NotificationEntryManager.KeyguardEnvironment.class)),
-                    mock(KeyguardStateController.class),
-                    statusBarStateController,
-                    mock(DozeLog.class),
-                    mDozeParameters,
-                    new CommandQueue(NotificationPanelViewTest.this.mContext));
-            mNotificationStackScroller = mNotificationStackScrollLayout;
-            mKeyguardStatusView = NotificationPanelViewTest.this.mKeyguardStatusView;
-            mKeyguardStatusBar = NotificationPanelViewTest.this.mKeyguardStatusBar;
-            mKeyguardBottomArea = NotificationPanelViewTest.this.mKeyguardBottomArea;
-            mBigClockContainer = NotificationPanelViewTest.this.mBigClockContainer;
-            mQsFrame = NotificationPanelViewTest.this.mQsFrame;
-            mAffordanceHelper = NotificationPanelViewTest.this.mAffordanceHelper;
-            initDependencies(NotificationPanelViewTest.this.mStatusBar,
-                    NotificationPanelViewTest.this.mGroupManager,
-                    NotificationPanelViewTest.this.mNotificationShelf,
-                    NotificationPanelViewTest.this.mHeadsUpManager,
-                    NotificationPanelViewTest.this.mNotificationAreaController,
-                    NotificationPanelViewTest.this.mScrimController);
-        }
+    private void onTouchEvent(MotionEvent ev) {
+        mTouchHandler.onTouch(mView, ev);
     }
 }
