@@ -4991,7 +4991,7 @@ public abstract class Context {
      * {@link android.os.incremental.IncrementalManager}.
      * @hide
      */
-    public static final String INCREMENTAL_SERVICE = "incremental";
+    public static final String INCREMENTAL_SERVICE = "incremental_service";
 
     /**
      * Determine whether the given permission is allowed for a particular

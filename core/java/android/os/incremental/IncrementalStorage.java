@@ -24,11 +24,11 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Provides operations on an Incremental File System directory, using IncrementalService. Example
- * usage:
+ * Provides operations on an Incremental File System directory, using IncrementalServiceNative.
+ * Example usage:
  *
  * <blockquote><pre>
- * IncrementalManager manager = (IncrementalManager) getSystemService(Context.INCREMENTAL_MANAGER);
+ * IncrementalManager manager = (IncrementalManager) getSystemService(Context.INCREMENTAL_SERVICE);
  * IncrementalStorage storage = manager.openStorage("/path/to/incremental/dir");
  * storage.makeDirectory("subdir");
  * </pre></blockquote>
@@ -38,10 +38,10 @@ import java.io.IOException;
 public final class IncrementalStorage {
     private static final String TAG = "IncrementalStorage";
     private final int mId;
-    private final IIncrementalManager mService;
+    private final IIncrementalManagerNative mService;
 
 
-    public IncrementalStorage(@NonNull IIncrementalManager is, int id) {
+    public IncrementalStorage(@NonNull IIncrementalManagerNative is, int id) {
         mService = is;
         mId = id;
     }
@@ -72,7 +72,7 @@ public final class IncrementalStorage {
             throws IOException {
         try {
             int res = mService.makeBindMount(mId, sourcePathUnderStorage, targetPath,
-                    IIncrementalManager.BIND_TEMPORARY);
+                    IIncrementalManagerNative.BIND_TEMPORARY);
             if (res < 0) {
                 throw new IOException("bind() failed with errno " + -res);
             }
@@ -103,7 +103,7 @@ public final class IncrementalStorage {
             throws IOException {
         try {
             int res = mService.makeBindMount(mId, sourcePathUnderStorage, targetPath,
-                    IIncrementalManager.BIND_PERMANENT);
+                    IIncrementalManagerNative.BIND_PERMANENT);
             if (res < 0) {
                 throw new IOException("bind() permanent failed with errno " + -res);
             }
@@ -274,7 +274,8 @@ public final class IncrementalStorage {
             throw new IOException("moveDir() requires that destination dir already exists.");
         }
         try {
-            int res = mService.makeBindMount(mId, "", destPath, IIncrementalManager.BIND_PERMANENT);
+            int res = mService.makeBindMount(mId, "", destPath,
+                    IIncrementalManagerNative.BIND_PERMANENT);
             if (res < 0) {
                 throw new IOException("moveDir() failed at making bind mount, errno " + -res);
             }

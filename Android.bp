@@ -810,8 +810,8 @@ cc_library {
 filegroup {
     name: "incremental_aidl",
     srcs: [
+        "core/java/android/os/incremental/IIncrementalManagerNative.aidl",
         "core/java/android/os/incremental/IIncrementalManager.aidl",
-        "core/java/android/os/incremental/IIncrementalServiceProxy.aidl",
         "core/java/android/os/incremental/IncrementalDataLoaderParamsParcel.aidl",
         "core/java/android/os/incremental/IncrementalFileSystemControlParcel.aidl",
         "core/java/android/os/incremental/NamedParcelFileDescriptor.aidl",
