@@ -30,6 +30,7 @@ import android.os.UserHandle;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
@@ -114,11 +115,7 @@ public class EmergencyButton extends Button {
         super.onFinishInflate();
         mLockPatternUtils = new LockPatternUtils(mContext);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                takeEmergencyCallAction();
-            }
-        });
+        setOnClickListener(v -> takeEmergencyCallAction());
         setOnLongClickListener(new OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -168,9 +165,9 @@ public class EmergencyButton extends Button {
      */
     public void takeEmergencyCallAction() {
         MetricsLogger.action(mContext, MetricsEvent.ACTION_EMERGENCY_CALL);
-        // TODO: implement a shorter timeout once new PowerManager API is ready.
-        // should be the equivalent to the old userActivity(EMERGENCY_CALL_TIMEOUT)
-        mPowerManager.userActivity(SystemClock.uptimeMillis(), true);
+        if (mPowerManager != null) {
+            mPowerManager.userActivity(SystemClock.uptimeMillis(), true);
+        }
         try {
             ActivityTaskManager.getService().stopSystemLockTaskMode();
         } catch (RemoteException e) {
@@ -182,10 +179,19 @@ public class EmergencyButton extends Button {
                 mEmergencyButtonCallback.onEmergencyButtonClickedWhenInCall();
             }
         } else {
-            Dependency.get(KeyguardUpdateMonitor.class).reportEmergencyCallAction(
-                    true /* bypassHandler */);
+            KeyguardUpdateMonitor updateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
+            if (updateMonitor != null) {
+                updateMonitor.reportEmergencyCallAction(true /* bypassHandler */);
+            } else {
+                Log.w(LOG_TAG, "KeyguardUpdateMonitor was null, launching intent anyway.");
+            }
+            TelecomManager telecomManager = getTelecommManager();
+            if (telecomManager == null) {
+                Log.wtf(LOG_TAG, "TelecomManager was null, cannot launch emergency dialer");
+                return;
+            }
             Intent emergencyDialIntent =
-                    getTelecommManager().createLaunchEmergencyDialerIntent(null /* number*/)
+                    telecomManager.createLaunchEmergencyDialerIntent(null /* number*/)
                             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                                     | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
                                     | Intent.FLAG_ACTIVITY_CLEAR_TOP)
