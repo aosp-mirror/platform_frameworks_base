@@ -4821,6 +4821,8 @@ public abstract class Context {
      * {@link android.telephony.ims.ImsManager}.
      * @hide
      */
+    @SystemApi
+    @TestApi
     public static final String TELEPHONY_IMS_SERVICE = "telephony_ims";
 
     /**

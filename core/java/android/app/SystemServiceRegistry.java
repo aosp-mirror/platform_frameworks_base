@@ -1245,6 +1245,14 @@ final class SystemServiceRegistry {
                         return new TimeZoneDetector();
                     }});
 
+        registerService(Context.TELEPHONY_IMS_SERVICE, android.telephony.ims.ImsManager.class,
+                new CachedServiceFetcher<android.telephony.ims.ImsManager>() {
+                    @Override
+                    public android.telephony.ims.ImsManager createService(ContextImpl ctx) {
+                        return new android.telephony.ims.ImsManager(ctx.getOuterContext());
+                    }
+                });
+
         registerService(Context.PERMISSION_SERVICE, PermissionManager.class,
                 new CachedServiceFetcher<PermissionManager>() {
                     @Override
