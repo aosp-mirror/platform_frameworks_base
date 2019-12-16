@@ -222,6 +222,8 @@ public class SystemConfig {
     private ArrayMap<String, Set<String>> mPackageToUserTypeWhitelist = new ArrayMap<>();
     private ArrayMap<String, Set<String>> mPackageToUserTypeBlacklist = new ArrayMap<>();
 
+    private final ArraySet<String> mRollbackWhitelistedPackages = new ArraySet<>();
+
     /**
      * Map of system pre-defined, uniquely named actors; keys are namespace,
      * value maps actor name to package name.
@@ -380,6 +382,10 @@ public class SystemConfig {
 
     public ArraySet<String> getBugreportWhitelistedPackages() {
         return mBugreportWhitelistedPackages;
+    }
+
+    public Set<String> getRollbackWhitelistedPackages() {
+        return mRollbackWhitelistedPackages;
     }
 
     /**
@@ -1075,6 +1081,16 @@ public class SystemConfig {
                             }
 
                             nameToPkgMap.put(actorName, pkgName);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "rollback-whitelisted-app": {
+                        String pkgname = parser.getAttributeValue(null, "package");
+                        if (pkgname == null) {
+                            Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            mRollbackWhitelistedPackages.add(pkgname);
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
