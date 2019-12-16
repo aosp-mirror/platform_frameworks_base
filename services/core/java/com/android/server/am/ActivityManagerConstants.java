@@ -131,6 +131,12 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED =
             "default_background_activity_starts_enabled";
 
+    /**
+     * Default value for mFlagBackgroundFgsStartRestrictionEnabled if not explicitly set in
+     * Settings.Global.
+     */
+    private static final String KEY_DEFAULT_BACKGROUND_FGS_STARTS_RESTRICTION_ENABLED =
+            "default_background_fgs_starts_restriction_enabled";
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -262,6 +268,16 @@ final class ActivityManagerConstants extends ContentObserver {
     // If not set explicitly the default is controlled by DeviceConfig.
     volatile boolean mFlagBackgroundActivityStartsEnabled;
 
+    // Indicates whether foreground service starts logging is enabled.
+    // Controlled by Settings.Global.FOREGROUND_SERVICE_STARTS_LOGGING_ENABLED
+    volatile boolean mFlagForegroundServiceStartsLoggingEnabled;
+
+    // Indicates whether the foreground service background start restriction is enabled.
+    // When the restriction is enabled, foreground service started from background will not have
+    // while-in-use permissions like location, camera and microphone. (The foreground service can be
+    // started, the restriction is on while-in-use permissions.)
+    volatile boolean mFlagBackgroundFgsStartRestrictionEnabled;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -332,6 +348,10 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final Uri ACTIVITY_STARTS_LOGGING_ENABLED_URI = Settings.Global.getUriFor(
                 Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED);
 
+    private static final Uri FOREGROUND_SERVICE_STARTS_LOGGING_ENABLED_URI =
+                Settings.Global.getUriFor(
+                        Settings.Global.FOREGROUND_SERVICE_STARTS_LOGGING_ENABLED);
+
     private static final Uri ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI =
             Settings.Global.getUriFor(Settings.Global.ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS);
 
@@ -349,6 +369,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED:
                                 updateBackgroundActivityStarts();
+                                break;
+                            case KEY_DEFAULT_BACKGROUND_FGS_STARTS_RESTRICTION_ENABLED:
+                                updateBackgroundFgsStartsRestriction();
                                 break;
                             case KEY_OOMADJ_UPDATE_POLICY:
                                 updateOomAdjUpdatePolicy();
@@ -388,6 +411,8 @@ final class ActivityManagerConstants extends ContentObserver {
         mResolver = resolver;
         mResolver.registerContentObserver(ACTIVITY_MANAGER_CONSTANTS_URI, false, this);
         mResolver.registerContentObserver(ACTIVITY_STARTS_LOGGING_ENABLED_URI, false, this);
+        mResolver.registerContentObserver(FOREGROUND_SERVICE_STARTS_LOGGING_ENABLED_URI,
+                false, this);
         if (mSystemServerAutomaticHeapDumpEnabled) {
             mResolver.registerContentObserver(ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI,
                     false, this);
@@ -402,6 +427,8 @@ final class ActivityManagerConstants extends ContentObserver {
         updateMaxCachedProcesses();
         updateActivityStartsLoggingEnabled();
         updateBackgroundActivityStarts();
+        updateForegroundServiceStartsLoggingEnabled();
+        updateBackgroundFgsStartsRestriction();
         updateOomAdjUpdatePolicy();
         updateImperceptibleKillExemptions();
     }
@@ -426,6 +453,8 @@ final class ActivityManagerConstants extends ContentObserver {
             updateConstants();
         } else if (ACTIVITY_STARTS_LOGGING_ENABLED_URI.equals(uri)) {
             updateActivityStartsLoggingEnabled();
+        } else if (FOREGROUND_SERVICE_STARTS_LOGGING_ENABLED_URI.equals(uri)) {
+            updateForegroundServiceStartsLoggingEnabled();
         } else if (ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI.equals(uri)) {
             updateEnableAutomaticSystemServerHeapDumps();
         }
@@ -520,6 +549,18 @@ final class ActivityManagerConstants extends ContentObserver {
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED,
                 /*defaultValue*/ false);
+    }
+
+    private void updateForegroundServiceStartsLoggingEnabled() {
+        mFlagForegroundServiceStartsLoggingEnabled = Settings.Global.getInt(mResolver,
+                Settings.Global.FOREGROUND_SERVICE_STARTS_LOGGING_ENABLED, 1) == 1;
+    }
+
+    private void updateBackgroundFgsStartsRestriction() {
+        mFlagBackgroundFgsStartRestrictionEnabled = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DEFAULT_BACKGROUND_FGS_STARTS_RESTRICTION_ENABLED,
+                /*defaultValue*/ true);
     }
 
     private void updateOomAdjUpdatePolicy() {

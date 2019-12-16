@@ -135,6 +135,16 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     private Runnable mStartedWhitelistingBgActivityStartsCleanUp;
     private ProcessRecord mAppForStartedWhitelistingBgActivityStarts;
 
+    // allow while-in-use permissions in foreground service or not.
+    // while-in-use permissions in FGS started from background might be restricted.
+    boolean mAllowWhileInUsePermissionInFgs;
+    // information string what/why service is denied while-in-use permissions when
+    // foreground service is started from background.
+    // TODO: remove this field after feature development is done
+    String mInfoDenyWhileInUsePermissionInFgs;
+    // the most recent package that start/bind this service.
+    String mRecentCallingPackage;
+
     String stringName;      // caching of toString
 
     private int lastStartId;    // identifier of most recent start request.
@@ -293,6 +303,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         ProtoUtils.toDuration(proto, ServiceRecordProto.LAST_ACTIVITY_TIME, lastActivity, now);
         ProtoUtils.toDuration(proto, ServiceRecordProto.RESTART_TIME, restartTime, now);
         proto.write(ServiceRecordProto.CREATED_FROM_FG, createdFromFg);
+        proto.write(ServiceRecordProto.ALLOW_WHILE_IN_USE_PERMISSION_IN_FGS,
+                mAllowWhileInUsePermissionInFgs);
 
         if (startRequested || delayedStop || lastStartId != 0) {
             long startToken = proto.start(ServiceRecordProto.START);
@@ -388,6 +400,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (mHasStartedWhitelistingBgActivityStarts) {
             pw.print(prefix); pw.print("hasStartedWhitelistingBgActivityStarts=");
             pw.println(mHasStartedWhitelistingBgActivityStarts);
+        }
+        if (mAllowWhileInUsePermissionInFgs) {
+            pw.print(prefix); pw.print("allowWhileInUsePermissionInFgs=");
+            pw.println(mAllowWhileInUsePermissionInFgs);
         }
         if (delayed) {
             pw.print(prefix); pw.print("delayed="); pw.println(delayed);
