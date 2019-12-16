@@ -25,6 +25,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -498,6 +499,19 @@ public class SystemConfig {
                 Environment.getSystemExtDirectory(), "etc", "sysconfig"), ALLOW_ALL);
         readPermissions(Environment.buildPath(
                 Environment.getSystemExtDirectory(), "etc", "permissions"), ALLOW_ALL);
+
+        // Skip loading configuration from apex if it is not a system process.
+        if (!isSystemProcess()) {
+            return;
+        }
+        // Read configuration of libs from apex module.
+        // TODO: Use a solid way to filter apex module folders?
+        for (File f: FileUtils.listFilesOrEmpty(Environment.getApexDirectory())) {
+            if (f.isFile() || f.getPath().contains("@")) {
+                continue;
+            }
+            readPermissions(Environment.buildPath(f, "etc", "permissions"), ALLOW_LIBS);
+        }
     }
 
     @VisibleForTesting
