@@ -324,6 +324,7 @@ public class SettingsBackupTest {
                     Settings.Global.LOW_POWER_MODE_SUGGESTION_PARAMS,
                     Settings.Global.LTE_SERVICE_FORCED,
                     Settings.Global.LID_BEHAVIOR,
+                    Settings.Global.MAX_ERROR_BYTES_PREFIX,
                     Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
                     Settings.Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
                     Settings.Global.MDC_INITIAL_MAX_RETRY,
