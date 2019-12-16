@@ -28,6 +28,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.annotation.NonNull;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -158,6 +159,23 @@ public class ActivityManagerWrapper {
         } else {
             return new ThumbnailData();
         }
+    }
+
+    /**
+     * Removes the outdated snapshot of home task.
+     */
+    public void invalidateHomeTaskSnapshot(final Activity homeActivity) {
+        mBackgroundExecutor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ActivityTaskManager.getService().invalidateHomeTaskSnapshot(
+                            homeActivity.getActivityToken());
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failed to invalidate home snapshot", e);
+                }
+            }
+        });
     }
 
     /**
