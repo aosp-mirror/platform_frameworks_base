@@ -44,9 +44,7 @@
 
 namespace android {
 
-// returns true if rowBytes * height can be represented by a positive int32_t value
-// and places that value in size.
-static bool computeAllocationSize(size_t rowBytes, int height, size_t* size) {
+bool Bitmap::computeAllocationSize(size_t rowBytes, int height, size_t* size) {
     return 0 <= height && height <= std::numeric_limits<size_t>::max() &&
            !__builtin_mul_overflow(rowBytes, (size_t)height, size) &&
            *size <= std::numeric_limits<int32_t>::max();
@@ -66,7 +64,7 @@ static sk_sp<Bitmap> allocateBitmap(SkBitmap* bitmap, AllocPixelRef alloc) {
     // we must respect the rowBytes value already set on the bitmap instead of
     // attempting to compute our own.
     const size_t rowBytes = bitmap->rowBytes();
-    if (!computeAllocationSize(rowBytes, bitmap->height(), &size)) {
+    if (!Bitmap::computeAllocationSize(rowBytes, bitmap->height(), &size)) {
         return nullptr;
     }
 

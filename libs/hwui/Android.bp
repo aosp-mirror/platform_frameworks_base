@@ -176,6 +176,7 @@ cc_defaults {
         "hwui/AnimatedImageThread.cpp",
         "hwui/Bitmap.cpp",
         "hwui/Canvas.cpp",
+        "hwui/ImageDecoder.cpp",
         "hwui/MinikinSkia.cpp",
         "hwui/MinikinUtils.cpp",
         "hwui/PaintImpl.cpp",
