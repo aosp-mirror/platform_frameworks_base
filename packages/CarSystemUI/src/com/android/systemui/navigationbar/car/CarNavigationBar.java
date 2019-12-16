@@ -278,6 +278,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             leftlp.windowAnimations = 0;
             leftlp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
             leftlp.gravity = Gravity.LEFT;
+            leftlp.setFitWindowInsetsTypes(0 /* types */);
             mWindowManager.addView(mLeftNavigationBarWindow, leftlp);
         }
         if (mRightNavigationBarWindow != null) {
@@ -295,6 +296,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             rightlp.windowAnimations = 0;
             rightlp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
             rightlp.gravity = Gravity.RIGHT;
+            rightlp.setFitWindowInsetsTypes(0 /* types */);
             mWindowManager.addView(mRightNavigationBarWindow, rightlp);
         }
     }

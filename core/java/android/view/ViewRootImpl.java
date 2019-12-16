@@ -19,12 +19,29 @@ package android.view;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
+import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE;
+import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
 import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
+import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 
 import android.Manifest;
@@ -93,6 +110,7 @@ import android.view.SurfaceControl.Transaction;
 import android.view.View.AttachInfo;
 import android.view.View.FocusDirection;
 import android.view.View.MeasureSpec;
+import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.accessibility.AccessibilityEvent;
@@ -118,6 +136,7 @@ import android.widget.Scroller;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.PhoneFallbackEventHandler;
@@ -519,6 +538,9 @@ public final class ViewRootImpl implements ViewParent,
 
     private WindowInsets mLastWindowInsets;
 
+    // Insets types hidden by legacy window flags or system UI flags.
+    private @InsetsType int mTypesHiddenByFlags = 0;
+
     /** Last applied configuration obtained from resources. */
     private final Configuration mLastConfigurationFromResources = new Configuration();
     /** Last configuration reported from WM or via {@link #MSG_UPDATE_CONFIGURATION}. */
@@ -890,6 +912,7 @@ public final class ViewRootImpl implements ViewParent,
                     mOrigWindowType = mWindowAttributes.type;
                     mAttachInfo.mRecomputeGlobalAttributes = true;
                     collectViewAttributes();
+                    adjustLayoutParamsForCompatibility(mWindowAttributes);
                     res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(), mTmpFrame,
                             mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,
@@ -1841,13 +1864,94 @@ public final class ViewRootImpl implements ViewParent,
     private int getImpliedSystemUiVisibility(WindowManager.LayoutParams params) {
         int vis = 0;
         // Translucent decor window flags imply stable system ui visibility.
-        if ((params.flags & WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS) != 0) {
+        if ((params.flags & FLAG_TRANSLUCENT_STATUS) != 0) {
             vis |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
         }
-        if ((params.flags & WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION) != 0) {
+        if ((params.flags & FLAG_TRANSLUCENT_NAVIGATION) != 0) {
             vis |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
         }
         return vis;
+    }
+
+    @VisibleForTesting
+    public static void adjustLayoutParamsForCompatibility(WindowManager.LayoutParams inOutParams) {
+        if (sNewInsetsMode != NEW_INSETS_MODE_FULL) {
+            return;
+        }
+        final int sysUiVis = inOutParams.systemUiVisibility | inOutParams.subtreeSystemUiVisibility;
+        final int flags = inOutParams.flags;
+        final int type = inOutParams.type;
+        final int adjust = inOutParams.softInputMode & SOFT_INPUT_MASK_ADJUST;
+
+        if ((sysUiVis & SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0) {
+            inOutParams.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+        } else if ((sysUiVis & SYSTEM_UI_FLAG_IMMERSIVE) != 0) {
+            inOutParams.insetsFlags.behavior = BEHAVIOR_SHOW_BARS_BY_SWIPE;
+        }
+
+        if ((inOutParams.privateFlags & PRIVATE_FLAG_FIT_INSETS_CONTROLLED) != 0) {
+            return;
+        }
+
+        int types = inOutParams.getFitWindowInsetsTypes();
+        int sides = inOutParams.getFitWindowInsetsSides();
+        boolean ignoreVis = inOutParams.getFitIgnoreVisibility();
+
+        if (((sysUiVis & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) != 0
+                || (flags & FLAG_LAYOUT_IN_SCREEN) != 0)
+                || (flags & FLAG_TRANSLUCENT_STATUS) != 0) {
+            types &= ~Type.statusBars();
+        }
+        if ((sysUiVis & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
+                || (flags & FLAG_TRANSLUCENT_NAVIGATION) != 0) {
+            types &= ~Type.systemBars();
+        }
+        if (type == TYPE_TOAST || type == TYPE_SYSTEM_ALERT) {
+            ignoreVis = true;
+        } else if ((types & Type.systemBars()) == Type.systemBars()
+                && adjust == SOFT_INPUT_ADJUST_RESIZE) {
+            types |= Type.ime();
+        }
+        inOutParams.setFitWindowInsetsTypes(types);
+        inOutParams.setFitWindowInsetsSides(sides);
+        inOutParams.setFitIgnoreVisibility(ignoreVis);
+
+        // The fitting of insets are not really controlled by the clients, so we remove the flag.
+        inOutParams.privateFlags &= ~PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
+    }
+
+    private void controlInsetsForCompatibility(WindowManager.LayoutParams params) {
+        if (sNewInsetsMode != NEW_INSETS_MODE_FULL) {
+            return;
+        }
+        final int sysUiVis = params.systemUiVisibility | params.subtreeSystemUiVisibility;
+        final int flags = params.flags;
+        final boolean statusWasHiddenByFlags = (mTypesHiddenByFlags & Type.statusBars()) != 0;
+        final boolean statusIsHiddenByFlags = (sysUiVis & SYSTEM_UI_FLAG_FULLSCREEN) != 0
+                || (flags & FLAG_FULLSCREEN) != 0;
+        final boolean navWasHiddenByFlags = (mTypesHiddenByFlags & Type.navigationBars()) != 0;
+        final boolean navIsHiddenByFlags = (sysUiVis & SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
+
+        @InsetsType int typesToHide = 0;
+        @InsetsType int typesToShow = 0;
+        if (statusIsHiddenByFlags && !statusWasHiddenByFlags) {
+            typesToHide |= Type.statusBars();
+        } else if (!statusIsHiddenByFlags && statusWasHiddenByFlags) {
+            typesToShow |= Type.statusBars();
+        }
+        if (navIsHiddenByFlags && !navWasHiddenByFlags) {
+            typesToHide |= Type.navigationBars();
+        } else if (!navIsHiddenByFlags && navWasHiddenByFlags) {
+            typesToShow |= Type.navigationBars();
+        }
+        if (typesToHide != 0) {
+            getInsetsController().hide(typesToHide);
+        }
+        if (typesToShow != 0) {
+            getInsetsController().show(typesToShow);
+        }
+        mTypesHiddenByFlags |= typesToHide;
+        mTypesHiddenByFlags &= ~typesToShow;
     }
 
     private boolean measureHierarchy(final View host, final WindowManager.LayoutParams lp,
@@ -2271,6 +2375,8 @@ public final class ViewRootImpl implements ViewParent,
                     && !PixelFormat.formatHasAlpha(params.format)) {
                 params.format = PixelFormat.TRANSLUCENT;
             }
+            adjustLayoutParamsForCompatibility(params);
+            controlInsetsForCompatibility(params);
         }
 
         if (mFirst || windowShouldResize || insetsChanged ||
@@ -2757,7 +2863,7 @@ public final class ViewRootImpl implements ViewParent,
         if (changedVisibility || regainedFocus) {
             // Toasts are presented as notifications - don't present them as windows as well
             boolean isToast = (mWindowAttributes == null) ? false
-                    : (mWindowAttributes.type == WindowManager.LayoutParams.TYPE_TOAST);
+                    : (mWindowAttributes.type == TYPE_TOAST);
             if (!isToast) {
                 host.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
             }
@@ -4051,7 +4157,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     boolean scrollToRectOrFocus(Rect rectangle, boolean immediate) {
-        final Rect ci = mAttachInfo.mContentInsets;
+        final Rect ci = getWindowInsets(false).getSystemWindowInsetsAsRect();
         final Rect vi = mAttachInfo.mVisibleInsets;
         int scrollY = 0;
         boolean handled = false;

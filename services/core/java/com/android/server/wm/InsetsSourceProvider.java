@@ -141,9 +141,10 @@ class InsetsSourceProvider {
     }
 
     /**
-     * Called when a layout pass has occurred.
+     * The source frame can affect the layout of other windows, so this should be called once the
+     * window gets laid out.
      */
-    void onPostLayout() {
+    void updateSourceFrame() {
         if (mWin == null) {
             return;
         }
@@ -155,6 +156,17 @@ class InsetsSourceProvider {
             mTmpRect.inset(mWin.mGivenContentInsets);
         }
         mSource.setFrame(mTmpRect);
+    }
+
+    /**
+     * Called when a layout pass has occurred.
+     */
+    void onPostLayout() {
+        if (mWin == null) {
+            return;
+        }
+
+        updateSourceFrame();
         if (mControl != null) {
             final Rect frame = mWin.getWindowFrames().mFrame;
             if (mControl.setSurfacePosition(frame.left, frame.top)) {

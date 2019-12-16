@@ -240,7 +240,7 @@ class CarTrustAgentUnlockDialogHelper extends BroadcastReceiver{
     }
 
     private WindowManager.LayoutParams createLayoutParams() {
-        return new WindowManager.LayoutParams(
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
@@ -249,6 +249,8 @@ class CarTrustAgentUnlockDialogHelper extends BroadcastReceiver{
                         | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
                 PixelFormat.TRANSLUCENT
         );
+        attrs.setFitWindowInsetsTypes(0 /* types */);
+        return attrs;
     }
 
     private void logd(String message) {

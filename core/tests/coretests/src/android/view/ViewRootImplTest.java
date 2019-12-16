@@ -16,13 +16,25 @@
 
 package android.view;
 
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.view.WindowInsets.Side;
+import android.view.WindowInsets.Type;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -55,6 +67,8 @@ public class ViewRootImplTest {
 
     @Test
     public void negativeInsets_areSetToZero() throws Exception {
+        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
+
         mViewRootImpl.getAttachInfo().getContentInsets().set(-10, -20, -30 , -40);
         mViewRootImpl.getAttachInfo().getStableInsets().set(-10, -20, -30 , -40);
         final WindowInsets insets = mViewRootImpl.getWindowInsets(true /* forceConstruct */);
@@ -65,6 +79,8 @@ public class ViewRootImplTest {
 
     @Test
     public void negativeInsets_areSetToZero_positiveAreLeftAsIs() throws Exception {
+        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
+
         mViewRootImpl.getAttachInfo().getContentInsets().set(-10, 20, -30 , 40);
         mViewRootImpl.getAttachInfo().getStableInsets().set(10, -20, 30 , -40);
         final WindowInsets insets = mViewRootImpl.getWindowInsets(true /* forceConstruct */);
@@ -75,12 +91,88 @@ public class ViewRootImplTest {
 
     @Test
     public void positiveInsets_areLeftAsIs() throws Exception {
+        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
+
         mViewRootImpl.getAttachInfo().getContentInsets().set(10, 20, 30 , 40);
         mViewRootImpl.getAttachInfo().getStableInsets().set(10, 20, 30 , 40);
         final WindowInsets insets = mViewRootImpl.getWindowInsets(true /* forceConstruct */);
 
         assertThat(insets.getSystemWindowInsets(), equalTo(Insets.of(10, 20, 30, 40)));
         assertThat(insets.getStableInsets(), equalTo(Insets.of(10, 20, 30, 40)));
+    }
+
+    @Test
+    public void adjustLayoutParamsForInsets_layoutFullscreen() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
+        attrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+
+        assertEquals(0, attrs.getFitWindowInsetsTypes() & Type.statusBars());
+    }
+
+    @Test
+    public void adjustLayoutParamsForInsets_layoutInScreen() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
+        attrs.flags = FLAG_LAYOUT_IN_SCREEN;
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+
+        assertEquals(0, attrs.getFitWindowInsetsTypes() & Type.statusBars());
+    }
+
+    @Test
+    public void adjustLayoutParamsForInsets_layoutHideNavigation() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
+        attrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+
+        assertEquals(0, attrs.getFitWindowInsetsTypes() & Type.systemBars());
+    }
+
+    @Test
+    public void adjustLayoutParamsForInsets_toast() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_TOAST);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+
+        assertEquals(Type.systemBars(), attrs.getFitWindowInsetsTypes() & Type.systemBars());
+        assertEquals(true, attrs.getFitIgnoreVisibility());
+    }
+
+    @Test
+    public void adjustLayoutParamsForInsets_systemAlert() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_SYSTEM_ALERT);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+
+        assertEquals(Type.systemBars(), attrs.getFitWindowInsetsTypes() & Type.systemBars());
+        assertEquals(true, attrs.getFitIgnoreVisibility());
+    }
+
+    @Test
+    public void adjustLayoutParamsForInsets_noAdjust() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
+        final int types = Type.all();
+        final int sides = Side.TOP | Side.LEFT;
+        final boolean fitMaxInsets = true;
+        attrs.flags = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        attrs.setFitWindowInsetsTypes(types);
+        attrs.setFitWindowInsetsSides(sides);
+        attrs.setFitIgnoreVisibility(fitMaxInsets);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+
+        assertEquals(types, attrs.getFitWindowInsetsTypes());
+        assertEquals(sides, attrs.getFitWindowInsetsSides());
+        assertEquals(fitMaxInsets, attrs.getFitIgnoreVisibility());
     }
 
     private static class ViewRootImplAccessor {

@@ -45,7 +45,7 @@ class InsetsPolicy {
     private final IntArray mShowingTransientTypes = new IntArray();
 
     private WindowState mFocusedWin;
-    private BarWindow mTopBar = new BarWindow(StatusBarManager.WINDOW_STATUS_BAR);
+    private BarWindow mStatusBar = new BarWindow(StatusBarManager.WINDOW_STATUS_BAR);
     private BarWindow mNavBar = new BarWindow(StatusBarManager.WINDOW_NAVIGATION_BAR);
 
     InsetsPolicy(InsetsStateController stateController, DisplayContent displayContent) {
@@ -57,15 +57,15 @@ class InsetsPolicy {
     /** Updates the target which can control system bars. */
     void updateBarControlTarget(@Nullable WindowState focusedWin) {
         mFocusedWin = focusedWin;
-        mStateController.onBarControlTargetChanged(getTopControlTarget(focusedWin),
-                getFakeTopControlTarget(focusedWin),
+        mStateController.onBarControlTargetChanged(getStatusControlTarget(focusedWin),
+                getFakeStatusControlTarget(focusedWin),
                 getNavControlTarget(focusedWin),
                 getFakeNavControlTarget(focusedWin));
         if (ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL) {
             return;
         }
-        mTopBar.setVisible(focusedWin == null
-                || focusedWin != getTopControlTarget(focusedWin)
+        mStatusBar.setVisible(focusedWin == null
+                || focusedWin != getStatusControlTarget(focusedWin)
                 || focusedWin.getClientInsetsState().getSource(ITYPE_STATUS_BAR).isVisible());
         mNavBar.setVisible(focusedWin == null
                 || focusedWin != getNavControlTarget(focusedWin)
@@ -110,6 +110,10 @@ class InsetsPolicy {
         mStateController.notifyInsetsChanged();
     }
 
+    boolean isTransient(@InternalInsetsType int type) {
+        return mShowingTransientTypes.indexOf(type) != -1;
+    }
+
     /**
      * @see InsetsStateController#getInsetsForDispatch
      */
@@ -130,8 +134,8 @@ class InsetsPolicy {
         if (ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL) {
             return;
         }
-        if (windowState == getTopControlTarget(mFocusedWin)) {
-            mTopBar.setVisible(state.getSource(ITYPE_STATUS_BAR).isVisible());
+        if (windowState == getStatusControlTarget(mFocusedWin)) {
+            mStatusBar.setVisible(state.getSource(ITYPE_STATUS_BAR).isVisible());
         }
         if (windowState == getNavControlTarget(mFocusedWin)) {
             mNavBar.setVisible(state.getSource(ITYPE_NAVIGATION_BAR).isVisible());
@@ -164,7 +168,8 @@ class InsetsPolicy {
         }
     }
 
-    private @Nullable InsetsControlTarget getFakeTopControlTarget(@Nullable WindowState focused) {
+    private @Nullable InsetsControlTarget getFakeStatusControlTarget(
+            @Nullable WindowState focused) {
         if (mShowingTransientTypes.indexOf(ITYPE_STATUS_BAR) != -1) {
             return focused;
         }
@@ -178,7 +183,7 @@ class InsetsPolicy {
         return null;
     }
 
-    private @Nullable InsetsControlTarget getTopControlTarget(@Nullable WindowState focusedWin) {
+    private @Nullable InsetsControlTarget getStatusControlTarget(@Nullable WindowState focusedWin) {
         if (mShowingTransientTypes.indexOf(ITYPE_STATUS_BAR) != -1) {
             return mTransientControlTarget;
         }

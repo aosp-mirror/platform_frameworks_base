@@ -414,7 +414,7 @@ class TaskSnapshotController {
         final LayoutParams attrs = mainWindow.getAttrs();
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.systemUiVisibility, task.getTaskDescription(),
-                mFullSnapshotScale);
+                mFullSnapshotScale, mainWindow.getClientInsetsState());
         final int width = (int) (task.getBounds().width() * mFullSnapshotScale);
         final int height = (int) (task.getBounds().height() * mFullSnapshotScale);
 

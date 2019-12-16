@@ -46,6 +46,8 @@ import android.os.RemoteException;
 import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionManager;
+import android.view.WindowInsets.Side.InsetsSide;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.accessibility.AccessibilityEvent;
 
 import java.util.Collections;
@@ -1238,6 +1240,60 @@ public abstract class Window {
         attrs.dimAmount = amount;
         mHaveDimAmount = true;
         dispatchWindowAttributesChanged(attrs);
+    }
+
+    /**
+     * A shortcut for {@link WindowManager.LayoutParams#setFitWindowInsetsTypes(int)}
+     * @hide pending unhide
+     */
+    public void setFitWindowInsetsTypes(@InsetsType int types) {
+        final WindowManager.LayoutParams attrs = getAttributes();
+        attrs.setFitWindowInsetsTypes(types);
+        dispatchWindowAttributesChanged(attrs);
+    }
+
+    /**
+     * A shortcut for {@link WindowManager.LayoutParams#setFitWindowInsetsSides(int)}
+     * @hide pending unhide
+     */
+    public void setFitWindowInsetsSides(@InsetsSide int sides) {
+        final WindowManager.LayoutParams attrs = getAttributes();
+        attrs.setFitWindowInsetsSides(sides);
+        dispatchWindowAttributesChanged(attrs);
+    }
+
+    /**
+     * A shortcut for {@link WindowManager.LayoutParams#setFitIgnoreVisibility(boolean)}
+     * @hide pending unhide
+     */
+    public void setFitIgnoreVisibility(boolean ignore) {
+        final WindowManager.LayoutParams attrs = getAttributes();
+        attrs.setFitIgnoreVisibility(ignore);
+        dispatchWindowAttributesChanged(attrs);
+    }
+
+    /**
+     * A shortcut for {@link WindowManager.LayoutParams#getFitWindowInsetsTypes}
+     * @hide pending unhide
+     */
+    public @InsetsType int getFitWindowInsetsTypes() {
+        return getAttributes().getFitWindowInsetsTypes();
+    }
+
+    /**
+     * A shortcut for {@link WindowManager.LayoutParams#getFitWindowInsetsSides()}
+     * @hide pending unhide
+     */
+    public @InsetsSide int getFitWindowInsetsSides() {
+        return getAttributes().getFitWindowInsetsSides();
+    }
+
+    /**
+     * A shortcut for {@link WindowManager.LayoutParams#getFitIgnoreVisibility()}
+     * @hide pending unhide
+     */
+    public boolean getFitIgnoreVisibility() {
+        return getAttributes().getFitIgnoreVisibility();
     }
 
     /**

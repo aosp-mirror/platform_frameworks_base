@@ -34,6 +34,7 @@ import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.Window
+import android.view.WindowInsets.Type
 import android.view.WindowManager
 import android.widget.TextView
 import com.android.internal.annotations.VisibleForTesting
@@ -287,6 +288,7 @@ class ChannelEditorDialogController @Inject constructor(
                 setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                 addFlags(wmFlags)
                 setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL)
+                setFitWindowInsetsTypes(getFitWindowInsetsTypes() and Type.statusBars().inv())
                 setWindowAnimations(com.android.internal.R.style.Animation_InputMethod)
 
                 attributes = attributes.apply {
