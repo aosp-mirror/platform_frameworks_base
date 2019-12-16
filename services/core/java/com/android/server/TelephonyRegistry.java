@@ -1496,16 +1496,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyDataConnection(int state, boolean isDataAllowed, String apn, String apnType,
-                                     LinkProperties linkProperties,
-                                     NetworkCapabilities networkCapabilities, int networkType,
-                                     boolean roaming) {
-        notifyDataConnectionForSubscriber(SubscriptionManager.DEFAULT_PHONE_INDEX,
-                SubscriptionManager.DEFAULT_SUBSCRIPTION_ID,  state,
-                isDataAllowed, apn, apnType, linkProperties,
-                networkCapabilities, networkType, roaming);
-    }
-
     public void notifyDataConnectionForSubscriber(int phoneId, int subId, int state,
                                                   boolean isDataAllowed,
                                                   String apn, String apnType,
@@ -1572,12 +1562,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         broadcastDataConnectionStateChanged(state, isDataAllowed, apn, apnType, linkProperties,
                 networkCapabilities, roaming, subId);
-    }
-
-    public void notifyDataConnectionFailed(String apnType) {
-         notifyDataConnectionFailedForSubscriber(SubscriptionManager.DEFAULT_PHONE_INDEX,
-                 SubscriptionManager.DEFAULT_SUBSCRIPTION_ID,
-                 apnType);
     }
 
     public void notifyDataConnectionFailedForSubscriber(int phoneId, int subId, String apnType) {
