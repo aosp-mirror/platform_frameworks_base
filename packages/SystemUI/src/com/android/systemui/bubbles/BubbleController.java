@@ -103,7 +103,6 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -725,7 +724,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     @SuppressWarnings("FieldCanBeLocal")
     private final NotificationEntryListener mEntryListener = new NotificationEntryListener() {
         @Override
-        public void onPendingEntryAdded(NotificationEntry entry) {
+        public void onNotificationAdded(NotificationEntry entry) {
             boolean previouslyUserCreated = mUserCreatedBubbles.contains(entry.getKey());
             boolean wasAdjusted = BubbleExperimentConfig.adjustForExperiments(
                     mContext, entry, previouslyUserCreated);
