@@ -12,12 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package {
+    default_visibility: [ ":__pkg__" ]
+}
+
 filegroup {
     name: "framework-sdkext-sources",
     srcs: [
         "java/**/*.java",
     ],
     path: "java",
+    visibility: [ "//frameworks/base:__pkg__" ] // For the "global" stubs.
 }
 
 java_library {
@@ -27,6 +32,7 @@ java_library {
     libs: [ "framework-annotations-lib" ],
     permitted_packages: [ "android.os.ext" ],
     installable: true,
+    visibility: [ "//frameworks/base/apex/sdkext:__pkg__" ],
 }
 
 droidstubs {
@@ -58,4 +64,8 @@ java_library {
     name: "framework-sdkext-stubs-systemapi",
     srcs: [":framework-sdkext-droidstubs-systemapi"],
     sdk_version: "system_current",
+    visibility: [
+      "//frameworks/base:__pkg__", // Framework
+      "//frameworks/base/apex/sdkext:__pkg__", // sdkext SDK
+    ]
 }
