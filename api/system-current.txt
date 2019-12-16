@@ -2277,6 +2277,15 @@ package android.hardware {
 
 }
 
+package android.hardware.biometrics {
+
+  public static interface BiometricManager.Authenticators {
+    field public static final int BIOMETRIC_CONVENIENCE = 4095; // 0xfff
+    field public static final int EMPTY_SET = 0; // 0x0
+  }
+
+}
+
 package android.hardware.camera2 {
 
   public abstract class CameraDevice implements java.lang.AutoCloseable {
@@ -7126,6 +7135,7 @@ package android.provider {
     field public static final String NAMESPACE_APP_COMPAT = "app_compat";
     field public static final String NAMESPACE_ATTENTION_MANAGER_SERVICE = "attention_manager_service";
     field public static final String NAMESPACE_AUTOFILL = "autofill";
+    field public static final String NAMESPACE_BIOMETRICS = "biometrics";
     field public static final String NAMESPACE_CONNECTIVITY = "connectivity";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
     field @Deprecated public static final String NAMESPACE_DEX_BOOT = "dex_boot";

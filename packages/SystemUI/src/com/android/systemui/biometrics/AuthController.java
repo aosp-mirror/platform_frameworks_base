@@ -18,6 +18,7 @@ package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -29,7 +30,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
@@ -341,6 +341,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         if (DEBUG) Log.d(TAG, "hideAuthenticationDialog");
 
         mCurrentDialog.dismissFromSystemServer();
+
+        // BiometricService will have already sent the callback to the client in this case.
+        // This avoids a round trip to SystemUI. So, just dismiss the dialog and we're done.
+        mCurrentDialog = null;
     }
 
     private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {
@@ -416,7 +420,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     // TODO: Clean this up
                     Bundle bundle = (Bundle) mCurrentDialogArgs.arg1;
                     bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
-                            Authenticator.TYPE_CREDENTIAL);
+                            Authenticators.DEVICE_CREDENTIAL);
                 }
 
                 showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState);

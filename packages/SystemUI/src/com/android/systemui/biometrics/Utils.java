@@ -16,23 +16,21 @@
 
 package com.android.systemui.biometrics;
 
+import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
 
 import android.annotation.IntDef;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
 import android.os.UserManager;
 import android.util.DisplayMetrics;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.widget.LockPatternUtils;
-import com.android.systemui.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -71,12 +69,12 @@ public class Utils {
 
     static boolean isDeviceCredentialAllowed(Bundle biometricPromptBundle) {
         final int authenticators = getAuthenticators(biometricPromptBundle);
-        return (authenticators & Authenticator.TYPE_CREDENTIAL) != 0;
+        return (authenticators & Authenticators.DEVICE_CREDENTIAL) != 0;
     }
 
     static boolean isBiometricAllowed(Bundle biometricPromptBundle) {
         final int authenticators = getAuthenticators(biometricPromptBundle);
-        return (authenticators & Authenticator.TYPE_BIOMETRIC) != 0;
+        return (authenticators & Authenticators.BIOMETRIC_WEAK) != 0;
     }
 
     static int getAuthenticators(Bundle biometricPromptBundle) {

@@ -2471,6 +2471,8 @@
   <java-symbol type="string" name="face_authenticated_no_confirmation_required" />
   <java-symbol type="string" name="face_authenticated_confirmation_required" />
 
+  <java-symbol type="array" name="config_biometric_sensors" />
+
   <java-symbol type="array" name="config_face_acquire_enroll_ignorelist" />
   <java-symbol type="array" name="config_face_acquire_vendor_enroll_ignorelist" />
   <java-symbol type="array" name="config_face_acquire_keyguard_ignorelist" />

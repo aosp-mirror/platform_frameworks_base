@@ -35,7 +35,7 @@ interface IBiometricService {
     void cancelAuthentication(IBinder token, String opPackageName);
 
     // Checks if biometrics can be used.
-    int canAuthenticate(String opPackageName, int userId);
+    int canAuthenticate(String opPackageName, int userId, int authenticators);
 
     // Checks if any biometrics are enrolled.
     boolean hasEnrolledBiometrics(int userId, String opPackageName);
@@ -43,7 +43,8 @@ interface IBiometricService {
     // Registers an authenticator (e.g. face, fingerprint, iris).
     // Id must be unique, whereas strength and modality don't need to be.
     // TODO(b/123321528): Turn strength and modality into enums.
-    void registerAuthenticator(int id, int strength, int modality, IBiometricAuthenticator authenticator);
+    void registerAuthenticator(int id, int modality, int strength,
+            IBiometricAuthenticator authenticator);
 
     // Register callback for when keyguard biometric eligibility changes.
     void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback);
