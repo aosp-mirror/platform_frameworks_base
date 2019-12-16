@@ -101,6 +101,14 @@ public class SoundTrigger {
         /** Voice detection engine version */
         public final int version;
 
+        /**
+         * String naming the architecture used for running the supported models.
+         * (eg. a platform running models on a DSP could implement this string to convey the DSP
+         * architecture used)
+         */
+        @NonNull
+        public final String supportedModelArch;
+
         /** Maximum number of active sound models */
         public final int maxSoundModels;
 
@@ -130,15 +138,17 @@ public class SoundTrigger {
         public final boolean returnsTriggerInEvent;
 
         ModuleProperties(int id, @NonNull String implementor, @NonNull String description,
-                @NonNull String uuid, int version, int maxSoundModels, int maxKeyphrases,
-                int maxUsers, int recognitionModes, boolean supportsCaptureTransition,
-                int maxBufferMs, boolean supportsConcurrentCapture,
-                int powerConsumptionMw, boolean returnsTriggerInEvent) {
+                @NonNull String uuid, int version, @NonNull String supportedModelArch,
+                int maxSoundModels, int maxKeyphrases, int maxUsers, int recognitionModes,
+                boolean supportsCaptureTransition, int maxBufferMs,
+                boolean supportsConcurrentCapture, int powerConsumptionMw,
+                boolean returnsTriggerInEvent) {
             this.id = id;
             this.implementor = requireNonNull(implementor);
             this.description = requireNonNull(description);
             this.uuid = UUID.fromString(requireNonNull(uuid));
             this.version = version;
+            this.supportedModelArch = requireNonNull(supportedModelArch);
             this.maxSoundModels = maxSoundModels;
             this.maxKeyphrases = maxKeyphrases;
             this.maxUsers = maxUsers;
@@ -167,6 +177,7 @@ public class SoundTrigger {
             String description = in.readString();
             String uuid = in.readString();
             int version = in.readInt();
+            String supportedModelArch = in.readString();
             int maxSoundModels = in.readInt();
             int maxKeyphrases = in.readInt();
             int maxUsers = in.readInt();
@@ -177,7 +188,7 @@ public class SoundTrigger {
             int powerConsumptionMw = in.readInt();
             boolean returnsTriggerInEvent = in.readByte() == 1;
             return new ModuleProperties(id, implementor, description, uuid, version,
-                    maxSoundModels, maxKeyphrases, maxUsers, recognitionModes,
+                    supportedModelArch, maxSoundModels, maxKeyphrases, maxUsers, recognitionModes,
                     supportsCaptureTransition, maxBufferMs, supportsConcurrentCapture,
                     powerConsumptionMw, returnsTriggerInEvent);
         }
@@ -189,6 +200,7 @@ public class SoundTrigger {
             dest.writeString(description);
             dest.writeString(uuid.toString());
             dest.writeInt(version);
+            dest.writeString(supportedModelArch);
             dest.writeInt(maxSoundModels);
             dest.writeInt(maxKeyphrases);
             dest.writeInt(maxUsers);
@@ -208,7 +220,8 @@ public class SoundTrigger {
         @Override
         public String toString() {
             return "ModuleProperties [id=" + id + ", implementor=" + implementor + ", description="
-                    + description + ", uuid=" + uuid + ", version=" + version + ", maxSoundModels="
+                    + description + ", uuid=" + uuid + ", version=" + version
+                    + " , supportedModelArch=" + supportedModelArch + ", maxSoundModels="
                     + maxSoundModels + ", maxKeyphrases=" + maxKeyphrases + ", maxUsers="
                     + maxUsers + ", recognitionModes=" + recognitionModes
                     + ", supportsCaptureTransition=" + supportsCaptureTransition + ", maxBufferMs="

@@ -155,7 +155,16 @@ public class SoundTriggerMiddlewareImplTest {
         return properties;
     }
 
-    private static void validateDefaultProperties(SoundTriggerModuleProperties properties,
+    private static android.hardware.soundtrigger.V2_3.Properties createDefaultProperties_2_3(
+            boolean supportConcurrentCapture) {
+        android.hardware.soundtrigger.V2_3.Properties properties =
+                new android.hardware.soundtrigger.V2_3.Properties();
+        properties.base = createDefaultProperties(supportConcurrentCapture);
+        properties.supportedModelArch = "supportedModelArch";
+        return properties;
+    }
+
+    private void validateDefaultProperties(SoundTriggerModuleProperties properties,
             boolean supportConcurrentCapture) {
         assertEquals("implementor", properties.implementor);
         assertEquals("description", properties.description);
@@ -173,8 +182,20 @@ public class SoundTriggerMiddlewareImplTest {
         assertEquals(supportConcurrentCapture, properties.concurrentCapture);
         assertTrue(properties.triggerInEvent);
         assertEquals(432, properties.powerConsumptionMw);
+
+        if (mHalDriver instanceof android.hardware.soundtrigger.V2_3.ISoundTriggerHw) {
+            assertEquals("supportedModelArch", properties.supportedModelArch);
+        } else {
+            assertEquals("", properties.supportedModelArch);
+        }
     }
 
+    private void verifyNotGetProperties() throws RemoteException {
+        if (mHalDriver instanceof android.hardware.soundtrigger.V2_3.ISoundTriggerHw) {
+            verify((android.hardware.soundtrigger.V2_3.ISoundTriggerHw) mHalDriver,
+                    never()).getProperties(any());
+        }
+    }
 
     private static android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionEvent createRecognitionEvent_2_0(
             int hwHandle,
@@ -290,6 +311,22 @@ public class SoundTriggerMiddlewareImplTest {
                     properties);
             return null;
         }).when(mHalDriver).getProperties(any());
+
+        if (mHalDriver instanceof android.hardware.soundtrigger.V2_3.ISoundTriggerHw) {
+            android.hardware.soundtrigger.V2_3.ISoundTriggerHw driver =
+                    (android.hardware.soundtrigger.V2_3.ISoundTriggerHw) mHalDriver;
+            doAnswer(invocation -> {
+                android.hardware.soundtrigger.V2_3.Properties properties =
+                        createDefaultProperties_2_3(
+                                supportConcurrentCapture);
+                ((android.hardware.soundtrigger.V2_3.ISoundTriggerHw.getProperties_2_3Callback)
+                        invocation.getArgument(
+                        0)).onValues(0,
+                        properties);
+                return null;
+            }).when(driver).getProperties_2_3(any());
+        }
+
         mService = new SoundTriggerMiddlewareImpl(mHalDriver, mAudioSessionProvider);
     }
 
@@ -716,6 +753,7 @@ public class SoundTriggerMiddlewareImplTest {
         SoundTriggerModuleProperties properties = allDescriptors[0].properties;
 
         validateDefaultProperties(properties, true);
+        verifyNotGetProperties();
     }
 
     @Test

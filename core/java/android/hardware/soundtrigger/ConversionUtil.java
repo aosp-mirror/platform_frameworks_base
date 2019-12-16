@@ -16,6 +16,7 @@
 
 package android.hardware.soundtrigger;
 
+import android.annotation.Nullable;
 import android.hardware.soundtrigger.ModelParams;
 import android.media.AudioFormat;
 import android.media.audio.common.AudioConfig;
@@ -32,8 +33,6 @@ import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
 
-import android.annotation.Nullable;
-
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -48,6 +47,7 @@ class ConversionUtil {
                 properties.description,
                 properties.uuid,
                 properties.version,
+                properties.supportedModelArch,
                 properties.maxSoundModels,
                 properties.maxKeyPhrases,
                 properties.maxUsers,

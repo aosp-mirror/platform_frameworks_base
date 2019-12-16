@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.hardware.audio.common.V2_0.Uuid;
 import android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback;
 import android.hardware.soundtrigger.V2_3.ISoundTriggerHw;
+import android.hardware.soundtrigger.V2_3.Properties;
 import android.media.audio.common.AudioConfig;
 import android.media.audio.common.AudioOffloadInfo;
 import android.media.soundtrigger_middleware.ConfidenceLevel;
@@ -66,6 +67,13 @@ class ConversionUtil {
         aidlProperties.concurrentCapture = hidlProperties.concurrentCapture;
         aidlProperties.triggerInEvent = hidlProperties.triggerInEvent;
         aidlProperties.powerConsumptionMw = hidlProperties.powerConsumptionMw;
+        return aidlProperties;
+    }
+
+    static @NonNull SoundTriggerModuleProperties hidl2aidlProperties(
+            @NonNull Properties hidlProperties) {
+        SoundTriggerModuleProperties aidlProperties = hidl2aidlProperties(hidlProperties.base);
+        aidlProperties.supportedModelArch = hidlProperties.supportedModelArch;
         return aidlProperties;
     }
 

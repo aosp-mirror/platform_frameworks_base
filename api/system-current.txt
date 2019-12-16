@@ -3556,6 +3556,7 @@ package android.hardware.soundtrigger {
     field public final int powerConsumptionMw;
     field public final int recognitionModes;
     field public final boolean returnsTriggerInEvent;
+    field @NonNull public final String supportedModelArch;
     field public final boolean supportsCaptureTransition;
     field public final boolean supportsConcurrentCapture;
     field @NonNull public final java.util.UUID uuid;
