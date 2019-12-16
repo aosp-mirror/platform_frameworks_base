@@ -20,6 +20,7 @@
 #include "config/ConfigKey.h"
 #include "config/ConfigListener.h"
 
+#include <android/os/IPendingIntentRef.h>
 #include <map>
 #include <mutex>
 #include <set>
@@ -64,12 +65,12 @@ public:
     /**
      * Sets the broadcast receiver for a configuration key.
      */
-    void SetConfigReceiver(const ConfigKey& key, const sp<IBinder>& intentSender);
+    void SetConfigReceiver(const ConfigKey& key, const sp<IPendingIntentRef>& pir);
 
     /**
      * Returns the package name and class name representing the broadcast receiver for this config.
      */
-    const sp<android::IBinder> GetConfigReceiver(const ConfigKey& key) const;
+    const sp<IPendingIntentRef> GetConfigReceiver(const ConfigKey& key) const;
 
     /**
      * Returns all config keys registered.
@@ -141,10 +142,9 @@ private:
     std::map<int, std::set<ConfigKey>> mConfigs;
 
     /**
-     * Each config key can be subscribed by up to one receiver, specified as IBinder from
-     * PendingIntent.
+     * Each config key can be subscribed by up to one receiver, specified as IPendingIntentRef.
      */
-    std::map<ConfigKey, sp<android::IBinder>> mConfigReceivers;
+    std::map<ConfigKey, sp<IPendingIntentRef>> mConfigReceivers;
 
     /**
      * Each uid can be subscribed by up to one receiver to notify that the list of active configs

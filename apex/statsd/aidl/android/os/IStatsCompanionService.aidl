@@ -66,9 +66,6 @@ interface IStatsCompanionService {
     /** Pull the specified data. Results will be sent to statsd when complete. */
     StatsLogEventWrapper[] pullData(int pullCode);
 
-    /** Send a broadcast to the specified PendingIntent's as IBinder that it should getData now. */
-    oneway void sendDataBroadcast(in IBinder intentSender, long lastReportTimeNs);
-
     /**
      * Send a broadcast to the specified PendingIntent's as IBinder notifying it that the list
      * of active configs has changed.

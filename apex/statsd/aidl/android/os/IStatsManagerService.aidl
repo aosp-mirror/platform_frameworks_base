@@ -30,10 +30,17 @@ interface IStatsManagerService {
      * memory consumed by the metrics for this configuration approach the pre-defined limits. There
      * can be at most one listener per config key.
      *
-     * Requires Manifest.permission.DUMP.
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
      */
-    void setDataFetchOperation(long configKey, in PendingIntent pendingIntent,
+    void setDataFetchOperation(long configId, in PendingIntent pendingIntent,
         in String packageName);
+
+    /**
+     * Removes the data fetch operation for the specified configuration.
+     *
+     * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS.
+     */
+    void removeDataFetchOperation(long configId, in String packageName);
 
     /**
      * Registers the given pending intent for this packagename. This intent is invoked when the

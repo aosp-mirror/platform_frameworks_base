@@ -170,18 +170,18 @@ StatsService::StatsService(const sp<Looper>& handlerLooper, shared_ptr<LogEventQ
             mUidMap, mPullerManager, mAnomalyAlarmMonitor, mPeriodicAlarmMonitor,
             getElapsedRealtimeNs(),
             [this](const ConfigKey& key) {
-                sp<IStatsCompanionService> sc = getStatsCompanionService();
-                auto receiver = mConfigManager->GetConfigReceiver(key);
-                if (sc == nullptr) {
-                    VLOG("Could not find StatsCompanionService");
+                sp<IPendingIntentRef> receiver = mConfigManager->GetConfigReceiver(key);
+                if (receiver == nullptr) {
+                    VLOG("Could not find a broadcast receiver for %s",
+                        key.ToString().c_str());
                     return false;
-                } else if (receiver == nullptr) {
-                    VLOG("Statscompanion could not find a broadcast receiver for %s",
-                         key.ToString().c_str());
-                    return false;
-                } else {
-                    sc->sendDataBroadcast(receiver, mProcessor->getLastReportTimeNs(key));
+                } else if (receiver->sendDataBroadcast(
+                           mProcessor->getLastReportTimeNs(key)).isOk()) {
                     return true;
+                } else {
+                    VLOG("Failed to send a broadcast for receiver %s",
+                        key.ToString().c_str());
+                    return false;
                 }
             },
             [this](const int& uid, const vector<int64_t>& activeConfigs) {
@@ -574,18 +574,19 @@ status_t StatsService::cmd_trigger_broadcast(int out, Vector<String8>& args) {
         return UNKNOWN_ERROR;
     }
     ConfigKey key(uid, StrToInt64(name));
-    auto receiver = mConfigManager->GetConfigReceiver(key);
-    sp<IStatsCompanionService> sc = getStatsCompanionService();
-    if (sc == nullptr) {
-        VLOG("Could not access statsCompanion");
-    } else if (receiver == nullptr) {
-        VLOG("Could not find receiver for %s, %s", args[1].c_str(), args[2].c_str())
-    } else {
-        sc->sendDataBroadcast(receiver, mProcessor->getLastReportTimeNs(key));
+    sp<IPendingIntentRef> receiver = mConfigManager->GetConfigReceiver(key);
+    if (receiver == nullptr) {
+        VLOG("Could not find receiver for %s, %s", args[1].c_str(), args[2].c_str());
+        return UNKNOWN_ERROR;
+    } else if (receiver->sendDataBroadcast(
+               mProcessor->getLastReportTimeNs(key)).isOk()) {
         VLOG("StatsService::trigger broadcast succeeded to %s, %s", args[1].c_str(),
              args[2].c_str());
+    } else {
+        VLOG("StatsService::trigger broadcast failed to %s, %s", args[1].c_str(),
+             args[2].c_str());
+        return UNKNOWN_ERROR;
     }
-
     return NO_ERROR;
 }
 
@@ -1185,23 +1186,21 @@ bool StatsService::addConfigurationChecked(int uid, int64_t key, const vector<ui
     return true;
 }
 
-Status StatsService::removeDataFetchOperation(int64_t key, const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
-
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), key);
+Status StatsService::removeDataFetchOperation(int64_t key,
+                                              const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
+    ConfigKey configKey(callingUid, key);
     mConfigManager->RemoveConfigReceiver(configKey);
     return Status::ok();
 }
 
 Status StatsService::setDataFetchOperation(int64_t key,
-                                           const sp<android::IBinder>& intentSender,
-                                           const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+                                           const sp<IPendingIntentRef>& pir,
+                                           const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), key);
-    mConfigManager->SetConfigReceiver(configKey, intentSender);
+    ConfigKey configKey(callingUid, key);
+    mConfigManager->SetConfigReceiver(configKey, pir);
     if (StorageManager::hasConfigMetricsReport(configKey)) {
         VLOG("StatsService::setDataFetchOperation marking configKey %s to dump reports on disk",
              configKey.ToString().c_str());

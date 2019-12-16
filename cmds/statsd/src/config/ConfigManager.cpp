@@ -46,6 +46,23 @@ using std::vector;
 using android::base::StringPrintf;
 using std::unique_ptr;
 
+class ConfigReceiverDeathRecipient : public android::IBinder::DeathRecipient {
+    public:
+        ConfigReceiverDeathRecipient(sp<ConfigManager> configManager, const ConfigKey& configKey):
+            mConfigManager(configManager),
+            mConfigKey(configKey) {}
+        ~ConfigReceiverDeathRecipient() override = default;
+    private:
+        sp<ConfigManager> mConfigManager;
+        ConfigKey mConfigKey;
+
+    void binderDied(const android::wp<android::IBinder>& who) override {
+        if (IInterface::asBinder(mConfigManager->GetConfigReceiver(mConfigKey)) == who.promote()) {
+             mConfigManager->RemoveConfigReceiver(mConfigKey);
+        }
+    }
+};
+
 ConfigManager::ConfigManager() {
 }
 
@@ -118,9 +135,11 @@ void ConfigManager::UpdateConfig(const ConfigKey& key, const StatsdConfig& confi
     }
 }
 
-void ConfigManager::SetConfigReceiver(const ConfigKey& key, const sp<IBinder>& intentSender) {
+void ConfigManager::SetConfigReceiver(const ConfigKey& key,
+                                      const sp<IPendingIntentRef>& pir) {
     lock_guard<mutex> lock(mMutex);
-    mConfigReceivers[key] = intentSender;
+    mConfigReceivers[key] = pir;
+    IInterface::asBinder(pir)->linkToDeath(new ConfigReceiverDeathRecipient(this, key));
 }
 
 void ConfigManager::RemoveConfigReceiver(const ConfigKey& key) {
@@ -266,7 +285,7 @@ vector<ConfigKey> ConfigManager::GetAllConfigKeys() const {
     return ret;
 }
 
-const sp<android::IBinder> ConfigManager::GetConfigReceiver(const ConfigKey& key) const {
+const sp<IPendingIntentRef> ConfigManager::GetConfigReceiver(const ConfigKey& key) const {
     lock_guard<mutex> lock(mMutex);
 
     auto it = mConfigReceivers.find(key);

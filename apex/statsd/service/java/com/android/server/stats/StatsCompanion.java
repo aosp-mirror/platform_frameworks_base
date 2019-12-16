@@ -16,7 +16,13 @@
 
 package com.android.server.stats;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.IPendingIntentRef;
+import android.os.Process;
+import android.os.StatsDimensionsValue;
 import android.util.Slog;
 
 import com.android.server.SystemService;
@@ -27,6 +33,13 @@ import com.android.server.SystemService;
 public class StatsCompanion {
     private static final String TAG = "StatsCompanion";
     private static final boolean DEBUG = false;
+
+    static void enforceStatsCompanionPermission(Context context) {
+        if (Binder.getCallingPid() == Process.myPid()) {
+            return;
+        }
+        context.enforceCallingPermission(android.Manifest.permission.STATSCOMPANION, null);
+    }
 
     /**
      * Lifecycle class for both {@link StatsCompanionService} and {@link StatsManagerService}.
@@ -63,8 +76,57 @@ public class StatsCompanion {
             super.onBootPhase(phase);
             if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 mStatsCompanionService.systemReady();
-                mStatsManagerService.systemReady();
             }
+        }
+    }
+
+    /**
+     * Wrapper for {@link PendingIntent}. Allows Statsd to send PendingIntents.
+     */
+    public static class PendingIntentRef extends IPendingIntentRef.Stub {
+
+        private static final String TAG = "PendingIntentRef";
+
+        /**
+         * The last report time is provided with each intent registered to
+         * StatsManager#setFetchReportsOperation. This allows easy de-duping in the receiver if
+         * statsd is requesting the client to retrieve the same statsd data. The last report time
+         * corresponds to the last_report_elapsed_nanos that will provided in the current
+         * ConfigMetricsReport, and this timestamp also corresponds to the
+         * current_report_elapsed_nanos of the most recently obtained ConfigMetricsReport.
+         */
+        private static final String EXTRA_LAST_REPORT_TIME = "android.app.extra.LAST_REPORT_TIME";
+        private static final int CODE_DATA_BROADCAST = 1;
+
+        private final PendingIntent mPendingIntent;
+        private final Context mContext;
+
+        public PendingIntentRef(PendingIntent pendingIntent, Context context) {
+            mPendingIntent = pendingIntent;
+            mContext = context;
+        }
+
+        @Override
+        public void sendDataBroadcast(long lastReportTimeNs) {
+            enforceStatsCompanionPermission(mContext);
+            Intent intent = new Intent();
+            intent.putExtra(EXTRA_LAST_REPORT_TIME, lastReportTimeNs);
+            try {
+                mPendingIntent.send(mContext, CODE_DATA_BROADCAST, intent, null, null);
+            } catch (PendingIntent.CanceledException e) {
+                Slog.w(TAG, "Unable to send PendingIntent");
+            }
+        }
+
+        @Override
+        public void sendActiveConfigsChangedBroadcast(long[] configIds) {
+            // no-op
+        }
+
+        @Override
+        public void sendSubscriberBroadcast(long configUid, long configId, long subscriptionId,
+                long subscriptionRuleId, String[] cookies, StatsDimensionsValue dimensionsValue) {
+            // no-op
         }
     }
 }

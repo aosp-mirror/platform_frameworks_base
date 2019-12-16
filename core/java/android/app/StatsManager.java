@@ -309,18 +309,16 @@ public final class StatsManager {
             throws StatsUnavailableException {
         synchronized (sLock) {
             try {
-                IStatsd service = getIStatsdLocked();
+                IStatsManagerService service = getIStatsManagerServiceLocked();
                 if (pendingIntent == null) {
                     service.removeDataFetchOperation(configKey, mContext.getOpPackageName());
                 } else {
-                    // Extracts IIntentSender from the PendingIntent and turns it into an IBinder.
-                    IBinder intentSender = pendingIntent.getTarget().asBinder();
-                    service.setDataFetchOperation(configKey, intentSender,
+                    service.setDataFetchOperation(configKey, pendingIntent,
                             mContext.getOpPackageName());
                 }
 
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsd when registering data listener.");
+                Slog.e(TAG, "Failed to connect to statsmanager when registering data listener.");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);

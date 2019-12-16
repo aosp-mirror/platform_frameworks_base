@@ -30,6 +30,7 @@
 #include <android/frameworks/stats/1.0/IStats.h>
 #include <android/frameworks/stats/1.0/types.h>
 #include <android/os/BnStatsd.h>
+#include <android/os/IPendingIntentRef.h>
 #include <android/os/IStatsCompanionService.h>
 #include <android/os/IStatsd.h>
 #include <binder/IResultReceiver.h>
@@ -121,14 +122,14 @@ public:
      * Binder call to let clients register the data fetch operation for a configuration.
      */
     virtual Status setDataFetchOperation(int64_t key,
-                                         const sp<android::IBinder>& intentSender,
-                                         const String16& packageName) override;
+                                         const sp<IPendingIntentRef>& pir,
+                                         const int32_t callingUid) override;
 
     /**
      * Binder call to remove the data fetch operation for the specified config key.
      */
     virtual Status removeDataFetchOperation(int64_t key,
-                                            const String16& packageName) override;
+                                            const int32_t callingUid) override;
 
     /**
      * Binder call to let clients register the active configs changed operation.

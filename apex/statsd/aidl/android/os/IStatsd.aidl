@@ -17,6 +17,7 @@
 package android.os;
 
 import android.os.IStatsPullerCallback;
+import android.os.IPendingIntentRef;
 import android.os.IPullAtomCallback;
 import android.os.ParcelFileDescriptor;
 
@@ -114,14 +115,15 @@ interface IStatsd {
      *
      * Requires Manifest.permission.DUMP.
      */
-    void setDataFetchOperation(long configKey, in IBinder intentSender, in String packageName);
+    void setDataFetchOperation(long configId, in IPendingIntentRef pendingIntentRef,
+                               int callingUid);
 
     /**
      * Removes the data fetch operation for the specified configuration.
      *
      * Requires Manifest.permission.DUMP.
      */
-    void removeDataFetchOperation(long configKey, in String packageName);
+    void removeDataFetchOperation(long configId, int callingUid);
 
     /**
      * Registers the given pending intent for this packagename. This intent is invoked when the
