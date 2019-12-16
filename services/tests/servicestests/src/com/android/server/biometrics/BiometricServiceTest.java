@@ -1177,6 +1177,18 @@ public class BiometricServiceTest {
                 mFingerprintAuthenticator);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testRegistrationWithNullAuthenticator_throwsIllegalArgumentException()
+            throws Exception {
+        mBiometricService = new BiometricService(mContext, mInjector);
+        mBiometricService.onStart();
+
+        mBiometricService.mImpl.registerAuthenticator(
+                0 /* id */, 2 /* modality */,
+                Authenticators.BIOMETRIC_STRONG /* strength */,
+                null /* authenticator */);
+    }
+
     @Test
     public void testRegistrationHappyPath_isOk() throws Exception {
         // This is being tested in many of the other cases, but here's the base case.

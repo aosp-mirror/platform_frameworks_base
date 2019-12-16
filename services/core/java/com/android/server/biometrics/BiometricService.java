@@ -764,6 +764,12 @@ public class BiometricService extends SystemService {
                     + " Modality: " + modality
                     + " Strength: " + strength);
 
+            if (authenticator == null) {
+                throw new IllegalArgumentException("Authenticator must not be null."
+                        + " Did you forget to modify the core/res/res/values/xml overlay for"
+                        + " config_biometric_sensors?");
+            }
+
             if (strength != Authenticators.BIOMETRIC_STRONG
                     && strength != Authenticators.BIOMETRIC_WEAK) {
                 throw new IllegalStateException("Unsupported strength");
