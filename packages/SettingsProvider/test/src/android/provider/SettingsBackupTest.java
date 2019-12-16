@@ -223,7 +223,6 @@ public class SettingsBackupTest {
                     Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES,
                     Settings.Global.DEVELOPMENT_FORCE_RTL,
                     Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM,
-                    Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
                     Settings.Global.DEVICE_DEMO_MODE,
                     Settings.Global.DEVICE_IDLE_CONSTANTS,
                     Settings.Global.BATTERY_SAVER_ADAPTIVE_CONSTANTS,
