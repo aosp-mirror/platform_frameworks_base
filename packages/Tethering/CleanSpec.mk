@@ -46,6 +46,12 @@
 
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/priv-app/Tethering)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/priv-app/InProcessTethering)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/InProcessTethering*)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/APPS/InProcessTethering*)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system_other/system/priv-app/InProcessTethering)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/apex/com.android.tethering)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/apex/com.android.tethering.apex)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/ETC/com.android.tethering*)
 
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER
