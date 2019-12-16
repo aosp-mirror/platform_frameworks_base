@@ -198,7 +198,9 @@ class TaskPositioningController {
     }
 
     void finishTaskPositioning() {
-        mHandler.post(() -> {
+        // TaskPositioner attaches the InputEventReceiver to the animation thread. We need to
+        // dispose the receiver on the same thread to avoid race conditions.
+        mService.mAnimationHandler.post(() -> {
             if (DEBUG_TASK_POSITIONING) Slog.d(TAG_WM, "finishPositioning");
 
             synchronized (mService.mGlobalLock) {
