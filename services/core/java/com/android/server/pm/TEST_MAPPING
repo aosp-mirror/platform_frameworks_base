@@ -24,7 +24,12 @@
       ]
     },
     {
-      "name": "PackageManagerShellCommandTest"
+      "name": "CtsContentTestCases",
+      "options": [
+        {
+          "include-filter": "android.content.pm.cts.PackageManagerShellCommandTest"
+        }
+      ]
     },
     {
       "name": "GtsSecurityHostTestCases",
