@@ -6734,7 +6734,6 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean hasUserRestrictionForUser(@NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isAdminUser();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isGuestUser();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isManagedProfile();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isManagedProfile(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isPrimaryUser();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isRestrictedProfile();

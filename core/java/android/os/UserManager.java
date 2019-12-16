@@ -1841,10 +1841,7 @@ public class UserManager {
      * Checks if the calling app is running in a managed profile.
      *
      * @return whether the caller is in a managed profile.
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean isManagedProfile() {
         // No need for synchronization.  Once it becomes non-null, it'll be non-null forever.
         // Worst case we might end up calling the AIDL method multiple times but that's fine.
