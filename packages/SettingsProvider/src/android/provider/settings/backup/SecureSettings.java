@@ -155,6 +155,7 @@ public class SecureSettings {
         Settings.Secure.GLOBAL_ACTIONS_PANEL_ENABLED,
         Settings.Secure.AWARE_LOCK_ENABLED,
         Settings.Secure.AWARE_TAP_PAUSE_GESTURE_COUNT,
-        Settings.Secure.AWARE_TAP_PAUSE_TOUCH_COUNT
+        Settings.Secure.AWARE_TAP_PAUSE_TOUCH_COUNT,
+        Settings.Secure.PEOPLE_STRIP,
     };
 }
