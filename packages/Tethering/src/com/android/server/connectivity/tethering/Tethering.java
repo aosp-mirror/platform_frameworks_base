@@ -456,7 +456,7 @@ public class Tethering {
                     mLog.e("setWifiTethering: failed to get WifiManager!");
                     return TETHER_ERROR_SERVICE_UNAVAIL;
                 }
-                if ((enable && mgr.startSoftAp(null /* use existing wifi config */))
+                if ((enable && mgr.startTetheredHotspot(null /* use existing softap config */))
                         || (!enable && mgr.stopSoftAp())) {
                     mWifiTetherRequested = enable;
                     return TETHER_ERROR_NO_ERROR;
