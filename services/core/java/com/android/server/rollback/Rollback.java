@@ -418,6 +418,7 @@ class Rollback {
                 if (isStaged()) {
                     parentParams.setStaged();
                 }
+                parentParams.setInstallReason(PackageManager.INSTALL_REASON_ROLLBACK);
 
                 int parentSessionId = packageInstaller.createSession(parentParams);
                 PackageInstaller.Session parentSession = packageInstaller.openSession(
@@ -484,6 +485,7 @@ class Rollback {
                                 synchronized (mLock) {
                                     mState = ROLLBACK_STATE_AVAILABLE;
                                     mRestoreUserDataInProgress = false;
+                                    info.setCommittedSessionId(-1);
                                 }
                                 sendFailure(context, statusReceiver,
                                         RollbackManager.STATUS_FAILURE_INSTALL,
@@ -500,7 +502,6 @@ class Rollback {
                                     mRestoreUserDataInProgress = false;
                                 }
 
-                                info.setCommittedSessionId(parentSessionId);
                                 info.getCausePackages().addAll(causePackages);
                                 RollbackStore.deletePackageCodePaths(this);
                                 RollbackStore.saveRollback(this);
@@ -528,6 +529,7 @@ class Rollback {
                 );
 
                 mState = ROLLBACK_STATE_COMMITTED;
+                info.setCommittedSessionId(parentSessionId);
                 mRestoreUserDataInProgress = true;
                 parentSession.commit(receiver.getIntentSender());
             } catch (IOException e) {

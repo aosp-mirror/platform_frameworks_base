@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
+import android.apex.ApexSessionParams;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -36,6 +37,8 @@ import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.ParceledListSlice;
 import android.content.rollback.IRollbackManager;
+import android.content.rollback.RollbackInfo;
+import android.content.rollback.RollbackManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -49,6 +52,7 @@ import android.os.storage.StorageManager;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.GuardedBy;
@@ -81,6 +85,9 @@ public class StagingManager {
 
     @GuardedBy("mStagedSessions")
     private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
+
+    @GuardedBy("mStagedSessions")
+    private final SparseIntArray mSessionRollbackIds = new SparseIntArray();
 
     StagingManager(PackageInstallerService pi, ApexManager am, Context context) {
         mPi = pi;
@@ -166,18 +173,32 @@ public class StagingManager {
 
     private List<PackageInfo> submitSessionToApexService(
             @NonNull PackageInstallerSession session) throws PackageManagerException {
-        final IntArray childSessionsIds = new IntArray();
+        final IntArray childSessionIds = new IntArray();
         if (session.isMultiPackage()) {
             for (int id : session.getChildSessionIds()) {
                 if (isApexSession(mStagedSessions.get(id))) {
-                    childSessionsIds.add(id);
+                    childSessionIds.add(id);
+                }
+            }
+        }
+        ApexSessionParams apexSessionParams = new ApexSessionParams();
+        apexSessionParams.sessionId = session.sessionId;
+        apexSessionParams.childSessionIds = childSessionIds.toArray();
+        if (session.params.installReason == PackageManager.INSTALL_REASON_ROLLBACK) {
+            apexSessionParams.isRollback = true;
+            apexSessionParams.rollbackId = retrieveRollbackIdForCommitSession(session.sessionId);
+        } else {
+            synchronized (mStagedSessions) {
+                int rollbackId = mSessionRollbackIds.get(session.sessionId, -1);
+                if (rollbackId != -1) {
+                    apexSessionParams.hasRollbackEnabled = true;
+                    apexSessionParams.rollbackId = rollbackId;
                 }
             }
         }
         // submitStagedSession will throw a PackageManagerException if apexd verification fails,
         // which will be propagated to populate stagedSessionErrorMessage of this session.
-        final ApexInfoList apexInfoList = mApexManager.submitStagedSession(session.sessionId,
-                childSessionsIds.toArray());
+        final ApexInfoList apexInfoList = mApexManager.submitStagedSession(apexSessionParams);
         final List<PackageInfo> result = new ArrayList<>();
         for (ApexInfo apexInfo : apexInfoList.apexInfos) {
             final PackageInfo packageInfo;
@@ -206,6 +227,19 @@ public class StagingManager {
         Slog.d(TAG, "Session " + session.sessionId + " has following APEX packages: ["
                 + result.stream().map(p -> p.packageName).collect(Collectors.joining(",")) + "]");
         return result;
+    }
+
+    private int retrieveRollbackIdForCommitSession(int sessionId) throws PackageManagerException {
+        RollbackManager rm = mContext.getSystemService(RollbackManager.class);
+
+        List<RollbackInfo> rollbacks = rm.getRecentlyCommittedRollbacks();
+        for (RollbackInfo rollback : rollbacks) {
+            if (rollback.getCommittedSessionId() == sessionId) {
+                return rollback.getRollbackId();
+            }
+        }
+        throw new PackageManagerException(
+                "Could not find rollback id for commit session: " + sessionId);
     }
 
     private void checkRequiredVersionCode(final PackageInstallerSession session,
@@ -633,6 +667,7 @@ public class StagingManager {
     void abortSession(@NonNull PackageInstallerSession session) {
         synchronized (mStagedSessions) {
             mStagedSessions.remove(session.sessionId);
+            mSessionRollbackIds.delete(session.sessionId);
         }
     }
 
@@ -865,6 +900,28 @@ public class StagingManager {
          */
         private void handlePreRebootVerification_Start(@NonNull PackageInstallerSession session) {
             Slog.d(TAG, "Starting preRebootVerification for session " + session.sessionId);
+
+            if ((session.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
+                // If rollback is enabled for this session, we call through to the RollbackManager
+                // with the list of sessions it must enable rollback for. Note that
+                // notifyStagedSession is a synchronous operation.
+                final IRollbackManager rm = IRollbackManager.Stub.asInterface(
+                        ServiceManager.getService(Context.ROLLBACK_SERVICE));
+                try {
+                    // NOTE: To stay consistent with the non-staged install flow, we don't fail the
+                    // entire install if rollbacks can't be enabled.
+                    int rollbackId = rm.notifyStagedSession(session.sessionId);
+                    if (rollbackId != -1) {
+                        synchronized (mStagedSessions) {
+                            mSessionRollbackIds.put(session.sessionId, rollbackId);
+                        }
+                    }
+                } catch (RemoteException re) {
+                    Slog.e(TAG, "Failed to notifyStagedSession for session: "
+                            + session.sessionId, re);
+                }
+            }
+
             notifyPreRebootVerification_Start_Complete(session.sessionId);
         }
 
@@ -929,25 +986,6 @@ public class StagingManager {
          * </ul></p>
          */
         private void handlePreRebootVerification_End(@NonNull PackageInstallerSession session) {
-            if ((session.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
-                // If rollback is enabled for this session, we call through to the RollbackManager
-                // with the list of sessions it must enable rollback for. Note that
-                // notifyStagedSession is a synchronous operation.
-                final IRollbackManager rm = IRollbackManager.Stub.asInterface(
-                        ServiceManager.getService(Context.ROLLBACK_SERVICE));
-                try {
-                    // NOTE: To stay consistent with the non-staged install flow, we don't fail the
-                    // entire install if rollbacks can't be enabled.
-                    if (!rm.notifyStagedSession(session.sessionId)) {
-                        Slog.e(TAG, "Unable to enable rollback for session: "
-                                + session.sessionId);
-                    }
-                } catch (RemoteException re) {
-                    Slog.e(TAG, "Failed to notifyStagedSession for session: "
-                            + session.sessionId, re);
-                }
-            }
-
             // Proactively mark session as ready before calling apexd. Although this call order
             // looks counter-intuitive, this is the easiest way to ensure that session won't end up
             // in the inconsistent state:

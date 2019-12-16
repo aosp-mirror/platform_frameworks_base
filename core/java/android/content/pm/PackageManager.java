@@ -946,7 +946,8 @@ public abstract class PackageManager {
             INSTALL_REASON_POLICY,
             INSTALL_REASON_DEVICE_RESTORE,
             INSTALL_REASON_DEVICE_SETUP,
-            INSTALL_REASON_USER
+            INSTALL_REASON_USER,
+            INSTALL_REASON_ROLLBACK
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallReason {}
@@ -975,6 +976,13 @@ public abstract class PackageManager {
      * Code indicating that the package installation was initiated by the user.
      */
     public static final int INSTALL_REASON_USER = 4;
+
+    /**
+     * Code indicating that the package installation was a rollback initiated by RollbackManager.
+     *
+     * @hide
+     */
+    public static final int INSTALL_REASON_ROLLBACK = 5;
 
     /**
      * @hide
