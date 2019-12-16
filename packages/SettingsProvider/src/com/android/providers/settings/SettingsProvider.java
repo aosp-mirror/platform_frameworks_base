@@ -3264,7 +3264,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 184;
+            private static final int SETTINGS_VERSION = 185;
 
             private final int mUserId;
 
@@ -4446,20 +4446,15 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 182) {
-                    // Remove secure bubble settings.
+                    // Remove secure bubble settings; it's in global now.
                     getSecureSettingsLocked(userId).deleteSettingLocked("notification_bubbles");
 
-                    // Add global bubble settings.
-                    getGlobalSettingsLocked().insertSettingLocked(Global.NOTIFICATION_BUBBLES,
-                            getContext().getResources().getBoolean(
-                                    R.bool.def_notification_bubbles) ? "1" : "0", null /* tag */,
-                            true /* makeDefault */, SettingsState.SYSTEM_PACKAGE_NAME);
-
+                    // Removed. Updated NOTIFICATION_BUBBLES to be true by default, see 184.
                     currentVersion = 183;
                 }
 
                 if (currentVersion == 183) {
-                    // Version 184: Set default values for WIRELESS_CHARGING_STARTED_SOUND
+                    // Version 183: Set default values for WIRELESS_CHARGING_STARTED_SOUND
                     // and CHARGING_STARTED_SOUND
                     final SettingsState globalSettings = getGlobalSettingsLocked();
 
@@ -4498,6 +4493,18 @@ public class SettingsProvider extends ContentProvider {
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 184;
+                }
+
+                if (currentVersion == 184) {
+                    // Version 184: Reset the default for Global Settings: NOTIFICATION_BUBBLES
+                    // This is originally set in version 182, however, the default value changed
+                    // so this step is to ensure the value is updated to the correct default.
+                    getGlobalSettingsLocked().insertSettingLocked(Global.NOTIFICATION_BUBBLES,
+                            getContext().getResources().getBoolean(
+                                    R.bool.def_notification_bubbles) ? "1" : "0", null /* tag */,
+                            true /* makeDefault */, SettingsState.SYSTEM_PACKAGE_NAME);
+
+                    currentVersion = 185;
                 }
 
                 // vXXX: Add new settings above this point.
