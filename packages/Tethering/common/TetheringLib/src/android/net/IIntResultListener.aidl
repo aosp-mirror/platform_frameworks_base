@@ -16,13 +16,10 @@
 
 package android.net;
 
-import android.net.Network;
-
 /**
- * Callback class for receiving tethering changed events
- * @hide
+ * Listener interface allowing objects to listen to various module event.
+ * {@hide}
  */
-oneway interface ITetheringEventCallback
-{
-    void onUpstreamChanged(in Network network);
+oneway interface IIntResultListener {
+    void onResult(int resultCode);
 }
