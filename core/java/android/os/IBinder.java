@@ -182,6 +182,14 @@ public interface IBinder {
     public static final int MAX_IPC_SIZE = 64 * 1024;
 
     /**
+     * Limit that should be placed on IPC sizes, in bytes, to keep them safely under the transaction
+     * buffer limit.
+     */
+    static int getSuggestedMaxIpcSizeBytes() {
+        return MAX_IPC_SIZE;
+    }
+
+    /**
      * Get the canonical name of the interface supported by this binder.
      */
     public @Nullable String getInterfaceDescriptor() throws RemoteException;
