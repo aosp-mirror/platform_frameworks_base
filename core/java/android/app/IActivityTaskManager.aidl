@@ -164,7 +164,7 @@ interface IActivityTaskManager {
     boolean convertToTranslucent(in IBinder token, in Bundle options);
     void notifyActivityDrawn(in IBinder token);
     void reportActivityFullyDrawn(in IBinder token, boolean restoredFromBundle);
-    int getActivityDisplayId(in IBinder activityToken);
+    int getDisplayId(in IBinder activityToken);
     boolean isImmersive(in IBinder token);
     void setImmersive(in IBinder token, boolean immersive);
     boolean isTopActivityImmersive();

@@ -54,7 +54,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 
 import android.content.ComponentName;
@@ -78,7 +77,7 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class ActivityStackTests extends ActivityTestsBase {
-    private ActivityDisplay mDefaultDisplay;
+    private DisplayContent mDefaultDisplay;
     private ActivityStack mStack;
     private Task mTask;
 
@@ -279,7 +278,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
     @Test
     public void testMoveStackToBackIncludingParent() {
-        final ActivityDisplay display = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
+        final DisplayContent display = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
         final ActivityStack stack1 = createStackForShouldBeVisibleTest(display,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final ActivityStack stack2 = createStackForShouldBeVisibleTest(display,
@@ -815,7 +814,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
     @SuppressWarnings("TypeParameterUnusedInFormals")
     private ActivityStack createStackForShouldBeVisibleTest(
-            ActivityDisplay display, int windowingMode, int activityType, boolean onTop) {
+            DisplayContent display, int windowingMode, int activityType, boolean onTop) {
         final ActivityStack stack;
         if (activityType == ACTIVITY_TYPE_HOME) {
             // Home stack and activity are created in ActivityTestsBase#setupActivityManagerService
@@ -998,7 +997,7 @@ public class ActivityStackTests extends ActivityTestsBase {
     @Test
     public void testFinishCurrentActivity() {
         // Create 2 activities on a new display.
-        final ActivityDisplay display = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
+        final DisplayContent display = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
         final ActivityStack stack1 = createStackForShouldBeVisibleTest(display,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final ActivityStack stack2 = createStackForShouldBeVisibleTest(display,
@@ -1065,6 +1064,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         StackOrderChangedListener listener = new StackOrderChangedListener();
         mDefaultDisplay.registerStackOrderChangedListener(listener);
         try {
+            mStack.mReparenting = true;
             mDefaultDisplay.addStack(mStack, 0);
         } finally {
             mDefaultDisplay.unregisterStackOrderChangedListener(listener);
@@ -1156,10 +1156,10 @@ public class ActivityStackTests extends ActivityTestsBase {
 
     private void verifyShouldSleepActivities(boolean focusedStack,
             boolean keyguardGoingAway, boolean displaySleeping, boolean expected) {
-        final ActivityDisplay display = mock(ActivityDisplay.class);
+        final DisplayContent display = mock(DisplayContent.class);
         final KeyguardController keyguardController = mSupervisor.getKeyguardController();
 
-        doReturn(display).when(mRootActivityContainer).getActivityDisplay(anyInt());
+        doReturn(display).when(mStack).getDisplay();
         doReturn(keyguardGoingAway).when(keyguardController).isKeyguardGoingAway();
         doReturn(displaySleeping).when(display).isSleeping();
         doReturn(focusedStack).when(mStack).isFocusedStackOnDisplay();
@@ -1168,7 +1168,7 @@ public class ActivityStackTests extends ActivityTestsBase {
     }
 
     private static class StackOrderChangedListener
-            implements ActivityDisplay.OnStackOrderChangedListener {
+            implements DisplayContent.OnStackOrderChangedListener {
         public boolean mChanged = false;
 
         @Override

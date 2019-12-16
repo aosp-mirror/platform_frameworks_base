@@ -18433,7 +18433,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         public ActivityPresentationInfo getActivityPresentationInfo(IBinder token) {
             int displayId = Display.INVALID_DISPLAY;
             try {
-                displayId = mActivityTaskManager.getActivityDisplayId(token);
+                displayId = mActivityTaskManager.getDisplayId(token);
             } catch (RemoteException e) {
             }
 

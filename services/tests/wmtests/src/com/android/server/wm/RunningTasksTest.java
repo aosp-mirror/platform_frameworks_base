@@ -57,9 +57,9 @@ public class RunningTasksTest extends ActivityTestsBase {
     @Test
     public void testCollectTasksByLastActiveTime() {
         // Create a number of stacks with tasks (of incrementing active time)
-        final ArrayList<ActivityDisplay> displays = new ArrayList<>();
-        final ActivityDisplay display =
-                new TestActivityDisplay.Builder(mService, 1000, 2500).build();
+        final ArrayList<DisplayContent> displays = new ArrayList<>();
+        final DisplayContent display =
+                new TestDisplayContent.Builder(mService, 1000, 2500).build();
         displays.add(display);
 
         final int numStacks = 2;

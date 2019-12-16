@@ -80,7 +80,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
 
     private TestPersisterQueue mPersisterQueue;
     private File mFolder;
-    private ActivityDisplay mTestDisplay;
+    private DisplayContent mTestDisplay;
     private String mDisplayUniqueId;
     private Task mTestTask;
     private Task mTaskWithDifferentUser;
@@ -104,9 +104,9 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
         deleteRecursively(mFolder);
 
         mDisplayUniqueId = "test:" + Integer.toString(sNextUniqueId++);
-        mTestDisplay = new TestActivityDisplay.Builder(mService, 1000, 1500)
+        mTestDisplay = new TestDisplayContent.Builder(mService, 1000, 1500)
                 .setUniqueId(mDisplayUniqueId).build();
-        when(mRootActivityContainer.getActivityDisplay(eq(mDisplayUniqueId)))
+        when(mRootActivityContainer.getDisplayContent(eq(mDisplayUniqueId)))
                 .thenReturn(mTestDisplay);
 
         ActivityStack stack = mTestDisplay.createStack(TEST_WINDOWING_MODE,
@@ -180,7 +180,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
     public void testReturnsEmptyDisplayIfDisplayIsNotFound() {
         mTarget.saveTask(mTestTask);
 
-        when(mRootActivityContainer.getActivityDisplay(eq(mDisplayUniqueId))).thenReturn(null);
+        when(mRootActivityContainer.getDisplayContent(eq(mDisplayUniqueId))).thenReturn(null);
 
         mTarget.getLaunchParams(mTestTask, null, mResult);
 

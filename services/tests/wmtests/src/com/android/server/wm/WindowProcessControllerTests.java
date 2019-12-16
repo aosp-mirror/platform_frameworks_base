@@ -61,33 +61,33 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
         assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
 
         // Register to display 1 as a listener.
-        TestActivityDisplay testActivityDisplay1 = createTestActivityDisplayInContainer();
-        mWpc.registerDisplayConfigurationListenerLocked(testActivityDisplay1);
-        assertTrue(testActivityDisplay1.containsListener(mWpc));
-        assertEquals(testActivityDisplay1.mDisplayId, mWpc.getDisplayId());
+        TestDisplayContent testDisplayContent1 = createTestDisplayContentInContainer();
+        mWpc.registerDisplayConfigurationListenerLocked(testDisplayContent1);
+        assertTrue(testDisplayContent1.containsListener(mWpc));
+        assertEquals(testDisplayContent1.mDisplayId, mWpc.getDisplayId());
 
         // Move to display 2.
-        TestActivityDisplay testActivityDisplay2 = createTestActivityDisplayInContainer();
-        mWpc.registerDisplayConfigurationListenerLocked(testActivityDisplay2);
-        assertFalse(testActivityDisplay1.containsListener(mWpc));
-        assertTrue(testActivityDisplay2.containsListener(mWpc));
-        assertEquals(testActivityDisplay2.mDisplayId, mWpc.getDisplayId());
+        TestDisplayContent testDisplayContent2 = createTestDisplayContentInContainer();
+        mWpc.registerDisplayConfigurationListenerLocked(testDisplayContent2);
+        assertFalse(testDisplayContent1.containsListener(mWpc));
+        assertTrue(testDisplayContent2.containsListener(mWpc));
+        assertEquals(testDisplayContent2.mDisplayId, mWpc.getDisplayId());
 
-        // Null ActivityDisplay will not change anything.
+        // Null DisplayContent will not change anything.
         mWpc.registerDisplayConfigurationListenerLocked(null);
-        assertTrue(testActivityDisplay2.containsListener(mWpc));
-        assertEquals(testActivityDisplay2.mDisplayId, mWpc.getDisplayId());
+        assertTrue(testDisplayContent2.containsListener(mWpc));
+        assertEquals(testDisplayContent2.mDisplayId, mWpc.getDisplayId());
 
         // Unregister listener will remove the wpc from registered displays.
         mWpc.unregisterDisplayConfigurationListenerLocked();
-        assertFalse(testActivityDisplay1.containsListener(mWpc));
-        assertFalse(testActivityDisplay2.containsListener(mWpc));
+        assertFalse(testDisplayContent1.containsListener(mWpc));
+        assertFalse(testDisplayContent2.containsListener(mWpc));
         assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
 
         // Unregistration still work even if the display was removed.
-        mWpc.registerDisplayConfigurationListenerLocked(testActivityDisplay1);
-        assertEquals(testActivityDisplay1.mDisplayId, mWpc.getDisplayId());
-        mRootActivityContainer.removeChild(testActivityDisplay1);
+        mWpc.registerDisplayConfigurationListenerLocked(testDisplayContent1);
+        assertEquals(testDisplayContent1.mDisplayId, mWpc.getDisplayId());
+        mRootActivityContainer.removeChild(testDisplayContent1);
         mWpc.unregisterDisplayConfigurationListenerLocked();
         assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
     }
@@ -129,7 +129,7 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
         orderVerifier.verifyNoMoreInteractions();
     }
 
-    private TestActivityDisplay createTestActivityDisplayInContainer() {
-        return new TestActivityDisplay.Builder(mService, 1000, 1500).build();
+    private TestDisplayContent createTestDisplayContentInContainer() {
+        return new TestDisplayContent.Builder(mService, 1000, 1500).build();
     }
 }

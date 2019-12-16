@@ -67,7 +67,7 @@ public class SizeCompatTests extends ActivityTestsBase {
     private Task mTask;
     private ActivityRecord mActivity;
 
-    private void setUpApp(ActivityDisplay display) {
+    private void setUpApp(DisplayContent display) {
         mStack = new StackBuilder(mRootActivityContainer).setDisplay(display).build();
         mTask = mStack.getBottomMostTask();
         mActivity = mTask.getTopNonFinishingActivity();
@@ -79,7 +79,7 @@ public class SizeCompatTests extends ActivityTestsBase {
 
     @Test
     public void testRestartProcessIfVisible() {
-        setUpApp(new TestActivityDisplay.Builder(mService, 1000, 2500).build());
+        setUpApp(new TestDisplayContent.Builder(mService, 1000, 2500).build());
         doNothing().when(mSupervisor).scheduleRestartTimeout(mActivity);
         mActivity.mVisibleRequested = true;
         mActivity.setSavedState(null /* savedState */);
@@ -99,7 +99,7 @@ public class SizeCompatTests extends ActivityTestsBase {
     public void testKeepBoundsWhenChangingFromFreeformToFullscreen() {
         removeGlobalMinSizeRestriction();
         // create freeform display and a freeform app
-        ActivityDisplay display = new TestActivityDisplay.Builder(mService, 2000, 1000)
+        DisplayContent display = new TestDisplayContent.Builder(mService, 2000, 1000)
                 .setCanRotate(false)
                 .setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM).build();
         setUpApp(display);
@@ -126,7 +126,7 @@ public class SizeCompatTests extends ActivityTestsBase {
     @Test
     public void testFixedAspectRatioBoundsWithDecor() {
         final int decorHeight = 200; // e.g. The device has cutout.
-        setUpApp(new TestActivityDisplay.Builder(mService, 600, 800)
+        setUpApp(new TestDisplayContent.Builder(mService, 600, 800)
                 .setNotch(decorHeight).build());
 
         mActivity.info.minAspectRatio = mActivity.info.maxAspectRatio = 1;
@@ -152,11 +152,11 @@ public class SizeCompatTests extends ActivityTestsBase {
 
     @Test
     public void testFixedScreenConfigurationWhenMovingToDisplay() {
-        setUpApp(new TestActivityDisplay.Builder(mService, 1000, 2500).build());
+        setUpApp(new TestDisplayContent.Builder(mService, 1000, 2500).build());
 
         // Make a new less-tall display with lower density
-        final ActivityDisplay newDisplay =
-                new TestActivityDisplay.Builder(mService, 1000, 2000)
+        final DisplayContent newDisplay =
+                new TestDisplayContent.Builder(mService, 1000, 2000)
                         .setDensityDpi(200).build();
 
         mActivity = new ActivityBuilder(mService)
@@ -180,7 +180,7 @@ public class SizeCompatTests extends ActivityTestsBase {
 
     @Test
     public void testFixedScreenBoundsWhenDisplaySizeChanged() {
-        setUpApp(new TestActivityDisplay.Builder(mService, 1000, 2500).build());
+        setUpApp(new TestDisplayContent.Builder(mService, 1000, 2500).build());
         prepareUnresizable(-1f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
         assertFalse(mActivity.inSizeCompatMode());
 
@@ -203,7 +203,7 @@ public class SizeCompatTests extends ActivityTestsBase {
 
     @Test
     public void testLetterboxFullscreenBounds() {
-        setUpApp(new TestActivityDisplay.Builder(mService, 1000, 2500).build());
+        setUpApp(new TestDisplayContent.Builder(mService, 1000, 2500).build());
 
         // Fill out required fields on default display since WM-side is mocked out
         prepareUnresizable(-1.f /* maxAspect */, SCREEN_ORIENTATION_LANDSCAPE);
@@ -213,10 +213,10 @@ public class SizeCompatTests extends ActivityTestsBase {
 
     @Test
     public void testMoveToDifferentOrientDisplay() {
-        setUpApp(new TestActivityDisplay.Builder(mService, 1000, 2500).build());
+        setUpApp(new TestDisplayContent.Builder(mService, 1000, 2500).build());
 
-        final ActivityDisplay newDisplay =
-                new TestActivityDisplay.Builder(mService, 2000, 1000)
+        final DisplayContent newDisplay =
+                new TestDisplayContent.Builder(mService, 2000, 1000)
                         .setCanRotate(false).build();
 
         prepareUnresizable(-1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
@@ -235,7 +235,7 @@ public class SizeCompatTests extends ActivityTestsBase {
     @Test
     public void testFixedOrientRotateCutoutDisplay() {
         // Create a display with a notch/cutout
-        setUpApp(new TestActivityDisplay.Builder(mService, 1000, 2500).setNotch(60).build());
+        setUpApp(new TestDisplayContent.Builder(mService, 1000, 2500).setNotch(60).build());
         prepareUnresizable(1.4f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
 
         final Rect origBounds = new Rect(mActivity.getBounds());
@@ -259,7 +259,7 @@ public class SizeCompatTests extends ActivityTestsBase {
 
     @Test
     public void testFixedAspOrientChangeOrient() {
-        setUpApp(new TestActivityDisplay.Builder(mService, 1000, 2500).build());
+        setUpApp(new TestDisplayContent.Builder(mService, 1000, 2500).build());
 
         prepareUnresizable(1.4f /* maxAspect */, SCREEN_ORIENTATION_LANDSCAPE);
         // The display aspect ratio 2.5 > 1.4 (max of activity), so the size is fitted.
@@ -286,7 +286,7 @@ public class SizeCompatTests extends ActivityTestsBase {
 
     @Test
     public void testFixedScreenLayoutSizeBits() {
-        setUpApp(new TestActivityDisplay.Builder(mService, 1000, 2500).build());
+        setUpApp(new TestDisplayContent.Builder(mService, 1000, 2500).build());
         final int fixedScreenLayout = Configuration.SCREENLAYOUT_LONG_NO
                 | Configuration.SCREENLAYOUT_SIZE_NORMAL
                 | Configuration.SCREENLAYOUT_COMPAT_NEEDED;
@@ -314,9 +314,9 @@ public class SizeCompatTests extends ActivityTestsBase {
 
     @Test
     public void testResetNonVisibleActivity() {
-        setUpApp(new TestActivityDisplay.Builder(mService, 1000, 2500).build());
+        setUpApp(new TestDisplayContent.Builder(mService, 1000, 2500).build());
         prepareUnresizable(1.5f, SCREEN_ORIENTATION_UNSPECIFIED);
-        final ActivityDisplay display = mStack.getDisplay();
+        final DisplayContent display = mStack.getDisplay();
         // Resize the display so the activity is in size compatibility mode.
         resizeDisplay(display, 900, 1800);
 
@@ -354,7 +354,7 @@ public class SizeCompatTests extends ActivityTestsBase {
      */
     @Test
     public void testHandleActivitySizeCompatMode() {
-        setUpApp(new TestActivityDisplay.Builder(mService, 1000, 2000).build());
+        setUpApp(new TestDisplayContent.Builder(mService, 1000, 2000).build());
         ActivityRecord activity = mActivity;
         activity.setState(ActivityStack.ActivityState.RESUMED, "testHandleActivitySizeCompatMode");
         prepareUnresizable(-1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
@@ -412,7 +412,7 @@ public class SizeCompatTests extends ActivityTestsBase {
         ensureActivityConfiguration();
     }
 
-    private void resizeDisplay(ActivityDisplay display, int width, int height) {
+    private void resizeDisplay(DisplayContent display, int width, int height) {
         final DisplayContent displayContent = display.mDisplayContent;
         displayContent.mBaseDisplayWidth = width;
         displayContent.mBaseDisplayHeight = height;

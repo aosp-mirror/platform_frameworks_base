@@ -184,7 +184,7 @@ public class TaskEmbedder {
             return false;
         }
 
-        // Create a container surface to which the ActivityDisplay will be reparented
+        // Create a container surface to which the DisplayContent will be reparented
         final String name = "TaskEmbedder - " + Integer.toHexString(System.identityHashCode(this));
         mSurfaceControl = new SurfaceControl.Builder()
                 .setContainerLayer()

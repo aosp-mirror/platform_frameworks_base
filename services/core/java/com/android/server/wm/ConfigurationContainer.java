@@ -384,7 +384,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      *  When you call this function, make sure that the following functions are called as well to
      *  keep proper z-order.
      *  - {@Link DisplayContent#positionStackAt(POSITION_TOP, TaskStack)};
-     *  - {@Link ActivityDisplay#positionChildAtTop(ActivityStack)};
      * */
     public void setAlwaysOnTop(boolean alwaysOnTop) {
         mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());

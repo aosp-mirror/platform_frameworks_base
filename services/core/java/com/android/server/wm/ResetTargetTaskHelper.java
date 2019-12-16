@@ -258,7 +258,7 @@ class ResetTargetTaskHelper {
     private void processCreatedTasks() {
         if (mCreatedTasks.isEmpty()) return;
 
-        ActivityDisplay display = mParent.getDisplay();
+        DisplayContent display = mParent.getDisplay();
         final boolean singleTaskInstanceDisplay = display.isSingleTaskInstance();
         if (singleTaskInstanceDisplay) {
             display = mParent.mRootActivityContainer.getDefaultDisplay();

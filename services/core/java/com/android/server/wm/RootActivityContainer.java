@@ -109,7 +109,6 @@ import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
-import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -176,10 +175,10 @@ class RootActivityContainer extends ConfigurationContainer
      * List of displays which contain activities, sorted by z-order.
      * The last entry in the list is the topmost.
      */
-    private final ArrayList<ActivityDisplay> mActivityDisplays = new ArrayList<>();
+    private final ArrayList<DisplayContent> mDisplayContents = new ArrayList<>();
 
     /** Reference to default display so we can quickly look it up. */
-    private ActivityDisplay mDefaultDisplay;
+    private DisplayContent mDefaultDisplay;
     private final SparseArray<IntArray> mDisplayAccessUIDs = new SparseArray<>();
 
     /** The current user */
@@ -355,35 +354,35 @@ class RootActivityContainer extends ConfigurationContainer
         final Display[] displays = mDisplayManager.getDisplays();
         for (int displayNdx = 0; displayNdx < displays.length; ++displayNdx) {
             final Display display = displays[displayNdx];
-            final ActivityDisplay activityDisplay = new ActivityDisplay(this, display);
-            if (activityDisplay.mDisplayId == DEFAULT_DISPLAY) {
-                mDefaultDisplay = activityDisplay;
+            final DisplayContent displayContent = new DisplayContent(display, this);
+            if (displayContent.mDisplayId == DEFAULT_DISPLAY) {
+                mDefaultDisplay = displayContent;
             }
-            addChild(activityDisplay, ActivityDisplay.POSITION_TOP);
+            addChild(displayContent, DisplayContent.POSITION_TOP);
         }
         calculateDefaultMinimalSizeOfResizeableTasks();
 
-        final ActivityDisplay defaultDisplay = getDefaultDisplay();
+        final DisplayContent defaultDisplay = getDefaultDisplay();
 
         defaultDisplay.getOrCreateStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-        positionChildAt(defaultDisplay, ActivityDisplay.POSITION_TOP);
+        positionChildAt(defaultDisplay, DisplayContent.POSITION_TOP);
     }
 
     // TODO(multi-display): Look at all callpoints to make sure they make sense in multi-display.
-    ActivityDisplay getDefaultDisplay() {
+    DisplayContent getDefaultDisplay() {
         return mDefaultDisplay;
     }
 
     /**
-     * Get an existing instance of {@link ActivityDisplay} that has the given uniqueId. Unique ID is
+     * Get an existing instance of {@link DisplayContent} that has the given uniqueId. Unique ID is
      * defined in {@link DisplayInfo#uniqueId}.
      *
      * @param uniqueId the unique ID of the display
-     * @return the {@link ActivityDisplay} or {@code null} if nothing is found.
+     * @return the {@link DisplayContent} or {@code null} if nothing is found.
      */
-    ActivityDisplay getActivityDisplay(String uniqueId) {
-        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
-            final ActivityDisplay display = mActivityDisplays.get(i);
+    DisplayContent getDisplayContent(String uniqueId) {
+        for (int i = mDisplayContents.size() - 1; i >= 0; --i) {
+            final DisplayContent display = mDisplayContents.get(i);
             final boolean isValid = display.mDisplay.isValid();
             if (isValid && display.mDisplay.getUniqueId().equals(uniqueId)) {
                 return display;
@@ -393,26 +392,26 @@ class RootActivityContainer extends ConfigurationContainer
         return null;
     }
 
-    // TODO: Look into consolidating with getActivityDisplayOrCreate()
-    ActivityDisplay getActivityDisplay(int displayId) {
-        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
-            final ActivityDisplay activityDisplay = mActivityDisplays.get(i);
-            if (activityDisplay.mDisplayId == displayId) {
-                return activityDisplay;
+    // TODO: Look into consolidating with getDisplayContentOrCreate()
+    DisplayContent getDisplayContent(int displayId) {
+        for (int i = mDisplayContents.size() - 1; i >= 0; --i) {
+            final DisplayContent displayContent = mDisplayContents.get(i);
+            if (displayContent.mDisplayId == displayId) {
+                return displayContent;
             }
         }
         return null;
     }
 
     /**
-     * Get an existing instance of {@link ActivityDisplay} or create new if there is a
+     * Get an existing instance of {@link DisplayContent} or create new if there is a
      * corresponding record in display manager.
      */
-    // TODO: Look into consolidating with getActivityDisplay()
-    @Nullable ActivityDisplay getActivityDisplayOrCreate(int displayId) {
-        ActivityDisplay activityDisplay = getActivityDisplay(displayId);
-        if (activityDisplay != null) {
-            return activityDisplay;
+    // TODO: Look into consolidating with getDisplayContent()
+    @Nullable DisplayContent getDisplayContentOrCreate(int displayId) {
+        DisplayContent displayContent = getDisplayContent(displayId);
+        if (displayContent != null) {
+            return displayContent;
         }
         if (mDisplayManager == null) {
             // The system isn't fully initialized yet.
@@ -424,9 +423,9 @@ class RootActivityContainer extends ConfigurationContainer
             return null;
         }
         // The display hasn't been added to ActivityManager yet, create a new record now.
-        activityDisplay = new ActivityDisplay(this, display);
-        addChild(activityDisplay, ActivityDisplay.POSITION_BOTTOM);
-        return activityDisplay;
+        displayContent = new DisplayContent(display, this);
+        addChild(displayContent, DisplayContent.POSITION_BOTTOM);
+        return displayContent;
     }
 
     ActivityRecord getDefaultDisplayHomeActivity() {
@@ -434,21 +433,21 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     ActivityRecord getDefaultDisplayHomeActivityForUser(int userId) {
-        return getActivityDisplay(DEFAULT_DISPLAY).getHomeActivityForUser(userId);
+        return getDisplayContent(DEFAULT_DISPLAY).getHomeActivityForUser(userId);
     }
 
     boolean startHomeOnAllDisplays(int userId, String reason) {
         boolean homeStarted = false;
-        for (int i = mActivityDisplays.size() - 1; i >= 0; i--) {
-            final int displayId = mActivityDisplays.get(i).mDisplayId;
+        for (int i = mDisplayContents.size() - 1; i >= 0; i--) {
+            final int displayId = mDisplayContents.get(i).mDisplayId;
             homeStarted |= startHomeOnDisplay(userId, reason, displayId);
         }
         return homeStarted;
     }
 
     void startHomeOnEmptyDisplays(String reason) {
-        for (int i = mActivityDisplays.size() - 1; i >= 0; i--) {
-            final ActivityDisplay display = mActivityDisplays.get(i);
+        for (int i = mDisplayContents.size() - 1; i >= 0; i--) {
+            final DisplayContent display = mDisplayContents.get(i);
             if (display.topRunningActivity() == null) {
                 startHomeOnDisplay(mCurrentUser, reason, display.mDisplayId);
             }
@@ -630,7 +629,7 @@ class RootActivityContainer extends ConfigurationContainer
             displayId = DEFAULT_DISPLAY;
         }
 
-        final ActivityRecord r = getActivityDisplay(displayId).getHomeActivity();
+        final ActivityRecord r = getDisplayContent(displayId).getHomeActivity();
         final String myReason = reason + " resumeHomeActivity";
 
         // Only resume home activity if isn't finishing.
@@ -672,7 +671,7 @@ class RootActivityContainer extends ConfigurationContainer
             return false;
         }
 
-        final ActivityDisplay display = getActivityDisplay(displayId);
+        final DisplayContent display = getDisplayContent(displayId);
         if (display == null || display.isRemoved() || !display.supportsSystemDecorations()) {
             // Can't launch home on display that doesn't support system decorations.
             return false;
@@ -772,10 +771,8 @@ class RootActivityContainer extends ConfigurationContainer
 
         if (displayContent != null) {
             // Update the configuration of the activities on the display.
-            // TODO(display-merge): Remove cast
-            return ((ActivityDisplay) displayContent)
-                .updateDisplayOverrideConfigurationLocked(config, starting, deferResume,
-                    null /* result */);
+            return displayContent.updateDisplayOverrideConfigurationLocked(config, starting,
+                    deferResume, null /* result */);
         } else {
             return true;
         }
@@ -789,8 +786,8 @@ class RootActivityContainer extends ConfigurationContainer
         final ArrayList<IBinder> topActivityTokens = new ArrayList<>();
         final ActivityStack topFocusedStack = getTopDisplayFocusedStack();
         // Traverse all displays.
-        for (int i = mActivityDisplays.size() - 1; i >= 0; i--) {
-            final ActivityDisplay display = mActivityDisplays.get(i);
+        for (int i = mDisplayContents.size() - 1; i >= 0; i--) {
+            final DisplayContent display = mDisplayContents.get(i);
             // Traverse all stacks on a display.
             for (int j = display.getStackCount() - 1; j >= 0; --j) {
                 final ActivityStack stack = display.getStackAt(j);
@@ -811,8 +808,8 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     ActivityStack getTopDisplayFocusedStack() {
-        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
-            final ActivityStack focusedStack = mActivityDisplays.get(i).getFocusedStack();
+        for (int i = mDisplayContents.size() - 1; i >= 0; --i) {
+            final ActivityStack focusedStack = mDisplayContents.get(i).getFocusedStack();
             if (focusedStack != null) {
                 return focusedStack;
             }
@@ -831,8 +828,8 @@ class RootActivityContainer extends ConfigurationContainer
         }
         // The top focused stack might not have a resumed activity yet - look on all displays in
         // focus order.
-        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
-            final ActivityDisplay display = mActivityDisplays.get(i);
+        for (int i = mDisplayContents.size() - 1; i >= 0; --i) {
+            final DisplayContent display = mDisplayContents.get(i);
             final ActivityRecord resumedActivityOnDisplay = display.getResumedActivity();
             if (resumedActivityOnDisplay != null) {
                 return resumedActivityOnDisplay;
@@ -861,8 +858,8 @@ class RootActivityContainer extends ConfigurationContainer
         // previous app if this activity is being hosted by the process that is actually still the
         // foreground.
         WindowProcessController fgApp = null;
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
                 if (isTopDisplayFocusedStack(stack)) {
@@ -889,8 +886,8 @@ class RootActivityContainer extends ConfigurationContainer
     boolean attachApplication(WindowProcessController app) throws RemoteException {
         final String processName = app.mName;
         boolean didSomething = false;
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             final ActivityStack stack = display.getFocusedStack();
             if (stack == null) {
                 continue;
@@ -958,8 +955,8 @@ class RootActivityContainer extends ConfigurationContainer
         try {
             mStackSupervisor.getKeyguardController().beginActivityVisibilityUpdate();
             // First the front stacks. In case any are not fullscreen and are in front of home.
-            for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-                final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+            for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+                final DisplayContent display = mDisplayContents.get(displayNdx);
                 display.ensureActivitiesVisible(starting, configChanges, preserveWindows,
                         notifyClients);
             }
@@ -988,8 +985,8 @@ class RootActivityContainer extends ConfigurationContainer
         mCurrentUser = userId;
 
         mStackSupervisor.mStartingUsers.add(uss);
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
                 stack.switchUser(userId);
@@ -1036,8 +1033,8 @@ class RootActivityContainer extends ConfigurationContainer
      * @param onTop Indicates whether container should be place on top or on bottom.
      */
     void moveStackToDisplay(int stackId, int displayId, boolean onTop) {
-        final ActivityDisplay activityDisplay = getActivityDisplayOrCreate(displayId);
-        if (activityDisplay == null) {
+        final DisplayContent displayContent = getDisplayContentOrCreate(displayId);
+        if (displayContent == null) {
             throw new IllegalArgumentException("moveStackToDisplay: Unknown displayId="
                     + displayId);
         }
@@ -1047,7 +1044,7 @@ class RootActivityContainer extends ConfigurationContainer
                     + stackId);
         }
 
-        final ActivityDisplay currentDisplay = stack.getDisplay();
+        final DisplayContent currentDisplay = stack.getDisplay();
         if (currentDisplay == null) {
             throw new IllegalStateException("moveStackToDisplay: Stack with stack=" + stack
                     + " is not attached to any display.");
@@ -1058,14 +1055,14 @@ class RootActivityContainer extends ConfigurationContainer
                     + " to its current displayId=" + displayId);
         }
 
-        if (activityDisplay.isSingleTaskInstance() && activityDisplay.getStackCount() > 0) {
+        if (displayContent.isSingleTaskInstance() && displayContent.getStackCount() > 0) {
             // We don't allow moving stacks to single instance display that already has a child.
             Slog.e(TAG, "Can not move stack=" + stack
-                    + " to single task instance display=" + activityDisplay);
+                    + " to single task instance display=" + displayContent);
             return;
         }
 
-        stack.reparent(activityDisplay.mDisplayContent, onTop);
+        stack.reparent(displayContent.mDisplayContent, onTop);
         // TODO(multi-display): resize stacks properly if moved from split-screen.
     }
 
@@ -1098,7 +1095,7 @@ class RootActivityContainer extends ConfigurationContainer
             String reason) {
         mService.deferWindowLayout();
 
-        final ActivityDisplay display = r.getActivityStack().getDisplay();
+        final DisplayContent display = r.getActivityStack().getDisplay();
 
         try {
             final Task task = r.getTask();
@@ -1168,8 +1165,8 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     void executeAppTransitionForAllDisplay() {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             display.mDisplayContent.executeAppTransition();
         }
     }
@@ -1194,7 +1191,7 @@ class RootActivityContainer extends ConfigurationContainer
         mTmpFindTaskResult.clear();
 
         // Looking up task on preferred display first
-        final ActivityDisplay preferredDisplay = getActivityDisplay(preferredDisplayId);
+        final DisplayContent preferredDisplay = getDisplayContent(preferredDisplayId);
         if (preferredDisplay != null) {
             preferredDisplay.findTaskLocked(r, true /* isPreferredDisplay */, mTmpFindTaskResult);
             if (mTmpFindTaskResult.mIdealMatch) {
@@ -1202,8 +1199,8 @@ class RootActivityContainer extends ConfigurationContainer
             }
         }
 
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             if (display.mDisplayId == preferredDisplayId) {
                 continue;
             }
@@ -1227,8 +1224,8 @@ class RootActivityContainer extends ConfigurationContainer
     int finishTopCrashedActivities(WindowProcessController app, String reason) {
         Task finishedTask = null;
         ActivityStack focusedStack = getTopDisplayFocusedStack();
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             // It is possible that request to finish activity might also remove its task and stack,
             // so we need to be careful with indexes in the loop and check child count every time.
             for (int stackNdx = 0; stackNdx < display.getStackCount(); ++stackNdx) {
@@ -1259,9 +1256,9 @@ class RootActivityContainer extends ConfigurationContainer
             result = targetStack.resumeTopActivityUncheckedLocked(target, targetOptions);
         }
 
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
             boolean resumedOnDisplay = false;
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
                 final ActivityRecord topRunningActivity = stack.topRunningActivity();
@@ -1291,7 +1288,7 @@ class RootActivityContainer extends ConfigurationContainer
                 final ActivityStack focusedStack = display.getFocusedStack();
                 if (focusedStack != null) {
                     result |= focusedStack.resumeTopActivityUncheckedLocked(target, targetOptions);
-                } else if (targetStack == null && !display.hasChild()) {
+                } else if (targetStack == null && display.getStackCount() == 0) {
                     result |= resumeHomeActivity(null /* prev */, "empty-display",
                             display.mDisplayId);
                 }
@@ -1302,9 +1299,9 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     void applySleepTokens(boolean applyToStacks) {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
             // Set the sleeping state of the display.
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             final boolean displayShouldSleep = display.shouldSleep();
             if (displayShouldSleep == display.isSleeping()) {
                 continue;
@@ -1358,8 +1355,8 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     protected ActivityStack getStack(int stackId) {
-        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
-            final ActivityStack stack = mActivityDisplays.get(i).getStack(stackId);
+        for (int i = mDisplayContents.size() - 1; i >= 0; --i) {
+            final ActivityStack stack = mDisplayContents.get(i).getStack(stackId);
             if (stack != null) {
                 return stack;
             }
@@ -1367,11 +1364,11 @@ class RootActivityContainer extends ConfigurationContainer
         return null;
     }
 
-    /** @see ActivityDisplay#getStack(int, int) */
+    /** @see DisplayContent#getStack(int, int) */
     ActivityStack getStack(int windowingMode, int activityType) {
-        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
+        for (int i = mDisplayContents.size() - 1; i >= 0; --i) {
             final ActivityStack stack =
-                    mActivityDisplays.get(i).getStack(windowingMode, activityType);
+                    mDisplayContents.get(i).getStack(windowingMode, activityType);
             if (stack != null) {
                 return stack;
             }
@@ -1381,7 +1378,7 @@ class RootActivityContainer extends ConfigurationContainer
 
     private ActivityStack getStack(int windowingMode, int activityType,
             int displayId) {
-        ActivityDisplay display = getActivityDisplay(displayId);
+        DisplayContent display = getDisplayContent(displayId);
         if (display == null) {
             return null;
         }
@@ -1390,7 +1387,7 @@ class RootActivityContainer extends ConfigurationContainer
 
     private ActivityManager.StackInfo getStackInfo(ActivityStack stack) {
         final int displayId = stack.mDisplayId;
-        final ActivityDisplay display = getActivityDisplay(displayId);
+        final DisplayContent display = getDisplayContent(displayId);
         ActivityManager.StackInfo info = new ActivityManager.StackInfo();
         stack.getBounds(info.bounds);
         info.displayId = displayId;
@@ -1455,8 +1452,8 @@ class RootActivityContainer extends ConfigurationContainer
     ArrayList<ActivityManager.StackInfo> getAllStackInfos(int displayId) {
         ArrayList<ActivityManager.StackInfo> list = new ArrayList<>();
         if (displayId == INVALID_DISPLAY) {
-            for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
-                final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+            for (int displayNdx = 0; displayNdx < mDisplayContents.size(); ++displayNdx) {
+                final DisplayContent display = mDisplayContents.get(displayNdx);
                 for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                     final ActivityStack stack = display.getStackAt(stackNdx);
                     list.add(getStackInfo(stack));
@@ -1464,7 +1461,7 @@ class RootActivityContainer extends ConfigurationContainer
             }
             return list;
         }
-        final ActivityDisplay display = getActivityDisplay(displayId);
+        final DisplayContent display = getDisplayContent(displayId);
         if (display == null) {
             return list;
         }
@@ -1493,7 +1490,7 @@ class RootActivityContainer extends ConfigurationContainer
     public void onDisplayAdded(int displayId) {
         if (DEBUG_STACK) Slog.v(TAG, "Display added displayId=" + displayId);
         synchronized (mService.mGlobalLock) {
-            final ActivityDisplay display = getActivityDisplayOrCreate(displayId);
+            final DisplayContent display = getDisplayContentOrCreate(displayId);
             if (display == null) {
                 return;
             }
@@ -1519,12 +1516,12 @@ class RootActivityContainer extends ConfigurationContainer
         }
 
         synchronized (mService.mGlobalLock) {
-            final ActivityDisplay activityDisplay = getActivityDisplay(displayId);
-            if (activityDisplay == null) {
+            final DisplayContent displayContent = getDisplayContent(displayId);
+            if (displayContent == null) {
                 return;
             }
 
-            activityDisplay.remove();
+            displayContent.remove();
         }
     }
 
@@ -1532,9 +1529,9 @@ class RootActivityContainer extends ConfigurationContainer
     public void onDisplayChanged(int displayId) {
         if (DEBUG_STACK) Slog.v(TAG, "Display changed displayId=" + displayId);
         synchronized (mService.mGlobalLock) {
-            final ActivityDisplay activityDisplay = getActivityDisplay(displayId);
-            if (activityDisplay != null) {
-                activityDisplay.onDisplayChanged();
+            final DisplayContent displayContent = getDisplayContent(displayId);
+            if (displayContent != null) {
+                displayContent.onDisplayChanged();
             }
         }
     }
@@ -1542,12 +1539,12 @@ class RootActivityContainer extends ConfigurationContainer
     /** Update lists of UIDs that are present on displays and have access to them. */
     void updateUIDsPresentOnDisplay() {
         mDisplayAccessUIDs.clear();
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay activityDisplay = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent displayContent = mDisplayContents.get(displayNdx);
             // Only bother calculating the whitelist for private displays
-            if (activityDisplay.isPrivate()) {
+            if (displayContent.isPrivate()) {
                 mDisplayAccessUIDs.append(
-                        activityDisplay.mDisplayId, activityDisplay.getPresentUIDs());
+                        displayContent.mDisplayId, displayContent.getPresentUIDs());
             }
         }
         // Store updated lists in DisplayManager. Callers from outside of AM should get them there.
@@ -1555,7 +1552,7 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     ActivityStack findStackBehind(ActivityStack stack) {
-        final ActivityDisplay display = getActivityDisplay(stack.mDisplayId);
+        final DisplayContent display = getDisplayContent(stack.mDisplayId);
         if (display != null) {
             for (int i = display.getStackCount() - 1; i >= 0; i--) {
                 if (display.getStackAt(i) == stack && i > 0) {
@@ -1569,12 +1566,12 @@ class RootActivityContainer extends ConfigurationContainer
 
     @Override
     protected int getChildCount() {
-        return mActivityDisplays.size();
+        return mDisplayContents.size();
     }
 
     @Override
-    protected ActivityDisplay getChildAt(int index) {
-        return mActivityDisplays.get(index);
+    protected DisplayContent getChildAt(int index) {
+        return mDisplayContents.get(index);
     }
 
     @Override
@@ -1592,61 +1589,59 @@ class RootActivityContainer extends ConfigurationContainer
 
     /** Change the z-order of the given display. */
     private void positionChildAt(DisplayContent display, int position) {
-        if (position >= mActivityDisplays.size()) {
-            position = mActivityDisplays.size() - 1;
+        if (position >= mDisplayContents.size()) {
+            position = mDisplayContents.size() - 1;
         } else if (position < 0) {
             position = 0;
         }
 
-        // TODO(display-merge): Remove cast
-        final ActivityDisplay activityDisplay = (ActivityDisplay) display;
-        if (mActivityDisplays.isEmpty()) {
-            mActivityDisplays.add(activityDisplay);
-        } else if (mActivityDisplays.get(position) != display) {
-            mActivityDisplays.remove(display);
-            mActivityDisplays.add(position, activityDisplay);
+        if (mDisplayContents.isEmpty()) {
+            mDisplayContents.add(display);
+        } else if (mDisplayContents.get(position) != display) {
+            mDisplayContents.remove(display);
+            mDisplayContents.add(position, display);
         }
         mStackSupervisor.updateTopResumedActivityIfNeeded();
     }
 
     @VisibleForTesting
-    void addChild(ActivityDisplay activityDisplay, int position) {
-        positionChildAt(activityDisplay, position);
-        mRootWindowContainer.positionChildAt(position, activityDisplay.mDisplayContent);
+    void addChild(DisplayContent displayContent, int position) {
+        positionChildAt(displayContent, position);
+        mRootWindowContainer.positionChildAt(position, displayContent);
     }
 
-    void removeChild(ActivityDisplay activityDisplay) {
-        // The caller must tell the controller of {@link ActivityDisplay} to release its container
-        // {@link DisplayContent}. That is done in {@link ActivityDisplay#releaseSelfIfNeeded}).
-        mActivityDisplays.remove(activityDisplay);
+    void removeChild(DisplayContent displayContent) {
+        // The caller must tell the controller of {@link DisplayContent} to release its container
+        // {@link DisplayContent}. That is done in {@link DisplayContent#releaseSelfIfNeeded}).
+        mDisplayContents.remove(displayContent);
     }
 
     Configuration getDisplayOverrideConfiguration(int displayId) {
-        final ActivityDisplay activityDisplay = getActivityDisplayOrCreate(displayId);
-        if (activityDisplay == null) {
+        final DisplayContent displayContent = getDisplayContentOrCreate(displayId);
+        if (displayContent == null) {
             throw new IllegalArgumentException("No display found with id: " + displayId);
         }
 
-        return activityDisplay.getRequestedOverrideConfiguration();
+        return displayContent.getRequestedOverrideConfiguration();
     }
 
     void setDisplayOverrideConfiguration(Configuration overrideConfiguration, int displayId) {
-        final ActivityDisplay activityDisplay = getActivityDisplayOrCreate(displayId);
-        if (activityDisplay == null) {
+        final DisplayContent displayContent = getDisplayContentOrCreate(displayId);
+        if (displayContent == null) {
             throw new IllegalArgumentException("No display found with id: " + displayId);
         }
 
-        activityDisplay.onRequestedOverrideConfigurationChanged(overrideConfiguration);
+        displayContent.onRequestedOverrideConfigurationChanged(overrideConfiguration);
     }
 
     void prepareForShutdown() {
-        for (int i = 0; i < mActivityDisplays.size(); i++) {
-            createSleepToken("shutdown", mActivityDisplays.get(i).mDisplayId);
+        for (int i = 0; i < mDisplayContents.size(); i++) {
+            createSleepToken("shutdown", mDisplayContents.get(i).mDisplayId);
         }
     }
 
     ActivityTaskManagerInternal.SleepToken createSleepToken(String tag, int displayId) {
-        final ActivityDisplay display = getActivityDisplay(displayId);
+        final DisplayContent display = getDisplayContent(displayId);
         if (display == null) {
             throw new IllegalArgumentException("Invalid display: " + displayId);
         }
@@ -1660,7 +1655,7 @@ class RootActivityContainer extends ConfigurationContainer
     private void removeSleepToken(SleepTokenImpl token) {
         mSleepTokens.remove(token);
 
-        final ActivityDisplay display = getActivityDisplay(token.mDisplayId);
+        final DisplayContent display = getDisplayContent(token.mDisplayId);
         if (display != null) {
             display.mAllSleepTokens.remove(token);
             if (display.mAllSleepTokens.isEmpty()) {
@@ -1717,8 +1712,8 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     void scheduleDestroyAllActivities(WindowProcessController app, String reason) {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
                 stack.scheduleDestroyActivities(app, reason);
@@ -1730,8 +1725,8 @@ class RootActivityContainer extends ConfigurationContainer
     // successfully put to sleep.
     boolean putStacksToSleep(boolean allowDelay, boolean shuttingDown) {
         boolean allSleep = true;
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 // Stacks and activities could be removed while putting activities to sleep if
                 // the app process was gone. This prevents us getting exception by accessing an
@@ -1801,8 +1796,8 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     boolean hasAwakeDisplay() {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             if (!display.shouldSleep()) {
                 return true;
             }
@@ -1878,7 +1873,7 @@ class RootActivityContainer extends ConfigurationContainer
                     return stack;
                 }
             }
-            final ActivityDisplay display = getActivityDisplayOrCreate(displayId);
+            final DisplayContent display = getDisplayContentOrCreate(displayId);
             if (display != null) {
                 stack = display.getOrCreateStack(r, options, candidateTask, activityType, onTop);
                 if (stack != null) {
@@ -1890,7 +1885,7 @@ class RootActivityContainer extends ConfigurationContainer
         // Give preference to the stack and display of the input task and activity if they match the
         // mode we want to launch into.
         stack = null;
-        ActivityDisplay display = null;
+        DisplayContent display = null;
         if (candidateTask != null) {
             stack = candidateTask.getStack();
         }
@@ -1948,8 +1943,8 @@ class RootActivityContainer extends ConfigurationContainer
     private ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r,
             @Nullable Task candidateTask, @Nullable ActivityOptions options,
             @Nullable LaunchParamsController.LaunchParams launchParams) {
-        final ActivityDisplay activityDisplay = getActivityDisplayOrCreate(displayId);
-        if (activityDisplay == null) {
+        final DisplayContent displayContent = getDisplayContentOrCreate(displayId);
+        if (displayContent == null) {
             throw new IllegalArgumentException(
                     "Display with displayId=" + displayId + " not found.");
         }
@@ -1978,12 +1973,12 @@ class RootActivityContainer extends ConfigurationContainer
             windowingMode = options != null ? options.getLaunchWindowingMode()
                     : r.getWindowingMode();
         }
-        windowingMode = activityDisplay.validateWindowingMode(windowingMode, r, candidateTask,
+        windowingMode = displayContent.validateWindowingMode(windowingMode, r, candidateTask,
                 r.getActivityType());
 
         // Return the topmost valid stack on the display.
-        for (int i = activityDisplay.getStackCount() - 1; i >= 0; --i) {
-            final ActivityStack stack = activityDisplay.getStackAt(i);
+        for (int i = displayContent.getStackCount() - 1; i >= 0; --i) {
+            final ActivityStack stack = displayContent.getStackAt(i);
             if (isValidLaunchStack(stack, r, windowingMode)) {
                 return stack;
             }
@@ -1994,7 +1989,7 @@ class RootActivityContainer extends ConfigurationContainer
             final int activityType =
                     options != null && options.getLaunchActivityType() != ACTIVITY_TYPE_UNDEFINED
                             ? options.getLaunchActivityType() : r.getActivityType();
-            return activityDisplay.createStack(windowingMode, activityType, true /*onTop*/);
+            return displayContent.createStack(windowingMode, activityType, true /*onTop*/);
         }
 
         return null;
@@ -2056,11 +2051,11 @@ class RootActivityContainer extends ConfigurationContainer
     ActivityStack getNextFocusableStack(@NonNull ActivityStack currentFocus,
             boolean ignoreCurrent) {
         // First look for next focusable stack on the same display
-        ActivityDisplay preferredDisplay = currentFocus.getDisplay();
+        DisplayContent preferredDisplay = currentFocus.getDisplay();
         if (preferredDisplay == null) {
             // Stack is currently detached because it is being removed. Use the previous display it
             // was on.
-            preferredDisplay = getActivityDisplay(currentFocus.mPrevDisplayId);
+            preferredDisplay = getDisplayContent(currentFocus.mPrevDisplayId);
         }
         final ActivityStack preferredFocusableStack = preferredDisplay.getNextFocusableStack(
                 currentFocus, ignoreCurrent);
@@ -2075,8 +2070,8 @@ class RootActivityContainer extends ConfigurationContainer
         }
 
         // Now look through all displays
-        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
-            final ActivityDisplay display = mActivityDisplays.get(i);
+        for (int i = mDisplayContents.size() - 1; i >= 0; --i) {
+            final DisplayContent display = mDisplayContents.get(i);
             if (display == preferredDisplay) {
                 // We've already checked this one
                 continue;
@@ -2102,8 +2097,8 @@ class RootActivityContainer extends ConfigurationContainer
      * @return Next valid {@link ActivityStack}, null if not found.
      */
     ActivityStack getNextValidLaunchStack(@NonNull ActivityRecord r, int currentFocus) {
-        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
-            final ActivityDisplay display = mActivityDisplays.get(i);
+        for (int i = mDisplayContents.size() - 1; i >= 0; --i) {
+            final DisplayContent display = mDisplayContents.get(i);
             if (display.mDisplayId == currentFocus) {
                 continue;
             }
@@ -2118,8 +2113,8 @@ class RootActivityContainer extends ConfigurationContainer
 
     boolean handleAppDied(WindowProcessController app) {
         boolean hasVisibleActivities = false;
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
                 hasVisibleActivities |= stack.handleAppDiedLocked(app);
@@ -2231,8 +2226,8 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     void finishVoiceTask(IVoiceInteractionSession session) {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             final int numStacks = display.getStackCount();
             for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
@@ -2246,20 +2241,20 @@ class RootActivityContainer extends ConfigurationContainer
      * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
      */
     void removeStacksInWindowingModes(int... windowingModes) {
-        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
-            mActivityDisplays.get(i).removeStacksInWindowingModes(windowingModes);
+        for (int i = mDisplayContents.size() - 1; i >= 0; --i) {
+            mDisplayContents.get(i).removeStacksInWindowingModes(windowingModes);
         }
     }
 
     void removeStacksWithActivityTypes(int... activityTypes) {
-        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
-            mActivityDisplays.get(i).removeStacksWithActivityTypes(activityTypes);
+        for (int i = mDisplayContents.size() - 1; i >= 0; --i) {
+            mDisplayContents.get(i).removeStacksWithActivityTypes(activityTypes);
         }
     }
 
     ActivityRecord topRunningActivity() {
-        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
-            final ActivityRecord topActivity = mActivityDisplays.get(i).topRunningActivity();
+        for (int i = mDisplayContents.size() - 1; i >= 0; --i) {
+            final ActivityRecord topActivity = mDisplayContents.get(i).topRunningActivity();
             if (topActivity != null) {
                 return topActivity;
             }
@@ -2268,9 +2263,9 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     boolean allResumedActivitiesIdle() {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
             // TODO(b/117135575): Check resumed activities on all visible stacks.
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             if (display.isSleeping()) {
                 // No resumed activities while display is sleeping.
                 continue;
@@ -2298,8 +2293,8 @@ class RootActivityContainer extends ConfigurationContainer
 
     boolean allResumedActivitiesVisible() {
         boolean foundResumed = false;
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
                 final ActivityRecord r = stack.getResumedActivity();
@@ -2316,8 +2311,8 @@ class RootActivityContainer extends ConfigurationContainer
 
     boolean allPausedActivitiesComplete() {
         boolean pausing = true;
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
                 final ActivityRecord r = stack.mPausingActivity;
@@ -2381,8 +2376,8 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     void cancelInitializingActivities() {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
                 stack.cancelInitializingActivities();
@@ -2467,9 +2462,9 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     ActivityRecord isInAnyStack(IBinder token) {
-        int numDisplays = mActivityDisplays.size();
+        int numDisplays = mDisplayContents.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
                 final ActivityRecord r = stack.isInStackLocked(token);
@@ -2503,9 +2498,9 @@ class RootActivityContainer extends ConfigurationContainer
             // activity on all displays, or if there are no resumed activities in the system.
             boolean noResumedActivities = true;
             boolean allFocusedProcessesDiffer = true;
-            for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
-                final ActivityDisplay activityDisplay = mActivityDisplays.get(displayNdx);
-                final ActivityRecord resumedActivity = activityDisplay.getResumedActivity();
+            for (int displayNdx = 0; displayNdx < mDisplayContents.size(); ++displayNdx) {
+                final DisplayContent displayContent = mDisplayContents.get(displayNdx);
+                final ActivityRecord resumedActivity = displayContent.getResumedActivity();
                 final WindowProcessController resumedActivityProcess =
                         resumedActivity == null ? null : resumedActivity.app;
 
@@ -2550,9 +2545,9 @@ class RootActivityContainer extends ConfigurationContainer
             return getTopDisplayFocusedStack().getDumpActivitiesLocked(name);
         } else {
             ArrayList<ActivityRecord> activities = new ArrayList<>();
-            int numDisplays = mActivityDisplays.size();
+            int numDisplays = mDisplayContents.size();
             for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-                final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+                final DisplayContent display = mDisplayContents.get(displayNdx);
                 for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                     final ActivityStack stack = display.getStackAt(stackNdx);
                     if (!dumpVisibleStacksOnly || stack.shouldBeVisible(null)) {
@@ -2567,9 +2562,9 @@ class RootActivityContainer extends ConfigurationContainer
     public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix);
         pw.println("topDisplayFocusedStack=" + getTopDisplayFocusedStack());
-        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
-            final ActivityDisplay display = mActivityDisplays.get(i);
-            display.dump(pw, prefix);
+        for (int i = mDisplayContents.size() - 1; i >= 0; --i) {
+            final DisplayContent display = mDisplayContents.get(i);
+            display.dump(pw, prefix, true /* dumpAll */);
         }
     }
 
@@ -2579,17 +2574,17 @@ class RootActivityContainer extends ConfigurationContainer
      */
     void dumpDisplayConfigs(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.println("Display override configurations:");
-        final int displayCount = mActivityDisplays.size();
+        final int displayCount = mDisplayContents.size();
         for (int i = 0; i < displayCount; i++) {
-            final ActivityDisplay activityDisplay = mActivityDisplays.get(i);
-            pw.print(prefix); pw.print("  "); pw.print(activityDisplay.mDisplayId); pw.print(": ");
-            pw.println(activityDisplay.getRequestedOverrideConfiguration());
+            final DisplayContent displayContent = mDisplayContents.get(i);
+            pw.print(prefix); pw.print("  "); pw.print(displayContent.mDisplayId); pw.print(": ");
+            pw.println(displayContent.getRequestedOverrideConfiguration());
         }
     }
 
     public void dumpDisplays(PrintWriter pw) {
-        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
-            final ActivityDisplay display = mActivityDisplays.get(i);
+        for (int i = mDisplayContents.size() - 1; i >= 0; --i) {
+            final DisplayContent display = mDisplayContents.get(i);
             pw.print("[id:" + display.mDisplayId + " stacks:");
             display.dumpStacks(pw);
             pw.print("]");
@@ -2600,18 +2595,18 @@ class RootActivityContainer extends ConfigurationContainer
             String dumpPackage) {
         boolean printed = false;
         boolean needSep = false;
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            ActivityDisplay activityDisplay = mActivityDisplays.get(displayNdx);
-            pw.print("Display #"); pw.print(activityDisplay.mDisplayId);
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            DisplayContent displayContent = mDisplayContents.get(displayNdx);
+            pw.print("Display #"); pw.print(displayContent.mDisplayId);
             pw.println(" (activities from top to bottom):");
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+            final DisplayContent display = mDisplayContents.get(displayNdx);
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
                 pw.println();
                 printed = stack.dump(fd, pw, dumpAll, dumpClient, dumpPackage, needSep);
                 needSep = printed;
             }
-            printThisActivity(pw, activityDisplay.getResumedActivity(), dumpPackage, needSep,
+            printThisActivity(pw, displayContent.getResumedActivity(), dumpPackage, needSep,
                     " ResumedActivity:");
         }
 
@@ -2632,9 +2627,9 @@ class RootActivityContainer extends ConfigurationContainer
             @WindowTraceLogLevel int logLevel) {
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, CONFIGURATION_CONTAINER, logLevel);
-        for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
-            final ActivityDisplay activityDisplay = mActivityDisplays.get(displayNdx);
-            activityDisplay.dumpDebug(proto, DISPLAYS, logLevel);
+        for (int displayNdx = 0; displayNdx < mDisplayContents.size(); ++displayNdx) {
+            final DisplayContent displayContent = mDisplayContents.get(displayNdx);
+            displayContent.dumpDebug(proto, DISPLAYS, logLevel);
         }
         mStackSupervisor.getKeyguardController().dumpDebug(proto, KEYGUARD_CONTROLLER);
         // TODO(b/111541062): Update tests to look for resumed activities on all displays

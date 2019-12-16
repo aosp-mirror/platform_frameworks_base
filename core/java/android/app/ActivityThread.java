@@ -3417,7 +3417,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     private ContextImpl createBaseContextForActivity(ActivityClientRecord r) {
         final int displayId;
         try {
-            displayId = ActivityTaskManager.getService().getActivityDisplayId(r.token);
+            displayId = ActivityTaskManager.getService().getDisplayId(r.token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
