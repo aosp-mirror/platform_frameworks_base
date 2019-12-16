@@ -405,8 +405,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final int ANIMATION_COMPLETED_TIMEOUT_MS = 5000;
 
-    final WindowManagerConstants mConstants = new WindowManagerConstants(this,
-            DeviceConfigInterface.REAL);
+    final WindowManagerConstants mConstants;
 
     final WindowTracing mWindowTracing;
 
@@ -1232,6 +1231,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mHighRefreshRateBlacklist = HighRefreshRateBlacklist.create(context.getResources());
 
+        mConstants = new WindowManagerConstants(this, DeviceConfigInterface.REAL);
         mConstants.start(new HandlerExecutor(mH));
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
