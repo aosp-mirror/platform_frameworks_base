@@ -223,7 +223,7 @@ public final class MediaParser {
     public static final class SeekPoint {
 
         /** A {@link SeekPoint} whose time and byte offset are both set to 0. */
-        public static final @NonNull SeekPoint START = new SeekPoint(0, 0);
+        @NonNull public static final SeekPoint START = new SeekPoint(0, 0);
 
         /** The time of the seek point, in microseconds. */
         public final long timeUs;
@@ -241,7 +241,8 @@ public final class MediaParser {
         }
 
         @Override
-        public @NonNull String toString() {
+        @NonNull
+        public String toString() {
             return "[timeUs=" + timeUs + ", position=" + position + "]";
         }
 
@@ -414,7 +415,8 @@ public final class MediaParser {
      * @return A new instance.
      * @throws IllegalArgumentException If an invalid name is provided.
      */
-    public static @NonNull MediaParser createByName(
+    @NonNull
+    public static MediaParser createByName(
             @NonNull String name, @NonNull OutputConsumer outputConsumer) {
         String[] nameAsArray = new String[] {name};
         assertValidNames(nameAsArray);
@@ -431,7 +433,8 @@ public final class MediaParser {
      *     default array of names is used.
      * @return A new instance.
      */
-    public static @NonNull MediaParser create(
+    @NonNull
+    public static MediaParser create(
             @NonNull OutputConsumer outputConsumer, @NonNull String... extractorNames) {
         assertValidNames(extractorNames);
         if (extractorNames.length == 0) {
@@ -448,7 +451,8 @@ public final class MediaParser {
      *
      * <p>TODO: List which properties are taken into account. E.g. MimeType.
      */
-    public static @NonNull List<String> getExtractorNames(@NonNull MediaFormat mediaFormat) {
+    @NonNull
+    public static List<String> getExtractorNames(@NonNull MediaFormat mediaFormat) {
         throw new UnsupportedOperationException();
     }
 
@@ -479,7 +483,8 @@ public final class MediaParser {
      * @return The name of the backing extractor implementation, or null if the backing extractor
      *     implementation has not yet been selected.
      */
-    public @Nullable String getExtractorName() {
+    @Nullable
+    public String getExtractorName() {
         return mExtractorName;
     }
 
