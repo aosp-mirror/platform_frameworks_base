@@ -76,6 +76,7 @@ public class RankingBuilder {
         mSmartActions = copyList(ranking.getSmartActions());
         mSmartReplies = copyList(ranking.getSmartReplies());
         mCanBubble = ranking.canBubble();
+        mIsVisuallyInterruptive = ranking.visuallyInterruptive();
     }
 
     public Ranking build() {

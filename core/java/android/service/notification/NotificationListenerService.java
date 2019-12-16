@@ -1895,7 +1895,8 @@ public abstract class NotificationListenerService extends Service {
                     && ((mSmartActions == null ? 0 : mSmartActions.size())
                         == (other.mSmartActions == null ? 0 : other.mSmartActions.size()))
                     && Objects.equals(mSmartReplies, other.mSmartReplies)
-                    && Objects.equals(mCanBubble, other.mCanBubble);
+                    && Objects.equals(mCanBubble, other.mCanBubble)
+                    && Objects.equals(mVisuallyInterruptive, other.mVisuallyInterruptive);
         }
     }
 
