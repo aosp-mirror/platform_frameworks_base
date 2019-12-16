@@ -309,6 +309,9 @@ public class Switch extends CompoundButton {
 
         // Refresh display with current params
         refreshDrawableState();
+        // Default state is derived from on/off-text, so state has to be updated when on/off-text
+        // are updated.
+        setDefaultStateDescritption();
         setChecked(isChecked());
     }
 
