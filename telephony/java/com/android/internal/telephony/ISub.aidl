@@ -300,4 +300,6 @@ interface ISub {
     int getActiveDataSubscriptionId();
 
     boolean canDisablePhysicalSubscription();
+
+    int setUiccApplicationsEnabled(boolean enabled, int subscriptionId);
 }
