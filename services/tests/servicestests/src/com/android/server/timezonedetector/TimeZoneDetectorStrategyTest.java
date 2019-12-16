@@ -453,7 +453,7 @@ public class TimeZoneDetectorStrategyTest {
 
         @Override
         public boolean isDeviceTimeZoneInitialized() {
-            return mTimeZoneId != null;
+            return mTimeZoneId.getLatest() != null;
         }
 
         @Override
