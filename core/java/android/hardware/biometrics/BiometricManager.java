@@ -90,19 +90,19 @@ public class BiometricManager {
          * @hide
          */
         @SystemApi
-        int EMPTY_SET = 0x0;
+        int EMPTY_SET = 0x0000;
 
         /**
          * Placeholder for the theoretical strongest biometric security tier.
          * @hide
          */
-        int BIOMETRIC_MAX_STRENGTH = 0x001;
+        int BIOMETRIC_MAX_STRENGTH = 0x0001;
 
         /**
          * Any biometric (e.g. fingerprint, iris, or face) on the device that meets or exceeds the
          * requirements for <strong>Strong</strong>, as defined by the Android CDD.
          */
-        int BIOMETRIC_STRONG = 0x00F;
+        int BIOMETRIC_STRONG = 0x000F;
 
         /**
          * Any biometric (e.g. fingerprint, iris, or face) on the device that meets or exceeds the
@@ -111,7 +111,7 @@ public class BiometricManager {
          * <p>Note that this is a superset of {@link #BIOMETRIC_STRONG} and is defined such that
          * <code>BIOMETRIC_STRONG | BIOMETRIC_WEAK == BIOMETRIC_WEAK</code>.
          */
-        int BIOMETRIC_WEAK = 0x0FF;
+        int BIOMETRIC_WEAK = 0x00FF;
 
         /**
          * Any biometric (e.g. fingerprint, iris, or face) on the device that meets or exceeds the
@@ -121,7 +121,7 @@ public class BiometricManager {
          * @hide
          */
         @SystemApi
-        int BIOMETRIC_CONVENIENCE = 0xFFF;
+        int BIOMETRIC_CONVENIENCE = 0x0FFF;
 
         /**
          * Placeholder for the theoretical weakest biometric security tier.
