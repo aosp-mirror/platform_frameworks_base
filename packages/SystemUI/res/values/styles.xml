@@ -227,7 +227,8 @@
     </style>
 
     <style name="TextAppearance.QS.Status" parent="TextAppearance.QS.TileLabel.Secondary">
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:textSize">13sp</item>
         <item name="android:textColor">@color/dark_mode_qs_icon_color_single_tone</item>
     </style>
 
