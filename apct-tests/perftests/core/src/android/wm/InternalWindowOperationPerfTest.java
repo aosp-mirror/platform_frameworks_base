@@ -95,7 +95,7 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase {
 
         mTraceMarkParser.forAllSlices((key, slices) -> {
             for (TraceMarkSlice slice : slices) {
-                state.addExtraResult(key, (long) (slice.getDurarionInSeconds() * NANOS_PER_S));
+                state.addExtraResult(key, (long) (slice.getDurationInSeconds() * NANOS_PER_S));
             }
         });
 

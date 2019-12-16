@@ -23,11 +23,15 @@ import android.os.Bundle;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -140,6 +144,8 @@ public final class ManualBenchmarkState {
     /** @see #addExtraResult(String, long) */
     private ArrayMap<String, ArrayList<Long>> mExtraResults;
 
+    private final List<Long> mTmpDurations = Arrays.asList(0L);
+
     // Statistics. These values will be filled when the benchmark has finished.
     // The computation needs double precision, but long int is fine for final reporting.
     private Stats mStats;
@@ -188,14 +194,25 @@ public final class ManualBenchmarkState {
         if (duration < 0) {
             throw new RuntimeException("duration is negative: " + duration);
         }
+        mTmpDurations.set(0, duration);
+        return keepRunning(mTmpDurations);
+    }
+
+    /**
+     * Similar to the {@link #keepRunning(long)} but accepts a list of durations
+     */
+    public boolean keepRunning(List<Long> durations) {
         switch (mState) {
             case NOT_STARTED:
                 mState = WARMUP;
                 mWarmupStartTime = System.nanoTime();
                 return true;
             case WARMUP: {
+                if (ArrayUtils.isEmpty(durations)) {
+                    return true;
+                }
                 final long timeSinceStartingWarmup = System.nanoTime() - mWarmupStartTime;
-                ++mWarmupIterations;
+                mWarmupIterations += durations.size();
                 if (mWarmupIterations >= WARMUP_MIN_ITERATIONS
                         && timeSinceStartingWarmup >= mWarmupDurationNs) {
                     beginBenchmark(timeSinceStartingWarmup, mWarmupIterations);
@@ -203,7 +220,10 @@ public final class ManualBenchmarkState {
                 return true;
             }
             case RUNNING: {
-                mResults.add(duration);
+                if (ArrayUtils.isEmpty(durations)) {
+                    return true;
+                }
+                mResults.addAll(durations);
                 final boolean keepRunning = mResults.size() < mMaxIterations;
                 if (!keepRunning) {
                     mStats = new Stats(mResults);

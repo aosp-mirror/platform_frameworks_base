@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"Ukladací priestor nastavení"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"Zmeny nastavení hotspotu"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"Pásmo vášho hotspotu sa zmenilo."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"Toto zariadenie nepodporuje vašu predvoľbu používať iba 5 GHz. Namiesto toho bude pásmo 5 GHz používať vtedy, keď bude k dispozícii."</string>
 </resources>

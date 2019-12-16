@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"సెట్టింగ్‌ల నిల్వ"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"మీ హాట్‌స్పాట్ సెట్టింగ్‌లకు మార్పులు"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"మీ హాట్‌స్పాట్ బ్యాండ్ మార్చబడింది."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"ఈ పరికరం 5GHz కోసం మాత్రమే మీ ప్రాధాన్యతకు మద్దతు ఇవ్వదు. బదులుగా, ఈ పరికరం అందుబాటులో ఉన్నప్పుడు 5GHz బ్యాండ్‌ను ఉపయోగిస్తుంది."</string>
 </resources>

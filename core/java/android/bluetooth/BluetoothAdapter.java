@@ -1642,7 +1642,7 @@ public final class BluetoothAdapter {
         // Workaround for legacy API for getting a BluetoothAdapter not
         // passing a context
         if (mContext != null) {
-            return null;
+            return mContext.getFeatureId();
         }
         return null;
     }

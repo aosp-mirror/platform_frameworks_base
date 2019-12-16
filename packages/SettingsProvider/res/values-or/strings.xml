@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"ସେଟିଙ୍ଗ ଷ୍ଟୋରେଜ୍‌"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"ଆପଣଙ୍କର ହଟ୍‌ସ୍ପଟ୍ ସେଟିଂସ୍‌କୁ ବଦଳାଇଥାଏ"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"ଆପଣଙ୍କର ହଟ୍‌ସ୍ପଟ୍ ପରିବର୍ତ୍ତନ କରାଯାଇଛି।"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"କେବଳ 5GHz ପାଇଁ, ଏହି ଡିଭାଇସ୍ ଆପଣଙ୍କର ପସନ୍ଦକୁ ସମର୍ଥନ କରେ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ, ଉପଲବ୍ଧ ହେଲେ ଏହି ଡିଭାଇସ୍ 5GHz ବ୍ୟାଣ୍ଡ ବ୍ୟବହାର କରିବ।"</string>
 </resources>

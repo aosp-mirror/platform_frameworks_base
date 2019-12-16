@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"설정 저장소"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"핫스팟 설정 변경"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"핫스팟 대역이 변경되었습니다."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"이 기기에서는 5GHz 전용 환경설정이 지원되지 않습니다. 대신 가능할 때만 기기에서 5GHz 대역이 사용됩니다."</string>
 </resources>

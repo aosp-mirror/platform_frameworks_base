@@ -20,10 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"သိုလှောင်မှုဆက်တင်များ"</string>
-    <!-- no translation found for wifi_softap_config_change (5338670993556993667) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7600005249167787750) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (2504664754843959730) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5338670993556993667">"သင်၏ဟော့စပေါ့ ဆက်တင်များ ပြောင်းလဲမှု"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"သင်၏ ဟော့စပေါ့လိုင်း ပြောင်းသွားပါပြီ။"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"ဤစက်ပစ္စည်းသည် သင်၏ 5GHz သီးသန့်ရွေးချယ်မှုအတွက် ပံ့ပိုးမထားပါ။ ၎င်းအစား ဤစက်ပစ္စည်းသည် ရနိုင်သည့်အခါ 5GHz လိုင်းကို သုံးသွားပါမည်။"</string>
 </resources>
