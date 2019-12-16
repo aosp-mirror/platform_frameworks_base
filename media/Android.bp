@@ -77,20 +77,13 @@ filegroup {
     path: "apex/java"
 }
 
-metalava_updatable_media_args = " --error UnhiddenSystemApi " +
-    "--hide RequiresPermission " +
-    "--hide MissingPermission --hide BroadcastBehavior " +
-    "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
-    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
-    "--hide HiddenTypedefConstant --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\) "
-
 droidstubs {
     name: "updatable-media-stubs",
     srcs: [
         ":updatable-media-srcs",
         ":framework-media-annotation-srcs",
     ],
-    args: metalava_updatable_media_args,
+    defaults: [ "framework-module-stubs-defaults-systemapi" ],
     aidl: {
         // TODO(b/135922046) remove this
         include_dirs: ["frameworks/base/core/java"],
