@@ -24,10 +24,15 @@ cc_library_shared {
 
     // our source files
     //
-    srcs: ["bitmap.cpp"],
+    srcs: [
+        "bitmap.cpp",
+        "aassetstreamadaptor.cpp",
+    ],
 
     shared_libs: [
+        "libandroid",
         "libandroid_runtime",
+        "liblog",
     ],
 
     arch: {
