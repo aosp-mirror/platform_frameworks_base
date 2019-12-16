@@ -1313,14 +1313,11 @@ public interface WindowManager extends ViewManager {
          * set for you by Window as described in {@link Window#setFlags}.*/
         public static final int FLAG_LAYOUT_INSET_DECOR = 0x00010000;
 
-        /** Window flag: invert the state of {@link #FLAG_NOT_FOCUSABLE} with
-         * respect to how this window interacts with the current method.  That
-         * is, if FLAG_NOT_FOCUSABLE is set and this flag is set, then the
-         * window will behave as if it needs to interact with the input method
-         * and thus be placed behind/away from it; if FLAG_NOT_FOCUSABLE is
-         * not set and this flag is set, then the window will behave as if it
-         * doesn't need to interact with the input method and can be placed
-         * to use more space and cover the input method.
+        /** Window flag: When set, input method can't interact with the focusable window
+         * and can be placed to use more space and cover the input method.
+         * Note: When combined with {@link #FLAG_NOT_FOCUSABLE}, this flag has no
+         * effect since input method cannot interact with windows having {@link #FLAG_NOT_FOCUSABLE}
+         * flag set.
          */
         public static final int FLAG_ALT_FOCUSABLE_IM = 0x00020000;
 
@@ -1998,16 +1995,12 @@ public interface WindowManager extends ViewManager {
          *
          * @param flags The current window manager flags.
          *
-         * @return Returns true if such a window should be behind/interact
-         * with an input method, false if not.
+         * @return Returns {@code true} if such a window should be behind/interact
+         * with an input method, {@code false} if not.
          */
         public static boolean mayUseInputMethod(int flags) {
-            switch (flags&(FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM)) {
-                case 0:
-                case FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM:
-                    return true;
-            }
-            return false;
+            return (flags & FLAG_NOT_FOCUSABLE) != FLAG_NOT_FOCUSABLE
+                    && (flags & FLAG_ALT_FOCUSABLE_IM) != FLAG_ALT_FOCUSABLE_IM;
         }
 
         /**

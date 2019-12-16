@@ -2149,13 +2149,27 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        final int fl = mAttrs.flags & (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM);
-        final int type = mAttrs.type;
+        if (PixelFormat.formatHasAlpha(mAttrs.format)) {
+            // Support legacy use cases where transparent windows can still be ime target with
+            // FLAG_NOT_FOCUSABLE and ALT_FOCUSABLE_IM set.
+            // Certain apps listen for IME insets using transparent windows and ADJUST_NOTHING to
+            // manually synchronize app content to IME animation b/144619551.
+            // TODO(b/145812508): remove this once new focus management is complete b/141738570
+            final int fl = mAttrs.flags & (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM);
+            final int type = mAttrs.type;
 
-        // Can only be an IME target if both FLAG_NOT_FOCUSABLE and FLAG_ALT_FOCUSABLE_IM are set or
-        // both are cleared...and not a starting window.
-        if (fl != 0 && fl != (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM)
-                && type != TYPE_APPLICATION_STARTING) {
+            // Can only be an IME target if both FLAG_NOT_FOCUSABLE and FLAG_ALT_FOCUSABLE_IM are
+            // set or both are cleared...and not a starting window.
+            if (fl != 0 && fl != (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM)
+                    && type != TYPE_APPLICATION_STARTING) {
+                return false;
+            }
+        } else if (!WindowManager.LayoutParams.mayUseInputMethod(mAttrs.flags)
+                || mAttrs.type == TYPE_APPLICATION_STARTING) {
+            // Can be an IME target only if:
+            // 1. FLAG_NOT_FOCUSABLE is not set
+            // 2. FLAG_ALT_FOCUSABLE_IM is not set
+            // 3. not a starting window.
             return false;
         }
 
