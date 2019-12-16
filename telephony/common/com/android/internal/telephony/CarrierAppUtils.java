@@ -138,8 +138,8 @@ public final class CarrierAppUtils {
             ContentResolver contentResolver, int userId,
             ArraySet<String> systemCarrierAppsDisabledUntilUsed,
             ArrayMap<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed) {
-        List<ApplicationInfo> candidates = getDefaultCarrierAppCandidatesHelper(packageManager,
-                userId, systemCarrierAppsDisabledUntilUsed);
+        List<ApplicationInfo> candidates = getDefaultNotUpdatedCarrierAppCandidatesHelper(
+                packageManager, userId, systemCarrierAppsDisabledUntilUsed);
         if (candidates == null || candidates.isEmpty()) {
             return;
         }
@@ -175,15 +175,16 @@ public final class CarrierAppUtils {
                     }
                 }
 
+                int enabledSetting = packageManager.getApplicationEnabledSetting(packageName,
+                        userId);
                 if (hasPrivileges) {
                     // Only update enabled state for the app on /system. Once it has been
                     // updated we shouldn't touch it.
-                    if (!ai.isUpdatedSystemApp()
-                            && (ai.enabledSetting
+                    if (enabledSetting
                             == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
-                            || ai.enabledSetting
+                            || enabledSetting
                             == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
-                            || (ai.flags & ApplicationInfo.FLAG_INSTALLED) == 0)) {
+                            || (ai.flags & ApplicationInfo.FLAG_INSTALLED) == 0) {
                         Log.i(TAG, "Update state(" + packageName + "): ENABLED for user "
                                 + userId);
                         packageManager.setSystemAppInstallState(
@@ -201,9 +202,12 @@ public final class CarrierAppUtils {
                     // Also enable any associated apps for this carrier app.
                     if (associatedAppList != null) {
                         for (ApplicationInfo associatedApp : associatedAppList) {
-                            if (associatedApp.enabledSetting
+                            int associatedAppEnabledSetting =
+                                    packageManager.getApplicationEnabledSetting(
+                                    associatedApp.packageName, userId);
+                            if (associatedAppEnabledSetting
                                     == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
-                                    || associatedApp.enabledSetting
+                                    || associatedAppEnabledSetting
                                     == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
                                     || (associatedApp.flags
                                     & ApplicationInfo.FLAG_INSTALLED) == 0) {
@@ -228,8 +232,7 @@ public final class CarrierAppUtils {
                 } else {  // No carrier privileges
                     // Only update enabled state for the app on /system. Once it has been
                     // updated we shouldn't touch it.
-                    if (!ai.isUpdatedSystemApp()
-                            && ai.enabledSetting
+                    if (enabledSetting
                             == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                             && (ai.flags & ApplicationInfo.FLAG_INSTALLED) != 0) {
                         Log.i(TAG, "Update state(" + packageName
@@ -246,7 +249,10 @@ public final class CarrierAppUtils {
                     if (!hasRunOnce) {
                         if (associatedAppList != null) {
                             for (ApplicationInfo associatedApp : associatedAppList) {
-                                if (associatedApp.enabledSetting
+                                int associatedAppEnabledSetting =
+                                        packageManager.getApplicationEnabledSetting(
+                                        associatedApp.packageName, userId);
+                                if (associatedAppEnabledSetting
                                         == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                                         && (associatedApp.flags
                                         & ApplicationInfo.FLAG_INSTALLED) != 0) {
@@ -357,6 +363,31 @@ public final class CarrierAppUtils {
         return apps;
     }
 
+    private static List<ApplicationInfo> getDefaultNotUpdatedCarrierAppCandidatesHelper(
+            IPackageManager packageManager,
+            int userId,
+            ArraySet<String> systemCarrierAppsDisabledUntilUsed) {
+        if (systemCarrierAppsDisabledUntilUsed == null) {
+            return null;
+        }
+
+        int size = systemCarrierAppsDisabledUntilUsed.size();
+        if (size == 0) {
+            return null;
+        }
+
+        List<ApplicationInfo> apps = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            String packageName = systemCarrierAppsDisabledUntilUsed.valueAt(i);
+            ApplicationInfo ai =
+                    getApplicationInfoIfNotUpdatedSystemApp(packageManager, userId, packageName);
+            if (ai != null) {
+                apps.add(ai);
+            }
+        }
+        return apps;
+    }
+
     private static Map<String, List<ApplicationInfo>> getDefaultCarrierAssociatedAppsHelper(
             IPackageManager packageManager,
             int userId,
@@ -369,11 +400,11 @@ public final class CarrierAppUtils {
                     systemCarrierAssociatedAppsDisabledUntilUsed.valueAt(i);
             for (int j = 0; j < associatedAppPackages.size(); j++) {
                 ApplicationInfo ai =
-                        getApplicationInfoIfSystemApp(
+                        getApplicationInfoIfNotUpdatedSystemApp(
                                 packageManager, userId, associatedAppPackages.get(j));
                 // Only update enabled state for the app on /system. Once it has been updated we
                 // shouldn't touch it.
-                if (ai != null && !ai.isUpdatedSystemApp()) {
+                if (ai != null) {
                     List<ApplicationInfo> appList = associatedApps.get(carrierAppPackage);
                     if (appList == null) {
                         appList = new ArrayList<>();
@@ -387,6 +418,26 @@ public final class CarrierAppUtils {
     }
 
     @Nullable
+    private static ApplicationInfo getApplicationInfoIfNotUpdatedSystemApp(
+            IPackageManager packageManager,
+            int userId,
+            String packageName) {
+        try {
+            ApplicationInfo ai = packageManager.getApplicationInfo(packageName,
+                    PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                            | PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS
+                            | PackageManager.MATCH_SYSTEM_ONLY
+                            | PackageManager.MATCH_FACTORY_ONLY, userId);
+            if (ai != null) {
+                return ai;
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Could not reach PackageManager", e);
+        }
+        return null;
+    }
+
+    @Nullable
     private static ApplicationInfo getApplicationInfoIfSystemApp(
             IPackageManager packageManager,
             int userId,
@@ -394,8 +445,9 @@ public final class CarrierAppUtils {
         try {
             ApplicationInfo ai = packageManager.getApplicationInfo(packageName,
                     PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
-                    | PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS, userId);
-            if (ai != null && ai.isSystemApp()) {
+                    | PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS
+                    | PackageManager.MATCH_SYSTEM_ONLY, userId);
+            if (ai != null) {
                 return ai;
             }
         } catch (RemoteException e) {
