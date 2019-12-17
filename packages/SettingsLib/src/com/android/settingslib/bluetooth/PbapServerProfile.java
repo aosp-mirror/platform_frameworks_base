@@ -16,6 +16,7 @@
 
 package com.android.settingslib.bluetooth;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothPbap;
@@ -52,14 +53,16 @@ public class PbapServerProfile implements LocalBluetoothProfile {
 
     // These callbacks run on the main thread.
     private final class PbapServiceListener
-            implements BluetoothPbap.ServiceListener {
+            implements BluetoothProfile.ServiceListener {
 
-        public void onServiceConnected(BluetoothPbap proxy) {
+        @Override
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
             mService = (BluetoothPbap) proxy;
             mIsProfileReady=true;
         }
 
-        public void onServiceDisconnected() {
+        @Override
+        public void onServiceDisconnected(int profile) {
             mIsProfileReady=false;
         }
     }
@@ -74,7 +77,8 @@ public class PbapServerProfile implements LocalBluetoothProfile {
     }
 
     PbapServerProfile(Context context) {
-        BluetoothPbap pbap = new BluetoothPbap(context, new PbapServiceListener());
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, new PbapServiceListener(),
+                BluetoothProfile.PBAP);
     }
 
     public boolean accessProfileEnabled() {
@@ -97,13 +101,8 @@ public class PbapServerProfile implements LocalBluetoothProfile {
     }
 
     public int getConnectionStatus(BluetoothDevice device) {
-        if (mService == null) {
-            return BluetoothProfile.STATE_DISCONNECTED;
-        }
-        if (mService.isConnected(device))
-            return BluetoothProfile.STATE_CONNECTED;
-        else
-            return BluetoothProfile.STATE_DISCONNECTED;
+        if (mService == null) return BluetoothProfile.STATE_DISCONNECTED;
+        return mService.getConnectionState(device);
     }
 
     public boolean isPreferred(BluetoothDevice device) {
@@ -142,7 +141,8 @@ public class PbapServerProfile implements LocalBluetoothProfile {
         Log.d(TAG, "finalize()");
         if (mService != null) {
             try {
-                mService.close();
+                BluetoothAdapter.getDefaultAdapter().closeProfileProxy(BluetoothProfile.PBAP,
+                        mService);
                 mService = null;
             }catch (Throwable t) {
                 Log.w(TAG, "Error cleaning up PBAP proxy", t);
