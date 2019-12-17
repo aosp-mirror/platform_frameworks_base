@@ -760,6 +760,17 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testWillHideDockedWallpaper() {
+        mAlwaysOnEnabled = false;
+        when(mDockManager.isDocked()).thenReturn(true);
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+
+        mScrimController.transitionTo(ScrimState.AOD);
+
+        verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
+    }
+
+    @Test
     public void testConservesExpansionOpacityAfterTransition() {
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         mScrimController.setPanelExpansion(0.5f);
