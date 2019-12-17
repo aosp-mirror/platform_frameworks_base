@@ -8259,6 +8259,44 @@ public class TelephonyManager {
     }
 
     /**
+     * Shut down all the live radios over all the slot index.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void shutdownAllRadios() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.shutdownMobileRadios();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#shutdownMobileRadios", e);
+        }
+    }
+
+    /**
+     * Check if any radio is on over all the slot indexes.
+     *
+     * @return {@code true} if any radio is on over any slot index.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isAnyRadioPoweredOn() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.needMobileRadioShutdown();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#needMobileRadioShutdown", e);
+        }
+        return false;
+    }
+
+    /**
      * Radio explicitly powered off (e.g, airplane mode).
      * @hide
      */
