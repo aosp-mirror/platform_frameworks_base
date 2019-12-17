@@ -21,6 +21,7 @@ import com.android.systemui.ScreenDecorations;
 import com.android.systemui.SizeCompatModeActivityController;
 import com.android.systemui.SliceBroadcastRelayHandler;
 import com.android.systemui.SystemUI;
+import com.android.systemui.accessibility.WindowMagnification;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -156,4 +157,10 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(VolumeUI.class)
     public abstract SystemUI bindVolumeUI(VolumeUI sysui);
+
+    /** Inject into WindowMagnification. */
+    @Binds
+    @IntoMap
+    @ClassKey(WindowMagnification.class)
+    public abstract SystemUI bindWindowMagnification(WindowMagnification sysui);
 }

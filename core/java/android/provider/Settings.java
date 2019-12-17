@@ -8416,6 +8416,12 @@ public final class Settings {
         public static final String PEOPLE_STRIP = "people_strip";
 
         /**
+         * Controls if window magnification is enabled.
+         * @hide
+         */
+        public static final String WINDOW_MAGNIFICATION = "window_magnification";
+
+        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *
