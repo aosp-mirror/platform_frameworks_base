@@ -333,6 +333,8 @@ applications that come with the platform
         <permission name="android.permission.ENTER_CAR_MODE_PRIORITIZED"/>
         <!-- Permission required for Telecom car mode CTS tests. -->
         <permission name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
+        <!-- Permission required for Tethering CTS tests. -->
+        <permission name="android.permission.TETHER_PRIVILEGED"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
