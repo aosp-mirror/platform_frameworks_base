@@ -286,13 +286,12 @@ public class SystemServicesTestRule implements TestRule {
 
         // Mock root, some default display, and home stack.
         spyOn(mWmService.mRoot);
-        final ActivityDisplay display = mAtmService.mRootActivityContainer.getDefaultDisplay();
+        final DisplayContent display = mAtmService.mRootActivityContainer.getDefaultDisplay();
         // Set default display to be in fullscreen mode. Devices with PC feature may start their
         // default display in freeform mode but some of tests in WmTests have implicit assumption on
         // that the default display is in fullscreen mode.
         display.setDisplayWindowingMode(WINDOWING_MODE_FULLSCREEN);
         spyOn(display);
-        spyOn(display.mDisplayContent);
         final ActivityStack homeStack = display.getStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
         spyOn(homeStack);

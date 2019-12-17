@@ -63,4 +63,7 @@ message WindowLayoutParamsProto {
     optional uint32 subtree_system_ui_visibility_flags = 28;
     optional uint32 appearance = 29;
     optional uint32 behavior = 30;
+    optional uint32 fit_insets_types = 31;
+    optional uint32 fit_insets_sides = 32;
+    optional bool fit_ignore_visibility = 33;
 }

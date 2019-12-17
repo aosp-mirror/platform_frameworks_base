@@ -102,7 +102,7 @@ public class RecentTasksTest extends ActivityTestsBase {
             UserManager.USER_TYPE_PROFILE_MANAGED);
     private static final int INVALID_STACK_ID = 999;
 
-    private ActivityDisplay mDisplay;
+    private DisplayContent mDisplay;
     private ActivityStack mStack;
     private TestTaskPersister mTaskPersister;
     private TestRecentTasks mRecentTasks;
@@ -117,7 +117,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void setUp() throws Exception {
         mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
         spyOn(mTaskPersister);
-        mDisplay = mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY);
+        mDisplay = mRootActivityContainer.getDisplayContent(DEFAULT_DISPLAY);
 
         // Set the recent tasks we should use for testing in this class.
         mRecentTasks = new TestRecentTasks(mService, mTaskPersister);
@@ -653,8 +653,8 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.setOnlyTestVisibleRange();
         mRecentTasks.setParameters(-1 /* min */, 3 /* max */, -1 /* ms */);
 
-        final ActivityDisplay singleTaskDisplay =
-                addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
+        final DisplayContent singleTaskDisplay =
+                addNewDisplayContentAt(DisplayContent.POSITION_TOP);
         singleTaskDisplay.setDisplayToSingleTaskInstance();
         ActivityStack singleTaskStack = singleTaskDisplay.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
@@ -833,7 +833,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
         final ActivityStack homeStack = mDisplay.getHomeStack();
-        final ActivityDisplay otherDisplay = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
+        final DisplayContent otherDisplay = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
         final ActivityStack otherDisplayStack = otherDisplay.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 

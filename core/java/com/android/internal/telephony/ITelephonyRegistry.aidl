@@ -60,15 +60,10 @@ interface ITelephonyRegistry {
     @UnsupportedAppUsage(maxTargetSdk = 28)
     void notifyDataActivity(int state);
     void notifyDataActivityForSubscriber(in int subId, int state);
-    void notifyDataConnection(int state, boolean isDataConnectivityPossible,
-            String apn, String apnType, in LinkProperties linkProperties,
-            in NetworkCapabilities networkCapabilities, int networkType, boolean roaming);
     void notifyDataConnectionForSubscriber(int phoneId, int subId, int state,
             boolean isDataConnectivityPossible,
             String apn, String apnType, in LinkProperties linkProperties,
             in NetworkCapabilities networkCapabilities, int networkType, boolean roaming);
-    @UnsupportedAppUsage
-    void notifyDataConnectionFailed(String apnType);
     void notifyDataConnectionFailedForSubscriber(int phoneId, int subId, String apnType);
     @UnsupportedAppUsage(maxTargetSdk = 28)
     void notifyCellLocation(in Bundle cellLocation);

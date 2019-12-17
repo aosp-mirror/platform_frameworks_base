@@ -21,10 +21,13 @@ import android.util.JsonToken;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Event {
     private static final String TAG = "HidEvent";
@@ -41,6 +44,7 @@ public class Event {
     private int mPid;
     private byte[] mReport;
     private SparseArray<byte[]> mFeatureReports;
+    private Map<ByteBuffer, byte[]> mOutputs;
     private int mDuration;
 
     public int getId() {
@@ -75,6 +79,10 @@ public class Event {
         return mFeatureReports;
     }
 
+    public Map<ByteBuffer, byte[]> getOutputs() {
+        return mOutputs;
+    }
+
     public int getDuration() {
         return mDuration;
     }
@@ -88,6 +96,7 @@ public class Event {
             + ", pid=" + mPid
             + ", report=" + Arrays.toString(mReport)
             + ", feature_reports=" + mFeatureReports.toString()
+            + ", outputs=" + mOutputs.toString()
             + ", duration=" + mDuration
             + "}";
     }
@@ -121,6 +130,10 @@ public class Event {
 
         public void setFeatureReports(SparseArray<byte[]> reports) {
             mEvent.mFeatureReports = reports;
+        }
+
+        public void setOutputs(Map<ByteBuffer, byte[]> outputs) {
+            mEvent.mOutputs = outputs;
         }
 
         public void setVid(int vid) {
@@ -199,6 +212,9 @@ public class Event {
                             case "feature_reports":
                                 eb.setFeatureReports(readFeatureReports());
                                 break;
+                            case "outputs":
+                                eb.setOutputs(readOutputs());
+                                break;
                             case "duration":
                                 eb.setDuration(readInt());
                                 break;
@@ -250,7 +266,7 @@ public class Event {
 
         private SparseArray<byte[]> readFeatureReports()
                 throws IllegalStateException, IOException {
-            SparseArray<byte[]> featureReports = new SparseArray();
+            SparseArray<byte[]> featureReports = new SparseArray<>();
             try {
                 mReader.beginArray();
                 while (mReader.hasNext()) {
@@ -276,17 +292,60 @@ public class Event {
                         }
                     }
                     mReader.endObject();
-                    if (data != null)
+                    if (data != null) {
                         featureReports.put(id, data);
+                    }
                 }
                 mReader.endArray();
-            } catch (IllegalStateException|NumberFormatException e) {
+            } catch (IllegalStateException | NumberFormatException e) {
                 consumeRemainingElements();
                 mReader.endArray();
                 throw new IllegalStateException("Encountered malformed data.", e);
-            } finally {
-                return featureReports;
             }
+            return featureReports;
+        }
+
+        private Map<ByteBuffer, byte[]> readOutputs()
+                throws IllegalStateException, IOException {
+            Map<ByteBuffer, byte[]> outputs = new HashMap<>();
+
+            try {
+                mReader.beginArray();
+                while (mReader.hasNext()) {
+                    byte[] output = null;
+                    byte[] response = null;
+                    mReader.beginObject();
+                    while (mReader.hasNext()) {
+                        String name = mReader.nextName();
+                        switch (name) {
+                            case "description":
+                                // Description is only used to keep track of the output responses
+                                mReader.nextString();
+                                break;
+                            case "output":
+                                output = readData();
+                                break;
+                            case "response":
+                                response = readData();
+                                break;
+                            default:
+                                consumeRemainingElements();
+                                mReader.endObject();
+                                throw new IllegalStateException("Invalid key in outputs: " + name);
+                        }
+                    }
+                    mReader.endObject();
+                    if (output != null) {
+                        outputs.put(ByteBuffer.wrap(output), response);
+                    }
+                }
+                mReader.endArray();
+            } catch (IllegalStateException | NumberFormatException e) {
+                consumeRemainingElements();
+                mReader.endArray();
+                throw new IllegalStateException("Encountered malformed data.", e);
+            }
+            return outputs;
         }
 
         private void consumeRemainingElements() throws IOException {
@@ -294,10 +353,6 @@ public class Event {
                 mReader.skipValue();
             }
         }
-    }
-
-    private static void error(String msg) {
-        error(msg, null);
     }
 
     private static void error(String msg, Exception e) {

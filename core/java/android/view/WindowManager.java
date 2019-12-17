@@ -17,11 +17,26 @@
 package android.view;
 
 import static android.content.pm.ActivityInfo.COLOR_MODE_DEFAULT;
+import static android.view.WindowInsets.Side.BOTTOM;
+import static android.view.WindowInsets.Side.LEFT;
+import static android.view.WindowInsets.Side.RIGHT;
+import static android.view.WindowInsets.Side.TOP;
+import static android.view.WindowInsets.Type.CAPTION_BAR;
+import static android.view.WindowInsets.Type.IME;
+import static android.view.WindowInsets.Type.MANDATORY_SYSTEM_GESTURES;
+import static android.view.WindowInsets.Type.NAVIGATION_BARS;
+import static android.view.WindowInsets.Type.STATUS_BARS;
+import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
+import static android.view.WindowInsets.Type.TAPPABLE_ELEMENT;
+import static android.view.WindowInsets.Type.WINDOW_DECOR;
 import static android.view.WindowLayoutParamsProto.ALPHA;
 import static android.view.WindowLayoutParamsProto.APPEARANCE;
 import static android.view.WindowLayoutParamsProto.BEHAVIOR;
 import static android.view.WindowLayoutParamsProto.BUTTON_BRIGHTNESS;
 import static android.view.WindowLayoutParamsProto.COLOR_MODE;
+import static android.view.WindowLayoutParamsProto.FIT_IGNORE_VISIBILITY;
+import static android.view.WindowLayoutParamsProto.FIT_INSETS_SIDES;
+import static android.view.WindowLayoutParamsProto.FIT_INSETS_TYPES;
 import static android.view.WindowLayoutParamsProto.FLAGS;
 import static android.view.WindowLayoutParamsProto.FORMAT;
 import static android.view.WindowLayoutParamsProto.GRAVITY;
@@ -65,6 +80,10 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
+import android.view.WindowInsets.Side;
+import android.view.WindowInsets.Side.InsetsSide;
+import android.view.WindowInsets.Type;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.lang.annotation.Retention;
@@ -1294,14 +1313,11 @@ public interface WindowManager extends ViewManager {
          * set for you by Window as described in {@link Window#setFlags}.*/
         public static final int FLAG_LAYOUT_INSET_DECOR = 0x00010000;
 
-        /** Window flag: invert the state of {@link #FLAG_NOT_FOCUSABLE} with
-         * respect to how this window interacts with the current method.  That
-         * is, if FLAG_NOT_FOCUSABLE is set and this flag is set, then the
-         * window will behave as if it needs to interact with the input method
-         * and thus be placed behind/away from it; if FLAG_NOT_FOCUSABLE is
-         * not set and this flag is set, then the window will behave as if it
-         * doesn't need to interact with the input method and can be placed
-         * to use more space and cover the input method.
+        /** Window flag: When set, input method can't interact with the focusable window
+         * and can be placed to use more space and cover the input method.
+         * Note: When combined with {@link #FLAG_NOT_FOCUSABLE}, this flag has no
+         * effect since input method cannot interact with windows having {@link #FLAG_NOT_FOCUSABLE}
+         * flag set.
          */
         public static final int FLAG_ALT_FOCUSABLE_IM = 0x00020000;
 
@@ -1840,6 +1856,20 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_USE_BLAST = 0x02000000;
 
         /**
+         * Flag to indicate that the window is controlling how it fits window insets on its own.
+         * So we don't need to adjust its attributes for fitting window insets.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_FIT_INSETS_CONTROLLED = 0x04000000;
+
+        /**
+         * Flag to indicate that the window only draws the bottom bar background so that we don't
+         * extend it to system bar areas at other sides.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND = 0x08000000;
+
+        /**
          * An internal annotation for flags that can be specified to {@link #softInputMode}.
          *
          * @hide
@@ -1941,7 +1971,15 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                         equals = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
-                        name = "COLOR_SPACE_AGNOSTIC")
+                        name = "COLOR_SPACE_AGNOSTIC"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
+                        equals = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
+                        name = "FIT_INSETS_CONTROLLED"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND,
+                        equals = PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND,
+                        name = "ONLY_DRAW_BOTTOM_BAR_BACKGROUND")
         })
         @TestApi
         public int privateFlags;
@@ -1957,16 +1995,12 @@ public interface WindowManager extends ViewManager {
          *
          * @param flags The current window manager flags.
          *
-         * @return Returns true if such a window should be behind/interact
-         * with an input method, false if not.
+         * @return Returns {@code true} if such a window should be behind/interact
+         * with an input method, {@code false} if not.
          */
         public static boolean mayUseInputMethod(int flags) {
-            switch (flags&(FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM)) {
-                case 0:
-                case FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM:
-                    return true;
-            }
-            return false;
+            return (flags & FLAG_NOT_FOCUSABLE) != FLAG_NOT_FOCUSABLE
+                    && (flags & FLAG_ALT_FOCUSABLE_IM) != FLAG_ALT_FOCUSABLE_IM;
         }
 
         /**
@@ -2591,6 +2625,124 @@ public interface WindowManager extends ViewManager {
          */
         public final InsetsFlags insetsFlags = new InsetsFlags();
 
+        @ViewDebug.ExportedProperty(flagMapping = {
+                @ViewDebug.FlagToString(
+                        mask = STATUS_BARS,
+                        equals = STATUS_BARS,
+                        name = "STATUS_BARS"),
+                @ViewDebug.FlagToString(
+                        mask = NAVIGATION_BARS,
+                        equals = NAVIGATION_BARS,
+                        name = "NAVIGATION_BARS"),
+                @ViewDebug.FlagToString(
+                        mask = CAPTION_BAR,
+                        equals = CAPTION_BAR,
+                        name = "CAPTION_BAR"),
+                @ViewDebug.FlagToString(
+                        mask = IME,
+                        equals = IME,
+                        name = "IME"),
+                @ViewDebug.FlagToString(
+                        mask = SYSTEM_GESTURES,
+                        equals = SYSTEM_GESTURES,
+                        name = "SYSTEM_GESTURES"),
+                @ViewDebug.FlagToString(
+                        mask = MANDATORY_SYSTEM_GESTURES,
+                        equals = MANDATORY_SYSTEM_GESTURES,
+                        name = "MANDATORY_SYSTEM_GESTURES"),
+                @ViewDebug.FlagToString(
+                        mask = TAPPABLE_ELEMENT,
+                        equals = TAPPABLE_ELEMENT,
+                        name = "TAPPABLE_ELEMENT"),
+                @ViewDebug.FlagToString(
+                        mask = WINDOW_DECOR,
+                        equals = WINDOW_DECOR,
+                        name = "WINDOW_DECOR")
+        })
+        private @InsetsType int mFitWindowInsetsTypes = Type.systemBars();
+
+        @ViewDebug.ExportedProperty(flagMapping = {
+                @ViewDebug.FlagToString(
+                        mask = LEFT,
+                        equals = LEFT,
+                        name = "LEFT"),
+                @ViewDebug.FlagToString(
+                        mask = TOP,
+                        equals = TOP,
+                        name = "TOP"),
+                @ViewDebug.FlagToString(
+                        mask = RIGHT,
+                        equals = RIGHT,
+                        name = "RIGHT"),
+                @ViewDebug.FlagToString(
+                        mask = BOTTOM,
+                        equals = BOTTOM,
+                        name = "BOTTOM")
+        })
+        private @InsetsSide int mFitWindowInsetsSides = Side.all();
+
+        private boolean mFitIgnoreVisibility = false;
+
+        /**
+         * Specifies types of insets that this window should avoid overlapping during layout.
+         *
+         * @param types which types of insets that this window should avoid. The initial value of
+         *              this object includes all system bars.
+         * @hide pending unhide
+         */
+        public void setFitWindowInsetsTypes(@InsetsType int types) {
+            mFitWindowInsetsTypes = types;
+            privateFlags |= PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
+        }
+
+        /**
+         * Specifies sides of insets that this window should avoid overlapping during layout.
+         *
+         * @param sides which sides that this window should avoid overlapping with the types
+         *              specified. The initial value of this object includes all sides.
+         * @hide pending unhide
+         */
+        public void setFitWindowInsetsSides(@InsetsSide int sides) {
+            mFitWindowInsetsSides = sides;
+            privateFlags |= PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
+        }
+
+        /**
+         * Specifies if this window should fit the window insets no matter they are visible or not.
+         *
+         * @param ignore if true, this window will fit the given types even if they are not visible.
+         * @hide pending unhide
+         */
+        public void setFitIgnoreVisibility(boolean ignore) {
+            mFitIgnoreVisibility = ignore;
+            privateFlags |= PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
+        }
+
+        /**
+         * @return the insets types that this window is avoiding overlapping.
+         * @hide pending unhide
+         */
+        public @InsetsType int getFitWindowInsetsTypes() {
+            return mFitWindowInsetsTypes;
+        }
+
+        /**
+         * @return the sides that this window is avoiding overlapping.
+         * @hide pending unhide
+         */
+        public @InsetsSide int getFitWindowInsetsSides() {
+            return mFitWindowInsetsSides;
+        }
+
+        /**
+         * @return {@code true} if this window fits the window insets no matter they are visible or
+         *         not.
+         * @hide pending unhide
+         */
+        public boolean getFitIgnoreVisibility() {
+            return mFitIgnoreVisibility;
+        }
+
         public LayoutParams() {
             super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             type = TYPE_APPLICATION;
@@ -2754,6 +2906,9 @@ public interface WindowManager extends ViewManager {
             out.writeLong(hideTimeoutMilliseconds);
             out.writeInt(insetsFlags.appearance);
             out.writeInt(insetsFlags.behavior);
+            out.writeInt(mFitWindowInsetsTypes);
+            out.writeInt(mFitWindowInsetsSides);
+            out.writeBoolean(mFitIgnoreVisibility);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<LayoutParams> CREATOR
@@ -2811,6 +2966,9 @@ public interface WindowManager extends ViewManager {
             hideTimeoutMilliseconds = in.readLong();
             insetsFlags.appearance = in.readInt();
             insetsFlags.behavior = in.readInt();
+            mFitWindowInsetsTypes = in.readInt();
+            mFitWindowInsetsSides = in.readInt();
+            mFitIgnoreVisibility = in.readBoolean();
         }
 
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -3049,6 +3207,21 @@ public interface WindowManager extends ViewManager {
                 changes |= INSET_FLAGS_CHANGED;
             }
 
+            if (mFitWindowInsetsTypes != o.mFitWindowInsetsTypes) {
+                mFitWindowInsetsTypes = o.mFitWindowInsetsTypes;
+                changes |= LAYOUT_CHANGED;
+            }
+
+            if (mFitWindowInsetsSides != o.mFitWindowInsetsSides) {
+                mFitWindowInsetsSides = o.mFitWindowInsetsSides;
+                changes |= LAYOUT_CHANGED;
+            }
+
+            if (mFitIgnoreVisibility != o.mFitIgnoreVisibility) {
+                mFitIgnoreVisibility = o.mFitIgnoreVisibility;
+                changes |= LAYOUT_CHANGED;
+            }
+
             return changes;
         }
 
@@ -3203,6 +3376,20 @@ public interface WindowManager extends ViewManager {
                 sb.append(prefix).append("  bhv=").append(ViewDebug.flagsToString(
                         InsetsFlags.class, "behavior", insetsFlags.behavior));
             }
+            if (mFitWindowInsetsTypes != 0) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  fitTypes=").append(ViewDebug.flagsToString(
+                        LayoutParams.class, "mFitWindowInsetsTypes", mFitWindowInsetsTypes));
+            }
+            if (mFitWindowInsetsSides != Side.all()) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  fitSides=").append(ViewDebug.flagsToString(
+                        LayoutParams.class, "mFitWindowInsetsSides", mFitWindowInsetsSides));
+            }
+            if (mFitIgnoreVisibility) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  fitIgnoreVis");
+            }
 
             sb.append('}');
             return sb.toString();
@@ -3240,6 +3427,9 @@ public interface WindowManager extends ViewManager {
             proto.write(SUBTREE_SYSTEM_UI_VISIBILITY_FLAGS, subtreeSystemUiVisibility);
             proto.write(APPEARANCE, insetsFlags.appearance);
             proto.write(BEHAVIOR, insetsFlags.behavior);
+            proto.write(FIT_INSETS_TYPES, mFitWindowInsetsTypes);
+            proto.write(FIT_INSETS_SIDES, mFitWindowInsetsSides);
+            proto.write(FIT_IGNORE_VISIBILITY, mFitIgnoreVisibility);
             proto.end(token);
         }
 

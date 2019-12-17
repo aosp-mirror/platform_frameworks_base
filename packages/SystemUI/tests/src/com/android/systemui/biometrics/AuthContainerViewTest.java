@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics;
 
+import static android.hardware.biometrics.BiometricManager.Authenticators;
+
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -26,7 +28,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
-import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
@@ -64,7 +65,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
     @Test
     public void testActionAuthenticated_sendsDismissedAuthenticated() {
-        initializeContainer(Authenticator.TYPE_BIOMETRIC);
+        initializeContainer(Authenticators.BIOMETRIC_WEAK);
 
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_AUTHENTICATED);
@@ -73,7 +74,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
     @Test
     public void testActionUserCanceled_sendsDismissedUserCanceled() {
-        initializeContainer(Authenticator.TYPE_BIOMETRIC);
+        initializeContainer(Authenticators.BIOMETRIC_WEAK);
 
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_USER_CANCELED);
@@ -82,7 +83,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
     @Test
     public void testActionButtonNegative_sendsDismissedButtonNegative() {
-        initializeContainer(Authenticator.TYPE_BIOMETRIC);
+        initializeContainer(Authenticators.BIOMETRIC_WEAK);
 
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_BUTTON_NEGATIVE);
@@ -91,7 +92,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
     @Test
     public void testActionTryAgain_sendsTryAgain() {
-        initializeContainer(Authenticator.TYPE_BIOMETRIC);
+        initializeContainer(Authenticators.BIOMETRIC_WEAK);
 
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_BUTTON_TRY_AGAIN);
@@ -100,7 +101,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
     @Test
     public void testActionError_sendsDismissedError() {
-        initializeContainer(Authenticator.TYPE_BIOMETRIC);
+        initializeContainer(Authenticators.BIOMETRIC_WEAK);
 
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_ERROR);
@@ -110,7 +111,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
     @Test
     public void testActionUseDeviceCredential_sendsOnDeviceCredentialPressed() {
         initializeContainer(
-                Authenticator.TYPE_BIOMETRIC | Authenticator.TYPE_CREDENTIAL);
+                Authenticators.BIOMETRIC_WEAK | Authenticators.DEVICE_CREDENTIAL);
 
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_USE_DEVICE_CREDENTIAL);
@@ -125,7 +126,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
     @Test
     public void testAnimateToCredentialUI_invokesStartTransitionToCredentialUI() {
         initializeContainer(
-                Authenticator.TYPE_BIOMETRIC | Authenticator.TYPE_CREDENTIAL);
+                Authenticators.BIOMETRIC_WEAK | Authenticators.DEVICE_CREDENTIAL);
 
         mAuthContainer.mBiometricView = mock(AuthBiometricView.class);
         mAuthContainer.animateToCredentialUI();
@@ -134,7 +135,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
     @Test
     public void testShowBiometricUI() {
-        initializeContainer(Authenticator.TYPE_BIOMETRIC);
+        initializeContainer(Authenticators.BIOMETRIC_WEAK);
 
         assertNotEquals(null, mAuthContainer.mBiometricView);
 
@@ -146,7 +147,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
     @Test
     public void testShowCredentialUI_doesNotInflateBiometricUI() {
-        initializeContainer(Authenticator.TYPE_CREDENTIAL);
+        initializeContainer(Authenticators.DEVICE_CREDENTIAL);
 
         mAuthContainer.onAttachedToWindowInternal();
 

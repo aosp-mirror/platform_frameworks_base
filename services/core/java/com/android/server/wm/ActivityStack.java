@@ -131,8 +131,6 @@ import android.app.AppGlobals;
 import android.app.IActivityController;
 import android.app.RemoteAction;
 import android.app.ResultInfo;
-import android.app.WindowConfiguration.ActivityType;
-import android.app.WindowConfiguration.WindowingMode;
 import android.app.servertransaction.ActivityResultItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.NewIntentItem;
@@ -144,7 +142,6 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.os.Binder;
 import android.os.Debug;
 import android.os.Handler;
@@ -154,9 +151,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
-import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
@@ -732,7 +727,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         }
     }
 
-    ActivityStack(ActivityDisplay display, int stackId, ActivityStackSupervisor supervisor,
+    ActivityStack(DisplayContent display, int stackId, ActivityStackSupervisor supervisor,
             int windowingMode, int activityType, boolean onTop) {
         super(supervisor.mService.mWindowManager);
         mStackId = stackId;
@@ -816,7 +811,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             }
         }
 
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         if (display == null ) {
             return;
         }
@@ -946,7 +941,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             boolean creating) {
         final int currentMode = getWindowingMode();
         final int currentOverrideMode = getRequestedOverrideWindowingMode();
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         final Task topTask = getTopMostTask();
         final ActivityStack splitScreenStack = display.getSplitScreenPrimaryStack();
         int windowingMode = preferredWindowingMode;
@@ -1116,8 +1111,8 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 !PRESERVE_WINDOWS);
     }
 
-    ActivityDisplay getDisplay() {
-        return mRootActivityContainer.getActivityDisplay(mDisplayId);
+    DisplayContent getDisplay() {
+        return getDisplayContent();
     }
 
     /**
@@ -1250,7 +1245,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
 
     /** @return true if the stack can only contain one task */
     boolean isSingleTaskInstance() {
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         return display != null && display.isSingleTaskInstance();
     }
 
@@ -1291,7 +1286,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             return;
         }
 
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
 
         if (inSplitScreenSecondaryWindowingMode()) {
             // If the stack is in split-screen seconardy mode, we need to make sure we move the
@@ -1358,7 +1353,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
 
     @Override
     public boolean isAttached() {
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         return display != null && !display.isRemoved();
     }
 
@@ -1777,7 +1772,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     }
 
     boolean isTopStackOnDisplay() {
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         return display != null && display.isTopStack(this);
     }
 
@@ -1786,7 +1781,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
      * otherwise.
      */
     boolean isFocusedStackOnDisplay() {
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         return display != null && this == display.getFocusedStack();
     }
 
@@ -1815,7 +1810,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             return STACK_VISIBILITY_INVISIBLE;
         }
 
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         boolean gotSplitScreenStack = false;
         boolean gotOpaqueSplitScreenPrimary = false;
         boolean gotOpaqueSplitScreenSecondary = false;
@@ -2049,13 +2044,13 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
      * {@link Display#FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD} applied.
      */
     boolean canShowWithInsecureKeyguard() {
-        final ActivityDisplay activityDisplay = getDisplay();
-        if (activityDisplay == null) {
+        final DisplayContent displayContent = getDisplay();
+        if (displayContent == null) {
             throw new IllegalStateException("Stack is not attached to any display, stackId="
                     + mStackId);
         }
 
-        final int flags = activityDisplay.mDisplay.getFlags();
+        final int flags = displayContent.mDisplay.getFlags();
         return (flags & FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0;
     }
 
@@ -2224,7 +2219,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         }
 
         next.delayedResume = false;
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
 
         // If the top activity is the resumed one, nothing to do.
         if (mResumedActivity == next && next.isState(RESUMED)
@@ -2966,7 +2961,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
 
     /** @return true if the stack behind this one is a standard activity type. */
     private boolean inFrontOfStandardStack() {
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         if (display == null) {
             return false;
         }
@@ -3665,7 +3660,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             return;
         }
 
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         final boolean topFocused = mRootActivityContainer.isTopDisplayFocusedStack(this);
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "removeChild: task=" + child);
 
@@ -3693,7 +3688,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     }
 
     void moveHomeStackToFrontIfNeeded(
-            boolean wasTopFocusedStack, ActivityDisplay display, String reason) {
+            boolean wasTopFocusedStack, DisplayContent display, String reason) {
         if (!hasChild() && wasTopFocusedStack) {
             // We only need to adjust focused stack if this stack is in focus and we are not in the
             // process of moving the task to the top of the stack that will be focused.
@@ -3790,11 +3785,11 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             return;
         }
         super.setAlwaysOnTop(alwaysOnTop);
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         // positionChildAtTop() must be called even when always on top gets turned off because we
         // need to make sure that the stack is moved from among always on top windows to below other
         // always on top windows. Since the position the stack should be inserted into is calculated
-        // properly in {@link ActivityDisplay#getTopInsertPosition()} in both cases, we can just
+        // properly in {@link DisplayContent#getTopInsertPosition()} in both cases, we can just
         // request that the stack is put at top here.
         display.positionStackAtTop(this, false /* includingParents */);
     }
@@ -4352,11 +4347,10 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     @Override
     protected void onParentChanged(
             ConfigurationContainer newParent, ConfigurationContainer oldParent) {
-        // TODO(display-merge): Remove cast
-        final ActivityDisplay display = newParent != null
-                ? (ActivityDisplay) ((WindowContainer) newParent).getDisplayContent() : null;
-        final ActivityDisplay oldDisplay = oldParent != null
-                ? (ActivityDisplay) ((WindowContainer) oldParent).getDisplayContent() : null;
+        final DisplayContent display = newParent != null
+                ? ((WindowContainer) newParent).getDisplayContent() : null;
+        final DisplayContent oldDisplay = oldParent != null
+                ? ((WindowContainer) oldParent).getDisplayContent() : null;
 
         mDisplayId = (display != null) ? display.mDisplayId : INVALID_DISPLAY;
         mPrevDisplayId = (oldDisplay != null) ? oldDisplay.mDisplayId : INVALID_DISPLAY;
@@ -5408,7 +5402,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     }
 
     boolean shouldSleepActivities() {
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
 
         // Do not sleep activities in this stack if we're marked as focused and the keyguard
         // is in the process of going away.

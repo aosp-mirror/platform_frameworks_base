@@ -77,9 +77,9 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         mRootActivityContainer = mService.mRootActivityContainer;
     }
 
-    /** Creates and adds a {@link TestActivityDisplay} to supervisor at the given position. */
-    TestActivityDisplay addNewActivityDisplayAt(int position) {
-        return new TestActivityDisplay.Builder(mService, 1000, 1500).setPosition(position).build();
+    /** Creates and adds a {@link TestDisplayContent} to supervisor at the given position. */
+    TestDisplayContent addNewDisplayContentAt(int position) {
+        return new TestDisplayContent.Builder(mService, 1000, 1500).setPosition(position).build();
     }
 
     /** Sets the default minimum task size to 1 so that tests can use small task sizes */
@@ -381,7 +381,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
 
     static class StackBuilder {
         private final RootActivityContainer mRootActivityContainer;
-        private ActivityDisplay mDisplay;
+        private DisplayContent mDisplay;
         private int mStackId = -1;
         private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
         private int mActivityType = ACTIVITY_TYPE_STANDARD;
@@ -408,15 +408,8 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
-        // TODO(display-merge): Remove
-        StackBuilder setDisplay(ActivityDisplay display) {
-            mDisplay = display;
-            return this;
-        }
-
         StackBuilder setDisplay(DisplayContent display) {
-            // TODO(display-merge): Remove cast
-            mDisplay = (ActivityDisplay) display;
+            mDisplay = display;
             return this;
         }
 
@@ -449,7 +442,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
                     if (mOnTop) {
                         // We move the task to front again in order to regain focus after activity
                         // added to the stack.
-                        // Or {@link ActivityDisplay#mPreferredTopFocusableStack} could be other
+                        // Or {@link DisplayContent#mPreferredTopFocusableStack} could be other
                         // stacks (e.g. home stack).
                         stack.moveToFront("createActivityStack");
                     } else {

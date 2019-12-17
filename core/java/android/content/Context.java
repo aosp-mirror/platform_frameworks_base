@@ -4916,6 +4916,8 @@ public abstract class Context {
      * {@link android.telephony.ims.ImsManager}.
      * @hide
      */
+    @SystemApi
+    @TestApi
     public static final String TELEPHONY_IMS_SERVICE = "telephony_ims";
 
     /**
@@ -4991,7 +4993,7 @@ public abstract class Context {
      * {@link android.os.incremental.IncrementalManager}.
      * @hide
      */
-    public static final String INCREMENTAL_SERVICE = "incremental";
+    public static final String INCREMENTAL_SERVICE = "incremental_service";
 
     /**
      * Determine whether the given permission is allowed for a particular

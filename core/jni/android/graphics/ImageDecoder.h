@@ -14,48 +14,12 @@
  * limitations under the License.
  */
 
-#include "NinePatchPeeker.h"
-
 #include <hwui/Canvas.h>
 
 #include <jni.h>
 
-class SkAndroidCodec;
-
-using namespace android;
-
-struct ImageDecoder {
-    // These need to stay in sync with ImageDecoder.java's Allocator constants.
-    enum Allocator {
-        kDefault_Allocator      = 0,
-        kSoftware_Allocator     = 1,
-        kSharedMemory_Allocator = 2,
-        kHardware_Allocator     = 3,
-    };
-
-    // These need to stay in sync with ImageDecoder.java's Error constants.
-    enum Error {
-        kSourceException     = 1,
-        kSourceIncomplete    = 2,
-        kSourceMalformedData = 3,
-    };
-
-    // These need to stay in sync with PixelFormat.java's Format constants.
-    enum PixelFormat {
-        kUnknown     =  0,
-        kTranslucent = -3,
-        kOpaque      = -1,
-    };
-
-    std::unique_ptr<SkAndroidCodec> mCodec;
-    sk_sp<NinePatchPeeker> mPeeker;
-
-    ImageDecoder()
-        :mPeeker(new NinePatchPeeker)
-    {}
-};
-
 // Creates a Java Canvas object from canvas, calls jimageDecoder's PostProcess on it, and then
 // releases the Canvas.
 // Caller needs to check for exceptions.
-jint postProcessAndRelease(JNIEnv* env, jobject jimageDecoder, std::unique_ptr<Canvas> canvas);
+jint postProcessAndRelease(JNIEnv* env, jobject jimageDecoder,
+                           std::unique_ptr<android::Canvas> canvas);

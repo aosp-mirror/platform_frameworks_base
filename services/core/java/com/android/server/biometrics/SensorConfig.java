@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package android.hardware.biometrics;
+package com.android.server.biometrics;
 
 /**
- * Type of authenticators defined on a granularity that the BiometricManager / BiometricPrompt
- * supports.
- * @hide
+ * Parsed sensor config. See core/res/res/values/config.xml config_biometric_sensors
  */
-public class Authenticator {
+class SensorConfig {
+    final int mId;
+    final int mModality;
+    final int mStrength;
 
-    /**
-     * Device credential, e.g. Pin/Pattern/Password.
-     */
-    public static final int TYPE_CREDENTIAL = 1 << 0;
-    /**
-     * Encompasses all biometrics on the device, e.g. Fingerprint/Iris/Face.
-     */
-    public static final int TYPE_BIOMETRIC = 1 << 1;
-
+    public SensorConfig(String config) {
+        String[] elems = config.split(":");
+        mId = Integer.parseInt(elems[0]);
+        mModality = Integer.parseInt(elems[1]);
+        mStrength = Integer.parseInt(elems[2]);
+    }
 }

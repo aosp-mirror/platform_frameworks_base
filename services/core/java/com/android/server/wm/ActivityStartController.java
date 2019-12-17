@@ -43,6 +43,7 @@ import android.os.Message;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.RemoteAnimationAdapter;
 
@@ -180,8 +181,8 @@ public class ActivityStartController {
         }
         options.setLaunchDisplayId(displayId);
 
-        final ActivityDisplay display =
-                mService.mRootActivityContainer.getActivityDisplay(displayId);
+        final DisplayContent display =
+                mService.mRootActivityContainer.getDisplayContent(displayId);
         // The home activity will be started later, defer resuming to avoid unneccerary operations
         // (e.g. start home recursively) when creating home stack.
         mSupervisor.beginDeferResume();
@@ -385,6 +386,7 @@ public class ActivityStartController {
         } else {
             callingPid = callingUid = -1;
         }
+        final SparseArray<String> startingUidPkgs = new SparseArray<>();
         final long origId = Binder.clearCallingIdentity();
         try {
             intents = ArrayUtils.filterNotNull(intents, Intent[]::new);
@@ -411,9 +413,14 @@ public class ActivityStartController {
                                 callingUid, realCallingUid, UserHandle.USER_NULL));
                 aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
 
-                if (aInfo != null && (aInfo.applicationInfo.privateFlags
-                        & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
-                    throw new IllegalArgumentException("FLAG_CANT_SAVE_STATE not supported here");
+                if (aInfo != null) {
+                    if ((aInfo.applicationInfo.privateFlags
+                            & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
+                        throw new IllegalArgumentException(
+                                "FLAG_CANT_SAVE_STATE not supported here");
+                    }
+                    startingUidPkgs.put(aInfo.applicationInfo.uid,
+                            aInfo.applicationInfo.packageName);
                 }
 
                 final boolean top = i == intents.length - 1;
@@ -438,6 +445,16 @@ public class ActivityStartController {
                         .setAllowPendingRemoteAnimationRegistryLookup(top /* allowLookup*/)
                         .setOriginatingPendingIntent(originatingPendingIntent)
                         .setAllowBackgroundActivityStart(allowBackgroundActivityStart);
+            }
+            // Log if the activities to be started have different uids.
+            if (startingUidPkgs.size() > 1) {
+                final StringBuilder sb = new StringBuilder("startActivities: different apps [");
+                final int size = startingUidPkgs.size();
+                for (int i = 0; i < size; i++) {
+                    sb.append(startingUidPkgs.valueAt(i)).append(i == size - 1 ? "]" : ", ");
+                }
+                sb.append(" from ").append(callingPackage);
+                Slog.wtf(TAG, sb.toString());
             }
 
             final ActivityRecord[] outActivity = new ActivityRecord[1];

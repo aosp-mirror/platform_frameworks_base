@@ -249,10 +249,8 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
             }
         }
 
-        if (adjustPeopleHubVisibilityAndPosition(lastPersonIndex)) {
-            // make room for peopleHub
-            firstGentleNotifIndex++;
-        }
+        // make room for peopleHub
+        firstGentleNotifIndex += adjustPeopleHubVisibilityAndPosition(lastPersonIndex);
 
         adjustGentleHeaderVisibilityAndPosition(firstGentleNotifIndex);
 
@@ -296,7 +294,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         }
     }
 
-    private boolean adjustPeopleHubVisibilityAndPosition(int lastPersonIndex) {
+    private int adjustPeopleHubVisibilityAndPosition(int lastPersonIndex) {
         final boolean showPeopleHeader = mPeopleHubVisible
                 && mNumberOfSections > 2
                 && mStatusBarStateController.getState() != StatusBarState.KEYGUARD;
@@ -307,6 +305,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         if (!showPeopleHeader) {
             if (currentlyVisible) {
                 mParent.removeView(mPeopleHubView);
+                return -1;
             }
         } else {
             mPeopleHubView.unDismiss();
@@ -317,7 +316,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
                     mPeopleHubView.setTransientContainer(null);
                 }
                 mParent.addView(mPeopleHubView, targetIndex);
-                return true;
+                return 1;
             } else if (currentHubIndex != targetIndex) {
                 if (currentHubIndex < targetIndex) {
                     targetIndex--;
@@ -325,7 +324,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
                 mParent.changeViewPosition(mPeopleHubView, targetIndex);
             }
         }
-        return false;
+        return 0;
     }
 
     /**

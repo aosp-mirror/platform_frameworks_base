@@ -112,7 +112,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     @Test
     public void testHandleNonResizableTaskOnSecondaryDisplay() {
         // Create an unresizable task on secondary display.
-        final ActivityDisplay newDisplay = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
+        final DisplayContent newDisplay = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
         final ActivityStack stack = new StackBuilder(mRootActivityContainer)
                 .setDisplay(newDisplay).build();
         final ActivityRecord unresizableActivity = stack.getTopNonFinishingActivity();

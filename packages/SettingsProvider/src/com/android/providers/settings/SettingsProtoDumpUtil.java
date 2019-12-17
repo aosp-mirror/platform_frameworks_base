@@ -691,6 +691,9 @@ class SettingsProtoDumpUtil {
         dumpRepeatedSetting(s, p,
                 Settings.Global.ERROR_LOGCAT_PREFIX,
                 GlobalSettingsProto.ERROR_LOGCAT_LINES);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.MAX_ERROR_BYTES_PREFIX,
+                GlobalSettingsProto.MAX_ERROR_BYTES);
 
         final long euiccToken = p.start(GlobalSettingsProto.EUICC);
         dumpSetting(s, p,

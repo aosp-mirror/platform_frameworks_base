@@ -23,6 +23,9 @@ import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+import androidx.preference.Preference;
+
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.util.ArrayList;
@@ -132,34 +135,44 @@ public class MetricsFeatureProvider {
         return ((Instrumentable) object).getMetricsCategory();
     }
 
-    public void logDashboardStartIntent(Context context, Intent intent,
-            int sourceMetricsCategory) {
+    /**
+     * Logs an event when the preference is clicked.
+     *
+     * @return true if the preference is loggable, otherwise false
+     */
+    public boolean logClickedPreference(@NonNull Preference preference, int sourceMetricsCategory) {
+        if (preference == null) {
+            return false;
+        }
+        return logSettingsTileClick(preference.getKey(), sourceMetricsCategory)
+                || logStartedIntent(preference.getIntent(), sourceMetricsCategory)
+                || logSettingsTileClick(preference.getFragment(), sourceMetricsCategory);
+    }
+
+    /**
+     * Logs an event when the intent is started.
+     *
+     * @return true if the intent is loggable, otherwise false
+     */
+    public boolean logStartedIntent(Intent intent, int sourceMetricsCategory) {
         if (intent == null) {
-            return;
+            return false;
         }
         final ComponentName cn = intent.getComponent();
-        if (cn == null) {
-            final String action = intent.getAction();
-            if (TextUtils.isEmpty(action)) {
-                // Not loggable
-                return;
-            }
-            action(sourceMetricsCategory,
-                    MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
-                    SettingsEnums.PAGE_UNKNOWN,
-                    action,
-                    0);
-            return;
-        } else if (TextUtils.equals(cn.getPackageName(), context.getPackageName())) {
-            // Going to a Setting internal page, skip click logging in favor of page's own
-            // visibility logging.
-            return;
+        return logSettingsTileClick(cn != null ? cn.flattenToString() : intent.getAction(),
+                sourceMetricsCategory);
+    }
+
+    private boolean logSettingsTileClick(String logKey, int sourceMetricsCategory) {
+        if (TextUtils.isEmpty(logKey)) {
+            // Not loggable
+            return false;
         }
         action(sourceMetricsCategory,
                 MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
                 SettingsEnums.PAGE_UNKNOWN,
-                cn.flattenToString(),
+                logKey,
                 0);
+        return true;
     }
-
 }

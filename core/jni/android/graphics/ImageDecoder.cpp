@@ -20,10 +20,12 @@
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "GraphicsJNI.h"
 #include "ImageDecoder.h"
+#include "NinePatchPeeker.h"
 #include "Utils.h"
 #include "core_jni_helpers.h"
 
 #include <hwui/Bitmap.h>
+#include <hwui/ImageDecoder.h>
 #include <HardwareBitmapUploader.h>
 
 #include <SkAndroidCodec.h>
@@ -49,6 +51,28 @@ static jmethodID gCallback_onPartialImageMethodID;
 static jmethodID gCanvas_constructorMethodID;
 static jmethodID gCanvas_releaseMethodID;
 
+// These need to stay in sync with ImageDecoder.java's Allocator constants.
+enum Allocator {
+    kDefault_Allocator      = 0,
+    kSoftware_Allocator     = 1,
+    kSharedMemory_Allocator = 2,
+    kHardware_Allocator     = 3,
+};
+
+// These need to stay in sync with ImageDecoder.java's Error constants.
+enum Error {
+    kSourceException     = 1,
+    kSourceIncomplete    = 2,
+    kSourceMalformedData = 3,
+};
+
+// These need to stay in sync with PixelFormat.java's Format constants.
+enum PixelFormat {
+    kUnknown     =  0,
+    kTranslucent = -3,
+    kOpaque      = -1,
+};
+
 // Clear and return any pending exception for handling other than throwing directly.
 static jthrowable get_and_clear_exception(JNIEnv* env) {
     jthrowable jexception = env->ExceptionOccurred();
@@ -59,7 +83,7 @@ static jthrowable get_and_clear_exception(JNIEnv* env) {
 }
 
 // Throw a new ImageDecoder.DecodeException. Returns null for convenience.
-static jobject throw_exception(JNIEnv* env, ImageDecoder::Error error, const char* msg,
+static jobject throw_exception(JNIEnv* env, Error error, const char* msg,
                                jthrowable cause, jobject source) {
     jstring jstr = nullptr;
     if (msg) {
@@ -81,27 +105,27 @@ static jobject throw_exception(JNIEnv* env, ImageDecoder::Error error, const cha
 static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream,
         jobject source, jboolean preferAnimation) {
     if (!stream.get()) {
-        return throw_exception(env, ImageDecoder::kSourceMalformedData, "Failed to create a stream",
+        return throw_exception(env, kSourceMalformedData, "Failed to create a stream",
                                nullptr, source);
     }
-    std::unique_ptr<ImageDecoder> decoder(new ImageDecoder);
+    sk_sp<NinePatchPeeker> peeker(new NinePatchPeeker);
     SkCodec::Result result;
     auto codec = SkCodec::MakeFromStream(
-            std::move(stream), &result, decoder->mPeeker.get(),
+            std::move(stream), &result, peeker.get(),
             preferAnimation ? SkCodec::SelectionPolicy::kPreferAnimation
                             : SkCodec::SelectionPolicy::kPreferStillImage);
     if (jthrowable jexception = get_and_clear_exception(env)) {
-        return throw_exception(env, ImageDecoder::kSourceException, "", jexception, source);
+        return throw_exception(env, kSourceException, "", jexception, source);
     }
     if (!codec) {
         switch (result) {
             case SkCodec::kIncompleteInput:
-                return throw_exception(env, ImageDecoder::kSourceIncomplete, "", nullptr, source);
+                return throw_exception(env, kSourceIncomplete, "", nullptr, source);
             default:
                 SkString msg;
                 msg.printf("Failed to create image decoder with message '%s'",
                            SkCodec::ResultToString(result));
-                return throw_exception(env, ImageDecoder::kSourceMalformedData,  msg.c_str(),
+                return throw_exception(env, kSourceMalformedData,  msg.c_str(),
                                        nullptr, source);
 
         }
@@ -109,21 +133,22 @@ static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream,
 
     const bool animated = codec->getFrameCount() > 1;
     if (jthrowable jexception = get_and_clear_exception(env)) {
-        return throw_exception(env, ImageDecoder::kSourceException, "", jexception, source);
+        return throw_exception(env, kSourceException, "", jexception, source);
     }
 
-    decoder->mCodec = SkAndroidCodec::MakeFromCodec(std::move(codec),
+    auto androidCodec = SkAndroidCodec::MakeFromCodec(std::move(codec),
             SkAndroidCodec::ExifOrientationBehavior::kRespect);
-    if (!decoder->mCodec.get()) {
-        return throw_exception(env, ImageDecoder::kSourceMalformedData, "", nullptr, source);
+    if (!androidCodec.get()) {
+        return throw_exception(env, kSourceMalformedData, "", nullptr, source);
     }
 
-    const auto& info = decoder->mCodec->getInfo();
+    const auto& info = androidCodec->getInfo();
     const int width = info.width();
     const int height = info.height();
-    const bool isNinePatch = decoder->mPeeker->mPatch != nullptr;
+    const bool isNinePatch = peeker->mPatch != nullptr;
+    ImageDecoder* decoder = new ImageDecoder(std::move(androidCodec), std::move(peeker));
     return env->NewObject(gImageDecoder_class, gImageDecoder_constructorMethodID,
-                          reinterpret_cast<jlong>(decoder.release()), width, height,
+                          reinterpret_cast<jlong>(decoder), width, height,
                           animated, isNinePatch);
 }
 
@@ -133,7 +158,7 @@ static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
 
     struct stat fdStat;
     if (fstat(descriptor, &fdStat) == -1) {
-        return throw_exception(env, ImageDecoder::kSourceMalformedData,
+        return throw_exception(env, kSourceMalformedData,
                                "broken file descriptor; fstat returned -1", nullptr, source);
     }
 
@@ -141,7 +166,7 @@ static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
     FILE* file = fdopen(dupDescriptor, "r");
     if (file == NULL) {
         close(dupDescriptor);
-        return throw_exception(env, ImageDecoder::kSourceMalformedData, "Could not open file",
+        return throw_exception(env, kSourceMalformedData, "Could not open file",
                                nullptr, source);
     }
 
@@ -154,7 +179,7 @@ static jobject ImageDecoder_nCreateInputStream(JNIEnv* env, jobject /*clazz*/,
     std::unique_ptr<SkStream> stream(CreateJavaInputStreamAdaptor(env, is, storage, false));
 
     if (!stream.get()) {
-        return throw_exception(env, ImageDecoder::kSourceMalformedData, "Failed to create a stream",
+        return throw_exception(env, kSourceMalformedData, "Failed to create a stream",
                                nullptr, source);
     }
 
@@ -177,7 +202,7 @@ static jobject ImageDecoder_nCreateByteBuffer(JNIEnv* env, jobject /*clazz*/,
     std::unique_ptr<SkStream> stream = CreateByteBufferStreamAdaptor(env, jbyteBuffer,
                                                                      initialPosition, limit);
     if (!stream) {
-        return throw_exception(env, ImageDecoder::kSourceMalformedData, "Failed to read ByteBuffer",
+        return throw_exception(env, kSourceMalformedData, "Failed to read ByteBuffer",
                                nullptr, source);
     }
     return native_create(env, std::move(stream), source, preferAnimation);
@@ -195,7 +220,7 @@ jint postProcessAndRelease(JNIEnv* env, jobject jimageDecoder, std::unique_ptr<C
                                      reinterpret_cast<jlong>(canvas.get()));
     if (!jcanvas) {
         doThrowOOME(env, "Failed to create Java Canvas for PostProcess!");
-        return ImageDecoder::kUnknown;
+        return kUnknown;
     }
 
     // jcanvas now owns canvas.
@@ -206,43 +231,23 @@ jint postProcessAndRelease(JNIEnv* env, jobject jimageDecoder, std::unique_ptr<C
 
 static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
                                           jobject jdecoder, jboolean jpostProcess,
-                                          jint desiredWidth, jint desiredHeight, jobject jsubset,
+                                          jint targetWidth, jint targetHeight, jobject jsubset,
                                           jboolean requireMutable, jint allocator,
                                           jboolean requireUnpremul, jboolean preferRamOverQuality,
                                           jboolean asAlphaMask, jlong colorSpaceHandle,
                                           jboolean extended) {
     auto* decoder = reinterpret_cast<ImageDecoder*>(nativePtr);
-    SkAndroidCodec* codec = decoder->mCodec.get();
-    const SkISize desiredSize = SkISize::Make(desiredWidth, desiredHeight);
-    SkISize decodeSize = desiredSize;
-    const int sampleSize = codec->computeSampleSize(&decodeSize);
-    const bool scale = desiredSize != decodeSize;
-    SkImageInfo decodeInfo = codec->getInfo().makeWH(decodeSize.width(), decodeSize.height());
-    if (scale && requireUnpremul && kOpaque_SkAlphaType != decodeInfo.alphaType()) {
+    if (!decoder->setTargetSize(targetWidth, targetHeight)) {
+        doThrowISE(env, "Could not scale to target size!");
+        return nullptr;
+    }
+    if (requireUnpremul && !decoder->setOutAlphaType(kUnpremul_SkAlphaType)) {
         doThrowISE(env, "Cannot scale unpremultiplied pixels!");
         return nullptr;
     }
 
-    switch (decodeInfo.alphaType()) {
-        case kUnpremul_SkAlphaType:
-            if (!requireUnpremul) {
-                decodeInfo = decodeInfo.makeAlphaType(kPremul_SkAlphaType);
-            }
-            break;
-        case kPremul_SkAlphaType:
-            if (requireUnpremul) {
-                decodeInfo = decodeInfo.makeAlphaType(kUnpremul_SkAlphaType);
-            }
-            break;
-        case kOpaque_SkAlphaType:
-            break;
-        case kUnknown_SkAlphaType:
-            doThrowIOE(env, "Unknown alpha type");
-            return nullptr;
-    }
-
     SkColorType colorType = kN32_SkColorType;
-    if (asAlphaMask && decodeInfo.colorType() == kGray_8_SkColorType) {
+    if (asAlphaMask && decoder->gray()) {
         // We have to trick Skia to decode this to a single channel.
         colorType = kGray_8_SkColorType;
     } else if (preferRamOverQuality) {
@@ -250,12 +255,12 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
         // result incorrect. If we call the postProcess before now and record
         // to a picture, we can know whether alpha was added, and if not, we
         // can still use 565.
-        if (decodeInfo.alphaType() == kOpaque_SkAlphaType && !jpostProcess) {
+        if (decoder->opaque() && !jpostProcess) {
             // If the final result will be hardware, decoding to 565 and then
             // uploading to the gpu as 8888 will not save memory. This still
             // may save us from using F16, but do not go down to 565.
-            if (allocator != ImageDecoder::kHardware_Allocator &&
-               (allocator != ImageDecoder::kDefault_Allocator || requireMutable)) {
+            if (allocator != kHardware_Allocator &&
+               (allocator != kDefault_Allocator || requireMutable)) {
                 colorType = kRGB_565_SkColorType;
             }
         }
@@ -263,12 +268,12 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     } else if (extended) {
         colorType = kRGBA_F16_SkColorType;
     } else {
-        colorType = codec->computeOutputColorType(colorType);
+        colorType = decoder->mCodec->computeOutputColorType(colorType);
     }
 
     const bool isHardware = !requireMutable
-        && (allocator == ImageDecoder::kDefault_Allocator ||
-            allocator == ImageDecoder::kHardware_Allocator)
+        && (allocator == kDefault_Allocator ||
+            allocator == kHardware_Allocator)
         && colorType != kGray_8_SkColorType;
 
     if (colorType == kRGBA_F16_SkColorType && isHardware &&
@@ -276,12 +281,28 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
         colorType = kN32_SkColorType;
     }
 
-    sk_sp<SkColorSpace> colorSpace = GraphicsJNI::getNativeColorSpace(colorSpaceHandle);
-    colorSpace = codec->computeOutputColorSpace(colorType, colorSpace);
-    decodeInfo = decodeInfo.makeColorType(colorType).makeColorSpace(colorSpace);
+    if (!decoder->setOutColorType(colorType)) {
+        doThrowISE(env, "Failed to set out color type!");
+        return nullptr;
+    }
+
+    {
+        sk_sp<SkColorSpace> colorSpace = GraphicsJNI::getNativeColorSpace(colorSpaceHandle);
+        colorSpace = decoder->mCodec->computeOutputColorSpace(colorType, colorSpace);
+        decoder->setOutColorSpace(std::move(colorSpace));
+    }
+
+    if (jsubset) {
+        SkIRect subset;
+        GraphicsJNI::jrect_to_irect(env, jsubset, &subset);
+        if (!decoder->setCropRect(&subset)) {
+            doThrowISE(env, "Invalid crop rect!");
+            return nullptr;
+        }
+    }
 
     SkBitmap bm;
-    auto bitmapInfo = decodeInfo;
+    SkImageInfo bitmapInfo = decoder->getOutputInfo();
     if (asAlphaMask && colorType == kGray_8_SkColorType) {
         bitmapInfo = bitmapInfo.makeColorType(kAlpha_8_SkColorType);
     }
@@ -291,10 +312,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     }
 
     sk_sp<Bitmap> nativeBitmap;
-    // If we are going to scale or subset, we will create a new bitmap later on,
-    // so use the heap for the temporary.
-    // FIXME: Use scanline decoding on only a couple lines to save memory. b/70709380.
-    if (allocator == ImageDecoder::kSharedMemory_Allocator && !scale && !jsubset) {
+    if (allocator == kSharedMemory_Allocator) {
         nativeBitmap = Bitmap::allocateAshmemBitmap(&bm);
     } else {
         nativeBitmap = Bitmap::allocateHeapBitmap(&bm);
@@ -302,16 +320,14 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     if (!nativeBitmap) {
         SkString msg;
         msg.printf("OOM allocating Bitmap with dimensions %i x %i",
-                decodeInfo.width(), decodeInfo.height());
+                bitmapInfo.width(), bitmapInfo.height());
         doThrowOOME(env, msg.c_str());
         return nullptr;
     }
 
-    SkAndroidCodec::AndroidOptions options;
-    options.fSampleSize = sampleSize;
-    auto result = codec->getAndroidPixels(decodeInfo, bm.getPixels(), bm.rowBytes(), &options);
+    SkCodec::Result result = decoder->decode(bm.getPixels(), bm.rowBytes());
     jthrowable jexception = get_and_clear_exception(env);
-    int onPartialImageError = jexception ? ImageDecoder::kSourceException
+    int onPartialImageError = jexception ? kSourceException
                                          : 0; // No error.
     switch (result) {
         case SkCodec::kSuccess:
@@ -321,12 +337,12 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
             break;
         case SkCodec::kIncompleteInput:
             if (!jexception) {
-                onPartialImageError = ImageDecoder::kSourceIncomplete;
+                onPartialImageError = kSourceIncomplete;
             }
             break;
         case SkCodec::kErrorInInput:
             if (!jexception) {
-                onPartialImageError = ImageDecoder::kSourceMalformedData;
+                onPartialImageError = kSourceMalformedData;
             }
             break;
         default:
@@ -350,77 +366,26 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     // Ignore ninepatch when post-processing.
     if (!jpostProcess) {
         // FIXME: Share more code with BitmapFactory.cpp.
-        if (decoder->mPeeker->mPatch != nullptr) {
-            size_t ninePatchArraySize = decoder->mPeeker->mPatch->serializedSize();
+        auto* peeker = reinterpret_cast<NinePatchPeeker*>(decoder->mPeeker.get());
+        if (peeker->mPatch != nullptr) {
+            size_t ninePatchArraySize = peeker->mPatch->serializedSize();
             ninePatchChunk = env->NewByteArray(ninePatchArraySize);
             if (ninePatchChunk == nullptr) {
                 doThrowOOME(env, "Failed to allocate nine patch chunk.");
                 return nullptr;
             }
 
-            env->SetByteArrayRegion(ninePatchChunk, 0, decoder->mPeeker->mPatchSize,
-                                    reinterpret_cast<jbyte*>(decoder->mPeeker->mPatch));
+            env->SetByteArrayRegion(ninePatchChunk, 0, peeker->mPatchSize,
+                                    reinterpret_cast<jbyte*>(peeker->mPatch));
         }
 
-        if (decoder->mPeeker->mHasInsets) {
-            ninePatchInsets = decoder->mPeeker->createNinePatchInsets(env, 1.0f);
+        if (peeker->mHasInsets) {
+            ninePatchInsets = peeker->createNinePatchInsets(env, 1.0f);
             if (ninePatchInsets == nullptr) {
                 doThrowOOME(env, "Failed to allocate nine patch insets.");
                 return nullptr;
             }
         }
-    }
-
-    if (scale || jsubset) {
-        int translateX = 0;
-        int translateY = 0;
-        SkImageInfo scaledInfo;
-        if (jsubset) {
-            SkIRect subset;
-            GraphicsJNI::jrect_to_irect(env, jsubset, &subset);
-
-            translateX = -subset.fLeft;
-            translateY = -subset.fTop;
-            scaledInfo = bitmapInfo.makeWH(subset.width(), subset.height());
-        } else {
-            scaledInfo = bitmapInfo.makeWH(desiredWidth, desiredHeight);
-        }
-        SkBitmap scaledBm;
-        if (!scaledBm.setInfo(scaledInfo)) {
-            doThrowIOE(env, "Failed scaled setInfo");
-            return nullptr;
-        }
-
-        sk_sp<Bitmap> scaledPixelRef;
-        if (allocator == ImageDecoder::kSharedMemory_Allocator) {
-            scaledPixelRef = Bitmap::allocateAshmemBitmap(&scaledBm);
-        } else {
-            scaledPixelRef = Bitmap::allocateHeapBitmap(&scaledBm);
-        }
-        if (!scaledPixelRef) {
-            SkString msg;
-            msg.printf("OOM allocating scaled Bitmap with dimensions %i x %i",
-                    desiredWidth, desiredHeight);
-            doThrowOOME(env, msg.c_str());
-            return nullptr;
-        }
-
-        SkPaint paint;
-        paint.setBlendMode(SkBlendMode::kSrc);
-        paint.setFilterQuality(kLow_SkFilterQuality);  // bilinear filtering
-
-        SkCanvas canvas(scaledBm, SkCanvas::ColorBehavior::kLegacy);
-        canvas.translate(translateX, translateY);
-        if (scale) {
-            float scaleX = (float) desiredWidth  / decodeInfo.width();
-            float scaleY = (float) desiredHeight / decodeInfo.height();
-            canvas.scale(scaleX, scaleY);
-        }
-
-        canvas.drawBitmap(bm, 0.0f, 0.0f, &paint);
-
-        bm.swap(scaledBm);
-        nativeBitmap = std::move(scaledPixelRef);
     }
 
     if (jpostProcess) {
@@ -433,12 +398,12 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
 
         SkAlphaType newAlphaType = bm.alphaType();
         switch (pixelFormat) {
-            case ImageDecoder::kUnknown:
+            case kUnknown:
                 break;
-            case ImageDecoder::kTranslucent:
+            case kTranslucent:
                 newAlphaType = kPremul_SkAlphaType;
                 break;
-            case ImageDecoder::kOpaque:
+            case kOpaque:
                 newAlphaType = kOpaque_SkAlphaType;
                 break;
             default:
@@ -477,7 +442,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
                 return bitmap::createBitmap(env, hwBitmap.release(), bitmapCreateFlags,
                                             ninePatchChunk, ninePatchInsets);
             }
-            if (allocator == ImageDecoder::kHardware_Allocator) {
+            if (allocator == kHardware_Allocator) {
                 doThrowOOME(env, "failed to allocate hardware Bitmap!");
                 return nullptr;
             }
@@ -501,7 +466,7 @@ static jobject ImageDecoder_nGetSampledSize(JNIEnv* env, jobject /*clazz*/, jlon
 static void ImageDecoder_nGetPadding(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
                                      jobject outPadding) {
     auto* decoder = reinterpret_cast<ImageDecoder*>(nativePtr);
-    decoder->mPeeker->getPadding(env, outPadding);
+    reinterpret_cast<NinePatchPeeker*>(decoder->mPeeker.get())->getPadding(env, outPadding);
 }
 
 static void ImageDecoder_nClose(JNIEnv* /*env*/, jobject /*clazz*/, jlong nativePtr) {

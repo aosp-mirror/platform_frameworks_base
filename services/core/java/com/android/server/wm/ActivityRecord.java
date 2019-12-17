@@ -1640,6 +1640,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 allowTaskSnapshot, activityCreated, fromRecents, snapshot);
 
         if (type == STARTING_WINDOW_TYPE_SNAPSHOT) {
+            if (isActivityTypeHome()) {
+                // The snapshot of home is only used once because it won't be updated while screen
+                // is on (see {@link TaskSnapshotController#screenTurningOff}).
+                mWmService.mTaskSnapshotController.removeSnapshotCache(task.mTaskId);
+                // TODO(b/9684093): Use more general condition to specify the case.
+                if (mDisplayContent.mAppTransition
+                        .getAppTransition() != WindowManager.TRANSIT_KEYGUARD_GOING_AWAY) {
+                    // Only use snapshot of home as starting window when unlocking.
+                    return false;
+                }
+            }
             return createSnapshot(snapshot);
         }
 
@@ -1800,7 +1811,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else if (taskSwitch && allowTaskSnapshot) {
-            return snapshot == null ? STARTING_WINDOW_TYPE_NONE
+            return snapshot == null ? STARTING_WINDOW_TYPE_SPLASH_SCREEN
                     : snapshotOrientationSameAsTask(snapshot) || fromRecents
                             ? STARTING_WINDOW_TYPE_SNAPSHOT : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else {
@@ -1991,7 +2002,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return getActivityStack() != null ? getActivityStack().mStackId : INVALID_STACK_ID;
     }
 
-    ActivityDisplay getDisplay() {
+    DisplayContent getDisplay() {
         final ActivityStack stack = getActivityStack();
         return stack != null ? stack.getDisplay() : null;
     }
@@ -2148,7 +2159,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         boolean isKeyguardLocked = mAtmService.isKeyguardLocked();
         boolean isCurrentAppLocked =
                 mAtmService.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         boolean hasPinnedStack = display != null && display.hasPinnedStack();
         // Don't return early if !isNotLocked, since we want to throw an exception if the activity
         // is in an incorrect state
@@ -2417,7 +2428,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     stack.adjustFocusToNextFocusableStack("finish-top");
                 } else {
                     // Only move the next stack to top in its display.
-                    final ActivityDisplay display = stack.getDisplay();
+                    final DisplayContent display = stack.getDisplay();
                     next = display.topRunningActivity();
                     if (next != null) {
                         display.positionStackAtTop(next.getActivityStack(),
@@ -2591,9 +2602,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mStackSupervisor.mGoingToSleepActivities.remove(this);
 
         final ActivityStack stack = getActivityStack();
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         // TODO(b/137329632): Exclude current activity when looking for the next one with
-        //  ActivityDisplay#topRunningActivity().
+        // DisplayContent#topRunningActivity().
         final ActivityRecord next = display.topRunningActivity();
         final boolean isLastStackOverEmptyHome =
                 next == null && stack.isFocusedStackOnDisplay() && display.getHomeStack() != null;
@@ -4660,7 +4671,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         r.setSavedState(null /* savedState */);
 
-        final ActivityDisplay display = r.getDisplay();
+        final DisplayContent display = r.getDisplay();
         if (display != null) {
             display.handleActivitySizeCompatModeIfNeeded(r);
         }
@@ -6257,7 +6268,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // The role of CompatDisplayInsets is like the override bounds.
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         if (display != null) {
             mCompatDisplayInsets = new CompatDisplayInsets(display.mDisplayContent,
                     getWindowConfiguration().getBounds(),
@@ -6527,7 +6538,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             onMergedOverrideConfigurationChanged();
         }
 
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         if (display == null) {
             return;
         }
@@ -7276,7 +7287,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * otherwise.
      */
     boolean isResumedActivityOnDisplay() {
-        final ActivityDisplay display = getDisplay();
+        final DisplayContent display = getDisplay();
         return display != null && this == display.getResumedActivity();
     }
 

@@ -47,9 +47,9 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.ActivityDisplay.POSITION_BOTTOM;
-import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
 import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
+import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -502,7 +502,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
      */
     @Test
     public void testTaskModeViolation() {
-        final ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
+        final DisplayContent display = mService.mRootActivityContainer.getDefaultDisplay();
         display.removeAllTasks();
         assertNoTasks(display);
 
@@ -517,7 +517,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         assertNoTasks(display);
     }
 
-    private void assertNoTasks(ActivityDisplay display) {
+    private void assertNoTasks(DisplayContent display) {
         for (int i = display.getStackCount() - 1; i >= 0; --i) {
             final ActivityStack stack = display.getStackAt(i);
             assertFalse(stack.hasChild());
@@ -761,8 +761,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 false /* mockGetLaunchStack */);
 
         // Create a secondary display at bottom.
-        final TestActivityDisplay secondaryDisplay =
-                new TestActivityDisplay.Builder(mService, 1000, 1500)
+        final TestDisplayContent secondaryDisplay =
+                new TestDisplayContent.Builder(mService, 1000, 1500)
                         .setPosition(POSITION_BOTTOM).build();
         final ActivityStack stack = secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
@@ -800,8 +800,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 false /* mockGetLaunchStack */);
 
         // Create a secondary display with an activity.
-        final TestActivityDisplay secondaryDisplay =
-                new TestActivityDisplay.Builder(mService, 1000, 1500).build();
+        final TestDisplayContent secondaryDisplay =
+                new TestDisplayContent.Builder(mService, 1000, 1500).build();
         mRootActivityContainer.addChild(secondaryDisplay, POSITION_TOP);
         final ActivityRecord singleTaskActivity = createSingleTaskActivityOn(
                 secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
@@ -853,7 +853,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 false /* mockGetLaunchStack */);
 
         // Create a secondary display at bottom.
-        final TestActivityDisplay secondaryDisplay = addNewActivityDisplayAt(POSITION_BOTTOM);
+        final TestDisplayContent secondaryDisplay = addNewDisplayContentAt(POSITION_BOTTOM);
         secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
 

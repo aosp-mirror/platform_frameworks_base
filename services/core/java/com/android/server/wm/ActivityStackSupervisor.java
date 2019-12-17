@@ -401,12 +401,12 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     private final MoveTaskToFullscreenHelper mMoveTaskToFullscreenHelper =
             new MoveTaskToFullscreenHelper();
     private class MoveTaskToFullscreenHelper {
-        private ActivityDisplay mToDisplay;
+        private DisplayContent mToDisplay;
         private boolean mOnTop;
         private Task mTopTask;
         private boolean mSchedulePictureInPictureModeChange;
 
-        void process(ActivityStack fromStack, ActivityDisplay toDisplay, boolean onTop,
+        void process(ActivityStack fromStack, DisplayContent toDisplay, boolean onTop,
                 boolean schedulePictureInPictureModeChange) {
             mSchedulePictureInPictureModeChange = schedulePictureInPictureModeChange;
             mToDisplay = toDisplay;
@@ -1122,9 +1122,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return true;
         }
 
-        final ActivityDisplay activityDisplay =
-                mRootActivityContainer.getActivityDisplayOrCreate(launchDisplayId);
-        if (activityDisplay == null || activityDisplay.isRemoved()) {
+        final DisplayContent displayContent =
+                mRootActivityContainer.getDisplayContentOrCreate(launchDisplayId);
+        if (displayContent == null || displayContent.isRemoved()) {
             Slog.w(TAG, "Launch on display check: display not found");
             return false;
         }
@@ -1140,10 +1140,10 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         // Check if caller is already present on display
-        final boolean uidPresentOnDisplay = activityDisplay.isUidPresent(callingUid);
+        final boolean uidPresentOnDisplay = displayContent.isUidPresent(callingUid);
 
-        final int displayOwnerUid = activityDisplay.mDisplay.getOwnerUid();
-        if (activityDisplay.mDisplay.getType() == TYPE_VIRTUAL && displayOwnerUid != SYSTEM_UID
+        final int displayOwnerUid = displayContent.mDisplay.getOwnerUid();
+        if (displayContent.mDisplay.getType() == TYPE_VIRTUAL && displayOwnerUid != SYSTEM_UID
                 && displayOwnerUid != aInfo.applicationInfo.uid) {
             // Limit launching on virtual displays, because their contents can be read from Surface
             // by apps that created them.
@@ -1161,7 +1161,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             }
         }
 
-        if (!activityDisplay.isPrivate()) {
+        if (!displayContent.isPrivate()) {
             // Anyone can launch on a public display.
             if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
                     + " allow launch on public display");
@@ -1482,7 +1482,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 currentStack, forceNonResizeable);
     }
 
-    private void moveHomeStackToFrontIfNeeded(int flags, ActivityDisplay display, String reason) {
+    private void moveHomeStackToFrontIfNeeded(int flags, DisplayContent display, String reason) {
         final ActivityStack focusedStack = display.getFocusedStack();
 
         if ((display.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
@@ -1542,8 +1542,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mService.deferWindowLayout();
         try {
             final int windowingMode = fromStack.getWindowingMode();
-            final ActivityDisplay toDisplay =
-                    mRootActivityContainer.getActivityDisplay(toDisplayId);
+            final DisplayContent toDisplay =
+                    mRootActivityContainer.getDisplayContent(toDisplayId);
 
             if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 // We are moving all tasks from the docked stack to the fullscreen stack,
@@ -1668,7 +1668,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // static stacks need to be adjusted so they don't overlap with the docked stack.
                 // We get the bounds to use from window manager which has been adjusted for any
                 // screen controls and is also the same for all stacks.
-                final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
+                final DisplayContent display = mRootActivityContainer.getDefaultDisplay();
                 final Rect otherTaskRect = new Rect();
                 for (int i = display.getStackCount() - 1; i >= 0; --i) {
                     final ActivityStack current = display.getStackAt(i);
@@ -1934,7 +1934,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
      * Returns the reparent target stack, creating the stack if necessary.  This call also enforces
      * the various checks on tasks that are going to be reparented from one stack to another.
      */
-    // TODO: Look into changing users to this method to ActivityDisplay.resolveWindowingMode()
+    // TODO: Look into changing users to this method to DisplayContent.resolveWindowingMode()
     ActivityStack getReparentTargetStack(Task task, ActivityStack stack, boolean toTop) {
         final ActivityStack prevStack = task.getStack();
         final int stackId = stack.mStackId;
@@ -2426,8 +2426,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 throw new IllegalStateException("Task resolved to incompatible display");
             }
 
-            final ActivityDisplay preferredDisplay =
-                    mRootActivityContainer.getActivityDisplay(preferredDisplayId);
+            final DisplayContent preferredDisplay =
+                    mRootActivityContainer.getDisplayContent(preferredDisplayId);
 
             final boolean singleTaskInstance = preferredDisplay != null
                     && preferredDisplay.isSingleTaskInstance();
@@ -2527,8 +2527,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     void scheduleUpdatePictureInPictureModeIfNeeded(Task task, ActivityStack prevStack) {
         final ActivityStack stack = task.getStack();
-        if (prevStack == null || prevStack == stack
-                || (!prevStack.inPinnedWindowingMode() && !stack.inPinnedWindowingMode())) {
+        if ((prevStack == null || (prevStack != stack
+                && !prevStack.inPinnedWindowingMode() && !stack.inPinnedWindowingMode()))) {
             return;
         }
 
@@ -2818,7 +2818,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // call this at the end to make sure that tasks exists on the window manager side.
                 setResizingDuringAnimation(task);
 
-                final ActivityDisplay display = task.getStack().getDisplay();
+                final DisplayContent display = task.getStack().getDisplay();
                 final ActivityStack topSecondaryStack =
                         display.getTopStackInWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
                 if (topSecondaryStack.isActivityTypeHome()) {

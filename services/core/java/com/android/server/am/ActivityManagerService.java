@@ -490,7 +490,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     // How many bytes to write into the dropbox log before truncating
-    static final int DROPBOX_MAX_SIZE = 192 * 1024;
+    static final int DROPBOX_DEFAULT_MAX_SIZE = 192 * 1024;
     // Assumes logcat entries average around 100 bytes; that's not perfect stack traces count
     // as one line, but close enough for now.
     static final int RESERVED_BYTES_PER_LOGCAT_LINE = 100;
@@ -9770,9 +9770,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     sb.append(report);
                 }
 
-                String setting = Settings.Global.ERROR_LOGCAT_PREFIX + dropboxTag;
-                int lines = Settings.Global.getInt(mContext.getContentResolver(), setting, 0);
-                int maxDataFileSize = DROPBOX_MAX_SIZE - sb.length()
+                String logcatSetting = Settings.Global.ERROR_LOGCAT_PREFIX + dropboxTag;
+                String maxBytesSetting = Settings.Global.MAX_ERROR_BYTES_PREFIX + dropboxTag;
+                int lines = Settings.Global.getInt(mContext.getContentResolver(), logcatSetting, 0);
+                int dropboxMaxSize = Settings.Global.getInt(
+                        mContext.getContentResolver(), maxBytesSetting, DROPBOX_DEFAULT_MAX_SIZE);
+                int maxDataFileSize = dropboxMaxSize - sb.length()
                         - lines * RESERVED_BYTES_PER_LOGCAT_LINE;
 
                 if (dataFile != null && maxDataFileSize > 0) {
@@ -18433,7 +18436,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         public ActivityPresentationInfo getActivityPresentationInfo(IBinder token) {
             int displayId = Display.INVALID_DISPLAY;
             try {
-                displayId = mActivityTaskManager.getActivityDisplayId(token);
+                displayId = mActivityTaskManager.getDisplayId(token);
             } catch (RemoteException e) {
             }
 

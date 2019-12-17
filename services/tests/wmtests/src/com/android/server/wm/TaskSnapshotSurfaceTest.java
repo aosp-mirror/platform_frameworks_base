@@ -74,7 +74,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
                 0 /* systemUiVisibility */, false /* isTranslucent */);
         mSurface = new TaskSnapshotSurface(mWm, new Window(), new SurfaceControl(), snapshot, "Test",
                 createTaskDescription(Color.WHITE, Color.RED, Color.BLUE), sysuiVis, windowFlags, 0,
-                taskBounds, ORIENTATION_PORTRAIT);
+                taskBounds, ORIENTATION_PORTRAIT, null /* insetsState */);
     }
 
     private static TaskDescription createTaskDescription(int background, int statusBar,

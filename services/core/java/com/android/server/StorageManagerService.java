@@ -3824,7 +3824,7 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             }
             if ((hasInstall || hasInstallOp) && hasWrite) {
-                return Zygote.MOUNT_EXTERNAL_WRITE;
+                return Zygote.MOUNT_EXTERNAL_INSTALLER;
             }
 
             // Otherwise we're willing to give out sandboxed or non-sandboxed if

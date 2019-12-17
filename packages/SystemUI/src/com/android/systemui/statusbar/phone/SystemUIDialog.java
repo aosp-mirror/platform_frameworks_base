@@ -23,6 +23,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserHandle;
+import android.view.Window;
+import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
@@ -102,16 +104,22 @@ public class SystemUIDialog extends AlertDialog {
 
     public static void setWindowOnTop(Dialog dialog) {
         if (Dependency.get(KeyguardStateController.class).isShowing()) {
-            dialog.getWindow().setType(LayoutParams.TYPE_STATUS_BAR_PANEL);
+            final Window window = dialog.getWindow();
+            window.setType(LayoutParams.TYPE_STATUS_BAR_PANEL);
+            window.setFitWindowInsetsTypes(
+                    window.getFitWindowInsetsTypes() & ~Type.statusBars());
         } else {
             dialog.getWindow().setType(LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
         }
     }
 
     public static AlertDialog applyFlags(AlertDialog dialog) {
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
-        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+        final Window window = dialog.getWindow();
+        window.setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
+        window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        window.setFitWindowInsetsTypes(
+                    window.getFitWindowInsetsTypes() & ~Type.statusBars());
         return dialog;
     }
 

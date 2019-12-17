@@ -126,7 +126,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
         assertEquals(0, removed.size());
         added.clear();
         // Check adding a display
-        ActivityDisplay newDisp1 = new TestActivityDisplay.Builder(mService, 600, 800).build();
+        DisplayContent newDisp1 = new TestDisplayContent.Builder(mService, 600, 800).build();
         assertEquals(1, added.size());
         assertEquals(0, changed.size());
         assertEquals(0, removed.size());

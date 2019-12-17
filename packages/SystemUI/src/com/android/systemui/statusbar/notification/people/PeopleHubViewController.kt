@@ -16,7 +16,14 @@
 
 package com.android.systemui.statusbar.notification.people
 
+import android.content.Context
+import android.database.ContentObserver
+import android.net.Uri
+import android.os.Handler
+import android.os.UserHandle
+import android.provider.Settings
 import android.view.View
+import com.android.systemui.dagger.qualifiers.MainHandler
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager
 import javax.inject.Inject
@@ -90,29 +97,58 @@ private class PeopleHubDataListenerImpl(
 @Singleton
 class PeopleHubViewModelFactoryDataSourceImpl @Inject constructor(
     private val activityStarter: ActivityStarter,
-    private val dataSource: DataSource<@JvmSuppressWildcards PeopleHubModel>
+    private val dataSource: DataSource<@JvmSuppressWildcards PeopleHubModel>,
+    private val settingChangeSource: DataSource<@JvmSuppressWildcards Boolean>
 ) : DataSource<PeopleHubViewModelFactory> {
 
-    override fun registerListener(listener: DataListener<PeopleHubViewModelFactory>) =
-            dataSource.registerListener(PeopleHubModelListenerImpl(activityStarter, listener))
+    override fun registerListener(listener: DataListener<PeopleHubViewModelFactory>): Subscription {
+        var stripEnabled = false
+        var model: PeopleHubModel? = null
+
+        fun updateListener() {
+            // don't invoke listener until we've received our first model
+            model?.let { model ->
+                val factory =
+                        if (stripEnabled) PeopleHubViewModelFactoryImpl(model, activityStarter)
+                        else EmptyViewModelFactory
+                listener.onDataChanged(factory)
+            }
+        }
+
+        val settingSub = settingChangeSource.registerListener(object : DataListener<Boolean> {
+            override fun onDataChanged(data: Boolean) {
+                stripEnabled = data
+                updateListener()
+            }
+        })
+        val dataSub = dataSource.registerListener(object : DataListener<PeopleHubModel> {
+            override fun onDataChanged(data: PeopleHubModel) {
+                model = data
+                updateListener()
+            }
+        })
+        return object : Subscription {
+            override fun unsubscribe() {
+                settingSub.unsubscribe()
+                dataSub.unsubscribe()
+            }
+        }
+    }
 }
 
-private class PeopleHubModelListenerImpl(
-    private val activityStarter: ActivityStarter,
-    private val dataListener: DataListener<PeopleHubViewModelFactory>
-) : DataListener<PeopleHubModel> {
-
-    override fun onDataChanged(data: PeopleHubModel) =
-            dataListener.onDataChanged(PeopleHubViewModelFactoryImpl(data, activityStarter))
+private object EmptyViewModelFactory : PeopleHubViewModelFactory {
+    override fun createWithAssociatedClickView(view: View): PeopleHubViewModel {
+        return PeopleHubViewModel(emptySequence(), false)
+    }
 }
 
 private class PeopleHubViewModelFactoryImpl(
-    private val data: PeopleHubModel,
+    private val model: PeopleHubModel,
     private val activityStarter: ActivityStarter
 ) : PeopleHubViewModelFactory {
 
     override fun createWithAssociatedClickView(view: View): PeopleHubViewModel {
-        val personViewModels = data.people.asSequence().map { personModel ->
+        val personViewModels = model.people.asSequence().map { personModel ->
             val onClick = {
                 activityStarter.startPendingIntentDismissingKeyguard(
                         personModel.clickIntent,
@@ -122,7 +158,42 @@ private class PeopleHubViewModelFactoryImpl(
             }
             PersonViewModel(personModel.name, personModel.avatar, onClick)
         }
-        return PeopleHubViewModel(personViewModels, data.people.isNotEmpty())
+        return PeopleHubViewModel(personViewModels, model.people.isNotEmpty())
+    }
+}
+
+@Singleton
+class PeopleHubSettingChangeDataSourceImpl @Inject constructor(
+    @MainHandler private val handler: Handler,
+    context: Context
+) : DataSource<Boolean> {
+
+    private val settingUri = Settings.Secure.getUriFor(Settings.Secure.PEOPLE_STRIP)
+    private val contentResolver = context.contentResolver
+
+    override fun registerListener(listener: DataListener<Boolean>): Subscription {
+        // Immediately report current value of setting
+        updateListener(listener)
+        val observer = object : ContentObserver(handler) {
+            override fun onChange(selfChange: Boolean, uri: Uri?, userId: Int) {
+                super.onChange(selfChange, uri, userId)
+                updateListener(listener)
+            }
+        }
+        contentResolver.registerContentObserver(settingUri, false, observer, UserHandle.USER_ALL)
+        return object : Subscription {
+            override fun unsubscribe() = contentResolver.unregisterContentObserver(observer)
+        }
+    }
+
+    private fun updateListener(listener: DataListener<Boolean>) {
+        val setting = Settings.Secure.getIntForUser(
+                contentResolver,
+                Settings.Secure.PEOPLE_STRIP,
+                0,
+                UserHandle.USER_CURRENT
+        )
+        listener.onDataChanged(setting != 0)
     }
 }
 

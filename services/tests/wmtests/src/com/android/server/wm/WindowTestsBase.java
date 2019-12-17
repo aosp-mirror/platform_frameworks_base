@@ -340,8 +340,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     /** Creates a {@link DisplayContent} and adds it to the system. */
     DisplayContent createNewDisplay(DisplayInfo info) {
-        final ActivityDisplay display =
-                new TestActivityDisplay.Builder(mWm.mAtmService, info).build();
+        final DisplayContent display =
+                new TestDisplayContent.Builder(mWm.mAtmService, info).build();
         return display.mDisplayContent;
     }
 

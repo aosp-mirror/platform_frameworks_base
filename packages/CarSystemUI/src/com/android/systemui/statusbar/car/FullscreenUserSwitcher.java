@@ -131,10 +131,7 @@ public class FullscreenUserSwitcher {
     private void showDialogForInitialUser() {
         int initialUser = mCarUserManagerHelper.getInitialUser();
         UserInfo initialUserInfo = mUserManager.getUserInfo(initialUser);
-        mSelectedUser = new UserRecord(initialUserInfo,
-                /* isStartGuestSession= */ false,
-                /* isAddUser= */ false,
-                /* isForeground= */ true);
+        mSelectedUser = new UserRecord(initialUserInfo, UserRecord.FOREGROUND_USER);
 
         // If the initial user has screen lock and trusted device, display the unlock dialog on the
         // keyguard.
@@ -180,12 +177,14 @@ public class FullscreenUserSwitcher {
      */
     private void onUserSelected(UserGridRecyclerView.UserRecord record) {
         mSelectedUser = record;
-        if (hasScreenLock(record.mInfo.id) && hasTrustedDevice(record.mInfo.id)) {
-            mUnlockDialogHelper.showUnlockDialog(record.mInfo.id, mOnHideListener);
-            return;
-        }
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "no trusted device enrolled for uid: " + record.mInfo.id);
+        if (record.mInfo != null) {
+            if (hasScreenLock(record.mInfo.id) && hasTrustedDevice(record.mInfo.id)) {
+                mUnlockDialogHelper.showUnlockDialog(record.mInfo.id, mOnHideListener);
+                return;
+            }
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "no trusted device enrolled for uid: " + record.mInfo.id);
+            }
         }
         dismissUserSwitcher();
     }
@@ -195,7 +194,7 @@ public class FullscreenUserSwitcher {
             Log.e(TAG, "Request to dismiss user switcher, but no user selected");
             return;
         }
-        if (mSelectedUser.mIsForeground) {
+        if (mSelectedUser.mType == UserRecord.FOREGROUND_USER) {
             hide();
             mStatusBar.dismissKeyguard();
             return;

@@ -138,8 +138,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testIncludedApps_expectTargetAndVisible() {
         mWm.setRecentsAnimationController(mController);
-        // TODO(display-merge): Remove cast
-        final ActivityStack homeStack = ((ActivityDisplay) mDisplayContent).getOrCreateStack(
+        final ActivityStack homeStack = mDisplayContent.getOrCreateStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
         final ActivityRecord homeActivity =
                 new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
@@ -164,8 +163,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testWallpaperIncluded_expectTarget() throws Exception {
         mWm.setRecentsAnimationController(mController);
-        // TODO(display-merge): Remove cast
-        final ActivityStack homeStack = ((ActivityDisplay) mDisplayContent).getOrCreateStack(
+        final ActivityStack homeStack = mDisplayContent.getOrCreateStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
         final ActivityRecord homeAppWindow =
                 new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
@@ -194,8 +192,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testWallpaperAnimatorCanceled_expectAnimationKeepsRunning() throws Exception {
         mWm.setRecentsAnimationController(mController);
-        // TODO(display-merge): Remove cast
-        final ActivityStack homeStack = ((ActivityDisplay) mDisplayContent).getOrCreateStack(
+        final ActivityStack homeStack = mDisplayContent.getOrCreateStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
         final ActivityRecord homeActivity =
                 new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
@@ -226,8 +223,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testFinish_expectTargetAndWallpaperAdaptersRemoved() {
         mWm.setRecentsAnimationController(mController);
-        // TODO(display-merge): Remove cast
-        final ActivityStack homeStack = ((ActivityDisplay) mDisplayContent).getOrCreateStack(
+        final ActivityStack homeStack = mDisplayContent.getOrCreateStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
         final ActivityRecord homeActivity =
                 new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)

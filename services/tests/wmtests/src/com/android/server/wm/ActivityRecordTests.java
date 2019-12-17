@@ -635,8 +635,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
         final ActivityStack stack1 = new StackBuilder(mRootActivityContainer).build();
         mStack.moveToFront("test");
         // The stack2 is needed here for moving back to simulate the
-        // {@link ActivityDisplay#mPreferredTopFocusableStack} is cleared, so
-        // {@link ActivityDisplay#getFocusedStack} will rely on the order of focusable-and-visible
+        // {@link DisplayContent#mPreferredTopFocusableStack} is cleared, so
+        // {@link DisplayContent#getFocusedStack} will rely on the order of focusable-and-visible
         // stacks. Then when mActivity is finishing, its stack will be invisible (no running
         // activities in the stack) that is the key condition to verify.
         final ActivityStack stack2 = new StackBuilder(mRootActivityContainer).build();

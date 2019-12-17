@@ -21,6 +21,7 @@ import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.os.UserManager.DISALLOW_ADD_USER;
 import static android.os.UserManager.SWITCHABILITY_STATUS_OK;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -54,6 +55,8 @@ import com.android.internal.util.UserIcons;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -142,8 +145,8 @@ public class UserGridRecyclerView extends RecyclerView {
             }
 
             boolean isForeground = fgUserId == userInfo.id;
-            UserRecord record = new UserRecord(userInfo, false /* isStartGuestSession */,
-                    false /* isAddUser */, isForeground);
+            UserRecord record = new UserRecord(userInfo,
+                    isForeground ? UserRecord.FOREGROUND_USER : UserRecord.BACKGROUND_USER);
             userRecords.add(record);
         }
 
@@ -160,27 +163,21 @@ public class UserGridRecyclerView extends RecyclerView {
 
     private UserRecord createForegroundUserRecord() {
         return new UserRecord(mUserManager.getUserInfo(ActivityManager.getCurrentUser()),
-                false /* isStartGuestSession */, false /* isAddUser */, true /* isForeground */);
+                UserRecord.FOREGROUND_USER);
     }
 
     /**
      * Create guest user record
      */
     private UserRecord createStartGuestUserRecord() {
-        UserInfo userInfo = new UserInfo();
-        userInfo.name = mContext.getString(R.string.start_guest_session);
-        return new UserRecord(userInfo, true /* isStartGuestSession */, false /* isAddUser */,
-                false /* isForeground */);
+        return new UserRecord(null /* userInfo */, UserRecord.START_GUEST);
     }
 
     /**
      * Create add user record
      */
     private UserRecord createAddUserRecord() {
-        UserInfo userInfo = new UserInfo();
-        userInfo.name = mContext.getString(R.string.car_add_user);
-        return new UserRecord(userInfo, false /* isStartGuestSession */,
-                true /* isAddUser */, false /* isForeground */);
+        return new UserRecord(null /* userInfo */, UserRecord.ADD_USER);
     }
 
     public void setUserSelectionListener(UserSelectionListener userSelectionListener) {
@@ -258,35 +255,36 @@ public class UserGridRecyclerView extends RecyclerView {
             UserRecord userRecord = mUsers.get(position);
             RoundedBitmapDrawable circleIcon = getCircularUserRecordIcon(userRecord);
             holder.mUserAvatarImageView.setImageDrawable(circleIcon);
-            holder.mUserNameTextView.setText(userRecord.mInfo.name);
+            holder.mUserNameTextView.setText(getUserRecordName(userRecord));
 
             holder.mView.setOnClickListener(v -> {
                 if (userRecord == null) {
                     return;
                 }
 
-                if (userRecord.mIsStartGuestSession) {
-                    notifyUserSelected(userRecord);
-                    UserInfo guest = createNewOrFindExistingGuest(mContext);
-                    if (guest != null) {
-                        mCarUserManagerHelper.switchToUser(guest);
-                    }
-                    return;
-                }
+                switch (userRecord.mType) {
+                    case UserRecord.START_GUEST:
+                        notifyUserSelected(userRecord);
+                        UserInfo guest = createNewOrFindExistingGuest(mContext);
+                        if (guest != null) {
+                            mCarUserManagerHelper.switchToUser(guest);
+                        }
+                        break;
+                    case UserRecord.ADD_USER:
+                        // If the user wants to add a user, show dialog to confirm adding a user
+                        // Disable button so it cannot be clicked multiple times
+                        mAddUserView = holder.mView;
+                        mAddUserView.setEnabled(false);
+                        mAddUserRecord = userRecord;
 
-                // If the user wants to add a user, show dialog to confirm adding a user
-                if (userRecord.mIsAddUser) {
-                    // Disable button so it cannot be clicked multiple times
-                    mAddUserView = holder.mView;
-                    mAddUserView.setEnabled(false);
-                    mAddUserRecord = userRecord;
-
-                    handleAddUserClicked();
-                    return;
+                        handleAddUserClicked();
+                        break;
+                    default:
+                        // If the user doesn't want to be a guest or add a user, switch to the user
+                        // selected
+                        notifyUserSelected(userRecord);
+                        mCarUserManagerHelper.switchToUser(userRecord.mInfo);
                 }
-                // If the user doesn't want to be a guest or add a user, switch to the user selected
-                notifyUserSelected(userRecord);
-                mCarUserManagerHelper.switchToUser(userRecord.mInfo);
             });
 
         }
@@ -372,17 +370,42 @@ public class UserGridRecyclerView extends RecyclerView {
         private RoundedBitmapDrawable getCircularUserRecordIcon(UserRecord userRecord) {
             Resources resources = mContext.getResources();
             RoundedBitmapDrawable circleIcon;
-            if (userRecord.mIsStartGuestSession) {
-                circleIcon = mUserIconProvider.getRoundedGuestDefaultIcon(resources);
-            } else if (userRecord.mIsAddUser) {
-                circleIcon = RoundedBitmapDrawableFactory.create(mRes, UserIcons.convertToBitmap(
-                        mContext.getDrawable(R.drawable.car_add_circle_round)));
-                circleIcon.setCircular(true);
-            } else {
-                circleIcon = mUserIconProvider.getRoundedUserIcon(userRecord.mInfo, mContext);
+            switch (userRecord.mType) {
+                case UserRecord.START_GUEST:
+                    circleIcon = mUserIconProvider.getRoundedGuestDefaultIcon(resources);
+                    break;
+                case UserRecord.ADD_USER:
+                    circleIcon = getCircularAddUserIcon();
+                    break;
+                default:
+                    circleIcon = mUserIconProvider.getRoundedUserIcon(userRecord.mInfo, mContext);
+                    break;
             }
-
             return circleIcon;
+        }
+
+        private RoundedBitmapDrawable getCircularAddUserIcon() {
+            RoundedBitmapDrawable circleIcon =
+                    RoundedBitmapDrawableFactory.create(mRes, UserIcons.convertToBitmap(
+                    mContext.getDrawable(R.drawable.car_add_circle_round)));
+            circleIcon.setCircular(true);
+            return circleIcon;
+        }
+
+        private String getUserRecordName(UserRecord userRecord) {
+            String recordName;
+            switch (userRecord.mType) {
+                case UserRecord.START_GUEST:
+                    recordName = mContext.getString(R.string.start_guest_session);
+                    break;
+                case UserRecord.ADD_USER:
+                    recordName = mContext.getString(R.string.car_add_user);
+                    break;
+                default:
+                    recordName = userRecord.mInfo.name;
+                    break;
+            }
+            return recordName;
         }
 
         /**
@@ -468,18 +491,21 @@ public class UserGridRecyclerView extends RecyclerView {
      * guest profile, add user profile, or the foreground user.
      */
     public static final class UserRecord {
-
         public final UserInfo mInfo;
-        public final boolean mIsStartGuestSession;
-        public final boolean mIsAddUser;
-        public final boolean mIsForeground;
+        public final @UserRecordType int mType;
 
-        public UserRecord(UserInfo userInfo, boolean isStartGuestSession, boolean isAddUser,
-                boolean isForeground) {
+        public static final int START_GUEST = 0;
+        public static final int ADD_USER = 1;
+        public static final int FOREGROUND_USER = 2;
+        public static final int BACKGROUND_USER = 3;
+
+        @IntDef({START_GUEST, ADD_USER, FOREGROUND_USER, BACKGROUND_USER})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface UserRecordType{}
+
+        public UserRecord(@Nullable UserInfo userInfo, @UserRecordType int recordType) {
             mInfo = userInfo;
-            mIsStartGuestSession = isStartGuestSession;
-            mIsAddUser = isAddUser;
-            mIsForeground = isForeground;
+            mType = recordType;
         }
     }
 

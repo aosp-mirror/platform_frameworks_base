@@ -1628,6 +1628,7 @@ package android.content {
     field public static final String STATS_MANAGER = "stats";
     field public static final String STATUS_BAR_SERVICE = "statusbar";
     field public static final String SYSTEM_UPDATE_SERVICE = "system_update";
+    field public static final String TELEPHONY_IMS_SERVICE = "telephony_ims";
     field public static final String TELEPHONY_REGISTRY_SERVICE = "telephony_registry";
     field public static final String VR_SERVICE = "vrmanager";
     field @Deprecated public static final String WIFI_RTT_SERVICE = "rttmanager";
@@ -2273,6 +2274,15 @@ package android.hardware {
   public abstract class SensorManager {
     method public boolean initDataInjection(boolean);
     method public boolean injectSensorData(android.hardware.Sensor, float[], int, long);
+  }
+
+}
+
+package android.hardware.biometrics {
+
+  public static interface BiometricManager.Authenticators {
+    field public static final int BIOMETRIC_CONVENIENCE = 4095; // 0xfff
+    field public static final int EMPTY_SET = 0; // 0x0
   }
 
 }
@@ -7078,34 +7088,34 @@ package android.provider {
     field public static final int STATUS_NOT_BLOCKED = 0; // 0x0
   }
 
-  public static final class ContactsContract.MetadataSync implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncColumns {
-    field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
-    field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata";
-    field public static final android.net.Uri CONTENT_URI;
-    field public static final String METADATA_AUTHORITY = "com.android.contacts.metadata";
-    field public static final android.net.Uri METADATA_AUTHORITY_URI;
+  @Deprecated public static final class ContactsContract.MetadataSync implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncColumns {
+    field @Deprecated public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
+    field @Deprecated public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata";
+    field @Deprecated public static final android.net.Uri CONTENT_URI;
+    field @Deprecated public static final String METADATA_AUTHORITY = "com.android.contacts.metadata";
+    field @Deprecated public static final android.net.Uri METADATA_AUTHORITY_URI;
   }
 
-  protected static interface ContactsContract.MetadataSyncColumns {
-    field public static final String ACCOUNT_NAME = "account_name";
-    field public static final String ACCOUNT_TYPE = "account_type";
-    field public static final String DATA = "data";
-    field public static final String DATA_SET = "data_set";
-    field public static final String DELETED = "deleted";
-    field public static final String RAW_CONTACT_BACKUP_ID = "raw_contact_backup_id";
+  @Deprecated protected static interface ContactsContract.MetadataSyncColumns {
+    field @Deprecated public static final String ACCOUNT_NAME = "account_name";
+    field @Deprecated public static final String ACCOUNT_TYPE = "account_type";
+    field @Deprecated public static final String DATA = "data";
+    field @Deprecated public static final String DATA_SET = "data_set";
+    field @Deprecated public static final String DELETED = "deleted";
+    field @Deprecated public static final String RAW_CONTACT_BACKUP_ID = "raw_contact_backup_id";
   }
 
-  public static final class ContactsContract.MetadataSyncState implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncStateColumns {
-    field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata_sync_state";
-    field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata_sync_state";
-    field public static final android.net.Uri CONTENT_URI;
+  @Deprecated public static final class ContactsContract.MetadataSyncState implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncStateColumns {
+    field @Deprecated public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata_sync_state";
+    field @Deprecated public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata_sync_state";
+    field @Deprecated public static final android.net.Uri CONTENT_URI;
   }
 
-  protected static interface ContactsContract.MetadataSyncStateColumns {
-    field public static final String ACCOUNT_NAME = "account_name";
-    field public static final String ACCOUNT_TYPE = "account_type";
-    field public static final String DATA_SET = "data_set";
-    field public static final String STATE = "state";
+  @Deprecated protected static interface ContactsContract.MetadataSyncStateColumns {
+    field @Deprecated public static final String ACCOUNT_NAME = "account_name";
+    field @Deprecated public static final String ACCOUNT_TYPE = "account_type";
+    field @Deprecated public static final String DATA_SET = "data_set";
+    field @Deprecated public static final String STATE = "state";
   }
 
   public final class DeviceConfig {
@@ -7126,6 +7136,7 @@ package android.provider {
     field public static final String NAMESPACE_APP_COMPAT = "app_compat";
     field public static final String NAMESPACE_ATTENTION_MANAGER_SERVICE = "attention_manager_service";
     field public static final String NAMESPACE_AUTOFILL = "autofill";
+    field public static final String NAMESPACE_BIOMETRICS = "biometrics";
     field public static final String NAMESPACE_CONNECTIVITY = "connectivity";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
     field @Deprecated public static final String NAMESPACE_DEX_BOOT = "dex_boot";
@@ -10322,6 +10333,11 @@ package android.telephony.ims {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsExternalCallState> CREATOR;
   }
 
+  public class ImsManager {
+    method @NonNull public android.telephony.ims.ImsMmTelManager getImsMmTelManager(int);
+    method @NonNull public android.telephony.ims.ImsRcsManager getImsRcsManager(int);
+  }
+
   public class ImsMmTelManager implements android.telephony.ims.RegistrationManager {
     method @NonNull public static android.telephony.ims.ImsMmTelManager createForSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getFeatureState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>) throws android.telephony.ims.ImsException;
@@ -10363,6 +10379,22 @@ package android.telephony.ims {
 
   @Deprecated public static class ImsMmTelManager.RegistrationCallback extends android.telephony.ims.RegistrationManager.RegistrationCallback {
     ctor @Deprecated public ImsMmTelManager.RegistrationCallback();
+  }
+
+  public class ImsRcsManager implements android.telephony.ims.RegistrationManager {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getRegistrationState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getRegistrationTransportType(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAvailable(int) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCapable(int, int) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RegistrationManager.RegistrationCallback) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerRcsAvailabilityCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsRcsManager.AvailabilityCallback) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterRcsAvailabilityCallback(@NonNull android.telephony.ims.ImsRcsManager.AvailabilityCallback) throws android.telephony.ims.ImsException;
+  }
+
+  public static class ImsRcsManager.AvailabilityCallback {
+    ctor public ImsRcsManager.AvailabilityCallback();
+    method public void onAvailabilityChanged(@NonNull android.telephony.ims.feature.RcsFeature.RcsImsCapabilities);
   }
 
   public final class ImsReasonInfo implements android.os.Parcelable {
@@ -10726,9 +10758,22 @@ package android.telephony.ims.feature {
 
   public class RcsFeature extends android.telephony.ims.feature.ImsFeature {
     ctor public RcsFeature();
-    method public void changeEnabledCapabilities(android.telephony.ims.feature.CapabilityChangeRequest, android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
+    method public void changeEnabledCapabilities(@NonNull android.telephony.ims.feature.CapabilityChangeRequest, @NonNull android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
+    method public final void notifyCapabilitiesStatusChanged(@NonNull android.telephony.ims.feature.RcsFeature.RcsImsCapabilities);
     method public void onFeatureReady();
     method public void onFeatureRemoved();
+    method public boolean queryCapabilityConfiguration(int, int);
+    method @NonNull public final android.telephony.ims.feature.RcsFeature.RcsImsCapabilities queryCapabilityStatus();
+  }
+
+  public static class RcsFeature.RcsImsCapabilities extends android.telephony.ims.feature.ImsFeature.Capabilities {
+    ctor public RcsFeature.RcsImsCapabilities(int);
+    method public void addCapabilities(int);
+    method public boolean isCapable(int);
+    method public void removeCapabilities(int);
+    field public static final int CAPABILITY_TYPE_NONE = 0; // 0x0
+    field public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1; // 0x1
+    field public static final int CAPABILITY_TYPE_PRESENCE_UCE = 2; // 0x2
   }
 
 }

@@ -7,12 +7,6 @@
       "group": "WM_DEBUG_KEEP_SCREEN_ON",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-2138637148": {
-      "message": "Clearing focused app, displayId=%d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/ActivityDisplay.java"
-    },
     "-2127842445": {
       "message": "Clearing startingData for token=%s",
       "level": "VERBOSE",
@@ -709,6 +703,12 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-603199586": {
+      "message": "Clearing focused app, displayId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-583031528": {
       "message": "%s",
       "level": "INFO",
@@ -1315,6 +1315,12 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
+    "584499099": {
+      "message": "Set focused app to: %s moveFocusNow=%b displayId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "585096182": {
       "message": "SURFACE isColorSpaceAgnostic=%b: %s",
       "level": "INFO",
@@ -1512,12 +1518,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
-    },
-    "917739349": {
-      "message": "Set focused app to: %s moveFocusNow=%b displayId=%d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/ActivityDisplay.java"
     },
     "954470154": {
       "message": "FORCED DISPLAY SCALING DISABLED",

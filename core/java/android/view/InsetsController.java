@@ -123,6 +123,10 @@ public class InsetsController implements WindowInsetsController {
             if (mAnimationControls.isEmpty()) {
                 return;
             }
+            if (mViewRoot.mView == null) {
+                // The view has already detached from window.
+                return;
+            }
 
             mTmpFinishedControls.clear();
             InsetsState state = new InsetsState(mState, true /* copySources */);
@@ -154,6 +158,7 @@ public class InsetsController implements WindowInsetsController {
         mFrame.set(frame);
     }
 
+    @Override
     public InsetsState getState() {
         return mState;
     }

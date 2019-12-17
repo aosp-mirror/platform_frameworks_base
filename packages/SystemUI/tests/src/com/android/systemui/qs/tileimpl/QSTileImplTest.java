@@ -188,6 +188,16 @@ public class QSTileImplTest extends SysuiTestCase {
         verify(mTile).handleSetListening(eq(false));
     }
 
+    @Test
+    public void testHandleDestroyClearsHandlerQueue() {
+        when(mTile.getStaleTimeout()).thenReturn(0L);
+        mTile.handleRefreshState(null); // this will add a delayed H.STALE message
+        mTile.handleDestroy();
+
+        mTestableLooper.processAllMessages();
+        verify(mTile, never()).handleStale();
+    }
+
     private class TileLogMatcher implements ArgumentMatcher<LogMaker> {
 
         private final int mCategory;

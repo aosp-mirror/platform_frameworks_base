@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package {
+    default_visibility: [":__subpackages__"],
+}
+
 apex {
     name: "com.android.sdkext",
     manifest: "manifest.json",
@@ -23,6 +27,11 @@ apex {
     ],
     key: "com.android.sdkext.key",
     certificate: ":com.android.sdkext.certificate",
+}
+
+sdk {
+    name: "sdkext-sdk",
+    java_libs: [ "framework-sdkext-stubs-systemapi" ],
 }
 
 apex_key {

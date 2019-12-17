@@ -3417,7 +3417,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     private ContextImpl createBaseContextForActivity(ActivityClientRecord r) {
         final int displayId;
         try {
-            displayId = ActivityTaskManager.getService().getActivityDisplayId(r.token);
+            displayId = ActivityTaskManager.getService().getDisplayId(r.token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4407,7 +4407,9 @@ public final class ActivityThread extends ClientTransactionHandler {
                 r.newConfig = null;
             }
             if (localLOGV) Slog.v(TAG, "Resuming " + r + " with isForward=" + isForward);
-            WindowManager.LayoutParams l = r.window.getAttributes();
+            ViewRootImpl impl = r.window.getDecorView().getViewRootImpl();
+            WindowManager.LayoutParams l = impl != null
+                    ? impl.mWindowAttributes : r.window.getAttributes();
             if ((l.softInputMode
                     & WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION)
                     != forwardBit) {

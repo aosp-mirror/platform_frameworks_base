@@ -207,6 +207,7 @@ public class WindowFrames {
         return (mLastFrame.width() != mFrame.width()) || (mLastFrame.height() != mFrame.height());
     }
 
+    // TODO(b/118118435): Remove after migration.
     /**
      * Calculate the insets for the type
      * {@link android.view.WindowManager.LayoutParams#TYPE_DOCK_DIVIDER}

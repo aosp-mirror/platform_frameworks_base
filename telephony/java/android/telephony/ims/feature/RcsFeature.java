@@ -193,7 +193,6 @@ public class RcsFeature extends ImsFeature {
      * of the capability and notify the capability status as true using
      * {@link #notifyCapabilitiesStatusChanged(RcsImsCapabilities)}. This will signal to the
      * framework that the capability is available for usage.
-     * @hide
      */
     public static class RcsImsCapabilities extends Capabilities {
         /** @hide*/
@@ -207,7 +206,6 @@ public class RcsFeature extends ImsFeature {
 
         /**
          * Undefined capability type for initialization
-         * @hide
          */
         public static final int CAPABILITY_TYPE_NONE = 0;
 
@@ -215,7 +213,6 @@ public class RcsFeature extends ImsFeature {
          * This carrier supports User Capability Exchange using SIP OPTIONS as defined by the
          * framework. If set, the RcsFeature should support capability exchange using SIP OPTIONS.
          * If not set, this RcsFeature should not service capability requests.
-         * @hide
          */
         public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1 << 0;
 
@@ -224,33 +221,27 @@ public class RcsFeature extends ImsFeature {
          * framework. If set, the RcsFeature should support capability exchange using a presence
          * server. If not set, this RcsFeature should not publish capabilities or service capability
          * requests using presence.
-         * @hide
          */
         public static final int CAPABILITY_TYPE_PRESENCE_UCE =  1 << 1;
 
-        /**@hide*/
         public RcsImsCapabilities(@RcsImsCapabilityFlag int capabilities) {
             super(capabilities);
         }
 
-        /**@hide*/
         private RcsImsCapabilities(Capabilities c) {
             super(c.getMask());
         }
 
-        /**@hide*/
         @Override
         public void addCapabilities(@RcsImsCapabilityFlag int capabilities) {
             super.addCapabilities(capabilities);
         }
 
-        /**@hide*/
         @Override
         public void removeCapabilities(@RcsImsCapabilityFlag int capabilities) {
             super.removeCapabilities(capabilities);
         }
 
-        /**@hide*/
         @Override
         public boolean isCapable(@RcsImsCapabilityFlag int capabilities) {
             return super.isCapable(capabilities);
@@ -295,10 +286,9 @@ public class RcsFeature extends ImsFeature {
      * set, the {@link RcsFeature} has brought up the capability and is ready for framework
      * requests. To change the status of the capabilities
      * {@link #notifyCapabilitiesStatusChanged(RcsImsCapabilities)} should be called.
-     * @hide
      */
     @Override
-    public final RcsImsCapabilities queryCapabilityStatus() {
+    public @NonNull final RcsImsCapabilities queryCapabilityStatus() {
         return new RcsImsCapabilities(super.queryCapabilityStatus());
     }
 
@@ -306,7 +296,6 @@ public class RcsFeature extends ImsFeature {
      * Notify the framework that the capabilities status has changed. If a capability is enabled,
      * this signals to the framework that the capability has been initialized and is ready.
      * Call {@link #queryCapabilityStatus()} to return the current capability status.
-     * @hide
      */
     public final void notifyCapabilitiesStatusChanged(@NonNull RcsImsCapabilities c) {
         if (c == null) {
@@ -321,7 +310,6 @@ public class RcsFeature extends ImsFeature {
      * {@link #changeEnabledCapabilities(CapabilityChangeRequest, CapabilityCallbackProxy)} to
      * enable or disable capability A, this method should return the correct configuration for
      * capability A afterwards (until it has changed).
-     * @hide
      */
     public boolean queryCapabilityConfiguration(
             @RcsImsCapabilities.RcsImsCapabilityFlag int capability,
@@ -343,11 +331,10 @@ public class RcsFeature extends ImsFeature {
      * If for some reason one or more of these capabilities can not be enabled/disabled,
      * {@link CapabilityCallbackProxy#onChangeCapabilityConfigurationError(int, int, int)} should
      * be called for each capability change that resulted in an error.
-     * @hide
      */
     @Override
-    public void changeEnabledCapabilities(CapabilityChangeRequest request,
-            CapabilityCallbackProxy c) {
+    public void changeEnabledCapabilities(@NonNull CapabilityChangeRequest request,
+            @NonNull CapabilityCallbackProxy c) {
         // Base Implementation - Override to provide functionality
     }
 

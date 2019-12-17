@@ -138,6 +138,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("ScreenPinningConfirmation");
         lp.gravity = Gravity.FILL;
+        lp.setFitWindowInsetsTypes(0 /* types */);
         return lp;
     }
 

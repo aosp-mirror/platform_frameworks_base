@@ -401,6 +401,7 @@ public class Toast {
             params.format = PixelFormat.TRANSLUCENT;
             params.windowAnimations = com.android.internal.R.style.Animation_Toast;
             params.type = WindowManager.LayoutParams.TYPE_TOAST;
+            params.setFitIgnoreVisibility(true);
             params.setTitle("Toast");
             params.flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE

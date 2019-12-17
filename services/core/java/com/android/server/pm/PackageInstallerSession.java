@@ -1517,9 +1517,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mInternalProgress = 0.5f;
                 computeProgressLocked(true);
 
-                // Unpack native libraries
-                // TODO(b/136132412): skip for incremental installation
-                extractNativeLibraries(stageDir, params.abiOverride, mayInheritNativeLibs());
+                // Unpack native libraries for non-incremental installation
+                if (params.incrementalParams == null) {
+                    extractNativeLibraries(stageDir, params.abiOverride, mayInheritNativeLibs());
+                }
             }
 
             // We've reached point of no return; call into PMS to install the stage.

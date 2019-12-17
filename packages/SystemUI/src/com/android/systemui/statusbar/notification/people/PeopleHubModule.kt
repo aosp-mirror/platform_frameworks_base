@@ -31,6 +31,11 @@ abstract class PeopleHubModule {
     abstract fun peopleHubDataSource(impl: PeopleHubDataSourceImpl): DataSource<PeopleHubModel>
 
     @Binds
+    abstract fun peopleHubSettingChangeDataSource(
+        impl: PeopleHubSettingChangeDataSourceImpl
+    ): DataSource<Boolean>
+
+    @Binds
     abstract fun peopleHubViewModelFactoryDataSource(
         impl: PeopleHubViewModelFactoryDataSourceImpl
     ): DataSource<PeopleHubViewModelFactory>

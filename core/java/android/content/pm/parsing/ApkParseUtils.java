@@ -2321,7 +2321,7 @@ public class ApkParseUtils {
                         parsingPackage.setProfileableByShell(true);
                     }
                     XmlUtils.skipCurrentTag(parser);
-
+                    break;
                 default:
                     if (!PackageParser.RIGID_PARSER) {
                         Slog.w(TAG, "Unknown element under <application>: " + tagName

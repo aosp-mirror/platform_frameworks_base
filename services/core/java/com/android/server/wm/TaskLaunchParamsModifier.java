@@ -137,7 +137,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // STEP 1: Determine the display to launch the activity/task.
         final int displayId = getPreferredLaunchDisplay(task, options, source, currentParams);
         outParams.mPreferredDisplayId = displayId;
-        ActivityDisplay display = mSupervisor.mRootActivityContainer.getActivityDisplay(displayId);
+        DisplayContent display = mSupervisor.mRootActivityContainer.getDisplayContent(displayId);
         if (DEBUG) {
             appendLog("display-id=" + outParams.mPreferredDisplayId + " display-windowing-mode="
                     + display.getWindowingMode());
@@ -282,7 +282,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             if (source != null && source.inFreeformWindowingMode()
                     && resolvedMode == WINDOWING_MODE_FREEFORM
                     && outParams.mBounds.isEmpty()
-                    && source.getDisplayId() == display.mDisplayId) {
+                    && source.getDisplayId() == display.getDisplayId()) {
                 // Set bounds to be not very far from source activity.
                 cascadeBounds(source.getConfiguration().windowConfiguration.getBounds(),
                         display, outParams.mBounds);
@@ -333,17 +333,17 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         if (displayId != INVALID_DISPLAY
-                && mSupervisor.mRootActivityContainer.getActivityDisplay(displayId) == null) {
+                && mSupervisor.mRootActivityContainer.getDisplayContent(displayId) == null) {
             displayId = currentParams.mPreferredDisplayId;
         }
         displayId = (displayId == INVALID_DISPLAY) ? currentParams.mPreferredDisplayId : displayId;
 
         return (displayId != INVALID_DISPLAY
-                && mSupervisor.mRootActivityContainer.getActivityDisplay(displayId) != null)
+                && mSupervisor.mRootActivityContainer.getDisplayContent(displayId) != null)
                 ? displayId : DEFAULT_DISPLAY;
     }
 
-    private boolean canInheritWindowingModeFromSource(@NonNull ActivityDisplay display,
+    private boolean canInheritWindowingModeFromSource(@NonNull DisplayContent display,
             @Nullable ActivityRecord source) {
         if (source == null) {
             return false;
@@ -365,10 +365,10 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // Only inherit windowing mode if both source and target activities are on the same display.
         // Otherwise we may have unintended freeform windows showing up if an activity in freeform
         // window launches an activity on a fullscreen display by specifying display ID.
-        return display.mDisplayId == source.getDisplayId();
+        return display.getDisplayId() == source.getDisplayId();
     }
 
-    private boolean canApplyFreeformWindowPolicy(@NonNull ActivityDisplay display, int launchMode) {
+    private boolean canApplyFreeformWindowPolicy(@NonNull DisplayContent display, int launchMode) {
         return mSupervisor.mService.mSupportsFreeformWindowManagement
                 && (display.inFreeformWindowingMode() || launchMode == WINDOWING_MODE_FREEFORM);
     }
@@ -378,7 +378,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 && launchMode == WINDOWING_MODE_PINNED;
     }
 
-    private void getLayoutBounds(@NonNull ActivityDisplay display, @NonNull ActivityRecord root,
+    private void getLayoutBounds(@NonNull DisplayContent display, @NonNull ActivityRecord root,
             @NonNull ActivityInfo.WindowLayout windowLayout, @NonNull Rect outBounds) {
         final int verticalGravity = windowLayout.gravity & Gravity.VERTICAL_GRAVITY_MASK;
         final int horizontalGravity = windowLayout.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
@@ -488,7 +488,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return orientation;
     }
 
-    private void cascadeBounds(@NonNull Rect srcBounds, @NonNull ActivityDisplay display,
+    private void cascadeBounds(@NonNull Rect srcBounds, @NonNull DisplayContent display,
             @NonNull Rect outBounds) {
         outBounds.set(srcBounds);
         float density = (float) display.getConfiguration().densityDpi / DENSITY_DEFAULT;
@@ -500,7 +500,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         outBounds.offset(dx, dy);
     }
 
-    private void getTaskBounds(@NonNull ActivityRecord root, @NonNull ActivityDisplay display,
+    private void getTaskBounds(@NonNull ActivityRecord root, @NonNull DisplayContent display,
             @NonNull ActivityInfo.WindowLayout layout, int resolvedMode, boolean hasInitialBounds,
             @NonNull Rect inOutBounds) {
         if (resolvedMode == WINDOWING_MODE_FULLSCREEN) {
@@ -567,7 +567,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
     }
 
-    private int resolveOrientation(@NonNull ActivityRecord root, @NonNull ActivityDisplay display,
+    private int resolveOrientation(@NonNull ActivityRecord root, @NonNull DisplayContent display,
             @NonNull Rect bounds) {
         int orientation = resolveOrientation(root);
 
@@ -593,7 +593,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return orientation;
     }
 
-    private void getDefaultFreeformSize(@NonNull ActivityDisplay display,
+    private void getDefaultFreeformSize(@NonNull DisplayContent display,
             @NonNull ActivityInfo.WindowLayout layout, int orientation, @NonNull Rect bounds) {
         // Default size, which is letterboxing/pillarboxing in display. That's to say the large
         // dimension of default size is the small dimension of display size, and the small dimension
@@ -637,7 +637,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
      * Gets centered bounds of width x height. If inOutBounds is not empty, the result bounds
      * centers at its center or display's app bounds center if inOutBounds is empty.
      */
-    private void centerBounds(@NonNull ActivityDisplay display, int width, int height,
+    private void centerBounds(@NonNull DisplayContent display, int width, int height,
             @NonNull Rect inOutBounds) {
         if (inOutBounds.isEmpty()) {
             inOutBounds.set(display.mDisplayContent.mDisplayFrames.mStable);
@@ -647,7 +647,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         inOutBounds.set(left, top, left + width, top + height);
     }
 
-    private void adjustBoundsToFitInDisplay(@NonNull ActivityDisplay display,
+    private void adjustBoundsToFitInDisplay(@NonNull DisplayContent display,
             @NonNull Rect inOutBounds) {
         final Rect displayStableBounds = display.mDisplayContent.mDisplayFrames.mStable;
 
@@ -702,7 +702,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
      * @param display the display which tasks are to check
      * @param inOutBounds the bounds used to input initial bounds and output result bounds
      */
-    private void adjustBoundsToAvoidConflictInDisplay(@NonNull ActivityDisplay display,
+    private void adjustBoundsToAvoidConflictInDisplay(@NonNull DisplayContent display,
             @NonNull Rect inOutBounds) {
         final List<Rect> taskBoundsToCheck = new ArrayList<>();
         for (int i = 0; i < display.getStackCount(); ++i) {

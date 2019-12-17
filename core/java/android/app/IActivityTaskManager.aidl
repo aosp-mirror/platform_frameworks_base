@@ -164,7 +164,7 @@ interface IActivityTaskManager {
     boolean convertToTranslucent(in IBinder token, in Bundle options);
     void notifyActivityDrawn(in IBinder token);
     void reportActivityFullyDrawn(in IBinder token, boolean restoredFromBundle);
-    int getActivityDisplayId(in IBinder activityToken);
+    int getDisplayId(in IBinder activityToken);
     boolean isImmersive(in IBinder token);
     void setImmersive(in IBinder token, boolean immersive);
     boolean isTopActivityImmersive();
@@ -403,6 +403,14 @@ interface IActivityTaskManager {
      * See {@link android.app.Activity#setDisablePreviewScreenshots}
      */
     void setDisablePreviewScreenshots(IBinder token, boolean disable);
+
+    /**
+     * It should only be called from home activity to remove its outdated snapshot. The home
+     * snapshot is used to speed up entering home from screen off. If the content of home activity
+     * is significantly different from before taking the snapshot, then the home activity can use
+     * this method to avoid inconsistent transition.
+     */
+    void invalidateHomeTaskSnapshot(IBinder homeToken);
 
     /**
      * Return the user id of last resumed activity.

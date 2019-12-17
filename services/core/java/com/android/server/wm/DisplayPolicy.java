@@ -33,6 +33,7 @@ import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.ITYPE_TOP_GESTURES;
 import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
@@ -49,7 +50,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_ATTACHED_IN_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
@@ -63,6 +63,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BA
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
@@ -149,13 +150,17 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InsetsFlags;
+import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewRootImpl;
-import android.view.WindowInsets;
+import android.view.WindowInsets.Side;
+import android.view.WindowInsets.Side.InsetsSide;
+import android.view.WindowInsets.Type;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
@@ -337,6 +342,7 @@ public class DisplayPolicy {
     private int mLastAppearance;
     private int mLastFullscreenAppearance;
     private int mLastDockedAppearance;
+    private int mLastBehavior;
     private final Rect mNonDockedStackBounds = new Rect();
     private final Rect mDockedStackBounds = new Rect();
     private final Rect mLastNonDockedStackBounds = new Rect();
@@ -353,6 +359,7 @@ public class DisplayPolicy {
     private static final Rect sTmpRect = new Rect();
     private static final Rect sTmpNavFrame = new Rect();
     private static final Rect sTmpLastParentFrame = new Rect();
+    private static final int[] sTmpTypesAndSides = new int[2];
 
     private WindowState mTopFullscreenOpaqueWindowState;
     private WindowState mTopFullscreenOpaqueOrDimmingWindowState;
@@ -1228,7 +1235,8 @@ public class DisplayPolicy {
         final boolean screenDecor = (pfl & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0;
 
         if (layoutInScreenAndInsetDecor && !screenDecor) {
-            if ((sysUiVis & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
+            if ((sysUiVis & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
+                    || (attrs.getFitWindowInsetsTypes() & Type.navigationBars()) == 0) {
                 outFrame.set(displayFrames.mUnrestricted);
             } else {
                 outFrame.set(displayFrames.mRestricted);
@@ -1281,11 +1289,27 @@ public class DisplayPolicy {
         }
     }
 
+    private static void getImpliedTypesAndSidesToFit(LayoutParams attrs, int[] typesAndSides) {
+        typesAndSides[0] = attrs.getFitWindowInsetsTypes();
+        typesAndSides[1] = attrs.getFitWindowInsetsSides();
+        final boolean forceDrawsBarBackgrounds =
+                (attrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0
+                        && attrs.height == MATCH_PARENT && attrs.width == MATCH_PARENT;
+        if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0 || forceDrawsBarBackgrounds) {
+            if ((attrs.privateFlags & PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND) != 0) {
+                typesAndSides[1] &= ~Side.BOTTOM;
+            } else {
+                typesAndSides[0] &= ~Type.systemBars();
+            }
+        }
+    }
+
+    // TODO(b/118118435): remove after migration
     private static int getImpliedSysUiFlagsForLayout(LayoutParams attrs) {
         int impliedFlags = 0;
         final boolean forceWindowDrawsBarBackgrounds =
                 (attrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0
-                && attrs.height == MATCH_PARENT && attrs.width == MATCH_PARENT;
+                        && attrs.height == MATCH_PARENT && attrs.width == MATCH_PARENT;
         if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
                 || forceWindowDrawsBarBackgrounds) {
             impliedFlags |= SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
@@ -1300,6 +1324,13 @@ public class DisplayPolicy {
             synchronized (mLock) {
                 mForceClearedSystemUiFlags &= ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
                 mDisplayContent.reevaluateStatusBarVisibility();
+                if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL && mNavigationBar != null) {
+                    final InsetsControlTarget target =
+                            mNavigationBar.getControllableInsetProvider().getControlTarget();
+                    if (target != null) {
+                        target.showInsets(Type.navigationBars(), false /* fromIme */);
+                    }
+                }
             }
         }
     };
@@ -1376,11 +1407,18 @@ public class DisplayPolicy {
         // For purposes of putting out fake window up to steal focus, we will
         // drive nav being hidden only by whether it is requested.
         final int sysui = mLastSystemUiFlags;
-        boolean navVisible = (sysui & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
+        final int behavior = mLastBehavior;
+        boolean navVisible = ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL
+                ? (sysui & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0
+                : mNavigationBar != null && mNavigationBar.getControllableInsetProvider() != null
+                        && mNavigationBar.getControllableInsetProvider().isClientVisible()
+                        && !mDisplayContent.getInsetsPolicy().isTransient(ITYPE_NAVIGATION_BAR);
         boolean navTranslucent = (sysui
                 & (View.NAVIGATION_BAR_TRANSLUCENT | View.NAVIGATION_BAR_TRANSPARENT)) != 0;
-        boolean immersive = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
-        boolean immersiveSticky = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0;
+        boolean immersive = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0
+                || (behavior & BEHAVIOR_SHOW_BARS_BY_SWIPE) != 0;
+        boolean immersiveSticky = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0
+                || (behavior & BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE) != 0;
         boolean navAllowedHidden = immersive || immersiveSticky;
         navTranslucent &= !immersiveSticky;  // transient trumps translucent
         boolean isKeyguardShowing = isStatusBarKeyguard()
@@ -1464,6 +1502,9 @@ public class DisplayPolicy {
                     displayFrames.mUnrestricted /* stableFrame */);
             w.getWindowFrames().setDisplayCutout(displayFrames.mDisplayCutout);
             w.computeFrameLw();
+            if (w.getControllableInsetProvider() != null) {
+                w.getControllableInsetProvider().updateSourceFrame();
+            }
             final Rect frame = w.getFrameLw();
 
             if (frame.left <= 0 && frame.top <= 0) {
@@ -1526,6 +1567,11 @@ public class DisplayPolicy {
         // Let the status bar determine its size.
         mStatusBar.computeFrameLw();
 
+        // Update the source frame to provide insets to other windows during layout.
+        if (mStatusBar.getControllableInsetProvider() != null) {
+            mStatusBar.getControllableInsetProvider().updateSourceFrame();
+        }
+
         // For layout, the status bar is always at the top with our fixed height.
         displayFrames.mStable.top = displayFrames.mUnrestricted.top
                 + mStatusBarHeightForRotation[displayFrames.mRotation];
@@ -1540,7 +1586,8 @@ public class DisplayPolicy {
         sTmpRect.bottom = displayFrames.mStable.top;  // Use collapsed status bar size
         mStatusBarController.setContentFrame(sTmpRect);
 
-        boolean statusBarTransient = (sysui & View.STATUS_BAR_TRANSIENT) != 0;
+        boolean statusBarTransient = (sysui & View.STATUS_BAR_TRANSIENT) != 0
+                || mDisplayContent.getInsetsPolicy().isTransient(ITYPE_STATUS_BAR);
         boolean statusBarTranslucent = (sysui
                 & (View.STATUS_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSPARENT)) != 0;
 
@@ -1676,6 +1723,9 @@ public class DisplayPolicy {
                 navigationFrame /* stableFrame */);
         mNavigationBar.getWindowFrames().setDisplayCutout(displayFrames.mDisplayCutout);
         mNavigationBar.computeFrameLw();
+        if (mNavigationBar.getControllableInsetProvider() != null) {
+            mNavigationBar.getControllableInsetProvider().updateSourceFrame();
+        }
         mNavigationBarController.setContentFrame(mNavigationBar.getContentFrameLw());
 
         if (DEBUG_LAYOUT) Slog.i(TAG, "mNavigationBar frame: " + navigationFrame);
@@ -1811,19 +1861,44 @@ public class DisplayPolicy {
 
         final int adjust = sim & SOFT_INPUT_MASK_ADJUST;
 
-        final boolean requestedFullscreen = (fl & FLAG_FULLSCREEN) != 0
-                || (requestedSysUiFl & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
-
         final boolean layoutInScreen = (fl & FLAG_LAYOUT_IN_SCREEN) == FLAG_LAYOUT_IN_SCREEN;
         final boolean layoutInsetDecor = (fl & FLAG_LAYOUT_INSET_DECOR) == FLAG_LAYOUT_INSET_DECOR;
 
         sf.set(displayFrames.mStable);
 
-        if (type == TYPE_INPUT_METHOD) {
+        if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
+            getImpliedTypesAndSidesToFit(attrs, sTmpTypesAndSides);
+            final @InsetsType int typesToFit = sTmpTypesAndSides[0];
+            final @InsetsSide int sidesToFit = sTmpTypesAndSides[1];
+            final ArraySet<Integer> types = InsetsState.toInternalType(typesToFit);
+            final Rect dfu = displayFrames.mUnrestricted;
+            Insets insets = Insets.of(0, 0, 0, 0);
+            for (int i = types.size() - 1; i >= 0; i--) {
+                insets = Insets.max(insets, mDisplayContent.getInsetsStateController()
+                        .getInsetsForDispatch(win).getSource(types.valueAt(i))
+                        .calculateInsets(dfu, attrs.getFitIgnoreVisibility()));
+            }
+            final int left = (sidesToFit & Side.LEFT) != 0 ? insets.left : 0;
+            final int top = (sidesToFit & Side.TOP) != 0 ? insets.top : 0;
+            final int right = (sidesToFit & Side.RIGHT) != 0 ? insets.right : 0;
+            final int bottom = (sidesToFit & Side.BOTTOM) != 0 ? insets.bottom : 0;
+            df.set(left, top, dfu.right - right, dfu.bottom - bottom);
+            if (attached == null) {
+                pf.set(df);
+                vf.set(adjust != SOFT_INPUT_ADJUST_NOTHING
+                        ? displayFrames.mCurrent : displayFrames.mDock);
+            } else {
+                pf.set((fl & FLAG_LAYOUT_IN_SCREEN) == 0 ? attached.getFrameLw() : df);
+                vf.set(attached.getVisibleFrameLw());
+            }
+            cf.set(adjust != SOFT_INPUT_ADJUST_RESIZE
+                    ? displayFrames.mDock : displayFrames.mContent);
+            dcf.set(displayFrames.mSystem);
+        } else if (type == TYPE_INPUT_METHOD) {
             vf.set(displayFrames.mDock);
             cf.set(displayFrames.mDock);
             df.set(displayFrames.mDock);
-            windowFrames.mParentFrame.set(displayFrames.mDock);
+            pf.set(displayFrames.mDock);
             // IM dock windows layout below the nav bar...
             pf.bottom = df.bottom = displayFrames.mUnrestricted.bottom;
             // ...with content insets above the nav bar
@@ -1989,7 +2064,7 @@ public class DisplayPolicy {
                     }
                 }
             } else if (layoutInScreen || (sysUiFl
-                    & (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    & (SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)) != 0) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "layoutWindowLw(" + attrs.getTitle()
                         + "): IN_SCREEN");
@@ -2039,7 +2114,7 @@ public class DisplayPolicy {
                     cf.set(displayFrames.mUnrestricted);
                     df.set(displayFrames.mUnrestricted);
                     pf.set(displayFrames.mUnrestricted);
-                } else if ((sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) != 0) {
+                } else if ((sysUiFl & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) != 0) {
                     df.set(displayFrames.mRestricted);
                     pf.set(displayFrames.mRestricted);
 
@@ -2111,8 +2186,12 @@ public class DisplayPolicy {
 
         final int cutoutMode = attrs.layoutInDisplayCutoutMode;
         final boolean attachedInParent = attached != null && !layoutInScreen;
+        final boolean requestedFullscreen = (fl & FLAG_FULLSCREEN) != 0
+                || (requestedSysUiFl & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0
+                || !win.getClientInsetsState().getSource(ITYPE_STATUS_BAR).isVisible();
         final boolean requestedHideNavigation =
-                (requestedSysUiFl & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
+                (requestedSysUiFl & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
+                        || !win.getClientInsetsState().getSource(ITYPE_NAVIGATION_BAR).isVisible();
 
         // TYPE_BASE_APPLICATION windows are never considered floating here because they don't get
         // cropped / shifted to the displayFrame in WindowState.
@@ -2195,6 +2274,9 @@ public class DisplayPolicy {
         }
 
         win.computeFrameLw();
+        if (win.getControllableInsetProvider() != null) {
+            win.getControllableInsetProvider().updateSourceFrame();
+        }
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
         if (type == TYPE_INPUT_METHOD && win.isVisibleLw()
@@ -2985,7 +3067,7 @@ public class DisplayPolicy {
                     mDisplayContent.getInsetsPolicy().showTransient(IntArray.wrap(
                             new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
                 } else {
-                    controlTarget.showInsets(WindowInsets.Type.systemBars(), false);
+                    controlTarget.showInsets(Type.systemBars(), false);
                 }
             } else {
                 boolean sb = mStatusBarController.checkShowTransientBarLw();
@@ -3109,6 +3191,7 @@ public class DisplayPolicy {
                 && mLastAppearance == appearance
                 && mLastFullscreenAppearance == fullscreenAppearance
                 && mLastDockedAppearance == dockedAppearance
+                && mLastBehavior == behavior
                 && mLastFocusIsFullscreen == isFullscreen
                 && mLastFocusIsImmersive == isImmersive
                 && mFocusedApp == win.getAppToken()
@@ -3125,6 +3208,7 @@ public class DisplayPolicy {
         mLastAppearance = appearance;
         mLastFullscreenAppearance = fullscreenAppearance;
         mLastDockedAppearance = dockedAppearance;
+        mLastBehavior = behavior;
         mLastFocusIsFullscreen = isFullscreen;
         mLastFocusIsImmersive = isImmersive;
         mFocusedApp = win.getAppToken();

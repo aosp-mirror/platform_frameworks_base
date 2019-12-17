@@ -193,7 +193,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     @FlakyTest(bugId = 137879065)
     public void testFitWithinBounds() {
         final Rect parentBounds = new Rect(10, 10, 200, 200);
-        ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
+        DisplayContent display = mService.mRootActivityContainer.getDefaultDisplay();
         ActivityStack stack = display.createStack(WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
         Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
@@ -232,7 +232,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     @Test
     @FlakyTest(bugId = 137879065)
     public void testBoundsOnModeChangeFreeformToFullscreen() {
-        ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
+        DisplayContent display = mService.mRootActivityContainer.getDefaultDisplay();
         ActivityStack stack = new StackBuilder(mRootActivityContainer).setDisplay(display)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         Task task = stack.getBottomMostTask();
@@ -265,9 +265,9 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testFullscreenBoundsForcedOrientation() {
         final Rect fullScreenBounds = new Rect(0, 0, 1920, 1080);
         final Rect fullScreenBoundsPort = new Rect(0, 0, 1080, 1920);
-        ActivityDisplay display = new TestActivityDisplay.Builder(
+        DisplayContent display = new TestDisplayContent.Builder(
                 mService, fullScreenBounds.width(), fullScreenBounds.height()).build();
-        assertTrue(mRootActivityContainer.getActivityDisplay(display.mDisplayId) != null);
+        assertTrue(mRootActivityContainer.getDisplayContent(display.mDisplayId) != null);
         // Fix the display orientation to landscape which is the natural rotation (0) for the test
         // display.
         final DisplayRotation dr = display.mDisplayContent.getDisplayRotation();
@@ -328,7 +328,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     @Test
     public void testIgnoresForcedOrientationWhenParentHandles() {
         final Rect fullScreenBounds = new Rect(0, 0, 1920, 1080);
-        ActivityDisplay display = new TestActivityDisplay.Builder(
+        DisplayContent display = new TestDisplayContent.Builder(
                 mService, fullScreenBounds.width(), fullScreenBounds.height()).build();
 
         display.getRequestedOverrideConfiguration().orientation =
@@ -809,7 +809,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     private void testStackBoundsConfiguration(int windowingMode, Rect parentBounds, Rect bounds,
             Rect expectedConfigBounds) {
 
-        ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
+        DisplayContent display = mService.mRootActivityContainer.getDefaultDisplay();
         ActivityStack stack = display.createStack(windowingMode, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
         Task task = new TaskBuilder(mSupervisor).setStack(stack).build();

@@ -84,6 +84,7 @@ public class FloatingRotationButton implements RotationButton {
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("FloatingRotationButton");
+        lp.setFitWindowInsetsTypes(0 /*types */);
         switch (mWindowManager.getDefaultDisplay().getRotation()) {
             case Surface.ROTATION_0:
                 lp.gravity = Gravity.BOTTOM | Gravity.LEFT;

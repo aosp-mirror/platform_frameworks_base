@@ -296,7 +296,7 @@ class KeyguardController {
         boolean requestDismissKeyguard = false;
         for (int displayNdx = mRootActivityContainer.getChildCount() - 1;
              displayNdx >= 0; displayNdx--) {
-            final ActivityDisplay display = mRootActivityContainer.getChildAt(displayNdx);
+            final DisplayContent display = mRootActivityContainer.getChildAt(displayNdx);
             final KeyguardDisplayState state = getDisplay(display.mDisplayId);
             state.visibilitiesUpdated(this, display);
             requestDismissKeyguard |= state.mRequestDismissKeyguard;
@@ -420,7 +420,7 @@ class KeyguardController {
     private void updateKeyguardSleepToken() {
         for (int displayNdx = mRootActivityContainer.getChildCount() - 1;
              displayNdx >= 0; displayNdx--) {
-            final ActivityDisplay display = mRootActivityContainer.getChildAt(displayNdx);
+            final DisplayContent display = mRootActivityContainer.getChildAt(displayNdx);
             updateKeyguardSleepToken(display.mDisplayId);
         }
     }
@@ -483,7 +483,7 @@ class KeyguardController {
             }
         }
 
-        void visibilitiesUpdated(KeyguardController controller, ActivityDisplay display) {
+        void visibilitiesUpdated(KeyguardController controller, DisplayContent display) {
             final boolean lastOccluded = mOccluded;
             final ActivityRecord lastDismissActivity = mDismissingKeyguardActivity;
             mRequestDismissKeyguard = false;
@@ -530,7 +530,7 @@ class KeyguardController {
          * Only the top non-pinned activity of the focusable stack on each display can control its
          * occlusion state.
          */
-        private ActivityStack getStackForControllingOccluding(ActivityDisplay display) {
+        private ActivityStack getStackForControllingOccluding(DisplayContent display) {
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
                 if (stack != null && stack.isFocusableAndVisible()
