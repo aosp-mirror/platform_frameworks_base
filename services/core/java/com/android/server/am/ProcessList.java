@@ -1918,9 +1918,8 @@ public final class ProcessList {
                 // Get all packages belongs to the same shared uid. sharedPackages is empty array
                 // if it doesn't have shared uid.
                 final PackageManagerInternal pmInt = mService.getPackageManagerInternalLocked();
-                final String sharedUserId = pmInt.getSharedUserIdForPackage(app.info.packageName);
-                final String[] sharedPackages = pmInt.getPackagesForSharedUserId(sharedUserId,
-                        app.userId);
+                final String[] sharedPackages = pmInt.getSharedUserPackagesForPackage(
+                        app.info.packageName, app.userId);
                 pkgDataInfoMap = getPackageAppDataInfoMap(pmInt, sharedPackages.length == 0
                         ? new String[]{app.info.packageName} : sharedPackages, uid);
             } else {

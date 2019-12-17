@@ -249,7 +249,6 @@ import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 import android.permission.IPermissionManager;
 import android.provider.DeviceConfig;
-import android.provider.MediaStore;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.security.KeyStore;
@@ -23063,16 +23062,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public String getSharedUserIdForPackage(String packageName) {
+        @NonNull
+        public String[] getSharedUserPackagesForPackage(String packageName, int userId) {
             synchronized (mLock) {
-                return getSharedUserIdForPackageLocked(packageName);
-            }
-        }
-
-        @Override
-        public String[] getPackagesForSharedUserId(String sharedUserId, int userId) {
-            synchronized (mLock) {
-                return getPackagesForSharedUserIdLocked(sharedUserId, userId);
+                return getSharedUserPackagesForPackageLocked(packageName, userId);
             }
         }
 
@@ -23305,36 +23298,25 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @GuardedBy("mLock")
-    private String getSharedUserIdForPackageLocked(String packageName) {
-        final PackageSetting ps = mSettings.mPackages.get(packageName);
-        return (ps != null && ps.isSharedUser()) ? ps.sharedUser.name : null;
-    }
-
-    @GuardedBy("mLock")
-    private String[] getPackagesForSharedUserIdLocked(String sharedUserId, int userId) {
-        try {
-            final SharedUserSetting sus = mSettings.getSharedUserLPw(
-                    sharedUserId, 0, 0, false);
-            if (sus == null) {
-                return EmptyArray.STRING;
-            }
-            String[] res = new String[sus.packages.size()];
-            final Iterator<PackageSetting> it = sus.packages.iterator();
-            int i = 0;
-            while (it.hasNext()) {
-                PackageSetting ps = it.next();
-                if (ps.getInstalled(userId)) {
-                    res[i++] = ps.name;
-                }
-            }
-            res = ArrayUtils.trimToSize(res, i);
-            if (res != null) {
-                return res;
-            }
-        } catch (PackageManagerException e) {
-            // Should not happen
+    @NonNull
+    private String[] getSharedUserPackagesForPackageLocked(String packageName, int userId) {
+        final PackageSetting packageSetting = mSettings.mPackages.get(packageName);
+        if (packageSetting == null || !packageSetting.isSharedUser()) {
+            return EmptyArray.STRING;
         }
-        return EmptyArray.STRING;
+
+        ArraySet<PackageSetting> packages = packageSetting.sharedUser.packages;
+        String[] res = new String[packages.size()];
+        final Iterator<PackageSetting> it = packages.iterator();
+        int i = 0;
+        while (it.hasNext()) {
+            PackageSetting ps = it.next();
+            if (ps.getInstalled(userId)) {
+                res[i++] = ps.name;
+            }
+        }
+        res = ArrayUtils.trimToSize(res, i);
+        return res != null ? res : EmptyArray.STRING;
     }
 
     @Override

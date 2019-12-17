@@ -646,16 +646,12 @@ public abstract class PackageManagerInternal {
     public abstract SparseArray<String> getAppsWithSharedUserIds();
 
     /**
-     * Get the value of attribute android:sharedUserId for the given packageName if specified,
-     * otherwise {@code null}.
+     * Get all packages which share the same userId as the specified package, or an empty array
+     * if the package does not have a shared userId.
      */
-    public abstract String getSharedUserIdForPackage(@NonNull String packageName);
-
-    /**
-     * Get all packages which specified the given sharedUserId as android:sharedUserId attribute
-     * or an empty array if no package specified it.
-     */
-    public abstract String[] getPackagesForSharedUserId(@NonNull String sharedUserId, int userId);
+    @NonNull
+    public abstract String[] getSharedUserPackagesForPackage(@NonNull String packageName,
+            int userId);
 
     /**
      * Return if device is currently in a "core" boot environment, typically
