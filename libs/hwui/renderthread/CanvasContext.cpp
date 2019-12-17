@@ -143,13 +143,15 @@ void CanvasContext::destroy() {
     mAnimationContext->destroy();
 }
 
-void CanvasContext::setSurface(sp<Surface>&& surface) {
+void CanvasContext::setSurface(sp<Surface>&& surface, bool enableTimeout) {
     ATRACE_CALL();
 
     if (surface) {
         mNativeSurface = new ReliableSurface{std::move(surface)};
-        // TODO: Fix error handling & re-shorten timeout
-        mNativeSurface->setDequeueTimeout(4000_ms);
+        if (enableTimeout) {
+            // TODO: Fix error handling & re-shorten timeout
+            mNativeSurface->setDequeueTimeout(4000_ms);
+        }
     } else {
         mNativeSurface = nullptr;
     }

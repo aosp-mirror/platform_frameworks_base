@@ -98,7 +98,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_AMBIENT;
 
         Policy expectedPolicy = new Policy(priorityCategories, priorityCallSenders,
-                priorityMessageSenders, suppressedVisualEffects);
+                priorityMessageSenders, suppressedVisualEffects, 0);
 
         assertEquals(expectedPolicy, config.toNotificationPolicy(zenPolicy));
     }

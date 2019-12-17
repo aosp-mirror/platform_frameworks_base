@@ -382,14 +382,30 @@ public class ResolverActivity extends Activity {
         finish();
     }
 
+    /**
+     * Numerous layouts are supported, each with optional ViewGroups.
+     * Make sure the inset gets added to the correct View, using
+     * a footer for Lists so it can properly scroll under the navbar.
+     */
+    protected boolean shouldAddFooterView() {
+        if (useLayoutWithDefault()) return true;
+
+        View buttonBar = findViewById(R.id.button_bar);
+        if (buttonBar == null || buttonBar.getVisibility() == View.GONE) return true;
+
+        return false;
+    }
+
     protected WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
         mSystemWindowInsets = insets.getSystemWindowInsets();
 
         mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,
                 mSystemWindowInsets.right, 0);
 
+        resetButtonBar();
+
         // Need extra padding so the list can fully scroll up
-        if (useLayoutWithDefault()) {
+        if (shouldAddFooterView()) {
             if (mFooterSpacer == null) {
                 mFooterSpacer = new Space(getApplicationContext());
             } else {
@@ -398,16 +414,14 @@ public class ResolverActivity extends Activity {
             mFooterSpacer.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,
                                                                        mSystemWindowInsets.bottom));
             ((ListView) mAdapterView).addFooterView(mFooterSpacer);
-        } else {
-            View emptyView = findViewById(R.id.empty);
-            if (emptyView != null) {
-                emptyView.setPadding(0, 0, 0, mSystemWindowInsets.bottom
-                                     + getResources().getDimensionPixelSize(
-                                             R.dimen.chooser_edge_margin_normal) * 2);
-            }
         }
 
-        resetButtonBar();
+        View emptyView = findViewById(R.id.empty);
+        if (emptyView != null) {
+            emptyView.setPadding(0, 0, 0, mSystemWindowInsets.bottom
+                                 + getResources().getDimensionPixelSize(
+                                         R.dimen.chooser_edge_margin_normal) * 2);
+        }
 
         return insets.consumeSystemWindowInsets();
     }
@@ -1413,6 +1427,7 @@ public class ResolverActivity extends Activity {
         private final Intent mResolvedIntent;
         private final List<Intent> mSourceIntents = new ArrayList<>();
         private boolean mIsSuspended;
+        private boolean mPinned = false;
 
         public DisplayResolveInfo(Intent originalIntent, ResolveInfo pri, CharSequence pLabel,
                 CharSequence pInfo, Intent pOrigIntent) {
@@ -1516,6 +1531,15 @@ public class ResolverActivity extends Activity {
         public boolean isSuspended() {
             return mIsSuspended;
         }
+
+        @Override
+        public boolean isPinned() {
+            return mPinned;
+        }
+
+        public void setPinned(boolean pinned) {
+            mPinned = pinned;
+        }
     }
 
     List<DisplayResolveInfo> getDisplayList() {
@@ -1616,6 +1640,11 @@ public class ResolverActivity extends Activity {
           * @return true if this target can be selected by the user
           */
         boolean isSuspended();
+
+        /**
+         * @return true if this target should be pinned to the front by the request of the user
+         */
+        boolean isPinned();
     }
 
     public class ResolveListAdapter extends BaseAdapter {
@@ -1922,6 +1951,10 @@ public class ResolverActivity extends Activity {
             final Intent replaceIntent = getReplacementIntent(add.activityInfo, intent);
             final DisplayResolveInfo dri = new DisplayResolveInfo(intent, add, roLabel,
                     extraInfo, replaceIntent);
+            dri.setPinned(rci.isPinned());
+            if (rci.isPinned()) {
+                Log.i(TAG, "Pinned item: " + rci.name);
+            }
             addResolveInfo(dri);
             if (replaceIntent == intent) {
                 // Only add alternates if we didn't get a specific replacement from
@@ -2090,6 +2123,7 @@ public class ResolverActivity extends Activity {
         public final ComponentName name;
         private final List<Intent> mIntents = new ArrayList<>();
         private final List<ResolveInfo> mResolveInfos = new ArrayList<>();
+        private boolean mPinned;
 
         public ResolvedComponentInfo(ComponentName name, Intent intent, ResolveInfo info) {
             this.name = name;
@@ -2130,6 +2164,15 @@ public class ResolverActivity extends Activity {
             }
             return -1;
         }
+
+        public boolean isPinned() {
+            return mPinned;
+        }
+
+        public void setPinned(boolean pinned) {
+            mPinned = pinned;
+        }
+
     }
 
     static class ViewHolder {

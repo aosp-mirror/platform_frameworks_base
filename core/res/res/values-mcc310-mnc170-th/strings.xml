@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="210168420192421012">"ไม่มีการจัดสรรซิม MM#2"</string>
-    <string name="mmcc_illegal_ms" msgid="1130721094178658338">"ไม่อนุญาตให้ใช้ซิม MM#3"</string>
-    <string name="mmcc_illegal_me" msgid="3173546391131606065">"ไม่อนุญาตให้ใช้โทรศัพท์ MM#6"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5424518490295341205">"ไม่มีการจัดสรรซิม MM#2"</string>
+    <string name="mmcc_illegal_ms" msgid="3527626511418944853">"ไม่อนุญาตให้ใช้ซิม MM#3"</string>
+    <string name="mmcc_illegal_me" msgid="3948912590657398489">"ไม่อนุญาตให้ใช้โทรศัพท์ MM#6"</string>
 </resources>

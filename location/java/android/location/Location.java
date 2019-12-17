@@ -158,7 +158,10 @@ public class Location implements Parcelable {
      * <p>By default time, latitude and longitude are 0, and the location
      * has no bearing, altitude, speed, accuracy or extras.
      *
-     * @param provider the name of the provider that generated this location
+     * @param provider the source that provides the location. It can be of type
+     * {@link LocationManager#GPS_PROVIDER}, {@link LocationManager#NETWORK_PROVIDER},
+     * or {@link LocationManager#PASSIVE_PROVIDER}. You can also define your own
+     * provider string, in which case an empty string is a valid provider.
      */
     public Location(String provider) {
         mProvider = provider;

@@ -469,8 +469,8 @@ public class ChooserActivityTest {
                 .launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
 
-        onView(withId(R.id.copy_button)).check(matches(isDisplayed()));
-        onView(withId(R.id.copy_button)).perform(click());
+        onView(withId(R.id.chooser_copy_button)).check(matches(isDisplayed()));
+        onView(withId(R.id.chooser_copy_button)).perform(click());
         ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(
                 Context.CLIPBOARD_SERVICE);
         ClipData clipData = clipboard.getPrimaryClip();

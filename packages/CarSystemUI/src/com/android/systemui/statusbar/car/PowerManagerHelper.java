@@ -24,6 +24,9 @@ import android.car.hardware.power.CarPowerManager.CarPowerStateListener;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.systemui.CarSystemUIFactory;
+import com.android.systemui.SystemUIFactory;
+
 /**
  * Helper class for connecting to the {@link CarPowerManager} and listening for power state changes.
  */
@@ -33,7 +36,6 @@ public class PowerManagerHelper {
     private final Context mContext;
     private final CarPowerStateListener mCarPowerStateListener;
 
-    private Car mCar;
     private CarPowerManager mCarPowerManager;
 
     private final CarServiceLifecycleListener mCarServiceLifecycleListener;
@@ -59,7 +61,7 @@ public class PowerManagerHelper {
      * Connect to Car service.
      */
     void connectToCarService() {
-        mCar = Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
-                mCarServiceLifecycleListener);
+        ((CarSystemUIFactory) SystemUIFactory.getInstance()).getCarServiceProvider(mContext)
+                .addListener(mCarServiceLifecycleListener);
     }
 }

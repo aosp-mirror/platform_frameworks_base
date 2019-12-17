@@ -4032,8 +4032,16 @@ public class DevicePolicyManager {
      * Make the device lock immediately, as if the lock screen timeout has expired at the point of
      * this call.
      * <p>
+     * This method secures the device in response to an urgent situation, such as a lost or stolen
+     * device. After this method is called, the device must be unlocked using strong authentication
+     * (PIN, pattern, or password). This API is intended for use only by device admins.
+     * <p>
      * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
      * to be able to call this method; if it has not, a security exception will be thrown.
+     * <p>
+     * If there's no lock type set, this method forces the device to go to sleep but doesn't lock
+     * the device. Device admins who find the device in this state can lock an otherwise-insecure
+     * device by first calling {@link #resetPassword} to set the password and then lock the device.
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to lock the parent profile.
@@ -4051,8 +4059,16 @@ public class DevicePolicyManager {
      * Make the device lock immediately, as if the lock screen timeout has expired at the point of
      * this call.
      * <p>
+     * This method secures the device in response to an urgent situation, such as a lost or stolen
+     * device. After this method is called, the device must be unlocked using strong authentication
+     * (PIN, pattern, or password). This API is intended for use only by device admins.
+     * <p>
      * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
      * to be able to call this method; if it has not, a security exception will be thrown.
+     * <p>
+     * If there's no lock type set, this method forces the device to go to sleep but doesn't lock
+     * the device. Device admins who find the device in this state can lock an otherwise-insecure
+     * device by first calling {@link #resetPassword} to set the password and then lock the device.
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to lock the parent profile.
@@ -8080,7 +8096,7 @@ public class DevicePolicyManager {
      * Sets which system features are enabled when the device runs in lock task mode. This method
      * doesn't affect the features when lock task mode is inactive. Any system features not included
      * in {@code flags} are implicitly disabled when calling this method. By default, only
-     * {@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS} is enabled—all the other features are disabled. To
+     * {@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS} is enabled; all the other features are disabled. To
      * disable the global actions dialog, call this method omitting
      * {@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS}.
      *

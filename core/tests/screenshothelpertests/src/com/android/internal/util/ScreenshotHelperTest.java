@@ -19,7 +19,7 @@ package com.android.internal.util;
 import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
 import static android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION;
 
-import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.fail;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -80,8 +80,8 @@ public final class ScreenshotHelperTest {
         CountDownLatch lock = new CountDownLatch(1);
         mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_FULLSCREEN, false, false, timeoutMs,
                 mHandler,
-                worked -> {
-                    assertFalse(worked);
+                uri -> {
+                    assertNull(uri);
                     lock.countDown();
                 });
 

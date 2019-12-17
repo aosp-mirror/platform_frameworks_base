@@ -20,5 +20,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_illegal_me" msgid="7320955531336937252">"फोनलाई अनुमति छैन MM#6"</string>
+    <string name="mmcc_illegal_me" msgid="8297733805803070310">"फोनलाई अनुमति छैन MM#6"</string>
 </resources>

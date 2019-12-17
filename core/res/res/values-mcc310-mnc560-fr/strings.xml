@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="2976453378311251765">"Carte SIM non provisionnée MM#2"</string>
-    <string name="mmcc_illegal_ms" msgid="2519618694918727742">"Carte SIM non autorisée MM#3"</string>
-    <string name="mmcc_illegal_me" msgid="7030488670186895244">"Téléphone non autorisé MM#6"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="3526528316378889524">"Carte SIM non provisionnée MM#2"</string>
+    <string name="mmcc_illegal_ms" msgid="4618730283812066268">"Carte SIM non autorisée MM#3"</string>
+    <string name="mmcc_illegal_me" msgid="8522039751358990401">"Téléphone non autorisé MM#6"</string>
 </resources>

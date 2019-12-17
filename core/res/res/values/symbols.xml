@@ -66,8 +66,7 @@
   <java-symbol type="id" name="content_preview_text_layout" />
   <java-symbol type="id" name="content_preview_title" />
   <java-symbol type="id" name="content_preview_title_layout" />
-  <java-symbol type="id" name="copy_button" />
-  <java-symbol type="id" name="file_copy_button" />
+  <java-symbol type="id" name="chooser_action_row" />
   <java-symbol type="id" name="current_scene" />
   <java-symbol type="id" name="scene_layoutid_cache" />
   <java-symbol type="id" name="customPanel" />
@@ -2060,6 +2059,14 @@
   <java-symbol type="layout" name="safe_mode" />
   <java-symbol type="layout" name="simple_list_item_2_single_choice" />
   <java-symbol type="layout" name="app_error_dialog" />
+  <java-symbol type="string" name="wifi_cannot_connect_with_randomized_mac_title" />
+  <java-symbol type="string" name="wifi_cannot_connect_with_randomized_mac_message" />
+  <java-symbol type="string" name="wifi_disable_mac_randomization_dialog_title" />
+  <java-symbol type="string" name="wifi_disable_mac_randomization_dialog_message" />
+  <java-symbol type="string" name="wifi_disable_mac_randomization_dialog_confirm_text" />
+  <java-symbol type="string" name="wifi_disable_mac_randomization_dialog_success" />
+  <java-symbol type="string" name="wifi_disable_mac_randomization_dialog_failure" />
+  <java-symbol type="string" name="wifi_disable_mac_randomization_dialog_network_not_found" />
   <java-symbol type="plurals" name="wifi_available" />
   <java-symbol type="plurals" name="wifi_available_detailed" />
   <java-symbol type="string" name="wifi_available_title" />
@@ -3047,7 +3054,8 @@
   <java-symbol type="color" name="notification_material_background_color" />
 
   <!-- Resolver target actions -->
-  <java-symbol type="array" name="resolver_target_actions" />
+  <java-symbol type="array" name="resolver_target_actions_pin" />
+  <java-symbol type="array" name="resolver_target_actions_unpin" />
 
   <java-symbol type="array" name="non_removable_euicc_slots" />
 
@@ -3839,5 +3847,11 @@
   <java-symbol type="drawable" name="android_logotype" />
   <java-symbol type="layout" name="platlogo_layout" />
 
+  <java-symbol type="id" name="chooser_copy_button" />
+  <java-symbol type="layout" name="chooser_action_button" />
+  <java-symbol type="dimen" name="chooser_action_button_icon_size" />
+  <java-symbol type="string" name="config_defaultNearbySharingComponent" />
+
   <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
+  <java-symbol type="bool" name="reset_geo_fencing_check_after_boot_or_apm" />
 </resources>

@@ -16,7 +16,6 @@
 
 package com.android.server.contentsuggestions;
 
-import static android.Manifest.permission.BIND_CONTENT_SUGGESTIONS_SERVICE;
 import static android.Manifest.permission.MANAGE_CONTENT_SUGGESTIONS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -96,7 +95,7 @@ public class ContentSuggestionsManagerService extends
 
     private void enforceCaller(int userId, String func) {
         Context ctx = getContext();
-        if (ctx.checkCallingPermission(BIND_CONTENT_SUGGESTIONS_SERVICE) == PERMISSION_GRANTED
+        if (ctx.checkCallingPermission(MANAGE_CONTENT_SUGGESTIONS) == PERMISSION_GRANTED
                 || mServiceNameResolver.isTemporary(userId)
                 || mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid())) {
             return;

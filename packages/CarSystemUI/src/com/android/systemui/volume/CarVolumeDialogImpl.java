@@ -55,7 +55,9 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.systemui.CarSystemUIFactory;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.plugins.VolumeDialog;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -90,12 +92,13 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     private final KeyguardManager mKeyguard;
     private final int mNormalTimeout;
     private final int mHoveringTimeout;
+    private final int mExpNormalTimeout;
+    private final int mExpHoveringTimeout;
 
     private Window mWindow;
     private CustomDialog mDialog;
     private RecyclerView mListView;
     private CarVolumeItemAdapter mVolumeItemsAdapter;
-    private Car mCar;
     private CarAudioManager mCarAudioManager;
     private boolean mHovering;
     private int mCurrentlyDisplayingGroupId;
@@ -179,6 +182,10 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                 R.integer.car_volume_dialog_display_normal_timeout);
         mHoveringTimeout = mContext.getResources().getInteger(
                 R.integer.car_volume_dialog_display_hovering_timeout);
+        mExpNormalTimeout = mContext.getResources().getInteger(
+                R.integer.car_volume_dialog_display_expanded_normal_timeout);
+        mExpHoveringTimeout = mContext.getResources().getInteger(
+                R.integer.car_volume_dialog_display_expanded_hovering_timeout);
     }
 
     private static int getSeekbarValue(CarAudioManager carAudioManager, int volumeGroupId) {
@@ -196,8 +203,9 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     @Override
     public void init(int windowType, Callback callback) {
         initDialog();
-        mCar = Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
-                mCarServiceLifecycleListener);
+
+        ((CarSystemUIFactory) SystemUIFactory.getInstance()).getCarServiceProvider(mContext)
+                .addListener(mCarServiceLifecycleListener);
     }
 
     @Override
@@ -205,12 +213,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         mHandler.removeCallbacksAndMessages(/* token= */ null);
 
         cleanupAudioManager();
-        // unregisterVolumeCallback is not being called when disconnect car, so we manually cleanup
-        // audio manager beforehand.
-        if (mCar != null) {
-            mCar.disconnect();
-            mCar = null;
-        }
     }
 
     private void initDialog() {
@@ -270,6 +272,19 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         mListView.setLayoutManager(new LinearLayoutManager(mContext));
     }
 
+    /**
+     * Reveals volume dialog.
+     */
+    public void show(int reason) {
+        mHandler.obtainMessage(H.SHOW, reason).sendToTarget();
+    }
+
+    /**
+     * Hides volume dialog.
+     */
+    public void dismiss(int reason) {
+        mHandler.obtainMessage(H.DISMISS, reason).sendToTarget();
+    }
 
     private void showH(int reason) {
         if (D.BUG) {
@@ -319,7 +334,11 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     }
 
     private int computeTimeoutH() {
-        return mHovering ? mHoveringTimeout : mNormalTimeout;
+        if (mExpanded) {
+            return mHovering ? mExpHoveringTimeout : mExpNormalTimeout;
+        } else {
+            return mHovering ? mHoveringTimeout : mNormalTimeout;
+        }
     }
 
     private void dismissH(int reason) {
@@ -538,6 +557,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         public void onClick(final View v) {
             mExpandIcon = v;
             toggleDialogExpansion(true);
+            rescheduleTimeoutH();
         }
     }
 

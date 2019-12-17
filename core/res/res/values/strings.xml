@@ -1138,6 +1138,8 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessCoarseLocation" product="tv">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when when the app is in the foreground. These location services must be turned on and available on your TV for the app to be able to use them.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessCoarseLocation" product="automotive">This app can get your approximate location only when it is in the foreground. These location services must be turned on and available on your car for the app to be able to use them.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessCoarseLocation" product="default">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when the app is in the foreground. These location services must be turned on and available on your phone for the app to be able to use them.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -3361,6 +3363,26 @@
     <!-- If there is ever a ringtone set for some setting, but that ringtone can no longer be resolved, t his is shown instead.  For example, if the ringtone was on a SD card and it had been removed, this woudl be shown for ringtones on that SD card. -->
     <string name="ringtone_unknown">Unknown</string>
 
+    <!-- Start of string constants used to inform the user that the current network may be failing to connect due to not supporting randomized MAC-->
+    <!-- Notification title [CHAR_LIMIT=NONE]-->
+    <string name="wifi_cannot_connect_with_randomized_mac_title">Can\u2019t connect to <xliff:g id="ssid" example="SSID_1">%1$s</xliff:g></string>
+    <!-- Notification text [CHAR_LIMIT=NONE]-->
+    <string name="wifi_cannot_connect_with_randomized_mac_message">Tap to change privacy settings and retry</string>
+    <!-- Title of the dialog which pops up when the notification is tapped. [CHAR_LIMIT=NONE]-->
+    <string name="wifi_disable_mac_randomization_dialog_title">Change privacy setting?</string>
+    <!-- Dialog text [CHAR_LIMIT=NONE]-->
+    <string name="wifi_disable_mac_randomization_dialog_message"><xliff:g id="ssid" example="SSID_1">%1$s</xliff:g> may want to connect using your device MAC address, a unique identifier. This may allow your device\u2019s location to be tracked by nearby devices.
+        \n\nIf you continue, <xliff:g id="ssid" example="SSID_1">%1$s</xliff:g> will change your privacy setting and try to connect again.</string>
+    <!-- Text of the button that will disable MAC randomization for the network when tapped. [CHAR_LIMIT=NONE]-->
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text">Change setting</string>
+    <!-- Toast message which shows up after MAC randomization for the network is disabled. [CHAR_LIMIT=NONE]-->
+    <string name="wifi_disable_mac_randomization_dialog_success">Setting updated. Try connecting again.</string>
+    <!-- Toast message which shows up if the operation failed. [CHAR_LIMIT=NONE]-->
+    <string name="wifi_disable_mac_randomization_dialog_failure">Can\u2019t change privacy setting</string>
+    <!-- Toast message which shows up if the network no longer exists on the device. [CHAR_LIMIT=NONE]-->
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found">Network not found</string>
+    <!-- End of string constants used to inform the user that the current network may be failing to connect due to not supporting randomized MAC-->
+
     <!-- A notification is shown when there are open wireless networks nearby.  This is the notification's title. -->
     <plurals name="wifi_available">
         <item quantity="one">Wi-Fi network available</item>
@@ -5072,6 +5094,10 @@
     <string name="usb_mtp_launch_notification_description">Tap to view files</string>
 
     <!-- Resolver target actions strings -->
+    <!-- Pin this app to the top of the Sharesheet app list. [CHAR LIMIT=60]-->
+    <string name="pin_target">Pin</string>
+    <!-- Un-pin this app in the Sharesheet, so that it is sorted normally. [CHAR LIMIT=60]-->
+    <string name="unpin_target">Unpin</string>
     <!-- View application info for a target. -->
     <string name="app_info">App info</string>
 
