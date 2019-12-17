@@ -227,6 +227,8 @@ public interface ParsingPackage extends AndroidPackage {
 
     ParsingPackage setEnabled(boolean enabled);
 
+    ParsingPackage setCrossProfile(boolean crossProfile);
+
     ParsingPackage setFullBackupContent(int fullBackupContent);
 
     ParsingPackage setHasDomainUrls(boolean hasDomainUrls);

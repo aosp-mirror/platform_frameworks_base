@@ -1753,6 +1753,12 @@
 
              The default value is {@code false}. -->
         <attr name="forceQueryable" format="boolean" />
+
+        <!-- If {@code true} indicates that this application is capable of presenting a unified
+             interface representing multiple profiles.
+
+             The default value is {@code false}. -->
+        <attr name="crossProfile" format="boolean" />
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
