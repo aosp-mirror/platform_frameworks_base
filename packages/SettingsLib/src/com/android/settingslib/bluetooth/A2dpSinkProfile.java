@@ -164,13 +164,13 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
         }
     }
 
-    boolean isA2dpPlaying() {
+    boolean isAudioPlaying() {
         if (mService == null) {
             return false;
         }
         List<BluetoothDevice> srcs = mService.getConnectedDevices();
         if (!srcs.isEmpty()) {
-            if (mService.isA2dpPlaying(srcs.get(0))) {
+            if (mService.isAudioPlaying(srcs.get(0))) {
                 return true;
             }
         }
