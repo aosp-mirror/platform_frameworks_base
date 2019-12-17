@@ -127,6 +127,13 @@ class ReceiverRestrictedContext extends ContextWrapper {
     }
 
     @Override
+    public Intent registerReceiverForAllUsers(BroadcastReceiver receiver, IntentFilter filter,
+            String broadcastPermission, Handler scheduler) {
+        return registerReceiverAsUser(
+                receiver, UserHandle.ALL, filter, broadcastPermission, scheduler);
+    }
+
+    @Override
     public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
             IntentFilter filter, String broadcastPermission, Handler scheduler) {
         if (receiver == null) {
@@ -1344,6 +1351,18 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public void sendOrderedBroadcast(Intent intent, String receiverPermission, String receiverAppOp,
+            Bundle options, BroadcastReceiver resultReceiver, Handler scheduler, int initialCode,
+            String initialData, @Nullable Bundle initialExtras) {
+        int intAppOp = AppOpsManager.OP_NONE;
+        if (!TextUtils.isEmpty(receiverAppOp)) {
+            intAppOp = AppOpsManager.strOpToOp(receiverAppOp);
+        }
+        sendOrderedBroadcastAsUser(intent, getUser(), receiverPermission, intAppOp, options,
+                resultReceiver, scheduler, initialCode, initialData, initialExtras);
+    }
+
+    @Override
     @Deprecated
     public void sendStickyBroadcast(Intent intent) {
         warnIfCallingFromSystemProcess();
@@ -1517,6 +1536,13 @@ class ContextImpl extends Context {
             String broadcastPermission, Handler scheduler, int flags) {
         return registerReceiverInternal(receiver, getUserId(),
                 filter, broadcastPermission, scheduler, getOuterContext(), flags);
+    }
+
+    @Override
+    public Intent registerReceiverForAllUsers(BroadcastReceiver receiver,
+            IntentFilter filter, String broadcastPermission, Handler scheduler) {
+        return registerReceiverAsUser(receiver, UserHandle.ALL,
+                filter, broadcastPermission, scheduler);
     }
 
     @Override
@@ -2221,6 +2247,15 @@ class ContextImpl extends Context {
         // Should be a better exception.
         throw new PackageManager.NameNotFoundException(
                 "Application package " + packageName + " not found");
+    }
+
+    @Override
+    public Context createContextAsUser(UserHandle user, @CreatePackageOptions int flags) {
+        try {
+            return createPackageContextAsUser(getPackageName(), flags, user);
+        } catch (NameNotFoundException e) {
+            throw new IllegalStateException("Own package not found: package=" + getPackageName());
+        }
     }
 
     @Override

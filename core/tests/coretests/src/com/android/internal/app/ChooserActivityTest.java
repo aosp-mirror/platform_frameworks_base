@@ -24,12 +24,19 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import static com.android.internal.app.ChooserActivity.CALLER_TARGET_SCORE_BOOST;
+import static com.android.internal.app.ChooserActivity.SHORTCUT_TARGET_SCORE_BOOST;
+import static com.android.internal.app.ChooserActivity.TARGET_TYPE_CHOOSER_TARGET;
+import static com.android.internal.app.ChooserActivity.TARGET_TYPE_DEFAULT;
+import static com.android.internal.app.ChooserActivity.TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE;
+import static com.android.internal.app.ChooserActivity.TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER;
 import static com.android.internal.app.ChooserWrapperActivity.sOverrides;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -45,6 +52,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager.ShareShortcutInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -770,6 +779,139 @@ public class ChooserActivityTest {
         onView(withId(R.id.content_preview_file_icon)).check(matches(isDisplayed()));
     }
 
+    @Test
+    public void testGetBaseScore() {
+        final float testBaseScore = 0.89f;
+
+        Intent sendIntent = createSendTextIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        when(sOverrides.resolverListController.getScore(Mockito.isA(
+                ResolverActivity.DisplayResolveInfo.class))).thenReturn(testBaseScore);
+
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+
+        final ResolverActivity.DisplayResolveInfo testDri =
+                activity.createTestDisplayResolveInfo(sendIntent,
+                ResolverDataProvider.createResolveInfo(3, 0), "testLabel", "testInfo", sendIntent);
+        final ChooserActivity.ChooserListAdapter adapter = activity.getAdapter();
+
+        assertThat(adapter.getBaseScore(null, 0), is(CALLER_TARGET_SCORE_BOOST));
+        assertThat(adapter.getBaseScore(testDri, TARGET_TYPE_DEFAULT), is(testBaseScore));
+        assertThat(adapter.getBaseScore(testDri, TARGET_TYPE_CHOOSER_TARGET), is(testBaseScore));
+        assertThat(adapter.getBaseScore(testDri, TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE),
+                is(SHORTCUT_TARGET_SCORE_BOOST));
+        assertThat(adapter.getBaseScore(testDri, TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER),
+                is(testBaseScore * SHORTCUT_TARGET_SCORE_BOOST));
+    }
+
+    /**
+     * The case when AppPrediction service is not defined in PackageManager is already covered
+     * as a test parameter {@link ChooserActivityTest#packageManagers}. This test is checking the
+     * case when the prediction service is defined but the component is not available on the device.
+     */
+    @Test
+    public void testIsAppPredictionServiceAvailable() {
+        Intent sendIntent = createSendTextIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+
+        if (activity.getPackageManager().getAppPredictionServicePackageName() == null) {
+            assertThat(activity.isAppPredictionServiceAvailable(), is(false));
+        } else {
+            assertThat(activity.isAppPredictionServiceAvailable(), is(true));
+
+            sOverrides.resources = Mockito.spy(activity.getResources());
+            when(sOverrides.resources.getString(R.string.config_defaultAppPredictionService))
+                    .thenReturn("ComponentNameThatDoesNotExist");
+
+            assertThat(activity.isAppPredictionServiceAvailable(), is(false));
+        }
+    }
+
+    @Test
+    public void testConvertToChooserTarget_predictionService() {
+        Intent sendIntent = createSendTextIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+
+        List<ShareShortcutInfo> shortcuts = createShortcuts(activity);
+
+        int[] expectedOrderAllShortcuts = {0, 1, 2, 3};
+        float[] expectedScoreAllShortcuts = {1.0f, 0.99f, 0.98f, 0.97f};
+
+        List<ChooserTarget> chooserTargets = activity.convertToChooserTarget(shortcuts, shortcuts,
+                null, TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE);
+        assertCorrectShortcutToChooserTargetConversion(shortcuts, chooserTargets,
+                expectedOrderAllShortcuts, expectedScoreAllShortcuts);
+
+        List<ShareShortcutInfo> subset = new ArrayList<>();
+        subset.add(shortcuts.get(1));
+        subset.add(shortcuts.get(2));
+        subset.add(shortcuts.get(3));
+
+        int[] expectedOrderSubset = {1, 2, 3};
+        float[] expectedScoreSubset = {0.99f, 0.98f, 0.97f};
+
+        chooserTargets = activity.convertToChooserTarget(subset, shortcuts, null,
+                TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE);
+        assertCorrectShortcutToChooserTargetConversion(shortcuts, chooserTargets,
+                expectedOrderSubset, expectedScoreSubset);
+    }
+
+    @Test
+    public void testConvertToChooserTarget_shortcutManager() {
+        Intent sendIntent = createSendTextIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+
+        List<ShareShortcutInfo> shortcuts = createShortcuts(activity);
+
+        int[] expectedOrderAllShortcuts = {2, 0, 3, 1};
+        float[] expectedScoreAllShortcuts = {1.0f, 0.99f, 0.99f, 0.98f};
+
+        List<ChooserTarget> chooserTargets = activity.convertToChooserTarget(shortcuts, shortcuts,
+                null, TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER);
+        assertCorrectShortcutToChooserTargetConversion(shortcuts, chooserTargets,
+                expectedOrderAllShortcuts, expectedScoreAllShortcuts);
+
+        List<ShareShortcutInfo> subset = new ArrayList<>();
+        subset.add(shortcuts.get(1));
+        subset.add(shortcuts.get(2));
+        subset.add(shortcuts.get(3));
+
+        int[] expectedOrderSubset = {2, 3, 1};
+        float[] expectedScoreSubset = {1.0f, 0.99f, 0.98f};
+
+        chooserTargets = activity.convertToChooserTarget(subset, shortcuts, null,
+                TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER);
+        assertCorrectShortcutToChooserTargetConversion(shortcuts, chooserTargets,
+                expectedOrderSubset, expectedScoreSubset);
+    }
+
     // This test is too long and too slow and should not be taken as an example for future tests.
     @Test
     public void testDirectTargetSelectionLogging() throws InterruptedException {
@@ -800,7 +942,7 @@ public class ChooserActivityTest {
                                 "testInfo",
                                 sendIntent),
                         serviceTargets,
-                        false)
+                        TARGET_TYPE_CHOOSER_TARGET)
         );
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
@@ -866,7 +1008,7 @@ public class ChooserActivityTest {
                                 "testInfo",
                                 sendIntent),
                         serviceTargets,
-                        false)
+                        TARGET_TYPE_CHOOSER_TARGET)
         );
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
@@ -927,7 +1069,7 @@ public class ChooserActivityTest {
                                 "testInfo",
                                 sendIntent),
                         serviceTargets,
-                        false)
+                        TARGET_TYPE_CHOOSER_TARGET)
         );
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
@@ -1065,5 +1207,44 @@ public class ChooserActivityTest {
         canvas.drawText("Hi!", (width / 2.f), (height / 2.f), paint);
 
         return bitmap;
+    }
+
+    private List<ShareShortcutInfo> createShortcuts(Context context) {
+        Intent testIntent = new Intent("TestIntent");
+
+        List<ShareShortcutInfo> shortcuts = new ArrayList<>();
+        shortcuts.add(new ShareShortcutInfo(
+                new ShortcutInfo.Builder(context, "shortcut1")
+                        .setIntent(testIntent).setShortLabel("label1").setRank(3).build(), // 0  2
+                new ComponentName("package1", "class1")));
+        shortcuts.add(new ShareShortcutInfo(
+                new ShortcutInfo.Builder(context, "shortcut2")
+                        .setIntent(testIntent).setShortLabel("label2").setRank(7).build(), // 1  3
+                new ComponentName("package2", "class2")));
+        shortcuts.add(new ShareShortcutInfo(
+                new ShortcutInfo.Builder(context, "shortcut3")
+                        .setIntent(testIntent).setShortLabel("label3").setRank(1).build(), // 2  0
+                new ComponentName("package3", "class3")));
+        shortcuts.add(new ShareShortcutInfo(
+                new ShortcutInfo.Builder(context, "shortcut4")
+                        .setIntent(testIntent).setShortLabel("label4").setRank(3).build(), // 3  2
+                new ComponentName("package4", "class4")));
+
+        return shortcuts;
+    }
+
+    private void assertCorrectShortcutToChooserTargetConversion(List<ShareShortcutInfo> shortcuts,
+            List<ChooserTarget> chooserTargets, int[] expectedOrder, float[] expectedScores) {
+        assertEquals(expectedOrder.length, chooserTargets.size());
+        for (int i = 0; i < chooserTargets.size(); i++) {
+            ChooserTarget ct = chooserTargets.get(i);
+            ShortcutInfo si = shortcuts.get(expectedOrder[i]).getShortcutInfo();
+            ComponentName cn = shortcuts.get(expectedOrder[i]).getTargetComponent();
+
+            assertEquals(si.getId(), ct.getIntentExtras().getString(Intent.EXTRA_SHORTCUT_ID));
+            assertEquals(si.getShortLabel(), ct.getTitle());
+            assertThat(Math.abs(expectedScores[i] - ct.getScore()) < 0.000001, is(true));
+            assertEquals(cn.flattenToString(), ct.getComponentName().flattenToString());
+        }
     }
 }

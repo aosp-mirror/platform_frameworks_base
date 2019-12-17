@@ -29,6 +29,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+
 import com.android.internal.telephony.PhoneConstants;
 
 /**
@@ -138,7 +139,7 @@ public class CarrierActionUtils {
                 SubscriptionManager.getDefaultVoiceSubscriptionId());
         logd("onRegisterDefaultNetworkAvail subId: " + subId);
         final TelephonyManager telephonyMgr = context.getSystemService(TelephonyManager.class);
-        telephonyMgr.carrierActionReportDefaultNetworkStatus(subId, true);
+        telephonyMgr.createForSubscriptionId(subId).reportDefaultNetworkStatus(true);
     }
 
     private static void onDeregisterDefaultNetworkAvail(Intent intent, Context context) {
@@ -146,7 +147,7 @@ public class CarrierActionUtils {
                 SubscriptionManager.getDefaultVoiceSubscriptionId());
         logd("onDeregisterDefaultNetworkAvail subId: " + subId);
         final TelephonyManager telephonyMgr = context.getSystemService(TelephonyManager.class);
-        telephonyMgr.carrierActionReportDefaultNetworkStatus(subId, false);
+        telephonyMgr.createForSubscriptionId(subId).reportDefaultNetworkStatus(false);
     }
 
     private static void onDisableRadio(Intent intent, Context context) {
@@ -154,7 +155,7 @@ public class CarrierActionUtils {
                 SubscriptionManager.getDefaultVoiceSubscriptionId());
         logd("onDisableRadio subId: " + subId);
         final TelephonyManager telephonyMgr = context.getSystemService(TelephonyManager.class);
-        telephonyMgr.carrierActionSetRadioEnabled(subId, !ENABLE);
+        telephonyMgr.createForSubscriptionId(subId).setRadioEnabled(!ENABLE);
     }
 
     private static void onEnableRadio(Intent intent, Context context) {
@@ -162,7 +163,7 @@ public class CarrierActionUtils {
                 SubscriptionManager.getDefaultVoiceSubscriptionId());
         logd("onEnableRadio subId: " + subId);
         final TelephonyManager telephonyMgr = context.getSystemService(TelephonyManager.class);
-        telephonyMgr.carrierActionSetRadioEnabled(subId, ENABLE);
+        telephonyMgr.createForSubscriptionId(subId).setRadioEnabled(ENABLE);
     }
 
     private static void onShowCaptivePortalNotification(Intent intent, Context context) {
@@ -205,7 +206,7 @@ public class CarrierActionUtils {
                 SubscriptionManager.getDefaultVoiceSubscriptionId());
         logd("onResetAllCarrierActions subId: " + subId);
         final TelephonyManager telephonyMgr = context.getSystemService(TelephonyManager.class);
-        telephonyMgr.carrierActionResetAll(subId);
+        telephonyMgr.createForSubscriptionId(subId).resetAllCarrierActions();
     }
 
     private static Notification getNotification(Context context, int titleId, int textId,

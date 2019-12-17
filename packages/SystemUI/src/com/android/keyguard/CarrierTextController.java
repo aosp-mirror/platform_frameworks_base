@@ -44,6 +44,7 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 
 import java.util.ArrayList;
@@ -162,8 +163,7 @@ public class CarrierTextController {
     public CarrierTextController(Context context, CharSequence separator, boolean showAirplaneMode,
             boolean showMissingSim) {
         mContext = context;
-        mIsEmergencyCallCapable = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_voice_capable);
+        mIsEmergencyCallCapable = getTelephonyManager().isVoiceCapable();
 
         mShowAirplaneMode = showAirplaneMode;
         mShowMissingSim = showMissingSim;
@@ -171,12 +171,15 @@ public class CarrierTextController {
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mSeparator = separator;
         mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
-        mSimSlotsNumber = ((TelephonyManager) context.getSystemService(
-                Context.TELEPHONY_SERVICE)).getSupportedModemCount();
+        mSimSlotsNumber = getTelephonyManager().getSupportedModemCount();
         mSimErrorState = new boolean[mSimSlotsNumber];
         updateDisplayOpportunisticSubscriptionCarrierText(SystemProperties.getBoolean(
                 TelephonyProperties.DISPLAY_OPPORTUNISTIC_SUBSCRIPTION_CARRIER_TEXT_PROPERTY_NAME,
                 false));
+    }
+
+    private TelephonyManager getTelephonyManager() {
+        return (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
     }
 
     /**
@@ -194,7 +197,7 @@ public class CarrierTextController {
         CharSequence carrierTextForSimIOError = getCarrierTextForSimState(
                 IccCardConstants.State.CARD_IO_ERROR, carrier);
         // mSimErrorState has the state of each sim indexed by slotID.
-        for (int index = 0; index < mSimErrorState.length; index++) {
+        for (int index = 0; index < getTelephonyManager().getActiveModemCount(); index++) {
             if (!mSimErrorState[index]) {
                 continue;
             }
@@ -227,8 +230,7 @@ public class CarrierTextController {
      * @param callback Callback to provide text updates
      */
     public void setListening(CarrierTextCallback callback) {
-        TelephonyManager telephonyManager = ((TelephonyManager) mContext
-                .getSystemService(Context.TELEPHONY_SERVICE));
+        TelephonyManager telephonyManager = getTelephonyManager();
         if (callback != null) {
             mCarrierTextCallback = callback;
             if (ConnectivityManager.from(mContext).isNetworkSupported(
@@ -361,7 +363,9 @@ public class CarrierTextController {
                 }
             }
         }
-        if (allSimsMissing) {
+        // Only create "No SIM card" if no cards with CarrierName && no wifi when some sim is READY
+        // This condition will also be true always when numSubs == 0
+        if (allSimsMissing && !anySimReadyAndInService) {
             if (numSubs != 0) {
                 // Shows "No SIM card | Emergency calls only" on devices that are voice-capable.
                 // This depends on mPlmn containing the text "Emergency calls only" when the radio

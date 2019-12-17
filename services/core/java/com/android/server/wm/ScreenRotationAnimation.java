@@ -558,7 +558,7 @@ class ScreenRotationAnimation {
                 Rect outer = new Rect(-mOriginalWidth*1, -mOriginalHeight*1,
                         mOriginalWidth*2, mOriginalHeight*2);
                 Rect inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
-                mCustomBlackFrame = new BlackFrame(t, outer, inner,
+                mCustomBlackFrame = new BlackFrame(mService.mTransactionFactory, t, outer, inner,
                         SCREEN_FREEZE_LAYER_CUSTOM, mDisplayContent, false);
                 mCustomBlackFrame.setMatrix(t, mFrameInitialMatrix);
             } catch (OutOfResourcesException e) {
@@ -589,7 +589,7 @@ class ScreenRotationAnimation {
                             mOriginalWidth*2, mOriginalHeight*2);
                     inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
                 }
-                mExitingBlackFrame = new BlackFrame(t, outer, inner,
+                mExitingBlackFrame = new BlackFrame(mService.mTransactionFactory, t, outer, inner,
                         SCREEN_FREEZE_LAYER_EXIT, mDisplayContent, mForceDefaultOrientation);
                 mExitingBlackFrame.setMatrix(t, mFrameInitialMatrix);
             } catch (OutOfResourcesException e) {
@@ -602,7 +602,7 @@ class ScreenRotationAnimation {
                 Rect outer = new Rect(-finalWidth*1, -finalHeight*1,
                         finalWidth*2, finalHeight*2);
                 Rect inner = new Rect(0, 0, finalWidth, finalHeight);
-                mEnteringBlackFrame = new BlackFrame(t, outer, inner,
+                mEnteringBlackFrame = new BlackFrame(mService.mTransactionFactory, t, outer, inner,
                         SCREEN_FREEZE_LAYER_ENTER, mDisplayContent, false);
             } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
@@ -640,7 +640,7 @@ class ScreenRotationAnimation {
             if (SHOW_TRANSACTIONS ||
                     SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,
                             "  FREEZE " + mSurfaceControl + ": DESTROY");
-            mSurfaceControl.remove();
+            mService.mTransactionFactory.make().remove(mSurfaceControl).apply();
             mSurfaceControl = null;
         }
         if (mCustomBlackFrame != null) {

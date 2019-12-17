@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ПИН код буруу байна."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Карт хүчингүй байна."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Бүрэн цэнэглэсэн"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Утасгүй цэнэглэж байна"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Утасгүй цэнэглэж байна"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Цэнэглэж байна"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Хурдан цэнэглэж байна"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Удаан цэнэглэж байна"</string>
@@ -151,7 +151,84 @@
       <item quantity="other">SIM-г идэвхгүй болголоо. Үргэлжлүүлэхийн тулд PUK кодыг оруулна уу. Таны SIM бүрмөсөн хүчингүй болох хүртэл <xliff:g id="_NUMBER_1">%d</xliff:g> оролдлого үлдлээ. Дэлгэрэнгүй мэдээлэл авахын тулд оператор компанитайгаа холбогдоно уу.</item>
       <item quantity="one">SIM-г идэвхгүй болголоо. Үргэлжлүүлэхийн тулд PUK кодыг оруулна уу. Таны SIM бүрмөсөн хүчингүй болох хүртэл <xliff:g id="_NUMBER_0">%d</xliff:g> оролдлого үлдлээ. Дэлгэрэнгүй мэдээлэл авахын тулд оператор компанитайгаа холбогдоно уу.</item>
     </plurals>
-    <string name="clock_title_default" msgid="6645600990069154049">"Өгөгдмөл"</string>
-    <string name="clock_title_bubble" msgid="1286365278681892114">"Бөмбөлөг"</string>
-    <string name="clock_title_analog" msgid="4047401488577315053">"Aналог"</string>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"Одоо"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"Одоо"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Арван хоёр"</item>
+    <item msgid="7389464214252023751">"Нэг"</item>
+    <item msgid="8803180377002008046">"Хоёр"</item>
+    <item msgid="8614897059944644719">"Гурав"</item>
+    <item msgid="2293058674782619556">"Дөрөв"</item>
+    <item msgid="4815402358455041664">"Тав"</item>
+    <item msgid="3325754778509665687">"Зургаа"</item>
+    <item msgid="5805551341866280575">"Долоо"</item>
+    <item msgid="203334816668238610">"Найм"</item>
+    <item msgid="4828052671464488923">"Ес"</item>
+    <item msgid="2233497913571137419">"Арав"</item>
+    <item msgid="5621554266768657830">"Арван нэг"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"Цаг"</item>
+    <item msgid="8837126587669001578">"Нэг"</item>
+    <item msgid="4294343372940455660">"Хоёр"</item>
+    <item msgid="7129166637707421536">"Гурав"</item>
+    <item msgid="7579404865008788673">"Дөрөв"</item>
+    <item msgid="3873924689207380586">"Тав"</item>
+    <item msgid="4849565597850069377">"Зургаа"</item>
+    <item msgid="4404219424523572364">"Долоо"</item>
+    <item msgid="8740481214764087329">"Найм"</item>
+    <item msgid="1713216865806811237">"Ес"</item>
+    <item msgid="3508406095411245038">"Арав"</item>
+    <item msgid="7161996337755311711">"Арван нэг"</item>
+    <item msgid="4044549963329624197">"Арван хоёр"</item>
+    <item msgid="333373157917379088">"Арван гурав"</item>
+    <item msgid="2631202907124819385">"Арван дөрөв"</item>
+    <item msgid="6472396076858033453">"Арван тав"</item>
+    <item msgid="8656981856181581643">"Арван зургаа"</item>
+    <item msgid="7289026608562030619">"Арван долоо"</item>
+    <item msgid="3881477602692646573">"Арван найм"</item>
+    <item msgid="3358129827772984226">"Арван ес"</item>
+    <item msgid="3308575407402865807">"Хорь"</item>
+    <item msgid="5346560955382229629">"Хорь\nНэг"</item>
+    <item msgid="226750304761473436">"Хорь\nХоёр"</item>
+    <item msgid="616811325336838734">"Хорь\nГурав"</item>
+    <item msgid="616346116869053440">"Хорь\nДөрөв"</item>
+    <item msgid="4642996410384042830">"Хорь\nТав"</item>
+    <item msgid="7506092849993571465">"Хорь\nЗургаа"</item>
+    <item msgid="1915078191101042031">"Хорь\nДолоо"</item>
+    <item msgid="4292378641900520252">"Хорь\nНайм"</item>
+    <item msgid="5339513901773103696">"Хорь\nЕс"</item>
+    <item msgid="3574673250891657607">"Гуч"</item>
+    <item msgid="5796923836589110940">"Гуч\nНэг"</item>
+    <item msgid="5859323597571702052">"Гуч\nХоёр"</item>
+    <item msgid="5133326723148876507">"Гуч\nГурав"</item>
+    <item msgid="2693999494655663096">"Гуч\nДөрөв"</item>
+    <item msgid="3316754944962836197">"Гуч\nТав"</item>
+    <item msgid="816891008836796723">"Гуч\nЗургаа"</item>
+    <item msgid="9158890488666520078">"Гуч\nДолоо"</item>
+    <item msgid="1894769703213894011">"Гуч\nНайм"</item>
+    <item msgid="5638820345598572399">"Гуч\nЕс"</item>
+    <item msgid="8838304023017895439">"Дөч"</item>
+    <item msgid="1834742948932559597">"Дөч\nНэг"</item>
+    <item msgid="6573707308847773944">"Дөч\nХоёр"</item>
+    <item msgid="2450149950652678001">"Дөч\nГурав"</item>
+    <item msgid="2874667401318178036">"Дөч\nДөрөв"</item>
+    <item msgid="3391101532763048862">"Дөч\nТав"</item>
+    <item msgid="1671489330863254362">"Дөч\nЗургаа"</item>
+    <item msgid="5916017359554531038">"Дөч\nДолоо"</item>
+    <item msgid="8205413177993059967">"Дөч\nНайм"</item>
+    <item msgid="6607867415142171302">"Дөч\nЕс"</item>
+    <item msgid="8358850748472089162">"Тавь"</item>
+    <item msgid="3551313125255080234">"Тавь\nНэг"</item>
+    <item msgid="1559678130725716542">"Тавь\nХоёр"</item>
+    <item msgid="431441994725492377">"Тавь\nГурав"</item>
+    <item msgid="6345774640539623024">"Тавь\nДөрөв"</item>
+    <item msgid="8018192990793931120">"Тавь\nТав"</item>
+    <item msgid="6187650843754604534">"Тавь\nЗургаа"</item>
+    <item msgid="8727240174015993259">"Тавь\nДолоо"</item>
+    <item msgid="848339003778952950">"Тавь\nНайм"</item>
+    <item msgid="5798985802835423618">"Тавь\nЕс"</item>
+  </string-array>
 </resources>

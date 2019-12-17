@@ -191,6 +191,7 @@ extern int register_android_os_SystemClock(JNIEnv* env);
 extern int register_android_os_Trace(JNIEnv* env);
 extern int register_android_os_FileObserver(JNIEnv *env);
 extern int register_android_os_UEventObserver(JNIEnv* env);
+extern int register_android_os_HidlMemory(JNIEnv* env);
 extern int register_android_os_MemoryFile(JNIEnv* env);
 extern int register_android_os_SharedMemory(JNIEnv* env);
 extern int register_android_net_LocalSocketImpl(JNIEnv* env);
@@ -692,6 +693,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
     std::string fingerprintBuf;
     char jdwpProviderBuf[sizeof("-XjdwpProvider:") - 1 + PROPERTY_VALUE_MAX];
+    char opaqueJniIds[sizeof("-Xopaque-jni-ids:") - 1 + PROPERTY_VALUE_MAX];
     char bootImageBuf[sizeof("-Ximage:") - 1 + PROPERTY_VALUE_MAX];
 
     // Read if we are using the profile configuration, do this at the start since the last ART args
@@ -881,6 +883,14 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
                          jdwpProviderBuf,
                          "-XjdwpProvider:",
                          "default");
+    }
+
+    // Only pass an explicit opaque-jni-ids to apps forked from zygote
+    if (zygote) {
+      parseRuntimeOption("dalvik.vm.opaque-jni-ids",
+                        opaqueJniIds,
+                        "-Xopaque-jni-ids:",
+                        "swapable");
     }
 
     parseRuntimeOption("dalvik.vm.lockprof.threshold",
@@ -1474,6 +1484,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_os_SystemProperties),
     REG_JNI(register_android_os_Binder),
     REG_JNI(register_android_os_Parcel),
+    REG_JNI(register_android_os_HidlMemory),
     REG_JNI(register_android_os_HidlSupport),
     REG_JNI(register_android_os_HwBinder),
     REG_JNI(register_android_os_HwBlob),

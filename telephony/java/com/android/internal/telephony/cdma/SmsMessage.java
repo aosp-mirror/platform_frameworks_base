@@ -878,9 +878,10 @@ public class SmsMessage extends SmsMessageBase {
      * Parses a broadcast SMS, possibly containing a CMAS alert.
      *
      * @param plmn the PLMN for a broadcast SMS
-     * @param subId
+     * @param slotIndex SIM slot index
+     * @param subId Subscription id
      */
-    public SmsCbMessage parseBroadcastSms(String plmn, int subId) {
+    public SmsCbMessage parseBroadcastSms(String plmn, int slotIndex, int subId) {
         BearerData bData = BearerData.decode(mEnvelope.bearerData, mEnvelope.serviceCategory);
         if (bData == null) {
             Rlog.w(LOG_TAG, "BearerData.decode() returned null");
@@ -896,7 +897,7 @@ public class SmsMessage extends SmsMessageBase {
         return new SmsCbMessage(SmsCbMessage.MESSAGE_FORMAT_3GPP2,
                 SmsCbMessage.GEOGRAPHICAL_SCOPE_PLMN_WIDE, bData.messageId, location,
                 mEnvelope.serviceCategory, bData.getLanguage(), bData.userData.payloadStr,
-                bData.priority, null, bData.cmasWarningInfo, subId);
+                bData.priority, null, bData.cmasWarningInfo, slotIndex, subId);
     }
 
     /**

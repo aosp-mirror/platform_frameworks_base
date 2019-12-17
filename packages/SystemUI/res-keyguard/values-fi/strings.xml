@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Väärä PIN-koodi"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Virheellinen kortti"</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Täyteen ladattu"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ladataan langattomasti"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ladataan langattomasti"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ladataan"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ladataan nopeasti"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ladataan hitaasti"</string>
@@ -151,7 +151,84 @@
       <item quantity="other">SIM-kortti on nyt lukittu. Anna PUK-koodi, niin voit jatkaa. Sinulla on <xliff:g id="_NUMBER_1">%d</xliff:g> yritystä jäljellä, ennen kuin SIM-kortti poistuu pysyvästi käytöstä. Pyydä lisätietoja operaattoriltasi.</item>
       <item quantity="one">SIM-kortti on nyt lukittu. Anna PUK-koodi, niin voit jatkaa. Sinulla on <xliff:g id="_NUMBER_0">%d</xliff:g> yritys jäljellä, ennen kuin SIM-kortti poistuu pysyvästi käytöstä. Pyydä lisätietoja operaattoriltasi.</item>
     </plurals>
-    <string name="clock_title_default" msgid="6645600990069154049">"Oletus"</string>
-    <string name="clock_title_bubble" msgid="1286365278681892114">"Kupla"</string>
-    <string name="clock_title_analog" msgid="4047401488577315053">"Analoginen"</string>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"Kello on"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"Kello on"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Kaksitoista"</item>
+    <item msgid="7389464214252023751">"Yksi"</item>
+    <item msgid="8803180377002008046">"Kaksi"</item>
+    <item msgid="8614897059944644719">"Kolme"</item>
+    <item msgid="2293058674782619556">"Neljä"</item>
+    <item msgid="4815402358455041664">"Viisi"</item>
+    <item msgid="3325754778509665687">"Kuusi"</item>
+    <item msgid="5805551341866280575">"Seitsemän"</item>
+    <item msgid="203334816668238610">"Kahdeksan"</item>
+    <item msgid="4828052671464488923">"Yhdeksän"</item>
+    <item msgid="2233497913571137419">"Kymmenen"</item>
+    <item msgid="5621554266768657830">"Yksitoista"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"Nolla nolla"</item>
+    <item msgid="8837126587669001578">"Nolla yksi"</item>
+    <item msgid="4294343372940455660">"Nolla kaksi"</item>
+    <item msgid="7129166637707421536">"Nolla kolme"</item>
+    <item msgid="7579404865008788673">"Nolla neljä"</item>
+    <item msgid="3873924689207380586">"Nolla viisi"</item>
+    <item msgid="4849565597850069377">"Nolla kuusi"</item>
+    <item msgid="4404219424523572364">"Nolla seitsemän"</item>
+    <item msgid="8740481214764087329">"Nolla kahdeksan"</item>
+    <item msgid="1713216865806811237">"Nolla yhdeksän"</item>
+    <item msgid="3508406095411245038">"Kymmenen"</item>
+    <item msgid="7161996337755311711">"Yksitoista"</item>
+    <item msgid="4044549963329624197">"Kaksitoista"</item>
+    <item msgid="333373157917379088">"Kolmetoista"</item>
+    <item msgid="2631202907124819385">"Neljätoista"</item>
+    <item msgid="6472396076858033453">"Viisitoista"</item>
+    <item msgid="8656981856181581643">"Kuusitoista"</item>
+    <item msgid="7289026608562030619">"Seitsemäntoista"</item>
+    <item msgid="3881477602692646573">"Kahdeksantoista"</item>
+    <item msgid="3358129827772984226">"Yhdeksäntoista"</item>
+    <item msgid="3308575407402865807">"Kaksikymmentä"</item>
+    <item msgid="5346560955382229629">"Kaksikymmentä-\nyksi"</item>
+    <item msgid="226750304761473436">"Kaksikymmentä-\nkaksi"</item>
+    <item msgid="616811325336838734">"Kaksikymmentä-\nkolme"</item>
+    <item msgid="616346116869053440">"Kaksikymmentä-\nneljä"</item>
+    <item msgid="4642996410384042830">"Kaksikymmentä-\nviisi"</item>
+    <item msgid="7506092849993571465">"Kaksikymmentä-\nkuusi"</item>
+    <item msgid="1915078191101042031">"Kaksikymmentä-\nseitsemän"</item>
+    <item msgid="4292378641900520252">"28\n"</item>
+    <item msgid="5339513901773103696">"Kaksikymmentä-\nyhdeksän"</item>
+    <item msgid="3574673250891657607">"Kolmekymmentä"</item>
+    <item msgid="5796923836589110940">"Kolmekymmentä-\nyksi"</item>
+    <item msgid="5859323597571702052">"Kolmekymmentä-\nkaksi"</item>
+    <item msgid="5133326723148876507">"Kolmekymmentä-\nkolme"</item>
+    <item msgid="2693999494655663096">"Kolmekymmentä-\nneljä"</item>
+    <item msgid="3316754944962836197">"Kolmekymmentä-\nviisi"</item>
+    <item msgid="816891008836796723">"Kolmekymmentä-\nkuusi"</item>
+    <item msgid="9158890488666520078">"Kolmekymmentä-\nseitsemän"</item>
+    <item msgid="1894769703213894011">"Kolmekymmentä-\nkahdeksan"</item>
+    <item msgid="5638820345598572399">"Kolmekymmentä-\nyhdeksän"</item>
+    <item msgid="8838304023017895439">"Neljäkymmentä"</item>
+    <item msgid="1834742948932559597">"Neljäkymmentä-\nyksi"</item>
+    <item msgid="6573707308847773944">"Neljäkymmentä-\nkaksi"</item>
+    <item msgid="2450149950652678001">"Neljäkymmentä-\nkolme"</item>
+    <item msgid="2874667401318178036">"Neljäkymmentä-\nneljä"</item>
+    <item msgid="3391101532763048862">"Neljäkymmentä-\nviisi"</item>
+    <item msgid="1671489330863254362">"Neljäkymmentä-\nkuusi"</item>
+    <item msgid="5916017359554531038">"Neljäkymmentä-\nseitsemän"</item>
+    <item msgid="8205413177993059967">"Neljäkymmentä-\nkahdeksan"</item>
+    <item msgid="6607867415142171302">"Neljäkymmentä-\nyhdeksän"</item>
+    <item msgid="8358850748472089162">"Viisikymmentä"</item>
+    <item msgid="3551313125255080234">"Viisikymmentä-\nyksi"</item>
+    <item msgid="1559678130725716542">"Viisikymmentä-\nkaksi"</item>
+    <item msgid="431441994725492377">"Viisikymmentä-\nkolme"</item>
+    <item msgid="6345774640539623024">"Viisikymmentä-\nneljä"</item>
+    <item msgid="8018192990793931120">"Viisikymmentä-\nviisi"</item>
+    <item msgid="6187650843754604534">"Viisikymmentä-\nkuusi"</item>
+    <item msgid="8727240174015993259">"Viisikymmentä-\nseitsemän"</item>
+    <item msgid="848339003778952950">"Viisikymmentä-\nkahdeksan"</item>
+    <item msgid="5798985802835423618">"Viisikymmentä-\nyhdeksän"</item>
+  </string-array>
 </resources>

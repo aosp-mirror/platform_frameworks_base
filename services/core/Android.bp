@@ -1,26 +1,22 @@
+filegroup {
+    name: "services.core-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
 java_library_static {
     name: "services.core.unboosted",
-
-    aidl: {
-        include_dirs: [
-            "frameworks/base/cmds/idmap2/idmap2d/aidl",
-            "frameworks/native/aidl/binder",
-            "frameworks/native/cmds/dumpstate/binder",
-            "system/core/storaged/binder",
-            "system/vold/binder",
-            "system/gsid/aidl",
-        ],
-    },
     srcs: [
         "java/**/*.java",
         ":dumpstate_aidl",
+        ":framework_native_aidl",
+        ":gsiservice_aidl",
         ":idmap2_aidl",
         ":installd_aidl",
         ":storaged_aidl",
         ":vold_aidl",
-        ":gsiservice_aidl",
         ":platform-compat-config",
-        ":tethering-servicescore-srcs",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
         "java/com/android/server/policy/EventLogTags.logtags",
@@ -50,7 +46,6 @@ java_library_static {
         "android.hardware.biometrics.face-V1.0-java",
         "android.hardware.biometrics.fingerprint-V2.1-java",
         "android.hardware.oemlock-V1.0-java",
-        "android.hardware.tetheroffload.control-V1.0-java",
         "android.hardware.configstore-V1.0-java",
         "android.hardware.contexthub-V1.0-java",
         "android.hidl.manager-V1.2-java",
@@ -81,12 +76,4 @@ java_library {
 prebuilt_etc {
     name: "gps_debug.conf",
     src: "java/com/android/server/location/gps_debug.conf",
-}
-
-// TODO: this should be removed after tethering migration done.
-filegroup {
-    name: "servicescore-tethering-src",
-    srcs: [
-        "java/com/android/server/connectivity/MockableSystemProperties.java",
-    ],
 }

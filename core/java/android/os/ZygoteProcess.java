@@ -306,6 +306,8 @@ public class ZygoteProcess {
      * @param appDataDir null-ok the data directory of the app.
      * @param invokeWith null-ok the command to invoke with.
      * @param packageName null-ok the name of the package this process belongs to.
+     * @param disabledCompatChanges null-ok list of disabled compat changes for the process being
+     *                             started.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      *
      * @return An object that describes the result of the attempt to start the process.
@@ -323,6 +325,7 @@ public class ZygoteProcess {
                                                   @Nullable String invokeWith,
                                                   @Nullable String packageName,
                                                   boolean useUsapPool,
+                                                  @Nullable long[] disabledCompatChanges,
                                                   @Nullable String[] zygoteArgs) {
         // TODO (chriswailes): Is there a better place to check this value?
         if (fetchUsapPoolEnabledPropWithMinInterval()) {
@@ -333,7 +336,7 @@ public class ZygoteProcess {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/ false,
-                    packageName, useUsapPool, zygoteArgs);
+                    packageName, useUsapPool, disabledCompatChanges, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -534,6 +537,7 @@ public class ZygoteProcess {
      * @param startChildZygote Start a sub-zygote. This creates a new zygote process
      * that has its state cloned from this zygote process.
      * @param packageName null-ok the name of the package this process belongs to.
+     * @param disabledCompatChanges a list of disabled compat changes for the process being started.
      * @param extraArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
      * @throws ZygoteStartFailedEx if process start failed for any reason
@@ -552,6 +556,7 @@ public class ZygoteProcess {
                                                       boolean startChildZygote,
                                                       @Nullable String packageName,
                                                       boolean useUsapPool,
+                                                      @Nullable long[] disabledCompatChanges,
                                                       @Nullable String[] extraArgs)
                                                       throws ZygoteStartFailedEx {
         ArrayList<String> argsForZygote = new ArrayList<>();
@@ -621,6 +626,21 @@ public class ZygoteProcess {
 
         if (packageName != null) {
             argsForZygote.add("--package-name=" + packageName);
+        }
+
+        if (disabledCompatChanges != null && disabledCompatChanges.length > 0) {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("--disabled-compat-changes=");
+
+            final int sz = disabledCompatChanges.length;
+            for (int i = 0; i < sz; i++) {
+                if (i != 0) {
+                    sb.append(',');
+                }
+                sb.append(disabledCompatChanges[i]);
+            }
+
+            argsForZygote.add(sb.toString());
         }
 
         argsForZygote.add(processClass);
@@ -1170,7 +1190,8 @@ public class ZygoteProcess {
                     gids, runtimeFlags, 0 /* mountExternal */, 0 /* targetSdkVersion */, seInfo,
                     abi, instructionSet, null /* appDataDir */, null /* invokeWith */,
                     true /* startChildZygote */, null /* packageName */,
-                    false /* useUsapPool */, extraArgs);
+                    false /* useUsapPool */,
+                    null /* disabledCompatChanges */, extraArgs);
         } catch (ZygoteStartFailedEx ex) {
             throw new RuntimeException("Starting child-zygote through Zygote failed", ex);
         }

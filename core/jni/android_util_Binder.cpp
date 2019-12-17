@@ -30,12 +30,13 @@
 #include <unistd.h>
 
 #include <android-base/stringprintf.h>
-#include <binder/IInterface.h>
-#include <binder/IServiceManager.h>
-#include <binder/IPCThreadState.h>
-#include <binder/Parcel.h>
 #include <binder/BpBinder.h>
+#include <binder/IInterface.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/Parcel.h>
 #include <binder/ProcessState.h>
+#include <binder/Stability.h>
 #include <cutils/atomic.h>
 #include <log/log.h>
 #include <utils/KeyedVector.h>
@@ -459,6 +460,9 @@ public:
         sp<JavaBBinder> b = mBinder.promote();
         if (b == NULL) {
             b = new JavaBBinder(env, obj);
+            if (mVintf) {
+                ::android::internal::Stability::markVintf(b.get());
+            }
             mBinder = b;
             ALOGV("Creating JavaBinder %p (refs %p) for Object %p, weakCount=%" PRId32 "\n",
                  b.get(), b->getWeakRefs(), obj, b->getWeakRefs()->getWeakCount());
@@ -473,9 +477,18 @@ public:
         return mBinder.promote();
     }
 
+    void markVintf() {
+        mVintf = true;
+    }
+
 private:
     Mutex           mLock;
     wp<JavaBBinder> mBinder;
+
+    // in the future, we might condense this into int32_t stability, or if there
+    // is too much binder state here, we can think about making JavaBBinder an
+    // sp here (avoid recreating it)
+    bool            mVintf = false;
 };
 
 // ----------------------------------------------------------------------------
@@ -962,6 +975,12 @@ static void android_os_Binder_restoreCallingWorkSource(jlong token)
     IPCThreadState::self()->restoreCallingWorkSource(token);
 }
 
+static void android_os_Binder_markVintfStability(JNIEnv* env, jobject clazz) {
+    JavaBBinderHolder* jbh =
+        (JavaBBinderHolder*) env->GetLongField(clazz, gBinderOffsets.mObject);
+    jbh->markVintf();
+}
+
 static void android_os_Binder_flushPendingCommands(JNIEnv* env, jobject clazz)
 {
     IPCThreadState::self()->flushCommands();
@@ -1038,6 +1057,7 @@ static const JNINativeMethod gBinderMethods[] = {
     // @CriticalNative
     { "clearCallingWorkSource", "()J", (void*)android_os_Binder_clearCallingWorkSource },
     { "restoreCallingWorkSource", "(J)V", (void*)android_os_Binder_restoreCallingWorkSource },
+    { "markVintfStability", "()V", (void*)android_os_Binder_markVintfStability},
     { "flushPendingCommands", "()V", (void*)android_os_Binder_flushPendingCommands },
     { "getNativeBBinderHolder", "()J", (void*)android_os_Binder_getNativeBBinderHolder },
     { "getNativeFinalizer", "()J", (void*)android_os_Binder_getNativeFinalizer },

@@ -35,7 +35,6 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -44,6 +43,9 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 /**
  * Class to manage the inventory of all connected devices.
@@ -56,12 +58,9 @@ public class AudioDeviceInventory {
 
     // Actual list of connected devices
     // Key for map created from DeviceInfo.makeDeviceListKey()
-    private final ArrayMap<String, DeviceInfo> mConnectedDevices = new ArrayMap<>();
+    private final LinkedHashMap<String, DeviceInfo> mConnectedDevices = new LinkedHashMap<>();
 
     private @NonNull AudioDeviceBroker mDeviceBroker;
-
-    // cache of the address of the last dock the device was connected to
-    private String mDockAddress;
 
     // Monitoring of audio routes.  Protected by mAudioRoutes.
     final AudioRoutesInfo mCurAudioRoutes = new AudioRoutesInfo();
@@ -146,8 +145,7 @@ public class AudioDeviceInventory {
      */
     /*package*/ void onRestoreDevices() {
         synchronized (mConnectedDevices) {
-            for (int i = 0; i < mConnectedDevices.size(); i++) {
-                DeviceInfo di = mConnectedDevices.valueAt(i);
+            for (DeviceInfo di : mConnectedDevices.values()) {
                 AudioSystem.setDeviceConnectionState(
                         di.mDeviceType,
                         AudioSystem.DEVICE_STATE_AVAILABLE,
@@ -167,7 +165,7 @@ public class AudioDeviceInventory {
         int a2dpVolume = btInfo.getVolume();
         if (AudioService.DEBUG_DEVICES) {
             Log.d(TAG, "onSetA2dpSinkConnectionState btDevice=" + btDevice + " state="
-                    + state + " is dock=" + btDevice.isBluetoothDock() + " vol=" + a2dpVolume);
+                    + state + " vol=" + a2dpVolume);
         }
         String address = btDevice.getAddress();
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
@@ -195,42 +193,17 @@ public class AudioDeviceInventory {
                         mDeviceBroker.postBluetoothA2dpDeviceConfigChange(btDevice);
                     }
                 } else {
-                    if (btDevice.isBluetoothDock()) {
-                        if (state == BluetoothProfile.STATE_DISCONNECTED) {
-                            // introduction of a delay for transient disconnections of docks when
-                            // power is rapidly turned off/on, this message will be canceled if
-                            // we reconnect the dock under a preset delay
-                            makeA2dpDeviceUnavailableLater(address,
-                                    AudioDeviceBroker.BTA2DP_DOCK_TIMEOUT_MS);
-                            // the next time isConnected is evaluated, it will be false for the dock
-                        }
-                    } else {
-                        makeA2dpDeviceUnavailableNow(address, di.mDeviceCodecFormat);
-                    }
+                    makeA2dpDeviceUnavailableNow(address, di.mDeviceCodecFormat);
                 }
-            } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
-                if (btDevice.isBluetoothDock()) {
-                    // this could be a reconnection after a transient disconnection
-                    mDeviceBroker.cancelA2dpDockTimeout();
-                    mDockAddress = address;
-                } else {
-                    // this could be a connection of another A2DP device before the timeout of
-                    // a dock: cancel the dock timeout, and make the dock unavailable now
-                    if (mDeviceBroker.hasScheduledA2dpDockTimeout() && mDockAddress != null) {
-                        mDeviceBroker.cancelA2dpDockTimeout();
-                        makeA2dpDeviceUnavailableNow(mDockAddress,
-                                AudioSystem.AUDIO_FORMAT_DEFAULT);
-                    }
-                }
-                if (a2dpVolume != -1) {
-                    mDeviceBroker.postSetVolumeIndexOnDevice(AudioSystem.STREAM_MUSIC,
-                            // convert index to internal representation in VolumeStreamState
-                            a2dpVolume * 10,
-                            AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, "onSetA2dpSinkConnectionState");
-                }
-                makeA2dpDeviceAvailable(address, BtHelper.getName(btDevice),
-                        "onSetA2dpSinkConnectionState", a2dpCodec);
             }
+            if (a2dpVolume != -1) {
+                mDeviceBroker.postSetVolumeIndexOnDevice(AudioSystem.STREAM_MUSIC,
+                        // convert index to internal representation in VolumeStreamState
+                        a2dpVolume * 10,
+                        AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, "onSetA2dpSinkConnectionState");
+            }
+            makeA2dpDeviceAvailable(address, BtHelper.getName(btDevice),
+                    "onSetA2dpSinkConnectionState", a2dpCodec);
         }
     }
 
@@ -372,9 +345,14 @@ public class AudioDeviceInventory {
         mDeviceBroker.postObserveDevicesForAllStreams();
     }
 
-    private static final int DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG =
-            AudioSystem.DEVICE_OUT_WIRED_HEADSET | AudioSystem.DEVICE_OUT_WIRED_HEADPHONE
-                    | AudioSystem.DEVICE_OUT_LINE | AudioSystem.DEVICE_OUT_ALL_USB;
+    private static final Set<Integer> DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET;
+    static {
+        DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET = new HashSet<>();
+        DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.add(AudioSystem.DEVICE_OUT_WIRED_HEADSET);
+        DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.add(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
+        DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.add(AudioSystem.DEVICE_OUT_LINE);
+        DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.addAll(AudioSystem.DEVICE_OUT_ALL_USB_SET);
+    }
 
     /*package*/ void onSetWiredDeviceConnectionState(
                             AudioDeviceInventory.WiredDeviceConnectionState wdcs) {
@@ -382,7 +360,7 @@ public class AudioDeviceInventory {
 
         synchronized (mConnectedDevices) {
             if ((wdcs.mState == AudioService.CONNECTION_STATE_DISCONNECTED)
-                    && ((wdcs.mType & DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG) != 0)) {
+                    && DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.contains(wdcs.mType)) {
                 mDeviceBroker.setBluetoothA2dpOnInt(true,
                         "onSetWiredDeviceConnectionState state DISCONNECTED");
             }
@@ -393,7 +371,7 @@ public class AudioDeviceInventory {
                 return;
             }
             if (wdcs.mState != AudioService.CONNECTION_STATE_DISCONNECTED) {
-                if ((wdcs.mType & DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG) != 0) {
+                if (DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.contains(wdcs.mType)) {
                     mDeviceBroker.setBluetoothA2dpOnInt(false,
                             "onSetWiredDeviceConnectionState state not DISCONNECTED");
                 }
@@ -666,9 +644,6 @@ public class AudioDeviceInventory {
                 DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address));
         // Remove A2DP routes as well
         setCurrentAudioRouteNameIfPossible(null);
-        if (mDockAddress == address) {
-            mDockAddress = null;
-        }
     }
 
     @GuardedBy("mConnectedDevices")
@@ -764,13 +739,19 @@ public class AudioDeviceInventory {
     // - none of these devices are connected anymore after one is disconnected AND
     // - the device being disconnected is actually used for music.
     // Access synchronized on mConnectedDevices
-    private int mBecomingNoisyIntentDevices =
-            AudioSystem.DEVICE_OUT_WIRED_HEADSET | AudioSystem.DEVICE_OUT_WIRED_HEADPHONE
-                    | AudioSystem.DEVICE_OUT_ALL_A2DP | AudioSystem.DEVICE_OUT_HDMI
-                    | AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET
-                    | AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET
-                    | AudioSystem.DEVICE_OUT_ALL_USB | AudioSystem.DEVICE_OUT_LINE
-                    | AudioSystem.DEVICE_OUT_HEARING_AID;
+    private static final Set<Integer> BECOMING_NOISY_INTENT_DEVICES_SET;
+    static {
+        BECOMING_NOISY_INTENT_DEVICES_SET = new HashSet<>();
+        BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_WIRED_HEADSET);
+        BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
+        BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_HDMI);
+        BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET);
+        BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET);
+        BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_LINE);
+        BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_HEARING_AID);
+        BECOMING_NOISY_INTENT_DEVICES_SET.addAll(AudioSystem.DEVICE_OUT_ALL_A2DP_SET);
+        BECOMING_NOISY_INTENT_DEVICES_SET.addAll(AudioSystem.DEVICE_OUT_ALL_USB_SET);
+    }
 
     // must be called before removing the device from mConnectedDevices
     // musicDevice argument is used when not AudioSystem.DEVICE_NONE instead of querying
@@ -781,16 +762,15 @@ public class AudioDeviceInventory {
         if (state != AudioService.CONNECTION_STATE_DISCONNECTED) {
             return 0;
         }
-        if ((device & mBecomingNoisyIntentDevices) == 0) {
+        if (!BECOMING_NOISY_INTENT_DEVICES_SET.contains(device)) {
             return 0;
         }
         int delay = 0;
-        int devices = 0;
-        for (int i = 0; i < mConnectedDevices.size(); i++) {
-            int dev = mConnectedDevices.valueAt(i).mDeviceType;
-            if (((dev & AudioSystem.DEVICE_BIT_IN) == 0)
-                    && ((dev & mBecomingNoisyIntentDevices) != 0)) {
-                devices |= dev;
+        Set<Integer> devices = new HashSet<>();
+        for (DeviceInfo di : mConnectedDevices.values()) {
+            if (((di.mDeviceType & AudioSystem.DEVICE_BIT_IN) == 0)
+                    && BECOMING_NOISY_INTENT_DEVICES_SET.contains(di.mDeviceType)) {
+                devices.add(di.mDeviceType);
             }
         }
         if (musicDevice == AudioSystem.DEVICE_NONE) {
@@ -801,8 +781,9 @@ public class AudioDeviceInventory {
         // because music routing is altered in this case.
         // also checks whether media routing if affected by a dynamic policy or mirroring
         if (((device == musicDevice) || mDeviceBroker.isInCommunication())
-                && (device == devices) && !mDeviceBroker.hasMediaDynamicPolicy()
-                        && ((musicDevice & AudioSystem.DEVICE_OUT_REMOTE_SUBMIX) == 0)) {
+                && AudioSystem.isSingleAudioDeviceType(devices, device)
+                && !mDeviceBroker.hasMediaDynamicPolicy()
+                && (musicDevice != AudioSystem.DEVICE_OUT_REMOTE_SUBMIX)) {
             if (!AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0 /*not looking in past*/)
                     && !mDeviceBroker.hasAudioFocusUsers()) {
                 // no media playback, not a "becoming noisy" situation, otherwise it could cause

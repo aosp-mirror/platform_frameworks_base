@@ -139,7 +139,7 @@ applications that come with the platform
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
         <permission name="android.permission.CHANGE_CONFIGURATION"/>
         <permission name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST"/>
-        <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
+        <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
         <permission name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
         <permission name="android.permission.DUMP"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
@@ -329,8 +329,10 @@ applications that come with the platform
         <permission name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE" />
         <!-- Permission required to test ExplicitHealthCheckServiceImpl. -->
         <permission name="android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE"/>
-        <!-- Permission required for UiModeManager cts test. -->
+        <!-- Permission required for UiModeManager CTS test. -->
         <permission name="android.permission.ENTER_CAR_MODE_PRIORITIZED"/>
+        <!-- Permission required for Telecom car mode CTS tests. -->
+        <permission name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

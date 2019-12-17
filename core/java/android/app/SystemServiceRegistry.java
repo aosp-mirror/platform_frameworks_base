@@ -31,6 +31,7 @@ import android.app.role.RoleManager;
 import android.app.slice.SliceManager;
 import android.app.timedetector.TimeDetector;
 import android.app.timezone.RulesManager;
+import android.app.timezonedetector.TimeZoneDetector;
 import android.app.trust.TrustManager;
 import android.app.usage.IStorageStatsManager;
 import android.app.usage.IUsageStatsManager;
@@ -1161,7 +1162,8 @@ final class SystemServiceRegistry {
             @Override
             public AppPredictionManager createService(ContextImpl ctx)
                     throws ServiceNotFoundException {
-                return new AppPredictionManager(ctx);
+                IBinder b = ServiceManager.getService(Context.APP_PREDICTION_SERVICE);
+                return b == null ? null : new AppPredictionManager(ctx);
             }
         });
 
@@ -1234,6 +1236,22 @@ final class SystemServiceRegistry {
                             throws ServiceNotFoundException {
                         return new TimeDetector();
                     }});
+
+        registerService(Context.TIME_ZONE_DETECTOR_SERVICE, TimeZoneDetector.class,
+                new CachedServiceFetcher<TimeZoneDetector>() {
+                    @Override
+                    public TimeZoneDetector createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new TimeZoneDetector();
+                    }});
+
+        registerService(Context.TELEPHONY_IMS_SERVICE, android.telephony.ims.ImsManager.class,
+                new CachedServiceFetcher<android.telephony.ims.ImsManager>() {
+                    @Override
+                    public android.telephony.ims.ImsManager createService(ContextImpl ctx) {
+                        return new android.telephony.ims.ImsManager(ctx.getOuterContext());
+                    }
+                });
 
         registerService(Context.PERMISSION_SERVICE, PermissionManager.class,
                 new CachedServiceFetcher<PermissionManager>() {

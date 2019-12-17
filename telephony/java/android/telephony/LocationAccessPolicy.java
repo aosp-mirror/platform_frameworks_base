@@ -33,6 +33,8 @@ import android.os.UserManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.internal.telephony.util.TelephonyUtils;
+
 import java.util.List;
 
 /**
@@ -162,7 +164,7 @@ public final class LocationAccessPolicy {
         }
         Log.e(TAG, errorMsg);
         try {
-            if (Build.IS_DEBUGGABLE) {
+            if (TelephonyUtils.IS_DEBUGGABLE) {
                 Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show();
             }
         } catch (Throwable t) {

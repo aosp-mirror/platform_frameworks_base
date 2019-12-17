@@ -27,6 +27,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
+import android.bluetooth.BluetoothProfile.ConnectionPolicy;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.PeriodicAdvertisingManager;
@@ -456,6 +457,37 @@ public final class BluetoothAdapter {
     @Retention(RetentionPolicy.SOURCE)
     public @interface IoCapability {}
 
+    /** @hide */
+    @IntDef(prefix = "ACTIVE_DEVICE_", value = {ACTIVE_DEVICE_AUDIO,
+            ACTIVE_DEVICE_PHONE_CALL, ACTIVE_DEVICE_ALL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ActiveDeviceUse {}
+
+    /**
+     * Use the specified device for audio (a2dp and hearing aid profile)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ACTIVE_DEVICE_AUDIO = 0;
+
+    /**
+     * Use the specified device for phone calls (headset profile and hearing
+     * aid profile)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ACTIVE_DEVICE_PHONE_CALL = 1;
+
+    /**
+     * Use the specified device for a2dp, hearing aid profile, and headset profile
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ACTIVE_DEVICE_ALL = 2;
+
     /**
      * Broadcast Action: The local Bluetooth adapter has started the remote
      * device discovery process.
@@ -815,7 +847,8 @@ public final class BluetoothAdapter {
         }
         synchronized (mLock) {
             if (sBluetoothLeScanner == null) {
-                sBluetoothLeScanner = new BluetoothLeScanner(mManagerService);
+                sBluetoothLeScanner = new BluetoothLeScanner(mManagerService, getOpPackageName(),
+                        getFeatureId());
             }
         }
         return sBluetoothLeScanner;
@@ -830,18 +863,7 @@ public final class BluetoothAdapter {
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean isEnabled() {
-        try {
-            mServiceLock.readLock().lock();
-            if (mService != null) {
-                return mService.isEnabled();
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
-
-        return false;
+        return getState() == BluetoothAdapter.STATE_ON;
     }
 
     /**
@@ -1616,6 +1638,15 @@ public final class BluetoothAdapter {
         return ActivityThread.currentOpPackageName();
     }
 
+    private String getFeatureId() {
+        // Workaround for legacy API for getting a BluetoothAdapter not
+        // passing a context
+        if (mContext != null) {
+            return null;
+        }
+        return null;
+    }
+
     /**
      * Start the remote device discovery process.
      * <p>The discovery process usually involves an inquiry scan of about 12
@@ -1653,7 +1684,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.startDiscovery(getOpPackageName());
+                return mService.startDiscovery(getOpPackageName(), getFeatureId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1730,6 +1761,41 @@ public final class BluetoothAdapter {
         } finally {
             mServiceLock.readLock().unlock();
         }
+        return false;
+    }
+
+    /**
+     *
+     * @param device is the remote bluetooth device
+     * @param profiles represents the purpose for which we are setting this as the active device.
+     *                 Possible values are:
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_AUDIO},
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_PHONE_CALL},
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_ALL}
+     * @return false on immediate error, true otherwise
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public boolean setActiveDevice(@Nullable BluetoothDevice device,
+            @ActiveDeviceUse int profiles) {
+        if (profiles != ACTIVE_DEVICE_AUDIO && profiles != ACTIVE_DEVICE_PHONE_CALL
+                && profiles != ACTIVE_DEVICE_ALL) {
+            Log.e(TAG, "Invalid profiles param value in setActiveDevice");
+            return false;
+        }
+
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.setActiveDevice(device, profiles);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+
         return false;
     }
 
@@ -3380,5 +3446,49 @@ public final class BluetoothAdapter {
          */
         void onMetadataChanged(@NonNull BluetoothDevice device, int key,
                 @Nullable byte[] value);
+    }
+
+    /**
+     * Converts old constant of priority to the new for connection policy
+     *
+     * @param priority is the priority to convert to connection policy
+     * @return the equivalent connection policy constant to the priority
+     *
+     * @hide
+     */
+    public static @ConnectionPolicy int priorityToConnectionPolicy(int priority) {
+        switch(priority) {
+            case BluetoothProfile.PRIORITY_AUTO_CONNECT:
+                return BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+            case BluetoothProfile.PRIORITY_ON:
+                return BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+            case BluetoothProfile.PRIORITY_OFF:
+                return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+            case BluetoothProfile.PRIORITY_UNDEFINED:
+                return BluetoothProfile.CONNECTION_POLICY_UNKNOWN;
+            default:
+                Log.e(TAG, "setPriority: Invalid priority: " + priority);
+                return BluetoothProfile.CONNECTION_POLICY_UNKNOWN;
+        }
+    }
+
+    /**
+     * Converts new constant of connection policy to the old for priority
+     *
+     * @param connectionPolicy is the connection policy to convert to priority
+     * @return the equivalent priority constant to the connectionPolicy
+     *
+     * @hide
+     */
+    public static int connectionPolicyToPriority(@ConnectionPolicy int connectionPolicy) {
+        switch(connectionPolicy) {
+            case BluetoothProfile.CONNECTION_POLICY_ALLOWED:
+                return BluetoothProfile.PRIORITY_ON;
+            case BluetoothProfile.CONNECTION_POLICY_FORBIDDEN:
+                return BluetoothProfile.PRIORITY_OFF;
+            case BluetoothProfile.CONNECTION_POLICY_UNKNOWN:
+                return BluetoothProfile.PRIORITY_UNDEFINED;
+        }
+        return BluetoothProfile.PRIORITY_UNDEFINED;
     }
 }

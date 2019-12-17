@@ -55,7 +55,8 @@ class TaskChangeNotificationController {
     private static final int NOTIFY_SIZE_COMPAT_MODE_ACTIVITY_CHANGED_MSG = 20;
     private static final int NOTIFY_BACK_PRESSED_ON_TASK_ROOT = 21;
     private static final int NOTIFY_SINGLE_TASK_DISPLAY_DRAWN = 22;
-    private static final int NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG = 23;
+    private static final int NOTIFY_SINGLE_TASK_DISPLAY_EMPTY = 23;
+    private static final int NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG = 24;
 
     // Delay in notifying task stack change listeners (in millis)
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -160,6 +161,10 @@ class TaskChangeNotificationController {
         l.onSingleTaskDisplayDrawn(m.arg1);
     };
 
+    private final TaskStackConsumer mNotifySingleTaskDisplayEmpty = (l, m) -> {
+        l.onSingleTaskDisplayEmpty(m.arg1);
+    };
+
     private final TaskStackConsumer mNotifyTaskDisplayChanged = (l, m) -> {
         l.onTaskDisplayChanged(m.arg1, m.arg2);
     };
@@ -245,6 +250,9 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_SINGLE_TASK_DISPLAY_DRAWN:
                     forAllRemoteListeners(mNotifySingleTaskDisplayDrawn, msg);
+                    break;
+                case NOTIFY_SINGLE_TASK_DISPLAY_EMPTY:
+                    forAllRemoteListeners(mNotifySingleTaskDisplayEmpty, msg);
                     break;
                 case NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG:
                     forAllRemoteListeners(mNotifyTaskDisplayChanged, msg);
@@ -501,6 +509,17 @@ class TaskChangeNotificationController {
         final Message msg = mHandler.obtainMessage(NOTIFY_SINGLE_TASK_DISPLAY_DRAWN,
                 displayId, 0 /* unused */);
         forAllLocalListeners(mNotifySingleTaskDisplayDrawn, msg);
+        msg.sendToTarget();
+    }
+
+    /**
+     * Notify listeners that the last task is removed from a single task display.
+     */
+    void notifySingleTaskDisplayEmpty(int displayId) {
+        final Message msg = mHandler.obtainMessage(
+                NOTIFY_SINGLE_TASK_DISPLAY_EMPTY,
+                displayId, 0 /* unused */);
+        forAllLocalListeners(mNotifySingleTaskDisplayEmpty, msg);
         msg.sendToTarget();
     }
 

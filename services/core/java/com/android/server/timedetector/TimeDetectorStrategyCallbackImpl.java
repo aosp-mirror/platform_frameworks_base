@@ -72,7 +72,7 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
     }
 
     @Override
-    public boolean isTimeDetectionEnabled() {
+    public boolean isAutoTimeDetectionEnabled() {
         try {
             return Settings.Global.getInt(mContentResolver, Settings.Global.AUTO_TIME) != 0;
         } catch (Settings.SettingNotFoundException snfe) {

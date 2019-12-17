@@ -24,48 +24,7 @@
     android:outlineProvider="none"
     android:elevation="5dp" > <!-- Put it above the status bar header -->
 
-    <LinearLayout
-        android:id="@+id/keyguard_indication_area"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/keyguard_indication_margin_bottom"
-        android:layout_gravity="bottom|center_horizontal"
-        android:orientation="horizontal">
-
-        <include layout="@layout/left_docked_overlay" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:orientation="vertical">
-
-            <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
-                android:id="@+id/keyguard_indication_enterprise_disclosure"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:paddingStart="@dimen/keyguard_indication_text_padding"
-                android:paddingEnd="@dimen/keyguard_indication_text_padding"
-                android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
-                android:visibility="gone" />
-
-            <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
-                android:id="@+id/keyguard_indication_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:paddingStart="@dimen/keyguard_indication_text_padding"
-                android:paddingEnd="@dimen/keyguard_indication_text_padding"
-                android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
-                android:accessibilityLiveRegion="polite" />
-
-        </LinearLayout>
-
-        <include layout="@layout/right_docked_overlay" />
-
-    </LinearLayout>
+    <include layout="@layout/keyguard_indication_area_overlay" />
 
     <FrameLayout
         android:id="@+id/preview_container"

@@ -1128,6 +1128,9 @@ public class WifiManager {
      */
     private static final int MAX_ACTIVE_LOCKS = 50;
 
+    /** Indicates an invalid SSID. */
+    public static final String UNKNOWN_SSID = "<unknown ssid>";
+
     /* Number of currently active WifiLocks and MulticastLocks */
     @UnsupportedAppUsage
     private int mActiveLockCount;
@@ -1197,6 +1200,7 @@ public class WifiManager {
      * <li>allowedAuthAlgorithms</li>
      * <li>allowedPairwiseCiphers</li>
      * <li>allowedGroupCiphers</li>
+     * <li>status</li>
      * </ul>
      * @return a list of network configurations in the form of a list
      * of {@link WifiConfiguration} objects.
@@ -2326,7 +2330,7 @@ public class WifiManager {
      * <p>
      * In the connected state, access to the SSID and BSSID requires
      * the same permissions as {@link #getScanResults}. If such access is not allowed,
-     * {@link WifiInfo#getSSID} will return {@code "<unknown ssid>"} and
+     * {@link WifiInfo#getSSID} will return {@link #UNKNOWN_SSID} and
      * {@link WifiInfo#getBSSID} will return {@code "02:00:00:00:00:00"}.
      *
      * @return the Wi-Fi information, contained in {@link WifiInfo}.

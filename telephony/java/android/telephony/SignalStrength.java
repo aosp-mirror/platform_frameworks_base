@@ -60,12 +60,6 @@ public class SignalStrength implements Parcelable {
     @UnsupportedAppUsage
     public static final int NUM_SIGNAL_STRENGTH_BINS = 5;
 
-    /** SIGNAL_STRENGTH_NAMES is currently used by BatteryStats, but to-be-removed soon. */
-    /** @hide */
-    public static final String[] SIGNAL_STRENGTH_NAMES = {
-        "none", "poor", "moderate", "good", "great"
-    };
-
     /**
      * Indicates the invalid measures of signal strength.
      *

@@ -301,7 +301,7 @@ interface ITelephony {
      * operator's MCC (Mobile Country Code).
      * @see android.telephony.TelephonyManager#getNetworkCountryIso
      */
-    String getNetworkCountryIsoForPhone(int phoneId);
+    String getNetworkCountryIsoForPhone(int phoneId, String callingPkg);
 
     /**
      * Returns the neighboring cell information of the device.
@@ -1989,6 +1989,21 @@ interface ITelephony {
      * Get the full emergency number list for Test Mode.
      */
     List<String> getEmergencyNumberListTestMode();
+
+    /**
+     * A test API to return the emergency number db version.
+     */
+    int getEmergencyNumberDbVersion(int subId);
+
+    /**
+     * Notify Telephony for OTA emergency number database installation complete.
+     */
+    void notifyOtaEmergencyNumberDbInstalled();
+
+    /**
+     * Override the file partition name for testing OTA emergency number database.
+     */
+    void updateTestOtaEmergencyNumberDbFilePath(String otaFilePath);
 
     /**
      * Enable or disable a logical modem stack associated with the slotIndex.

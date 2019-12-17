@@ -114,7 +114,7 @@ public final class RollbackManager {
     })
     public @NonNull List<RollbackInfo> getRecentlyCommittedRollbacks() {
         try {
-            return mBinder.getRecentlyExecutedRollbacks().getList();
+            return mBinder.getRecentlyCommittedRollbacks().getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -246,6 +246,27 @@ public final class RollbackManager {
     public void expireRollbackForPackage(@NonNull String packageName) {
         try {
             mBinder.expireRollbackForPackage(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Block the RollbackManager for a specified amount of time.
+     * This API is meant to facilitate testing of race conditions in
+     * RollbackManager. Blocks RollbackManager from processing anything for
+     * the given number of milliseconds.
+     *
+     * @param millis number of milliseconds to block the RollbackManager for
+     * @throws SecurityException if the caller does not have appropriate permissions.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS)
+    @TestApi
+    public void blockRollbackManager(long millis) {
+        try {
+            mBinder.blockRollbackManager(millis);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

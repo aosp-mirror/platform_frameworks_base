@@ -25,17 +25,15 @@ import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.telephony.Annotation;
 import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.DataActivityType;
 import android.telephony.Annotation.DataFailureCause;
 import android.telephony.Annotation.DataState;
 import android.telephony.Annotation.NetworkType;
+import android.telephony.Annotation.PreciseCallStates;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.Annotation.SrvccState;
@@ -43,7 +41,6 @@ import android.telephony.CallQuality;
 import android.telephony.CellInfo;
 import android.telephony.DisconnectCause;
 import android.telephony.PhoneCapability;
-import android.telephony.PreciseCallState.State;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -464,6 +461,19 @@ public class TelephonyRegistryManager {
     }
 
     /**
+     * Sim activation type: voice
+     * @see #notifyVoiceActivationStateChanged
+     * @hide
+     */
+    public static final int SIM_ACTIVATION_TYPE_VOICE = 0;
+    /**
+     * Sim activation type: data
+     * @see #notifyDataActivationStateChanged
+     * @hide
+     */
+    public static final int SIM_ACTIVATION_TYPE_DATA = 1;
+
+    /**
      * Notify data activation state changed on certain subscription.
      * @see TelephonyManager#getDataActivationState()
      *
@@ -478,7 +488,7 @@ public class TelephonyRegistryManager {
         @SimActivationState int activationState) {
         try {
             sRegistry.notifySimActivationStateChangedForPhoneId(slotIndex, subId,
-                TelephonyManager.SIM_ACTIVATION_TYPE_DATA, activationState);
+                    SIM_ACTIVATION_TYPE_DATA, activationState);
         } catch (RemoteException ex) {
             // system process is dead
         }
@@ -499,7 +509,7 @@ public class TelephonyRegistryManager {
         @SimActivationState int activationState) {
         try {
             sRegistry.notifySimActivationStateChangedForPhoneId(slotIndex, subId,
-                TelephonyManager.SIM_ACTIVATION_TYPE_VOICE, activationState);
+                    SIM_ACTIVATION_TYPE_VOICE, activationState);
         } catch (RemoteException ex) {
             // system process is dead
         }
@@ -624,8 +634,10 @@ public class TelephonyRegistryManager {
      *
      * @hide
      */
-    public void notifyPreciseCallState(int subId, int slotIndex, @State int ringCallPreciseState,
-        @State int foregroundCallPreciseState, @State int backgroundCallPreciseState) {
+    public void notifyPreciseCallState(int subId, int slotIndex,
+        @PreciseCallStates int ringCallPreciseState,
+        @PreciseCallStates int foregroundCallPreciseState,
+        @PreciseCallStates int backgroundCallPreciseState) {
         try {
             sRegistry.notifyPreciseCallState(slotIndex, subId, ringCallPreciseState,
                 foregroundCallPreciseState, backgroundCallPreciseState);

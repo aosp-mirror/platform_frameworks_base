@@ -56,8 +56,12 @@ public class DateUtils
     public static final long DAY_IN_MILLIS = HOUR_IN_MILLIS * 24;
     public static final long WEEK_IN_MILLIS = DAY_IN_MILLIS * 7;
     /**
-     * This constant is actually the length of 364 days, not of a year!
+     * @deprecated Not all years have the same number of days, and this constant is actually the
+     * length of 364 days. Please use other date/time constructs such as
+     * {@link java.util.concurrent.TimeUnit}, {@link java.util.Calendar} or
+     * {@link java.time.Duration} instead.
      */
+    @Deprecated
     public static final long YEAR_IN_MILLIS = WEEK_IN_MILLIS * 52;
 
     // The following FORMAT_* symbols are used for specifying the format of

@@ -18,6 +18,7 @@ import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
@@ -1028,12 +1029,16 @@ public class TelecomManager {
      * by the user.
      *
      * @param includeDisabledAccounts When {@code true}, disabled phone accounts will be included,
-     *                                when {@code false}, only
+     *                                when {@code false}, only enabled phone accounts will be
+     *                                included.
      * @return A list of {@code PhoneAccountHandle} objects.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 119305590)
-    public List<PhoneAccountHandle> getCallCapablePhoneAccounts(boolean includeDisabledAccounts) {
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_PRIVILEGED_PHONE_STATE)
+    public @NonNull List<PhoneAccountHandle> getCallCapablePhoneAccounts(
+            boolean includeDisabledAccounts) {
         try {
             if (isServiceConnected()) {
                 return getTelecomService().getCallCapablePhoneAccounts(

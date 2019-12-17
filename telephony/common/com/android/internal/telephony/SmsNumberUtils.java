@@ -359,15 +359,41 @@ public class SmsNumberUtils {
         return NP_NONE;
     }
 
+    /**
+     * This function checks if the passed in string conforms to the NANP format
+     * i.e. NXX-NXX-XXXX, N is any digit 2-9 and X is any digit 0-9
+     */
     private static boolean isNANP(String number) {
+        boolean retVal = false;
+
         if (number.length() == NANP_MEDIUM_LENGTH
             || (number.length() == NANP_LONG_LENGTH  && number.startsWith(NANP_NDD))) {
+
             if (number.length() == NANP_LONG_LENGTH) {
                 number = number.substring(1);
             }
-            return (PhoneNumberUtils.isNanp(number));
+
+            if (isTwoToNine(number.charAt(0)) &&
+                isTwoToNine(number.charAt(3))) {
+                retVal = true;
+                for (int i=1; i<NANP_MEDIUM_LENGTH; i++ ) {
+                    char c=number.charAt(i);
+                    if (!PhoneNumberUtils.isISODigit(c)) {
+                        retVal = false;
+                        break;
+                    }
+                 }
+             }
         }
-        return false;
+        return retVal;
+    }
+
+    private static boolean isTwoToNine (char c) {
+        if (c >= '2' && c <= '9') {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -573,9 +599,9 @@ public class SmsNumberUtils {
         int networkType = -1;
         int phoneType = telephonyManager.getPhoneType();
 
-        if (phoneType == PhoneConstants.PHONE_TYPE_GSM) {
+        if (phoneType == TelephonyManager.PHONE_TYPE_GSM) {
             networkType = GSM_UMTS_NETWORK;
-        } else if (phoneType == PhoneConstants.PHONE_TYPE_CDMA) {
+        } else if (phoneType == TelephonyManager.PHONE_TYPE_CDMA) {
             if (isInternationalRoaming(telephonyManager)) {
                 networkType = CDMA_ROAMING_NETWORK;
             } else {

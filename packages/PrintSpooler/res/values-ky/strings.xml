@@ -33,17 +33,17 @@
     <string name="pages_range_example" msgid="8558694453556945172">"мис. 1—5,8,11—13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Алдын ала көрүү"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Алдын ала көрүү үчүн PDF-серепчи орнотуңуз"</string>
-    <string name="printing_app_crashed" msgid="854477616686566398">"Басып чыгаруу колдонмосунда ката кетти"</string>
-    <string name="generating_print_job" msgid="3119608742651698916">"Басып чыгаруу тапшырмасы түзүлүүдө"</string>
+    <string name="printing_app_crashed" msgid="854477616686566398">"Басуу колдонмосу кыйрады"</string>
+    <string name="generating_print_job" msgid="3119608742651698916">"Басуу тапшырмасы түзүлүүдө"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF катары сактоо"</string>
     <string name="all_printers" msgid="5018829726861876202">"Бардык принтерлер…"</string>
-    <string name="print_dialog" msgid="32628687461331979">"Басып чыгаруу диалог терезеси"</string>
+    <string name="print_dialog" msgid="32628687461331979">"Басуу баарлашуусу"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g> ичинен <xliff:g id="CURRENT_PAGE">%1$d</xliff:g>-бет"</string>
     <string name="summary_template" msgid="8899734908625669193">"Корутунду, <xliff:g id="COPIES">%1$s</xliff:g> көчүрмө, барак өлчөмү <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
     <string name="expand_handle" msgid="7282974448109280522">"Тутканы жаюу"</string>
     <string name="collapse_handle" msgid="6886637989442507451">"Тутканы жыйноо"</string>
-    <string name="print_button" msgid="645164566271246268">"Басып чыгаруу"</string>
+    <string name="print_button" msgid="645164566271246268">"Басуу"</string>
     <string name="savetopdf_button" msgid="2976186791686924743">"PDF\'ке сактоо"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"Басып чыгаруу параметрлери жайылды"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"Басып чыгаруу параметрлери жыйналды"</string>

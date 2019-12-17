@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
@@ -459,6 +460,14 @@ public class NetworkRequest implements Parcelable {
      */
     public boolean hasTransport(@Transport int transportType) {
         return networkCapabilities.hasTransport(transportType);
+    }
+
+    /**
+     * @see Builder#setNetworkSpecifier(NetworkSpecifier)
+     */
+    @Nullable
+    public NetworkSpecifier getNetworkSpecifier() {
+        return networkCapabilities.getNetworkSpecifier();
     }
 
     public String toString() {

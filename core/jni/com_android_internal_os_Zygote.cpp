@@ -74,6 +74,7 @@
 #include <android-base/strings.h>
 #include <android-base/unique_fd.h>
 #include <bionic/malloc.h>
+#include <bionic/page.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
 #include <private/android_filesystem_config.h>
@@ -1108,7 +1109,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   UnsetChldSignalHandler();
 
   if (is_system_server) {
-    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkSystemServerHooks);
+    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkSystemServerHooks, runtime_flags);
     if (env->ExceptionCheck()) {
       fail_fn("Error calling post fork system server hooks.");
     }
@@ -1673,9 +1674,14 @@ static void com_android_internal_os_Zygote_nativeEmptyUsapPool(JNIEnv* env, jcla
 static int disable_execute_only(struct dl_phdr_info *info, size_t size, void *data) {
   // Search for any execute-only segments and mark them read+execute.
   for (int i = 0; i < info->dlpi_phnum; i++) {
-    if ((info->dlpi_phdr[i].p_type == PT_LOAD) && (info->dlpi_phdr[i].p_flags == PF_X)) {
-      mprotect(reinterpret_cast<void*>(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr),
-              info->dlpi_phdr[i].p_memsz, PROT_READ | PROT_EXEC);
+    const auto& phdr = info->dlpi_phdr[i];
+    if ((phdr.p_type == PT_LOAD) && (phdr.p_flags == PF_X)) {
+      auto addr = reinterpret_cast<void*>(info->dlpi_addr + PAGE_START(phdr.p_vaddr));
+      size_t len = PAGE_OFFSET(phdr.p_vaddr) + phdr.p_memsz;
+      if (mprotect(addr, len, PROT_READ | PROT_EXEC) == -1) {
+        ALOGE("mprotect(%p, %zu, PROT_READ | PROT_EXEC) failed: %m", addr, len);
+        return -1;
+      }
     }
   }
   // Return non-zero to exit dl_iterate_phdr.
@@ -1741,7 +1747,7 @@ int register_com_android_internal_os_Zygote(JNIEnv* env) {
   gZygoteClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kZygoteClassName));
   gCallPostForkSystemServerHooks = GetStaticMethodIDOrDie(env, gZygoteClass,
                                                           "callPostForkSystemServerHooks",
-                                                          "()V");
+                                                          "(I)V");
   gCallPostForkChildHooks = GetStaticMethodIDOrDie(env, gZygoteClass, "callPostForkChildHooks",
                                                    "(IZZLjava/lang/String;)V");
 

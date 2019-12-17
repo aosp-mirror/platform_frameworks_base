@@ -17,26 +17,28 @@
 package com.android.server.timedetector;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.util.TimestampedValue;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.timedetector.TimeDetectorStrategy.Callback;
-
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,45 +50,63 @@ public class TimeDetectorServiceTest {
 
     private Context mMockContext;
     private StubbedTimeDetectorStrategy mStubbedTimeDetectorStrategy;
-    private Callback mMockCallback;
 
     private TimeDetectorService mTimeDetectorService;
+    private HandlerThread mHandlerThread;
+    private TestHandler mTestHandler;
+
 
     @Before
     public void setUp() {
         mMockContext = mock(Context.class);
-        mMockCallback = mock(Callback.class);
+
+        // Create a thread + handler for processing the work that the service posts.
+        mHandlerThread = new HandlerThread("TimeDetectorServiceTest");
+        mHandlerThread.start();
+        mTestHandler = new TestHandler(mHandlerThread.getLooper());
+
         mStubbedTimeDetectorStrategy = new StubbedTimeDetectorStrategy();
 
         mTimeDetectorService = new TimeDetectorService(
-                mMockContext, mMockCallback,
-                mStubbedTimeDetectorStrategy);
+                mMockContext, mTestHandler, mStubbedTimeDetectorStrategy);
     }
 
-    @Test(expected=SecurityException.class)
-    public void testStubbedCall_withoutPermission() {
-        doThrow(new SecurityException("Mock"))
-                .when(mMockContext).enforceCallingPermission(anyString(), any());
-        PhoneTimeSuggestion phoneTimeSuggestion = createPhoneTimeSuggestion();
-
-        try {
-            mTimeDetectorService.suggestPhoneTime(phoneTimeSuggestion);
-        } finally {
-            verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.SET_TIME), anyString());
-        }
+    @After
+    public void tearDown() throws Exception {
+        mHandlerThread.quit();
+        mHandlerThread.join();
     }
 
     @Test
-    public void testSuggestPhoneTime() {
+    public void testSuggestPhoneTime() throws Exception {
         doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
 
         PhoneTimeSuggestion phoneTimeSuggestion = createPhoneTimeSuggestion();
         mTimeDetectorService.suggestPhoneTime(phoneTimeSuggestion);
+        mTestHandler.assertTotalMessagesEnqueued(1);
 
-        verify(mMockContext)
-                .enforceCallingPermission(eq(android.Manifest.permission.SET_TIME), anyString());
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.SET_TIME),
+                anyString());
+
+        mTestHandler.waitForEmptyQueue();
         mStubbedTimeDetectorStrategy.verifySuggestPhoneTimeCalled(phoneTimeSuggestion);
+    }
+
+    @Test
+    public void testSuggestManualTime() throws Exception {
+        doNothing().when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
+
+        ManualTimeSuggestion manualTimeSuggestion = createManualTimeSuggestion();
+        mTimeDetectorService.suggestManualTime(manualTimeSuggestion);
+        mTestHandler.assertTotalMessagesEnqueued(1);
+
+        verify(mMockContext).enforceCallingOrSelfPermission(
+                eq(android.Manifest.permission.SET_TIME),
+                anyString());
+
+        mTestHandler.waitForEmptyQueue();
+        mStubbedTimeDetectorStrategy.verifySuggestManualTimeCalled(manualTimeSuggestion);
     }
 
     @Test
@@ -101,31 +121,37 @@ public class TimeDetectorServiceTest {
     }
 
     @Test
-    public void testAutoTimeDetectionToggle() {
-        when(mMockCallback.isTimeDetectionEnabled()).thenReturn(true);
+    public void testAutoTimeDetectionToggle() throws Exception {
+        mTimeDetectorService.handleAutoTimeDetectionToggle();
+        mTestHandler.assertTotalMessagesEnqueued(1);
+        mTestHandler.waitForEmptyQueue();
+        mStubbedTimeDetectorStrategy.verifyHandleAutoTimeDetectionToggleCalled();
 
         mTimeDetectorService.handleAutoTimeDetectionToggle();
-
-        mStubbedTimeDetectorStrategy.verifyHandleAutoTimeDetectionToggleCalled(true);
-
-        when(mMockCallback.isTimeDetectionEnabled()).thenReturn(false);
-
-        mTimeDetectorService.handleAutoTimeDetectionToggle();
-
-        mStubbedTimeDetectorStrategy.verifyHandleAutoTimeDetectionToggleCalled(false);
+        mTestHandler.assertTotalMessagesEnqueued(2);
+        mTestHandler.waitForEmptyQueue();
+        mStubbedTimeDetectorStrategy.verifyHandleAutoTimeDetectionToggleCalled();
     }
 
     private static PhoneTimeSuggestion createPhoneTimeSuggestion() {
         int phoneId = 1234;
         TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
-        return new PhoneTimeSuggestion(phoneId, timeValue);
+        return new PhoneTimeSuggestion.Builder(phoneId)
+                .setUtcTime(timeValue)
+                .build();
+    }
+
+    private static ManualTimeSuggestion createManualTimeSuggestion() {
+        TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
+        return new ManualTimeSuggestion(timeValue);
     }
 
     private static class StubbedTimeDetectorStrategy implements TimeDetectorStrategy {
 
         // Call tracking.
         private PhoneTimeSuggestion mLastPhoneSuggestion;
-        private Boolean mLastAutoTimeDetectionToggle;
+        private ManualTimeSuggestion mLastManualSuggestion;
+        private boolean mLastAutoTimeDetectionToggleCalled;
         private boolean mDumpCalled;
 
         @Override
@@ -139,9 +165,15 @@ public class TimeDetectorServiceTest {
         }
 
         @Override
-        public void handleAutoTimeDetectionToggle(boolean enabled) {
+        public void suggestManualTime(ManualTimeSuggestion timeSuggestion) {
             resetCallTracking();
-            mLastAutoTimeDetectionToggle = enabled;
+            mLastManualSuggestion = timeSuggestion;
+        }
+
+        @Override
+        public void handleAutoTimeDetectionChanged() {
+            resetCallTracking();
+            mLastAutoTimeDetectionToggleCalled = true;
         }
 
         @Override
@@ -152,21 +184,58 @@ public class TimeDetectorServiceTest {
 
         void resetCallTracking() {
             mLastPhoneSuggestion = null;
-            mLastAutoTimeDetectionToggle = null;
+            mLastManualSuggestion = null;
+            mLastAutoTimeDetectionToggleCalled = false;
             mDumpCalled = false;
         }
 
-        void verifySuggestPhoneTimeCalled(PhoneTimeSuggestion expectedSignal) {
-            assertEquals(expectedSignal, mLastPhoneSuggestion);
+        void verifySuggestPhoneTimeCalled(PhoneTimeSuggestion expectedSuggestion) {
+            assertEquals(expectedSuggestion, mLastPhoneSuggestion);
         }
 
-        void verifyHandleAutoTimeDetectionToggleCalled(boolean expectedEnable) {
-            assertNotNull(mLastAutoTimeDetectionToggle);
-            assertEquals(expectedEnable, mLastAutoTimeDetectionToggle);
+        public void verifySuggestManualTimeCalled(ManualTimeSuggestion expectedSuggestion) {
+            assertEquals(expectedSuggestion, mLastManualSuggestion);
+        }
+
+        void verifyHandleAutoTimeDetectionToggleCalled() {
+            assertTrue(mLastAutoTimeDetectionToggleCalled);
         }
 
         void verifyDumpCalled() {
             assertTrue(mDumpCalled);
+        }
+    }
+
+    /**
+     * A Handler that can track posts/sends and wait for work to be completed.
+     */
+    private static class TestHandler extends Handler {
+
+        private int mMessagesSent;
+
+        TestHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
+            mMessagesSent++;
+            return super.sendMessageAtTime(msg, uptimeMillis);
+        }
+
+        /** Asserts the number of messages posted or sent is as expected. */
+        void assertTotalMessagesEnqueued(int expected) {
+            assertEquals(expected, mMessagesSent);
+        }
+
+        /**
+         * Waits for all currently enqueued work due to be processed to be completed before
+         * returning.
+         */
+        void waitForEmptyQueue() throws InterruptedException {
+            while (!getLooper().getQueue().isIdle()) {
+                Thread.sleep(100);
+            }
         }
     }
 }

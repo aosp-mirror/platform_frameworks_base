@@ -15,17 +15,14 @@
  */
 package android.telephony;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.PersistableBundle;
-
 import android.telephony.Annotation.DataFailureCause;
-import com.android.internal.util.ArrayUtils;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import com.android.internal.telephony.util.ArrayUtils;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -953,14 +950,10 @@ public final class DataFailCause {
     public static final int UNKNOWN = 0x10000;
     /** Data fail due to radio not unavailable. */
     public static final int RADIO_NOT_AVAILABLE = 0x10001;                   /* no retry */
-    /** @hide */
+    /** Data fail due to unacceptable network parameter. */
     public static final int UNACCEPTABLE_NETWORK_PARAMETER = 0x10002;        /* no retry */
-    /** @hide */
-    public static final int CONNECTION_TO_DATACONNECTIONAC_BROKEN = 0x10003;
     /** Data connection was lost. */
     public static final int LOST_CONNECTION = 0x10004;
-    /** @hide */
-    public static final int RESET_BY_FRAMEWORK = 0x10005;
 
     /**
      * Data handover failed.
@@ -1364,10 +1357,7 @@ public final class DataFailCause {
         sFailCauseMap.put(RADIO_NOT_AVAILABLE, "RADIO_NOT_AVAILABLE");
         sFailCauseMap.put(UNACCEPTABLE_NETWORK_PARAMETER,
                 "UNACCEPTABLE_NETWORK_PARAMETER");
-        sFailCauseMap.put(CONNECTION_TO_DATACONNECTIONAC_BROKEN,
-                "CONNECTION_TO_DATACONNECTIONAC_BROKEN");
         sFailCauseMap.put(LOST_CONNECTION, "LOST_CONNECTION");
-        sFailCauseMap.put(RESET_BY_FRAMEWORK, "RESET_BY_FRAMEWORK");
     }
 
     private DataFailCause() {

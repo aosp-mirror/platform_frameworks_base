@@ -25,12 +25,15 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /* IF YOU CHANGE ANY OF THE CONSTANTS IN THIS FILE, DO NOT FORGET
  * TO UPDATE THE CORRESPONDING NATIVE GLUE AND AudioManager.java.
@@ -541,51 +544,75 @@ public class AudioSystem
 
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
 
-    public static final int DEVICE_OUT_ALL = (DEVICE_OUT_EARPIECE |
-                                              DEVICE_OUT_SPEAKER |
-                                              DEVICE_OUT_WIRED_HEADSET |
-                                              DEVICE_OUT_WIRED_HEADPHONE |
-                                              DEVICE_OUT_BLUETOOTH_SCO |
-                                              DEVICE_OUT_BLUETOOTH_SCO_HEADSET |
-                                              DEVICE_OUT_BLUETOOTH_SCO_CARKIT |
-                                              DEVICE_OUT_BLUETOOTH_A2DP |
-                                              DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
-                                              DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER |
-                                              DEVICE_OUT_HDMI |
-                                              DEVICE_OUT_ANLG_DOCK_HEADSET |
-                                              DEVICE_OUT_DGTL_DOCK_HEADSET |
-                                              DEVICE_OUT_USB_ACCESSORY |
-                                              DEVICE_OUT_USB_DEVICE |
-                                              DEVICE_OUT_REMOTE_SUBMIX |
-                                              DEVICE_OUT_TELEPHONY_TX |
-                                              DEVICE_OUT_LINE |
-                                              DEVICE_OUT_HDMI_ARC |
-                                              DEVICE_OUT_SPDIF |
-                                              DEVICE_OUT_FM |
-                                              DEVICE_OUT_AUX_LINE |
-                                              DEVICE_OUT_SPEAKER_SAFE |
-                                              DEVICE_OUT_IP |
-                                              DEVICE_OUT_BUS |
-                                              DEVICE_OUT_PROXY |
-                                              DEVICE_OUT_USB_HEADSET |
-                                              DEVICE_OUT_HEARING_AID |
-                                              DEVICE_OUT_DEFAULT);
-    public static final int DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP |
-                                                   DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
-                                                   DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER);
-    public static final int DEVICE_OUT_ALL_SCO = (DEVICE_OUT_BLUETOOTH_SCO |
-                                                  DEVICE_OUT_BLUETOOTH_SCO_HEADSET |
-                                                  DEVICE_OUT_BLUETOOTH_SCO_CARKIT);
+    // Deprecated in R because multiple device types are no longer accessed as a bit mask.
+    // Removing this will get lint warning about changing hidden apis.
     @UnsupportedAppUsage
     public static final int DEVICE_OUT_ALL_USB = (DEVICE_OUT_USB_ACCESSORY |
                                                   DEVICE_OUT_USB_DEVICE |
                                                   DEVICE_OUT_USB_HEADSET);
-    public static final int DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO = (DEVICE_OUT_AUX_LINE |
-                                                                DEVICE_OUT_HDMI_ARC |
-                                                                DEVICE_OUT_SPDIF);
-    public static final int DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER =
-            (DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO |
-             DEVICE_OUT_SPEAKER);
+
+    public static final Set<Integer> DEVICE_OUT_ALL_SET;
+    public static final Set<Integer> DEVICE_OUT_ALL_A2DP_SET;
+    public static final Set<Integer> DEVICE_OUT_ALL_SCO_SET;
+    public static final Set<Integer> DEVICE_OUT_ALL_USB_SET;
+    public static final Set<Integer> DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO_SET;
+    public static final Set<Integer> DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER_SET;
+    static {
+        DEVICE_OUT_ALL_SET = new HashSet<>();
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_EARPIECE);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_SPEAKER);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_WIRED_HEADSET);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_WIRED_HEADPHONE);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLUETOOTH_SCO);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLUETOOTH_SCO_HEADSET);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLUETOOTH_SCO_CARKIT);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLUETOOTH_A2DP);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_HDMI);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_ANLG_DOCK_HEADSET);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_DGTL_DOCK_HEADSET);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_USB_ACCESSORY);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_USB_DEVICE);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_REMOTE_SUBMIX);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_TELEPHONY_TX);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_LINE);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_HDMI_ARC);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_SPDIF);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_FM);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_AUX_LINE);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_SPEAKER_SAFE);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_IP);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BUS);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_PROXY);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_USB_HEADSET);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_HEARING_AID);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_DEFAULT);
+
+        DEVICE_OUT_ALL_A2DP_SET = new HashSet<>();
+        DEVICE_OUT_ALL_A2DP_SET.add(DEVICE_OUT_BLUETOOTH_A2DP);
+        DEVICE_OUT_ALL_A2DP_SET.add(DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES);
+        DEVICE_OUT_ALL_A2DP_SET.add(DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER);
+
+        DEVICE_OUT_ALL_SCO_SET = new HashSet<>();
+        DEVICE_OUT_ALL_SCO_SET.add(DEVICE_OUT_BLUETOOTH_SCO);
+        DEVICE_OUT_ALL_SCO_SET.add(DEVICE_OUT_BLUETOOTH_SCO_HEADSET);
+        DEVICE_OUT_ALL_SCO_SET.add(DEVICE_OUT_BLUETOOTH_SCO_CARKIT);
+
+        DEVICE_OUT_ALL_USB_SET = new HashSet<>();
+        DEVICE_OUT_ALL_USB_SET.add(DEVICE_OUT_USB_ACCESSORY);
+        DEVICE_OUT_ALL_USB_SET.add(DEVICE_OUT_USB_DEVICE);
+        DEVICE_OUT_ALL_USB_SET.add(DEVICE_OUT_USB_HEADSET);
+
+        DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO_SET = new HashSet<>();
+        DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO_SET.add(DEVICE_OUT_AUX_LINE);
+        DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO_SET.add(DEVICE_OUT_HDMI_ARC);
+        DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO_SET.add(DEVICE_OUT_SPDIF);
+
+        DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER_SET = new HashSet<>();
+        DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER_SET.addAll(DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO_SET);
+        DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER_SET.add(DEVICE_OUT_SPEAKER);
+    }
 
     // input devices
     @UnsupportedAppUsage
@@ -633,37 +660,47 @@ public class AudioSystem
     @UnsupportedAppUsage
     public static final int DEVICE_IN_DEFAULT = DEVICE_BIT_IN | DEVICE_BIT_DEFAULT;
 
-    public static final int DEVICE_IN_ALL = (DEVICE_IN_COMMUNICATION |
-                                             DEVICE_IN_AMBIENT |
-                                             DEVICE_IN_BUILTIN_MIC |
-                                             DEVICE_IN_BLUETOOTH_SCO_HEADSET |
-                                             DEVICE_IN_WIRED_HEADSET |
-                                             DEVICE_IN_HDMI |
-                                             DEVICE_IN_TELEPHONY_RX |
-                                             DEVICE_IN_BACK_MIC |
-                                             DEVICE_IN_REMOTE_SUBMIX |
-                                             DEVICE_IN_ANLG_DOCK_HEADSET |
-                                             DEVICE_IN_DGTL_DOCK_HEADSET |
-                                             DEVICE_IN_USB_ACCESSORY |
-                                             DEVICE_IN_USB_DEVICE |
-                                             DEVICE_IN_FM_TUNER |
-                                             DEVICE_IN_TV_TUNER |
-                                             DEVICE_IN_LINE |
-                                             DEVICE_IN_SPDIF |
-                                             DEVICE_IN_BLUETOOTH_A2DP |
-                                             DEVICE_IN_LOOPBACK |
-                                             DEVICE_IN_IP |
-                                             DEVICE_IN_BUS |
-                                             DEVICE_IN_PROXY |
-                                             DEVICE_IN_USB_HEADSET |
-                                             DEVICE_IN_BLUETOOTH_BLE |
-                                             DEVICE_IN_HDMI_ARC |
-                                             DEVICE_IN_ECHO_REFERENCE |
-                                             DEVICE_IN_DEFAULT);
-    public static final int DEVICE_IN_ALL_SCO = DEVICE_IN_BLUETOOTH_SCO_HEADSET;
-    public static final int DEVICE_IN_ALL_USB = (DEVICE_IN_USB_ACCESSORY |
-                                                 DEVICE_IN_USB_DEVICE |
-                                                 DEVICE_IN_USB_HEADSET);
+    public static final Set<Integer> DEVICE_IN_ALL_SET;
+    public static final Set<Integer> DEVICE_IN_ALL_SCO_SET;
+    public static final Set<Integer> DEVICE_IN_ALL_USB_SET;
+    static {
+        DEVICE_IN_ALL_SET = new HashSet<>();
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_COMMUNICATION);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_AMBIENT);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_BUILTIN_MIC);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_BLUETOOTH_SCO_HEADSET);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_WIRED_HEADSET);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_HDMI);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_TELEPHONY_RX);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_BACK_MIC);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_REMOTE_SUBMIX);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_ANLG_DOCK_HEADSET);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_DGTL_DOCK_HEADSET);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_USB_ACCESSORY);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_USB_DEVICE);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_FM_TUNER);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_TV_TUNER);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_LINE);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_SPDIF);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_BLUETOOTH_A2DP);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_LOOPBACK);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_IP);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_BUS);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_PROXY);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_USB_HEADSET);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_BLUETOOTH_BLE);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_HDMI_ARC);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_ECHO_REFERENCE);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_DEFAULT);
+
+        DEVICE_IN_ALL_SCO_SET = new HashSet<>();
+        DEVICE_IN_ALL_SCO_SET.add(DEVICE_IN_BLUETOOTH_SCO_HEADSET);
+
+        DEVICE_IN_ALL_USB_SET = new HashSet<>();
+        DEVICE_IN_ALL_USB_SET.add(DEVICE_IN_USB_ACCESSORY);
+        DEVICE_IN_ALL_USB_SET.add(DEVICE_IN_USB_DEVICE);
+        DEVICE_IN_ALL_USB_SET.add(DEVICE_IN_USB_HEADSET);
+    }
 
     // device states, must match AudioSystem::device_connection_state
     @UnsupportedAppUsage
@@ -1124,6 +1161,12 @@ public class AudioSystem
      */
     public static native boolean isHapticPlaybackSupported();
 
+    /**
+     * Send audio HAL server process pids to native audioserver process for use
+     * when generating audio HAL servers tombstones
+     */
+    public static native int setAudioHalPids(int[] pids);
+
     // Items shared with audio service
 
     /**
@@ -1197,7 +1240,8 @@ public class AudioSystem
      * </ul>
      */
     public static int getPlatformType(Context context) {
-        if (context.getResources().getBoolean(com.android.internal.R.bool.config_voice_capable)) {
+        if (((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE))
+                .isVoiceCapable()) {
             return PLATFORM_VOICE;
         } else if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
             return PLATFORM_TELEVISION;
@@ -1214,6 +1258,40 @@ public class AudioSystem
         boolean forceSingleVolume = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_single_volume);
         return getPlatformType(context) == PLATFORM_TELEVISION || forceSingleVolume;
+    }
+
+    /**
+     * Return a set of audio device types from a bit mask audio device type, which may
+     * represent multiple audio device types.
+     * FIXME: Remove this when getting ride of bit mask usage of audio device types.
+     */
+    public static Set<Integer> generateAudioDeviceTypesSet(int types) {
+        Set<Integer> deviceTypes = new HashSet<>();
+        Set<Integer> allDeviceTypes =
+                (types & DEVICE_BIT_IN) == 0 ? DEVICE_OUT_ALL_SET : DEVICE_IN_ALL_SET;
+        for (int deviceType : allDeviceTypes) {
+            if ((types & deviceType) == deviceType) {
+                deviceTypes.add(deviceType);
+            }
+        }
+        return deviceTypes;
+    }
+
+    /**
+     * Return the intersection of two audio device types collections.
+     */
+    public static Set<Integer> intersectionAudioDeviceTypes(
+            @NonNull Set<Integer> a, @NonNull Set<Integer> b) {
+        Set<Integer> intersection = new HashSet<>(a);
+        intersection.retainAll(b);
+        return intersection;
+    }
+
+    /**
+     * Return true if the audio device types collection only contains the given device type.
+     */
+    public static boolean isSingleAudioDeviceType(@NonNull Set<Integer> types, int type) {
+        return types.size() == 1 && types.contains(type);
     }
 
     public static final int DEFAULT_MUTE_STREAMS_AFFECTED =

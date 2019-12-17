@@ -762,10 +762,7 @@ public final class LinkProperties implements Parcelable {
      * Returns the NAT64 prefix in use on this link, if any.
      *
      * @return the NAT64 prefix or {@code null}.
-     * @hide
      */
-    @SystemApi
-    @TestApi
     public @Nullable IpPrefix getNat64Prefix() {
         return mNat64Prefix;
     }
@@ -777,10 +774,7 @@ public final class LinkProperties implements Parcelable {
      * 128-bit IPv6 address) are supported or {@code null} for no prefix.
      *
      * @param prefix the NAT64 prefix.
-     * @hide
      */
-    @SystemApi
-    @TestApi
     public void setNat64Prefix(@Nullable IpPrefix prefix) {
         if (prefix != null && prefix.getPrefixLength() != 96) {
             throw new IllegalArgumentException("Only 96-bit prefixes are supported: " + prefix);

@@ -16,10 +16,12 @@
 
 package com.android.server.locksettings;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -40,7 +42,9 @@ import android.os.UserManager;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.security.KeyStore;
-import android.test.AndroidTestCase;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
@@ -49,6 +53,9 @@ import com.android.server.LocalServices;
 import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
 import com.android.server.wm.WindowManagerInternal;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -56,8 +63,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-
-public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public abstract class BaseLockSettingsServiceTests {
     protected static final int PRIMARY_USER_ID = 0;
     protected static final int MANAGED_PROFILE_USER_ID = 12;
     protected static final int TURNED_OFF_PROFILE_USER_ID = 17;
@@ -93,10 +100,8 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
     RecoverableKeyStoreManager mRecoverableKeyStoreManager;
     protected boolean mHasSecureLockScreen;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUp_baseServices() throws Exception {
         mGateKeeperService = new FakeGateKeeperService();
         mNotificationManager = mock(NotificationManager.class);
         mUserManager = mock(UserManager.class);
@@ -115,11 +120,11 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
         LocalServices.addService(DevicePolicyManagerInternal.class, mDevicePolicyManagerInternal);
         LocalServices.addService(WindowManagerInternal.class, mMockWindowManager);
 
-        mContext = new MockLockSettingsContext(getContext(), mUserManager, mNotificationManager,
-                mDevicePolicyManager, mock(StorageManager.class), mock(TrustManager.class),
-                mock(KeyguardManager.class));
+        mContext = new MockLockSettingsContext(InstrumentationRegistry.getContext(), mUserManager,
+                mNotificationManager, mDevicePolicyManager, mock(StorageManager.class),
+                mock(TrustManager.class), mock(KeyguardManager.class));
         mStorage = new LockSettingsStorageTestable(mContext,
-                new File(getContext().getFilesDir(), "locksettings"));
+                new File(InstrumentationRegistry.getContext().getFilesDir(), "locksettings"));
         File storageDir = mStorage.mStorageDir;
         if (storageDir.exists()) {
             FileUtils.deleteContents(storageDir);
@@ -222,11 +227,10 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
         return sm;
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    @After
+    public void tearDown_baseServices() throws Exception {
         mStorage.closeDatabase();
-        File db = getContext().getDatabasePath("locksettings.db");
+        File db = InstrumentationRegistry.getContext().getDatabasePath("locksettings.db");
         assertTrue(!db.exists() || db.delete());
 
         File storageDir = mStorage.mStorageDir;

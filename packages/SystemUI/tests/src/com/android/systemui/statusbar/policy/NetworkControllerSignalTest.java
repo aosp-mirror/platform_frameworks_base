@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.os.Looper;
+import android.telephony.CellSignalStrength;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
@@ -180,7 +181,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
     @Test
     public void testCdmaSignalRoaming() {
-        for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        for (int testStrength = CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
                 testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
             setupDefaultSignal();
             setCdma();
@@ -203,7 +204,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
     @Test
     public void testQsSignalStrength() {
-        for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        for (int testStrength = CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
                 testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
             setupDefaultSignal();
             setLevel(testStrength);
@@ -216,7 +217,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
     @Test
     public void testCdmaQsSignalStrength() {
-        for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        for (int testStrength = CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
                 testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
             setupDefaultSignal();
             setCdma();
@@ -370,7 +371,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
         String defaultNetworkName = mMobileSignalController
             .getStringIfExists(
-                com.android.internal.R.string.lockscreen_carrier_default);
+                com.android.internal.R.string.lockscreen_carrier_default).toString();
         assertNetworkNameEquals(defaultNetworkName);
     }
 
@@ -384,7 +385,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         mNetworkController.onReceive(mContext, intent);
 
         String defaultNetworkName = mMobileSignalController.getStringIfExists(
-                com.android.internal.R.string.lockscreen_carrier_default);
+                com.android.internal.R.string.lockscreen_carrier_default).toString();
         assertNetworkNameEquals(defaultNetworkName);
     }
 
@@ -402,7 +403,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
         assertNetworkNameEquals(plmn
                 + mMobileSignalController.getStringIfExists(
-                        R.string.status_bar_network_name_separator)
+                        R.string.status_bar_network_name_separator).toString()
                 + spn);
     }
 

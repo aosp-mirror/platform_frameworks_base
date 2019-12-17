@@ -21,7 +21,6 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
-import android.telephony.Rlog;
 import android.telephony.TelephonyManager;
 import android.test.InstrumentationTestCase;
 
@@ -90,12 +89,10 @@ public class CarrierDefaultReceiverTest extends InstrumentationTestCase {
 
         Intent intent = new Intent(TelephonyIntents.ACTION_CARRIER_SIGNAL_REDIRECTED);
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
-        Rlog.d(TAG, "OnReceive redirection intent");
         mReceiver.onReceive(mContext, intent);
 
         mContext.waitForMs(100);
 
-        Rlog.d(TAG, "verify carrier action: showPortalNotification");
         verify(mNotificationMgr, times(1)).notify(mString.capture(), mInt.capture(),
                 mNotification.capture());
         assertEquals(PORTAL_NOTIFICATION_ID, (int) mInt.getValue());
@@ -103,7 +100,6 @@ public class CarrierDefaultReceiverTest extends InstrumentationTestCase {
         PendingIntent pendingIntent = mNotification.getValue().contentIntent;
         assertNotNull(pendingIntent);
 
-        Rlog.d(TAG, "verify carrier action: disable all metered apns");
         verify(mTelephonyMgr).setCarrierDataEnabled(eq(false));
     }
 }

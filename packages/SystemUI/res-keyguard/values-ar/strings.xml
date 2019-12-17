@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"رمز رقم التعريف الشخصي غير صحيح."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"بطاقة غير صالحة."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"تم شحن البطارية بالكامل"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن لاسلكيًا"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن لاسلكيًا"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن سريعًا"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن ببطء"</string>
@@ -62,7 +62,7 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"‏يتعذّر إيقاف eSIM بسبب خطأ."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"نسيت النقش"</string>
-    <string name="kg_wrong_pattern" msgid="2873443744087746812">"النقش غير صحيح"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"نقش غير صحيح"</string>
     <string name="kg_wrong_password" msgid="8060364776224836597">"كلمة مرور غير صحيحة"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"رقم تعريف شخصي خاطئ"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
@@ -183,7 +183,35 @@
       <item quantity="other">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك <xliff:g id="_NUMBER_1">%d</xliff:g> محاولة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>
       <item quantity="one">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك محاولة واحدة (<xliff:g id="_NUMBER_0">%d</xliff:g>) قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>
     </plurals>
-    <string name="clock_title_default" msgid="6645600990069154049">"تلقائي"</string>
-    <string name="clock_title_bubble" msgid="1286365278681892114">"فقاعة"</string>
-    <string name="clock_title_analog" msgid="4047401488577315053">"ساعة تقليدية"</string>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="zero">"<annotation name="color">"الساعة الآن"</annotation>\n"^1\n^2</item>
+      <item quantity="two">"<annotation name="color">"الساعة الآن"</annotation>\n"^1\n^2</item>
+      <item quantity="few">"<annotation name="color">"الساعة الآن"</annotation>\n"^1\n^2</item>
+      <item quantity="many">"<annotation name="color">"الساعة الآن"</annotation>\n"^1\n^2</item>
+      <item quantity="other">"<annotation name="color">"الساعة الآن"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"الساعة الآن"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"الثانية عشرة"</item>
+    <item msgid="7389464214252023751">"الواحدة"</item>
+    <item msgid="8803180377002008046">"الثانية"</item>
+    <item msgid="8614897059944644719">"الثالثة"</item>
+    <item msgid="2293058674782619556">"الرابعة"</item>
+    <item msgid="4815402358455041664">"الخامسة"</item>
+    <item msgid="3325754778509665687">"السادسة"</item>
+    <item msgid="5805551341866280575">"السابعة"</item>
+    <item msgid="203334816668238610">"الثامنة"</item>
+    <item msgid="4828052671464488923">"التاسعة"</item>
+    <item msgid="2233497913571137419">"العاشرة"</item>
+    <item msgid="5621554266768657830">"الحادية عشرة"</item>
+  </string-array>
+    <!-- no translation found for type_clock_minutes:1 (2091812961809760681) -->
+    <!-- no translation found for type_clock_minutes:2 (1496435384877290709) -->
+    <!-- no translation found for type_clock_minutes:3 (881846472976674129) -->
+    <!-- no translation found for type_clock_minutes:4 (2784477043911540584) -->
+    <!-- no translation found for type_clock_minutes:5 (1610928853656700614) -->
+    <!-- no translation found for type_clock_minutes:6 (2317806244043886658) -->
+    <!-- no translation found for type_clock_minutes:7 (3318687539120971327) -->
+    <!-- no translation found for type_clock_minutes:8 (5701600693712102348) -->
+    <!-- no translation found for type_clock_minutes:9 (3247381605947372495) -->
 </resources>

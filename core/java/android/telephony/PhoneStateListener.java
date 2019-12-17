@@ -184,7 +184,8 @@ public class PhoneStateListener {
     public static final int LISTEN_CELL_INFO = 0x00000400;
 
     /**
-     * Listen for {@link PreciseCallState.State} of ringing, background and foreground calls.
+     * Listen for {@link android.telephony.Annotation.PreciseCallStates} of ringing,
+     * background and foreground calls.
      *
      * @hide
      */
@@ -283,14 +284,6 @@ public class PhoneStateListener {
      *  @see #onUserMobileDataStateChanged
      */
     public static final int LISTEN_USER_MOBILE_DATA_STATE                  = 0x00080000;
-
-    /**
-     *  Listen for changes to the physical channel configuration.
-     *
-     *  @see #onPhysicalChannelConfigurationChanged
-     *  @hide
-     */
-    public static final int LISTEN_PHYSICAL_CHANNEL_CONFIGURATION          = 0x00100000;
 
     /**
      *  Listen for changes to the phone capability.
@@ -830,24 +823,6 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when the current physical channel configuration has changed on the
-     * registered subscription.
-     * Note, the registration subId comes from {@link TelephonyManager} object which registers
-     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
-     * If this TelephonyManager object was created with
-     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
-     * subId. Otherwise, this callback applies to
-     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
-     *
-     * @param configs List of the current {@link PhysicalChannelConfig}s
-     * @hide
-     */
-    public void onPhysicalChannelConfigurationChanged(
-            @NonNull List<PhysicalChannelConfig> configs) {
-        // default implementation empty
-    }
-
-    /**
      * Callback invoked when the current emergency number list has changed on the registered
      * subscription.
      * Note, the registration subId comes from {@link TelephonyManager} object which registers
@@ -1191,15 +1166,6 @@ public class PhoneStateListener {
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> psl.onCarrierNetworkChange(active)));
-        }
-
-        public void onPhysicalChannelConfigurationChanged(List<PhysicalChannelConfig> configs) {
-            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
-            if (psl == null) return;
-
-            Binder.withCleanCallingIdentity(
-                    () -> mExecutor.execute(
-                            () -> psl.onPhysicalChannelConfigurationChanged(configs)));
         }
 
         public void onEmergencyNumberListChanged(Map emergencyNumberList) {

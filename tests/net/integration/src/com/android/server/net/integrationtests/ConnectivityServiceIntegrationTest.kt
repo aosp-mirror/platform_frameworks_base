@@ -32,6 +32,7 @@ import android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET
 import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
 import android.net.NetworkRequest
 import android.net.TestNetworkStackClient
+import android.net.TetheringManager
 import android.net.metrics.IpConnectivityLog
 import android.os.ConditionVariable
 import android.os.IBinder
@@ -48,7 +49,6 @@ import com.android.server.connectivity.DefaultNetworkMetrics
 import com.android.server.connectivity.IpConnectivityMetrics
 import com.android.server.connectivity.MockableSystemProperties
 import com.android.server.connectivity.ProxyTracker
-import com.android.server.connectivity.Tethering
 import com.android.server.net.NetworkPolicyManagerInternal
 import com.android.testutils.TestableNetworkCallback
 import org.junit.After
@@ -169,8 +169,7 @@ class ConnectivityServiceIntegrationTest {
         val deps = spy(ConnectivityService.Dependencies())
         doReturn(networkStackClient).`when`(deps).networkStack
         doReturn(metricsLogger).`when`(deps).metricsLogger
-        doReturn(mock(Tethering::class.java)).`when`(deps).makeTethering(
-                any(), any(), any(), any(), any())
+        doReturn(mock(TetheringManager::class.java)).`when`(deps).getTetheringManager()
         doReturn(mock(ProxyTracker::class.java)).`when`(deps).makeProxyTracker(any(), any())
         doReturn(mock(MockableSystemProperties::class.java)).`when`(deps).systemProperties
         doReturn(TestNetIdManager()).`when`(deps).makeNetIdManager()

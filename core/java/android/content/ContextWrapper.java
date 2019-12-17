@@ -583,6 +583,16 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent,
+            @Nullable String receiverPermission, @Nullable String receiverAppOp,
+            @Nullable Bundle options, @Nullable BroadcastReceiver resultReceiver,
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras) {
+        mBase.sendOrderedBroadcast(intent, receiverPermission, receiverAppOp, options,
+                resultReceiver, scheduler, initialCode, initialData, initialExtras);
+    }
+
+    @Override
     @Deprecated
     public void sendStickyBroadcast(Intent intent) {
         mBase.sendStickyBroadcast(intent);
@@ -660,6 +670,16 @@ public class ContextWrapper extends Context {
         String broadcastPermission, Handler scheduler, int flags) {
         return mBase.registerReceiver(receiver, filter, broadcastPermission,
                 scheduler, flags);
+    }
+
+    /** @hide */
+    @Override
+    @Nullable
+    public Intent registerReceiverForAllUsers(@Nullable BroadcastReceiver receiver,
+            @NonNull IntentFilter filter, @Nullable String broadcastPermission,
+            @Nullable Handler scheduler) {
+        return mBase.registerReceiverForAllUsers(receiver, filter, broadcastPermission,
+                scheduler);
     }
 
     /** @hide */
@@ -894,6 +914,12 @@ public class ContextWrapper extends Context {
     public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
             throws PackageManager.NameNotFoundException {
         return mBase.createPackageContextAsUser(packageName, flags, user);
+    }
+
+    /** @hide */
+    @Override
+    public Context createContextAsUser(UserHandle user, @CreatePackageOptions int flags) {
+        return mBase.createContextAsUser(user, flags);
     }
 
     /** @hide */

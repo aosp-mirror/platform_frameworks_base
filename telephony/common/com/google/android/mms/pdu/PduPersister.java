@@ -291,15 +291,11 @@ public class PduPersister {
     @UnsupportedAppUsage
     private final ContentResolver mContentResolver;
     private final DrmManagerClient mDrmManagerClient;
-    @UnsupportedAppUsage
-    private final TelephonyManager mTelephonyManager;
 
     private PduPersister(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
         mDrmManagerClient = new DrmManagerClient(context);
-        mTelephonyManager = (TelephonyManager)context
-                .getSystemService(Context.TELEPHONY_SERVICE);
      }
 
     /** Get(or create if not exist) an instance of PduPersister */
@@ -1453,7 +1449,8 @@ public class PduPersister {
         if (excludeMyNumber) {
             // Build a list of my phone numbers from the various sims.
             for (int subid : subscriptionManager.getActiveSubscriptionIdList()) {
-                final String myNumber = mTelephonyManager.getLine1Number(subid);
+                final String myNumber = mContext.getSystemService(TelephonyManager.class).
+                        createForSubscriptionId(subid).getLine1Number();
                 if (myNumber != null) {
                     myPhoneNumbers.add(myNumber);
                 }

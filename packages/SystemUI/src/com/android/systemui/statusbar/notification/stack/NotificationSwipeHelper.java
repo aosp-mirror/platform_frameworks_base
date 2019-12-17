@@ -28,6 +28,7 @@ import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.SwipeHelper;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -50,9 +51,11 @@ class NotificationSwipeHelper extends SwipeHelper
     private boolean mIsExpanded;
     private boolean mPulsing;
 
-    public NotificationSwipeHelper(int swipeDirection, NotificationCallback callback,
-            Context context, NotificationMenuRowPlugin.OnMenuEventListener menuListener) {
-        super(swipeDirection, callback, context);
+    NotificationSwipeHelper(
+            int swipeDirection, NotificationCallback callback, Context context,
+            NotificationMenuRowPlugin.OnMenuEventListener menuListener,
+            FalsingManager falsingManager) {
+        super(swipeDirection, callback, context, falsingManager);
         mMenuListener = menuListener;
         mCallback = callback;
         mFalsingCheck = new Runnable() {

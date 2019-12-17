@@ -144,7 +144,7 @@ public abstract class CallScreeningService extends Service {
         private final boolean mShouldSilenceCall;
         private final boolean mShouldSkipCallLog;
         private final boolean mShouldSkipNotification;
-        private final boolean mShouldScreenCallFurther;
+        private final boolean mShouldScreenCallViaAudioProcessing;
 
         private CallResponse(
                 boolean shouldDisallowCall,
@@ -152,13 +152,13 @@ public abstract class CallScreeningService extends Service {
                 boolean shouldSilenceCall,
                 boolean shouldSkipCallLog,
                 boolean shouldSkipNotification,
-                boolean shouldScreenCallFurther) {
+                boolean shouldScreenCallViaAudioProcessing) {
             if (!shouldDisallowCall
                     && (shouldRejectCall || shouldSkipCallLog || shouldSkipNotification)) {
                 throw new IllegalStateException("Invalid response state for allowed call.");
             }
 
-            if (shouldDisallowCall && shouldScreenCallFurther) {
+            if (shouldDisallowCall && shouldScreenCallViaAudioProcessing) {
                 throw new IllegalStateException("Invalid response state for allowed call.");
             }
 
@@ -167,7 +167,7 @@ public abstract class CallScreeningService extends Service {
             mShouldSkipCallLog = shouldSkipCallLog;
             mShouldSkipNotification = shouldSkipNotification;
             mShouldSilenceCall = shouldSilenceCall;
-            mShouldScreenCallFurther = shouldScreenCallFurther;
+            mShouldScreenCallViaAudioProcessing = shouldScreenCallViaAudioProcessing;
         }
 
         /*
@@ -211,8 +211,8 @@ public abstract class CallScreeningService extends Service {
          * for further screening of the call.
          * @hide
          */
-        public boolean getShouldScreenCallFurther() {
-            return mShouldScreenCallFurther;
+        public boolean getShouldScreenCallViaAudioProcessing() {
+            return mShouldScreenCallViaAudioProcessing;
         }
 
         public static class Builder {
@@ -221,7 +221,7 @@ public abstract class CallScreeningService extends Service {
             private boolean mShouldSilenceCall;
             private boolean mShouldSkipCallLog;
             private boolean mShouldSkipNotification;
-            private boolean mShouldScreenCallFurther;
+            private boolean mShouldScreenCallViaAudioProcessing;
 
             /**
              * Sets whether the incoming call should be blocked.
@@ -285,13 +285,14 @@ public abstract class CallScreeningService extends Service {
              * This request will only be honored if the {@link CallScreeningService} shares the same
              * uid as the default dialer app. Otherwise, the call will go through as usual.
              *
-             * @param shouldScreenCallFurther Whether to request further call screening.
+             * @param shouldScreenCallViaAudioProcessing Whether to request further call screening.
              * @hide
              */
             @SystemApi
             @TestApi
-            public Builder setShouldScreenCallFurther(boolean shouldScreenCallFurther) {
-                mShouldScreenCallFurther = shouldScreenCallFurther;
+            public @NonNull Builder setShouldScreenCallViaAudioProcessing(
+                    boolean shouldScreenCallViaAudioProcessing) {
+                mShouldScreenCallViaAudioProcessing = shouldScreenCallViaAudioProcessing;
                 return this;
             }
 
@@ -302,7 +303,7 @@ public abstract class CallScreeningService extends Service {
                         mShouldSilenceCall,
                         mShouldSkipCallLog,
                         mShouldSkipNotification,
-                        mShouldScreenCallFurther);
+                        mShouldScreenCallViaAudioProcessing);
             }
        }
     }
@@ -380,7 +381,7 @@ public abstract class CallScreeningService extends Service {
                         new ComponentName(getPackageName(), getClass().getName()));
             } else if (response.getSilenceCall()) {
                 mCallScreeningAdapter.silenceCall(callDetails.getTelecomCallId());
-            } else if (response.getShouldScreenCallFurther()) {
+            } else if (response.getShouldScreenCallViaAudioProcessing()) {
                 mCallScreeningAdapter.screenCallFurther(callDetails.getTelecomCallId());
             } else {
                 mCallScreeningAdapter.allowCall(callDetails.getTelecomCallId());

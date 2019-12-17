@@ -27,10 +27,12 @@ import android.content.SharedPreferences;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;
 
@@ -162,9 +164,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     public void disconnect() {
         synchronized (mProfileLock) {
-            for (LocalBluetoothProfile profile : mProfiles) {
-                disconnect(profile);
-            }
+            mLocalAdapter.disconnectAllEnabledProfiles(mDevice);
         }
         // Disconnect  PBAP server in case its connected
         // This is to ensure all the profiles are disconnected as some CK/Hs do not
@@ -608,9 +608,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         ParcelUuid[] uuids = mDevice.getUuids();
 
         long timeout = MAX_UUID_DELAY_FOR_AUTO_CONNECT;
-        if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.Hogp)) {
+        if (ArrayUtils.contains(uuids, BluetoothUuid.HOGP)) {
             timeout = MAX_HOGP_DELAY_FOR_AUTO_CONNECT;
-        } else if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.HearingAid)) {
+        } else if (ArrayUtils.contains(uuids, BluetoothUuid.HEARING_AID)) {
             timeout = MAX_HEARING_AIDS_DELAY_FOR_AUTO_CONNECT;
         }
 
@@ -643,12 +643,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
         refresh();
 
-        if (bondState == BluetoothDevice.BOND_BONDED) {
-            if (mDevice.isBluetoothDock()) {
-                onBondingDockConnect();
-            } else if (mDevice.isBondingInitiatedLocally()) {
-                connect(false);
-            }
+        if (bondState == BluetoothDevice.BOND_BONDED && mDevice.isBondingInitiatedLocally()) {
+            connect(false);
         }
     }
 
@@ -804,10 +800,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                         == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE ||
                     mDevice.getBluetoothClass().getDeviceClass()
                         == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET) {
-                    mDevice.setPhonebookAccessPermission(BluetoothDevice.ACCESS_ALLOWED);
-                } else {
-                    mDevice.setPhonebookAccessPermission(BluetoothDevice.ACCESS_REJECTED);
+                    EventLog.writeEvent(0x534e4554, "138529441", -1, "");
                 }
+                mDevice.setPhonebookAccessPermission(BluetoothDevice.ACCESS_REJECTED);
             }
         }
     }
