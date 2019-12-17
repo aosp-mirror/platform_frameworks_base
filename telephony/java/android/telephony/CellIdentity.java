@@ -185,6 +185,14 @@ public abstract class CellIdentity implements Parcelable {
     @SystemApi
     public abstract @NonNull CellLocation asCellLocation();
 
+    /**
+     * Create and a return a new instance of CellIdentity with location-identifying information
+     * removed.
+     *
+     * @hide
+     */
+    public abstract @NonNull CellIdentity sanitizeLocationInfo();
+
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof CellIdentity)) {
@@ -312,4 +320,23 @@ public abstract class CellIdentity implements Parcelable {
         return true;
     }
 
+    /** @hide */
+    public static CellIdentity create(android.hardware.radio.V1_5.CellIdentity ci) {
+        if (ci == null) return null;
+        switch (ci.getDiscriminator()) {
+            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.gsm:
+                return new CellIdentityGsm(ci.gsm());
+            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.cdma:
+                return new CellIdentityCdma(ci.cdma());
+            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.lte:
+                return new CellIdentityLte(ci.lte());
+            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.wcdma:
+                return new CellIdentityWcdma(ci.wcdma());
+            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.tdscdma:
+                return new CellIdentityTdscdma(ci.tdscdma());
+            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.nr:
+                return new CellIdentityNr(ci.nr());
+            default: return null;
+        }
+    }
 }

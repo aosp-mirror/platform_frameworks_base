@@ -128,7 +128,8 @@ public final class CellIdentityCdma extends CellIdentity {
     }
 
     /** @hide */
-    public CellIdentityCdma sanitizeLocationInfo() {
+    @Override
+    public @NonNull CellIdentityCdma sanitizeLocationInfo() {
         return new CellIdentityCdma(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 mAlphaLong, mAlphaShort);
