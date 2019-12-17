@@ -69,7 +69,8 @@ public final class CellIdentityNr extends CellIdentity {
     }
 
     /** @hide */
-    public CellIdentityNr sanitizeLocationInfo() {
+    @Override
+    public @NonNull CellIdentityNr sanitizeLocationInfo() {
         return new CellIdentityNr(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 mMccStr, mMncStr, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort);
     }
