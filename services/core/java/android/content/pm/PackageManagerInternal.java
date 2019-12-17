@@ -341,14 +341,16 @@ public abstract class PackageManagerInternal {
      * @param responseObj The response of the first phase of ephemeral resolution
      * @param origIntent The original intent that triggered ephemeral resolution
      * @param resolvedType The resolved type of the intent
-     * @param callingPackage The name of the package requesting the ephemeral application
+     * @param callingPkg The app requesting the ephemeral application
+     * @param isRequesterInstantApp Whether or not the app requesting the ephemeral application
+     *                              is an instant app
      * @param verificationBundle Optional bundle to pass to the installer for additional
      * verification
      * @param userId The ID of the user that triggered ephemeral resolution
      */
     public abstract void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
-            Intent origIntent, String resolvedType, String callingPackage,
-            Bundle verificationBundle, int userId);
+            Intent origIntent, String resolvedType, String callingPkg,
+            boolean isRequesterInstantApp, Bundle verificationBundle, int userId);
 
     /**
      * Grants implicit access based on an interaction between two apps. This grants the target app

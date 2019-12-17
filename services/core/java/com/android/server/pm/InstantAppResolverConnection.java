@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.InstantAppRequestInfo;
 import android.content.pm.InstantAppResolveInfo;
 import android.os.Binder;
 import android.os.Build;
@@ -85,13 +86,13 @@ final class InstantAppResolverConnection implements DeathRecipient {
         mBgHandler = BackgroundThread.getHandler();
     }
 
-    public List<InstantAppResolveInfo> getInstantAppResolveInfoList(Intent sanitizedIntent,
-            int[] hashPrefix, int userId, String token) throws ConnectionException {
+    public List<InstantAppResolveInfo> getInstantAppResolveInfoList(InstantAppRequestInfo request)
+            throws ConnectionException {
         throwIfCalledOnMainThread();
         IInstantAppResolver target = null;
         try {
             try {
-                target = getRemoteInstanceLazy(token);
+                target = getRemoteInstanceLazy(request.token);
             } catch (TimeoutException e) {
                 throw new ConnectionException(ConnectionException.FAILURE_BIND);
             } catch (InterruptedException e) {
@@ -99,8 +100,7 @@ final class InstantAppResolverConnection implements DeathRecipient {
             }
             try {
                 return mGetInstantAppResolveInfoCaller
-                        .getInstantAppResolveInfoList(target, sanitizedIntent, hashPrefix, userId,
-                                token);
+                        .getInstantAppResolveInfoList(target, request);
             } catch (TimeoutException e) {
                 throw new ConnectionException(ConnectionException.FAILURE_CALL);
             } catch (RemoteException ignore) {
@@ -113,8 +113,8 @@ final class InstantAppResolverConnection implements DeathRecipient {
         return null;
     }
 
-    public void getInstantAppIntentFilterList(Intent sanitizedIntent, int[] hashPrefix, int userId,
-            String token, PhaseTwoCallback callback, Handler callbackHandler, final long startTime)
+    public void getInstantAppIntentFilterList(InstantAppRequestInfo request,
+            PhaseTwoCallback callback, Handler callbackHandler, final long startTime)
             throws ConnectionException {
         final IRemoteCallback remoteCallback = new IRemoteCallback.Stub() {
             @Override
@@ -126,9 +126,8 @@ final class InstantAppResolverConnection implements DeathRecipient {
             }
         };
         try {
-            getRemoteInstanceLazy(token)
-                    .getInstantAppIntentFilterList(sanitizedIntent, hashPrefix, userId, token,
-                            remoteCallback);
+            getRemoteInstanceLazy(request.token)
+                    .getInstantAppIntentFilterList(request, remoteCallback);
         } catch (TimeoutException e) {
             throw new ConnectionException(ConnectionException.FAILURE_BIND);
         } catch (InterruptedException e) {
@@ -352,12 +351,10 @@ final class InstantAppResolverConnection implements DeathRecipient {
             };
         }
 
-        public List<InstantAppResolveInfo> getInstantAppResolveInfoList(
-                IInstantAppResolver target, Intent sanitizedIntent, int[] hashPrefix, int userId,
-                String token) throws RemoteException, TimeoutException {
+        public List<InstantAppResolveInfo> getInstantAppResolveInfoList(IInstantAppResolver target,
+                InstantAppRequestInfo request) throws RemoteException, TimeoutException {
             final int sequence = onBeforeRemoteCall();
-            target.getInstantAppResolveInfoList(sanitizedIntent, hashPrefix, userId, token,
-                    sequence, mCallback);
+            target.getInstantAppResolveInfoList(request, sequence, mCallback);
             return getResultTimed(sequence);
         }
     }

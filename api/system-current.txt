@@ -546,10 +546,12 @@ package android.app {
     method public final android.os.IBinder onBind(android.content.Intent);
     method @Deprecated public void onGetInstantAppIntentFilter(@Nullable int[], @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
     method @Deprecated public void onGetInstantAppIntentFilter(@NonNull android.content.Intent, @Nullable int[], @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method public void onGetInstantAppIntentFilter(@NonNull android.content.Intent, @Nullable int[], @NonNull android.os.UserHandle, @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method @Deprecated public void onGetInstantAppIntentFilter(@NonNull android.content.Intent, @Nullable int[], @NonNull android.os.UserHandle, @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public void onGetInstantAppIntentFilter(@NonNull android.content.pm.InstantAppRequestInfo, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
     method @Deprecated public void onGetInstantAppResolveInfo(@Nullable int[], @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
     method @Deprecated public void onGetInstantAppResolveInfo(@NonNull android.content.Intent, @Nullable int[], @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method public void onGetInstantAppResolveInfo(@NonNull android.content.Intent, @Nullable int[], @NonNull android.os.UserHandle, @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method @Deprecated public void onGetInstantAppResolveInfo(@NonNull android.content.Intent, @Nullable int[], @NonNull android.os.UserHandle, @NonNull String, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public void onGetInstantAppResolveInfo(@NonNull android.content.pm.InstantAppRequestInfo, @NonNull android.app.InstantAppResolverService.InstantAppResolutionCallback);
   }
 
   public static final class InstantAppResolverService.InstantAppResolutionCallback {
@@ -1926,6 +1928,18 @@ package android.content.pm {
     method public String getSplitName();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstantAppIntentFilter> CREATOR;
+  }
+
+  public final class InstantAppRequestInfo implements android.os.Parcelable {
+    ctor public InstantAppRequestInfo(@NonNull android.content.Intent, @Nullable int[], @NonNull android.os.UserHandle, boolean, @NonNull String);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstantAppRequestInfo> CREATOR;
+    field @Nullable public final int[] hostDigestPrefix;
+    field @NonNull public final android.content.Intent intent;
+    field public final boolean isRequesterInstantApp;
+    field @NonNull public final String token;
+    field @NonNull public final android.os.UserHandle userHandle;
   }
 
   public final class InstantAppResolveInfo implements android.os.Parcelable {
