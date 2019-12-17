@@ -18,7 +18,6 @@ package com.android.server.timedetector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -26,7 +25,6 @@ import static org.junit.Assert.fail;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
-import android.content.Intent;
 import android.icu.util.Calendar;
 import android.icu.util.GregorianCalendar;
 import android.icu.util.TimeZone;
@@ -78,8 +76,7 @@ public class TimeDetectorStrategyImplTest {
 
         long expectedSystemClockMillis =
                 mScript.calculateTimeInMillisForNow(timeSuggestion.getUtcTime());
-        mScript.verifySystemClockWasSetAndResetCallTracking(
-                expectedSystemClockMillis, true /* expectNetworkBroadcast */)
+        mScript.verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis)
                 .assertLatestPhoneSuggestion(phoneId, timeSuggestion);
     }
 
@@ -118,8 +115,7 @@ public class TimeDetectorStrategyImplTest {
                     mScript.calculateTimeInMillisForNow(timeSuggestion1.getUtcTime());
 
             mScript.simulatePhoneTimeSuggestion(timeSuggestion1)
-                    .verifySystemClockWasSetAndResetCallTracking(
-                            expectedSystemClockMillis1, true /* expectNetworkBroadcast */)
+                    .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis1)
                     .assertLatestPhoneSuggestion(phoneId, timeSuggestion1);
         }
 
@@ -146,8 +142,7 @@ public class TimeDetectorStrategyImplTest {
                     mScript.calculateTimeInMillisForNow(timeSuggestion3.getUtcTime());
 
             mScript.simulatePhoneTimeSuggestion(timeSuggestion3)
-                    .verifySystemClockWasSetAndResetCallTracking(
-                            expectedSystemClockMillis3, true /* expectNetworkBroadcast */)
+                    .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis3)
                     .assertLatestPhoneSuggestion(phoneId, timeSuggestion3);
         }
     }
@@ -175,8 +170,7 @@ public class TimeDetectorStrategyImplTest {
                     mScript.calculateTimeInMillisForNow(phone2TimeSuggestion.getUtcTime());
 
             mScript.simulatePhoneTimeSuggestion(phone2TimeSuggestion)
-                    .verifySystemClockWasSetAndResetCallTracking(
-                            expectedSystemClockMillis, true /* expectNetworkBroadcast */)
+                    .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis)
                     .assertLatestPhoneSuggestion(phone1Id, null)
                     .assertLatestPhoneSuggestion(phone2Id, phone2TimeSuggestion);
         }
@@ -193,8 +187,7 @@ public class TimeDetectorStrategyImplTest {
                     mScript.calculateTimeInMillisForNow(phone1TimeSuggestion.getUtcTime());
 
             mScript.simulatePhoneTimeSuggestion(phone1TimeSuggestion)
-                    .verifySystemClockWasSetAndResetCallTracking(
-                            expectedSystemClockMillis, true /* expectNetworkBroadcast */)
+                    .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis)
                     .assertLatestPhoneSuggestion(phone1Id, phone1TimeSuggestion);
 
         }
@@ -227,8 +220,7 @@ public class TimeDetectorStrategyImplTest {
                     mScript.calculateTimeInMillisForNow(phone2TimeSuggestion.getUtcTime());
 
             mScript.simulatePhoneTimeSuggestion(phone2TimeSuggestion)
-                    .verifySystemClockWasSetAndResetCallTracking(
-                            expectedSystemClockMillis, true /* expectNetworkBroadcast */)
+                    .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis)
                     .assertLatestPhoneSuggestion(phone2Id, phone2TimeSuggestion);
         }
     }
@@ -265,8 +257,7 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing();
         long expectedSystemClockMillis1 = mScript.calculateTimeInMillisForNow(utcTime1);
         mScript.simulatePhoneTimeSuggestion(timeSuggestion1)
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedSystemClockMillis1, true /* expectNetworkBroadcast */)
+                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis1)
                 .assertLatestPhoneSuggestion(phoneId, timeSuggestion1);
 
         // The UTC time increment should be larger than the system clock update threshold so we
@@ -304,8 +295,7 @@ public class TimeDetectorStrategyImplTest {
         PhoneTimeSuggestion timeSuggestion4 =
                 createPhoneTimeSuggestion(phoneId, utcTime4);
         mScript.simulatePhoneTimeSuggestion(timeSuggestion4)
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedSystemClockMillis4, true /* expectNetworkBroadcast */)
+                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis4)
                 .assertLatestPhoneSuggestion(phoneId, timeSuggestion4);
     }
 
@@ -339,8 +329,7 @@ public class TimeDetectorStrategyImplTest {
 
         // Turn on auto time detection.
         mScript.simulateAutoTimeDetectionToggle()
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedSystemClockMillis1, true /* expectNetworkBroadcast */)
+                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis1)
                 .assertLatestPhoneSuggestion(phoneId, timeSuggestion1);
 
         // Turn off auto time detection.
@@ -367,8 +356,7 @@ public class TimeDetectorStrategyImplTest {
 
         // Turn on auto time detection.
         mScript.simulateAutoTimeDetectionToggle()
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedSystemClockMillis2, true /* expectNetworkBroadcast */)
+                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis2)
                 .assertLatestPhoneSuggestion(phoneId, timeSuggestion2);
     }
 
@@ -388,7 +376,7 @@ public class TimeDetectorStrategyImplTest {
                 mScript.calculateTimeInMillisForNow(phoneSuggestion.getUtcTime());
         mScript.simulatePhoneTimeSuggestion(phoneSuggestion)
                 .verifySystemClockWasSetAndResetCallTracking(
-                        expectedSystemClockMillis, true /* expectedNetworkBroadcast */)
+                        expectedSystemClockMillis  /* expectedNetworkBroadcast */)
                 .assertLatestPhoneSuggestion(phoneId, phoneSuggestion);
 
         // Look inside and check what the strategy considers the current best phone suggestion.
@@ -416,8 +404,7 @@ public class TimeDetectorStrategyImplTest {
         long expectedSystemClockMillis =
                 mScript.calculateTimeInMillisForNow(timeSuggestion.getUtcTime());
         mScript.simulateManualTimeSuggestion(timeSuggestion)
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedSystemClockMillis, false /* expectNetworkBroadcast */);
+                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis);
     }
 
     @Test
@@ -439,8 +426,7 @@ public class TimeDetectorStrategyImplTest {
         long expectedAutoClockMillis =
                 mScript.calculateTimeInMillisForNow(phoneTimeSuggestion.getUtcTime());
         mScript.simulatePhoneTimeSuggestion(phoneTimeSuggestion)
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedAutoClockMillis, true /* expectNetworkBroadcast */)
+                .verifySystemClockWasSetAndResetCallTracking(expectedAutoClockMillis)
                 .assertLatestPhoneSuggestion(phoneId, phoneTimeSuggestion);
 
         // Simulate the passage of time.
@@ -463,8 +449,7 @@ public class TimeDetectorStrategyImplTest {
         long expectedManualClockMillis =
                 mScript.calculateTimeInMillisForNow(manualTimeSuggestion.getUtcTime());
         mScript.simulateManualTimeSuggestion(manualTimeSuggestion)
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedManualClockMillis, false /* expectNetworkBroadcast */)
+                .verifySystemClockWasSetAndResetCallTracking(expectedManualClockMillis)
                 .assertLatestPhoneSuggestion(phoneId, phoneTimeSuggestion);
 
         // Simulate the passage of time.
@@ -475,8 +460,7 @@ public class TimeDetectorStrategyImplTest {
 
         expectedAutoClockMillis =
                 mScript.calculateTimeInMillisForNow(phoneTimeSuggestion.getUtcTime());
-        mScript.verifySystemClockWasSetAndResetCallTracking(
-                        expectedAutoClockMillis, true /* expectNetworkBroadcast */)
+        mScript.verifySystemClockWasSetAndResetCallTracking(expectedAutoClockMillis)
                 .assertLatestPhoneSuggestion(phoneId, phoneTimeSuggestion);
 
         // Switch back to manual - nothing should happen to the clock.
@@ -514,8 +498,7 @@ public class TimeDetectorStrategyImplTest {
         long expectedSystemClockMillis =
                 mScript.calculateTimeInMillisForNow(timeSuggestion.getUtcTime());
         mScript.simulateNetworkTimeSuggestion(timeSuggestion)
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedSystemClockMillis, false /* expectNetworkBroadcast */);
+                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis);
     }
 
     @Test
@@ -550,8 +533,7 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing(smallTimeIncrementMillis)
                 .simulateNetworkTimeSuggestion(networkTimeSuggestion1)
                 .verifySystemClockWasSetAndResetCallTracking(
-                        mScript.calculateTimeInMillisForNow(networkTimeSuggestion1.getUtcTime()),
-                        false /* expectNetworkBroadcast */);
+                        mScript.calculateTimeInMillisForNow(networkTimeSuggestion1.getUtcTime()));
 
         // Check internal state.
         mScript.assertLatestPhoneSuggestion(ARBITRARY_PHONE_ID, null)
@@ -570,8 +552,7 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing(smallTimeIncrementMillis)
                 .simulatePhoneTimeSuggestion(phoneTimeSuggestion)
                 .verifySystemClockWasSetAndResetCallTracking(
-                        mScript.calculateTimeInMillisForNow(phoneTimeSuggestion.getUtcTime()),
-                        true /* expectNetworkBroadcast */);
+                        mScript.calculateTimeInMillisForNow(phoneTimeSuggestion.getUtcTime()));
 
         // Check internal state.
         mScript.assertLatestPhoneSuggestion(ARBITRARY_PHONE_ID, phoneTimeSuggestion)
@@ -622,8 +603,7 @@ public class TimeDetectorStrategyImplTest {
 
         // Verify the latest network time now wins.
         mScript.verifySystemClockWasSetAndResetCallTracking(
-                mScript.calculateTimeInMillisForNow(networkTimeSuggestion2.getUtcTime()),
-                false /* expectNetworkTimeBroadcast */);
+                mScript.calculateTimeInMillisForNow(networkTimeSuggestion2.getUtcTime()));
 
         // Check internal state.
         mScript.assertLatestPhoneSuggestion(ARBITRARY_PHONE_ID, phoneTimeSuggestion)
@@ -645,7 +625,6 @@ public class TimeDetectorStrategyImplTest {
 
         // Tracking operations.
         private boolean mSystemClockWasSet;
-        private Intent mBroadcastSent;
 
         @Override
         public int systemClockUpdateThresholdMillis() {
@@ -687,12 +666,6 @@ public class TimeDetectorStrategyImplTest {
         public void releaseWakeLock() {
             assertWakeLockAcquired();
             mWakeLockAcquired = false;
-        }
-
-        @Override
-        public void sendStickyBroadcast(Intent intent) {
-            assertNotNull(intent);
-            mBroadcastSent = intent;
         }
 
         // Methods below are for managing the fake's behavior.
@@ -739,17 +712,8 @@ public class TimeDetectorStrategyImplTest {
             assertEquals(expectedSystemClockMillis, mSystemClockMillis);
         }
 
-        void verifyIntentWasBroadcast() {
-            assertTrue(mBroadcastSent != null);
-        }
-
-        void verifyIntentWasNotBroadcast() {
-            assertNull(mBroadcastSent);
-        }
-
         void resetCallTracking() {
             mSystemClockWasSet = false;
-            mBroadcastSent = null;
         }
 
         private void assertWakeLockAcquired() {
@@ -832,17 +796,12 @@ public class TimeDetectorStrategyImplTest {
 
         Script verifySystemClockWasNotSetAndResetCallTracking() {
             mFakeCallback.verifySystemClockNotSet();
-            mFakeCallback.verifyIntentWasNotBroadcast();
             mFakeCallback.resetCallTracking();
             return this;
         }
 
-        Script verifySystemClockWasSetAndResetCallTracking(
-                long expectedSystemClockMillis, boolean expectNetworkBroadcast) {
+        Script verifySystemClockWasSetAndResetCallTracking(long expectedSystemClockMillis) {
             mFakeCallback.verifySystemClockWasSet(expectedSystemClockMillis);
-            if (expectNetworkBroadcast) {
-                mFakeCallback.verifyIntentWasBroadcast();
-            }
             mFakeCallback.resetCallTracking();
             return this;
         }
