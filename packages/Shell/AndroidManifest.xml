@@ -224,6 +224,9 @@
     <!-- Permission requried for CTS test - CellBroadcastIntentsTest -->
     <uses-permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS"/>
 
+    <!-- Permission required for CTS test - TetheringManagerTest -->
+    <uses-permission android:name="android.permission.TETHER_PRIVILEGED"/>
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
