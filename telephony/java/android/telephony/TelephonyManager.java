@@ -2864,6 +2864,24 @@ public class TelephonyManager {
     //
     //
 
+    /** @hide */
+    @IntDef(prefix = {"SIM_STATE_"},
+            value = {
+                    SIM_STATE_UNKNOWN,
+                    SIM_STATE_ABSENT,
+                    SIM_STATE_PIN_REQUIRED,
+                    SIM_STATE_PUK_REQUIRED,
+                    SIM_STATE_NETWORK_LOCKED,
+                    SIM_STATE_READY,
+                    SIM_STATE_NOT_READY,
+                    SIM_STATE_PERM_DISABLED,
+                    SIM_STATE_CARD_IO_ERROR,
+                    SIM_STATE_CARD_RESTRICTED,
+                    SIM_STATE_LOADED,
+                    SIM_STATE_PRESENT,
+            })
+    public @interface SimState {}
+
     /**
      * SIM card state: Unknown. Signifies that the SIM is in transition
      * between states. For example, when the user inputs the SIM pin
@@ -3069,7 +3087,7 @@ public class TelephonyManager {
      * @see #SIM_STATE_CARD_IO_ERROR
      * @see #SIM_STATE_CARD_RESTRICTED
      */
-    public int getSimState() {
+    public @SimState int getSimState() {
         int simState = getSimStateIncludingLoaded();
         if (simState == SIM_STATE_LOADED) {
             simState = SIM_STATE_READY;
@@ -3077,7 +3095,7 @@ public class TelephonyManager {
         return simState;
     }
 
-    private int getSimStateIncludingLoaded() {
+    private @SimState int getSimStateIncludingLoaded() {
         int slotIndex = getSlotIndex();
         // slotIndex may be invalid due to sim being absent. In that case query all slots to get
         // sim state
@@ -3111,7 +3129,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    public int getSimCardState() {
+    public @SimState int getSimCardState() {
         int simState = getSimState();
         return getSimCardStateFromSimState(simState);
     }
@@ -3131,7 +3149,7 @@ public class TelephonyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public int getSimCardState(int physicalSlotIndex) {
+    public @SimState int getSimCardState(int physicalSlotIndex) {
         int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex));
         return getSimCardStateFromSimState(simState);
     }
@@ -3141,7 +3159,7 @@ public class TelephonyManager {
      * @param simState
      * @return SIM card state
      */
-    private int getSimCardStateFromSimState(int simState) {
+    private @SimState int getSimCardStateFromSimState(int simState) {
         switch (simState) {
             case SIM_STATE_UNKNOWN:
             case SIM_STATE_ABSENT:
@@ -3181,7 +3199,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    public int getSimApplicationState() {
+    public @SimState int getSimApplicationState() {
         int simState = getSimStateIncludingLoaded();
         return getSimApplicationStateFromSimState(simState);
     }
@@ -3204,7 +3222,7 @@ public class TelephonyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public int getSimApplicationState(int physicalSlotIndex) {
+    public @SimState int getSimApplicationState(int physicalSlotIndex) {
         int simState =
                 SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex));
         return getSimApplicationStateFromSimState(simState);
@@ -3215,7 +3233,7 @@ public class TelephonyManager {
      * @param simState
      * @return SIM application state
      */
-    private int getSimApplicationStateFromSimState(int simState) {
+    private @SimState int getSimApplicationStateFromSimState(int simState) {
         switch (simState) {
             case SIM_STATE_UNKNOWN:
             case SIM_STATE_ABSENT:
@@ -3272,7 +3290,7 @@ public class TelephonyManager {
      * @see #SIM_STATE_CARD_IO_ERROR
      * @see #SIM_STATE_CARD_RESTRICTED
      */
-    public int getSimState(int slotIndex) {
+    public @SimState int getSimState(int slotIndex) {
         int simState = SubscriptionManager.getSimStateForSlotIndex(slotIndex);
         if (simState == SIM_STATE_LOADED) {
             simState = SIM_STATE_READY;
