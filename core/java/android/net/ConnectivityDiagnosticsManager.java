@@ -18,10 +18,16 @@ package android.net;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.PersistableBundle;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -60,25 +66,38 @@ public class ConnectivityDiagnosticsManager {
     /** @hide */
     public ConnectivityDiagnosticsManager() {}
 
+    /** @hide */
+    @VisibleForTesting
+    public static boolean persistableBundleEquals(
+            @Nullable PersistableBundle a, @Nullable PersistableBundle b) {
+        if (a == b) return true;
+        if (a == null || b == null) return false;
+        if (!Objects.equals(a.keySet(), b.keySet())) return false;
+        for (String key : a.keySet()) {
+            if (!Objects.equals(a.get(key), b.get(key))) return false;
+        }
+        return true;
+    }
+
     /** Class that includes connectivity information for a specific Network at a specific time. */
-    public static class ConnectivityReport {
+    public static final class ConnectivityReport implements Parcelable {
         /** The Network for which this ConnectivityReport applied */
-        @NonNull public final Network network;
+        @NonNull private final Network mNetwork;
 
         /**
          * The timestamp for the report. The timestamp is taken from {@link
          * System#currentTimeMillis}.
          */
-        public final long reportTimestamp;
+        private final long mReportTimestamp;
 
         /** LinkProperties available on the Network at the reported timestamp */
-        @NonNull public final LinkProperties linkProperties;
+        @NonNull private final LinkProperties mLinkProperties;
 
         /** NetworkCapabilities available on the Network at the reported timestamp */
-        @NonNull public final NetworkCapabilities networkCapabilities;
+        @NonNull private final NetworkCapabilities mNetworkCapabilities;
 
         /** PersistableBundle that may contain additional info about the report */
-        @NonNull public final PersistableBundle additionalInfo;
+        @NonNull private final PersistableBundle mAdditionalInfo;
 
         /**
          * Constructor for ConnectivityReport.
@@ -101,12 +120,120 @@ public class ConnectivityDiagnosticsManager {
                 @NonNull LinkProperties linkProperties,
                 @NonNull NetworkCapabilities networkCapabilities,
                 @NonNull PersistableBundle additionalInfo) {
-            this.network = network;
-            this.reportTimestamp = reportTimestamp;
-            this.linkProperties = linkProperties;
-            this.networkCapabilities = networkCapabilities;
-            this.additionalInfo = additionalInfo;
+            mNetwork = network;
+            mReportTimestamp = reportTimestamp;
+            mLinkProperties = linkProperties;
+            mNetworkCapabilities = networkCapabilities;
+            mAdditionalInfo = additionalInfo;
         }
+
+        /**
+         * Returns the Network for this ConnectivityReport.
+         *
+         * @return The Network for which this ConnectivityReport applied
+         */
+        @NonNull
+        public Network getNetwork() {
+            return mNetwork;
+        }
+
+        /**
+         * Returns the epoch timestamp (milliseconds) for when this report was taken.
+         *
+         * @return The timestamp for the report. Taken from {@link System#currentTimeMillis}.
+         */
+        public long getReportTimestamp() {
+            return mReportTimestamp;
+        }
+
+        /**
+         * Returns the LinkProperties available when this report was taken.
+         *
+         * @return LinkProperties available on the Network at the reported timestamp
+         */
+        @NonNull
+        public LinkProperties getLinkProperties() {
+            return new LinkProperties(mLinkProperties);
+        }
+
+        /**
+         * Returns the NetworkCapabilities when this report was taken.
+         *
+         * @return NetworkCapabilities available on the Network at the reported timestamp
+         */
+        @NonNull
+        public NetworkCapabilities getNetworkCapabilities() {
+            return new NetworkCapabilities(mNetworkCapabilities);
+        }
+
+        /**
+         * Returns a PersistableBundle with additional info for this report.
+         *
+         * @return PersistableBundle that may contain additional info about the report
+         */
+        @NonNull
+        public PersistableBundle getAdditionalInfo() {
+            return new PersistableBundle(mAdditionalInfo);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (this == o) return true;
+            if (!(o instanceof ConnectivityReport)) return false;
+            final ConnectivityReport that = (ConnectivityReport) o;
+
+            // PersistableBundle is optimized to avoid unparcelling data unless fields are
+            // referenced. Because of this, use {@link ConnectivityDiagnosticsManager#equals} over
+            // {@link PersistableBundle#kindofEquals}.
+            return mReportTimestamp == that.mReportTimestamp
+                    && mNetwork.equals(that.mNetwork)
+                    && mLinkProperties.equals(that.mLinkProperties)
+                    && mNetworkCapabilities.equals(that.mNetworkCapabilities)
+                    && persistableBundleEquals(mAdditionalInfo, that.mAdditionalInfo);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(
+                    mNetwork,
+                    mReportTimestamp,
+                    mLinkProperties,
+                    mNetworkCapabilities,
+                    mAdditionalInfo);
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeParcelable(mNetwork, flags);
+            dest.writeLong(mReportTimestamp);
+            dest.writeParcelable(mLinkProperties, flags);
+            dest.writeParcelable(mNetworkCapabilities, flags);
+            dest.writeParcelable(mAdditionalInfo, flags);
+        }
+
+        /** Implement the Parcelable interface */
+        public static final @NonNull Creator<ConnectivityReport> CREATOR =
+                new Creator<>() {
+                    public ConnectivityReport createFromParcel(Parcel in) {
+                        return new ConnectivityReport(
+                                in.readParcelable(null),
+                                in.readLong(),
+                                in.readParcelable(null),
+                                in.readParcelable(null),
+                                in.readParcelable(null));
+                    }
+
+                    public ConnectivityReport[] newArray(int size) {
+                        return new ConnectivityReport[size];
+                    }
+                };
     }
 
     /** Class that includes information for a suspected data stall on a specific Network */
