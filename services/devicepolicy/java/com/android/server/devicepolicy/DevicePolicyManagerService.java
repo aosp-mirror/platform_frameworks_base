@@ -2447,7 +2447,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userId) != 0) {
             profileOwner.ensureUserRestrictions().putBoolean(
                     UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true);
-            saveUserRestrictionsLocked(userId);
+            saveUserRestrictionsLocked(userId, /* parent = */ false);
             mInjector.settingsSecurePutIntForUser(
                     Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userId);
         }
@@ -2478,7 +2478,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             admin.defaultEnabledRestrictionsAlreadySet.addAll(restrictionsToSet);
             Slog.i(LOG_TAG, "Enabled the following restrictions by default: " + restrictionsToSet);
-            saveUserRestrictionsLocked(userId);
+            saveUserRestrictionsLocked(userId, /* parent = */ false);
         }
     }
 
@@ -8039,7 +8039,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 activeAdmin.defaultEnabledRestrictionsAlreadySet.addAll(restrictions);
                 Slog.i(LOG_TAG, "Enabled the following restrictions by default: " + restrictions);
 
-                saveUserRestrictionsLocked(userId);
+                saveUserRestrictionsLocked(userId, /* parent = */ false);
             }
 
             long ident = mInjector.binderClearCallingIdentity();
@@ -10310,24 +10310,33 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setUserRestriction(ComponentName who, String key, boolean enabledFromThisOwner) {
+    public void setUserRestriction(ComponentName who, String key, boolean enabledFromThisOwner,
+            boolean parent) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         if (!UserRestrictionsUtils.isValidRestriction(key)) {
             return;
         }
 
-        final int userHandle = mInjector.userHandleGetCallingUserId();
+        int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (getLockObject()) {
             final ActiveAdmin activeAdmin =
                     getActiveAdminForCallerLocked(who,
-                            DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+                            DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, parent);
             final boolean isDeviceOwner = isDeviceOwner(who, userHandle);
+
             if (isDeviceOwner) {
                 if (!UserRestrictionsUtils.canDeviceOwnerChange(key)) {
                     throw new SecurityException("Device owner cannot set user restriction " + key);
                 }
-            } else { // profile owner
-                if (!UserRestrictionsUtils.canProfileOwnerChange(key, userHandle)) {
+                if (parent) {
+                    throw new IllegalArgumentException(
+                            "Cannot use the parent instance in Device Owner mode");
+                }
+            } else {
+                if (!(UserRestrictionsUtils.canProfileOwnerChange(key, userHandle) || (
+                        isProfileOwnerOfOrganizationOwnedDevice(activeAdmin) && parent
+                        && UserRestrictionsUtils.canProfileOwnerOfOrganizationOwnedDeviceChange(
+                                key)))) {
                     throw new SecurityException("Profile owner cannot set user restriction " + key);
                 }
             }
@@ -10339,7 +10348,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             } else {
                 restrictions.remove(key);
             }
-            saveUserRestrictionsLocked(userHandle);
+            saveUserRestrictionsLocked(userHandle, parent);
         }
         final int eventId = enabledFromThisOwner
                 ? DevicePolicyEnums.ADD_USER_RESTRICTION
@@ -10357,9 +10366,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void saveUserRestrictionsLocked(int userId) {
+    private void saveUserRestrictionsLocked(int userId, boolean parent) {
         saveSettingsLocked(userId);
-        pushUserRestrictions(userId);
+        pushUserRestrictions(parent ? getProfileParentId(userId) : userId);
         sendChangedNotification(userId);
     }
 
@@ -10368,6 +10377,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final boolean isDeviceOwner = mOwners.isDeviceOwnerUserId(userId);
             Bundle userRestrictions = null;
             final int restrictionOwnerType;
+            final int originatingUserId;
 
             if (isDeviceOwner) {
                 final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
@@ -10377,6 +10387,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 userRestrictions = deviceOwner.userRestrictions;
                 addOrRemoveDisableCameraRestriction(userRestrictions, deviceOwner);
                 restrictionOwnerType = UserManagerInternal.OWNER_TYPE_DEVICE_OWNER;
+                originatingUserId = deviceOwner.getUserHandle().getIdentifier();
             } else {
                 final ActiveAdmin profileOwnerOfOrganizationOwnedDevice =
                         getProfileOwnerOfOrganizationOwnedDeviceLocked(userId);
@@ -10391,21 +10402,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     userRestrictions = parent.userRestrictions;
                     userRestrictions = addOrRemoveDisableCameraRestriction(userRestrictions,
                             parent);
+                    originatingUserId =
+                            profileOwnerOfOrganizationOwnedDevice.getUserHandle().getIdentifier();
                 } else {
                     final ActiveAdmin profileOwner = getProfileOwnerAdminLocked(userId);
 
                     if (profileOwner != null) {
                         userRestrictions = profileOwner.userRestrictions;
                         restrictionOwnerType = UserManagerInternal.OWNER_TYPE_PROFILE_OWNER;
+                        originatingUserId = profileOwner.getUserHandle().getIdentifier();
                     } else {
                         restrictionOwnerType = UserManagerInternal.OWNER_TYPE_NO_OWNER;
+                        originatingUserId = userId;
                     }
                     userRestrictions = addOrRemoveDisableCameraRestriction(
                             userRestrictions, userId);
                 }
             }
-            mUserManagerInternal.setDevicePolicyUserRestrictions(userId, userRestrictions,
-                    restrictionOwnerType);
+            mUserManagerInternal.setDevicePolicyUserRestrictions(originatingUserId,
+                    userRestrictions, restrictionOwnerType);
         }
     }
 
@@ -10435,14 +10450,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public Bundle getUserRestrictions(ComponentName who) {
+    public Bundle getUserRestrictions(ComponentName who, boolean parent) {
         if (!mHasFeature) {
             return null;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
+
         synchronized (getLockObject()) {
             final ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(who,
-                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, parent);
+            if (parent) {
+                enforceProfileOwnerOfOrganizationOwnedDevice(activeAdmin);
+            }
             return activeAdmin.userRestrictions;
         }
     }
@@ -11241,7 +11260,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 } else {
                     try {
                         setUserRestriction(who, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
-                                (Integer.parseInt(value) == 0) ? true : false);
+                                (Integer.parseInt(value) == 0) ? true : false, /* parent */ false);
                         DevicePolicyEventLogger
                                 .createEvent(DevicePolicyEnums.SET_SECURE_SETTING)
                                 .setAdmin(who)
@@ -11286,7 +11305,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (getLockObject()) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            setUserRestriction(who, UserManager.DISALLOW_UNMUTE_DEVICE, on);
+            setUserRestriction(who, UserManager.DISALLOW_UNMUTE_DEVICE, on, /* parent */ false);
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.SET_MASTER_VOLUME_MUTED)
                     .setAdmin(who)

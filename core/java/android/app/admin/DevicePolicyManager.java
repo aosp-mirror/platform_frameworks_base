@@ -1349,6 +1349,9 @@ public class DevicePolicyManager {
      * Broadcast action: send when any policy admin changes a policy.
      * This is generally used to find out when a new policy is in effect.
      *
+     * If the profile owner of an organization-owned managed profile changes some user
+     * restriction explicitly on the parent user, this broadcast will <em>not</em> be
+     * sent to the parent user.
      * @hide
      */
     @UnsupportedAppUsage
@@ -7958,18 +7961,23 @@ public class DevicePolicyManager {
      * <p>
      * The calling device admin must be a profile or device owner; if it is not, a security
      * exception will be thrown.
+     * <p>
+     * The profile owner of an organization-owned managed profile may invoke this method on
+     * the {@link DevicePolicyManager} instance it obtained from
+     * {@link #getParentProfileInstance(ComponentName)}, for enforcing device-wide restrictions.
+     * <p>
+     * See the constants in {@link android.os.UserManager} for the list of restrictions that can
+     * be enforced device-wide.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param key The key of the restriction. See the constants in {@link android.os.UserManager}
-     *            for the list of keys.
+     * @param key   The key of the restriction.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void addUserRestriction(@NonNull ComponentName admin,
             @UserManager.UserRestrictionKey String key) {
-        throwIfParentInstance("addUserRestriction");
         if (mService != null) {
             try {
-                mService.setUserRestriction(admin, key, true);
+                mService.setUserRestriction(admin, key, true, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -7981,18 +7989,22 @@ public class DevicePolicyManager {
      * <p>
      * The calling device admin must be a profile or device owner; if it is not, a security
      * exception will be thrown.
+     * <p>
+     * The profile owner of an organization-owned managed profile may invoke this method on
+     * the {@link DevicePolicyManager} instance it obtained from
+     * {@link #getParentProfileInstance(ComponentName)}, for clearing device-wide restrictions.
+     * <p>
+     * See the constants in {@link android.os.UserManager} for the list of restrictions.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param key The key of the restriction. See the constants in {@link android.os.UserManager}
-     *            for the list of keys.
+     * @param key   The key of the restriction.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void clearUserRestriction(@NonNull ComponentName admin,
             @UserManager.UserRestrictionKey String key) {
-        throwIfParentInstance("clearUserRestriction");
         if (mService != null) {
             try {
-                mService.setUserRestriction(admin, key, false);
+                mService.setUserRestriction(admin, key, false, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8006,16 +8018,20 @@ public class DevicePolicyManager {
      * The target user may have more restrictions set by the system or other device owner / profile
      * owner. To get all the user restrictions currently set, use
      * {@link UserManager#getUserRestrictions()}.
+     * <p>
+     * The profile owner of an organization-owned managed profile may invoke this method on
+     * the {@link DevicePolicyManager} instance it obtained from
+     * {@link #getParentProfileInstance(ComponentName)}, for retrieving device-wide restrictions
+     * it previously set with {@link #addUserRestriction(ComponentName, String)}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public @NonNull Bundle getUserRestrictions(@NonNull ComponentName admin) {
-        throwIfParentInstance("getUserRestrictions");
         Bundle ret = null;
         if (mService != null) {
             try {
-                ret = mService.getUserRestrictions(admin);
+                ret = mService.getUserRestrictions(admin, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
