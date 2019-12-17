@@ -51,7 +51,6 @@ import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
-import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
@@ -1685,19 +1684,9 @@ class ActivityStarter {
             return START_SUCCESS;
         }
 
-        // True if we are clearing top and resetting of a standard (default) launch mode
-        // ({@code LAUNCH_MULTIPLE}) activity. The existing activity will be finished.
-        final boolean clearTopAndResetStandardLaunchMode =
-                (mLaunchFlags & (FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_RESET_TASK_IF_NEEDED))
-                        == (FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
-                        && mLaunchMode == LAUNCH_MULTIPLE;
-
         boolean clearTaskForReuse = false;
         if (reusedTask != null) {
-            // If mStartActivity does not have a task associated with it, associate it with the
-            // reused activity's task. Do not do so if we're clearing top and resetting for a
-            // standard launchMode activity.
-            if (mStartActivity.getTask() == null && !clearTopAndResetStandardLaunchMode) {
+            if (mStartActivity.getTask() == null) {
                 mStartActivity.setTaskForReuse(reusedTask);
                 clearTaskForReuse = true;
             }
