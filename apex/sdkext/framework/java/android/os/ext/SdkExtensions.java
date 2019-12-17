@@ -60,7 +60,7 @@ public class SdkExtensions {
      */
     public static int getExtensionVersion(@SdkVersion int sdk) {
         if (sdk < VERSION_CODES.R) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(String.valueOf(sdk) + " does not have extensions");
         }
         return R_EXTENSION_INT;
     }
