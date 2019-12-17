@@ -1956,6 +1956,12 @@ public class CarrierConfigManager {
             "allow_add_call_during_video_call";
 
     /**
+     * When false, indicates that holding a video call is disabled
+     */
+    public static final String KEY_ALLOW_HOLDING_VIDEO_CALL_BOOL =
+            "allow_holding_video_call";
+
+    /**
      * When true, indicates that the HD audio icon in the in-call screen should not be shown for
      * VoWifi calls.
      * @hide
@@ -3688,6 +3694,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_MERGE_WIFI_CALLS_WHEN_VOWIFI_OFF_BOOL, true);
         sDefaults.putBoolean(KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_ALLOW_HOLDING_VIDEO_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_WIFI_CALLS_CAN_BE_HD_AUDIO, true);
         sDefaults.putBoolean(KEY_VIDEO_CALLS_CAN_BE_HD_AUDIO, true);
         sDefaults.putBoolean(KEY_GSM_CDMA_CALLS_CAN_BE_HD_AUDIO, false);
