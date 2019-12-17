@@ -20,12 +20,6 @@ import java.util.function.Consumer;
 public class ScreenshotHelper {
     private static final String TAG = "ScreenshotHelper";
 
-    private static final String SYSUI_PACKAGE = "com.android.systemui";
-    private static final String SYSUI_SCREENSHOT_SERVICE =
-            "com.android.systemui.screenshot.TakeScreenshotService";
-    private static final String SYSUI_SCREENSHOT_ERROR_RECEIVER =
-            "com.android.systemui.screenshot.ScreenshotServiceErrorReceiver";
-
     // Time until we give up on the screenshot & show an error instead.
     private final int SCREENSHOT_TIMEOUT_MS = 10000;
 
@@ -94,8 +88,9 @@ public class ScreenshotHelper {
             if (mScreenshotConnection != null) {
                 return;
             }
-            final ComponentName serviceComponent = new ComponentName(SYSUI_PACKAGE,
-                    SYSUI_SCREENSHOT_SERVICE);
+            final ComponentName serviceComponent = ComponentName.unflattenFromString(
+                    mContext.getResources().getString(
+                            com.android.internal.R.string.config_screenshotServiceComponent));
             final Intent serviceIntent = new Intent();
 
             final Runnable mScreenshotTimeout = new Runnable() {
@@ -181,8 +176,9 @@ public class ScreenshotHelper {
      */
     private void notifyScreenshotError() {
         // If the service process is killed, then ask it to clean up after itself
-        final ComponentName errorComponent = new ComponentName(SYSUI_PACKAGE,
-                SYSUI_SCREENSHOT_ERROR_RECEIVER);
+        final ComponentName errorComponent = ComponentName.unflattenFromString(
+                mContext.getResources().getString(
+                        com.android.internal.R.string.config_screenshotErrorReceiverComponent));
         // Broadcast needs to have a valid action.  We'll just pick
         // a generic one, since the receiver here doesn't care.
         Intent errorIntent = new Intent(Intent.ACTION_USER_PRESENT);

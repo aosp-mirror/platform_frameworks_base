@@ -35,6 +35,7 @@ import android.app.timedetector.TimeDetector;
 import android.app.timezonedetector.TimeZoneDetector;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -162,6 +163,8 @@ public class MockSystemServices {
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(realContext.getPackageManager());
+        when(packageManagerInternal.getSystemUiServiceComponent()).thenReturn(
+                new ComponentName("com.android.systemui", ".Service"));
 
         contentResolver = new MockContentResolver();
         contentResolver.addProvider("telephony", new MockContentProvider(realContext) {

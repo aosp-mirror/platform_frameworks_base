@@ -275,6 +275,11 @@ public abstract class PackageManagerInternal {
     public abstract ComponentName getDefaultHomeActivity(int userId);
 
     /**
+     * @return The SystemUI service component name.
+     */
+    public abstract ComponentName getSystemUiServiceComponent();
+
+    /**
      * Called by DeviceOwnerManagerService to set the package names of device owner and profile
      * owners.
      */

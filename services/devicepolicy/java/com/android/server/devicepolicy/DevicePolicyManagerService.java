@@ -13773,8 +13773,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } else {
             deviceOwner.lastNetworkLoggingNotificationTimeMs = now;
         }
+        final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
         final Intent intent = new Intent(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
-        intent.setPackage("com.android.systemui");
+        intent.setPackage(pm.getSystemUiServiceComponent().getPackageName());
         final PendingIntent pendingIntent = PendingIntent.getBroadcastAsUser(mContext, 0, intent, 0,
                 UserHandle.CURRENT);
         Notification notification =

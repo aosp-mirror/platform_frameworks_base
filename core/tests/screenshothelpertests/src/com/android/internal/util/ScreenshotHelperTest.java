@@ -24,8 +24,13 @@ import static junit.framework.Assert.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -54,9 +59,15 @@ public final class ScreenshotHelperTest {
         // This raises a `SecurityException` if the device is locked. Calling either `Context`
         // method results in a broadcast of `android.intent.action. USER_PRESENT`. Only the system
         // process is allowed to broadcast that `Intent`.
+        Resources res = mock(Resources.class);
         mContext = Mockito.spy(Context.class);
-        Mockito.doNothing().when(mContext).sendBroadcastAsUser(any(), any());
-        Mockito.doReturn(true).when(mContext).bindServiceAsUser(any(), any(), anyInt(), any());
+        doNothing().when(mContext).sendBroadcastAsUser(any(), any());
+        doReturn(true).when(mContext).bindServiceAsUser(any(), any(), anyInt(), any());
+        doReturn(res).when(mContext).getResources();
+        doReturn("com.android.systemui/.Service").when(res).getString(
+                eq(com.android.internal.R.string.config_screenshotServiceComponent));
+        doReturn("com.android.systemui/.ErrorReceiver").when(res).getString(
+                eq(com.android.internal.R.string.config_screenshotErrorReceiverComponent));
 
         mHandler = new Handler(Looper.getMainLooper());
         mScreenshotHelper = new ScreenshotHelper(mContext);

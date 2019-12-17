@@ -36,12 +36,6 @@ import android.util.Slog;
 public final class Sandman {
     private static final String TAG = "Sandman";
 
-    // The component name of a special dock app that merely launches a dream.
-    // We don't want to launch this app when docked because it causes an unnecessary
-    // activity transition.  We just want to start the dream.
-    private static final ComponentName SOMNAMBULATOR_COMPONENT =
-            new ComponentName("com.android.systemui", "com.android.systemui.Somnambulator");
-
 
     // The sandman is eternal.  No one instantiates him.
     private Sandman() {
@@ -52,8 +46,11 @@ public final class Sandman {
      * False if we should dream instead, if appropriate.
      */
     public static boolean shouldStartDockApp(Context context, Intent intent) {
+        final ComponentName somnambulatorComponent = ComponentName.unflattenFromString(
+                context.getResources().getString(
+                        com.android.internal.R.string.config_somnambulatorComponent));
         ComponentName name = intent.resolveActivity(context.getPackageManager());
-        return name != null && !name.equals(SOMNAMBULATOR_COMPONENT);
+        return name != null && !name.equals(somnambulatorComponent);
     }
 
     /**
