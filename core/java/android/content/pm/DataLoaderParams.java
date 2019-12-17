@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.ParcelFileDescriptor;
 
 import java.util.Arrays;
@@ -26,9 +27,12 @@ import java.util.stream.Collectors;
 
 /**
  * This class represents the parameters used to configure an Incremental Data Loader.
- * Hide for now.
+ *
+ * WARNING: This is a system API to aid internal development.
+ * Use at your own risk. It will change or be removed without warning.
  * @hide
  */
+@SystemApi
 public class DataLoaderParams {
     @NonNull private final DataLoaderParamsParcel mData;
 
@@ -52,6 +56,9 @@ public class DataLoaderParams {
         mData = data;
     }
 
+    /**
+     * @hide
+     */
     public DataLoaderParams(@NonNull DataLoaderParamsParcel data) {
         mData = data;
     }
@@ -70,6 +77,9 @@ public class DataLoaderParams {
         return mData.packageName;
     }
 
+    /**
+     * @hide
+     */
     public final @NonNull DataLoaderParamsParcel getData() {
         return mData;
     }

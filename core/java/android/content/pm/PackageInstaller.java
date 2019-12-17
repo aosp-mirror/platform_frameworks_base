@@ -1082,8 +1082,12 @@ public class PackageInstaller {
          * @throws SecurityException if called after the session has been
          *             sealed or abandoned
          * @throws IllegalStateException if called for non-callback session
+         *
+         * WARNING: This is a system API to aid internal development.
+         * Use at your own risk. It will change or be removed without warning.
          * {@hide}
          */
+        @SystemApi
         public void addFile(@NonNull String name, long lengthBytes, @NonNull byte[] metadata) {
             try {
                 mSession.addFile(name, lengthBytes, metadata);
@@ -1857,9 +1861,11 @@ public class PackageInstaller {
 
         /**
          * Set Incremental data loader params.
-         *
+         * WARNING: This is a system API to aid internal development.
+         * Use at your own risk. It will change or be removed without warning.
          * {@hide}
          */
+        @SystemApi
         @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
         public void setIncrementalParams(@NonNull DataLoaderParams incrementalParams) {
             this.incrementalParams = incrementalParams;
