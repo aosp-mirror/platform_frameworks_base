@@ -15,19 +15,25 @@
  */
 package android.app.appsearch;
 
+import android.annotation.SystemApi;
 import android.app.SystemServiceRegistry;
 import android.content.Context;
 
 /**
- * This is where the AppSearchManagerService wrapper is registered.
+ * Class holding initialization code for the AppSearch module.
  *
- * TODO(b/142567528): add comments when implement this class
  * @hide
  */
+@SystemApi
 public class AppSearchManagerFrameworkInitializer {
+    private AppSearchManagerFrameworkInitializer() {}
 
     /**
-     * TODO(b/142567528): add comments when implement this class
+     * Called by {@link SystemServiceRegistry}'s static initializer and registers all AppSearch
+     * services to {@link Context}, so that {@link Context#getSystemService} can return them.
+     *
+     * @throws IllegalStateException if this is called from anywhere besides
+     *     {@link SystemServiceRegistry}
      */
     public static void initialize() {
         SystemServiceRegistry.registerStaticService(

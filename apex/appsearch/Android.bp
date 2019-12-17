@@ -14,9 +14,11 @@
 
 apex {
     name: "com.android.appsearch",
-
     manifest: "apex_manifest.json",
-
+    java_libs: [
+        "framework-appsearch",
+        "service-appsearch",
+    ],
     key: "com.android.appsearch.key",
     certificate: ":com.android.appsearch.certificate",
 }
