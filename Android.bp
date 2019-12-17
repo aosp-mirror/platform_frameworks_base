@@ -203,7 +203,6 @@ filegroup {
     name: "framework-non-updatable-sources",
     srcs: [
         // Java/AIDL sources under frameworks/base
-        ":framework-appsearch-sources",
         ":framework-blobstore-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
@@ -262,6 +261,7 @@ filegroup {
 filegroup {
     name: "framework-updatable-sources",
     srcs: [
+        ":framework-appsearch-sources",
         ":framework-sdkext-sources",
         ":framework-statsd-sources",
         ":updatable-media-srcs",
@@ -427,6 +427,7 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
     libs: [
+        "framework-appsearch-stubs",
         // TODO(b/146167933): Use framework-statsd-stubs
         "framework-statsd",
         "framework-wifi-stubs",
@@ -466,6 +467,7 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
+        "framework-appsearch", // TODO(b/146218515): should be framework-appsearch-stubs
         "framework-sdkext-stubs-systemapi",
         // TODO(b/146167933): Use framework-statsd-stubs instead.
         "framework-statsd",

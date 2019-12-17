@@ -23,17 +23,52 @@ filegroup {
 
 java_library {
   name: "framework-appsearch",
-  installable: false,
-  sdk_version: "core_platform",
-  srcs: [
-    ":framework-appsearch-sources",
-  ],
-  aidl: {
-    export_include_dirs: [
-      "java",
-    ],
-  },
+  installable: true,
+  sdk_version: "core_platform", // TODO(b/146218515) should be core_current
+  srcs: [":framework-appsearch-sources"],
   libs: [
-    "framework-minus-apex",
+    "framework-minus-apex",  // TODO(b/146218515) should be framework-system-stubs
   ],
+}
+
+metalava_appsearch_docs_args =
+    "--hide-package com.android.server " +
+    "--error UnhiddenSystemApi " +
+    "--hide RequiresPermission " +
+    "--hide MissingPermission " +
+    "--hide BroadcastBehavior " +
+    "--hide HiddenSuperclass " +
+    "--hide DeprecationMismatch " +
+    "--hide UnavailableSymbol " +
+    "--hide SdkConstant " +
+    "--hide HiddenTypeParameter " +
+    "--hide Todo --hide Typo " +
+    "--hide HiddenTypedefConstant " +
+    "--show-annotation android.annotation.SystemApi "
+
+droidstubs {
+    name: "framework-appsearch-stubs-srcs",
+    srcs: [
+        ":framework-annotations",
+        ":framework-appsearch-sources",
+    ],
+    aidl: {
+        include_dirs: ["frameworks/base/core/java"],
+    },
+    args: metalava_appsearch_docs_args,
+    sdk_version: "core_current",
+    libs: ["android_system_stubs_current"],
+}
+
+java_library {
+    name: "framework-appsearch-stubs",
+    srcs: [":framework-appsearch-stubs-srcs"],
+    aidl: {
+        export_include_dirs: [
+            "java",
+        ],
+    },
+    sdk_version: "core_current",
+    libs: ["android_system_stubs_current"],
+    installable: false,
 }

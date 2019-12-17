@@ -811,6 +811,14 @@ package android.app.admin {
 
 }
 
+package android.app.appsearch {
+
+  public class AppSearchManagerFrameworkInitializer {
+    method public static void initialize();
+  }
+
+}
+
 package android.app.assist {
 
   public static class AssistStructure.ViewNode {
