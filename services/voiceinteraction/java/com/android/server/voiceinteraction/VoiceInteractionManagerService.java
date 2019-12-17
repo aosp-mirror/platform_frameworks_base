@@ -1291,6 +1291,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 pw.println("  mCurUser: " + mCurUser);
                 pw.println("  mCurUserUnlocked: " + mCurUserUnlocked);
                 pw.println("  mCurUserSupported: " + mCurUserSupported);
+                dumpSupportedUsers(pw, "  ");
                 if (mImpl == null) {
                     pw.println("  (No active implementation)");
                     return;
