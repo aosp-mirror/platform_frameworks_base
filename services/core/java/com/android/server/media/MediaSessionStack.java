@@ -274,6 +274,15 @@ class MediaSessionStack {
     }
 
     private void updateMediaButtonSession(MediaSessionRecordImpl newMediaButtonSession) {
+        // Check if the policy states that this session should not be updated as a media button
+        // session.
+        if (newMediaButtonSession != null) {
+            int policies = newMediaButtonSession.getSessionPolicies();
+            if ((policies & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_SESSION) == 1) {
+                return;
+            }
+        }
+
         MediaSessionRecordImpl oldMediaButtonSession = mMediaButtonSession;
         mMediaButtonSession = newMediaButtonSession;
         mOnMediaButtonSessionChangedListener.onMediaButtonSessionChanged(

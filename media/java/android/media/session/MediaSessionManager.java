@@ -61,6 +61,7 @@ import java.util.concurrent.Executor;
  * @see MediaSession
  * @see MediaController
  */
+// TODO: (jinpark) Add API for getting and setting session policies from MediaSessionService.
 @SystemService(Context.MEDIA_SESSION_SERVICE)
 public final class MediaSessionManager {
     private static final String TAG = "SessionManager";

@@ -159,9 +159,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
     private long mDuration = -1;
     private String mMetadataDescription;
 
+    private int mPolicies;
+
     public MediaSessionRecord(int ownerPid, int ownerUid, int userId, String ownerPackageName,
             ISessionCallback cb, String tag, Bundle sessionInfo,
-            MediaSessionService service, Looper handlerLooper) throws RemoteException {
+            MediaSessionService service, Looper handlerLooper, int policies)
+            throws RemoteException {
         mOwnerPid = ownerPid;
         mOwnerUid = ownerUid;
         mUserId = userId;
@@ -178,6 +181,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
         mAudioAttrs = DEFAULT_ATTRIBUTES;
+        mPolicies = policies;
 
         // May throw RemoteException if the session app is killed.
         mSessionCb.mCb.asBinder().linkToDeath(this, 0);
@@ -435,6 +439,20 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             KeyEvent ke, int sequenceId, ResultReceiver cb) {
         return mSessionCb.sendMediaButton(packageName, pid, uid, asSystemService, ke, sequenceId,
                 cb);
+    }
+
+    @Override
+    public int getSessionPolicies() {
+        synchronized (mLock) {
+            return mPolicies;
+        }
+    }
+
+    @Override
+    public void setSessionPolicies(int policies) {
+        synchronized (mLock) {
+            mPolicies = policies;
+        }
     }
 
     @Override
@@ -808,6 +826,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         @Override
         public void setMediaButtonReceiver(PendingIntent pi) throws RemoteException {
+            if ((mPolicies & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER) == 1) {
+                return;
+            }
             mMediaButtonReceiver = pi;
             final long token = Binder.clearCallingIdentity();
             try {

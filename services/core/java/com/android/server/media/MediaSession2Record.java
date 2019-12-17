@@ -50,15 +50,18 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
     private final MediaSessionService mService;
     @GuardedBy("mLock")
     private boolean mIsConnected;
+    @GuardedBy("mLock")
+    private int mPolicies;
 
     public MediaSession2Record(Session2Token sessionToken, MediaSessionService service,
-            Looper handlerLooper) {
+            Looper handlerLooper, int policies) {
         mSessionToken = sessionToken;
         mService = service;
         mHandlerExecutor = new HandlerExecutor(new Handler(handlerLooper));
         mController = new MediaController2.Builder(service.getContext(), sessionToken)
                 .setControllerCallback(mHandlerExecutor, new Controller2Callback())
                 .build();
+        mPolicies = policies;
     }
 
     @Override
@@ -127,6 +130,21 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
             KeyEvent ke, int sequenceId, ResultReceiver cb) {
         // TODO(jaewan): Implement.
         return false;
+    }
+
+
+    @Override
+    public int getSessionPolicies() {
+        synchronized (mLock) {
+            return mPolicies;
+        }
+    }
+
+    @Override
+    public void setSessionPolicies(int policies) {
+        synchronized (mLock) {
+            mPolicies = policies;
+        }
     }
 
     @Override
