@@ -324,6 +324,15 @@ public class HwParcel {
     public native final void writeStrongBinder(IHwBinder binder);
 
     /**
+     * Write a HidlMemory object (without duplicating the underlying file descriptors) to the end
+     * of the parcel.
+     *
+     * @param memory value to write
+     */
+    @FastNative
+    public native final void writeHidlMemory(@NonNull HidlMemory memory);
+
+    /**
      * Checks to make sure that the interface name matches the name written by the parcel
      * sender by writeInterfaceToken
      *
@@ -580,6 +589,38 @@ public class HwParcel {
      */
     @FastNative
     public native final IHwBinder readStrongBinder();
+
+    /**
+     * Reads a HidlMemory value (without duplicating the underlying file
+     * descriptors) from the parcel. These file descriptors will only
+     * be open for the duration that the binder window is open. If they
+     * are needed further, you must call {@link HidlMemory#dup()}, which makes you also
+     * responsible for calling {@link HidlMemory#close()}.
+     *
+     * @return HidlMemory object read from parcel.
+     * @throws IllegalArgumentException if the parcel has no more data or is otherwise corrupt.
+     */
+    @FastNative
+    @NonNull
+    public native final HidlMemory readHidlMemory();
+
+    /**
+     * Reads an embedded HidlMemory (without duplicating the underlying
+     * file descriptors) from the parcel. These file descriptors will only
+     * be open for the duration that the binder window is open. If they
+     * are needed further, you must call {@link HidlMemory#dup()}. You
+     * do not need to call close on the HidlMemory returned from this.
+     *
+     * @param fieldHandle  handle of the field, obtained from the {@link HwBlob}.
+     * @param parentHandle parentHandle from which to read the embedded object
+     * @param offset       offset into parent
+     * @return a {@link HidlMemory} instance parsed from the parcel
+     * @throws IllegalArgumentException if the parcel has no more data
+     */
+    @FastNative
+    @NonNull
+    public native final @Nullable
+    HidlMemory readEmbeddedHidlMemory(long fieldHandle, long parentHandle, long offset);
 
     /**
      * Read opaque segment of data as a blob.

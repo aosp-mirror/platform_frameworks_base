@@ -228,7 +228,7 @@ final class CompatConfig {
 
     /**
      * Removes all overrides previously added via {@link #addOverride(long, String, boolean)} or
-     * {@link #addAppOverrides(CompatibilityChangeConfig, String)} for a certain package.
+     * {@link #addOverrides(CompatibilityChangeConfig, String)} for a certain package.
      *
      * <p>This restores the default behaviour for the given change and app, once any app
      * processes have been restarted.
@@ -240,6 +240,27 @@ final class CompatConfig {
             for (int i = 0; i < mChanges.size(); ++i) {
                 mChanges.valueAt(i).removePackageOverride(packageName);
             }
+        }
+    }
+
+    boolean registerListener(long changeId, CompatChange.ChangeListener listener) {
+        boolean alreadyKnown = true;
+        synchronized (mChanges) {
+            CompatChange c = mChanges.get(changeId);
+            if (c == null) {
+                alreadyKnown = false;
+                c = new CompatChange(changeId);
+                addChange(c);
+            }
+            c.registerListener(listener);
+        }
+        return alreadyKnown;
+    }
+
+    @VisibleForTesting
+    void clearChanges() {
+        synchronized (mChanges) {
+            mChanges.clear();
         }
     }
 
@@ -298,7 +319,8 @@ final class CompatConfig {
                 changeInfos[i] = new CompatibilityChangeInfo(change.getId(),
                         change.getName(),
                         change.getEnableAfterTargetSdk(),
-                        change.getDisabled());
+                        change.getDisabled(),
+                        change.getDescription());
             }
             return changeInfos;
         }

@@ -296,7 +296,6 @@
   <java-symbol type="bool" name="config_hotswapCapable" />
   <java-symbol type="bool" name="config_mms_content_disposition_support" />
   <java-symbol type="string" name="config_ims_package" />
-  <java-symbol type="bool" name="config_dynamic_bind_ims" />
   <java-symbol type="string" name="config_wwan_network_service_package" />
   <java-symbol type="string" name="config_wlan_network_service_package" />
   <java-symbol type="string" name="config_wwan_network_service_class" />
@@ -1313,6 +1312,7 @@
   <java-symbol type="array" name="config_cdma_dun_supported_types" />
   <java-symbol type="array" name="config_disabledUntilUsedPreinstalledImes" />
   <java-symbol type="array" name="config_callBarringMMI" />
+  <java-symbol type="array" name="config_callBarringMMI_for_ims" />
   <java-symbol type="array" name="config_globalActionsList" />
   <java-symbol type="array" name="config_telephonyEuiccDeviceCapabilities" />
   <java-symbol type="array" name="config_telephonyHardware" />
@@ -1990,9 +1990,6 @@
   <java-symbol type="drawable" name="stat_sys_battery_charge" />
   <java-symbol type="drawable" name="stat_sys_battery_unknown" />
   <java-symbol type="drawable" name="stat_sys_data_usb" />
-  <java-symbol type="drawable" name="stat_sys_tether_bluetooth" />
-  <java-symbol type="drawable" name="stat_sys_tether_general" />
-  <java-symbol type="drawable" name="stat_sys_tether_usb" />
   <java-symbol type="drawable" name="stat_sys_throttled" />
   <java-symbol type="drawable" name="vpn_connected" />
   <java-symbol type="drawable" name="vpn_disconnected" />
@@ -2186,10 +2183,6 @@
   <java-symbol type="string" name="select_keyboard_layout_notification_message" />
   <java-symbol type="string" name="smv_application" />
   <java-symbol type="string" name="smv_process" />
-  <java-symbol type="string" name="tethered_notification_message" />
-  <java-symbol type="string" name="tethered_notification_title" />
-  <java-symbol type="string" name="disable_tether_notification_message" />
-  <java-symbol type="string" name="disable_tether_notification_title" />
   <java-symbol type="string" name="adb_debugging_notification_channel_tv" />
   <java-symbol type="string" name="usb_accessory_notification_title" />
   <java-symbol type="string" name="usb_mtp_notification_title" />
@@ -3805,6 +3798,7 @@
 
   <!-- For high refresh rate displays -->
   <java-symbol type="integer" name="config_defaultPeakRefreshRate" />
+  <java-symbol type="integer" name="config_defaultRefreshRateInZone" />
   <java-symbol type="array" name="config_brightnessThresholdsOfPeakRefreshRate" />
   <java-symbol type="array" name="config_ambientThresholdsOfPeakRefreshRate" />
 
@@ -3848,4 +3842,5 @@
   <java-symbol type="drawable" name="android_logotype" />
   <java-symbol type="layout" name="platlogo_layout" />
 
+  <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
 </resources>

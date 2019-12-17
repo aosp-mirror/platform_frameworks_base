@@ -309,8 +309,6 @@ interface ITelecomService {
 
     void addOrRemoveTestCallCompanionApp(String packageName, boolean isAdded);
 
-    void setTestAutoModeApp(String packageName);
-
     /**
      * @see TelecomServiceImpl#setSystemDialer
      */

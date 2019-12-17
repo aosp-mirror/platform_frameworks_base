@@ -71,9 +71,9 @@ import java.util.List;
  * instead of scroll view which offers greater user interface flexibility and
  * support for the material design scrolling patterns.</p>
  *
- * <p>To learn more about material design patterns for handling scrolling, see
- * <a href="https://material.io/guidelines/patterns/scrolling-techniques.html#">
- * Scrolling techniques</a>.</p>
+ * <p>Material Design offers guidelines on how the appearance of
+ * <a href="https://material.io/components/">several UI components</a>, including app bars and
+ * banners, should respond to gestures.</p>
  *
  * @attr ref android.R.styleable#ScrollView_fillViewport
  */

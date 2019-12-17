@@ -18,6 +18,7 @@ package com.android.server.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
 import android.content.Intent;
 import android.util.TimestampedValue;
@@ -26,16 +27,24 @@ import java.io.PrintWriter;
 
 /**
  * The interface for classes that implement the time detection algorithm used by the
- * TimeDetectorService. The TimeDetectorService handles thread safety: all calls to implementations
- * of this interface can be assumed to be single threaded (though the thread used may vary).
+ * TimeDetectorService.
+ *
+ * <p>Most calls will be handled by a single thread but that is not true for all calls. For example
+ * {@link #dump(PrintWriter, String[])}) may be called on a different thread so implementations must
+ * handle thread safety.
  *
  * @hide
  */
-// @NotThreadSafe
 public interface TimeDetectorStrategy {
 
     /**
      * The interface used by the strategy to interact with the surrounding service.
+     *
+     * <p>Note: Because the system properties-derived value {@link #isAutoTimeDetectionEnabled()}
+     * can be modified independently and from different threads (and processes!). its use is prone
+     * to race conditions. That will be true until the responsibility for setting their values is
+     * moved to {@link TimeDetectorStrategy}. There are similar issues with
+     * {@link #systemClockMillis()} while any process can modify the system clock.
      */
     interface Callback {
 
@@ -47,7 +56,7 @@ public interface TimeDetectorStrategy {
         int systemClockUpdateThresholdMillis();
 
         /** Returns true if automatic time detection is enabled. */
-        boolean isTimeDetectionEnabled();
+        boolean isAutoTimeDetectionEnabled();
 
         /** Acquire a suitable wake lock. Must be followed by {@link #releaseWakeLock()} */
         void acquireWakeLock();
@@ -71,11 +80,14 @@ public interface TimeDetectorStrategy {
     /** Initialize the strategy. */
     void initialize(@NonNull Callback callback);
 
-    /** Process the suggested time. */
+    /** Process the suggested time from telephony sources. */
     void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSuggestion);
 
+    /** Process the suggested manually entered time. */
+    void suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
+
     /** Handle the auto-time setting being toggled on or off. */
-    void handleAutoTimeDetectionToggle(boolean enabled);
+    void handleAutoTimeDetectionChanged();
 
     /** Dump debug information. */
     void dump(@NonNull PrintWriter pw, @Nullable String[] args);

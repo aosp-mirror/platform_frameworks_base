@@ -30,6 +30,7 @@ java_sdk_library {
     libs: [
         "framework-all",
         "app-compat-annotations",
+        "unsupportedappusage",
     ],
 
     api_packages: [

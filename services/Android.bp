@@ -1,3 +1,37 @@
+filegroup {
+    name: "services-main-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//visibility:private"],
+}
+
+filegroup {
+    name: "services-sources",
+    srcs: [
+        ":services.core-sources",
+        ":services.accessibility-sources",
+        ":services.appprediction-sources",
+        ":services.appwidget-sources",
+        ":services.autofill-sources",
+        ":services.backup-sources",
+        ":services.companion-sources",
+        ":services.contentcapture-sources",
+        ":services.contentsuggestions-sources",
+        ":services.coverage-sources",
+        ":services.devicepolicy-sources",
+        ":services.midi-sources",
+        ":services.net-sources",
+        ":services.print-sources",
+        ":services.restrictions-sources",
+        ":services.startop.iorap-sources",
+        ":services.systemcaptions-sources",
+        ":services.usage-sources",
+        ":services.usb-sources",
+        ":services.voiceinteraction-sources",
+    ],
+    visibility: ["//visibility:private"],
+}
+
 // merge all required services into one jar
 // ============================================================
 java_library {
@@ -9,9 +43,7 @@ java_library {
         profile: "art-profile",
     },
 
-    srcs: [
-        "java/**/*.java",
-    ],
+    srcs: [":services-main-sources"],
 
     // The convention is to name each service module 'services.$(module_name)'
     static_libs: [
@@ -63,4 +95,9 @@ cc_library_shared {
 platform_compat_config {
     name: "services-platform-compat-config",
     src: ":services",
+}
+
+filegroup {
+    name: "art-profile",
+    srcs: ["art-profile"],
 }

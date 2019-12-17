@@ -2875,6 +2875,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final PlatformCompat platformCompat = (PlatformCompat)
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
         String toggleValue = getNextArgRequired();
+        if (toggleValue.equals("reset-all")) {
+            final String packageName = getNextArgRequired();
+            pw.println("Reset all changes for " + packageName + " to default value.");
+            platformCompat.clearOverrides(packageName);
+            return 0;
+        }
         long changeId;
         String changeIdString = getNextArgRequired();
         try {
@@ -3029,7 +3035,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --receiver-permission <PERMISSION>: Require receiver to hold permission.");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
             pw.println("          [--user <USER_ID> | current]");
-            pw.println("          [--no-hidden-api-checks [--no-test-api-checks]]");
+            pw.println("          [--no-hidden-api-checks [--no-test-api-access]]");
             pw.println("          [--no-isolated-storage]");
             pw.println("          [--no-window-animation] [--abi <ABI>] <COMPONENT>");
             pw.println("      Start an Instrumentation.  Typically this target <COMPONENT> is in the");
@@ -3049,7 +3055,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --user <USER_ID> | current: Specify user instrumentation runs in;");
             pw.println("          current user if not specified.");
             pw.println("      --no-hidden-api-checks: disable restrictions on use of hidden API.");
-            pw.println("      --no-test-api-checks: disable restrictions to test APIs, if hidden");
+            pw.println("      --no-test-api-access: do not allow access to test APIs, if hidden");
             pw.println("          API checks are enabled.");
             pw.println("      --no-isolated-storage: don't use isolated storage sandbox and ");
             pw.println("          mount full external storage");
@@ -3233,9 +3239,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      without restarting any processes.");
             pw.println("  write");
             pw.println("      Write all pending state to storage.");
-            pw.println("  compat enable|disable|reset <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
-            pw.println("      Toggles a change either by id or by name for <PACKAGE_NAME>.");
-            pw.println("      It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
+            pw.println("  compat [COMMAND] [...]: sub-commands for toggling app-compat changes.");
+            pw.println("         enable|disable|reset <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
+            pw.println("            Toggles a change either by id or by name for <PACKAGE_NAME>.");
+            pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
+            pw.println("         reset-all <PACKAGE_NAME>");
+            pw.println("            Removes all existing overrides for all changes for ");
+            pw.println("            <PACKAGE_NAME> (back to default behaviour).");
+            pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }

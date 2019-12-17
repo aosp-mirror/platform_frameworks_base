@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.database.CursorWindow;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.BaseBundle;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -78,11 +79,6 @@ public final class SmsManager {
     private static final SmsManager sInstance = new SmsManager(
             SubscriptionManager.DEFAULT_SUBSCRIPTION_ID);
     private static final Object sLockObject = new Object();
-
-    /** @hide */
-    public static final int CELL_BROADCAST_RAN_TYPE_GSM = 0;
-    /** @hide */
-    public static final int CELL_BROADCAST_RAN_TYPE_CDMA = 1;
 
     /** SMS record length from TS 51.011 10.5.3
      * @hide
@@ -2457,7 +2453,9 @@ public final class SmsManager {
         }
     }
 
-    /** callback for providing asynchronous sms messages for financial app. */
+    /**
+     * callback for providing asynchronous sms messages for financial app.
+     */
     public abstract static class FinancialSmsCallback {
         /**
          * Callback to send sms messages back to financial app asynchronously.
@@ -2483,24 +2481,14 @@ public final class SmsManager {
      * @param params the parameters to filter SMS messages returned.
      * @param executor the executor on which callback will be invoked.
      * @param callback a callback to receive CursorWindow with SMS messages.
+     *
      */
     @RequiresPermission(android.Manifest.permission.SMS_FINANCIAL_TRANSACTIONS)
     public void getSmsMessagesForFinancialApp(
             Bundle params,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull FinancialSmsCallback callback) {
-        try {
-            ISms iccSms = getISmsServiceOrThrow();
-            iccSms.getSmsMessagesForFinancialApp(
-                    getSubscriptionId(), ActivityThread.currentPackageName(), params,
-                    new IFinancialSmsCallback.Stub() {
-                        public void onGetSmsMessagesForFinancialApp(CursorWindow msgs) {
-                            Binder.withCleanCallingIdentity(() -> executor.execute(
-                                    () -> callback.onFinancialSmsMessages(msgs)));
-                        }});
-        } catch (RemoteException ex) {
-            ex.rethrowFromSystemServer();
-        }
+        // This API is not functional and thus removed to avoid future confusion.
     }
 
     /**

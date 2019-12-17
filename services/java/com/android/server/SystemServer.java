@@ -23,6 +23,7 @@ import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.NonNull;
+import android.annotation.StringRes;
 import android.app.ActivityThread;
 import android.app.AppCompatCallbacks;
 import android.app.INotificationManager;
@@ -40,9 +41,11 @@ import android.database.sqlite.SQLiteGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityModuleConnector;
 import android.net.NetworkStackClient;
+import android.net.TetheringManager;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Debug;
 import android.os.Environment;
 import android.os.FactoryTest;
 import android.os.FileUtils;
@@ -135,6 +138,7 @@ import com.android.server.policy.role.LegacyRoleResolutionPolicy;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.power.ThermalManagerService;
+import com.android.server.recoverysystem.RecoverySystemService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.role.RoleManagerService;
 import com.android.server.rollback.RollbackManagerService;
@@ -270,6 +274,8 @@ public final class SystemServer {
             "com.android.internal.car.CarServiceHelperService";
     private static final String TIME_DETECTOR_SERVICE_CLASS =
             "com.android.server.timedetector.TimeDetectorService$Lifecycle";
+    private static final String TIME_ZONE_DETECTOR_SERVICE_CLASS =
+            "com.android.server.timezonedetector.TimeZoneDetectorService$Lifecycle";
     private static final String ACCESSIBILITY_MANAGER_SERVICE_CLASS =
             "com.android.server.accessibility.AccessibilityManagerService$Lifecycle";
     private static final String ADB_SERVICE_CLASS =
@@ -383,15 +389,6 @@ public final class SystemServer {
             EventLog.writeEvent(EventLogTags.SYSTEM_SERVER_START,
                     mStartCount, mRuntimeStartUptime, mRuntimeStartElapsedTime);
 
-            // If a device's clock is before 1970 (before 0), a lot of
-            // APIs crash dealing with negative numbers, notably
-            // java.io.File#setLastModified, so instead we fake it and
-            // hope that time from cell towers or NTP fixes it shortly.
-            if (System.currentTimeMillis() < EARLIEST_SUPPORTED_TIME) {
-                Slog.w(TAG, "System clock is before 1970; setting to 1970.");
-                SystemClock.setCurrentTimeMillis(EARLIEST_SUPPORTED_TIME);
-            }
-
             //
             // Default the timezone property to GMT if not set.
             //
@@ -449,10 +446,6 @@ public final class SystemServer {
             // Mmmmmm... more memory!
             VMRuntime.getRuntime().clearGrowthLimit();
 
-            // The system server has to run all of the time, so it needs to be
-            // as efficient as possible with its memory usage.
-            VMRuntime.getRuntime().setTargetHeapUtilization(0.8f);
-
             // Some devices rely on runtime fingerprint generation, so make sure
             // we've defined it before booting further.
             Build.ensureFingerprintProperty();
@@ -504,6 +497,24 @@ public final class SystemServer {
             LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);
             // Prepare the thread pool for init tasks that can be parallelized
             SystemServerInitThreadPool.get();
+            // Attach JVMTI agent if this is a debuggable build and the system property is set.
+            if (Build.IS_DEBUGGABLE) {
+                // Property is of the form "library_path=parameters".
+                String jvmtiAgent = SystemProperties.get("persist.sys.dalvik.jvmtiagent");
+                if (!jvmtiAgent.isEmpty()) {
+                    int equalIndex = jvmtiAgent.indexOf('=');
+                    String libraryPath = jvmtiAgent.substring(0, equalIndex);
+                    String parameterList =
+                            jvmtiAgent.substring(equalIndex + 1, jvmtiAgent.length());
+                    // Attach the agent.
+                    try {
+                        Debug.attachJvmtiAgent(libraryPath, parameterList, null);
+                    } catch (Exception e) {
+                        Slog.e("System", "*************************************************");
+                        Slog.e("System", "********** Failed to load jvmti plugin: " + jvmtiAgent);
+                    }
+                }
+            }
         } finally {
             traceEnd();  // InitBeforeStartServices
         }
@@ -698,7 +709,7 @@ public final class SystemServer {
 
         // Bring up recovery system in case a rescue party needs a reboot
         traceBeginAndSlog("StartRecoverySystemService");
-        mSystemServiceManager.startService(RecoverySystemService.class);
+        mSystemServiceManager.startService(RecoverySystemService.Lifecycle.class);
         traceEnd();
 
         // Now that we have the bare essentials of the OS up and running, take
@@ -1266,14 +1277,22 @@ public final class SystemServer {
             startSystemCaptionsManagerService(context);
 
             // App prediction manager service
-            traceBeginAndSlog("StartAppPredictionService");
-            mSystemServiceManager.startService(APP_PREDICTION_MANAGER_SERVICE_CLASS);
-            traceEnd();
+            if (deviceHasConfigString(context, R.string.config_defaultAppPredictionService)) {
+                traceBeginAndSlog("StartAppPredictionService");
+                mSystemServiceManager.startService(APP_PREDICTION_MANAGER_SERVICE_CLASS);
+                traceEnd();
+            } else {
+                Slog.d(TAG, "AppPredictionService not defined by OEM");
+            }
 
             // Content suggestions manager service
-            traceBeginAndSlog("StartContentSuggestionsService");
-            mSystemServiceManager.startService(CONTENT_SUGGESTIONS_SERVICE_CLASS);
-            traceEnd();
+            if (deviceHasConfigString(context, R.string.config_defaultContentSuggestionsService)) {
+                traceBeginAndSlog("StartContentSuggestionsService");
+                mSystemServiceManager.startService(CONTENT_SUGGESTIONS_SERVICE_CLASS);
+                traceEnd();
+            } else {
+                Slog.d(TAG, "ContentSuggestionsService not defined by OEM");
+            }
 
             traceBeginAndSlog("InitConnectivityModuleConnector");
             try {
@@ -1468,6 +1487,14 @@ public final class SystemServer {
                 mSystemServiceManager.startService(TIME_DETECTOR_SERVICE_CLASS);
             } catch (Throwable e) {
                 reportWtf("starting StartTimeDetectorService service", e);
+            }
+            traceEnd();
+
+            traceBeginAndSlog("StartTimeZoneDetectorService");
+            try {
+                mSystemServiceManager.startService(TIME_ZONE_DETECTOR_SERVICE_CLASS);
+            } catch (Throwable e) {
+                reportWtf("starting StartTimeZoneDetectorService service", e);
             }
             traceEnd();
 
@@ -2183,6 +2210,15 @@ public final class SystemServer {
             }
             traceEnd();
 
+            traceBeginAndSlog("StartTethering");
+            try {
+                // Tethering must start after ConnectivityService and NetworkStack.
+                TetheringManager.getInstance().start();
+            } catch (Throwable e) {
+                reportWtf("starting Tethering", e);
+            }
+            traceEnd();
+
             traceBeginAndSlog("MakeLocationServiceReady");
             try {
                 if (locationF != null) {
@@ -2264,10 +2300,13 @@ public final class SystemServer {
         }, BOOT_TIMINGS_TRACE_LOG);
     }
 
+    private boolean deviceHasConfigString(@NonNull Context context, @StringRes int resId) {
+        String serviceName = context.getString(resId);
+        return !TextUtils.isEmpty(serviceName);
+    }
+
     private void startSystemCaptionsManagerService(@NonNull Context context) {
-        String serviceName = context.getString(
-                com.android.internal.R.string.config_defaultSystemCaptionsManagerService);
-        if (TextUtils.isEmpty(serviceName)) {
+        if (!deviceHasConfigString(context, R.string.config_defaultSystemCaptionsManagerService)) {
             Slog.d(TAG, "SystemCaptionsManagerService disabled because resource is not overlaid");
             return;
         }
@@ -2294,9 +2333,7 @@ public final class SystemServer {
 
         // Then check if OEM overlaid the resource that defines the service.
         if (!explicitlyEnabled) {
-            final String serviceName = context
-                    .getString(com.android.internal.R.string.config_defaultContentCaptureService);
-            if (TextUtils.isEmpty(serviceName)) {
+            if (!deviceHasConfigString(context, R.string.config_defaultContentCaptureService)) {
                 Slog.d(TAG, "ContentCaptureService disabled because resource is not overlaid");
                 return;
             }

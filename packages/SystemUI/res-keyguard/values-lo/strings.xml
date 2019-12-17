@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ລະຫັດ PIN ບໍ່ຖືກຕ້ອງ."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ບັດບໍ່ຖືກຕ້ອງ."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"ສາກເຕັມແລ້ວ"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳ​ລັງ​ສາກ​ໄຟໄຮ້​ສາຍ"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບໄຮ້ສາຍ"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບດ່ວນ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບຊ້າ"</string>
@@ -151,7 +151,84 @@
       <item quantity="other">ຕອນນີ້ປິດການນຳໃຊ້ SIM ແລ້ວ. ໃສ່ລະຫັດ PUK ເພື່ອດຳເນີນການຕໍ່. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="_NUMBER_1">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ. ກະລຸນາຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການສຳລັບລາຍລະອຽດ.</item>
       <item quantity="one">ຕອນນີ້ປິດການນຳໃຊ້ SIM ແລ້ວ. ໃສ່ລະຫັດ PUK ເພື່ອດຳເນີນການຕໍ່. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="_NUMBER_0">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ. ກະລຸນາຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການສຳລັບລາຍລະອຽດ.</item>
     </plurals>
-    <string name="clock_title_default" msgid="6645600990069154049">"ຄ່າເລີ່ມຕົ້ນ"</string>
-    <string name="clock_title_bubble" msgid="1286365278681892114">"ຟອງ"</string>
-    <string name="clock_title_analog" msgid="4047401488577315053">"ໂມງເຂັມ"</string>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"ມັນແມ່ນ"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"ມັນແມ່ນ"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"ສິບສອງ"</item>
+    <item msgid="7389464214252023751">"ໜຶ່ງ"</item>
+    <item msgid="8803180377002008046">"ສອງ"</item>
+    <item msgid="8614897059944644719">"ສາມ"</item>
+    <item msgid="2293058674782619556">"ສີ່"</item>
+    <item msgid="4815402358455041664">"ຫ້າ"</item>
+    <item msgid="3325754778509665687">"ຫົກ"</item>
+    <item msgid="5805551341866280575">"ເຈັດ"</item>
+    <item msgid="203334816668238610">"ແປດ"</item>
+    <item msgid="4828052671464488923">"ເກົ້າ"</item>
+    <item msgid="2233497913571137419">"ສິບ"</item>
+    <item msgid="5621554266768657830">"ສິບເອັດ"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"O’Clock"</item>
+    <item msgid="8837126587669001578">"O’One"</item>
+    <item msgid="4294343372940455660">"O’Two"</item>
+    <item msgid="7129166637707421536">"O’Three"</item>
+    <item msgid="7579404865008788673">"O’Four"</item>
+    <item msgid="3873924689207380586">"O’Five"</item>
+    <item msgid="4849565597850069377">"O’Six"</item>
+    <item msgid="4404219424523572364">"O’Seven"</item>
+    <item msgid="8740481214764087329">"O’Eight"</item>
+    <item msgid="1713216865806811237">"O’Nine"</item>
+    <item msgid="3508406095411245038">"ສິບ"</item>
+    <item msgid="7161996337755311711">"ສິບເອັດ"</item>
+    <item msgid="4044549963329624197">"ສິບສອງ"</item>
+    <item msgid="333373157917379088">"ສິບສາມ"</item>
+    <item msgid="2631202907124819385">"ສິບສີ່"</item>
+    <item msgid="6472396076858033453">"ສິບຫ້າ"</item>
+    <item msgid="8656981856181581643">"ສິບຫົກ"</item>
+    <item msgid="7289026608562030619">"ສິບເຈັດ"</item>
+    <item msgid="3881477602692646573">"ສິບແປດ"</item>
+    <item msgid="3358129827772984226">"ສິບເກົ້າ"</item>
+    <item msgid="3308575407402865807">"ຊາວ"</item>
+    <item msgid="5346560955382229629">"ຊາວ\nເອັດ"</item>
+    <item msgid="226750304761473436">"ຊາວ\nສອງ"</item>
+    <item msgid="616811325336838734">"ຊາວ\nສາມ"</item>
+    <item msgid="616346116869053440">"ຊາວ\nສີ່"</item>
+    <item msgid="4642996410384042830">"ຊາວ\nຫ້າ"</item>
+    <item msgid="7506092849993571465">"ຊາວ\nຫົກ"</item>
+    <item msgid="1915078191101042031">"ຊາວ\nເຈັດ"</item>
+    <item msgid="4292378641900520252">"ຊາວ\nແປດ"</item>
+    <item msgid="5339513901773103696">"ຊາວ\nເກົ້າ"</item>
+    <item msgid="3574673250891657607">"ສາມສິບ"</item>
+    <item msgid="5796923836589110940">"ສາມ\nສິບເອັດ"</item>
+    <item msgid="5859323597571702052">"ສາມ\nສິບສອງ"</item>
+    <item msgid="5133326723148876507">"ສາມ\nສິບສາມ"</item>
+    <item msgid="2693999494655663096">"ສາມ\nສິບສີ່"</item>
+    <item msgid="3316754944962836197">"ສາມ\nສິບຫ້າ"</item>
+    <item msgid="816891008836796723">"ສາມ\nສິບຫົກ"</item>
+    <item msgid="9158890488666520078">"ສາມ\nສິບເຈັດ"</item>
+    <item msgid="1894769703213894011">"ສາມສິບ\nແປດ"</item>
+    <item msgid="5638820345598572399">"ສາມ\nສິບເກົ້າ"</item>
+    <item msgid="8838304023017895439">"ສີ່ສິບ"</item>
+    <item msgid="1834742948932559597">"ສີ່\nສິບເອັດ"</item>
+    <item msgid="6573707308847773944">"ສີ່\nສິບສອງ"</item>
+    <item msgid="2450149950652678001">"ສີ່\nສິບສາມ"</item>
+    <item msgid="2874667401318178036">"ສີ່\nສິບສີ່"</item>
+    <item msgid="3391101532763048862">"ສີ່\nສິບຫ້າ"</item>
+    <item msgid="1671489330863254362">"ສີ່\nສິບຫົກ"</item>
+    <item msgid="5916017359554531038">"ສີ່\nສິບເຈັດ"</item>
+    <item msgid="8205413177993059967">"ສີ່\nສິບແປດ"</item>
+    <item msgid="6607867415142171302">"ສີ່\nສິບເກົ້າ"</item>
+    <item msgid="8358850748472089162">"ຫ້າສິບ"</item>
+    <item msgid="3551313125255080234">"ຫ້າ\nສິບເອັດ"</item>
+    <item msgid="1559678130725716542">"ຫ້າ\nສິບສອງ"</item>
+    <item msgid="431441994725492377">"ຫ້າ\nສິບສາມ"</item>
+    <item msgid="6345774640539623024">"ຫ້າ\nສິບສີ່"</item>
+    <item msgid="8018192990793931120">"ຫ້າ\nສິບຫ້າ"</item>
+    <item msgid="6187650843754604534">"ຫ້າ\nສິບຫົກ"</item>
+    <item msgid="8727240174015993259">"ຫ້າ\nສິບເຈັດ"</item>
+    <item msgid="848339003778952950">"ຫ້າ\nສິບແປດ"</item>
+    <item msgid="5798985802835423618">"ຫ້າ\nສິບເກົ້າ"</item>
+  </string-array>
 </resources>

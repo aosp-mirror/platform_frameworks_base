@@ -183,7 +183,7 @@ public class ApexManagerTest {
     public void testSubmitStagedSession_throwPackageManagerException() throws RemoteException {
         doAnswer(invocation -> {
             throw new Exception();
-        }).when(mApexService).submitStagedSession(anyInt(), any(), any());
+        }).when(mApexService).submitStagedSession(any(), any());
 
         assertThrows(PackageManagerException.class,
                 () -> mApexManager.submitStagedSession(TEST_SESSION_ID, TEST_CHILD_SESSION_ID));
@@ -191,8 +191,7 @@ public class ApexManagerTest {
 
     @Test
     public void testSubmitStagedSession_throwRunTimeException() throws RemoteException {
-        doThrow(RemoteException.class).when(mApexService).submitStagedSession(anyInt(), any(),
-                any());
+        doThrow(RemoteException.class).when(mApexService).submitStagedSession(any(), any());
 
         assertThrows(RuntimeException.class,
                 () -> mApexManager.submitStagedSession(TEST_SESSION_ID, TEST_CHILD_SESSION_ID));

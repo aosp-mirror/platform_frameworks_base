@@ -52,13 +52,12 @@ import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.telephony.ITelephony;
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.Protocol;
 
@@ -711,6 +710,12 @@ public class ConnectivityManager {
     @Deprecated
     public static final int TYPE_TEST = 18; // TODO: Remove this once NetworkTypes are unused.
 
+    // Deprecated constants for return values of startUsingNetworkFeature. They used to live
+    // in com.android.internal.telephony.PhoneConstants until they were made inaccessible.
+    private static final int DEPRECATED_PHONE_CONSTANT_APN_ALREADY_ACTIVE = 0;
+    private static final int DEPRECATED_PHONE_CONSTANT_APN_REQUEST_STARTED = 1;
+    private static final int DEPRECATED_PHONE_CONSTANT_APN_REQUEST_FAILED = 3;
+
     /** {@hide} */
     public static final int MAX_RADIO_TYPE = TYPE_TEST;
 
@@ -1001,7 +1006,7 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     @Nullable
     public Network getActiveNetworkForUid(int uid) {
         return getActiveNetworkForUid(uid, false);
@@ -1130,7 +1135,7 @@ public class ConnectivityManager {
      *
      * {@hide}
      */
-    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     @UnsupportedAppUsage
     public NetworkInfo getActiveNetworkInfoForUid(int uid) {
         return getActiveNetworkInfoForUid(uid, false);
@@ -1365,10 +1370,14 @@ public class ConnectivityManager {
      * The system network validation may be using different strategies to detect captive portals,
      * so this method does not necessarily return a URL used by the system. It only returns a URL
      * that may be relevant for other components trying to detect captive portals.
+     *
      * @hide
+     * @deprecated This API returns URL which is not guaranteed to be one of the URLs used by the
+     *             system.
      */
+    @Deprecated
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.LOCAL_MAC_ADDRESS)
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public String getCaptivePortalServerUrl() {
         try {
             return mService.getCaptivePortalServerUrl();
@@ -1407,7 +1416,7 @@ public class ConnectivityManager {
         if (netCap == null) {
             Log.d(TAG, "Can't satisfy startUsingNetworkFeature for " + networkType + ", " +
                     feature);
-            return PhoneConstants.APN_REQUEST_FAILED;
+            return DEPRECATED_PHONE_CONSTANT_APN_REQUEST_FAILED;
         }
 
         NetworkRequest request = null;
@@ -1417,9 +1426,9 @@ public class ConnectivityManager {
                 Log.d(TAG, "renewing startUsingNetworkFeature request " + l.networkRequest);
                 renewRequestLocked(l);
                 if (l.currentNetwork != null) {
-                    return PhoneConstants.APN_ALREADY_ACTIVE;
+                    return DEPRECATED_PHONE_CONSTANT_APN_ALREADY_ACTIVE;
                 } else {
-                    return PhoneConstants.APN_REQUEST_STARTED;
+                    return DEPRECATED_PHONE_CONSTANT_APN_REQUEST_STARTED;
                 }
             }
 
@@ -1427,10 +1436,10 @@ public class ConnectivityManager {
         }
         if (request != null) {
             Log.d(TAG, "starting startUsingNetworkFeature for request " + request);
-            return PhoneConstants.APN_REQUEST_STARTED;
+            return DEPRECATED_PHONE_CONSTANT_APN_REQUEST_STARTED;
         } else {
             Log.d(TAG, " request Failed");
-            return PhoneConstants.APN_REQUEST_FAILED;
+            return DEPRECATED_PHONE_CONSTANT_APN_REQUEST_FAILED;
         }
     }
 
@@ -2149,19 +2158,14 @@ public class ConnectivityManager {
     @Deprecated
     @UnsupportedAppUsage
     public boolean getMobileDataEnabled() {
-        IBinder b = ServiceManager.getService(Context.TELEPHONY_SERVICE);
-        if (b != null) {
-            try {
-                ITelephony it = ITelephony.Stub.asInterface(b);
-                int subId = SubscriptionManager.getDefaultDataSubscriptionId();
-                Log.d("ConnectivityManager", "getMobileDataEnabled()+ subId=" + subId);
-                boolean retVal = it.isUserDataEnabled(subId);
-                Log.d("ConnectivityManager", "getMobileDataEnabled()- subId=" + subId
-                        + " retVal=" + retVal);
-                return retVal;
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+        if (tm != null) {
+            int subId = SubscriptionManager.getDefaultDataSubscriptionId();
+            Log.d("ConnectivityManager", "getMobileDataEnabled()+ subId=" + subId);
+            boolean retVal = tm.createForSubscriptionId(subId).isDataEnabled();
+            Log.d("ConnectivityManager", "getMobileDataEnabled()- subId=" + subId
+                    + " retVal=" + retVal);
+            return retVal;
         }
         Log.d("ConnectivityManager", "getMobileDataEnabled()- remote exception retVal=false");
         return false;
@@ -2400,6 +2404,7 @@ public class ConnectivityManager {
      * @return an array of 0 or more {@code String} of tethered dhcp ranges.
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public String[] getTetheredDhcpRanges() {
         try {
             return mService.getTetheredDhcpRanges();
@@ -2979,7 +2984,7 @@ public class ConnectivityManager {
      *        HTTP proxy.  A {@code null} value will clear the global HTTP proxy.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     public void setGlobalProxy(ProxyInfo p) {
         try {
             mService.setGlobalProxy(p);
@@ -3124,6 +3129,7 @@ public class ConnectivityManager {
      * Get the mobile provisioning url.
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public String getMobileProvisioningUrl() {
         try {
             return mService.getMobileProvisioningUrl();
@@ -3170,6 +3176,7 @@ public class ConnectivityManager {
 
     /** {@hide} - returns the factory serial number */
     @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public int registerNetworkFactory(Messenger messenger, String name) {
         try {
             return mService.registerNetworkFactory(messenger, name);
@@ -3180,6 +3187,7 @@ public class ConnectivityManager {
 
     /** {@hide} */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public void unregisterNetworkFactory(Messenger messenger) {
         try {
             mService.unregisterNetworkFactory(messenger);
@@ -3197,6 +3205,7 @@ public class ConnectivityManager {
      * Register a NetworkAgent with ConnectivityService.
      * @return NetID corresponding to NetworkAgent.
      */
+    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public int registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkMisc misc) {
         return registerNetworkAgent(messenger, ni, lp, nc, score, misc,
@@ -3208,6 +3217,7 @@ public class ConnectivityManager {
      * Register a NetworkAgent with ConnectivityService.
      * @return NetID corresponding to NetworkAgent.
      */
+    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public int registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkMisc misc, int factorySerialNumber) {
         try {
@@ -4202,7 +4212,7 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void startCaptivePortalApp(Network network) {
         try {
             mService.startCaptivePortalApp(network);
@@ -4318,6 +4328,7 @@ public class ConnectivityManager {
      * Resets all connectivity manager settings back to factory defaults.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void factoryReset() {
         try {
             mService.factoryReset();

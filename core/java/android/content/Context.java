@@ -856,11 +856,16 @@ public abstract class Context {
      * to any callers for the same name, meaning they will see each other's
      * edits as soon as they are made.
      *
-     * This method is thead-safe.
+     * <p>This method is thread-safe.
      *
-     * @param name Desired preferences file. If a preferences file by this name
-     * does not exist, it will be created when you retrieve an
-     * editor (SharedPreferences.edit()) and then commit changes (Editor.commit()).
+     * <p>If the preferences directory does not already exist, it will be created when this method
+     * is called.
+     *
+     * <p>If a preferences file by this name does not exist, it will be created when you retrieve an
+     * editor ({@link SharedPreferences#edit()}) and then commit changes ({@link
+     * SharedPreferences.Editor#commit()} or {@link SharedPreferences.Editor#apply()}).
+     *
+     * @param name Desired preferences file.
      * @param mode Operating mode.
      *
      * @return The single {@link SharedPreferences} instance that can be used
@@ -2424,10 +2429,52 @@ public abstract class Context {
      *
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
+    public void sendOrderedBroadcast(@NonNull Intent intent, @Nullable String receiverPermission,
+            @Nullable String receiverAppOp, @Nullable BroadcastReceiver resultReceiver,
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Version of
+     * {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String,
+     * Bundle)} that allows you to specify the App Op to enforce restrictions on which receivers
+     * the broadcast will be sent to as well as supply an optional sending options
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param receiverPermission String naming a permissions that
+     *               a receiver must hold in order to receive your broadcast.
+     *               If null, no permission is required.
+     * @param receiverAppOp The app op associated with the broadcast. If null, no appOp is
+     *                      required. If both receiverAppOp and receiverPermission are non-null,
+     *                      a receiver must have both of them to
+     *                      receive the broadcast
+     * @param options (optional) Additional sending options, generated from a
+     * {@link android.app.BroadcastOptions}.
+     * @param resultReceiver Your own BroadcastReceiver to treat as the final
+     *                       receiver of the broadcast.
+     * @param scheduler A custom Handler with which to schedule the
+     *                  resultReceiver callback; if null it will be
+     *                  scheduled in the Context's main thread.
+     * @param initialCode An initial value for the result code.  Often
+     *                    Activity.RESULT_OK.
+     * @param initialData An initial value for the result data.  Often
+     *                    null.
+     * @param initialExtras An initial value for the result extras.  Often
+     *                      null.
+     *
+     * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
+     * @see android.app.BroadcastOptions
+     */
     public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent,
             @Nullable String receiverPermission, @Nullable String receiverAppOp,
-            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
-            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
+            @Nullable Bundle options, @Nullable BroadcastReceiver resultReceiver,
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -2793,6 +2840,37 @@ public abstract class Context {
     public abstract Intent registerReceiver(BroadcastReceiver receiver,
             IntentFilter filter, @Nullable String broadcastPermission,
             @Nullable Handler scheduler, @RegisterReceiverFlags int flags);
+
+    /**
+     * Same as {@link #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)}
+     * but this receiver will receive broadcasts that are sent to all users. The receiver can
+     * use {@link BroadcastReceiver#getSendingUser} to determine on which user the broadcast
+     * was sent.
+     *
+     * @param receiver The BroadcastReceiver to handle the broadcast.
+     * @param filter Selects the Intent broadcasts to be received.
+     * @param broadcastPermission String naming a permissions that a
+     *      broadcaster must hold in order to send an Intent to you. If {@code null},
+     *      no permission is required.
+     * @param scheduler Handler identifying the thread that will receive
+     *      the Intent. If {@code null}, the main thread of the process will be used.
+     *
+     * @return The first sticky intent found that matches <var>filter</var>,
+     *         or {@code null} if there are none.
+     *
+     * @see #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)
+     * @see #sendBroadcast
+     * @see #unregisterReceiver
+     * @hide
+     */
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @SystemApi
+    public Intent registerReceiverForAllUsers(@Nullable BroadcastReceiver receiver,
+            @NonNull IntentFilter filter, @Nullable String broadcastPermission,
+            @Nullable Handler scheduler) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * @hide
@@ -3298,6 +3376,7 @@ public abstract class Context {
             CROSS_PROFILE_APPS_SERVICE,
             //@hide: SYSTEM_UPDATE_SERVICE,
             //@hide: TIME_DETECTOR_SERVICE,
+            //@hide: TIME_ZONE_DETECTOR_SERVICE,
             PERMISSION_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -4153,6 +4232,9 @@ public abstract class Context {
     /**
      * Official published name of the app prediction service.
      *
+     * <p><b>NOTE: </b> this service is optional; callers of
+     * {@code Context.getSystemServiceName(APP_PREDICTION_SERVICE)} should check for {@code null}.
+     *
      * @hide
      * @see #getSystemService(String)
      */
@@ -4712,12 +4794,21 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.app.timedetector.ITimeDetectorService}.
+     * {@link android.app.timedetector.TimeDetector}.
      * @hide
      *
      * @see #getSystemService(String)
      */
     public static final String TIME_DETECTOR_SERVICE = "time_detector";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.app.timezonedetector.TimeZoneDetector}.
+     * @hide
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String TIME_ZONE_DETECTOR_SERVICE = "time_zone_detector";
 
     /**
      * Binder service name for {@link AppBindingService}.
@@ -4730,6 +4821,8 @@ public abstract class Context {
      * {@link android.telephony.ims.ImsManager}.
      * @hide
      */
+    @SystemApi
+    @TestApi
     public static final String TELEPHONY_IMS_SERVICE = "telephony_ims";
 
     /**
@@ -5256,11 +5349,29 @@ public abstract class Context {
      */
     @SystemApi
     @TestApi
+    @NonNull
     public Context createPackageContextAsUser(
-            String packageName, @CreatePackageOptions int flags, UserHandle user)
+            @NonNull String packageName, @CreatePackageOptions int flags, @NonNull UserHandle user)
             throws PackageManager.NameNotFoundException {
         if (Build.IS_ENG) {
             throw new IllegalStateException("createPackageContextAsUser not overridden!");
+        }
+        return this;
+    }
+
+    /**
+     * Similar to {@link #createPackageContext(String, int)}, but for the own package with a
+     * different {@link UserHandle}. For example, {@link #getContentResolver()}
+     * will open any {@link Uri} as the given user.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @NonNull
+    public Context createContextAsUser(@NonNull UserHandle user, @CreatePackageOptions int flags) {
+        if (Build.IS_ENG) {
+            throw new IllegalStateException("createContextAsUser not overridden!");
         }
         return this;
     }

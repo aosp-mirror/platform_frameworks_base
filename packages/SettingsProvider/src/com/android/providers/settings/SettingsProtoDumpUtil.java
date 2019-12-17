@@ -1057,6 +1057,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.NOTIFICATION_SNOOZE_OPTIONS,
                 GlobalSettingsProto.Notification.SNOOZE_OPTIONS);
         dumpSetting(s, p,
+                Settings.Global.NOTIFICATION_BUBBLES,
+                GlobalSettingsProto.Notification.BUBBLES);
+        dumpSetting(s, p,
                 Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
                 GlobalSettingsProto.Notification.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS);
         dumpSetting(s, p,
@@ -2150,7 +2153,7 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.NOTIFICATION_BADGING,
                 SecureSettingsProto.Notification.BADGING);
         dumpSetting(s, p,
-                Settings.Secure.NOTIFICATION_BUBBLES,
+                Settings.Global.NOTIFICATION_BUBBLES,
                 SecureSettingsProto.Notification.BUBBLES);
         dumpSetting(s, p,
                 Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING,

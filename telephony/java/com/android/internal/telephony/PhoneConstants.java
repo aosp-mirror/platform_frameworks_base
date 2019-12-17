@@ -161,6 +161,8 @@ public class PhoneConstants {
     public static final String APN_TYPE_EMERGENCY = "emergency";
     /** APN type for Mission Critical Services */
     public static final String APN_TYPE_MCX = "mcx";
+    /** APN type for XCAP */
+    public static final String APN_TYPE_XCAP = "xcap";
     /** Array of all APN types */
     public static final String[] APN_TYPES = {APN_TYPE_DEFAULT,
             APN_TYPE_MMS,
@@ -172,7 +174,8 @@ public class PhoneConstants {
             APN_TYPE_CBS,
             APN_TYPE_IA,
             APN_TYPE_EMERGENCY,
-            APN_TYPE_MCX
+            APN_TYPE_MCX,
+            APN_TYPE_XCAP,
     };
 
     public static final int RIL_CARD_MAX_APPS    = 8;
@@ -188,10 +191,6 @@ public class PhoneConstants {
     public static final String PHONE_KEY = "phone";
 
     public static final String SLOT_KEY  = "slot";
-
-    /** Fired when a subscriptions phone state changes. */
-    public static final String ACTION_SUBSCRIPTION_PHONE_STATE_CHANGED =
-        "android.intent.action.SUBSCRIPTION_PHONE_STATE";
 
     // FIXME: This is used to pass a subId via intents, we need to look at its usage, which is
     // FIXME: extensive, and see if this should be an array of all active subId's or ...?

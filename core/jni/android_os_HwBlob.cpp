@@ -340,6 +340,14 @@ static jstring JHwBlob_native_getString(
     return env->NewStringUTF(s->c_str());
 }
 
+static jlong JHwBlob_native_getFieldHandle(JNIEnv* env,
+                                           jobject thiz,
+                                           jlong offset) {
+    sp<JHwBlob> blob = JHwBlob::GetNativeContext(env, thiz);
+
+    return reinterpret_cast<jlong>(blob->data()) + offset;
+}
+
 #define DEFINE_BLOB_ARRAY_COPIER(Suffix,Type,NewType)                          \
 static void JHwBlob_native_copyTo ## Suffix ## Array(                          \
         JNIEnv *env,                                                           \
@@ -593,6 +601,7 @@ static JNINativeMethod gMethods[] = {
     { "getFloat", "(J)F", (void *)JHwBlob_native_getFloat },
     { "getDouble", "(J)D", (void *)JHwBlob_native_getDouble },
     { "getString", "(J)Ljava/lang/String;", (void *)JHwBlob_native_getString },
+    { "getFieldHandle", "(J)J", (void*) JHwBlob_native_getFieldHandle},
 
     { "copyToBoolArray", "(J[ZI)V", (void *)JHwBlob_native_copyToBoolArray },
     { "copyToInt8Array", "(J[BI)V", (void *)JHwBlob_native_copyToInt8Array },

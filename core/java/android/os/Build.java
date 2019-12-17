@@ -992,6 +992,11 @@ public class Build {
          * engaged. It's now time to see if you can dance.</em>
          */
         public static final int Q = 29;
+
+        /**
+         * R.
+         */
+        public static final int R = CUR_DEVELOPMENT;
     }
 
     /** The type of build, like "user" or "eng". */
@@ -1077,7 +1082,7 @@ public class Build {
             return result == 0;
         }
 
-        final String system = SystemProperties.get("ro.build.fingerprint");
+        final String system = SystemProperties.get("ro.system.build.fingerprint");
         final String vendor = SystemProperties.get("ro.vendor.build.fingerprint");
         final String bootimage = SystemProperties.get("ro.bootimage.build.fingerprint");
         final String requiredBootloader = SystemProperties.get("ro.build.expect.bootloader");
@@ -1086,7 +1091,7 @@ public class Build {
         final String currentRadio = SystemProperties.get("gsm.version.baseband");
 
         if (TextUtils.isEmpty(system)) {
-            Slog.e(TAG, "Required ro.build.fingerprint is empty!");
+            Slog.e(TAG, "Required ro.system.build.fingerprint is empty!");
             return false;
         }
 

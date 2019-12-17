@@ -39,11 +39,11 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
+import android.telephony.PackageChangeReceiver;
 import android.telephony.Rlog;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.android.internal.content.PackageMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
@@ -195,7 +195,7 @@ public final class SmsApplication {
      * @return
      */
     private static int getIncomingUserId(Context context) {
-        int contextUserId = context.getUserId();
+        int contextUserId = UserHandle.myUserId();
         final int callingUid = Binder.getCallingUid();
         if (DEBUG_MULTIUSER) {
             Log.i(LOG_TAG, "getIncomingUserHandle caller=" + callingUid + ", myuid="
@@ -305,7 +305,7 @@ public final class SmsApplication {
                 Uri.fromParts(SCHEME_SMSTO, "", null));
         List<ResolveInfo> respondServices = packageManager.queryIntentServicesAsUser(intent,
                 PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.getUserHandleForUid(userId));
+                UserHandle.of(userId));
         for (ResolveInfo resolveInfo : respondServices) {
             final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             if (serviceInfo == null) {
@@ -782,7 +782,7 @@ public final class SmsApplication {
      * Tracks package changes and ensures that the default SMS app is always configured to be the
      * preferred activity for SENDTO sms/mms intents.
      */
-    private static final class SmsPackageMonitor extends PackageMonitor {
+    private static final class SmsPackageMonitor extends PackageChangeReceiver {
         final Context mContext;
 
         public SmsPackageMonitor(Context context) {
@@ -791,12 +791,12 @@ public final class SmsApplication {
         }
 
         @Override
-        public void onPackageDisappeared(String packageName, int reason) {
+        public void onPackageDisappeared() {
             onPackageChanged();
         }
 
         @Override
-        public void onPackageAppeared(String packageName, int reason) {
+        public void onPackageAppeared() {
             onPackageChanged();
         }
 
@@ -829,7 +829,7 @@ public final class SmsApplication {
 
     public static void initSmsPackageMonitor(Context context) {
         sSmsPackageMonitor = new SmsPackageMonitor(context);
-        sSmsPackageMonitor.register(context, context.getMainLooper(), UserHandle.ALL, false);
+        sSmsPackageMonitor.register(context, context.getMainLooper(), UserHandle.ALL);
     }
 
     @UnsupportedAppUsage

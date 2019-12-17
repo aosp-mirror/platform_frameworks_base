@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SystemPropertiesTest extends TestCase {
     private static final String KEY = "sys.testkey";
+    private static final String UNSET_KEY = "Aiw7woh6ie4toh7W";
     private static final String PERSIST_KEY = "persist.sys.testkey";
 
     @SmallTest
@@ -93,6 +94,27 @@ public class SystemPropertiesTest extends TestCase {
     }
 
     @SmallTest
+    private static void testHandle() throws Exception {
+        String value;
+        SystemProperties.Handle handle = SystemProperties.find("doesnotexist_2341431");
+        assertNull(handle);
+        SystemProperties.set(KEY, "abc");
+        handle = SystemProperties.find(KEY);
+        assertNotNull(handle);
+        value = handle.get();
+        assertEquals("abc", value);
+        SystemProperties.set(KEY, "blarg");
+        value = handle.get();
+        assertEquals("blarg", value);
+        SystemProperties.set(KEY, "1");
+        assertEquals(1, handle.getInt(-1));
+        assertEquals(1, handle.getLong(-1));
+        assertEquals(true, handle.getBoolean(false));
+        SystemProperties.set(KEY, "");
+        assertEquals(12345, handle.getInt(12345));
+    }
+
+    @SmallTest
     public void testIntegralProperties() throws Exception {
         testInt("", 123, 123);
         testInt("", 0, 0);
@@ -109,6 +131,15 @@ public class SystemPropertiesTest extends TestCase {
         testLong("3147483647", 124, 3147483647L);
         testLong("0", 124, 0);
         testLong("-3147483647", 124, -3147483647L);
+    }
+
+    @SmallTest
+    public void testUnset() throws Exception {
+        assertEquals("abc", SystemProperties.get(UNSET_KEY, "abc"));
+        assertEquals(true, SystemProperties.getBoolean(UNSET_KEY, true));
+        assertEquals(false, SystemProperties.getBoolean(UNSET_KEY, false));
+        assertEquals(5, SystemProperties.getInt(UNSET_KEY, 5));
+        assertEquals(-10, SystemProperties.getLong(UNSET_KEY, -10));
     }
 
     @SmallTest

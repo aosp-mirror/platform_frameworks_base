@@ -47,6 +47,7 @@ import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
@@ -55,7 +56,6 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.StateMachine;
-import com.android.server.connectivity.MockableSystemProperties;
 
 import java.io.PrintWriter;
 
@@ -94,7 +94,6 @@ public class EntitlementManager {
     private final ArraySet<Integer> mCurrentTethers;
     private final Context mContext;
     private final int mPermissionChangeMessageCode;
-    private final MockableSystemProperties mSystemProperties;
     private final SharedLog mLog;
     private final SparseIntArray mEntitlementCacheValue;
     private final EntitlementHandler mHandler;
@@ -110,12 +109,12 @@ public class EntitlementManager {
     private TetheringConfigurationFetcher mFetcher;
 
     public EntitlementManager(Context ctx, StateMachine tetherMasterSM, SharedLog log,
-            int permissionChangeMessageCode, MockableSystemProperties systemProperties) {
+            int permissionChangeMessageCode) {
+
         mContext = ctx;
         mLog = log.forSubComponent(TAG);
         mCurrentTethers = new ArraySet<Integer>();
         mCellularPermitted = new SparseIntArray();
-        mSystemProperties = systemProperties;
         mEntitlementCacheValue = new SparseIntArray();
         mTetherMasterSM = tetherMasterSM;
         mPermissionChangeMessageCode = permissionChangeMessageCode;
@@ -287,7 +286,7 @@ public class EntitlementManager {
      */
     @VisibleForTesting
     protected boolean isTetherProvisioningRequired(final TetheringConfiguration config) {
-        if (mSystemProperties.getBoolean(DISABLE_PROVISIONING_SYSPROP_KEY, false)
+        if (SystemProperties.getBoolean(DISABLE_PROVISIONING_SYSPROP_KEY, false)
                 || config.provisioningApp.length == 0) {
             return false;
         }
@@ -526,8 +525,8 @@ public class EntitlementManager {
                     handleMaybeRunProvisioning(config);
                     break;
                 case EVENT_GET_ENTITLEMENT_VALUE:
-                    handleGetLatestTetheringEntitlementValue(msg.arg1, (ResultReceiver) msg.obj,
-                            toBool(msg.arg2));
+                    handleRequestLatestTetheringEntitlementValue(msg.arg1,
+                            (ResultReceiver) msg.obj, toBool(msg.arg2));
                     break;
                 default:
                     mLog.log("Unknown event: " + msg.what);
@@ -651,15 +650,15 @@ public class EntitlementManager {
     }
 
     /** Get the last value of the tethering entitlement check. */
-    public void getLatestTetheringEntitlementResult(int downstream, ResultReceiver receiver,
+    public void requestLatestTetheringEntitlementResult(int downstream, ResultReceiver receiver,
             boolean showEntitlementUi) {
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_GET_ENTITLEMENT_VALUE,
                 downstream, encodeBool(showEntitlementUi), receiver));
 
     }
 
-    private void handleGetLatestTetheringEntitlementValue(int downstream, ResultReceiver receiver,
-            boolean showEntitlementUi) {
+    private void handleRequestLatestTetheringEntitlementValue(int downstream,
+            ResultReceiver receiver, boolean showEntitlementUi) {
         final TetheringConfiguration config = mFetcher.fetchTetheringConfiguration();
         if (!isTetherProvisioningRequired(config)) {
             receiver.send(TETHER_ERROR_NO_ERROR, null);

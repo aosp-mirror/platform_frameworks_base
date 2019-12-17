@@ -87,19 +87,6 @@ class WebViewUpdater {
                         newPackage = findPreferredWebViewPackage();
                         if (mCurrentWebViewPackage != null) {
                             oldProviderName = mCurrentWebViewPackage.packageName;
-                            if (changedState == WebViewUpdateService.PACKAGE_CHANGED
-                                    && newPackage.packageName.equals(oldProviderName)) {
-                                // If we don't change package name we should only rerun the
-                                // preparation phase if the current package has been replaced
-                                // (not if it has been enabled/disabled).
-                                return;
-                            }
-                            if (newPackage.packageName.equals(oldProviderName)
-                                    && (newPackage.lastUpdateTime
-                                        == mCurrentWebViewPackage.lastUpdateTime)) {
-                                // If the chosen package hasn't been updated, then early-out
-                                return;
-                            }
                         }
                         // Only trigger update actions if the updated package is the one
                         // that will be used, or the one that was in use before the

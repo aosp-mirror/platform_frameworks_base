@@ -529,8 +529,10 @@ public class TextClassifierTest {
     }
 
     @Test
-    public void testSuggetsConversationActions_deduplicate() {
-        if (isTextClassifierDisabled()) return;
+    public void testSuggestConversationActions_deduplicate() {
+        Context context = new FakeContextBuilder()
+                .setIntentComponent(Intent.ACTION_SENDTO, FakeContextBuilder.DEFAULT_COMPONENT)
+                .build();
         ConversationActions.Message message =
                 new ConversationActions.Message.Builder(
                         ConversationActions.Message.PERSON_USER_OTHERS)
@@ -541,7 +543,8 @@ public class TextClassifierTest {
                         .setMaxSuggestions(3)
                         .build();
 
-        ConversationActions conversationActions = mClassifier.suggestConversationActions(request);
+        TextClassifier classifier = new TextClassifierImpl(context, TC_CONSTANTS);
+        ConversationActions conversationActions = classifier.suggestConversationActions(request);
 
         Truth.assertThat(conversationActions.getConversationActions()).isEmpty();
     }

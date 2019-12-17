@@ -23,13 +23,14 @@ import android.os.Parcelable;
 import android.util.TimestampedValue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 /**
- * A time signal from a telephony source. The value consists of the number of milliseconds elapsed
+ * A time signal from a telephony source. The value can be {@code null} to indicate that the
+ * telephony source has entered an "un-opinionated" state and any previously sent suggestions are
+ * being withdrawn. When not {@code null}, the value consists of the number of milliseconds elapsed
  * since 1/1/1970 00:00:00 UTC and the time according to the elapsed realtime clock when that number
  * was established. The elapsed realtime clock is considered accurate but volatile, so time signals
  * must not be persisted across device resets.
@@ -50,23 +51,25 @@ public final class PhoneTimeSuggestion implements Parcelable {
             };
 
     private final int mPhoneId;
-    @NonNull
-    private final TimestampedValue<Long> mUtcTime;
-    @Nullable
-    private ArrayList<String> mDebugInfo;
+    @Nullable private final TimestampedValue<Long> mUtcTime;
+    @Nullable private ArrayList<String> mDebugInfo;
 
-    public PhoneTimeSuggestion(int phoneId, @NonNull TimestampedValue<Long> utcTime) {
-        mPhoneId = phoneId;
-        mUtcTime = Objects.requireNonNull(utcTime);
+    private PhoneTimeSuggestion(Builder builder) {
+        mPhoneId = builder.mPhoneId;
+        mUtcTime = builder.mUtcTime;
+        mDebugInfo = builder.mDebugInfo != null ? new ArrayList<>(builder.mDebugInfo) : null;
     }
 
     private static PhoneTimeSuggestion createFromParcel(Parcel in) {
         int phoneId = in.readInt();
-        TimestampedValue<Long> utcTime = in.readParcelable(null /* classLoader */);
-        PhoneTimeSuggestion suggestion = new PhoneTimeSuggestion(phoneId, utcTime);
+        PhoneTimeSuggestion suggestion = new PhoneTimeSuggestion.Builder(phoneId)
+                .setUtcTime(in.readParcelable(null /* classLoader */))
+                .build();
         @SuppressWarnings("unchecked")
         ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */);
-        suggestion.mDebugInfo = debugInfo;
+        if (debugInfo != null) {
+            suggestion.addDebugInfo(debugInfo);
+        }
         return suggestion;
     }
 
@@ -86,14 +89,15 @@ public final class PhoneTimeSuggestion implements Parcelable {
         return mPhoneId;
     }
 
-    @NonNull
+    @Nullable
     public TimestampedValue<Long> getUtcTime() {
         return mUtcTime;
     }
 
     @NonNull
     public List<String> getDebugInfo() {
-        return Collections.unmodifiableList(mDebugInfo);
+        return mDebugInfo == null
+                ? Collections.emptyList() : Collections.unmodifiableList(mDebugInfo);
     }
 
     /**
@@ -101,11 +105,23 @@ public final class PhoneTimeSuggestion implements Parcelable {
      * information is present in {@link #toString()} but is not considered for
      * {@link #equals(Object)} and {@link #hashCode()}.
      */
-    public void addDebugInfo(String... debugInfos) {
+    public void addDebugInfo(String debugInfo) {
         if (mDebugInfo == null) {
             mDebugInfo = new ArrayList<>();
         }
-        mDebugInfo.addAll(Arrays.asList(debugInfos));
+        mDebugInfo.add(debugInfo);
+    }
+
+    /**
+     * Associates information with the instance that can be useful for debugging / logging. The
+     * information is present in {@link #toString()} but is not considered for
+     * {@link #equals(Object)} and {@link #hashCode()}.
+     */
+    public void addDebugInfo(@NonNull List<String> debugInfo) {
+        if (mDebugInfo == null) {
+            mDebugInfo = new ArrayList<>(debugInfo.size());
+        }
+        mDebugInfo.addAll(debugInfo);
     }
 
     @Override
@@ -133,5 +149,45 @@ public final class PhoneTimeSuggestion implements Parcelable {
                 + ", mUtcTime=" + mUtcTime
                 + ", mDebugInfo=" + mDebugInfo
                 + '}';
+    }
+
+    /**
+     * Builds {@link PhoneTimeSuggestion} instances.
+     *
+     * @hide
+     */
+    public static class Builder {
+        private final int mPhoneId;
+        private TimestampedValue<Long> mUtcTime;
+        private List<String> mDebugInfo;
+
+        public Builder(int phoneId) {
+            mPhoneId = phoneId;
+        }
+
+        /** Returns the builder for call chaining. */
+        public Builder setUtcTime(@Nullable TimestampedValue<Long> utcTime) {
+            if (utcTime != null) {
+                // utcTime can be null, but the value it holds cannot.
+                Objects.requireNonNull(utcTime.getValue());
+            }
+
+            mUtcTime = utcTime;
+            return this;
+        }
+
+        /** Returns the builder for call chaining. */
+        public Builder addDebugInfo(@NonNull String debugInfo) {
+            if (mDebugInfo == null) {
+                mDebugInfo = new ArrayList<>();
+            }
+            mDebugInfo.add(debugInfo);
+            return this;
+        }
+
+        /** Returns the {@link PhoneTimeSuggestion}. */
+        public PhoneTimeSuggestion build() {
+            return new PhoneTimeSuggestion(this);
+        }
     }
 }

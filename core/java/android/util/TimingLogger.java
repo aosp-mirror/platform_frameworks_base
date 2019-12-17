@@ -44,7 +44,14 @@ import android.os.SystemClock;
  *     D/TAG     ( 3459): methodA:      6 ms, work C
  *     D/TAG     ( 3459): methodA: end, 16 ms
  * </pre>
+ *
+ * @deprecated Use {@link android.os.Trace}, or
+ *   <a href="https://developer.android.com/studio/profile/benchmark">Android Studio</a>. In
+ *   general, milliseconds is the wrong granularity for method-level tracing. Rounding errors
+ *   can overemphasize cheap operations, or underemphasize repeated operations. This timing
+ *   system also does not take CPU scheduling or frequency into account.
  */
+@Deprecated
 public class TimingLogger {
 
     /**

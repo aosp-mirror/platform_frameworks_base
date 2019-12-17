@@ -470,6 +470,13 @@ public class MockContext extends Context {
     }
 
     @Override
+    public void sendOrderedBroadcast(Intent intent, String receiverPermission, String receiverAppOp,
+            Bundle options, BroadcastReceiver resultReceiver, Handler scheduler, int initialCode,
+            String initialData, Bundle initialExtras) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void sendStickyBroadcast(Intent intent) {
         throw new UnsupportedOperationException();
     }
@@ -530,6 +537,14 @@ public class MockContext extends Context {
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
             String broadcastPermission, Handler scheduler, int flags) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    @SystemApi
+    public Intent registerReceiverForAllUsers(BroadcastReceiver receiver,
+            IntentFilter filter, String broadcastPermission, Handler scheduler) {
         throw new UnsupportedOperationException();
     }
 
@@ -760,6 +775,12 @@ public class MockContext extends Context {
     @Override
     public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
             throws PackageManager.NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public Context createContextAsUser(UserHandle user, @CreatePackageOptions int flags) {
         throw new UnsupportedOperationException();
     }
 

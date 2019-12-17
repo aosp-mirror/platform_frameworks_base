@@ -628,6 +628,13 @@ public class Notification implements Parcelable
      */
     public static final int FLAG_BUBBLE = 0x00001000;
 
+    /** @hide */
+    @IntDef({FLAG_SHOW_LIGHTS, FLAG_ONGOING_EVENT, FLAG_INSISTENT, FLAG_ONLY_ALERT_ONCE,
+            FLAG_AUTO_CANCEL, FLAG_NO_CLEAR, FLAG_FOREGROUND_SERVICE, FLAG_HIGH_PRIORITY,
+            FLAG_LOCAL_ONLY, FLAG_GROUP_SUMMARY, FLAG_AUTOGROUP_SUMMARY, FLAG_BUBBLE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NotificationFlags{};
+
     public int flags;
 
     /** @hide */
@@ -4537,10 +4544,15 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @hide
+         * Set the value for a notification flag
+         *
+         * @param mask Bit mask of the flag
+         * @param value Status (on/off) of the flag
+         *
+         * @return The same Builder.
          */
         @NonNull
-        public Builder setFlag(int mask, boolean value) {
+        public Builder setFlag(@NotificationFlags int mask, boolean value) {
             if (value) {
                 mN.flags |= mask;
             } else {
@@ -8539,24 +8551,34 @@ public class Notification implements Parcelable
          * If set and the app creating the bubble is in the foreground, the bubble will be posted
          * in its expanded state, with the contents of {@link #getIntent()} in a floating window.
          *
-         * <p>If the app creating the bubble is not in the foreground this flag has no effect.</p>
+         * <p>This flag has no effect if the app posting the bubble is not in the foreground.
+         * The app is considered foreground if it is visible and on the screen, note that
+         * a foreground service does not qualify.
+         * </p>
          *
          * <p>Generally this flag should only be set if the user has performed an action to request
          * or create a bubble.</p>
+         *
+         * @hide
          */
-        private static final int FLAG_AUTO_EXPAND_BUBBLE = 0x00000001;
+        public static final int FLAG_AUTO_EXPAND_BUBBLE = 0x00000001;
 
         /**
          * If set and the app posting the bubble is in the foreground, the bubble will
          * be posted <b>without</b> the associated notification in the notification shade.
          *
-         * <p>If the app posting the bubble is not in the foreground this flag has no effect.</p>
+         * <p>This flag has no effect if the app posting the bubble is not in the foreground.
+         * The app is considered foreground if it is visible and on the screen, note that
+         * a foreground service does not qualify.
+         * </p>
          *
          * <p>Generally this flag should only be set if the user has performed an action to request
          * or create a bubble, or if the user has seen the content in the notification and the
          * notification is no longer relevant.</p>
+         *
+         * @hide
          */
-        private static final int FLAG_SUPPRESS_NOTIFICATION = 0x00000002;
+        public static final int FLAG_SUPPRESS_NOTIFICATION = 0x00000002;
 
         private BubbleMetadata(PendingIntent expandIntent, PendingIntent deleteIntent,
                 Icon icon, int height, @DimenRes int heightResId) {
@@ -8672,8 +8694,18 @@ public class Notification implements Parcelable
             out.writeInt(mDesiredHeightResId);
         }
 
-        private void setFlags(int flags) {
+        /**
+         * @hide
+         */
+        public void setFlags(int flags) {
             mFlags = flags;
+        }
+
+        /**
+         * @hide
+         */
+        public int getFlags() {
+            return mFlags;
         }
 
         /**
@@ -8792,6 +8824,8 @@ public class Notification implements Parcelable
              * {@link #getIntent()} in a floating window).
              *
              * <p>This flag has no effect if the app posting the bubble is not in the foreground.
+             * The app is considered foreground if it is visible and on the screen, note that
+             * a foreground service does not qualify.
              * </p>
              *
              * <p>Generally, this flag should only be set if the user has performed an action to
@@ -8810,6 +8844,8 @@ public class Notification implements Parcelable
              * the notification shade.
              *
              * <p>This flag has no effect if the app posting the bubble is not in the foreground.
+             * The app is considered foreground if it is visible and on the screen, note that
+             * a foreground service does not qualify.
              * </p>
              *
              * <p>Generally, this flag should only be set if the user has performed an action to
@@ -10484,12 +10520,7 @@ public class Notification implements Parcelable
         final StandardTemplateParams fillTextsFrom(Builder b) {
             Bundle extras = b.mN.extras;
             this.title = b.processLegacyText(extras.getCharSequence(EXTRA_TITLE));
-
-            CharSequence text = extras.getCharSequence(EXTRA_BIG_TEXT);
-            if (TextUtils.isEmpty(text)) {
-                text = extras.getCharSequence(EXTRA_TEXT);
-            }
-            this.text = b.processLegacyText(text);
+            this.text = b.processLegacyText(extras.getCharSequence(EXTRA_TEXT));
             this.summaryText = extras.getCharSequence(EXTRA_SUB_TEXT);
             return this;
         }

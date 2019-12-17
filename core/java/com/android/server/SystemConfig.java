@@ -24,6 +24,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.storage.StorageManager;
@@ -53,6 +54,8 @@ import java.util.Map;
 
 /**
  * Loads global system configuration info.
+ * Note: Initializing this class hits the disk and is slow.  This class should generally only be
+ * accessed by the system_server process.
  */
 public class SystemConfig {
     static final String TAG = "SystemConfig";
@@ -208,6 +211,11 @@ public class SystemConfig {
     private final ArraySet<String> mBugreportWhitelistedPackages = new ArraySet<>();
 
     public static SystemConfig getInstance() {
+        if (!isSystemProcess()) {
+            Slog.wtf(TAG, "SystemConfig is being accessed by a process other than "
+                    + "system_server.");
+        }
+
         synchronized (SystemConfig.class) {
             if (sInstance == null) {
                 sInstance = new SystemConfig();
@@ -410,6 +418,19 @@ public class SystemConfig {
                 Environment.getSystemExtDirectory(), "etc", "sysconfig"), ALLOW_ALL);
         readPermissions(Environment.buildPath(
                 Environment.getSystemExtDirectory(), "etc", "permissions"), ALLOW_ALL);
+
+        // Skip loading configuration from apex if it is not a system process.
+        if (!isSystemProcess()) {
+            return;
+        }
+        // Read configuration of libs from apex module.
+        // TODO(146407631): Use a solid way to filter apex module folders?
+        for (File f: FileUtils.listFilesOrEmpty(Environment.getApexDirectory())) {
+            if (f.isFile() || f.getPath().contains("@")) {
+                continue;
+            }
+            readPermissions(Environment.buildPath(f, "etc", "permissions"), ALLOW_LIBS);
+        }
     }
 
     void readPermissions(File libraryDir, int permissionFlag) {
@@ -1160,5 +1181,9 @@ public class SystemConfig {
         if (!newPermissions.isEmpty()) {
             mSplitPermissions.add(new SplitPermissionInfo(splitPerm, newPermissions, targetSdk));
         }
+    }
+
+    private static boolean isSystemProcess() {
+        return Process.myUid() == Process.SYSTEM_UID;
     }
 }

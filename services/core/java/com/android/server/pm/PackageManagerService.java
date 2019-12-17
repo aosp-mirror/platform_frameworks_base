@@ -91,6 +91,7 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
@@ -196,6 +197,7 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
+import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.content.res.Resources;
 import android.content.rollback.IRollbackManager;
 import android.database.ContentObserver;
@@ -236,6 +238,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import android.permission.PermissionManager;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings.Global;
@@ -374,6 +377,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Keep track of all those APKs everywhere.
@@ -588,16 +592,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static final String PACKAGE_SCHEME = "package";
 
-    private static final String VENDOR_OVERLAY_DIR = "/vendor/overlay";
-
-    private static final String PRODUCT_OVERLAY_DIR = "/product/overlay";
-
-    private static final String SYSTEM_EXT_OVERLAY_DIR = "/system_ext/overlay";
-
-    private static final String ODM_OVERLAY_DIR = "/odm/overlay";
-
-    private static final String OEM_OVERLAY_DIR = "/oem/overlay";
-
     /** Canonical intent used to identify what counts as a "web browser" app */
     private static final Intent sBrowserIntent;
     static {
@@ -757,7 +751,31 @@ public class PackageManagerService extends IPackageManager.Stub
     private final Injector mInjector;
 
     /**
-     * Unit tests will instantiate and / or extend to mock dependencies / behaviors.
+     * The list of all system partitions that may contain packages in ascending order of
+     * specificity (the more generic, the earlier in the list a partition appears).
+     */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static final List<SystemPartition> SYSTEM_PARTITIONS = Collections.unmodifiableList(
+            Arrays.asList(
+                    new SystemPartition(Environment.getRootDirectory(), 0 /* scanFlag */,
+                            false /* hasOverlays */),
+                    new SystemPartition(Environment.getVendorDirectory(), SCAN_AS_VENDOR,
+                            true /* hasOverlays */),
+                    new SystemPartition(Environment.getOdmDirectory(), SCAN_AS_ODM,
+                            true /* hasOverlays */),
+                    new SystemPartition(Environment.getOemDirectory(), SCAN_AS_OEM,
+                            true /* hasOverlays */),
+                    new SystemPartition(Environment.getProductDirectory(), SCAN_AS_PRODUCT,
+                            true /* hasOverlays */),
+                    new SystemPartition(Environment.getSystemExtDirectory(), SCAN_AS_SYSTEM_EXT,
+                            true /* hasOverlays */)));
+
+    private final List<SystemPartition> mDirsToScanAsSystem;
+
+    /**
+     * Unit tests will instantiate, extend and/or mock to mock dependencies / behaviors.
+     *
+     * NOTE: All getters should return the same instance for every call.
      */
     @VisibleForTesting
     static class Injector {
@@ -2048,6 +2066,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     pkgList.add(packageName);
                     sendResourcesChangedBroadcast(true, true, pkgList, uidArray, null);
                 }
+            } else if (!ArrayUtils.isEmpty(res.libraryConsumers)) { // if static shared lib
+                for (int i = 0; i < res.libraryConsumers.size(); i++) {
+                    PackageParser.Package pkg = res.libraryConsumers.get(i);
+                    // send broadcast that all consumers of the static shared library have changed
+                    sendPackageChangedBroadcast(pkg.packageName, false /*killFlag*/,
+                            new ArrayList<>(Collections.singletonList(pkg.packageName)),
+                            pkg.applicationInfo.uid);
+                }
             }
 
             // Work that needs to happen on first install within each user
@@ -2144,6 +2170,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 notifyInstallObserver(packageName);
             }
         }
+    }
+
+    @Override
+    public List<SplitPermissionInfoParcelable> getSplitPermissions() {
+        return PermissionManager.splitPermissionInfoListToParcelableList(
+                SystemConfig.getInstance().getSplitPermissions());
     }
 
     private void notifyInstallObserver(String packageName) {
@@ -2410,9 +2442,70 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static class SystemPartition {
+        public final File folder;
+        public final int scanFlag;
+        public final File appFolder;
+        @Nullable
+        public final File privAppFolder;
+        @Nullable
+        public final File overlayFolder;
+
+
+        private static boolean shouldScanPrivApps(@ScanFlags int scanFlags) {
+            if ((scanFlags & SCAN_AS_OEM) != 0) {
+                return false;
+            }
+            if (scanFlags == 0) {  // /system partition
+                return true;
+            }
+            if ((scanFlags
+                    & (SCAN_AS_VENDOR | SCAN_AS_ODM | SCAN_AS_PRODUCT | SCAN_AS_SYSTEM_EXT)) != 0) {
+                return true;
+            }
+            return false;
+        }
+
+        private SystemPartition(File folder, int scanFlag, boolean hasOverlays) {
+            this.folder = folder;
+            this.scanFlag = scanFlag;
+            this.appFolder = toCanonical(new File(folder, "app"));
+            this.privAppFolder = shouldScanPrivApps(scanFlag)
+                    ? toCanonical(new File(folder, "priv-app"))
+                    : null;
+            this.overlayFolder = hasOverlays ? toCanonical(new File(folder, "overlay")) : null;
+        }
+
+        public boolean containsPrivApp(File scanFile) {
+            return FileUtils.contains(privAppFolder, scanFile);
+        }
+
+        public boolean containsApp(File scanFile) {
+            return FileUtils.contains(appFolder, scanFile);
+        }
+
+        public boolean containsPath(String path) {
+            return path.startsWith(folder.getPath() + "/");
+        }
+
+        public boolean containsPrivPath(String path) {
+            return privAppFolder != null && path.startsWith(privAppFolder.getPath() + "/");
+        }
+
+        private static File toCanonical(File dir) {
+            try {
+                return dir.getCanonicalFile();
+            } catch (IOException e) {
+                // failed to look up canonical path, continue with original one
+                return dir;
+            }
+        }
+    }
+
     public PackageManagerService(Context context, Installer installer,
-            boolean factoryTest, boolean onlyCore) {
-        LockGuard.installLock(mPackages, LockGuard.INDEX_PACKAGES);
+        boolean factoryTest, boolean onlyCore) {
+            LockGuard.installLock(mPackages, LockGuard.INDEX_PACKAGES);
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "create package manager");
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
                 SystemClock.uptimeMillis());
@@ -2505,7 +2598,18 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mProtectedPackages = new ProtectedPackages(mContext);
 
-        mApexManager = ApexManager.create(context);
+        mApexManager = ApexManager.create(mContext);
+
+        mDirsToScanAsSystem = new ArrayList<>();
+        mDirsToScanAsSystem.addAll(SYSTEM_PARTITIONS);
+        mDirsToScanAsSystem.addAll(mApexManager.getActiveApexInfos().stream()
+                .map(ai -> resolveApexToSystemPartition(ai))
+                .filter(Objects::nonNull).collect(Collectors.toList()));
+        Slog.d(TAG,
+                "Directories scanned as system partitions: [" + mDirsToScanAsSystem.stream().map(
+                        d -> (d.folder.getAbsolutePath() + ":" + d.scanFlag))
+                        .collect(Collectors.joining(",")) + "]");
+
         // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
         // writer
@@ -2640,215 +2744,35 @@ public class PackageManagerService extends IPackageManager.Stub
             // any apps.)
             // For security and version matching reason, only consider overlay packages if they
             // reside in the right directory.
-            scanDirTracedLI(new File(VENDOR_OVERLAY_DIR),
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_VENDOR,
-                    0);
-            scanDirTracedLI(new File(PRODUCT_OVERLAY_DIR),
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_PRODUCT,
-                    0);
-            scanDirTracedLI(new File(SYSTEM_EXT_OVERLAY_DIR),
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_SYSTEM_EXT,
-                    0);
-            scanDirTracedLI(new File(ODM_OVERLAY_DIR),
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_ODM,
-                    0);
-            scanDirTracedLI(new File(OEM_OVERLAY_DIR),
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_OEM,
-                    0);
+            final int systemParseFlags = mDefParseFlags | PackageParser.PARSE_IS_SYSTEM_DIR;
+            final int systemScanFlags = scanFlags | SCAN_AS_SYSTEM;
+            for (int i = mDirsToScanAsSystem.size() - 1; i >= 0; i--) {
+                final SystemPartition partition = mDirsToScanAsSystem.get(i);
+                if (partition.overlayFolder == null) {
+                    continue;
+                }
+                scanDirTracedLI(partition.overlayFolder, systemParseFlags,
+                        systemScanFlags | partition.scanFlag, 0);
+            }
 
             mParallelPackageParserCallback.findStaticOverlayPackages();
 
-            // Find base frameworks (resource packages without code).
-            scanDirTracedLI(frameworkDir,
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_NO_DEX
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_PRIVILEGED,
-                    0);
+            scanDirTracedLI(frameworkDir, systemParseFlags,
+                    systemScanFlags | SCAN_NO_DEX | SCAN_AS_PRIVILEGED, 0);
             if (!mPackages.containsKey("android")) {
                 throw new IllegalStateException(
                         "Failed to load frameworks package; check log for warnings");
             }
-
-            // Collect privileged system packages.
-            final File privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
-            scanDirTracedLI(privilegedAppDir,
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_PRIVILEGED,
-                    0);
-
-            // Collect ordinary system packages.
-            final File systemAppDir = new File(Environment.getRootDirectory(), "app");
-            scanDirTracedLI(systemAppDir,
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM,
-                    0);
-
-            // Collect privileged vendor packages.
-            File privilegedVendorAppDir = new File(Environment.getVendorDirectory(), "priv-app");
-            try {
-                privilegedVendorAppDir = privilegedVendorAppDir.getCanonicalFile();
-            } catch (IOException e) {
-                // failed to look up canonical path, continue with original one
+            for (int i = 0, size = mDirsToScanAsSystem.size(); i < size; i++) {
+                final SystemPartition partition = mDirsToScanAsSystem.get(i);
+                if (partition.privAppFolder != null) {
+                    scanDirTracedLI(partition.privAppFolder, systemParseFlags,
+                            systemScanFlags | SCAN_AS_PRIVILEGED | partition.scanFlag, 0);
+                }
+                scanDirTracedLI(partition.appFolder, systemParseFlags,
+                        systemScanFlags | partition.scanFlag, 0);
             }
-            scanDirTracedLI(privilegedVendorAppDir,
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_VENDOR
-                    | SCAN_AS_PRIVILEGED,
-                    0);
 
-            // Collect ordinary vendor packages.
-            File vendorAppDir = new File(Environment.getVendorDirectory(), "app");
-            try {
-                vendorAppDir = vendorAppDir.getCanonicalFile();
-            } catch (IOException e) {
-                // failed to look up canonical path, continue with original one
-            }
-            scanDirTracedLI(vendorAppDir,
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_VENDOR,
-                    0);
-
-            // Collect privileged odm packages. /odm is another vendor partition
-            // other than /vendor.
-            File privilegedOdmAppDir = new File(Environment.getOdmDirectory(),
-                        "priv-app");
-            try {
-                privilegedOdmAppDir = privilegedOdmAppDir.getCanonicalFile();
-            } catch (IOException e) {
-                // failed to look up canonical path, continue with original one
-            }
-            scanDirTracedLI(privilegedOdmAppDir,
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_VENDOR
-                    | SCAN_AS_PRIVILEGED,
-                    0);
-
-            // Collect ordinary odm packages. /odm is another vendor partition
-            // other than /vendor.
-            File odmAppDir = new File(Environment.getOdmDirectory(), "app");
-            try {
-                odmAppDir = odmAppDir.getCanonicalFile();
-            } catch (IOException e) {
-                // failed to look up canonical path, continue with original one
-            }
-            scanDirTracedLI(odmAppDir,
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_VENDOR,
-                    0);
-
-            // Collect all OEM packages.
-            final File oemAppDir = new File(Environment.getOemDirectory(), "app");
-            scanDirTracedLI(oemAppDir,
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_OEM,
-                    0);
-
-            // Collected privileged /product packages.
-            File privilegedProductAppDir = new File(Environment.getProductDirectory(), "priv-app");
-            try {
-                privilegedProductAppDir = privilegedProductAppDir.getCanonicalFile();
-            } catch (IOException e) {
-                // failed to look up canonical path, continue with original one
-            }
-            scanDirTracedLI(privilegedProductAppDir,
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_PRODUCT
-                    | SCAN_AS_PRIVILEGED,
-                    0);
-
-            // Collect ordinary /product packages.
-            File productAppDir = new File(Environment.getProductDirectory(), "app");
-            try {
-                productAppDir = productAppDir.getCanonicalFile();
-            } catch (IOException e) {
-                // failed to look up canonical path, continue with original one
-            }
-            scanDirTracedLI(productAppDir,
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_PRODUCT,
-                    0);
-
-            // Collected privileged /system_ext packages.
-            File privilegedSystemExtAppDir =
-                    new File(Environment.getSystemExtDirectory(), "priv-app");
-            try {
-                privilegedSystemExtAppDir =
-                        privilegedSystemExtAppDir.getCanonicalFile();
-            } catch (IOException e) {
-                // failed to look up canonical path, continue with original one
-            }
-            scanDirTracedLI(privilegedSystemExtAppDir,
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_SYSTEM_EXT
-                    | SCAN_AS_PRIVILEGED,
-                    0);
-
-            // Collect ordinary /system_ext packages.
-            File systemExtAppDir = new File(Environment.getSystemExtDirectory(), "app");
-            try {
-                systemExtAppDir = systemExtAppDir.getCanonicalFile();
-            } catch (IOException e) {
-                // failed to look up canonical path, continue with original one
-            }
-            scanDirTracedLI(systemExtAppDir,
-                    mDefParseFlags
-                    | PackageParser.PARSE_IS_SYSTEM_DIR,
-                    scanFlags
-                    | SCAN_AS_SYSTEM
-                    | SCAN_AS_SYSTEM_EXT,
-                    0);
 
             // Prune any system packages that no longer exist.
             final List<String> possiblyDeletedUpdatedSystemApps = new ArrayList<>();
@@ -3016,89 +2940,26 @@ public class PackageManagerService extends IPackageManager.Stub
                         logCriticalInfo(Log.WARN, "Expected better " + packageName
                                 + " but never showed up; reverting to system");
 
-                        final @ParseFlags int reparseFlags;
-                        final @ScanFlags int rescanFlags;
-                        if (FileUtils.contains(privilegedAppDir, scanFile)) {
-                            reparseFlags =
-                                    mDefParseFlags |
-                                    PackageParser.PARSE_IS_SYSTEM_DIR;
-                            rescanFlags =
-                                    scanFlags
-                                    | SCAN_AS_SYSTEM
-                                    | SCAN_AS_PRIVILEGED;
-                        } else if (FileUtils.contains(systemAppDir, scanFile)) {
-                            reparseFlags =
-                                    mDefParseFlags |
-                                    PackageParser.PARSE_IS_SYSTEM_DIR;
-                            rescanFlags =
-                                    scanFlags
-                                    | SCAN_AS_SYSTEM;
-                        } else if (FileUtils.contains(privilegedVendorAppDir, scanFile)
-                                || FileUtils.contains(privilegedOdmAppDir, scanFile)) {
-                            reparseFlags =
-                                    mDefParseFlags |
-                                    PackageParser.PARSE_IS_SYSTEM_DIR;
-                            rescanFlags =
-                                    scanFlags
-                                    | SCAN_AS_SYSTEM
-                                    | SCAN_AS_VENDOR
-                                    | SCAN_AS_PRIVILEGED;
-                        } else if (FileUtils.contains(vendorAppDir, scanFile)
-                                || FileUtils.contains(odmAppDir, scanFile)) {
-                            reparseFlags =
-                                    mDefParseFlags |
-                                    PackageParser.PARSE_IS_SYSTEM_DIR;
-                            rescanFlags =
-                                    scanFlags
-                                    | SCAN_AS_SYSTEM
-                                    | SCAN_AS_VENDOR;
-                        } else if (FileUtils.contains(oemAppDir, scanFile)) {
-                            reparseFlags =
-                                    mDefParseFlags |
-                                    PackageParser.PARSE_IS_SYSTEM_DIR;
-                            rescanFlags =
-                                    scanFlags
-                                    | SCAN_AS_SYSTEM
-                                    | SCAN_AS_OEM;
-                        } else if (FileUtils.contains(privilegedProductAppDir, scanFile)) {
-                            reparseFlags =
-                                    mDefParseFlags |
-                                    PackageParser.PARSE_IS_SYSTEM_DIR;
-                            rescanFlags =
-                                    scanFlags
-                                    | SCAN_AS_SYSTEM
-                                    | SCAN_AS_PRODUCT
-                                    | SCAN_AS_PRIVILEGED;
-                        } else if (FileUtils.contains(productAppDir, scanFile)) {
-                            reparseFlags =
-                                    mDefParseFlags |
-                                    PackageParser.PARSE_IS_SYSTEM_DIR;
-                            rescanFlags =
-                                    scanFlags
-                                    | SCAN_AS_SYSTEM
-                                    | SCAN_AS_PRODUCT;
-                        } else if (FileUtils.contains(privilegedSystemExtAppDir, scanFile)) {
-                            reparseFlags =
-                                    mDefParseFlags |
-                                    PackageParser.PARSE_IS_SYSTEM_DIR;
-                            rescanFlags =
-                                    scanFlags
-                                    | SCAN_AS_SYSTEM
-                                    | SCAN_AS_SYSTEM_EXT
-                                    | SCAN_AS_PRIVILEGED;
-                        } else if (FileUtils.contains(systemExtAppDir, scanFile)) {
-                            reparseFlags =
-                                    mDefParseFlags |
-                                    PackageParser.PARSE_IS_SYSTEM_DIR;
-                            rescanFlags =
-                                    scanFlags
-                                    | SCAN_AS_SYSTEM
-                                    | SCAN_AS_SYSTEM_EXT;
-                        } else {
+                        @ParseFlags int reparseFlags = 0;
+                        @ScanFlags int rescanFlags = 0;
+                        for (int i1 = 0, size = mDirsToScanAsSystem.size(); i1 < size; i1++) {
+                            SystemPartition partition = mDirsToScanAsSystem.get(i1);
+                            if (partition.containsPrivApp(scanFile)) {
+                                reparseFlags = systemParseFlags;
+                                rescanFlags = systemScanFlags | SCAN_AS_PRIVILEGED
+                                        | partition.scanFlag;
+                                break;
+                            }
+                            if (partition.containsApp(scanFile)) {
+                                reparseFlags = systemParseFlags;
+                                rescanFlags = systemScanFlags | partition.scanFlag;
+                                break;
+                            }
+                        }
+                        if (rescanFlags == 0) {
                             Slog.e(TAG, "Ignoring unexpected fallback path " + scanFile);
                             continue;
                         }
-
                         mSettings.enableSystemPackageLPw(packageName);
 
                         try {
@@ -3275,7 +3136,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         // No apps are running this early, so no need to freeze
                         clearAppDataLIF(ps.pkg, UserHandle.USER_ALL,
                                 FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL
-                                        | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+                                        | Installer.FLAG_CLEAR_CODE_CACHE_ONLY
+                                        | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES);
                     }
                 }
                 ver.fingerprint = Build.FINGERPRINT;
@@ -10361,7 +10223,9 @@ public class PackageManagerService extends IPackageManager.Stub
             clearAppDataLeafLIF(pkg.childPackages.get(i), userId, flags);
         }
 
-        clearAppProfilesLIF(pkg, UserHandle.USER_ALL);
+        if ((flags & Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES) == 0) {
+            clearAppProfilesLIF(pkg, UserHandle.USER_ALL);
+        }
     }
 
     private void clearAppDataLeafLIF(PackageParser.Package pkg, int userId, int flags) {
@@ -12304,6 +12168,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     clientLibPkgs = updateAllSharedLibrariesLocked(pkg, combinedPackages);
                 }
             }
+        }
+        if (reconciledPkg.installResult != null) {
+            reconciledPkg.installResult.libraryConsumers = clientLibPkgs;
         }
 
         if ((scanFlags & SCAN_BOOTING) != 0) {
@@ -15092,17 +14959,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             TRACE_TAG_PACKAGE_MANAGER, "enable_rollback", enableRollbackToken);
                     mPendingEnableRollback.append(enableRollbackToken, this);
 
-                    final int[] installedUsers;
-                    synchronized (mPackages) {
-                        PackageSetting ps = mSettings.getPackageLPr(pkgLite.packageName);
-                        if (ps != null) {
-                            installedUsers = ps.queryInstalledUsers(sUserManager.getUserIds(),
-                                    true);
-                        } else {
-                            installedUsers = new int[0];
-                        }
-                    }
-
                     Intent enableRollbackIntent = new Intent(Intent.ACTION_PACKAGE_ENABLE_ROLLBACK);
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
@@ -15110,9 +14966,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALL_FLAGS,
                             installFlags);
-                    enableRollbackIntent.putExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALLED_USERS,
-                            installedUsers);
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_USER,
                             getRollbackUser().getIdentifier());
@@ -15670,6 +15523,8 @@ public class PackageManagerService extends IPackageManager.Stub
         String installerPackageName;
         PackageRemovedInfo removedInfo;
         ArrayMap<String, PackageInstalledInfo> addedChildPackages;
+        // The set of packages consuming this shared library or null if no consumers exist.
+        ArrayList<PackageParser.Package> libraryConsumers;
 
         public void setError(int code, String msg) {
             setReturnCode(code);
@@ -17619,8 +17474,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (new File(signaturePath).exists() && !VerityUtils.hasFsverity(filePath)) {
                     try {
                         VerityUtils.setUpFsverity(filePath, signaturePath);
-                    } catch (IOException | DigestException | NoSuchAlgorithmException
-                            | SecurityException e) {
+                    } catch (IOException e) {
                         throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
                                 "Failed to enable fs-verity: " + e);
                     }
@@ -18230,7 +18084,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             continue;
                         }
                         List<VersionedPackage> libClientPackages = getPackagesUsingSharedLibraryLPr(
-                                libraryInfo, 0, currUserId);
+                                libraryInfo, MATCH_KNOWN_PACKAGES, currUserId);
                         if (!ArrayUtils.isEmpty(libClientPackages)) {
                             Slog.w(TAG, "Not removing package " + pkg.manifestPackageName
                                     + " hosting lib " + libraryInfo.getName() + " version "
@@ -18425,8 +18279,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             if (removedAppId >= 0) {
+                // If a system app's updates are uninstalled the UID is not actually removed. Some
+                // services need to know the package name affected.
+                if (extras.getBoolean(Intent.EXTRA_REPLACING, false)) {
+                    extras.putString(Intent.EXTRA_PACKAGE_NAME, removedPackage);
+                }
+
                 packageSender.sendPackageBroadcast(Intent.ACTION_UID_REMOVED,
-                    null, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND,
+                        null, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND,
                     null, null, broadcastUsers, instantUserIds);
             }
         }
@@ -18515,19 +18375,20 @@ public class PackageManagerService extends IPackageManager.Stub
                         // or packages running under the shared user of the removed
                         // package if revoking the permissions requested only by the removed
                         // package is successful and this causes a change in gids.
+                        boolean shouldKill = false;
                         for (int userId : UserManagerService.getInstance().getUserIds()) {
                             final int userIdToKill = mSettings.updateSharedUserPermsLPw(deletedPs,
                                     userId);
-                            if (userIdToKill == UserHandle.USER_ALL
-                                    || userIdToKill >= UserHandle.USER_SYSTEM) {
-                                // If gids changed for this user, kill all affected packages.
-                                mHandler.post(() -> {
-                                    // This has to happen with no lock held.
-                                    killApplication(deletedPs.name, deletedPs.appId,
-                                            KILL_APP_REASON_GIDS_CHANGED);
-                                });
-                                break;
-                            }
+                            shouldKill |= userIdToKill == UserHandle.USER_ALL
+                                    || userIdToKill >= UserHandle.USER_SYSTEM;
+                        }
+                        // If gids changed, kill all affected packages.
+                        if (shouldKill) {
+                            mHandler.post(() -> {
+                                // This has to happen with no lock held.
+                                killApplication(deletedPs.name, deletedPs.appId,
+                                        KILL_APP_REASON_GIDS_CHANGED);
+                            });
                         }
                     }
                     clearPackagePreferredActivitiesLPw(
@@ -18573,80 +18434,28 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    static boolean locationIsPrivileged(String path) {
-        try {
-            final File privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
-            final File privilegedVendorAppDir = new File(Environment.getVendorDirectory(), "priv-app");
-            final File privilegedOdmAppDir = new File(Environment.getOdmDirectory(), "priv-app");
-            final File privilegedProductAppDir = new File(Environment.getProductDirectory(), "priv-app");
-            final File privilegedSystemExtAppDir =
-                    new File(Environment.getSystemExtDirectory(), "priv-app");
-            return path.startsWith(privilegedAppDir.getCanonicalPath() + "/")
-                    || path.startsWith(privilegedVendorAppDir.getCanonicalPath() + "/")
-                    || path.startsWith(privilegedOdmAppDir.getCanonicalPath() + "/")
-                    || path.startsWith(privilegedProductAppDir.getCanonicalPath() + "/")
-                    || path.startsWith(privilegedSystemExtAppDir.getCanonicalPath() + "/");
-        } catch (IOException e) {
-            Slog.e(TAG, "Unable to access code path " + path);
+    private static @Nullable SystemPartition resolveApexToSystemPartition(
+            ApexManager.ActiveApexInfo apexInfo) {
+        for (int i = 0, size = SYSTEM_PARTITIONS.size(); i < size; i++) {
+            SystemPartition sp = SYSTEM_PARTITIONS.get(i);
+            if (apexInfo.preinstalledApexPath.getAbsolutePath().startsWith(
+                    sp.folder.getAbsolutePath())) {
+                return new SystemPartition(apexInfo.apexDirectory, sp.scanFlag,
+                        false /* hasOverlays */);
+            }
         }
-        return false;
-    }
-
-    static boolean locationIsOem(String path) {
-        try {
-            return path.startsWith(Environment.getOemDirectory().getCanonicalPath() + "/");
-        } catch (IOException e) {
-            Slog.e(TAG, "Unable to access code path " + path);
-        }
-        return false;
-    }
-
-    static boolean locationIsVendor(String path) {
-        try {
-            return path.startsWith(Environment.getVendorDirectory().getCanonicalPath() + "/")
-                    || path.startsWith(Environment.getOdmDirectory().getCanonicalPath() + "/");
-        } catch (IOException e) {
-            Slog.e(TAG, "Unable to access code path " + path);
-        }
-        return false;
-    }
-
-    static boolean locationIsProduct(String path) {
-        try {
-            return path.startsWith(Environment.getProductDirectory().getCanonicalPath() + "/");
-        } catch (IOException e) {
-            Slog.e(TAG, "Unable to access code path " + path);
-        }
-        return false;
-    }
-
-    static boolean locationIsSystemExt(String path) {
-        try {
-            return path.startsWith(
-              Environment.getSystemExtDirectory().getCanonicalPath() + "/");
-        } catch (IOException e) {
-            Slog.e(TAG, "Unable to access code path " + path);
-        }
-        return false;
-    }
-
-    static boolean locationIsOdm(String path) {
-        try {
-            return path.startsWith(Environment.getOdmDirectory().getCanonicalPath() + "/");
-        } catch (IOException e) {
-            Slog.e(TAG, "Unable to access code path " + path);
-        }
-        return false;
+        return null;
     }
 
     /*
      * Tries to delete system package.
      */
     private void deleteSystemPackageLIF(DeletePackageAction action, PackageSetting deletedPs,
-            int[] allUserHandles, int flags, PackageRemovedInfo outInfo, boolean writeSettings)
+            int[] allUserHandles, int flags, @Nullable PackageRemovedInfo outInfo,
+            boolean writeSettings)
             throws SystemDeleteException {
-        final boolean applyUserRestrictions
-                = (allUserHandles != null) && (outInfo.origUsers != null);
+        final boolean applyUserRestrictions =
+                (allUserHandles != null) && outInfo != null && (outInfo.origUsers != null);
         final PackageParser.Package deletedPkg = deletedPs.pkg;
         // Confirm if the system package has been updated
         // An updated system app can be deleted. This will also have to restore
@@ -18667,19 +18476,21 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        // Delete the updated package
-        outInfo.isRemovedPackageSystemUpdate = true;
-        if (outInfo.removedChildPackages != null) {
-            final int childCount = (deletedPs.childPackageNames != null)
-                    ? deletedPs.childPackageNames.size() : 0;
-            for (int i = 0; i < childCount; i++) {
-                String childPackageName = deletedPs.childPackageNames.get(i);
-                if (disabledPs.childPackageNames != null && disabledPs.childPackageNames
-                        .contains(childPackageName)) {
-                    PackageRemovedInfo childInfo = outInfo.removedChildPackages.get(
-                            childPackageName);
-                    if (childInfo != null) {
-                        childInfo.isRemovedPackageSystemUpdate = true;
+        if (outInfo != null) {
+            // Delete the updated package
+            outInfo.isRemovedPackageSystemUpdate = true;
+            if (outInfo.removedChildPackages != null) {
+                final int childCount = (deletedPs.childPackageNames != null)
+                        ? deletedPs.childPackageNames.size() : 0;
+                for (int i = 0; i < childCount; i++) {
+                    String childPackageName = deletedPs.childPackageNames.get(i);
+                    if (disabledPs.childPackageNames != null && disabledPs.childPackageNames
+                            .contains(childPackageName)) {
+                        PackageRemovedInfo childInfo = outInfo.removedChildPackages.get(
+                                childPackageName);
+                        if (childInfo != null) {
+                            childInfo.isRemovedPackageSystemUpdate = true;
+                        }
                     }
                 }
             }
@@ -18712,7 +18523,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
         try {
             installPackageFromSystemLIF(disabledPs.codePathString, allUserHandles,
-                    outInfo.origUsers, deletedPs.getPermissionsState(), writeSettings);
+                    outInfo == null ? null : outInfo.origUsers, deletedPs.getPermissionsState(),
+                    writeSettings);
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to restore system package:" + deletedPkg.packageName + ": "
                     + e.getMessage());
@@ -18744,23 +18556,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 | PackageParser.PARSE_MUST_BE_APK
                 | PackageParser.PARSE_IS_SYSTEM_DIR;
         @ScanFlags int scanFlags = SCAN_AS_SYSTEM;
-        if (locationIsPrivileged(codePathString)) {
-            scanFlags |= SCAN_AS_PRIVILEGED;
-        }
-        if (locationIsOem(codePathString)) {
-            scanFlags |= SCAN_AS_OEM;
-        }
-        if (locationIsVendor(codePathString)) {
-            scanFlags |= SCAN_AS_VENDOR;
-        }
-        if (locationIsProduct(codePathString)) {
-            scanFlags |= SCAN_AS_PRODUCT;
-        }
-        if (locationIsSystemExt(codePathString)) {
-            scanFlags |= SCAN_AS_SYSTEM_EXT;
-        }
-        if (locationIsOdm(codePathString)) {
-            scanFlags |= SCAN_AS_ODM;
+        for (int i = 0, size = mDirsToScanAsSystem.size(); i < size; i++) {
+            SystemPartition partition = mDirsToScanAsSystem.get(i);
+            if (partition.containsPath(codePathString)) {
+                scanFlags |= partition.scanFlag;
+                if (partition.containsPrivPath(codePathString)) {
+                    scanFlags |= SCAN_AS_PRIVILEGED;
+                }
+                break;
+            }
         }
 
         final File codePath = new File(codePathString);
@@ -20484,7 +20288,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     public void sendSessionCommitBroadcast(PackageInstaller.SessionInfo sessionInfo, int userId) {
         UserManagerService ums = UserManagerService.getInstance();
-        if (ums != null) {
+        if (ums != null && !sessionInfo.isStaged()) {
             final UserInfo parent = ums.getProfileParent(userId);
             final int launcherUid = (parent != null) ? parent.id : userId;
             final ComponentName launcherComponent = getDefaultHomeActivity(launcherUid);
@@ -22245,7 +22049,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 if (!Build.FINGERPRINT.equals(ver.fingerprint)) {
                     clearAppDataLIF(ps.pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
-                            | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+                            | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY
+                            | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES);
                 }
             }
         }
@@ -22574,9 +22379,9 @@ public class PackageManagerService extends IPackageManager.Stub
             mSettings.writeKernelMappingLPr(ps);
         }
 
-        final UserManager um = mContext.getSystemService(UserManager.class);
+        final UserManagerService um = sUserManager;
         UserManagerInternal umInternal = getUserManagerInternal();
-        for (UserInfo user : um.getUsers()) {
+        for (UserInfo user : um.getUsers(false /* excludeDying */)) {
             final int flags;
             if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
@@ -23259,8 +23064,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 continue;
             }
             final String packageName = ps.pkg.packageName;
-            // Skip over if system app
-            if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+            // Skip over if system app or static shared library
+            if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0
+                    || !TextUtils.isEmpty(ps.pkg.staticSharedLibName)) {
                 continue;
             }
             if (DEBUG_CLEAN_APKS) {

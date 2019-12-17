@@ -32,6 +32,7 @@ import android.widget.FrameLayout;
 import android.widget.ViewFlipper;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.R;
 
 /**
  * Subclass of the current view flipper that allows us to overload dispatchTouchEvent() so

@@ -20,7 +20,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -133,29 +132,5 @@ public class DozeTriggersTest extends SysuiTestCase {
 
         mTriggers.transitionTo(DozeMachine.State.DOZE, DozeMachine.State.FINISH);
         verify(mDockManagerFake).removeListener(any());
-    }
-
-    @Test
-    public void testOnSensor_whenUndockedWithNearAndDoubleTapScreen_shouldNotWakeUp() {
-        mSensors.getMockProximitySensor().sendProximityResult(false /* far */);
-
-        mTriggers.onSensor(DozeLog.REASON_SENSOR_DOUBLE_TAP,
-                false /* sensorPerformedProxCheck */, 50 /* screenX */, 50 /* screenY */,
-                null /* rawValues */);
-        verify(mMachine, never()).wakeUp();
-    }
-
-    @Test
-    public void testOnSensor_whenDockedWithNearAndDoubleTapScreen_shouldWakeUp() {
-        doReturn(true).when(mDockManagerFake).isDocked();
-        doReturn(true).when(mParameters).getDisplayNeedsBlanking();
-        mSensors.getMockProximitySensor().sendProximityResult(false /* far */);
-
-        mTriggers.onSensor(DozeLog.REASON_SENSOR_DOUBLE_TAP,
-                false /* sensorPerformedProxCheck */, 50 /* screenX */, 50 /* screenY */,
-                null /* rawValues */);
-
-        verify(mHost).setAodDimmingScrim(eq(1f));
-        verify(mMachine).wakeUp();
     }
 }

@@ -222,7 +222,6 @@ filegroup {
         ":framework-mca-effect-sources",
         ":framework-mca-filterfw-sources",
         ":framework-mca-filterpacks-sources",
-        ":framework-mime-sources",
         ":framework-mms-sources",
         ":framework-opengl-sources",
         ":framework-rs-sources",
@@ -264,10 +263,19 @@ filegroup {
 }
 
 filegroup {
+    name: "framework-updatable-sources",
+    srcs: [
+        ":framework-sdkext-sources",
+        ":updatable-media-srcs",
+    ]
+}
+
+filegroup {
     name: "framework-all-sources",
     srcs: [
+        ":framework-mime-sources",
         ":framework-non-updatable-sources",
-        ":updatable-media-srcs",
+        ":framework-updatable-sources",
     ],
 }
 
@@ -316,6 +324,7 @@ java_library {
         "android.hardware.radio-V1.2-java",
         "android.hardware.radio-V1.3-java",
         "android.hardware.radio-V1.4-java",
+        "android.hardware.radio-V1.5-java",
         "android.hardware.thermal-V1.0-java-constants",
         "android.hardware.thermal-V1.0-java",
         "android.hardware.thermal-V1.1-java",
@@ -357,7 +366,9 @@ java_defaults {
 
     sdk_version: "core_platform",
     libs: [
+        "app-compat-annotations",
         "ext",
+        "unsupportedappusage",
         "updatable_media_stubs",
     ],
 
@@ -365,7 +376,6 @@ java_defaults {
 
     static_libs: [
         "framework-internal-utils",
-        "mimemap",
     ],
 
     required: [
@@ -418,13 +428,17 @@ java_library {
     name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
-    libs: ["app-compat-annotations"],
     installable: true,
     javac_shard_size: 150,
     required: [
         "framework-platform-compat-config",
         "libcore-platform-compat-config",
         "services-platform-compat-config",
+    ],
+    static_libs: [
+        // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
+        // in favor of an API stubs dependency in java_library "framework" below.
+        "mimemap",
     ],
     // For backwards compatibility.
     stem: "framework",
@@ -445,7 +459,8 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
-        // TODO(jiyong): add stubs for APEXes here
+        "framework-sdkext-stubs-systemapi",
+        // TODO(jiyong): add more stubs for APEXes here
     ],
     sdk_version: "core_platform",
 }
@@ -455,14 +470,16 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-all-sources"],
     installable: false,
-    libs: ["app-compat-annotations"],
 }
 
 java_library {
     name: "framework-annotation-proc",
     defaults: ["framework-defaults"],
     srcs: [":framework-all-sources"],
-    libs: ["app-compat-annotations"],
+    libs: [
+        "app-compat-annotations",
+        "unsupportedappusage",
+    ],
     installable: false,
     plugins: [
         "unsupportedappusage-annotation-processor",
@@ -550,10 +567,17 @@ filegroup {
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
+        "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/UnsupportedAppUsage.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
         "core/java/com/android/internal/annotations/VisibleForTesting.java",
     ],
+}
+
+java_library {
+    name: "framework-annotations-lib",
+    srcs: [ ":framework-annotations" ],
+    sdk_version: "current",
 }
 
 filegroup {
@@ -753,6 +777,31 @@ cc_library {
     },
 }
 
+filegroup {
+    name: "incremental_aidl",
+    srcs: [
+        "core/java/android/os/incremental/IncrementalFileSystemControlParcel.aidl",
+    ],
+    path: "core/java",
+}
+
+aidl_interface {
+    name: "libincremental_aidl",
+    srcs: [
+        ":incremental_aidl",
+    ],
+    backend: {
+        java: {
+            sdk_version: "28",
+        },
+        cpp: {
+            enabled: true,
+        },
+        ndk: {
+            enabled: true,
+        },
+    },
+}
 
 gensrcs {
     name: "gen-platform-proto-constants",
@@ -816,11 +865,13 @@ java_library {
     srcs: [
         "core/java/android/os/HidlSupport.java",
         "core/java/android/annotation/IntDef.java",
+        "core/java/android/annotation/IntRange.java",
         "core/java/android/annotation/NonNull.java",
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/TestApi.java",
         "core/java/android/annotation/UnsupportedAppUsage.java",
+        "core/java/android/os/HidlMemory.java",
         "core/java/android/os/HwBinder.java",
         "core/java/android/os/HwBlob.java",
         "core/java/android/os/HwParcel.java",
@@ -947,7 +998,8 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--hide CallbackInterface " +
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
-    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo "
+    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
+    "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.*"
 
 packages_to_document = [
     "android",
@@ -965,14 +1017,15 @@ packages_to_document = [
 stubs_defaults {
     name: "framework-doc-stubs-default",
     srcs: [
+        ":framework-mime-sources",
         ":framework-non-updatable-sources",
+        ":framework-updatable-sources",
         "core/java/**/*.logtags",
         "test-base/src/**/*.java",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
         ":core-current-stubs-source",
         ":core_public_api_files",
-        ":updatable-media-srcs",
         "test-mock/src/**/*.java",
         "test-runner/src/**/*.java",
     ],
@@ -1030,12 +1083,13 @@ stubs_defaults {
     name: "metalava-api-stubs-default",
     srcs: [
         ":framework-non-updatable-sources",
+        ":framework-updatable-sources",
         "core/java/**/*.logtags",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
         ":core-current-stubs-source",
         ":core_public_api_files",
-        ":updatable-media-srcs",
+        ":ike-api-srcs",
     ],
     libs: ["framework-internal-utils"],
     installable: false,
@@ -1358,8 +1412,10 @@ droidstubs {
     srcs: [
         "core/java/android/os/HidlSupport.java",
         "core/java/android/annotation/IntDef.java",
+        "core/java/android/annotation/IntRange.java",
         "core/java/android/annotation/NonNull.java",
         "core/java/android/annotation/SystemApi.java",
+        "core/java/android/os/HidlMemory.java",
         "core/java/android/os/HwBinder.java",
         "core/java/android/os/HwBlob.java",
         "core/java/android/os/HwParcel.java",
@@ -1550,14 +1606,36 @@ genrule {
     },
 }
 
-// Avoid including Parcelable classes as we don't want to have two copies of
-// Parcelable cross the process.
 filegroup {
     name: "framework-cellbroadcast-shared-srcs",
     srcs: [
-        "core/java/android/util/LocalLog.java",
+	"core/java/android/os/HandlerExecutor.java",
+	"core/java/android/util/LocalLog.java",
         "core/java/android/util/Slog.java",
+	"core/java/com/android/internal/util/IState.java",
+	"core/java/com/android/internal/util/Preconditions.java",
+	"core/java/com/android/internal/util/State.java",
+	"core/java/com/android/internal/util/StateMachine.java",
+    ],
+}
+
+// Avoid including Parcelable classes as we don't want to have two copies of
+// Parcelable cross the process.
+filegroup {
+    name: "framework-telephony-stack-shared-srcs",
+    srcs: [
+        "core/java/android/os/RegistrantList.java",
+        "core/java/android/os/Registrant.java",
+        "core/java/android/util/LocalLog.java",
+        "core/java/android/util/TimeUtils.java",
+        "core/java/com/android/internal/os/SomeArgs.java",
+        "core/java/com/android/internal/util/FastXmlSerializer.java",
+        "core/java/com/android/internal/util/HexDump.java",
+        "core/java/com/android/internal/util/IState.java",
+        "core/java/com/android/internal/util/IndentingPrintWriter.java",
+        "core/java/com/android/internal/util/Preconditions.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
+        "core/java/com/android/internal/util/UserIcons.java",
     ],
 }

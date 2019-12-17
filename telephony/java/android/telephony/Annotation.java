@@ -1,6 +1,7 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.telecom.Connection;
 import android.telephony.data.ApnSetting;
 
 import java.lang.annotation.Retention;
@@ -115,7 +116,8 @@ public class Annotation {
             ApnSetting.TYPE_CBS,
             ApnSetting.TYPE_IA,
             ApnSetting.TYPE_EMERGENCY,
-            ApnSetting.TYPE_MCX
+            ApnSetting.TYPE_MCX,
+            ApnSetting.TYPE_XCAP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApnType {
@@ -462,11 +464,75 @@ public class Annotation {
             DataFailCause.UNKNOWN,
             DataFailCause.RADIO_NOT_AVAILABLE,
             DataFailCause.UNACCEPTABLE_NETWORK_PARAMETER,
-            DataFailCause.CONNECTION_TO_DATACONNECTIONAC_BROKEN,
             DataFailCause.LOST_CONNECTION,
-            DataFailCause.RESET_BY_FRAMEWORK
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DataFailureCause {
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"PRECISE_CALL_STATE_"},
+            value = {
+            PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
+            PreciseCallState.PRECISE_CALL_STATE_IDLE,
+            PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
+            PreciseCallState.PRECISE_CALL_STATE_HOLDING,
+            PreciseCallState.PRECISE_CALL_STATE_DIALING,
+            PreciseCallState.PRECISE_CALL_STATE_ALERTING,
+            PreciseCallState. PRECISE_CALL_STATE_INCOMING,
+            PreciseCallState.PRECISE_CALL_STATE_WAITING,
+            PreciseCallState.PRECISE_CALL_STATE_DISCONNECTED,
+            PreciseCallState.PRECISE_CALL_STATE_DISCONNECTING})
+    public @interface PreciseCallStates {}
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"RIL_RADIO_TECHNOLOGY_" }, value = {
+            ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN,
+            ServiceState.RIL_RADIO_TECHNOLOGY_GPRS,
+            ServiceState.RIL_RADIO_TECHNOLOGY_EDGE,
+            ServiceState.RIL_RADIO_TECHNOLOGY_UMTS,
+            ServiceState.RIL_RADIO_TECHNOLOGY_IS95A,
+            ServiceState.RIL_RADIO_TECHNOLOGY_IS95B,
+            ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT,
+            ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0,
+            ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A,
+            ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA,
+            ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA,
+            ServiceState.RIL_RADIO_TECHNOLOGY_HSPA,
+            ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B,
+            ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD,
+            ServiceState.RIL_RADIO_TECHNOLOGY_LTE,
+            ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP,
+            ServiceState.RIL_RADIO_TECHNOLOGY_GSM,
+            ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA,
+            ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN,
+            ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA,
+            ServiceState.RIL_RADIO_TECHNOLOGY_NR})
+    public @interface RilRadioTechnology {}
+
+    @IntDef({
+            Connection.AUDIO_CODEC_NONE,
+            Connection.AUDIO_CODEC_AMR,
+            Connection.AUDIO_CODEC_AMR_WB,
+            Connection.AUDIO_CODEC_QCELP13K,
+            Connection.AUDIO_CODEC_EVRC,
+            Connection.AUDIO_CODEC_EVRC_B,
+            Connection.AUDIO_CODEC_EVRC_WB,
+            Connection.AUDIO_CODEC_EVRC_NW,
+            Connection.AUDIO_CODEC_GSM_EFR,
+            Connection.AUDIO_CODEC_GSM_FR,
+            Connection.AUDIO_CODEC_G711U,
+            Connection.AUDIO_CODEC_G723,
+            Connection.AUDIO_CODEC_G711A,
+            Connection.AUDIO_CODEC_G722,
+            Connection.AUDIO_CODEC_G711AB,
+            Connection.AUDIO_CODEC_G729,
+            Connection.AUDIO_CODEC_EVS_NB,
+            Connection.AUDIO_CODEC_EVS_WB,
+            Connection.AUDIO_CODEC_EVS_SWB,
+            Connection.AUDIO_CODEC_EVS_FB
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ImsAudioCodec {
     }
 }

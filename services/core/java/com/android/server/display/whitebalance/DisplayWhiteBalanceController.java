@@ -95,6 +95,11 @@ public class DisplayWhiteBalanceController implements
     // A piecewise linear relationship between high light brightness and high light bias.
     private Spline.LinearSpline mHighLightAmbientBrightnessToBiasSpline;
 
+    private float mLatestAmbientColorTemperature;
+    private float mLatestAmbientBrightness;
+    private float mLatestLowLightBias;
+    private float mLatestHighLightBias;
+
     /**
      * @param brightnessSensor
      *      The sensor used to detect changes in the ambient brightness.
@@ -348,6 +353,7 @@ public class DisplayWhiteBalanceController implements
     public void updateAmbientColorTemperature() {
         final long time = System.currentTimeMillis();
         float ambientColorTemperature = mColorTemperatureFilter.getEstimate(time);
+        mLatestAmbientColorTemperature = ambientColorTemperature;
 
         if (mAmbientToDisplayColorTemperatureSpline != null && ambientColorTemperature != -1.0f) {
             ambientColorTemperature =
@@ -355,6 +361,7 @@ public class DisplayWhiteBalanceController implements
         }
 
         float ambientBrightness = mBrightnessFilter.getEstimate(time);
+        mLatestAmbientBrightness = ambientBrightness;
 
         if (ambientColorTemperature != -1.0f &&
                 mLowLightAmbientBrightnessToBiasSpline != null) {
@@ -362,6 +369,7 @@ public class DisplayWhiteBalanceController implements
             ambientColorTemperature =
                     bias * ambientColorTemperature + (1.0f - bias)
                     * mLowLightAmbientColorTemperature;
+            mLatestLowLightBias = bias;
         }
         if (ambientColorTemperature != -1.0f &&
                 mHighLightAmbientBrightnessToBiasSpline != null) {
@@ -369,6 +377,7 @@ public class DisplayWhiteBalanceController implements
             ambientColorTemperature =
                     (1.0f - bias) * ambientColorTemperature + bias
                     * mHighLightAmbientColorTemperature;
+            mLatestHighLightBias = bias;
         }
 
         if (mAmbientColorTemperatureOverride != -1.0f) {
@@ -426,6 +435,11 @@ public class DisplayWhiteBalanceController implements
         }
         mPendingAmbientColorTemperature = -1.0f;
         mAmbientColorTemperatureHistory.add(mAmbientColorTemperature);
+        Slog.d(TAG, "Display cct: " + mAmbientColorTemperature
+                + " Latest ambient cct: " + mLatestAmbientColorTemperature
+                + " Latest ambient lux: " + mLatestAmbientBrightness
+                + " Latest low light bias: " + mLatestLowLightBias
+                + " Latest high light bias: " + mLatestHighLightBias);
         mColorDisplayServiceInternal.setDisplayWhiteBalanceColorTemperature(
                 (int) mAmbientColorTemperature);
         mLastAmbientColorTemperature = mAmbientColorTemperature;

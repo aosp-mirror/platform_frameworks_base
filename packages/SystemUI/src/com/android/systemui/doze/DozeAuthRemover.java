@@ -25,7 +25,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
  */
 public class DozeAuthRemover implements DozeMachine.Part {
 
-    KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     public DozeAuthRemover(Context context) {
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(context);

@@ -1275,7 +1275,13 @@ public final class FileUtils {
     /**
      * Closes the given object quietly, ignoring any checked exceptions. Does
      * nothing if the given object is {@code null}.
+     *
+     * @deprecated This method may suppress potentially significant exceptions, particularly when
+     *   closing writable resources. With a writable resource, a failure thrown from {@code close()}
+     *   should be considered as significant as a failure thrown from a write method because it may
+     *   indicate a failure to flush bytes to the underlying resource.
      */
+    @Deprecated
     public static void closeQuietly(@Nullable AutoCloseable closeable) {
         IoUtils.closeQuietly(closeable);
     }
@@ -1283,7 +1289,13 @@ public final class FileUtils {
     /**
      * Closes the given object quietly, ignoring any checked exceptions. Does
      * nothing if the given object is {@code null}.
+     *
+     * @deprecated This method may suppress potentially significant exceptions, particularly when
+     *   closing writable resources. With a writable resource, a failure thrown from {@code close()}
+     *   should be considered as significant as a failure thrown from a write method because it may
+     *   indicate a failure to flush bytes to the underlying resource.
      */
+    @Deprecated
     public static void closeQuietly(@Nullable FileDescriptor fd) {
         IoUtils.closeQuietly(fd);
     }

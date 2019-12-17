@@ -30,8 +30,8 @@ import android.bluetooth.BluetoothMapClient;
 import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothPbap;
 import android.bluetooth.BluetoothPbapClient;
-import android.bluetooth.BluetoothSap;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothSap;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +40,7 @@ import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -471,43 +472,40 @@ public class LocalBluetoothProfileManager {
         }
 
         if (mHeadsetProfile != null) {
-            if ((BluetoothUuid.isUuidPresent(localUuids, BluetoothUuid.HSP_AG) &&
-                    BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.HSP)) ||
-                    (BluetoothUuid.isUuidPresent(localUuids, BluetoothUuid.Handsfree_AG) &&
-                            BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.Handsfree))) {
+            if ((ArrayUtils.contains(localUuids, BluetoothUuid.HSP_AG)
+                    && ArrayUtils.contains(uuids, BluetoothUuid.HSP))
+                    || (ArrayUtils.contains(localUuids, BluetoothUuid.HFP_AG)
+                    && ArrayUtils.contains(uuids, BluetoothUuid.HFP))) {
                 profiles.add(mHeadsetProfile);
                 removedProfiles.remove(mHeadsetProfile);
             }
         }
 
         if ((mHfpClientProfile != null) &&
-                BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.Handsfree_AG) &&
-                BluetoothUuid.isUuidPresent(localUuids, BluetoothUuid.Handsfree)) {
+                ArrayUtils.contains(uuids, BluetoothUuid.HFP_AG)
+                && ArrayUtils.contains(localUuids, BluetoothUuid.HFP)) {
             profiles.add(mHfpClientProfile);
             removedProfiles.remove(mHfpClientProfile);
         }
 
-        if (BluetoothUuid.containsAnyUuid(uuids, A2dpProfile.SINK_UUIDS) &&
-            mA2dpProfile != null) {
+        if (BluetoothUuid.containsAnyUuid(uuids, A2dpProfile.SINK_UUIDS) && mA2dpProfile != null) {
             profiles.add(mA2dpProfile);
             removedProfiles.remove(mA2dpProfile);
         }
 
-        if (BluetoothUuid.containsAnyUuid(uuids, A2dpSinkProfile.SRC_UUIDS) &&
-                mA2dpSinkProfile != null) {
+        if (BluetoothUuid.containsAnyUuid(uuids, A2dpSinkProfile.SRC_UUIDS)
+                && mA2dpSinkProfile != null) {
                 profiles.add(mA2dpSinkProfile);
                 removedProfiles.remove(mA2dpSinkProfile);
         }
 
-        if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.ObexObjectPush) &&
-            mOppProfile != null) {
+        if (ArrayUtils.contains(uuids, BluetoothUuid.OBEX_OBJECT_PUSH) && mOppProfile != null) {
             profiles.add(mOppProfile);
             removedProfiles.remove(mOppProfile);
         }
 
-        if ((BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.Hid) ||
-             BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.Hogp)) &&
-            mHidProfile != null) {
+        if ((ArrayUtils.contains(uuids, BluetoothUuid.HID)
+                || ArrayUtils.contains(uuids, BluetoothUuid.HOGP)) && mHidProfile != null) {
             profiles.add(mHidProfile);
             removedProfiles.remove(mHidProfile);
         }
@@ -520,8 +518,8 @@ public class LocalBluetoothProfileManager {
 
         if(isPanNapConnected)
             if(DEBUG) Log.d(TAG, "Valid PAN-NAP connection exists.");
-        if ((BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.NAP) &&
-            mPanProfile != null) || isPanNapConnected) {
+        if ((ArrayUtils.contains(uuids, BluetoothUuid.NAP) && mPanProfile != null)
+                || isPanNapConnected) {
             profiles.add(mPanProfile);
             removedProfiles.remove(mPanProfile);
         }
@@ -545,20 +543,18 @@ public class LocalBluetoothProfileManager {
             removedProfiles.remove(mMapClientProfile);
         }
 
-        if ((mPbapClientProfile != null) &&
-                BluetoothUuid.isUuidPresent(localUuids, BluetoothUuid.PBAP_PCE) &&
-                BluetoothUuid.containsAnyUuid(uuids, PbapClientProfile.SRC_UUIDS)) {
+        if ((mPbapClientProfile != null) && ArrayUtils.contains(localUuids, BluetoothUuid.PBAP_PCE)
+                && BluetoothUuid.containsAnyUuid(uuids, PbapClientProfile.SRC_UUIDS)) {
             profiles.add(mPbapClientProfile);
             removedProfiles.remove(mPbapClientProfile);
         }
 
-        if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.HearingAid) &&
-            mHearingAidProfile != null) {
+        if (ArrayUtils.contains(uuids, BluetoothUuid.HEARING_AID) && mHearingAidProfile != null) {
             profiles.add(mHearingAidProfile);
             removedProfiles.remove(mHearingAidProfile);
         }
 
-        if (mSapProfile != null && BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.SAP)) {
+        if (mSapProfile != null && ArrayUtils.contains(uuids, BluetoothUuid.SAP)) {
             profiles.add(mSapProfile);
             removedProfiles.remove(mSapProfile);
         }

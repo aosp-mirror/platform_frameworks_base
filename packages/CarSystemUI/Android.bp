@@ -13,21 +13,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-android_app {
-    name: "CarSystemUI",
-
-    overrides: [
-        "SystemUI",
-    ],
+android_library {
+    name: "CarSystemUI-core",
 
     srcs: [
         "src/**/*.java",
         "src/**/I*.aidl",
     ],
 
+    resource_dirs: [
+        "res-keyguard",
+        "res",
+    ],
+
     static_libs: [
-        "CarNotificationLib",
         "SystemUI-core",
+        "CarNotificationLib",
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SettingsLib",
@@ -47,6 +48,8 @@ android_app {
         "androidx.lifecycle_lifecycle-extensions",
         "SystemUI-tags",
         "SystemUI-proto",
+        "dagger2-2.19",
+        "//external/kotlinc:kotlin-annotations",
     ],
 
     libs: [
@@ -55,6 +58,28 @@ android_app {
     ],
 
     manifest: "AndroidManifest.xml",
+
+    plugins: ["dagger2-compiler-2.19"],
+
+}
+
+android_app {
+    name: "CarSystemUI",
+
+    static_libs: [
+        "CarSystemUI-core",
+    ],
+
+    libs: [
+        "telephony-common",
+        "android.car",
+    ],
+
+    resource_dirs: [],
+
+     overrides: [
+        "SystemUI",
+    ],
 
     platform_apis: true,
     product_specific: true,
@@ -66,18 +91,14 @@ android_app {
             "proguard.flags",
         ],
     },
-    resource_dirs: [
-        "res-keyguard",
-        "res",
-    ],
-
-
     dxflags: ["--multi-dex"],
 
     aaptflags: [
         "--extra-packages",
         "com.android.keyguard",
     ],
+
+    kotlincflags: ["-Xjvm-default=enable"],
 
     plugins: ["dagger2-compiler-2.19"],
 

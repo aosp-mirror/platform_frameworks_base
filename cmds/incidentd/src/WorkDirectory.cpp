@@ -664,7 +664,7 @@ int64_t WorkDirectory::make_timestamp_ns_locked() {
             nanosleep(&spec, nullptr);
         }
         clock_gettime(CLOCK_REALTIME, &spec);
-        timestampNs = (spec.tv_sec) * 1000 + spec.tv_nsec;
+        timestampNs = int64_t(spec.tv_sec) * 1000 + spec.tv_nsec;
     } while (file_exists_locked(timestampNs));
     return timestampNs;
 }

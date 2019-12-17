@@ -48,7 +48,7 @@ public class WifiSsid implements Parcelable {
 
     private static final int HEX_RADIX = 16;
     @UnsupportedAppUsage
-    public static final String NONE = "<unknown ssid>";
+    public static final String NONE = WifiManager.UNKNOWN_SSID;
 
     private WifiSsid() {
     }

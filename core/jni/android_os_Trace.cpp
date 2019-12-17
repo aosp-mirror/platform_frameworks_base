@@ -50,10 +50,6 @@ inline static void withString(JNIEnv* env, jstring jstr, F callback) {
     callback(buffer.data());
 }
 
-static jlong android_os_Trace_nativeGetEnabledTags(JNIEnv*, jclass) {
-    return atrace_get_enabled_tags();
-}
-
 static void android_os_Trace_nativeTraceCounter(JNIEnv* env, jclass,
         jlong tag, jstring nameStr, jlong value) {
     withString(env, nameStr, [tag, value](char* str) {
@@ -96,9 +92,6 @@ static void android_os_Trace_nativeSetTracingEnabled(JNIEnv*, jclass, jboolean e
 
 static const JNINativeMethod gTraceMethods[] = {
     /* name, signature, funcPtr */
-    { "nativeGetEnabledTags",
-            "()J",
-            (void*)android_os_Trace_nativeGetEnabledTags },
     { "nativeSetAppTracingAllowed",
             "(Z)V",
             (void*)android_os_Trace_nativeSetAppTracingAllowed },
@@ -123,6 +116,11 @@ static const JNINativeMethod gTraceMethods[] = {
     { "nativeAsyncTraceEnd",
             "(JLjava/lang/String;I)V",
             (void*)android_os_Trace_nativeAsyncTraceEnd },
+
+    // ----------- @CriticalNative  ----------------
+    { "nativeGetEnabledTags",
+            "()J",
+            (void*)atrace_get_enabled_tags },
 };
 
 int register_android_os_Trace(JNIEnv* env) {

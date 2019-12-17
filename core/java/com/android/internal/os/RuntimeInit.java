@@ -30,8 +30,10 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.Log;
 import android.util.Slog;
+
 import com.android.internal.logging.AndroidConfig;
 import com.android.server.NetworkManagementSocketTagger;
+
 import dalvik.system.RuntimeHooks;
 import dalvik.system.VMRuntime;
 
@@ -365,8 +367,8 @@ public class RuntimeInit {
         if (DEBUG) Slog.d(TAG, "Leaving RuntimeInit!");
     }
 
-    protected static Runnable applicationInit(int targetSdkVersion, String[] argv,
-            ClassLoader classLoader) {
+    protected static Runnable applicationInit(int targetSdkVersion, long[] disabledCompatChanges,
+            String[] argv, ClassLoader classLoader) {
         // If the application calls System.exit(), terminate the process
         // immediately without running any shutdown hooks.  It is not possible to
         // shutdown an Android application gracefully.  Among other things, the
@@ -374,10 +376,8 @@ public class RuntimeInit {
         // leftover running threads to crash before the process actually exits.
         nativeSetExitWithoutCleanup(true);
 
-        // We want to be fairly aggressive about heap utilization, to avoid
-        // holding on to a lot of memory that isn't needed.
-        VMRuntime.getRuntime().setTargetHeapUtilization(0.75f);
         VMRuntime.getRuntime().setTargetSdkVersion(targetSdkVersion);
+        VMRuntime.getRuntime().setDisabledCompatChanges(disabledCompatChanges);
 
         final Arguments args = new Arguments(argv);
 

@@ -508,7 +508,7 @@
         -->
     <string translatable="false" name="config_mobile_hotspot_provision_app_no_ui"></string>
     <!-- Sent in response to a provisioning check. The caller must hold the
-         permission android.permission.CONNECTIVITY_INTERNAL for Settings to
+         permission android.permission.TETHER_PRIVILEGED for Settings to
          receive this response.
 
          See config_mobile_hotspot_provision_response
@@ -2797,6 +2797,18 @@
         <item>353</item>
     </string-array>
 
+    <!-- Ims supported call barring MMI code -->
+    <string-array translatable="false" name="config_callBarringMMI_for_ims">
+        <item>33</item>
+        <item>331</item>
+        <item>332</item>
+        <item>35</item>
+        <item>351</item>
+        <item>330</item>
+        <item>333</item>
+        <item>353</item>
+    </string-array>
+
     <!-- Override the default detection behavior for the framework method
          android.view.ViewConfiguration#hasPermanentMenuKey().
          Valid settings are:
@@ -3014,9 +3026,6 @@
 
     <!-- String array containing numbers that shouldn't be logged. Country-specific. -->
     <string-array name="unloggable_phone_numbers" />
-
-    <!-- Flag specifying whether or not IMS will use the dynamic ImsResolver -->
-    <bool name="config_dynamic_bind_ims">false</bool>
 
     <!-- Cellular data service package name to bind to by default. If none is specified in an overlay, an
          empty string is passed in -->
@@ -3677,14 +3686,13 @@
      -->
     <string name="config_defaultWellbeingPackage" translatable="false"></string>
 
-
     <!-- The package name for the system telephony apps.
          This package must be trusted, as it will be granted with permissions with special telephony
          protection level. Note, framework by default support multiple telephony apps, each package
          name is separated by comma.
          Example: "com.android.phone,com.android.stk,com.android.providers.telephony"
      -->
-    <string name="config_telephonyPackages" translatable="false">"com.android.phone,com.android.stk,com.android.providers.telephony,com.android.ons"</string>
+    <string name="config_telephonyPackages" translatable="false">"com.android.phone,com.android.stk,com.android.providers.telephony,com.android.ons,com.android.cellbroadcastservice"</string>
 
     <!-- The component name for the default system attention service.
          This service must be trusted, as it can be activated without explicit consent of the user.
@@ -3855,6 +3863,8 @@
          instead of 'Emergency calls only' when SIM is unready. -->
     <string-array translatable="false" name="config_display_no_service_when_sim_unready">
         <item>"DE"</item>
+        <item>"GB"</item>
+        <item>"JP"</item>
     </string-array>
 
     <!-- Class names of device specific services inheriting com.android.server.SystemService. The
@@ -4223,6 +4233,10 @@
         -->
     </integer-array>
 
+    <!-- Default refresh rate in the zone defined by brightness and ambient thresholds.
+         If non-positive, then the refresh rate is unchanged even if thresholds are configured. -->
+    <integer name="config_defaultRefreshRateInZone">0</integer>
+
     <!-- The type of the light sensor to be used by the display framework for things like
          auto-brightness. If unset, then it just gets the default sensor of type TYPE_LIGHT. -->
     <string name="config_displayLightSensorType" translatable="false" />
@@ -4307,4 +4321,9 @@
     <!-- The list of packages to automatically opt out of refresh rates higher than 60hz because
          of known compatibility issues. -->
     <string-array name="config_highRefreshRateBlacklist"></string-array>
+
+    <!-- Whether or not to hide the navigation bar when the soft keyboard is visible in order to
+         create additional screen real estate outside beyond the keyboard. Note that the user needs
+         to have a confirmed way to dismiss the keyboard when desired. -->
+    <bool name="config_automotiveHideNavBarForKeyboard">false</bool>
 </resources>

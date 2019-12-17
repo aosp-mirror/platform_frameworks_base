@@ -1172,8 +1172,16 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 return false;
             }
             final int displayId = display.getDisplayId();
-            return displayId == DEFAULT_DISPLAY
-                    || mWindowManagerInternal.shouldShowSystemDecorOnDisplay(displayId);
+            if (displayId == DEFAULT_DISPLAY) {
+                return true;
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return mWindowManagerInternal.shouldShowSystemDecorOnDisplay(displayId);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
         void forEachDisplayConnector(Consumer<DisplayConnector> action) {

@@ -57,7 +57,7 @@ final class OppProfile implements LocalBluetoothProfile {
     }
 
     public int getPreferred(BluetoothDevice device) {
-        return BluetoothProfile.PRIORITY_OFF; // Settings app doesn't handle OPP
+        return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN; // Settings app doesn't handle OPP
     }
 
     public void setPreferred(BluetoothDevice device, boolean preferred) {

@@ -30,13 +30,14 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,8 +90,8 @@ public class SubscriptionInfo implements Parcelable {
     private int mCarrierId;
 
     /**
-     * The source of the name, NAME_SOURCE_DEFAULT_SOURCE, NAME_SOURCE_SIM_SOURCE or
-     * NAME_SOURCE_USER_INPUT.
+     * The source of the name, NAME_SOURCE_DEFAULT_SOURCE, NAME_SOURCE_SIM_SPN,
+     * NAME_SOURCE_SIM_PNN, or NAME_SOURCE_USER_INPUT.
      */
     private int mNameSource;
 
@@ -334,7 +335,7 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * @return the source of the name, eg NAME_SOURCE_DEFAULT_SOURCE, NAME_SOURCE_SIM_SOURCE or
+     * @return the source of the name, eg NAME_SOURCE_DEFAULT_SOURCE, NAME_SOURCE_SIM_SPN or
      * NAME_SOURCE_USER_INPUT.
      * @hide
      */
@@ -578,7 +579,8 @@ public class SubscriptionInfo implements Parcelable {
         PackageManager packageManager = context.getPackageManager();
         PackageInfo packageInfo;
         try {
-            packageInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+            packageInfo = packageManager.getPackageInfo(packageName,
+                PackageManager.GET_SIGNING_CERTIFICATES);
         } catch (PackageManager.NameNotFoundException e) {
             Log.d("SubscriptionInfo", "canManageSubscription: Unknown package: " + packageName, e);
             return false;
@@ -653,6 +655,7 @@ public class SubscriptionInfo implements Parcelable {
      * Return whether the subscription's group is disabled.
      * @hide
      */
+    @SystemApi
     public boolean isGroupDisabled() {
         return mIsGroupDisabled;
     }
@@ -746,7 +749,7 @@ public class SubscriptionInfo implements Parcelable {
     public static String givePrintableIccid(String iccId) {
         String iccIdToPrint = null;
         if (iccId != null) {
-            if (iccId.length() > 9 && !Build.IS_DEBUGGABLE) {
+            if (iccId.length() > 9 && !TelephonyUtils.IS_DEBUGGABLE) {
                 iccIdToPrint = iccId.substring(0, 9) + Rlog.pii(false, iccId.substring(9));
             } else {
                 iccIdToPrint = iccId;
@@ -762,7 +765,8 @@ public class SubscriptionInfo implements Parcelable {
         return "{id=" + mId + " iccId=" + iccIdToPrint + " simSlotIndex=" + mSimSlotIndex
                 + " carrierId=" + mCarrierId + " displayName=" + mDisplayName
                 + " carrierName=" + mCarrierName + " nameSource=" + mNameSource
-                + " iconTint=" + mIconTint + " mNumber=" + Rlog.pii(Build.IS_DEBUGGABLE, mNumber)
+                + " iconTint=" + mIconTint
+                + " mNumber=" + Rlog.pii(TelephonyUtils.IS_DEBUGGABLE, mNumber)
                 + " dataRoaming=" + mDataRoaming + " iconBitmap=" + mIconBitmap + " mcc " + mMcc
                 + " mnc " + mMnc + "mCountryIso=" + mCountryIso + " isEmbedded " + mIsEmbedded
                 + " nativeAccessRules " + Arrays.toString(mNativeAccessRules)

@@ -508,8 +508,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         CarrierConfigManager configManager = (CarrierConfigManager)
                 mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);
         int ddSubId = SubscriptionManager.getDefaultDataSubscriptionId();
-        String mccMnc = SubscriptionManager.isValidSubscriptionId(ddSubId)
-                ? phone.getSimOperator(ddSubId) : phone.getSimOperator();
+        if (SubscriptionManager.isValidSubscriptionId(ddSubId)) {
+            phone = phone.createForSubscriptionId(ddSubId);
+        }
+        String mccMnc = phone.getSimOperator();
         boolean isKeepLppProfile = false;
         if (!TextUtils.isEmpty(mccMnc)) {
             if (DEBUG) Log.d(TAG, "SIM MCC/MNC is available: " + mccMnc);
@@ -1459,7 +1461,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 info.mSvCarrierFreqs);
 
         // Log CN0 as part of GNSS metrics
-        mGnssMetrics.logCn0(info.mCn0s, info.mSvCount);
+        mGnssMetrics.logCn0(info.mCn0s, info.mSvCount, info.mSvCarrierFreqs);
 
         if (VERBOSE) {
             Log.v(TAG, "SV count: " + info.mSvCount);
@@ -1510,6 +1512,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 SystemClock.elapsedRealtime() - mLastFixTime > RECENT_FIX_TIMEOUT) {
             updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE);
         }
+
+        mGnssMetrics.logSvStatus(info.mSvCount, info.mSvidWithFlags, info.mSvCarrierFreqs);
     }
 
     @NativeEntryPoint
@@ -1901,24 +1905,17 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         String setId = null;
 
         int ddSubId = SubscriptionManager.getDefaultDataSubscriptionId();
+        if (SubscriptionManager.isValidSubscriptionId(ddSubId)) {
+            phone = phone.createForSubscriptionId(ddSubId);
+        }
         if ((flags & AGPS_RIL_REQUEST_SETID_IMSI) == AGPS_RIL_REQUEST_SETID_IMSI) {
-            if (SubscriptionManager.isValidSubscriptionId(ddSubId)) {
-                setId = phone.getSubscriberId(ddSubId);
-            }
-            if (setId == null) {
-                setId = phone.getSubscriberId();
-            }
+            setId = phone.getSubscriberId();
             if (setId != null) {
                 // This means the framework has the SIM card.
                 type = AGPS_SETID_TYPE_IMSI;
             }
         } else if ((flags & AGPS_RIL_REQUEST_SETID_MSISDN) == AGPS_RIL_REQUEST_SETID_MSISDN) {
-            if (SubscriptionManager.isValidSubscriptionId(ddSubId)) {
-                setId = phone.getLine1Number(ddSubId);
-            }
-            if (setId == null) {
-                setId = phone.getLine1Number();
-            }
+            setId = phone.getLine1Number();
             if (setId != null) {
                 // This means the framework has the SIM card.
                 type = AGPS_SETID_TYPE_MSISDN;

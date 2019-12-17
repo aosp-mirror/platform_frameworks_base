@@ -16,6 +16,10 @@
 
 package android.telecom;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -32,6 +36,7 @@ public final class ConnectionRequest implements Parcelable {
      * Builder class for {@link ConnectionRequest}
      * @hide
      */
+    @TestApi // For convenience in CTS tests
     public static final class Builder {
         private PhoneAccountHandle mAccountHandle;
         private Uri mAddress;
@@ -48,7 +53,7 @@ public final class ConnectionRequest implements Parcelable {
          * Sets the phone account handle for the resulting {@link ConnectionRequest}
          * @param accountHandle The accountHandle which should be used to place the call.
          */
-        public Builder setAccountHandle(PhoneAccountHandle accountHandle) {
+        public @NonNull Builder setAccountHandle(@NonNull PhoneAccountHandle accountHandle) {
             this.mAccountHandle = accountHandle;
             return this;
         }
@@ -58,7 +63,7 @@ public final class ConnectionRequest implements Parcelable {
          * @param address The address(e.g., phone number) to which the {@link Connection} is to
          *                connect.
          */
-        public Builder setAddress(Uri address) {
+        public @NonNull Builder setAddress(@NonNull Uri address) {
             this.mAddress = address;
             return this;
         }
@@ -67,7 +72,7 @@ public final class ConnectionRequest implements Parcelable {
          * Sets the extras bundle for the resulting {@link ConnectionRequest}
          * @param extras Application-specific extra data.
          */
-        public Builder setExtras(Bundle extras) {
+        public @NonNull Builder setExtras(@NonNull Bundle extras) {
             this.mExtras = extras;
             return this;
         }
@@ -76,7 +81,7 @@ public final class ConnectionRequest implements Parcelable {
          * Sets the video state for the resulting {@link ConnectionRequest}
          * @param videoState Determines the video state for the connection.
          */
-        public Builder setVideoState(int videoState) {
+        public @NonNull Builder setVideoState(int videoState) {
             this.mVideoState = videoState;
             return this;
         }
@@ -85,7 +90,7 @@ public final class ConnectionRequest implements Parcelable {
          * Sets the Telecom call ID for the resulting {@link ConnectionRequest}
          * @param telecomCallId The telecom call ID.
          */
-        public Builder setTelecomCallId(String telecomCallId) {
+        public @NonNull Builder setTelecomCallId(@NonNull String telecomCallId) {
             this.mTelecomCallId = telecomCallId;
             return this;
         }
@@ -97,7 +102,7 @@ public final class ConnectionRequest implements Parcelable {
          *                                 its own incoming call UI for an incoming call.  When
          *                                 {@code false}, Telecom shows the incoming call UI.
          */
-        public Builder setShouldShowIncomingCallUi(boolean shouldShowIncomingCallUi) {
+        public @NonNull Builder setShouldShowIncomingCallUi(boolean shouldShowIncomingCallUi) {
             this.mShouldShowIncomingCallUi = shouldShowIncomingCallUi;
             return this;
         }
@@ -107,7 +112,8 @@ public final class ConnectionRequest implements Parcelable {
          * resulting {@link ConnectionRequest}
          * @param rttPipeFromInCall The data pipe to read from.
          */
-        public Builder setRttPipeFromInCall(ParcelFileDescriptor rttPipeFromInCall) {
+        public @NonNull Builder setRttPipeFromInCall(
+                @NonNull ParcelFileDescriptor rttPipeFromInCall) {
             this.mRttPipeFromInCall = rttPipeFromInCall;
             return this;
         }
@@ -117,12 +123,16 @@ public final class ConnectionRequest implements Parcelable {
          * resulting {@link ConnectionRequest}
          * @param rttPipeToInCall The data pipe to write to.
          */
-        public Builder setRttPipeToInCall(ParcelFileDescriptor rttPipeToInCall) {
+        public @NonNull Builder setRttPipeToInCall(@NonNull ParcelFileDescriptor rttPipeToInCall) {
             this.mRttPipeToInCall = rttPipeToInCall;
             return this;
         }
 
-        public ConnectionRequest build() {
+        /**
+         * Build the {@link ConnectionRequest}
+         * @return Result of the builder
+         */
+        public @NonNull ConnectionRequest build() {
             return new ConnectionRequest(
                     mAccountHandle,
                     mAddress,
@@ -261,7 +271,9 @@ public final class ConnectionRequest implements Parcelable {
      * @return The Telecom ID.
      * @hide
      */
-    public String getTelecomCallId() {
+    @SystemApi
+    @TestApi
+    public @Nullable String getTelecomCallId() {
         return mTelecomCallId;
     }
 

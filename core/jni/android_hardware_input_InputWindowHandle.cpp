@@ -28,6 +28,7 @@
 #include "android_hardware_input_InputWindowHandle.h"
 #include "android_hardware_input_InputApplicationHandle.h"
 #include "android_util_Binder.h"
+#include <binder/IPCThreadState.h>
 
 namespace android {
 
@@ -78,6 +79,12 @@ NativeInputWindowHandle::NativeInputWindowHandle(jweak objWeak) :
 NativeInputWindowHandle::~NativeInputWindowHandle() {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->DeleteWeakGlobalRef(mObjWeak);
+
+    // Clear the weak reference to the layer handle and flush any binder ref count operations so we
+    // do not hold on to any binder references.
+    // TODO(b/139697085) remove this after it can be flushed automatically
+    mInfo.touchableRegionCropHandle.clear();
+    IPCThreadState::self()->flushCommands();
 }
 
 jobject NativeInputWindowHandle::getInputWindowHandleObjLocalRef(JNIEnv* env) {

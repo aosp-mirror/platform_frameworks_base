@@ -154,6 +154,7 @@ public final class SystemClock {
         final IAlarmManager mgr = IAlarmManager.Stub
                 .asInterface(ServiceManager.getService(Context.ALARM_SERVICE));
         if (mgr == null) {
+            Slog.e(TAG, "Unable to set RTC: mgr == null");
             return false;
         }
 

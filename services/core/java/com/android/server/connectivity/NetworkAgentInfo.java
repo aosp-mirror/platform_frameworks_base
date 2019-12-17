@@ -291,13 +291,18 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      *
      * <p>If {@link NetworkMonitor#notifyNetworkCapabilitiesChanged(NetworkCapabilities)} fails,
      * the exception is logged but not reported to callers.
+     *
+     * @return the old capabilities of this network.
      */
-    public void setNetworkCapabilities(NetworkCapabilities nc) {
+    public synchronized NetworkCapabilities getAndSetNetworkCapabilities(
+            @NonNull final NetworkCapabilities nc) {
+        final NetworkCapabilities oldNc = networkCapabilities;
         networkCapabilities = nc;
         final NetworkMonitorManager nm = mNetworkMonitor;
         if (nm != null) {
             nm.notifyNetworkCapabilitiesChanged(nc);
         }
+        return oldNc;
     }
 
     public ConnectivityService connService() {
@@ -580,7 +585,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         // semantics of WakeupMessage guarantee that if cancel is called then the alarm will
         // never call its callback (handleLingerComplete), even if it has already fired.
         // WakeupMessage makes no such guarantees about rescheduling a message, so if mLingerMessage
-        // has already been dispatched, rescheduling to some time in the future it won't stop it
+        // has already been dispatched, rescheduling to some time in the future won't stop it
         // from calling its callback immediately.
         if (mLingerMessage != null) {
             mLingerMessage.cancel();

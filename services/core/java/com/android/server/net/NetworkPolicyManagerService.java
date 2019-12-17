@@ -20,6 +20,9 @@ import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS;
+import static android.Manifest.permission.NETWORK_SETTINGS;
+import static android.Manifest.permission.NETWORK_STACK;
+import static android.Manifest.permission.OBSERVE_NETWORK_POLICY;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
@@ -33,6 +36,7 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED;
@@ -153,6 +157,7 @@ import android.net.NetworkPolicyManager;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
+import android.net.NetworkStack;
 import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkTemplate;
@@ -218,7 +223,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.RoSystemProperties;
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
@@ -820,7 +824,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             // watch for network interfaces to be claimed
             final IntentFilter connFilter = new IntentFilter(CONNECTIVITY_ACTION);
-            mContext.registerReceiver(mConnReceiver, connFilter, CONNECTIVITY_INTERNAL, mHandler);
+            mContext.registerReceiver(mConnReceiver, connFilter, NETWORK_STACK, mHandler);
 
             // listen for package changes to update policy
             final IntentFilter packageFilter = new IntentFilter();
@@ -1122,7 +1126,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         @Override
         public void limitReached(String limitName, String iface) {
             // only someone like NMS should be calling us
-            mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+            NetworkStack.checkNetworkStackPermission(mContext);
 
             if (!LIMIT_GLOBAL_ALERT.equals(limitName)) {
                 mHandler.obtainMessage(MSG_LIMIT_REACHED, iface).sendToTarget();
@@ -1477,7 +1481,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // on background handler thread, and verified CONNECTIVITY_INTERNAL
+            // on background handler thread, and verified NETWORK_STACK
             // permission above.
             updateNetworksInternal();
         }
@@ -1507,6 +1511,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             latch.countDown();
         });
         latch.await(5, TimeUnit.SECONDS);
+    }
+
+    @VisibleForTesting
+    Handler getHandlerForTesting() {
+        return mHandler;
     }
 
     /**
@@ -1640,10 +1649,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // No need to do a permission check, because the ACTION_CARRIER_CONFIG_CHANGED
             // broadcast is protected and can't be spoofed. Runs on a background handler thread.
 
-            if (!intent.hasExtra(PhoneConstants.SUBSCRIPTION_KEY)) {
+            if (!intent.hasExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX)) {
                 return;
             }
-            final int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY, -1);
+            final int subId = intent.getIntExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, -1);
 
             // Get all of our cross-process communication with telephony out of
             // the way before we acquire internal locks.
@@ -2710,17 +2719,35 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return changed;
     }
 
+    private boolean checkAnyPermissionOf(String... permissions) {
+        for (String permission : permissions) {
+            if (mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void enforceAnyPermissionOf(String... permissions) {
+        if (!checkAnyPermissionOf(permissions)) {
+            throw new SecurityException("Requires one of the following permissions: "
+                    + String.join(", ", permissions) + ".");
+        }
+    }
+
     @Override
     public void registerListener(INetworkPolicyListener listener) {
-        // TODO: create permission for observing network policy
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        // TODO: Remove CONNECTIVITY_INTERNAL and the *AnyPermissionOf methods above after all apps
+        //  have declared OBSERVE_NETWORK_POLICY.
+        enforceAnyPermissionOf(CONNECTIVITY_INTERNAL, OBSERVE_NETWORK_POLICY);
         mListeners.register(listener);
     }
 
     @Override
     public void unregisterListener(INetworkPolicyListener listener) {
-        // TODO: create permission for observing network policy
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        // TODO: Remove CONNECTIVITY_INTERNAL and the *AnyPermissionOf methods above after all apps
+        //  have declared OBSERVE_NETWORK_POLICY.
+        enforceAnyPermissionOf(CONNECTIVITY_INTERNAL, OBSERVE_NETWORK_POLICY);
         mListeners.unregister(listener);
     }
 
@@ -4943,7 +4970,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @Override
     public void factoryReset(String subscriber) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        mContext.enforceCallingOrSelfPermission(NETWORK_SETTINGS, TAG);
 
         if (mUserManager.hasUserRestriction(UserManager.DISALLOW_NETWORK_RESET)) {
             return;
@@ -4976,7 +5003,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public boolean isUidNetworkingBlocked(int uid, boolean isNetworkMetered) {
         final long startTime = mStatLogger.getTime();
 
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
         final int uidRules;
         final boolean isBackgroundRestricted;
         synchronized (mUidRulesFirstLock) {
