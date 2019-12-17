@@ -212,4 +212,9 @@ public class ISmsImplBase extends ISms.Stub {
             String smsc, int subId, String callingPackage) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public int getSmsCapacityOnIccForSubscriber(int subId) {
+        throw new UnsupportedOperationException();
+    }
 }
