@@ -38,6 +38,9 @@ import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -140,6 +143,14 @@ import java.util.regex.Pattern;
 @SystemService(Context.TELEPHONY_SERVICE)
 public class TelephonyManager {
     private static final String TAG = "TelephonyManager";
+
+    /**
+     * To expand the error codes for {@link TelephonyManager#updateAvailableNetworks} and
+     * {@link TelephonyManager#setPreferredOpportunisticDataSubscription}.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    private static final long CALLBACK_ON_MORE_ERROR_CODE_CHANGE = 130595455L;
 
     /**
      * The key to use when placing the result of {@link #requestModemActivityInfo(ResultReceiver)}
@@ -11367,7 +11378,11 @@ public class TelephonyManager {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     executor.execute(() -> {
-                        callback.accept(SET_OPPORTUNISTIC_SUB_REMOTE_SERVICE_EXCEPTION);
+                        if (Compatibility.isChangeEnabled(CALLBACK_ON_MORE_ERROR_CODE_CHANGE)) {
+                            callback.accept(SET_OPPORTUNISTIC_SUB_REMOTE_SERVICE_EXCEPTION);
+                        } else {
+                            callback.accept(SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION);
+                        }
                     });
                 } finally {
                     Binder.restoreCallingIdentity(identity);
@@ -11464,7 +11479,11 @@ public class TelephonyManager {
                     final long identity = Binder.clearCallingIdentity();
                     try {
                         executor.execute(() -> {
-                            callback.accept(UPDATE_AVAILABLE_NETWORKS_REMOTE_SERVICE_EXCEPTION);
+                            if (Compatibility.isChangeEnabled(CALLBACK_ON_MORE_ERROR_CODE_CHANGE)) {
+                                callback.accept(UPDATE_AVAILABLE_NETWORKS_REMOTE_SERVICE_EXCEPTION);
+                            } else {
+                                callback.accept(UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE);
+                            }
                         });
                     } finally {
                         Binder.restoreCallingIdentity(identity);
