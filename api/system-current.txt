@@ -9751,6 +9751,10 @@ package android.telephony {
     field public static final int ROAMING_TYPE_UNKNOWN = 1; // 0x1
   }
 
+  public class SignalStrength implements android.os.Parcelable {
+    ctor public SignalStrength(@NonNull android.telephony.SignalStrength);
+  }
+
   public final class SmsCbCmasInfo implements android.os.Parcelable {
     ctor public SmsCbCmasInfo(int, int, int, int, int, int);
     method public int describeContents();
