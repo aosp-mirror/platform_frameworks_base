@@ -366,8 +366,6 @@ class TaskSnapshotPersister {
         }
 
         boolean writeBuffer() {
-            // TODO(b/116112787) TaskSnapshot needs bookkeep the ColorSpace of the
-            // hardware bitmap when created.
             final Bitmap bitmap = Bitmap.wrapHardwareBuffer(
                     mSnapshot.getSnapshot(), mSnapshot.getColorSpace());
             if (bitmap == null) {
