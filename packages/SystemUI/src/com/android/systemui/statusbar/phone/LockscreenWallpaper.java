@@ -37,12 +37,19 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.Dependency;
+import com.android.systemui.DumpController;
+import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.statusbar.NotificationMediaManager;
 
 import libcore.io.IoUtils;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -52,16 +59,15 @@ import javax.inject.Singleton;
  * Manages the lockscreen wallpaper.
  */
 @Singleton
-public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implements Runnable {
+public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implements Runnable,
+        Dumpable {
 
     private static final String TAG = "LockscreenWallpaper";
 
-    private final NotificationMediaManager mMediaManager =
-            Dependency.get(NotificationMediaManager.class);
-
+    private final NotificationMediaManager mMediaManager;
     private final WallpaperManager mWallpaperManager;
-    private Handler mH;
     private final KeyguardUpdateMonitor mUpdateMonitor;
+    private final Handler mH;
 
     private boolean mCached;
     private Bitmap mCache;
@@ -74,10 +80,16 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     @Inject
     public LockscreenWallpaper(WallpaperManager wallpaperManager,
             @Nullable IWallpaperManager iWallpaperManager,
-            KeyguardUpdateMonitor keyguardUpdateMonitor) {
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            DumpController dumpController,
+            NotificationMediaManager mediaManager,
+            @MainHandler Handler mainHandler) {
+        dumpController.registerDumpable(getClass().getSimpleName(), this);
         mWallpaperManager = wallpaperManager;
         mCurrentUserId = ActivityManager.getCurrentUser();
         mUpdateMonitor = keyguardUpdateMonitor;
+        mMediaManager = mediaManager;
+        mH = mainHandler;
 
         if (iWallpaperManager != null) {
             // Service is disabled on some devices like Automotive
@@ -87,14 +99,6 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
                 Log.e(TAG, "System dead?" + e);
             }
         }
-    }
-
-    void setHandler(Handler handler) {
-        if (mH != null) {
-            Log.wtfStack(TAG, "Handler has already been set. Trying to double initialize?");
-            return;
-        }
-        mH = handler;
     }
 
     public Bitmap getBitmap() {
@@ -225,6 +229,16 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
                 mLoader = null;
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println(getClass().getSimpleName() + ":");
+        IndentingPrintWriter iPw = new IndentingPrintWriter(pw, "  ").increaseIndent();
+        iPw.println("mCached=" + mCached);
+        iPw.println("mCache=" + mCache);
+        iPw.println("mCurrentUserId=" + mCurrentUserId);
+        iPw.println("mSelectedUser=" + mSelectedUser);
     }
 
     private static class LoaderResult {
