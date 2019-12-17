@@ -67,8 +67,6 @@ interface ITelephonyRegistry {
     @UnsupportedAppUsage(maxTargetSdk = 28)
     void notifyCellLocation(in Bundle cellLocation);
     void notifyCellLocationForSubscriber(in int subId, in Bundle cellLocation);
-    @UnsupportedAppUsage(maxTargetSdk = 28)
-    void notifyOtaspChanged(in int subId, in int otaspMode);
     @UnsupportedAppUsage
     void notifyCellInfo(in List<CellInfo> cellInfo);
     void notifyPreciseCallState(int phoneId, int subId, int ringingCallState,
