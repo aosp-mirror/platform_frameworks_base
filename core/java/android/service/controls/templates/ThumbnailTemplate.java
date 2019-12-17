@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package android.service.controls;
+package android.service.controls.templates;
 
 import android.annotation.NonNull;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.service.controls.Control;
 
 import com.android.internal.util.Preconditions;
 
 /**
  * A template for a {@link Control} that displays an image.
+ *
  * @hide
  */
 public final class ThumbnailTemplate extends ControlTemplate {
 
+    private static final @TemplateType int TYPE = TYPE_THUMBNAIL;
     private static final String KEY_ICON = "key_icon";
     private static final String KEY_CONTENT_DESCRIPTION = "key_content_description";
 
@@ -76,7 +79,7 @@ public final class ThumbnailTemplate extends ControlTemplate {
      */
     @Override
     public int getTemplateType() {
-        return TYPE_THUMBNAIL;
+        return TYPE;
     }
 
     @Override
@@ -90,6 +93,8 @@ public final class ThumbnailTemplate extends ControlTemplate {
     public static final Creator<ThumbnailTemplate> CREATOR = new Creator<ThumbnailTemplate>() {
         @Override
         public ThumbnailTemplate createFromParcel(Parcel source) {
+            int type = source.readInt();
+            verifyType(type, TYPE);
             return new ThumbnailTemplate(source.readBundle());
         }
 

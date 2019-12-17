@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package android.service.controls;
+package android.service.controls.templates;
 
 import android.annotation.NonNull;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.service.controls.Control;
+import android.service.controls.actions.BooleanAction;
 
 import com.android.internal.util.Preconditions;
 
@@ -33,6 +35,7 @@ import com.android.internal.util.Preconditions;
  */
 public final class ToggleTemplate extends ControlTemplate {
 
+    private static final @TemplateType int TYPE = TYPE_TOGGLE;
     private static final String KEY_BUTTON = "key_button";
     private final @NonNull ControlButton mButton;
 
@@ -51,12 +54,12 @@ public final class ToggleTemplate extends ControlTemplate {
         mButton = b.getParcelable(KEY_BUTTON);
     }
 
-    /**
-     * The button provided to this object in {@link ToggleTemplate#ToggleTemplate}
-     */
-    @NonNull
-    public ControlButton getButton() {
-        return mButton;
+    public boolean isChecked() {
+        return mButton.isChecked();
+    }
+
+    public CharSequence getContentDescription() {
+        return mButton.getActionDescription();
     }
 
     /**
@@ -64,19 +67,21 @@ public final class ToggleTemplate extends ControlTemplate {
      */
     @Override
     public int getTemplateType() {
-        return TYPE_TOGGLE;
+        return TYPE;
     }
 
     @Override
     protected Bundle getDataBundle() {
         Bundle b =  super.getDataBundle();
-        b.putObject(KEY_BUTTON, mButton);
+        b.putParcelable(KEY_BUTTON, mButton);
         return b;
     }
 
     public static final Creator<ToggleTemplate> CREATOR = new Creator<ToggleTemplate>() {
         @Override
         public ToggleTemplate createFromParcel(Parcel source) {
+            int type = source.readInt();
+            verifyType(type, TYPE);
             return new ToggleTemplate(source.readBundle());
         }
 

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package android.service.controls;
+package android.service.controls.actions;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.service.controls.templates.ToggleTemplate;
 
 /**
  * Action sent by a {@link ToggleTemplate}
@@ -27,6 +28,7 @@ import android.os.Parcel;
  */
 public final class BooleanAction extends ControlAction {
 
+    private static final @ActionType int TYPE = TYPE_BOOLEAN;
     private static final String KEY_NEW_STATE = "key_new_state";
 
     private final boolean mNewState;
@@ -41,15 +43,15 @@ public final class BooleanAction extends ControlAction {
 
     /**
      * @param templateId the identifier of the {@link ToggleTemplate} that originated this action.
-     * @param newValue new value for the state displayed by the {@link ToggleTemplate}.
+     * @param newState new value for the state displayed by the {@link ToggleTemplate}.
      * @param challengeValue a value sent by the user along with the action to authenticate. {@code}
      *                       null is sent when no authentication is needed or has not been
      *                       requested.
      */
-    public BooleanAction(@NonNull String templateId, boolean newValue,
+    public BooleanAction(@NonNull String templateId, boolean newState,
             @Nullable String challengeValue) {
         super(templateId, challengeValue);
-        mNewState = newValue;
+        mNewState = newState;
     }
 
     BooleanAction(Bundle b) {
@@ -72,7 +74,7 @@ public final class BooleanAction extends ControlAction {
      */
     @Override
     public int getActionType() {
-        return ControlAction.TYPE_BOOLEAN;
+        return TYPE;
     }
 
     @Override
@@ -85,6 +87,8 @@ public final class BooleanAction extends ControlAction {
     public static final @NonNull Creator<BooleanAction> CREATOR = new Creator<BooleanAction>() {
         @Override
         public BooleanAction createFromParcel(Parcel source) {
+            int type = source.readInt();
+            verifyType(type, TYPE);
             return new BooleanAction(source.readBundle());
         }
 

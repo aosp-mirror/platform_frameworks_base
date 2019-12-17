@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.service.controls;
+package android.service.controls.actions;
 
-parcelable FloatAction;
+parcelable ModeAction;

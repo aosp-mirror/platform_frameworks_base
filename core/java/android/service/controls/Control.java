@@ -20,10 +20,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.controls.actions.ControlAction;
+import android.service.controls.templates.ControlTemplate;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
@@ -37,64 +38,90 @@ import com.android.internal.util.Preconditions;
  * Each control needs a unique (per provider) identifier that is persistent across reboots of the
  * system.
  * <p>
- * Each {@link Control} will have a name and an icon. The name is usually set up by the user in the
- * {@link ControlProvider} while the icon is usually decided by the {@link ControlProvider} based
- * on the type of device.
+ * Each {@link Control} will have a name, a subtitle and will optionally belong to a structure
+ * and zone. Some of these values are defined by the user and/or the {@link ControlProviderService}
+ * and will be used to display the control as well as group them for management.
+ * <p>
+ * Each object will have an associated {@link DeviceTypes.DeviceType}. This will determine the icons and colors
+ * used to display it.
  * <p>
  * The {@link ControlTemplate.TemplateType} provided will be used as a hint when displaying this in
  * non-interactive situations (for example when there's no state to display). This template is not
  * the one that will be shown with the current state and provide interactions. That template is set
  * using {@link ControlState}.
  * <p>
- * An {@link Intent} linking to the provider Activity that expands this {@link Control} should be
- * provided.
+ * An {@link Intent} linking to the provider Activity that expands on this {@link Control} and
+ * allows for further actions should be provided.
  * @hide
  */
 public class Control implements Parcelable {
+    private static final String TAG = "Control";
+
+    ;
 
     private final @NonNull String mControlId;
-    private final @NonNull Icon mIcon;
+    private final @DeviceTypes.DeviceType
+    int mDeviceType;
     private final @NonNull CharSequence mTitle;
-    private final @Nullable ColorStateList mTintColor;
+    private final @NonNull CharSequence mSubtitle;
+    private final @Nullable CharSequence mStructure;
+    private final @Nullable CharSequence mZone;
     private final @NonNull PendingIntent mAppIntent;
     private final @ControlTemplate.TemplateType int mPrimaryType;
 
     /**
      * @param controlId the unique persistent identifier for this object.
-     * @param icon an icon to display identifying the control.
+     * @param deviceType the type of device for this control. This will determine icons and colors.
      * @param title the user facing name of this control (e.g. "Bedroom thermostat").
-     * @param tintColor the color to tint parts of the element UI. If {@code null} is passed, the
-     *                  system accent color will be used.
+     * @param subtitle a user facing subtitle with extra information about this control
+     * @param structure a user facing name for the structure containing the device associated with
+     *                  this control.
+     * @param zone
      * @param appIntent a {@link PendingIntent} linking to a page to interact with the
      *                  corresponding device.
      * @param primaryType the primary template for this type.
      */
     public Control(@NonNull String controlId,
-            @NonNull Icon icon,
+            @DeviceTypes.DeviceType int deviceType,
             @NonNull CharSequence title,
-            @Nullable ColorStateList tintColor,
+            @NonNull CharSequence subtitle,
+            @Nullable CharSequence structure,
+            @Nullable CharSequence zone,
             @NonNull PendingIntent appIntent,
             int primaryType) {
         Preconditions.checkNotNull(controlId);
-        Preconditions.checkNotNull(icon);
         Preconditions.checkNotNull(title);
+        Preconditions.checkNotNull(subtitle);
         Preconditions.checkNotNull(appIntent);
         mControlId = controlId;
-        mIcon = icon;
+        if (!DeviceTypes.validDeviceType(deviceType)) {
+            Log.e(TAG, "Invalid device type:" + deviceType);
+            mDeviceType = DeviceTypes.TYPE_UNKNOWN;
+        } else {
+            mDeviceType = deviceType;
+        }
         mTitle = title;
-        mTintColor = tintColor;
+        mSubtitle = subtitle;
+        mStructure = structure;
+        mZone = zone;
         mAppIntent = appIntent;
         mPrimaryType = primaryType;
     }
 
     public Control(Parcel in) {
         mControlId = in.readString();
-        mIcon = Icon.CREATOR.createFromParcel(in);
+        mDeviceType = in.readInt();
         mTitle = in.readCharSequence();
-        if (in.readByte() == 1) {
-            mTintColor = ColorStateList.CREATOR.createFromParcel(in);
+        mSubtitle = in.readCharSequence();
+        if (in.readByte() == (byte) 1) {
+            mStructure = in.readCharSequence();
         } else {
-            mTintColor = null;
+            mStructure = null;
+        }
+        if (in.readByte() == (byte) 1) {
+            mZone = in.readCharSequence();
+        } else {
+            mZone = null;
         }
         mAppIntent = PendingIntent.CREATOR.createFromParcel(in);
         mPrimaryType = in.readInt();
@@ -105,9 +132,9 @@ public class Control implements Parcelable {
         return mControlId;
     }
 
-    @NonNull
-    public Icon getIcon() {
-        return mIcon;
+    @DeviceTypes.DeviceType
+    public int getDeviceType() {
+        return mDeviceType;
     }
 
     @NonNull
@@ -115,9 +142,19 @@ public class Control implements Parcelable {
         return mTitle;
     }
 
+    @NonNull
+    public CharSequence getSubtitle() {
+        return mSubtitle;
+    }
+
     @Nullable
-    public ColorStateList getTint() {
-        return mTintColor;
+    public CharSequence getStructure() {
+        return mStructure;
+    }
+
+    @Nullable
+    public CharSequence getZone() {
+        return mZone;
     }
 
     @NonNull
@@ -125,7 +162,7 @@ public class Control implements Parcelable {
         return mAppIntent;
     }
 
-    @ControlTemplate.TemplateType
+    @android.service.controls.templates.ControlTemplate.TemplateType
     public int getPrimaryType() {
         return mPrimaryType;
     }
@@ -138,11 +175,18 @@ public class Control implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mControlId);
-        mIcon.writeToParcel(dest, flags);
+        dest.writeInt(mDeviceType);
         dest.writeCharSequence(mTitle);
-        if (mTintColor != null) {
+        dest.writeCharSequence(mSubtitle);
+        if (mStructure != null) {
             dest.writeByte((byte) 1);
-            mTintColor.writeToParcel(dest, flags);
+            dest.writeCharSequence(mStructure);
+        } else {
+            dest.writeByte((byte) 0);
+        }
+        if (mZone != null) {
+            dest.writeByte((byte) 1);
+            dest.writeCharSequence(mZone);
         } else {
             dest.writeByte((byte) 0);
         }
@@ -168,31 +212,33 @@ public class Control implements Parcelable {
      * This class facilitates the creation of {@link Control}. It provides the following
      * defaults for non-optional parameters:
      * <ul>
+     *     <li> Device type: {@link DeviceTypes#TYPE_UNKNOWN}
      *     <li> Title: {@code ""}
+     *     <li> Subtitle: {@code ""}
      *     <li> Primary template: {@link ControlTemplate#TYPE_NONE}
      * </ul>
      */
     public static class Builder {
-        private String mControlId;
-        private Icon mIcon;
-        private CharSequence mTitle = "";
-        private ColorStateList mTintColor;
-        private @Nullable PendingIntent mAppIntent;
+        private static final String TAG = "Control.Builder";
+        private @NonNull String mControlId;
+        private @DeviceTypes.DeviceType
+        int mDeviceType = DeviceTypes.TYPE_UNKNOWN;
+        private @NonNull CharSequence mTitle = "";
+        private @NonNull CharSequence mSubtitle = "";
+        private @Nullable CharSequence mStructure;
+        private @Nullable CharSequence mZone;
+        private @NonNull PendingIntent mAppIntent;
         private @ControlTemplate.TemplateType int mPrimaryType = ControlTemplate.TYPE_NONE;
 
         /**
          * @param controlId the identifier for the {@link Control}.
-         * @param icon the icon for the {@link Control}.
          * @param appIntent the pending intent linking to the device Activity.
          */
         public Builder(@NonNull String controlId,
-                @NonNull Icon icon,
                 @NonNull PendingIntent appIntent) {
             Preconditions.checkNotNull(controlId);
-            Preconditions.checkNotNull(icon);
             Preconditions.checkNotNull(appIntent);
             mControlId = controlId;
-            mIcon = icon;
             mAppIntent = appIntent;
         }
 
@@ -203,9 +249,11 @@ public class Control implements Parcelable {
         public Builder(@NonNull Control control) {
             Preconditions.checkNotNull(control);
             mControlId = control.mControlId;
-            mIcon = control.mIcon;
+            mDeviceType = control.mDeviceType;
             mTitle = control.mTitle;
-            mTintColor = control.mTintColor;
+            mSubtitle = control.mSubtitle;
+            mStructure = control.mStructure;
+            mZone = control.mZone;
             mAppIntent = control.mAppIntent;
             mPrimaryType = control.mPrimaryType;
         }
@@ -214,20 +262,21 @@ public class Control implements Parcelable {
          * @param controlId the identifier for the {@link Control}.
          * @return {@code this}
          */
+        @NonNull
         public Builder setControlId(@NonNull String controlId) {
             Preconditions.checkNotNull(controlId);
             mControlId = controlId;
             return this;
         }
 
-        /**
-         * @param icon the icon for the {@link Control}
-         * @return {@code this}
-         */
         @NonNull
-        public Builder setIcon(@NonNull Icon icon) {
-            Preconditions.checkNotNull(icon);
-            mIcon = icon;
+        public Builder setDeviceType(@DeviceTypes.DeviceType int deviceType) {
+            if (!DeviceTypes.validDeviceType(deviceType)) {
+                Log.e(TAG, "Invalid device type:" + deviceType);
+                mDeviceType = DeviceTypes.TYPE_UNKNOWN;
+            } else {
+                mDeviceType = deviceType;
+            }
             return this;
         }
 
@@ -242,14 +291,22 @@ public class Control implements Parcelable {
             return this;
         }
 
-        /**
-         * @param tint colors for tinting parts of the {@link Control} UI. Passing {@code null} will
-         *             default to using the current color accent.
-         * @return {@code this}
-         */
         @NonNull
-        public Builder setTint(@Nullable ColorStateList tint) {
-            mTintColor = tint;
+        public Builder setSubtitle(@NonNull CharSequence subtitle) {
+            Preconditions.checkNotNull(subtitle);
+            mSubtitle = subtitle;
+            return this;
+        }
+
+        @NonNull
+        public Builder setStructure(@Nullable CharSequence structure) {
+            mStructure = structure;
+            return this;
+        }
+
+        @NonNull
+        public Builder setZone(@Nullable CharSequence zone) {
+            mZone = zone;
             return this;
         }
 
@@ -280,7 +337,14 @@ public class Control implements Parcelable {
          */
         @NonNull
         public Control build() {
-            return new Control(mControlId, mIcon, mTitle, mTintColor, mAppIntent, mPrimaryType);
+            return new Control(mControlId,
+                    mDeviceType,
+                    mTitle,
+                    mSubtitle,
+                    mStructure,
+                    mZone,
+                    mAppIntent,
+                    mPrimaryType);
         }
     }
 }

@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-package android.service.controls;
+package android.service.controls.templates;
 
-import android.service.controls.actions.ControlAction;
-
-/** @hide */
-oneway interface IControlsProvider {
-    void load();
-
-    void subscribe(in List<String> controlIds);
-
-    void unsubscribe();
-
-    void onAction(in String controlId, in ControlAction action);
-}
+parcelable RangeTemplate;
