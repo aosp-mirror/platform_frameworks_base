@@ -10130,19 +10130,25 @@ public class TelephonyManager {
     }
 
     /**
-     * Action set from carrier signalling broadcast receivers to enable/disable radio
-     * Permissions {@link android.Manifest.permission.MODIFY_PHONE_STATE} is required.
-     * @param subId the subscription ID that this action applies to.
+     * Carrier action to enable or disable the radio.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
      * @param enabled control enable or disable radio.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void carrierActionSetRadioEnabled(int subId, boolean enabled) {
+    public void setRadioEnabled(boolean enabled) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.carrierActionSetRadioEnabled(subId, enabled);
+                service.carrierActionSetRadioEnabled(
+                        getSubId(SubscriptionManager.getDefaultDataSubscriptionId()), enabled);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#carrierActionSetRadioEnabled", e);
@@ -10150,20 +10156,25 @@ public class TelephonyManager {
     }
 
     /**
-     * Action set from carrier signalling broadcast receivers to start/stop reporting default
-     * network available events
-     * Permissions {@link android.Manifest.permission.MODIFY_PHONE_STATE} is required.
-     * @param subId the subscription ID that this action applies to.
+     * Carrier action to start or stop reporting default network available events.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
      * @param report control start/stop reporting network status.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void carrierActionReportDefaultNetworkStatus(int subId, boolean report) {
+    public void reportDefaultNetworkStatus(boolean report) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.carrierActionReportDefaultNetworkStatus(subId, report);
+                service.carrierActionReportDefaultNetworkStatus(
+                        getSubId(SubscriptionManager.getDefaultDataSubscriptionId()), report);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#carrierActionReportDefaultNetworkStatus", e);
@@ -10171,18 +10182,24 @@ public class TelephonyManager {
     }
 
     /**
-     * Action set from carrier signalling broadcast receivers to reset all carrier actions
-     * Permissions {@link android.Manifest.permission.MODIFY_PHONE_STATE} is required.
-     * @param subId the subscription ID that this action applies to.
+     * Reset all carrier actions previously set by {@link #setRadioEnabled},
+     * {@link #reportDefaultNetworkStatus} and {@link #setCarrierDataEnabled}.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void carrierActionResetAll(int subId) {
+    public void resetAllCarrierActions() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.carrierActionResetAll(subId);
+                service.carrierActionResetAll(
+                        getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#carrierActionResetAll", e);
