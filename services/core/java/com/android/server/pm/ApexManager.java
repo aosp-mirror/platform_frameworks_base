@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
+import android.apex.ApexSessionParams;
 import android.apex.IApexService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -439,7 +440,10 @@ abstract class ApexManager {
                 throws PackageManagerException {
             try {
                 final ApexInfoList apexInfoList = new ApexInfoList();
-                mApexService.submitStagedSession(sessionId, childSessionIds, apexInfoList);
+                ApexSessionParams params = new ApexSessionParams();
+                params.sessionId = sessionId;
+                params.childSessionIds = childSessionIds;
+                mApexService.submitStagedSession(params, apexInfoList);
                 return apexInfoList;
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
