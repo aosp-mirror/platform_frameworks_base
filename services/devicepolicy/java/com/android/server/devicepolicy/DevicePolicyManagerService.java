@@ -430,6 +430,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final Set<String> GLOBAL_SETTINGS_DEPRECATED;
     private static final Set<String> SYSTEM_SETTINGS_WHITELIST;
     private static final Set<Integer> DA_DISALLOWED_POLICIES;
+    // A collection of user restrictions that are deprecated and should simply be ignored.
+    private static final Set<String> DEPRECATED_USER_RESTRICTIONS;
     private static final String AB_DEVICE_KEY = "ro.build.ab_update";
 
     static {
@@ -471,6 +473,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         DA_DISALLOWED_POLICIES.add(DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES);
         DA_DISALLOWED_POLICIES.add(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD);
         DA_DISALLOWED_POLICIES.add(DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+
+        DEPRECATED_USER_RESTRICTIONS = Sets.newHashSet(
+                UserManager.DISALLOW_ADD_MANAGED_PROFILE,
+                UserManager.DISALLOW_REMOVE_MANAGED_PROFILE);
     }
 
     /**
@@ -2400,20 +2406,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             setDeviceOwnerSystemPropertyLocked();
             findOwnerComponentIfNecessaryLocked();
             migrateUserRestrictionsIfNecessaryLocked();
-            maybeSetDefaultDeviceOwnerUserRestrictionsLocked();
 
             // TODO PO may not have a class name either due to b/17652534.  Address that too.
 
             updateDeviceOwnerLocked();
-        }
-    }
-
-    /** Apply default restrictions that haven't been applied to device owners yet. */
-    private void maybeSetDefaultDeviceOwnerUserRestrictionsLocked() {
-        final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-        if (deviceOwner != null) {
-            maybeSetDefaultRestrictionsForAdminLocked(mOwners.getDeviceOwnerUserId(),
-                    deviceOwner, UserRestrictionsUtils.getDefaultEnabledForDeviceOwner());
         }
     }
 
@@ -8030,18 +8026,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             updateDeviceOwnerLocked();
             setDeviceOwnerSystemPropertyLocked();
 
-            final Set<String> restrictions =
-                    UserRestrictionsUtils.getDefaultEnabledForDeviceOwner();
-            if (!restrictions.isEmpty()) {
-                for (String restriction : restrictions) {
-                    activeAdmin.ensureUserRestrictions().putBoolean(restriction, true);
-                }
-                activeAdmin.defaultEnabledRestrictionsAlreadySet.addAll(restrictions);
-                Slog.i(LOG_TAG, "Enabled the following restrictions by default: " + restrictions);
-
-                saveUserRestrictionsLocked(userId, /* parent = */ false);
-            }
-
             long ident = mInjector.binderClearCallingIdentity();
             try {
                 // TODO Send to system too?
@@ -10384,8 +10368,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (deviceOwner == null) {
                     return; // Shouldn't happen.
                 }
-                userRestrictions = deviceOwner.userRestrictions;
-                addOrRemoveDisableCameraRestriction(userRestrictions, deviceOwner);
+                userRestrictions = addOrRemoveDisableCameraRestriction(
+                        deviceOwner.userRestrictions, deviceOwner);
                 restrictionOwnerType = UserManagerInternal.OWNER_TYPE_DEVICE_OWNER;
                 originatingUserId = deviceOwner.getUserHandle().getIdentifier();
             } else {
@@ -10418,6 +10402,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     userRestrictions = addOrRemoveDisableCameraRestriction(
                             userRestrictions, userId);
                 }
+            }
+            // Remove deprecated restrictions.
+            for (String deprecatedRestriction: DEPRECATED_USER_RESTRICTIONS) {
+                userRestrictions.remove(deprecatedRestriction);
             }
             mUserManagerInternal.setDevicePolicyUserRestrictions(originatingUserId,
                     userRestrictions, restrictionOwnerType);
