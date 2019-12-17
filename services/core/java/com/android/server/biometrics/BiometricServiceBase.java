@@ -1013,8 +1013,13 @@ public abstract class BiometricServiceBase extends SystemService
 
     private boolean isForegroundActivity(int uid, int pid) {
         try {
-            List<ActivityManager.RunningAppProcessInfo> procs =
+            final List<ActivityManager.RunningAppProcessInfo> procs =
                     ActivityManager.getService().getRunningAppProcesses();
+            if (procs == null) {
+                Slog.e(getTag(), "Processes null, defaulting to true");
+                return true;
+            }
+
             int N = procs.size();
             for (int i = 0; i < N; i++) {
                 ActivityManager.RunningAppProcessInfo proc = procs.get(i);
