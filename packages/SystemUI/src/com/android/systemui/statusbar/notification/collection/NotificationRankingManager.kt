@@ -16,14 +16,11 @@
 
 package com.android.systemui.statusbar.notification.collection
 
-import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
-import android.app.NotificationManager.IMPORTANCE_LOW
 import android.app.NotificationManager.IMPORTANCE_MIN
 import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.NotificationListenerService.RankingMap
 import android.service.notification.StatusBarNotification
-import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.notification.NotificationFilter
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
@@ -105,44 +102,6 @@ open class NotificationRankingManager @Inject constructor(
         return entry.key == mediaManager.mediaNotificationKey && importance > IMPORTANCE_MIN
     }
 
-    @VisibleForTesting
-    protected fun isHighPriority(entry: NotificationEntry): Boolean {
-        if (entry.importance >= IMPORTANCE_DEFAULT ||
-                hasHighPriorityCharacteristics(entry)) {
-            return true
-        }
-
-        if (groupManager.isSummaryOfGroup(entry.sbn)) {
-            val logicalChildren = groupManager.getLogicalChildren(entry.sbn)
-            for (child in logicalChildren) {
-                if (isHighPriority(child)) {
-                    return true
-                }
-            }
-        }
-
-        return false
-    }
-
-    private fun hasHighPriorityCharacteristics(entry: NotificationEntry): Boolean {
-        val c = entry.channel
-        val n = entry.sbn.notification
-
-        if ((n.isForegroundService && entry.ranking.importance >= IMPORTANCE_LOW) ||
-                n.hasMediaSession() ||
-                entry.isPeopleNotification()) {
-            // Users who have long pressed and demoted to silent should not see the notification
-            // in the top section
-            if (c != null && c.hasUserSetImportance()) {
-                return false
-            }
-
-            return true
-        }
-
-        return false
-    }
-
     fun updateRanking(
         newRankingMap: RankingMap?,
         entries: Collection<NotificationEntry>,
@@ -219,7 +178,10 @@ open class NotificationRankingManager @Inject constructor(
                         // TODO: notify group manager here?
                         groupManager.onEntryUpdated(entry, oldSbn)
                     }
-                    entry.setIsHighPriority(isHighPriority(entry))
+
+                    // TODO: (b/145659174) remove after moving to new NotifPipeline
+                    // (should be able to remove all groupManager code post-migration)
+                    entry.invalidateDerivedMembers()
                 }
             }
         }
