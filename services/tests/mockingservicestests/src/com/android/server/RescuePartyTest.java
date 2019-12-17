@@ -24,6 +24,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.RescueParty.LEVEL_FACTORY_RESET;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -144,7 +145,6 @@ public class RescuePartyTest {
 
 
         doReturn(CURRENT_NETWORK_TIME_MILLIS).when(() -> RescueParty.getElapsedRealtime());
-        RescueParty.resetAllThresholds();
         FlagNamespaceUtils.resetKnownResetNamespacesFlagCounterForTest();
 
         SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL,
@@ -160,28 +160,28 @@ public class RescuePartyTest {
 
     @Test
     public void testBootLoopDetectionWithExecutionForAllRescueLevels() {
-        noteBoot(RescueParty.TRIGGER_COUNT);
+        noteBoot();
 
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS);
         assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
-        noteBoot(RescueParty.TRIGGER_COUNT);
+        noteBoot();
 
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_CHANGES);
         assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
-        noteBoot(RescueParty.TRIGGER_COUNT);
+        noteBoot();
 
         verifySettingsResets(Settings.RESET_MODE_TRUSTED_DEFAULTS);
         assertEquals(RescueParty.LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
-        noteBoot(RescueParty.TRIGGER_COUNT);
+        noteBoot();
 
         verify(() -> RecoverySystem.rebootPromptAndWipeUserData(mMockContext, RescueParty.TAG));
-        assertEquals(RescueParty.LEVEL_FACTORY_RESET,
+        assertEquals(LEVEL_FACTORY_RESET,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
     }
 
@@ -208,48 +208,15 @@ public class RescuePartyTest {
         notePersistentAppCrash();
 
         verify(() -> RecoverySystem.rebootPromptAndWipeUserData(mMockContext, RescueParty.TAG));
-        assertEquals(RescueParty.LEVEL_FACTORY_RESET,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
-    }
-
-    @Test
-    public void testBootLoopDetectionWithWrongInterval() {
-        noteBoot(RescueParty.TRIGGER_COUNT - 1);
-
-        // last boot is just outside of the boot loop detection window
-        doReturn(CURRENT_NETWORK_TIME_MILLIS + RescueParty.BOOT_TRIGGER_WINDOW_MILLIS + 1).when(
-                () -> RescueParty.getElapsedRealtime());
-        noteBoot(/*numTimes=*/1);
-
-        assertEquals(RescueParty.LEVEL_NONE,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
-    }
-
-    @Test
-    public void testBootLoopDetectionWithProperInterval() {
-        noteBoot(RescueParty.TRIGGER_COUNT - 1);
-
-        // last boot is just inside of the boot loop detection window
-        doReturn(CURRENT_NETWORK_TIME_MILLIS + RescueParty.BOOT_TRIGGER_WINDOW_MILLIS).when(
-                () -> RescueParty.getElapsedRealtime());
-        noteBoot(/*numTimes=*/1);
-
-        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS);
-        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
-    }
-
-    @Test
-    public void testBootLoopDetectionWithWrongTriggerCount() {
-        noteBoot(RescueParty.TRIGGER_COUNT - 1);
-        assertEquals(RescueParty.LEVEL_NONE,
+        assertEquals(LEVEL_FACTORY_RESET,
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
     }
 
     @Test
     public void testIsAttemptingFactoryReset() {
-        noteBoot(RescueParty.TRIGGER_COUNT * 4);
-
+        for (int i = 0; i < LEVEL_FACTORY_RESET; i++) {
+            noteBoot();
+        }
         verify(() -> RecoverySystem.rebootPromptAndWipeUserData(mMockContext, RescueParty.TAG));
         assertTrue(RescueParty.isAttemptingFactoryReset());
     }
@@ -306,7 +273,7 @@ public class RescuePartyTest {
 
         // Ensure that no action is taken for cases where the failure reason is unknown
         SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
-                RescueParty.LEVEL_FACTORY_RESET));
+                LEVEL_FACTORY_RESET));
         assertEquals(observer.onHealthCheckFailed(null, PackageWatchdog.FAILURE_REASON_UNKNOWN),
                 PackageHealthObserverImpact.USER_IMPACT_NONE);
 
@@ -342,7 +309,7 @@ public class RescuePartyTest {
 
 
         SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
-                RescueParty.LEVEL_FACTORY_RESET));
+                LEVEL_FACTORY_RESET));
         assertEquals(observer.onHealthCheckFailed(null,
                 PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING),
                 PackageHealthObserverImpact.USER_IMPACT_HIGH);
@@ -366,10 +333,8 @@ public class RescuePartyTest {
                 eq(resetMode), anyInt()));
     }
 
-    private void noteBoot(int numTimes) {
-        for (int i = 0; i < numTimes; i++) {
-            RescueParty.noteBoot(mMockContext);
-        }
+    private void noteBoot() {
+        RescuePartyObserver.getInstance(mMockContext).executeBootLoopMitigation();
     }
 
     private void notePersistentAppCrash() {

@@ -29,6 +29,7 @@ import android.net.ConnectivityModuleConnector;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
@@ -36,6 +37,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.LongArrayQueue;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -117,6 +119,12 @@ public class PackageWatchdog {
     // Whether explicit health checks are enabled or not
     private static final boolean DEFAULT_EXPLICIT_HEALTH_CHECK_ENABLED = true;
 
+    @VisibleForTesting
+    static final int DEFAULT_BOOT_LOOP_TRIGGER_COUNT = 5;
+    static final long DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS = TimeUnit.MINUTES.toMillis(10);
+    private static final String PROP_RESCUE_BOOT_COUNT = "sys.rescue_boot_count";
+    private static final String PROP_RESCUE_BOOT_START = "sys.rescue_boot_start";
+
     private long mNumberOfNativeCrashPollsRemaining;
 
     private static final int DB_VERSION = 1;
@@ -152,6 +160,7 @@ public class PackageWatchdog {
     private final Runnable mSyncStateWithScheduledReason = this::syncStateWithScheduledReason;
     private final Runnable mSaveToFile = this::saveToFile;
     private final SystemClock mSystemClock;
+    private final BootThreshold mBootThreshold;
     @GuardedBy("mLock")
     private boolean mIsPackagesReady;
     // Flag to control whether explicit health checks are supported or not
@@ -169,6 +178,7 @@ public class PackageWatchdog {
     @FunctionalInterface
     @VisibleForTesting
     interface SystemClock {
+        // TODO: Add elapsedRealtime to this interface
         long uptimeMillis();
     }
 
@@ -198,6 +208,8 @@ public class PackageWatchdog {
         mConnectivityModuleConnector = connectivityModuleConnector;
         mSystemClock = clock;
         mNumberOfNativeCrashPollsRemaining = NUMBER_OF_NATIVE_CRASH_POLLS;
+        mBootThreshold = new BootThreshold(DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
+                DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS);
         loadFromFile();
         sPackageWatchdog = this;
     }
@@ -411,6 +423,35 @@ public class PackageWatchdog {
         }
     }
 
+    /**
+     * Called when the system server boots. If the system server is detected to be in a boot loop,
+     * query each observer and perform the mitigation action with the lowest user impact.
+     */
+    public void noteBoot() {
+        synchronized (mLock) {
+            if (mBootThreshold.incrementAndTest()) {
+                mBootThreshold.reset();
+                PackageHealthObserver currentObserverToNotify = null;
+                int currentObserverImpact = Integer.MAX_VALUE;
+                for (int i = 0; i < mAllObservers.size(); i++) {
+                    final ObserverInternal observer = mAllObservers.valueAt(i);
+                    PackageHealthObserver registeredObserver = observer.registeredObserver;
+                    if (registeredObserver != null) {
+                        int impact = registeredObserver.onBootLoop();
+                        if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
+                                && impact < currentObserverImpact) {
+                            currentObserverToNotify = registeredObserver;
+                            currentObserverImpact = impact;
+                        }
+                    }
+                }
+                if (currentObserverToNotify != null) {
+                    currentObserverToNotify.executeBootLoopMitigation();
+                }
+            }
+        }
+    }
+
     // TODO(b/120598832): Optimize write? Maybe only write a separate smaller file? Also
     // avoid holding lock?
     // This currently adds about 7ms extra to shutdown thread
@@ -518,6 +559,22 @@ public class PackageWatchdog {
          */
         boolean execute(@Nullable VersionedPackage versionedPackage,
                 @FailureReasons int failureReason);
+
+
+        /**
+         * Called when the system server has booted several times within a window of time, defined
+         * by {@link #mBootThreshold}
+         */
+        default @PackageHealthObserverImpact int onBootLoop() {
+            return PackageHealthObserverImpact.USER_IMPACT_NONE;
+        }
+
+        /**
+         * Executes mitigation for {@link #onBootLoop}
+         */
+        default boolean executeBootLoopMitigation() {
+            return false;
+        }
 
         // TODO(b/120598832): Ensure uniqueness?
         /**
@@ -1366,5 +1423,63 @@ public class PackageWatchdog {
         private long toPositive(long value) {
             return value > 0 ? value : Long.MAX_VALUE;
         }
+    }
+
+    /**
+     * Handles the thresholding logic for system server boots.
+     */
+    static class BootThreshold {
+
+        private final int mBootTriggerCount;
+        private final long mTriggerWindow;
+
+        BootThreshold(int bootTriggerCount, long triggerWindow) {
+            this.mBootTriggerCount = bootTriggerCount;
+            this.mTriggerWindow = triggerWindow;
+        }
+
+        public void reset() {
+            setStart(0);
+            setCount(0);
+        }
+
+        private int getCount() {
+            return SystemProperties.getInt(PROP_RESCUE_BOOT_COUNT, 0);
+        }
+
+        private void setCount(int count) {
+            SystemProperties.set(PROP_RESCUE_BOOT_COUNT, Integer.toString(count));
+        }
+
+        public long getStart() {
+            return SystemProperties.getLong(PROP_RESCUE_BOOT_START, 0);
+        }
+
+        public void setStart(long start) {
+            final long now = android.os.SystemClock.elapsedRealtime();
+            final long newStart = MathUtils.constrain(start, 0, now);
+            SystemProperties.set(PROP_RESCUE_BOOT_START, Long.toString(newStart));
+        }
+
+        /** Increments the boot counter, and returns whether the device is bootlooping. */
+        public boolean incrementAndTest() {
+            final long now = android.os.SystemClock.elapsedRealtime();
+            if (now - getStart() < 0) {
+                Slog.e(TAG, "Window was less than zero. Resetting start to current time.");
+                setStart(now);
+            }
+            final long window = now - getStart();
+            if (window >= mTriggerWindow) {
+                setCount(1);
+                setStart(now);
+                return false;
+            } else {
+                int count = getCount() + 1;
+                setCount(count);
+                EventLogTags.writeRescueNote(Process.ROOT_UID, count, window);
+                return count >= mBootTriggerCount;
+            }
+        }
+
     }
 }

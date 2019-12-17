@@ -27,17 +27,16 @@ import android.content.pm.VersionedPackage;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.Process;
 import android.os.RecoverySystem;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.text.format.DateUtils;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -80,12 +79,6 @@ public class RescueParty {
     static final int LEVEL_FACTORY_RESET = 4;
     @VisibleForTesting
     static final String PROP_RESCUE_BOOT_COUNT = "sys.rescue_boot_count";
-    /**
-     * The boot trigger window size must always be greater than Watchdog's deadlock timeout
-     * {@link Watchdog#DEFAULT_TIMEOUT}.
-     */
-    @VisibleForTesting
-    static final long BOOT_TRIGGER_WINDOW_MILLIS = 600 * DateUtils.SECOND_IN_MILLIS;
     @VisibleForTesting
     static final String TAG = "RescueParty";
 
@@ -93,17 +86,10 @@ public class RescueParty {
 
 
     private static final String PROP_DISABLE_RESCUE = "persist.sys.disable_rescue";
-    private static final String PROP_RESCUE_BOOT_START = "sys.rescue_boot_start";
     private static final String PROP_VIRTUAL_DEVICE = "ro.hardware.virtual_device";
 
     private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
             | ApplicationInfo.FLAG_SYSTEM;
-
-
-    /** Threshold for boot loops */
-    private static final Threshold sBoot = new BootThreshold();
-    /** Threshold for app crash loops */
-    private static SparseArray<Threshold> sApps = new SparseArray<>();
 
     /** Register the Rescue Party observer as a Package Watchdog health observer */
     public static void registerHealthObserver(Context context) {
@@ -141,19 +127,6 @@ public class RescueParty {
     }
 
     /**
-     * Take note of a boot event. If we notice too many of these events
-     * happening in rapid succession, we'll send out a rescue party.
-     */
-    public static void noteBoot(Context context) {
-        if (isDisabled()) return;
-        if (sBoot.incrementAndTest()) {
-            sBoot.reset();
-            incrementRescueLevel(sBoot.uid);
-            executeRescueLevel(context);
-        }
-    }
-
-    /**
      * Check if we're currently attempting to reboot for a factory reset.
      */
     public static boolean isAttemptingFactoryReset() {
@@ -170,11 +143,6 @@ public class RescueParty {
     }
 
     @VisibleForTesting
-    static void resetAllThresholds() {
-        sBoot.reset();
-    }
-
-    @VisibleForTesting
     static long getElapsedRealtime() {
         return SystemClock.elapsedRealtime();
     }
@@ -184,6 +152,14 @@ public class RescueParty {
             FlagNamespaceUtils.resetDeviceConfig(Settings.RESET_MODE_TRUSTED_DEFAULTS,
                     Arrays.asList(SettingsToPropertiesMapper.getResetNativeCategories()));
         }
+    }
+
+    /**
+     * Get the current rescue level.
+     */
+    private static int getRescueLevel() {
+        return MathUtils.constrain(SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE),
+                LEVEL_NONE, LEVEL_FACTORY_RESET);
     }
 
     /**
@@ -366,87 +342,26 @@ public class RescueParty {
         }
 
         @Override
+        public int onBootLoop() {
+            if (isDisabled()) {
+                return PackageHealthObserverImpact.USER_IMPACT_NONE;
+            }
+            return mapRescueLevelToUserImpact(getRescueLevel());
+        }
+
+        @Override
+        public boolean executeBootLoopMitigation() {
+            if (isDisabled()) {
+                return false;
+            }
+            incrementRescueLevel(Process.ROOT_UID);
+            executeRescueLevel(mContext);
+            return true;
+        }
+
+        @Override
         public String getName() {
             return NAME;
-        }
-    }
-
-    /**
-     * Threshold that can be triggered if a number of events occur within a
-     * window of time.
-     */
-    private abstract static class Threshold {
-        public abstract int getCount();
-        public abstract void setCount(int count);
-        public abstract long getStart();
-        public abstract void setStart(long start);
-
-        private final int uid;
-        private final int triggerCount;
-        private final long triggerWindow;
-
-        public Threshold(int uid, int triggerCount, long triggerWindow) {
-            this.uid = uid;
-            this.triggerCount = triggerCount;
-            this.triggerWindow = triggerWindow;
-        }
-
-        public void reset() {
-            setCount(0);
-            setStart(0);
-        }
-
-        /**
-         * @return if this threshold has been triggered
-         */
-        public boolean incrementAndTest() {
-            final long now = getElapsedRealtime();
-            final long window = now - getStart();
-            if (window > triggerWindow) {
-                setCount(1);
-                setStart(now);
-                return false;
-            } else {
-                int count = getCount() + 1;
-                setCount(count);
-                EventLogTags.writeRescueNote(uid, count, window);
-                Slog.w(TAG, "Noticed " + count + " events for UID " + uid + " in last "
-                        + (window / 1000) + " sec");
-                return (count >= triggerCount);
-            }
-        }
-    }
-
-    /**
-     * Specialization of {@link Threshold} for monitoring boot events. It stores
-     * counters in system properties for robustness.
-     */
-    private static class BootThreshold extends Threshold {
-        public BootThreshold() {
-            // We're interested in TRIGGER_COUNT events in any
-            // BOOT_TRIGGER_WINDOW_MILLIS second period; this window is super relaxed because
-            // booting can take a long time if forced to dexopt things.
-            super(android.os.Process.ROOT_UID, TRIGGER_COUNT, BOOT_TRIGGER_WINDOW_MILLIS);
-        }
-
-        @Override
-        public int getCount() {
-            return SystemProperties.getInt(PROP_RESCUE_BOOT_COUNT, 0);
-        }
-
-        @Override
-        public void setCount(int count) {
-            SystemProperties.set(PROP_RESCUE_BOOT_COUNT, Integer.toString(count));
-        }
-
-        @Override
-        public long getStart() {
-            return SystemProperties.getLong(PROP_RESCUE_BOOT_START, 0);
-        }
-
-        @Override
-        public void setStart(long start) {
-            SystemProperties.set(PROP_RESCUE_BOOT_START, Long.toString(start));
         }
     }
 

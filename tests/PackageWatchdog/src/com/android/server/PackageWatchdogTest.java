@@ -18,10 +18,13 @@ package com.android.server;
 
 import static android.service.watchdog.ExplicitHealthCheckService.PackageConfig;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -36,12 +39,14 @@ import android.content.pm.VersionedPackage;
 import android.net.ConnectivityModuleConnector;
 import android.net.ConnectivityModuleConnector.ConnectivityModuleHealthListener;
 import android.os.Handler;
+import android.os.SystemProperties;
 import android.os.test.TestLooper;
 import android.provider.DeviceConfig;
 import android.util.AtomicFile;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.server.PackageWatchdog.HealthCheckState;
 import com.android.server.PackageWatchdog.MonitoredPackage;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
@@ -54,11 +59,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -88,6 +97,8 @@ public class PackageWatchdogTest {
     private PackageManager mMockPackageManager;
     @Captor
     private ArgumentCaptor<ConnectivityModuleHealthListener> mConnectivityModuleCallbackCaptor;
+    private MockitoSession mSession;
+    private HashMap<String, String> mSystemSettingsMap;
 
     @Before
     public void setUp() throws Exception {
@@ -104,11 +115,47 @@ public class PackageWatchdogTest {
             res.setLongVersionCode(VERSION_CODE);
             return res;
         });
+        mSession = ExtendedMockito.mockitoSession()
+                .initMocks(this)
+                .strictness(Strictness.LENIENT)
+                .spyStatic(SystemProperties.class)
+                .startMocking();
+        mSystemSettingsMap = new HashMap<>();
+
+
+        // Mock SystemProperties setter and various getters
+        doAnswer((Answer<Void>) invocationOnMock -> {
+                    String key = invocationOnMock.getArgument(0);
+                    String value = invocationOnMock.getArgument(1);
+
+                    mSystemSettingsMap.put(key, value);
+                    return null;
+                }
+        ).when(() -> SystemProperties.set(anyString(), anyString()));
+
+        doAnswer((Answer<Integer>) invocationOnMock -> {
+                    String key = invocationOnMock.getArgument(0);
+                    int defaultValue = invocationOnMock.getArgument(1);
+
+                    String storedValue = mSystemSettingsMap.get(key);
+                    return storedValue == null ? defaultValue : Integer.parseInt(storedValue);
+                }
+        ).when(() -> SystemProperties.getInt(anyString(), anyInt()));
+
+        doAnswer((Answer<Long>) invocationOnMock -> {
+                    String key = invocationOnMock.getArgument(0);
+                    long defaultValue = invocationOnMock.getArgument(1);
+
+                    String storedValue = mSystemSettingsMap.get(key);
+                    return storedValue == null ? defaultValue : Long.parseLong(storedValue);
+                }
+        ).when(() -> SystemProperties.getLong(anyString(), anyLong()));
     }
 
     @After
     public void tearDown() throws Exception {
         dropShellPermissions();
+        mSession.finishMocking();
     }
 
     @Test
@@ -968,6 +1015,54 @@ public class PackageWatchdogTest {
         assertThat(persistentObserver.mHealthCheckFailedPackages).isEmpty();
     }
 
+
+    /** Ensure that boot loop mitigation is done when the number of boots meets the threshold. */
+    @Test
+    public void testBootLoopDetection_meetsThreshold() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver bootObserver = new TestObserver(OBSERVER_NAME_1);
+        watchdog.registerHealthObserver(bootObserver);
+        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; i++) {
+            watchdog.noteBoot();
+        }
+        assertThat(bootObserver.mitigatedBootLoop()).isTrue();
+    }
+
+
+    /**
+     * Ensure that boot loop mitigation is not done when the number of boots does not meet the
+     * threshold.
+     */
+    @Test
+    public void testBootLoopDetection_doesNotMeetThreshold() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver bootObserver = new TestObserver(OBSERVER_NAME_1);
+        watchdog.registerHealthObserver(bootObserver);
+        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT - 1; i++) {
+            watchdog.noteBoot();
+        }
+        assertThat(bootObserver.mitigatedBootLoop()).isFalse();
+    }
+
+    /**
+     * Ensure that boot loop mitigation is done for the observer with the lowest user impact
+     */
+    @Test
+    public void testBootLoopMitigationDoneForLowestUserImpact() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver bootObserver1 = new TestObserver(OBSERVER_NAME_1);
+        bootObserver1.setImpact(PackageHealthObserverImpact.USER_IMPACT_LOW);
+        TestObserver bootObserver2 = new TestObserver(OBSERVER_NAME_2);
+        bootObserver2.setImpact(PackageHealthObserverImpact.USER_IMPACT_MEDIUM);
+        watchdog.registerHealthObserver(bootObserver1);
+        watchdog.registerHealthObserver(bootObserver2);
+        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; i++) {
+            watchdog.noteBoot();
+        }
+        assertThat(bootObserver1.mitigatedBootLoop()).isTrue();
+        assertThat(bootObserver2.mitigatedBootLoop()).isFalse();
+    }
+
     private void adoptShellPermissions(String... permissions) {
         InstrumentationRegistry
                 .getInstrumentation()
@@ -1046,6 +1141,7 @@ public class PackageWatchdogTest {
         private int mLastFailureReason;
         private boolean mIsPersistent = false;
         private boolean mMayObservePackages = false;
+        private boolean mMitigatedBootLoop = false;
         final List<String> mHealthCheckFailedPackages = new ArrayList<>();
         final List<String> mMitigatedPackages = new ArrayList<>();
 
@@ -1082,12 +1178,29 @@ public class PackageWatchdogTest {
             return mMayObservePackages;
         }
 
+        public int onBootLoop() {
+            return mImpact;
+        }
+
+        public boolean executeBootLoopMitigation() {
+            mMitigatedBootLoop = true;
+            return true;
+        }
+
+        public boolean mitigatedBootLoop() {
+            return mMitigatedBootLoop;
+        }
+
         public int getLastFailureReason() {
             return mLastFailureReason;
         }
 
         public void setPersistent(boolean persistent) {
             mIsPersistent = persistent;
+        }
+
+        public void setImpact(int impact) {
+            mImpact = impact;
         }
 
         public void setMayObservePackages(boolean mayObservePackages) {

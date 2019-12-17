@@ -752,7 +752,7 @@ public final class SystemServer {
         // note that we just booted, which might send out a rescue party if
         // we're stuck in a runtime restart loop.
         RescueParty.registerHealthObserver(mSystemContext);
-        RescueParty.noteBoot(mSystemContext);
+        PackageWatchdog.getInstance(mSystemContext).noteBoot();
 
         // Manages LEDs and display backlight so we need it to bring up the display.
         t.traceBegin("StartLightsService");
