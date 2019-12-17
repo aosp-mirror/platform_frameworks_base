@@ -148,6 +148,7 @@ import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.signedconfig.SignedConfigService;
 import com.android.server.soundtrigger.SoundTriggerService;
+import com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
 import com.android.server.telecom.TelecomLoaderService;
@@ -1553,6 +1554,10 @@ public final class SystemServer {
                     reportWtf("starting " + className, e);
                 }
             }
+            t.traceEnd();
+
+            t.traceBegin("StartSoundTriggerMiddlewareService");
+            mSystemServiceManager.startService(SoundTriggerMiddlewareService.Lifecycle.class);
             t.traceEnd();
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_BROADCAST_RADIO)) {

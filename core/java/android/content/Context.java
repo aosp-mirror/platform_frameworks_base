@@ -4336,6 +4336,15 @@ public abstract class Context {
     public static final String SOUND_TRIGGER_SERVICE = "soundtrigger";
 
     /**
+     * Use with {@link #getSystemService(String)} to access the
+     * {@link com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareService}.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    public static final String SOUND_TRIGGER_MIDDLEWARE_SERVICE = "soundtrigger_middleware";
+
+    /**
      * Official published name of the (internal) permission service.
      *
      * @see #getSystemService(String)
