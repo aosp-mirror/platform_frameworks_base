@@ -2191,6 +2191,14 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.NAVIGATION_MODE,
                 SecureSettingsProto.NAVIGATION_MODE);
 
+        dumpSetting(s, p,
+                Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT,
+                SecureSettingsProto.GestureNavigation.BACK_GESTURE_INSET_SCALE_LEFT);
+
+        dumpSetting(s, p,
+                Settings.Secure.BACK_GESTURE_INSET_SCALE_RIGHT,
+                SecureSettingsProto.GestureNavigation.BACK_GESTURE_INSET_SCALE_RIGHT);
+
         final long nfcPaymentToken = p.start(SecureSettingsProto.NFC_PAYMENT);
         dumpSetting(s, p,
                 Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT,

@@ -8392,6 +8392,20 @@ public final class Settings {
                 "navigation_mode";
 
         /**
+         * Scale factor for the back gesture inset size on the left side of the screen.
+         * @hide
+         */
+        public static final String BACK_GESTURE_INSET_SCALE_LEFT =
+                "back_gesture_inset_scale_left";
+
+        /**
+         * Scale factor for the back gesture inset size on the right side of the screen.
+         * @hide
+         */
+        public static final String BACK_GESTURE_INSET_SCALE_RIGHT =
+                "back_gesture_inset_scale_right";
+
+        /**
          * Controls whether aware is enabled.
          * @hide
          */
