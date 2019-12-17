@@ -246,9 +246,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         StatusBarStateController.StateListener, ActivityLaunchAnimator.Callback {
     public static final boolean MULTIUSER_DEBUG = false;
 
-    public static final boolean ENABLE_CHILD_NOTIFICATIONS
-            = SystemProperties.getBoolean("debug.child_notifs", true);
-
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
     protected static final int MSG_PRELOAD_RECENT_APPS = 1022;
     protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
@@ -1270,6 +1267,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mFeatureFlags.isNewNotifPipelineEnabled()) {
             mNewNotifPipeline.get().initialize(mNotificationListener);
         }
+        mEntryManager.attach(mNotificationListener);
     }
 
     /**

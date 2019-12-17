@@ -116,7 +116,7 @@ public class NotifCollection {
         }
         mAttached = true;
 
-        listenerService.setDownstreamListener(mNotifServiceListener);
+        listenerService.addNotificationListener(mNotifServiceListener);
     }
 
     /**

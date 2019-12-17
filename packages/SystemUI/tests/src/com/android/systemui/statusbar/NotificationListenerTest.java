@@ -27,7 +27,8 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationListenerService.Ranking;
+import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -35,8 +36,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.NotificationListener.NotifServiceListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,52 +51,39 @@ public class NotificationListenerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
 
-    @Mock private NotificationListenerService.RankingMap mRanking;
-
-    // Dependency mocks:
-    @Mock private NotificationEntryManager mEntryManager;
+    @Mock private NotifServiceListener mServiceListener;
     @Mock private NotificationManager mNotificationManager;
-    @Mock private NotificationGroupManager mNotificationGroupManager;
 
     private NotificationListener mListener;
     private StatusBarNotification mSbn;
+    private RankingMap mRanking = new RankingMap(new Ranking[0]);
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mContext.addMockSystemService(NotificationManager.class, mNotificationManager);
 
-        mListener = new NotificationListener(mContext,
-                new Handler(TestableLooper.get(this).getLooper()), mEntryManager,
-                mNotificationGroupManager);
+        mListener = new NotificationListener(
+                mContext,
+                mNotificationManager,
+                new Handler(TestableLooper.get(this).getLooper()));
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 new Notification(), UserHandle.CURRENT, null, 0);
+
+        mListener.addNotificationListener(mServiceListener);
     }
 
     @Test
     public void testNotificationAddCallsAddNotification() {
         mListener.onNotificationPosted(mSbn, mRanking);
         TestableLooper.get(this).processAllMessages();
-        verify(mEntryManager).addNotification(mSbn, mRanking);
-    }
-
-    @Test
-    public void testNotificationUpdateCallsUpdateNotification() {
-        when(mEntryManager.getActiveNotificationUnfiltered(mSbn.getKey()))
-                .thenReturn(
-                        new NotificationEntryBuilder()
-                                .setSbn(mSbn)
-                                .build());
-        mListener.onNotificationPosted(mSbn, mRanking);
-        TestableLooper.get(this).processAllMessages();
-        verify(mEntryManager).updateNotification(mSbn, mRanking);
+        verify(mServiceListener).onNotificationPosted(mSbn, mRanking);
     }
 
     @Test
     public void testNotificationRemovalCallsRemoveNotification() {
         mListener.onNotificationRemoved(mSbn, mRanking);
         TestableLooper.get(this).processAllMessages();
-        verify(mEntryManager).removeNotification(eq(mSbn.getKey()), eq(mRanking), anyInt());
+        verify(mServiceListener).onNotificationRemoved(eq(mSbn), eq(mRanking), anyInt());
     }
 
     @Test
@@ -104,7 +91,7 @@ public class NotificationListenerTest extends SysuiTestCase {
         mListener.onNotificationRankingUpdate(mRanking);
         TestableLooper.get(this).processAllMessages();
         // RankingMap may be modified by plugins.
-        verify(mEntryManager).updateNotificationRanking(any());
+        verify(mServiceListener).onNotificationRankingUpdate(any());
     }
 
     @Test

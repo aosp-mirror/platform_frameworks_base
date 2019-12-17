@@ -23,6 +23,7 @@ import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
+import android.app.NotificationManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
@@ -127,6 +128,12 @@ public class SystemServicesModule {
     static LocalBluetoothManager provideLocalBluetoothController(Context context,
             @BgHandler Handler bgHandler) {
         return LocalBluetoothManager.create(context, bgHandler, UserHandle.ALL);
+    }
+
+    @Singleton
+    @Provides
+    static NotificationManager provideNotificationManager(Context context) {
+        return context.getSystemService(NotificationManager.class);
     }
 
     @Singleton
