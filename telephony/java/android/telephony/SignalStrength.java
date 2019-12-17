@@ -19,6 +19,7 @@ package android.telephony;
 import com.android.telephony.Rlog;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Bundle;
@@ -277,8 +278,8 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
-    public SignalStrength(SignalStrength s) {
+    @SystemApi
+    public SignalStrength(@NonNull SignalStrength s) {
         copyFrom(s);
     }
 
