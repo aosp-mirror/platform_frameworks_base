@@ -103,7 +103,6 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -720,9 +719,16 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             return !isAutogroupSummary;
         } else {
             // If it's not a user dismiss it's a cancel.
+            for (int i = 0; i < bubbleChildren.size(); i++) {
+                // First check if any of these are user-created (i.e. experimental bubbles)
+                if (mUserCreatedBubbles.contains(bubbleChildren.get(i).getKey())) {
+                    // Experimental bubble! Intercept the removal.
+                    return true;
+                }
+            }
+            // Not an experimental bubble, safe to remove.
             mBubbleData.removeSuppressedSummary(groupKey);
-
-            // Remove any associated bubble children.
+            // Remove any associated bubble children with the summary.
             for (int i = 0; i < bubbleChildren.size(); i++) {
                 Bubble bubbleChild = bubbleChildren.get(i);
                 mBubbleData.notificationEntryRemoved(bubbleChild.getEntry(),
