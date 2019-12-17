@@ -6744,7 +6744,8 @@ public class TelephonyManager {
      * If the list is longer than the size of EFfplmn, then the file will be written from the
      * beginning of the list up to the file size.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * <p>Requires Permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE
+     * MODIFY_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param fplmns a list of PLMNs to be forbidden.
@@ -6758,7 +6759,7 @@ public class TelephonyManager {
     public int setForbiddenPlmns(@NonNull List<String> fplmns) {
         try {
             ITelephony telephony = getITelephony();
-            if (telephony == null) return 0;
+            if (telephony == null) return -1;
             return telephony.setForbiddenPlmns(
                     getSubId(), APPTYPE_USIM, fplmns, getOpPackageName());
         } catch (RemoteException ex) {
@@ -6767,7 +6768,7 @@ public class TelephonyManager {
             // This could happen before phone starts
             Rlog.e(TAG, "setForbiddenPlmns NullPointerException: " + ex.getMessage());
         }
-        return 0;
+        return -1;
     }
 
     /**
