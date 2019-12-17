@@ -88,14 +88,14 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         int rows;
         if (res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             columns = Settings.System.getIntForUser(resolver,
-                    Settings.System.QS_COLUMNS_PORTRAIT, 5,
+                    Settings.System.QS_COLUMNS_PORTRAIT, 3,
                     UserHandle.USER_CURRENT);
             rows = Settings.System.getIntForUser(mContext.getContentResolver(),
                     Settings.System.QS_ROWS_PORTRAIT, 3,
                     UserHandle.USER_CURRENT);
         } else {
             columns = Settings.System.getIntForUser(resolver,
-                    Settings.System.QS_COLUMNS_LANDSCAPE, 5,
+                    Settings.System.QS_COLUMNS_LANDSCAPE, 4,
                     UserHandle.USER_CURRENT);
             rows = Settings.System.getIntForUser(mContext.getContentResolver(),
                         Settings.System.QS_ROWS_LANDSCAPE, 1,
