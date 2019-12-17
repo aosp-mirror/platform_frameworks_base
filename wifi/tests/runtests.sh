@@ -16,7 +16,6 @@ $ANDROID_BUILD_TOP/build/soong/soong_ui.bash --make-mode MODULES-IN-frameworks-b
 
 set -x # print commands
 
-adb root
 adb wait-for-device
 
 TARGET_ARCH=$($ANDROID_BUILD_TOP/build/soong/soong_ui.bash --dumpvar-mode TARGET_ARCH)
