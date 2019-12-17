@@ -8814,6 +8814,7 @@ package android.telephony {
   }
 
   public class SubscriptionInfo implements android.os.Parcelable {
+    method public boolean areUiccApplicationsEnabled();
     method @Nullable public java.util.List<android.telephony.UiccAccessRule> getAccessRules();
     method public int getProfileClass();
     method public boolean isGroupDisabled();
