@@ -91,6 +91,16 @@ public class DisplayResolveInfo implements TargetInfo {
         mResolveInfoPresentationGetter = resolveInfoPresentationGetter;
     }
 
+    DisplayResolveInfo(DisplayResolveInfo other) {
+        mSourceIntents.addAll(other.getAllSourceIntents());
+        mResolveInfo = other.mResolveInfo;
+        mDisplayLabel = other.mDisplayLabel;
+        mDisplayIcon = other.mDisplayIcon;
+        mExtendedInfo = other.mExtendedInfo;
+        mResolvedIntent = other.mResolvedIntent;
+        mResolveInfoPresentationGetter = other.mResolveInfoPresentationGetter;
+    }
+
     public ResolveInfo getResolveInfo() {
         return mResolveInfo;
     }
@@ -189,4 +199,5 @@ public class DisplayResolveInfo implements TargetInfo {
     public void setPinned(boolean pinned) {
         mPinned = pinned;
     }
+
 }

@@ -1160,7 +1160,7 @@ public class ResolverActivity extends Activity implements
         return !target.isSuspended();
     }
 
-    public void showTargetDetails(ResolveInfo ri) {
+    void showTargetDetails(ResolveInfo ri) {
         Intent in = new Intent().setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 .setData(Uri.fromParts("package", ri.activityInfo.packageName, null))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);

@@ -111,6 +111,7 @@ import com.android.internal.app.ResolverListAdapter.ActivityInfoPresentationGett
 import com.android.internal.app.ResolverListAdapter.ViewHolder;
 import com.android.internal.app.chooser.ChooserTargetInfo;
 import com.android.internal.app.chooser.DisplayResolveInfo;
+import com.android.internal.app.chooser.MultiDisplayResolveInfo;
 import com.android.internal.app.chooser.NotSelectableTargetInfo;
 import com.android.internal.app.chooser.SelectableTargetInfo;
 import com.android.internal.app.chooser.SelectableTargetInfo.SelectableTargetInfoCommunicator;
@@ -1352,17 +1353,31 @@ public class ChooserActivity extends ResolverActivity implements
         return getIntent().getBooleanExtra(Intent.EXTRA_AUTO_LAUNCH_SINGLE_CHOICE, true);
     }
 
-    @Override
-    public void showTargetDetails(ResolveInfo ri) {
-        if (ri == null) {
+    void showTargetDetails(TargetInfo ti) {
+        if (ti == null) {
             return;
         }
-
-        ComponentName name = ri.activityInfo.getComponentName();
+        ComponentName name = ti.getResolveInfo().activityInfo.getComponentName();
         boolean pinned = mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
-        ResolverTargetActionsDialogFragment f =
-                new ResolverTargetActionsDialogFragment(ri.loadLabel(getPackageManager()),
-                        name, pinned);
+
+        ResolverTargetActionsDialogFragment f;
+
+        // For multiple targets, include info on all targets
+        if (ti instanceof MultiDisplayResolveInfo) {
+            MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) ti;
+            List<CharSequence> labels = new ArrayList<>();
+
+            for (TargetInfo innerInfo : mti.getTargets()) {
+                labels.add(innerInfo.getResolveInfo().loadLabel(getPackageManager()));
+            }
+            f = new ResolverTargetActionsDialogFragment(
+                    mti.getResolveInfo().loadLabel(getPackageManager()), name, mti.getTargets(),
+                    labels);
+        } else {
+            f = new ResolverTargetActionsDialogFragment(
+                    ti.getResolveInfo().loadLabel(getPackageManager()), name, pinned);
+        }
+
         f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
     }
 
@@ -1416,7 +1431,25 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         final long selectionCost = System.currentTimeMillis() - mChooserShownTime;
+
+        // Stacked apps get a disambiguation first
+        if (targetInfo instanceof MultiDisplayResolveInfo) {
+            MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) targetInfo;
+            CharSequence[] labels = new CharSequence[mti.getTargets().size()];
+            int i = 0;
+            for (TargetInfo ti : mti.getTargets()) {
+                labels[i++] = ti.getResolveInfo().loadLabel(getPackageManager());
+            }
+            ChooserStackedAppDialogFragment f = new ChooserStackedAppDialogFragment(
+                    targetInfo.getDisplayLabel(),
+                    ((MultiDisplayResolveInfo) targetInfo).getTargets(), labels);
+
+            f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
+            return;
+        }
+
         super.startSelected(which, always, filtered);
+
 
         if (currentListAdapter.getCount() > 0) {
             // Log the index of which type of target the user picked.
@@ -2363,7 +2396,7 @@ public class ChooserActivity extends ResolverActivity implements
                 itemView.setOnLongClickListener(v -> {
                     showTargetDetails(
                             mChooserMultiProfilePagerAdapter.getActiveListAdapter()
-                                    .resolveInfoForPosition(mListPosition, /* filtered */ true));
+                                    .targetInfoForPosition(mListPosition, /* filtered */ true));
                     return true;
                 });
             }
@@ -2615,7 +2648,7 @@ public class ChooserActivity extends ResolverActivity implements
                     @Override
                     public boolean onLongClick(View v) {
                         showTargetDetails(
-                                mChooserListAdapter.resolveInfoForPosition(
+                                mChooserListAdapter.targetInfoForPosition(
                                         holder.getItemIndex(column), true));
                         return true;
                     }
