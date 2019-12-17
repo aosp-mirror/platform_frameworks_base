@@ -1004,6 +1004,51 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA = 14;
 
+    /**
+     * <p>The camera device supports the OFFLINE_PROCESSING use case.</p>
+     * <p>With OFFLINE_PROCESSING capability, the application can switch an ongoing
+     * capture session to offline mode by calling the
+     * CameraCaptureSession#switchToOffline method and specify streams to be kept in offline
+     * mode. The camera will then stop currently active repeating requests, prepare for
+     * some requests to go into offline mode, and return an offline session object. After
+     * the switchToOffline call returns, the original capture session is in closed state as
+     * if the CameraCaptureSession#close method has been called.
+     * In the offline mode, all inflight requests will continue to be processed in the
+     * background, and the application can immediately close the camera or create a new
+     * capture session without losing those requests' output images and capture results.</p>
+     * <p>While the camera device is processing offline requests, it
+     * might not be able to support all stream configurations it can support
+     * without offline requests. When that happens, the createCaptureSession
+     * method call will fail. The following stream configurations are guaranteed to work
+     * without hitting the resource busy exception:</p>
+     * <ul>
+     * <li>One ongoing offline session: target one output surface of YUV or
+     * JPEG format, any resolution.</li>
+     * <li>The active camera capture session:<ol>
+     * <li>One preview surface (SurfaceView or SurfaceTexture) up to 1920 width</li>
+     * <li>One YUV ImageReader surface up to 1920 width</li>
+     * <li>One Jpeg ImageReader, any resolution: the camera device is
+     *    allowed to slow down JPEG output speed by 50% if there is any ongoing offline
+     *    session.</li>
+     * <li>One ImageWriter surface of private format, any resolution if the device supports
+     *    PRIVATE_REPROCESSING capability</li>
+     * </ol>
+     * </li>
+     * <li>Alternatively, the active camera session above can be replaced by an legacy
+     * {@link android.hardware.Camera Camera} with the following parameter settings:<ol>
+     * <li>Preview size up to 1920 width</li>
+     * <li>Preview callback size up to 1920 width</li>
+     * <li>Video size up to 1920 width</li>
+     * <li>Picture size, any resolution: the camera device is
+     *     allowed to slow down JPEG output speed by 50% if there is any ongoing offline
+     *     session.</li>
+     * </ol>
+     * </li>
+     * </ul>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING = 15;
+
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
     //
