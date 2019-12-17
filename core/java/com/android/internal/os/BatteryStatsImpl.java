@@ -5266,7 +5266,7 @@ public class BatteryStatsImpl extends BatteryStats {
         // Unknown is included in DATA_CONNECTION_OTHER.
         int bin = DATA_CONNECTION_OUT_OF_SERVICE;
         if (hasData) {
-            if (dataType > 0 && dataType <= TelephonyManager.MAX_NETWORK_TYPE) {
+            if (dataType > 0 && dataType <= TelephonyManager.getAllNetworkTypes().length) {
                 bin = dataType;
             } else {
                 switch (serviceType) {
