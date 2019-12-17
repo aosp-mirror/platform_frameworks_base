@@ -1497,6 +1497,11 @@ package android.bluetooth {
     field public static final int REMOTE_PANU_ROLE = 2; // 0x2
   }
 
+  public class BluetoothPbap implements android.bluetooth.BluetoothProfile {
+    method public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
+    field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
+  }
+
   public interface BluetoothProfile {
     field public static final int CONNECTION_POLICY_ALLOWED = 100; // 0x64
     field public static final int CONNECTION_POLICY_FORBIDDEN = 0; // 0x0
