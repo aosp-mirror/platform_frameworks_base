@@ -5994,6 +5994,14 @@ message PermissionGrantRequestResultReported {
         USER_GRANTED_ONE_TIME = 10;
         // user ignored request by leaving the request screen without choosing any option
         USER_IGNORED = 11;
+        // user granted the permission after being linked to settings
+        USER_GRANTED_IN_SETTINGS = 12;
+        // user denied the permission after being linked to settings
+        USER_DENIED_IN_SETTINGS = 13;
+        // user denied the permission with prejudice after being linked to settings
+        USER_DENIED_WITH_PREJUDICE_IN_SETTINGS = 14;
+        // permission was automatically revoked after one-time permission expired
+        AUTO_ONE_TIME_PERMISSION_REVOKED = 15;
     }
     // The result of the permission grant
     optional Result result = 6;
