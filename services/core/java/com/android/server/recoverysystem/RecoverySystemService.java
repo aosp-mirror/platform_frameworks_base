@@ -24,8 +24,11 @@ import android.os.Binder;
 import android.os.IRecoverySystem;
 import android.os.IRecoverySystemProgressListener;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RecoverySystem;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.util.Slog;
 
@@ -39,6 +42,7 @@ import libcore.io.IoUtils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileDescriptor;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -548,6 +552,30 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
             IoUtils.closeQuietly(mInputStream);
             IoUtils.closeQuietly(mOutputStream);
             IoUtils.closeQuietly(mLocalSocket);
+        }
+    }
+
+    private boolean isCallerShell() {
+        final int callingUid = Binder.getCallingUid();
+        return callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID;
+    }
+
+    private void enforceShell() {
+        if (!isCallerShell()) {
+            throw new SecurityException("Caller must be shell");
+        }
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+        enforceShell();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            new RecoverySystemShellCommand(this).exec(
+                    this, in, out, err, args, callback, resultReceiver);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 }
