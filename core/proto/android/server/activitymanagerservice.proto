@@ -60,7 +60,7 @@ message ActivityManagerServiceDumpActivitiesProto {
 message ActivityStackSupervisorProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
+    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1 [deprecated=true];
     repeated ActivityDisplayProto displays = 2;
     optional KeyguardControllerProto keyguard_controller = 3;
     // TODO(b/111541062): Focused stack and resumed activity are now per-display. Topmost instances
@@ -71,6 +71,7 @@ message ActivityStackSupervisorProto {
     // know what activity types to check for when invoking splitscreen multi-window.
     optional bool is_home_recents_component = 6;
     repeated .com.android.server.wm.IdentifierProto pending_activities = 7;
+    optional .com.android.server.wm.RootWindowContainerProto root_window_container = 8;
 }
 
 /* represents ActivityStackSupervisor.ActivityDisplay */

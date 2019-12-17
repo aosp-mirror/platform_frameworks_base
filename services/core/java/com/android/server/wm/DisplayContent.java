@@ -1038,7 +1038,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         onDisplayChanged(this);
 
         // Add itself as a child to the root container.
-        mWmService.mRoot.addChild(this, null);
+        mWmService.mRoot.addChild(this, POSITION_BOTTOM);
 
         // TODO(b/62541591): evaluate whether this is the best spot to declare the
         // {@link DisplayContent} ready for use.
@@ -6410,7 +6410,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             stack.removeIfPossible();
         } else if (getTopStack() == null) {
             removeIfPossible();
-            mRootActivityContainer.removeChild(this);
             mRootActivityContainer.mStackSupervisor
                     .getKeyguardController().onDisplayRemoved(mDisplayId);
         }

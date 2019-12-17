@@ -27,6 +27,7 @@ import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
@@ -91,6 +92,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         mFullscreenStack = mRootActivityContainer.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        doNothing().when(mService).updateSleepIfNeededLocked();
     }
 
     /**

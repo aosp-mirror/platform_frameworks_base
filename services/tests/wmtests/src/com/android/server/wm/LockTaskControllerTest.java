@@ -135,7 +135,6 @@ public class LockTaskControllerTest {
 
         mSupervisor.mRecentTasks = mRecentTasks;
         mSupervisor.mRootActivityContainer = mRootActivityContainer;
-        mRootActivityContainer.mRootWindowContainer = mRootWindowContainer;
 
         mLockTaskController = new LockTaskController(mContext, mSupervisor,
                 new ImmediatelyExecuteHandler());

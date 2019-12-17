@@ -1116,7 +1116,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplayWindowSettings = new DisplayWindowSettings(this);
         mPolicy = policy;
         mAnimator = new WindowAnimator(this);
-        mRoot = new RootWindowContainer(this);
+        mRoot = new RootActivityContainer(mAtmService, this);
 
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mTaskSnapshotController = new TaskSnapshotController(this);
@@ -5787,7 +5787,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     void dumpDebugLocked(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
         mPolicy.dumpDebug(proto, POLICY);
-        mRoot.dumpDebug(proto, ROOT_WINDOW_CONTAINER, logLevel);
+        mRoot.dumpDebugInner(proto, ROOT_WINDOW_CONTAINER, logLevel);
         final DisplayContent topFocusedDisplayContent = mRoot.getTopFocusedDisplayContent();
         if (topFocusedDisplayContent.mCurrentFocus != null) {
             topFocusedDisplayContent.mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);

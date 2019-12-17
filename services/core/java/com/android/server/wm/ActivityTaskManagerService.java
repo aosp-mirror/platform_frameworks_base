@@ -825,13 +825,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mAppWarnings = createAppWarnings(mUiContext, mH, mUiHandler, systemDir);
         mCompatModePackages = new CompatModePackages(this, systemDir, mH);
         mPendingIntentController = intentController;
-
-        mTempConfig.setToDefaults();
-        mTempConfig.setLocales(LocaleList.getDefault());
-        mConfigurationSeq = mTempConfig.seq = 1;
         mStackSupervisor = createStackSupervisor();
-        mRootActivityContainer = new RootActivityContainer(this);
-        mRootActivityContainer.onConfigurationChanged(mTempConfig);
 
         mTaskChangeNotificationController =
                 new TaskChangeNotificationController(mGlobalLock, mStackSupervisor, mH);
@@ -868,6 +862,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void setWindowManager(WindowManagerService wm) {
         synchronized (mGlobalLock) {
             mWindowManager = wm;
+            // TODO(merge-root): Remove cast
+            mRootActivityContainer = (RootActivityContainer) wm.mRoot;
+            mTempConfig.setToDefaults();
+            mTempConfig.setLocales(LocaleList.getDefault());
+            mConfigurationSeq = mTempConfig.seq = 1;
+            mRootActivityContainer.onConfigurationChanged(mTempConfig);
             mLockTaskController.setWindowManager(wm);
             mStackSupervisor.setWindowManager(wm);
             mRootActivityContainer.setWindowManager(wm);
@@ -5216,7 +5216,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * also corresponds to the merged configuration of the default display.
      */
     Configuration getGlobalConfiguration() {
-        return mRootActivityContainer.getConfiguration();
+        // Return default configuration before mRootActivityContainer initialized, which happens
+        // while initializing process record for system, see {@link
+        // ActivityManagerService#setSystemProcess}.
+        return mRootActivityContainer != null ? mRootActivityContainer.getConfiguration()
+                : new Configuration();
     }
 
     boolean updateConfigurationLocked(Configuration values, ActivityRecord starting,
@@ -7277,6 +7281,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public WindowProcessController getTopApp() {
             synchronized (mGlobalLockWithoutBoost) {
+                if (mRootActivityContainer == null) {
+                    // Return null if mRootActivityContainer not yet initialize, while update
+                    // oomadj after AMS created.
+                    return null;
+                }
                 final ActivityRecord top = mRootActivityContainer.getTopResumedActivity();
                 return top != null ? top.app : null;
             }

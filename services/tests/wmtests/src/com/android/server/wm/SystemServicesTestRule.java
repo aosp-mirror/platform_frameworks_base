@@ -269,6 +269,14 @@ public class SystemServicesTestRule implements TestRule {
                 mContext, mImService, false, false, mWMPolicy, mAtmService, StubTransaction::new,
                 () -> mock(Surface.class), (unused) -> new MockSurfaceControlBuilder());
         spyOn(mWmService);
+        spyOn(mWmService.mRoot);
+        // Invoked during {@link ActivityStack} creation.
+        doNothing().when((RootActivityContainer) mWmService.mRoot).updateUIDsPresentOnDisplay();
+        // Always keep things awake.
+        doReturn(true).when((RootActivityContainer) mWmService.mRoot).hasAwakeDisplay();
+        // Called when moving activity to pinned stack.
+        doNothing().when((RootActivityContainer) mWmService.mRoot).ensureActivitiesVisible(any(),
+                anyInt(), anyBoolean(), anyBoolean());
 
         // Setup factory classes to prevent calls to native code.
         mTransaction = spy(StubTransaction.class);
@@ -284,8 +292,7 @@ public class SystemServicesTestRule implements TestRule {
         // Set configuration for default display
         mWmService.getDefaultDisplayContentLocked().reconfigureDisplayLocked();
 
-        // Mock root, some default display, and home stack.
-        spyOn(mWmService.mRoot);
+        // Mock default display, and home stack.
         final DisplayContent display = mAtmService.mRootActivityContainer.getDefaultDisplay();
         // Set default display to be in fullscreen mode. Devices with PC feature may start their
         // default display in freeform mode but some of tests in WmTests have implicit assumption on
@@ -311,9 +318,12 @@ public class SystemServicesTestRule implements TestRule {
         // Needs to explicitly dispose current static threads because there could be messages
         // scheduled at a later time, and all mocks are invalid when it's executed.
         DisplayThread.dispose();
+        // Dispose SurfaceAnimationThread before AnimationThread does, so it won't create a new
+        // AnimationThread after AnimationThread disposed, see {@link
+        // AnimatorListenerAdapter#onAnimationEnd()}
+        SurfaceAnimationThread.dispose();
         AnimationThread.dispose();
         UiThread.dispose();
-        SurfaceAnimationThread.dispose();
         mInputChannel.dispose();
 
         tearDownLocalServices();
@@ -443,22 +453,10 @@ public class SystemServicesTestRule implements TestRule {
             spyOn(getLifecycleManager());
             spyOn(getLockTaskController());
             spyOn(getTaskChangeNotificationController());
-            initRootActivityContainerMocks();
 
             AppWarnings appWarnings = getAppWarningsLocked();
             spyOn(appWarnings);
             doNothing().when(appWarnings).onStartActivity(any());
-        }
-
-        void initRootActivityContainerMocks() {
-            spyOn(mRootActivityContainer);
-            // Invoked during {@link ActivityStack} creation.
-            doNothing().when(mRootActivityContainer).updateUIDsPresentOnDisplay();
-            // Always keep things awake.
-            doReturn(true).when(mRootActivityContainer).hasAwakeDisplay();
-            // Called when moving activity to pinned stack.
-            doNothing().when(mRootActivityContainer).ensureActivitiesVisible(any(), anyInt(),
-                    anyBoolean());
         }
 
         @Override
