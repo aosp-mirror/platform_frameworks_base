@@ -4248,6 +4248,10 @@
         <!-- Add packages here -->
     </string-array>
 
+    <!-- Whether or not wcg (wide color gamut) should be enabled on this device,
+         we only enabled it while the device has ability of mixed color spaces composition -->
+    <bool name="config_enableWcgMode">false</bool>
+
     <!-- When true, enables the whitelisted app to handle bug reports from power menu short press. -->
     <bool name="config_bugReportHandlerEnabled">false</bool>
 

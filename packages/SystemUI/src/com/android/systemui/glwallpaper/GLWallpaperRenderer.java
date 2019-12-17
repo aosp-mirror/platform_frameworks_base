@@ -27,6 +27,11 @@ import java.io.PrintWriter;
 public interface GLWallpaperRenderer {
 
     /**
+     * Check if the content to render is a WCG content.
+     */
+    boolean isWcgContent();
+
+    /**
      * Called when the surface is created or recreated.
      */
     void onSurfaceCreated();
