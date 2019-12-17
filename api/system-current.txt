@@ -4489,7 +4489,11 @@ package android.media.tv.tuner {
 
   public final class Tuner implements java.lang.AutoCloseable {
     ctor public Tuner(@NonNull android.content.Context);
+    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.Tuner.Descrambler openDescrambler();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int tune(@NonNull android.media.tv.tuner.FrontendSettings);
+  }
+
+  public class Tuner.Descrambler {
   }
 
 }
