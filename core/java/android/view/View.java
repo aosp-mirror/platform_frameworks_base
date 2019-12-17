@@ -15602,7 +15602,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * by the most recent call to {@link #measure(int, int)}.  This result is a bit mask
      * as defined by {@link #MEASURED_SIZE_MASK} and {@link #MEASURED_STATE_TOO_SMALL}.
      * This should be used during measurement and layout calculations only. Use
-     * {@link #getHeight()} to see how wide a view is after layout.
+     * {@link #getHeight()} to see how high a view is after layout.
      *
      * @return The measured height of this view as a bit mask.
      */
