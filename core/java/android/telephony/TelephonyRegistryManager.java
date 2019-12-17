@@ -587,22 +587,6 @@ public class TelephonyRegistryManager {
     }
 
     /**
-     * Notify over the air sim provisioning(OTASP) mode changed on certain subscription.
-     *
-     * @param subId for which otasp mode changed.
-     * @param otaspMode latest mode for OTASP e.g, OTASP needed.
-     *
-     * @hide
-     */
-    public void notifyOtaspChanged(int subId, int otaspMode) {
-        try {
-            sRegistry.notifyOtaspChanged(subId, otaspMode);
-        } catch (RemoteException ex) {
-            // system process is dead
-        }
-    }
-
-    /**
      * Notify precise call state changed on certain subscription, including foreground, background
      * and ringcall states.
      *

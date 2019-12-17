@@ -209,8 +209,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int[] mDataConnectionNetworkType;
 
-    private int[] mOtaspMode;
-
     private ArrayList<List<CellInfo>> mCellInfo = null;
 
     private Map<Integer, List<EmergencyNumber>> mEmergencyNumberList;
@@ -406,7 +404,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mCallForwarding = copyOf(mCallForwarding, mNumPhones);
         mCellLocation = copyOf(mCellLocation, mNumPhones);
         mSrvccState = copyOf(mSrvccState, mNumPhones);
-        mOtaspMode = copyOf(mOtaspMode, mNumPhones);
         mPreciseCallState = copyOf(mPreciseCallState, mNumPhones);
         mForegroundCallState = copyOf(mForegroundCallState, mNumPhones);
         mBackgroundCallState = copyOf(mBackgroundCallState, mNumPhones);
@@ -444,7 +441,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCellInfo.add(i, null);
             mImsReasonInfo.add(i, null);
             mSrvccState[i] = TelephonyManager.SRVCC_STATE_HANDOVER_NONE;
-            mOtaspMode[i] = TelephonyManager.OTASP_UNKNOWN;
             mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
             mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
             mCallQuality[i] = createCallQuality();
@@ -507,7 +503,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mCallForwarding = new boolean[numPhones];
         mCellLocation = new Bundle[numPhones];
         mSrvccState = new int[numPhones];
-        mOtaspMode = new int[numPhones];
         mPreciseCallState = new PreciseCallState[numPhones];
         mForegroundCallState = new int[numPhones];
         mBackgroundCallState = new int[numPhones];
@@ -539,7 +534,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCellInfo.add(i, null);
             mImsReasonInfo.add(i, null);
             mSrvccState[i] = TelephonyManager.SRVCC_STATE_HANDOVER_NONE;
-            mOtaspMode[i] = TelephonyManager.OTASP_UNKNOWN;
             mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
             mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
             mCallQuality[i] = createCallQuality();
@@ -877,13 +871,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if ((events & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0) {
                         try {
                             r.callback.onSignalStrengthsChanged(mSignalStrength[phoneId]);
-                        } catch (RemoteException ex) {
-                            remove(r.binder);
-                        }
-                    }
-                    if ((events & PhoneStateListener.LISTEN_OTASP_CHANGED) != 0) {
-                        try {
-                            r.callback.onOtaspChanged(mOtaspMode[phoneId]);
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -1678,29 +1665,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyOtaspChanged(int subId, int otaspMode) {
-        if (!checkNotifyPermission("notifyOtaspChanged()" )) {
-            return;
-        }
-        int phoneId = SubscriptionManager.getPhoneId(subId);
-        synchronized (mRecords) {
-            if (validatePhoneId(phoneId)) {
-                mOtaspMode[phoneId] = otaspMode;
-                for (Record r : mRecords) {
-                    if (r.matchPhoneStateListenerEvent(PhoneStateListener.LISTEN_OTASP_CHANGED)
-                            && idMatch(r.subId, subId, phoneId)) {
-                        try {
-                            r.callback.onOtaspChanged(otaspMode);
-                        } catch (RemoteException ex) {
-                            mRemoveList.add(r.binder);
-                        }
-                    }
-                }
-            }
-            handleRemoveListLocked();
-        }
-    }
-
     public void notifyPreciseCallState(int phoneId, int subId, int ringingCallState,
                                        int foregroundCallState, int backgroundCallState) {
         if (!checkNotifyPermission("notifyPreciseCallState()")) {
@@ -2131,7 +2095,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mCellInfo=" + mCellInfo.get(i));
                 pw.println("mImsCallDisconnectCause=" + mImsReasonInfo.get(i));
                 pw.println("mSrvccState=" + mSrvccState[i]);
-                pw.println("mOtaspMode=" + mOtaspMode[i]);
                 pw.println("mCallPreciseDisconnectCause=" + mCallPreciseDisconnectCause[i]);
                 pw.println("mCallQuality=" + mCallQuality[i]);
                 pw.println("mCallAttributes=" + mCallAttributes[i]);
