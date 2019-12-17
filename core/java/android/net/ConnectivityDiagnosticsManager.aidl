@@ -18,3 +18,4 @@
 package android.net;
 
 parcelable ConnectivityDiagnosticsManager.ConnectivityReport;
+parcelable ConnectivityDiagnosticsManager.DataStallReport;

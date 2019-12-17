@@ -53,16 +53,6 @@ import java.util.concurrent.Executor;
  * </ul>
  */
 public class ConnectivityDiagnosticsManager {
-    public static final int DETECTION_METHOD_DNS_EVENTS = 1;
-    public static final int DETECTION_METHOD_TCP_METRICS = 2;
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(
-            prefix = {"DETECTION_METHOD_"},
-            value = {DETECTION_METHOD_DNS_EVENTS, DETECTION_METHOD_TCP_METRICS})
-    public @interface DetectionMethod {}
-
     /** @hide */
     public ConnectivityDiagnosticsManager() {}
 
@@ -237,21 +227,31 @@ public class ConnectivityDiagnosticsManager {
     }
 
     /** Class that includes information for a suspected data stall on a specific Network */
-    public static class DataStallReport {
+    public static final class DataStallReport implements Parcelable {
+        public static final int DETECTION_METHOD_DNS_EVENTS = 1;
+        public static final int DETECTION_METHOD_TCP_METRICS = 2;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(
+                prefix = {"DETECTION_METHOD_"},
+                value = {DETECTION_METHOD_DNS_EVENTS, DETECTION_METHOD_TCP_METRICS})
+        public @interface DetectionMethod {}
+
         /** The Network for which this DataStallReport applied */
-        @NonNull public final Network network;
+        @NonNull private final Network mNetwork;
 
         /**
          * The timestamp for the report. The timestamp is taken from {@link
          * System#currentTimeMillis}.
          */
-        public final long reportTimestamp;
+        private long mReportTimestamp;
 
         /** The detection method used to identify the suspected data stall */
-        @DetectionMethod public final int detectionMethod;
+        @DetectionMethod private final int mDetectionMethod;
 
         /** PersistableBundle that may contain additional information on the suspected data stall */
-        @NonNull public final PersistableBundle stallDetails;
+        @NonNull private final PersistableBundle mStallDetails;
 
         /**
          * Constructor for DataStallReport.
@@ -270,11 +270,101 @@ public class ConnectivityDiagnosticsManager {
                 long reportTimestamp,
                 @DetectionMethod int detectionMethod,
                 @NonNull PersistableBundle stallDetails) {
-            this.network = network;
-            this.reportTimestamp = reportTimestamp;
-            this.detectionMethod = detectionMethod;
-            this.stallDetails = stallDetails;
+            mNetwork = network;
+            mReportTimestamp = reportTimestamp;
+            mDetectionMethod = detectionMethod;
+            mStallDetails = stallDetails;
         }
+
+        /**
+         * Returns the Network for this DataStallReport.
+         *
+         * @return The Network for which this DataStallReport applied
+         */
+        @NonNull
+        public Network getNetwork() {
+            return mNetwork;
+        }
+
+        /**
+         * Returns the epoch timestamp (milliseconds) for when this report was taken.
+         *
+         * @return The timestamp for the report. Taken from {@link System#currentTimeMillis}.
+         */
+        public long getReportTimestamp() {
+            return mReportTimestamp;
+        }
+
+        /**
+         * Returns the detection method used to identify this suspected data stall.
+         *
+         * @return The detection method used to identify the suspected data stall
+         */
+        public int getDetectionMethod() {
+            return mDetectionMethod;
+        }
+
+        /**
+         * Returns a PersistableBundle with additional info for this report.
+         *
+         * @return PersistableBundle that may contain additional information on the suspected data
+         *     stall
+         */
+        @NonNull
+        public PersistableBundle getStallDetails() {
+            return new PersistableBundle(mStallDetails);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (this == o) return true;
+            if (!(o instanceof DataStallReport)) return false;
+            final DataStallReport that = (DataStallReport) o;
+
+            // PersistableBundle is optimized to avoid unparcelling data unless fields are
+            // referenced. Because of this, use {@link ConnectivityDiagnosticsManager#equals} over
+            // {@link PersistableBundle#kindofEquals}.
+            return mReportTimestamp == that.mReportTimestamp
+                    && mDetectionMethod == that.mDetectionMethod
+                    && mNetwork.equals(that.mNetwork)
+                    && persistableBundleEquals(mStallDetails, that.mStallDetails);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mNetwork, mReportTimestamp, mDetectionMethod, mStallDetails);
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeParcelable(mNetwork, flags);
+            dest.writeLong(mReportTimestamp);
+            dest.writeInt(mDetectionMethod);
+            dest.writeParcelable(mStallDetails, flags);
+        }
+
+        /** Implement the Parcelable interface */
+        public static final @NonNull Creator<DataStallReport> CREATOR =
+                new Creator<DataStallReport>() {
+                    public DataStallReport createFromParcel(Parcel in) {
+                        return new DataStallReport(
+                                in.readParcelable(null),
+                                in.readLong(),
+                                in.readInt(),
+                                in.readParcelable(null));
+                    }
+
+                    public DataStallReport[] newArray(int size) {
+                        return new DataStallReport[size];
+                    }
+                };
     }
 
     /**

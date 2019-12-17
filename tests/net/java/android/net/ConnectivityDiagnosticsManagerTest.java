@@ -17,6 +17,7 @@
 package android.net;
 
 import static android.net.ConnectivityDiagnosticsManager.ConnectivityReport;
+import static android.net.ConnectivityDiagnosticsManager.DataStallReport;
 
 import static com.android.testutils.ParcelUtilsKt.assertParcelSane;
 
@@ -34,6 +35,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class ConnectivityDiagnosticsManagerTest {
     private static final int NET_ID = 1;
+    private static final int DETECTION_METHOD = 2;
     private static final long TIMESTAMP = 10L;
     private static final String INTERFACE_NAME = "interface";
     private static final String BUNDLE_KEY = "key";
@@ -154,5 +156,41 @@ public class ConnectivityDiagnosticsManagerTest {
     @Test
     public void testConnectivityReportParcelUnparcel() {
         assertParcelSane(createSampleConnectivityReport(), 5);
+    }
+
+    private DataStallReport createSampleDataStallReport() {
+        final PersistableBundle bundle = new PersistableBundle();
+        bundle.putString(BUNDLE_KEY, BUNDLE_VALUE);
+        return new DataStallReport(new Network(NET_ID), TIMESTAMP, DETECTION_METHOD, bundle);
+    }
+
+    private DataStallReport createDefaultDataStallReport() {
+        return new DataStallReport(new Network(0), 0L, 0, PersistableBundle.EMPTY);
+    }
+
+    @Test
+    public void testDataStallReportEquals() {
+        assertEquals(createSampleDataStallReport(), createSampleDataStallReport());
+        assertEquals(createDefaultDataStallReport(), createDefaultDataStallReport());
+
+        final PersistableBundle bundle = new PersistableBundle();
+        bundle.putString(BUNDLE_KEY, BUNDLE_VALUE);
+
+        assertNotEquals(
+                createDefaultDataStallReport(),
+                new DataStallReport(new Network(NET_ID), 0L, 0, PersistableBundle.EMPTY));
+        assertNotEquals(
+                createDefaultDataStallReport(),
+                new DataStallReport(new Network(0), TIMESTAMP, 0, PersistableBundle.EMPTY));
+        assertNotEquals(
+                createDefaultDataStallReport(),
+                new DataStallReport(new Network(0), 0L, DETECTION_METHOD, PersistableBundle.EMPTY));
+        assertNotEquals(
+                createDefaultDataStallReport(), new DataStallReport(new Network(0), 0L, 0, bundle));
+    }
+
+    @Test
+    public void testDataStallReportParcelUnparcel() {
+        assertParcelSane(createSampleDataStallReport(), 4);
     }
 }
