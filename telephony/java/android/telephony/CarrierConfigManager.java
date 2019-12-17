@@ -2176,7 +2176,7 @@ public class CarrierConfigManager {
      * the start of the next month.
      * <p>
      * This setting may be still overridden by explicit user choice. By default,
-     * the platform value will be used.
+     * {@link #DATA_CYCLE_USE_PLATFORM_DEFAULT} will be used.
      */
     public static final String KEY_MONTHLY_DATA_CYCLE_DAY_INT =
             "monthly_data_cycle_day_int";
@@ -2185,10 +2185,7 @@ public class CarrierConfigManager {
      * When {@link #KEY_MONTHLY_DATA_CYCLE_DAY_INT}, {@link #KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG},
      * or {@link #KEY_DATA_WARNING_THRESHOLD_BYTES_LONG} are set to this value, the platform default
      * value will be used for that key.
-     *
-     * @hide
      */
-    @Deprecated
     public static final int DATA_CYCLE_USE_PLATFORM_DEFAULT = -1;
 
     /**
@@ -2212,8 +2209,8 @@ public class CarrierConfigManager {
      * If the value is set to {@link #DATA_CYCLE_THRESHOLD_DISABLED}, the data usage warning will
      * be disabled.
      * <p>
-     * This setting may be overridden by explicit user choice. By default, the platform value
-     * will be used.
+     * This setting may be overridden by explicit user choice. By default,
+     * {@link #DATA_CYCLE_USE_PLATFORM_DEFAULT} will be used.
      */
     public static final String KEY_DATA_WARNING_THRESHOLD_BYTES_LONG =
             "data_warning_threshold_bytes_long";
@@ -2221,8 +2218,7 @@ public class CarrierConfigManager {
     /**
      * Controls if the device should automatically notify the user as they reach
      * their cellular data warning. When set to {@code false} the carrier is
-     * expected to have implemented their own notification mechanism.
-     * @hide
+     * expected to have implemented their own notification mechanism. {@code true} by default.
      */
     public static final String KEY_DATA_WARNING_NOTIFICATION_BOOL =
             "data_warning_notification_bool";
@@ -2244,8 +2240,8 @@ public class CarrierConfigManager {
      * phone. If the value is set to {@link #DATA_CYCLE_THRESHOLD_DISABLED}, the data limit will be
      * disabled.
      * <p>
-     * This setting may be overridden by explicit user choice. By default, the platform value
-     * will be used.
+     * This setting may be overridden by explicit user choice. By default,
+     * {@link #DATA_CYCLE_USE_PLATFORM_DEFAULT} will be used.
      */
     public static final String KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG =
             "data_limit_threshold_bytes_long";
@@ -2253,8 +2249,7 @@ public class CarrierConfigManager {
     /**
      * Controls if the device should automatically notify the user as they reach
      * their cellular data limit. When set to {@code false} the carrier is
-     * expected to have implemented their own notification mechanism.
-     * @hide
+     * expected to have implemented their own notification mechanism. {@code true} by default.
      */
     public static final String KEY_DATA_LIMIT_NOTIFICATION_BOOL =
             "data_limit_notification_bool";
@@ -2262,8 +2257,7 @@ public class CarrierConfigManager {
     /**
      * Controls if the device should automatically notify the user when rapid
      * cellular data usage is observed. When set to {@code false} the carrier is
-     * expected to have implemented their own notification mechanism.
-     * @hide
+     * expected to have implemented their own notification mechanism.  {@code true} by default.
      */
     public static final String KEY_DATA_RAPID_NOTIFICATION_BOOL =
             "data_rapid_notification_bool";
