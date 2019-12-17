@@ -21,7 +21,6 @@ import static android.view.InsetsState.ISIDE_FLOATING;
 import static android.view.InsetsState.ISIDE_LEFT;
 import static android.view.InsetsState.ISIDE_RIGHT;
 import static android.view.InsetsState.ISIDE_TOP;
-import static android.view.InsetsState.toPublicType;
 
 import android.annotation.Nullable;
 import android.graphics.Insets;
@@ -34,7 +33,8 @@ import android.util.SparseSetArray;
 import android.view.InsetsState.InternalInsetsSide;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetsType;
-import android.view.WindowInsetsAnimationListener.InsetsAnimation;
+import android.view.WindowInsetsAnimationCallback.AnimationBounds;
+import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -66,20 +66,21 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private final @InsetsType int mTypes;
     private final Supplier<SyncRtSurfaceTransactionApplier> mTransactionApplierSupplier;
     private final InsetsController mController;
-    private final WindowInsetsAnimationListener.InsetsAnimation mAnimation;
+    private final WindowInsetsAnimationCallback.InsetsAnimation mAnimation;
     private final Rect mFrame;
     private Insets mCurrentInsets;
     private Insets mPendingInsets;
+    private float mPendingFraction;
     private boolean mFinished;
     private boolean mCancelled;
-    private int mFinishedShownTypes;
+    private boolean mShownOnFinish;
 
     @VisibleForTesting
     public InsetsAnimationControlImpl(SparseArray<InsetsSourceConsumer> consumers, Rect frame,
             InsetsState state, WindowInsetsAnimationControlListener listener,
             @InsetsType int types,
             Supplier<SyncRtSurfaceTransactionApplier> transactionApplierSupplier,
-            InsetsController controller) {
+            InsetsController controller, long durationMs) {
         mConsumers = consumers;
         mListener = listener;
         mTypes = types;
@@ -97,9 +98,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         // TODO: Check for controllability first and wait for IME if needed.
         listener.onReady(this, types);
 
-        mAnimation = new WindowInsetsAnimationListener.InsetsAnimation(mTypes, mHiddenInsets,
-                mShownInsets);
-        mController.dispatchAnimationStarted(mAnimation);
+        mAnimation = new WindowInsetsAnimationCallback.InsetsAnimation(mTypes,
+                InsetsController.INTERPOLATOR, durationMs);
+        mController.dispatchAnimationStarted(mAnimation,
+                new AnimationBounds(mHiddenInsets, mShownInsets));
     }
 
     @Override
@@ -123,7 +125,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     }
 
     @Override
-    public void changeInsets(Insets insets) {
+    public void setInsetsAndAlpha(Insets insets, float alpha, float fraction) {
         if (mFinished) {
             throw new IllegalStateException(
                     "Can't change insets on an animation that is finished.");
@@ -132,6 +134,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             throw new IllegalStateException(
                     "Can't change insets on an animation that is cancelled.");
         }
+        mPendingFraction = sanitize(fraction);
         mPendingInsets = sanitize(insets);
         mController.scheduleApplyChangeInsets();
     }
@@ -155,30 +158,35 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         SyncRtSurfaceTransactionApplier applier = mTransactionApplierSupplier.get();
         applier.scheduleApply(params.toArray(new SurfaceParams[params.size()]));
         mCurrentInsets = mPendingInsets;
+        mAnimation.setFraction(mPendingFraction);
         if (mFinished) {
-            mController.notifyFinished(this, mFinishedShownTypes);
+            mController.notifyFinished(this, mShownOnFinish);
         }
         return mFinished;
     }
 
     @Override
-    public void finish(int shownTypes) {
+    public void finish(boolean shown) {
         if (mCancelled) {
             return;
         }
         InsetsState state = new InsetsState(mController.getState());
         for (int i = mConsumers.size() - 1; i >= 0; i--) {
             InsetsSourceConsumer consumer = mConsumers.valueAt(i);
-            boolean visible = (shownTypes & toPublicType(consumer.getType())) != 0;
-            state.getSource(consumer.getType()).setVisible(visible);
+            state.getSource(consumer.getType()).setVisible(shown);
         }
         Insets insets = getInsetsFromState(state, mFrame, null /* typeSideMap */);
-        changeInsets(insets);
+        setInsetsAndAlpha(insets, 1f /* alpha */, shown ? 1f : 0f /* fraction */);
         mFinished = true;
-        mFinishedShownTypes = shownTypes;
+        mShownOnFinish = shown;
     }
 
+    @Override
     @VisibleForTesting
+    public float getCurrentFraction() {
+        return mAnimation.getFraction();
+    }
+
     public void onCancelled() {
         if (mFinished) {
             return;
@@ -189,6 +197,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
 
     InsetsAnimation getAnimation() {
         return mAnimation;
+    }
+
+    WindowInsetsAnimationControlListener getListener() {
+        return mListener;
     }
 
     private Insets calculateInsets(InsetsState state, Rect frame,
@@ -210,7 +222,14 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     }
 
     private Insets sanitize(Insets insets) {
+        if (insets == null) {
+            insets = getCurrentInsets();
+        }
         return Insets.max(Insets.min(insets, mShownInsets), mHiddenInsets);
+    }
+
+    private static float sanitize(float alpha) {
+        return alpha >= 1 ? 1 : (alpha <= 0 ? 0 : alpha);
     }
 
     private void updateLeashesForSide(@InternalInsetsSide int side, int offset, int inset,

@@ -177,7 +177,7 @@ public final class WindowInsets {
      * @return The insets that include system bars indicated by {@code typeMask}, taken from
      *         {@code typeInsetsMap}.
      */
-    private static Insets getInsets(Insets[] typeInsetsMap, @InsetsType int typeMask) {
+    static Insets getInsets(Insets[] typeInsetsMap, @InsetsType int typeMask) {
         Insets result = null;
         for (int i = FIRST; i <= LAST; i = i << 1) {
             if ((typeMask & i) == 0) {
@@ -289,9 +289,8 @@ public final class WindowInsets {
      *
      * @param typeMask Bit mask of {@link InsetsType}s to query the insets for.
      * @return The insets.
-     *
-     * @hide pending unhide
      */
+    @NonNull
     public Insets getInsets(@InsetsType int typeMask) {
         return getInsets(mTypeInsetsMap, typeMask);
     }
@@ -313,8 +312,8 @@ public final class WindowInsets {
      *                                  insets are not available for this type as the height of the
      *                                  IME is dynamic depending on the {@link EditorInfo} of the
      *                                  currently focused view, as well as the UI state of the IME.
-     * @hide pending unhide
      */
+    @NonNull
     public Insets getMaxInsets(@InsetsType int typeMask) throws IllegalArgumentException {
         if ((typeMask & IME) != 0) {
             throw new IllegalArgumentException("Unable to query the maximum insets for IME");
@@ -329,7 +328,6 @@ public final class WindowInsets {
      * @param typeMask Bit mask of {@link Type.InsetsType}s to query visibility status.
      * @return {@code true} if and only if all windows included in {@code typeMask} are currently
      *         visible on screen.
-     * @hide pending unhide
      */
     public boolean isVisible(@InsetsType int typeMask) {
         for (int i = FIRST; i <= LAST; i = i << 1) {
@@ -874,7 +872,7 @@ public final class WindowInsets {
         return typeInsetsMap;
     }
 
-    private static Insets insetInsets(Insets insets, int left, int top, int right, int bottom) {
+    static Insets insetInsets(Insets insets, int left, int top, int right, int bottom) {
         int newLeft = Math.max(0, insets.left - left);
         int newTop = Math.max(0, insets.top - top);
         int newRight = Math.max(0, insets.right - right);
@@ -1015,7 +1013,6 @@ public final class WindowInsets {
          * @param insets The insets to set.
          *
          * @return itself
-         * @hide pending unhide
          */
         @NonNull
         public Builder setInsets(@InsetsType int typeMask, @NonNull Insets insets) {
@@ -1046,7 +1043,6 @@ public final class WindowInsets {
          *                                  the IME is dynamic depending on the {@link EditorInfo}
          *                                  of the currently focused view, as well as the UI
          *                                  state of the IME.
-         * @hide pending unhide
          */
         @NonNull
         public Builder setMaxInsets(@InsetsType int typeMask, @NonNull Insets insets)
@@ -1070,7 +1066,6 @@ public final class WindowInsets {
          * @param visible Whether to mark the windows as visible or not.
          *
          * @return itself
-         * @hide pending unhide
          */
         @NonNull
         public Builder setVisible(@InsetsType int typeMask, boolean visible) {
@@ -1145,7 +1140,6 @@ public final class WindowInsets {
 
     /**
      * Class that defines different types of sources causing window insets.
-     * @hide pending unhide
      */
     public static final class Type {
 
