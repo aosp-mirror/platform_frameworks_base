@@ -1061,7 +1061,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (ENABLE_LOCKSCREEN_WALLPAPER && mWallpaperSupported) {
             mLockscreenWallpaper = mLockscreenWallpaperLazy.get();
-            mLockscreenWallpaper.setHandler(mHandler);
         }
 
         mKeyguardIndicationController =
