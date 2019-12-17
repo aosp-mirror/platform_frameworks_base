@@ -229,6 +229,11 @@ public interface AndroidPackage extends Parcelable {
 
     String getOverlayTargetName();
 
+    /**
+     * Map of overlayable name to actor name.
+     */
+    Map<String, String> getOverlayables();
+
     // TODO(b/135203078): Does this and getAppInfoPackageName have to be separate methods?
     //  The refactor makes them the same value with no known consequences, so should be redundant.
     String getPackageName();

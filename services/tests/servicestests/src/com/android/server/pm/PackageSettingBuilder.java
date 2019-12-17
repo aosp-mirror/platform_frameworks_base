@@ -22,7 +22,7 @@ import android.util.SparseArray;
 
 import java.io.File;
 
-class PackageSettingBuilder {
+public class PackageSettingBuilder {
     private String mName;
     private String mRealName;
     private String mCodePath;
