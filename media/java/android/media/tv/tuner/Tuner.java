@@ -106,6 +106,9 @@ public final class Tuner implements AutoCloseable  {
      */
     private native Frontend nativeOpenFrontendById(int id);
     private native int nativeTune(int type, FrontendSettings settings);
+    private native int nativeStopTune();
+    private native int nativeSetLnb(int lnbId);
+    private native int nativeSetLna(boolean enable);
 
     private native Filter nativeOpenFilter(int type, int subType, int bufferSize);
 
@@ -254,6 +257,46 @@ public final class Tuner implements AutoCloseable  {
     public int tune(@NonNull FrontendSettings settings) {
         checkPermission();
         return nativeTune(settings.getType(), settings);
+    }
+
+    /**
+     * Stops a previous tuning.
+     *
+     * If the method completes successfully the frontend is no longer tuned and no data
+     * will be sent to attached filters.
+     *
+     * @return result status of the operation.
+     * @hide
+     */
+    public int stopTune() {
+        return nativeStopTune();
+    }
+
+    /**
+     * Sets Low-Noise Block downconverter (LNB) for satellite frontend.
+     *
+     * This assigns a hardware LNB resource to the satellite tuner. It can be
+     * called multiple times to update LNB assignment.
+     *
+     * @param lnb the LNB instance.
+     *
+     * @return result status of the operation.
+     * @hide
+     */
+    public int setLnb(@NonNull Lnb lnb) {
+        return nativeSetLnb(lnb.mId);
+    }
+
+    /**
+     * Enable or Disable Low Noise Amplifier (LNA).
+     *
+     * @param enable true to activate LNA module; false to deactivate LNA
+     *
+     * @return result status of the operation.
+     * @hide
+     */
+    public int setLna(boolean enable) {
+        return nativeSetLna(enable);
     }
 
     private List<Integer> getFrontendIds() {
