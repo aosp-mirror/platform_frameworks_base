@@ -1461,10 +1461,7 @@ public class PackageInstaller {
         /** {@hide} */
         public long requiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
         /** {@hide} */
-        public DataLoaderParams incrementalParams;
-        /** TODO(b/146080380): add a class name to make it fully compatible with ComponentName.
-         * {@hide} */
-        public String dataLoaderPackageName;
+        public DataLoaderParams dataLoaderParams;
         /** {@hide} */
         public int rollbackDataPolicy = PackageManager.RollbackDataPolicy.RESTORE;
 
@@ -1503,10 +1500,8 @@ public class PackageInstaller {
             DataLoaderParamsParcel dataLoaderParamsParcel = source.readParcelable(
                     DataLoaderParamsParcel.class.getClassLoader());
             if (dataLoaderParamsParcel != null) {
-                incrementalParams = new DataLoaderParams(
-                        dataLoaderParamsParcel);
+                dataLoaderParams = new DataLoaderParams(dataLoaderParamsParcel);
             }
-            dataLoaderPackageName = source.readString();
             rollbackDataPolicy = source.readInt();
         }
 
@@ -1531,8 +1526,7 @@ public class PackageInstaller {
             ret.isMultiPackage = isMultiPackage;
             ret.isStaged = isStaged;
             ret.requiredInstalledVersionCode = requiredInstalledVersionCode;
-            ret.incrementalParams = incrementalParams;
-            ret.dataLoaderPackageName = dataLoaderPackageName;
+            ret.dataLoaderParams = dataLoaderParams;
             ret.rollbackDataPolicy = rollbackDataPolicy;
             return ret;
         }
@@ -1893,29 +1887,18 @@ public class PackageInstaller {
         }
 
         /**
-         * Set Incremental data loader params.
+         * Set the data loader params for the session.
+         * This also switches installation into data provider mode and disallow direct writes into
+         * staging folder.
+         *
          * WARNING: This is a system API to aid internal development.
          * Use at your own risk. It will change or be removed without warning.
          * {@hide}
          */
         @SystemApi
         @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
-        public void setIncrementalParams(@NonNull DataLoaderParams incrementalParams) {
-            this.incrementalParams = incrementalParams;
-        }
-
-        /**
-         * Set the data provider params for the session.
-         * This also switches installation into callback mode and disallow direct writes into
-         * staging folder.
-         * TODO(b/146080380): unify dataprovider params with Incremental.
-         *
-         * @param dataLoaderPackageName name of the dataLoader package
-         * {@hide}
-         */
-        @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
-        public void setDataLoaderPackageName(String dataLoaderPackageName) {
-            this.dataLoaderPackageName = dataLoaderPackageName;
+        public void setDataLoaderParams(@NonNull DataLoaderParams dataLoaderParams) {
+            this.dataLoaderParams = dataLoaderParams;
         }
 
         /** {@hide} */
@@ -1938,7 +1921,7 @@ public class PackageInstaller {
             pw.printPair("isMultiPackage", isMultiPackage);
             pw.printPair("isStaged", isStaged);
             pw.printPair("requiredInstalledVersionCode", requiredInstalledVersionCode);
-            pw.printPair("dataLoaderPackageName", dataLoaderPackageName);
+            pw.printPair("dataLoaderParams", dataLoaderParams);
             pw.printPair("rollbackDataPolicy", rollbackDataPolicy);
             pw.println();
         }
@@ -1969,12 +1952,11 @@ public class PackageInstaller {
             dest.writeBoolean(isMultiPackage);
             dest.writeBoolean(isStaged);
             dest.writeLong(requiredInstalledVersionCode);
-            if (incrementalParams != null) {
-                dest.writeParcelable(incrementalParams.getData(), flags);
+            if (dataLoaderParams != null) {
+                dest.writeParcelable(dataLoaderParams.getData(), flags);
             } else {
                 dest.writeParcelable(null, flags);
             }
-            dest.writeString(dataLoaderPackageName);
             dest.writeInt(rollbackDataPolicy);
         }
 

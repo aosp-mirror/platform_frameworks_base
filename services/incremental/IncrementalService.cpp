@@ -351,10 +351,13 @@ StorageId IncrementalService::createStorage(std::string_view mountPoint,
     {
         metadata::Mount m;
         m.mutable_storage()->set_id(ifs->mountId);
+        m.mutable_loader()->set_type((int)dataLoaderParams.type);
         m.mutable_loader()->set_package_name(dataLoaderParams.packageName);
-        m.mutable_loader()->set_arguments(dataLoaderParams.staticArgs);
+        m.mutable_loader()->set_class_name(dataLoaderParams.className);
+        m.mutable_loader()->set_arguments(dataLoaderParams.arguments);
         const auto metadata = m.SerializeAsString();
         m.mutable_loader()->release_arguments();
+        m.mutable_loader()->release_class_name();
         m.mutable_loader()->release_package_name();
         if (auto err = mIncFs->makeFile(ifs->control, constants().infoMdName, INCFS_ROOT_INODE, 0,
                                         metadata);
@@ -794,7 +797,7 @@ bool IncrementalService::startLoading(StorageId storage) const {
     }
     bool started = false;
     std::unique_lock l(ifs->lock);
-    if (ifs->dataLoaderStatus != IDataLoaderStatusListener::DATA_LOADER_READY) {
+    if (ifs->dataLoaderStatus != IDataLoaderStatusListener::DATA_LOADER_CREATED) {
         if (ifs->dataLoaderReady.wait_for(l, Seconds(5)) == std::cv_status::timeout) {
             LOG(ERROR) << "Timeout waiting for data loader to be ready";
             return false;
@@ -917,8 +920,10 @@ bool IncrementalService::mountExistingImage(std::string_view root, std::string_v
     }
 
     DataLoaderParamsParcel dlParams;
+    dlParams.type = (DataLoaderType)m.loader().type();
     dlParams.packageName = std::move(*m.mutable_loader()->mutable_package_name());
-    dlParams.staticArgs = std::move(*m.mutable_loader()->mutable_arguments());
+    dlParams.className = std::move(*m.mutable_loader()->mutable_class_name());
+    dlParams.arguments = std::move(*m.mutable_loader()->mutable_arguments());
     if (!prepareDataLoader(*ifs, &dlParams)) {
         deleteStorage(*ifs);
         return false;
@@ -955,7 +960,7 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
     }
 
     std::unique_lock l(ifs.lock);
-    if (ifs.dataLoaderStatus == IDataLoaderStatusListener::DATA_LOADER_READY) {
+    if (ifs.dataLoaderStatus == IDataLoaderStatusListener::DATA_LOADER_CREATED) {
         LOG(INFO) << "Skipped data loader preparation because it already exists";
         return true;
     }
@@ -1008,20 +1013,20 @@ binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChange
             }
             break;
         }
-        case IDataLoaderStatusListener::DATA_LOADER_READY: {
+        case IDataLoaderStatusListener::DATA_LOADER_CONNECTION_OK: {
+            ifs->dataLoaderStatus = IDataLoaderStatusListener::DATA_LOADER_STARTED;
+            break;
+        }
+        case IDataLoaderStatusListener::DATA_LOADER_CREATED: {
             ifs->dataLoaderReady.notify_one();
             break;
         }
-        case IDataLoaderStatusListener::DATA_LOADER_NOT_READY: {
+        case IDataLoaderStatusListener::DATA_LOADER_DESTROYED: {
             ifs->dataLoaderStatus = IDataLoaderStatusListener::DATA_LOADER_STOPPED;
             incrementalService.deleteStorageLocked(*ifs, std::move(l));
             break;
         }
-        case IDataLoaderStatusListener::DATA_LOADER_RUNNING: {
-            break;
-        }
-        case IDataLoaderStatusListener::DATA_LOADER_CONNECTION_OK: {
-            ifs->dataLoaderStatus = IDataLoaderStatusListener::DATA_LOADER_RUNNING;
+        case IDataLoaderStatusListener::DATA_LOADER_STARTED: {
             break;
         }
         case IDataLoaderStatusListener::DATA_LOADER_STOPPED: {

@@ -87,8 +87,8 @@ public final class IncrementalFileStorages {
         mPackageName = packageName;
         mStageDir = stageDir;
         mIncrementalManager = incrementalManager;
-        if (dataLoaderParams.getPackageName().equals("local")) {
-            final String incrementalPath = dataLoaderParams.getStaticArgs();
+        if (dataLoaderParams.getComponentName().getPackageName().equals("local")) {
+            final String incrementalPath = dataLoaderParams.getArguments();
             mDefaultStorage = mIncrementalManager.openStorage(incrementalPath);
             mDefaultDir = incrementalPath;
             return;

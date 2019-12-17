@@ -833,6 +833,7 @@ filegroup {
     name: "dataloader_aidl",
     srcs: [
         "core/java/android/content/pm/DataLoaderParamsParcel.aidl",
+        "core/java/android/content/pm/DataLoaderType.aidl",
         "core/java/android/content/pm/FileSystemControlParcel.aidl",
         "core/java/android/content/pm/IDataLoaderStatusListener.aidl",
         "core/java/android/content/pm/IPackageInstallerSessionFileSystemConnector.aidl",

@@ -34,6 +34,7 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.DataLoaderParams;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstaller;
@@ -136,7 +137,9 @@ class PackageManagerShellCommand extends ShellCommand {
     private final static String ART_PROFILE_SNAPSHOT_DEBUG_LOCATION = "/data/misc/profman/";
     private static final int DEFAULT_WAIT_MS = 60 * 1000;
 
-    private static final String PM_SHELL_DATALOADER = "com.android.pm.dataloader";
+    private static final String DATA_LOADER_PACKAGE = "android";
+    private static final String DATA_LOADER_CLASS =
+            "com.android.server.pm.PackageManagerShellCommandDataLoader";
 
     final IPackageManager mInterface;
     final IPermissionManager mPermissionManager;
@@ -1159,8 +1162,10 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runStreamingInstall() throws RemoteException {
         final InstallParams params = makeInstallParams();
-        if (TextUtils.isEmpty(params.sessionParams.dataLoaderPackageName)) {
-            params.sessionParams.setDataLoaderPackageName(PM_SHELL_DATALOADER);
+        if (params.sessionParams.dataLoaderParams == null) {
+            final DataLoaderParams dataLoaderParams = DataLoaderParams.forStreaming(
+                    new ComponentName(DATA_LOADER_PACKAGE, DATA_LOADER_CLASS), "");
+            params.sessionParams.setDataLoaderParams(dataLoaderParams);
         }
         return doRunInstall(params);
     }
@@ -1171,7 +1176,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int doRunInstall(final InstallParams params) throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        final boolean streaming = !TextUtils.isEmpty(params.sessionParams.dataLoaderPackageName);
+        final boolean streaming = params.sessionParams.dataLoaderParams != null;
 
         ArrayList<String> inPaths = getRemainingArgs();
         if (inPaths.isEmpty()) {

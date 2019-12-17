@@ -51,13 +51,19 @@ static jboolean nativeDestroyDataLoader(JNIEnv* env,
 }
 
 
-static jboolean nativeReportStatus(JNIEnv* env,
-                                   jobject clazz,
-                                   jlong self,
-                                   jint status) {
-    auto listener = (DataLoaderStatusListenerPtr)self;
-    return DataLoader_StatusListener_reportStatus(listener,
-                     (DataLoaderStatus)status);
+static jboolean nativePrepareImage(JNIEnv* env, jobject thiz, jint storageId, jobject addedFiles, jobject removedFiles) {
+    return DataLoaderService_OnPrepareImage(storageId, addedFiles, removedFiles);
+}
+
+static void nativeWriteData(JNIEnv* env,
+                            jobject clazz,
+                            jlong self,
+                            jstring name,
+                            jlong offsetBytes,
+                            jlong lengthBytes,
+                            jobject incomingFd) {
+    auto connector = (DataLoaderFilesystemConnectorPtr)self;
+    return DataLoader_FilesystemConnector_writeData(connector, name, offsetBytes, lengthBytes, incomingFd);
 }
 
 static const JNINativeMethod dlc_method_table[] = {
@@ -69,7 +75,8 @@ static const JNINativeMethod dlc_method_table[] = {
         {"nativeStartDataLoader", "(I)Z", (void*)nativeStartDataLoader},
         {"nativeStopDataLoader", "(I)Z", (void*)nativeStopDataLoader},
         {"nativeDestroyDataLoader", "(I)Z", (void*)nativeDestroyDataLoader},
-        {"nativeReportStatus", "(JI)Z", (void*)nativeReportStatus},
+        {"nativePrepareImage", "(ILjava/util/Collection;Ljava/util/Collection;)Z", (void*)nativePrepareImage},
+        {"nativeWriteData", "(JLjava/lang/String;JJLandroid/os/ParcelFileDescriptor;)V", (void*)nativeWriteData},
 };
 
 }  // namespace

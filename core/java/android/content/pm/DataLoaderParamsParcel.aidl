@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.content.pm.DataLoaderType;
 import android.content.pm.NamedParcelFileDescriptor;
 
 /**
@@ -23,7 +24,9 @@ import android.content.pm.NamedParcelFileDescriptor;
  * @hide
  */
 parcelable DataLoaderParamsParcel {
+    DataLoaderType type;
     @utf8InCpp String packageName;
-    @utf8InCpp String staticArgs;
+    @utf8InCpp String className;
+    @utf8InCpp String arguments;
     NamedParcelFileDescriptor[] dynamicArgs;
 }
