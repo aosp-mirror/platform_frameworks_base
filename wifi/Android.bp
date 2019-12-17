@@ -58,21 +58,6 @@ java_library {
     }
 }
 
-metalava_wifi_docs_args =
-    "--hide-package com.android.server " +
-    "--error UnhiddenSystemApi " +
-    "--hide RequiresPermission " +
-    "--hide MissingPermission " +
-    "--hide BroadcastBehavior " +
-    "--hide HiddenSuperclass " +
-    "--hide DeprecationMismatch " +
-    "--hide UnavailableSymbol " +
-    "--hide SdkConstant " +
-    "--hide HiddenTypeParameter " +
-    "--hide Todo --hide Typo " +
-    "--hide HiddenTypedefConstant " +
-    "--show-annotation android.annotation.SystemApi "
-
 droidstubs {
     name: "framework-wifi-stubs-srcs",
     srcs: [
@@ -82,7 +67,7 @@ droidstubs {
     aidl: {
         include_dirs: ["frameworks/base/core/java"],
     },
-    args: metalava_wifi_docs_args,
+    defaults: [ "framework-module-stubs-defaults-systemapi" ],
     sdk_version: "core_current",
     libs: ["android_system_stubs_current"],
 }
