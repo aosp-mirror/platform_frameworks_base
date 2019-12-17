@@ -75,12 +75,14 @@ class UsbSerialReader extends IUsbSerialReader.Stub {
         if (uid != Process.SYSTEM_UID) {
             enforcePackageBelongsToUid(uid, packageName);
 
+            UserHandle user = Binder.getCallingUserHandle();
             int packageTargetSdkVersion;
             long token = Binder.clearCallingIdentity();
             try {
                 PackageInfo pkg;
                 try {
-                    pkg = mContext.getPackageManager().getPackageInfo(packageName, 0);
+                    pkg = mContext.getPackageManager()
+                            .getPackageInfoAsUser(packageName, 0, user.getIdentifier());
                 } catch (PackageManager.NameNotFoundException e) {
                     throw new RemoteException("package " + packageName + " cannot be found");
                 }
