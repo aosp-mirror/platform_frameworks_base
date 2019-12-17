@@ -89,6 +89,7 @@ public interface WindowInsetsAnimationCallback {
         private float mFraction;
         @Nullable private final Interpolator mInterpolator;
         private long mDurationMs;
+        private float mAlpha;
 
         public InsetsAnimation(
                 @InsetsType int typeMask, @Nullable Interpolator interpolator, long durationMs) {
@@ -176,6 +177,18 @@ public interface WindowInsetsAnimationCallback {
          */
         public void setDuration(long durationMs) {
             mDurationMs = durationMs;
+        }
+
+        /**
+         * @return alpha of {@link WindowInsets.Type.InsetsType}.
+         */
+        @FloatRange(from = 0f, to = 1f)
+        public float getAlpha() {
+            return mAlpha;
+        }
+
+        void setAlpha(@FloatRange(from = 0f, to = 1f) float alpha) {
+            mAlpha = alpha;
         }
     }
 
