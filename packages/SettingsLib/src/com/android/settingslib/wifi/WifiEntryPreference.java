@@ -152,6 +152,14 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
         // TODO(b/70983952): Fill this method in
     }
 
+    /**
+     * Result of the sign-in request indecated by the WifiEntry.SIGNIN_STATUS constants
+     */
+    public void onSignInResult(int status) {
+        // TODO(b/70983952): Fill this method in
+    }
+
+
     private void updateIcon(int level) {
         if (level == -1) {
             setIcon(null);
