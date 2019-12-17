@@ -59,7 +59,7 @@ public interface WindowProcessListener {
             long versionCode);
 
     /** App died :(...oh well */
-    void appDied();
+    void appDied(String reason);
     void dumpDebug(ProtoOutputStream proto, long fieldId);
 
     /**

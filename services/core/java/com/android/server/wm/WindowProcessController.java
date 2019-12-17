@@ -971,11 +971,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAtm.mH.sendMessageAtFrontOfQueue(m);
     }
 
-    public void appDied() {
+    void appDied(String reason) {
         if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
         final Message m = PooledLambda.obtainMessage(
-                WindowProcessListener::appDied, mListener);
+                WindowProcessListener::appDied, mListener, reason);
         mAtm.mH.sendMessage(m);
     }
 
@@ -1136,6 +1136,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     public void appEarlyNotResponding(String annotation, Runnable killAppCallback) {
+        Runnable targetRunnable = null;
         synchronized (mAtm.mGlobalLock) {
             if (mAtm.mController == null) {
                 return;
@@ -1145,12 +1146,15 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 // 0 == continue, -1 = kill process immediately
                 int res = mAtm.mController.appEarlyNotResponding(mName, mPid, annotation);
                 if (res < 0 && mPid != MY_PID) {
-                    killAppCallback.run();
+                    targetRunnable = killAppCallback;
                 }
             } catch (RemoteException e) {
                 mAtm.mController = null;
                 Watchdog.getInstance().setActivityController(null);
             }
+        }
+        if (targetRunnable != null) {
+            targetRunnable.run();
         }
     }
 
@@ -1179,6 +1183,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
         }
         if (targetRunnable != null) {
+            // Execute runnable outside WM lock since the runnable will hold AM lock
             targetRunnable.run();
             return true;
         }

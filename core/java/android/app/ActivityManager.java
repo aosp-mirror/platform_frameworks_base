@@ -22,6 +22,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import android.Manifest;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -3477,6 +3478,50 @@ public class ActivityManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Return a list of {@link ApplicationExitInfo} records containing the reasons for the most
+     * recent app deaths.
+     *
+     * <p class="note"> Note: System stores this historical information in a ring buffer and only
+     * the most recent records will be returned. </p>
+     *
+     * <p class="note"> Note: In the case that this application was bound to an external service
+     * with flag {@link android.content.Context#BIND_EXTERNAL_SERVICE}, the process of that external
+     * service will be included in this package's exit info. </p>
+     *
+     * @param packageName Optional, a null value means match all packages belonging to the
+     *                    caller's UID. If this package belongs to another UID, you must hold
+     *                    {@link android.Manifest.permission#DUMP} in order to retrieve it.
+     * @param pid         A process ID that used to belong to this package but died later; a value
+     *                    of 0 means to ignore this parameter and return all matching records.
+     * @param maxNum      The maximum number of results to be returned; a value of 0
+     *                    means to ignore this parameter and return all matching records
+     *
+     * @return a list of {@link ApplicationExitInfo} records matching the criteria, sorted in
+     *         the order from most recent to least recent.
+     */
+    @Nullable
+    public List<ApplicationExitInfo> getHistoricalProcessExitReasons(@Nullable String packageName,
+            @IntRange(from = 0) int pid, @IntRange(from = 0) int maxNum) {
+        try {
+            ParceledListSlice<ApplicationExitInfo> r = getService().getHistoricalProcessExitReasons(
+                    packageName, pid, maxNum, mContext.getUserId());
+            return r == null ? null : r.getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * @return Whether or not the low memory kill will be reported in
+     * {@link #getHistoricalProcessExitReasons}.
+     *
+     * @see {@link ApplicationExitInfo#REASON_LOW_MEMORY}
+     */
+    public static boolean isLowMemoryKillReportSupported() {
+        return SystemProperties.getBoolean("persist.sys.lmk.reportkills", false);
     }
 
     /**

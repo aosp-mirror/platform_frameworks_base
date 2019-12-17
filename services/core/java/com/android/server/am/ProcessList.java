@@ -54,6 +54,9 @@ import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppProtoEnums;
+import android.app.ApplicationExitInfo;
+import android.app.ApplicationExitInfo.Reason;
+import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -424,12 +427,6 @@ public final class ProcessList {
     ActiveUids mActiveUids;
 
     /**
-     * The listener who is intereted with the lmkd kills.
-     */
-    @GuardedBy("mService")
-    private LmkdKillListener mLmkdKillListener = null;
-
-    /**
      * The currently running isolated processes.
      */
     final SparseArray<ProcessRecord> mIsolatedProcesses = new SparseArray<>();
@@ -438,6 +435,12 @@ public final class ProcessList {
      * The currently running application zygotes.
      */
     final ProcessMap<AppZygote> mAppZygotes = new ProcessMap<AppZygote>();
+
+    /**
+     * Managees the {@link android.app.ApplicationExitInfo} records.
+     */
+    @GuardedBy("mAppExitInfoTracker")
+    final AppExitInfoTracker mAppExitInfoTracker = new AppExitInfoTracker();
 
     /**
      * The processes that are forked off an application zygote.
@@ -627,7 +630,6 @@ public final class ProcessList {
     final class KillHandler extends Handler {
         static final int KILL_PROCESS_GROUP_MSG = 4000;
         static final int LMKD_RECONNECT_MSG = 4001;
-        static final int LMKD_PROC_KILLED_MSG = 4002;
 
         public KillHandler(Looper looper) {
             super(looper, null, true);
@@ -650,10 +652,6 @@ public final class ProcessList {
                                 KillHandler.LMKD_RECONNECT_MSG), LMKD_RECONNECT_DELAY_MS);
                     }
                     break;
-                case LMKD_PROC_KILLED_MSG:
-                    handleLmkdProcKilled(msg.arg1 /* pid */, msg.arg2 /* uid */);
-                    break;
-
                 default:
                     super.handleMessage(msg);
             }
@@ -722,9 +720,8 @@ public final class ProcessList {
                                     if (receivedLen != 12) {
                                         return false;
                                     }
-                                    sKillHandler.obtainMessage(KillHandler.LMKD_PROC_KILLED_MSG,
-                                            dataReceived.getInt(4), dataReceived.getInt(8))
-                                            .sendToTarget();
+                                    mAppExitInfoTracker.scheduleNoteLmkdProcKilled(
+                                            dataReceived.getInt(4), dataReceived.getInt(8));
                                     return true;
                                 default:
                                     return false;
@@ -739,7 +736,12 @@ public final class ProcessList {
                         mSystemServerSocketForZygote.getFileDescriptor(),
                         EVENT_INPUT, this::handleZygoteMessages);
             }
+            mAppExitInfoTracker.init(mService, sKillThread.getLooper());
         }
+    }
+
+    void onSystemReady() {
+        mAppExitInfoTracker.onSystemReady();
     }
 
     void applyDisplaySize(WindowManagerService wm) {
@@ -1474,7 +1476,10 @@ public final class ProcessList {
                             proc.lastCachedPss, holder.appVersion);
                 }
             }
-            proc.kill(Long.toString(proc.lastCachedPss) + "k from cached", true);
+            proc.kill(Long.toString(proc.lastCachedPss) + "k from cached",
+                    ApplicationExitInfo.REASON_OTHER,
+                    ApplicationExitInfo.SUBREASON_LARGE_CACHED,
+                    true);
         } else if (proc != null && !keepIfLarge
                 && mService.mLastMemoryLevel > ProcessStats.ADJ_MEM_FACTOR_NORMAL
                 && proc.setProcState >= ActivityManager.PROCESS_STATE_CACHED_EMPTY) {
@@ -1493,7 +1498,10 @@ public final class ProcessList {
                                 proc.lastCachedPss, holder.appVersion);
                     }
                 }
-                proc.kill(Long.toString(proc.lastCachedPss) + "k from cached", true);
+                proc.kill(Long.toString(proc.lastCachedPss) + "k from cached",
+                        ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_LARGE_CACHED,
+                        true);
             }
         }
         return proc;
@@ -2188,6 +2196,9 @@ public final class ProcessList {
         if (doKill) {
             // do the killing
             ProcessList.killProcessGroup(app.uid, app.pid);
+            noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
+                    ApplicationExitInfo.SUBREASON_UNKNOWN,
+                    String.format(formatString, ""));
         }
 
         // wait for the death
@@ -2266,6 +2277,8 @@ public final class ProcessList {
             app.pendingStart = false;
             killProcessQuiet(pid);
             Process.killProcessGroup(app.uid, app.pid);
+            noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
+                    ApplicationExitInfo.SUBREASON_UNKNOWN, reason);
             return false;
         }
         mService.mBatteryStatsService.noteProcessStart(app.processName, app.info.uid);
@@ -2351,6 +2364,8 @@ public final class ProcessList {
                     if (app.pid > 0) {
                         killProcessQuiet(app.pid);
                         ProcessList.killProcessGroup(app.uid, app.pid);
+                        noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
+                                ApplicationExitInfo.SUBREASON_UNKNOWN, "hasn't been killed");
                     } else {
                         app.pendingStart = false;
                     }
@@ -2481,6 +2496,12 @@ public final class ProcessList {
     @GuardedBy("mService")
     boolean removeProcessLocked(ProcessRecord app,
             boolean callerWillRestart, boolean allowRestart, String reason) {
+        return removeProcessLocked(app, callerWillRestart, allowRestart, reason,
+                ApplicationExitInfo.REASON_OTHER);
+    }
+
+    boolean removeProcessLocked(ProcessRecord app,
+            boolean callerWillRestart, boolean allowRestart, String reason, int reasonCode) {
         final String name = app.processName;
         final int uid = app.uid;
         if (DEBUG_PROCESSES) Slog.d(TAG_PROCESSES,
@@ -2516,7 +2537,7 @@ public final class ProcessList {
                     needRestart = true;
                 }
             }
-            app.kill(reason, true);
+            app.kill(reason, reasonCode, true);
             mService.handleAppDiedLocked(app, willRestart, allowRestart);
             if (willRestart) {
                 removeLruProcessLocked(app);
@@ -2601,6 +2622,7 @@ public final class ProcessList {
                 // the uid of the isolated process is specified by the caller.
                 uid = isolatedUid;
             }
+            mAppExitInfoTracker.mIsolatedUidRecords.addIsolatedUid(uid, info.uid);
             mService.getPackageManagerInternalLocked().addIsolatedUid(uid, info.uid);
 
             // Register the isolated UID with this application so BatteryStats knows to
@@ -3574,38 +3596,6 @@ public final class ProcessList {
         }
     }
 
-    void setLmkdKillListener(final LmkdKillListener listener) {
-        synchronized (mService) {
-            mLmkdKillListener = listener;
-        }
-    }
-
-    private void handleLmkdProcKilled(final int pid, final int uid) {
-        // Log only now
-        if (DEBUG_PROCESSES) {
-            Slog.i(TAG, "lmkd kill: pid=" + pid + " uid=" + uid);
-        }
-
-        if (mService == null) {
-            return;
-        }
-        // Notify any interesed party regarding the lmkd kills
-        synchronized (mService) {
-            final LmkdKillListener listener = mLmkdKillListener;
-            if (listener != null) {
-                mService.mHandler.post(()-> listener.onLmkdKillOccurred(pid, uid));
-            }
-        }
-    }
-
-    private void handleZygoteSigChld(int pid, int uid, int status) {
-        // Just log it now.
-        if (DEBUG_PROCESSES) {
-            Slog.i(TAG, "Got SIGCHLD from zygote: pid=" + pid + ", uid=" + uid
-                    + ", status=" + Integer.toHexString(status));
-        }
-    }
-
     /**
      * Create a server socket in system_server, zygote will connect to it
      * in order to send unsolicited messages to system_server.
@@ -3649,7 +3639,8 @@ public final class ProcessList {
                         mZygoteUnsolicitedMessage.length);
                 if (len > 0 && mZygoteSigChldMessage.length == Zygote.nativeParseSigChld(
                         mZygoteUnsolicitedMessage, len, mZygoteSigChldMessage)) {
-                    handleZygoteSigChld(mZygoteSigChldMessage[0] /* pid */,
+                    mAppExitInfoTracker.handleZygoteSigChld(
+                            mZygoteSigChldMessage[0] /* pid */,
                             mZygoteSigChldMessage[1] /* uid */,
                             mZygoteSigChldMessage[2] /* status */);
                 }
@@ -3659,4 +3650,39 @@ public final class ProcessList {
         }
         return EVENT_INPUT;
     }
+
+    /**
+     * Called by ActivityManagerService when a process died.
+     */
+    @GuardedBy("mService")
+    void noteProcessDiedLocked(final ProcessRecord app) {
+        if (DEBUG_PROCESSES) {
+            Slog.i(TAG, "note: " + app + " died, saving the exit info");
+        }
+
+        mAppExitInfoTracker.scheduleNoteProcessDiedLocked(app);
+    }
+
+    /**
+     * Called by ActivityManagerService when it decides to kill an application process.
+     */
+    void noteAppKill(final ProcessRecord app, final @Reason int reason,
+            final @SubReason int subReason, final String msg) {
+        if (DEBUG_PROCESSES) {
+            Slog.i(TAG, "note: " + app + " is being killed, reason: " + reason
+                    + ", sub-reason: " + subReason + ", message: " + msg);
+        }
+        mAppExitInfoTracker.scheduleNoteAppKill(app, reason, subReason, msg);
+    }
+
+    void noteAppKill(final int pid, final int uid, final @Reason int reason,
+            final @SubReason int subReason, final String msg) {
+        if (DEBUG_PROCESSES) {
+            Slog.i(TAG, "note: " + pid + " is being killed, reason: " + reason
+                    + ", sub-reason: " + subReason + ", message: " + msg);
+        }
+
+        mAppExitInfoTracker.scheduleNoteAppKill(pid, uid, reason, subReason, msg);
+    }
 }
+

@@ -946,7 +946,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     // This is the second time we failed -- finish activity and give up.
                     Slog.e(TAG, "Second failure launching "
                             + r.intent.getComponent().flattenToShortString() + ", giving up", e);
-                    proc.appDied();
+                    proc.appDied("2nd-crash");
                     r.finishIfPossible("2nd-crash", false /* oomAdj */);
                     return false;
                 }
