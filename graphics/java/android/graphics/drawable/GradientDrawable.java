@@ -784,9 +784,7 @@ public class GradientDrawable extends Drawable {
             mFillPaint.setDither(st.mDither);
             mFillPaint.setColorFilter(colorFilter);
             if (colorFilter != null && st.mSolidColors == null) {
-                // If we don't have a solid color and we don't have a gradient,
-                // the app is stroking the shape, set the color to transparent
-                mFillPaint.setColor(st.mGradientColors != null ? mAlpha << 24 : 0);
+                mFillPaint.setColor(mAlpha << 24);
             }
             if (haveStroke) {
                 mStrokePaint.setAlpha(currStrokeAlpha);
