@@ -249,7 +249,7 @@ private fun addBadgeToDrawable(
     }
 }
 
-private fun extractAvatarFromRow(entry: NotificationEntry): Drawable? =
+fun extractAvatarFromRow(entry: NotificationEntry): Drawable? =
         entry.row
                 ?.childrenWithId(R.id.expanded)
                 ?.mapNotNull { it as? ViewGroup }
