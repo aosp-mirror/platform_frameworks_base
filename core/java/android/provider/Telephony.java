@@ -4800,4 +4800,23 @@ public final class Telephony {
             public static final Uri CONTENT_URI = Uri.parse("content://carrier_id/all");
         }
     }
+
+    /**
+     * Contains SIM Information
+     * @hide
+     */
+    @SystemApi
+    public static final class SimInfo {
+        /**
+         * Not instantiable.
+         * @hide
+         */
+        private SimInfo() {}
+
+        /**
+         * The {@code content://} style URI for this provider.
+         */
+        @NonNull
+        public static final Uri CONTENT_URI = Uri.parse("content://telephony/siminfo");
+    }
 }
