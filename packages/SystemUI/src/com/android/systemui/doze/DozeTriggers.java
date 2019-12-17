@@ -103,8 +103,7 @@ public class DozeTriggers implements DozeMachine.Part {
         mWakeLock = wakeLock;
         mAllowPulseTriggers = allowPulseTriggers;
         mDozeSensors = new DozeSensors(context, alarmManager, mSensorManager, dozeParameters,
-                config, wakeLock, this::onSensor, this::onProximityFar,
-                dozeParameters.getPolicy(), dozeLog);
+                config, wakeLock, this::onSensor, this::onProximityFar, dozeLog);
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mDockManager = dockManager;
         mProxCheck = new ProximitySensor.ProximityCheck(proximitySensor, handler);
