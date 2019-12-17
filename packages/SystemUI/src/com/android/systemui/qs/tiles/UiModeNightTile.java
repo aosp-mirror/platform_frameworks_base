@@ -91,7 +91,10 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         boolean nightMode = (mContext.getResources().getConfiguration().uiMode
                         & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
 
-        if (isAuto && !powerSave) {
+        if (powerSave) {
+            state.secondaryLabel = mContext.getResources().getString(
+                    R.string.quick_settings_dark_mode_secondary_label_battery_saver);
+        } else if (isAuto) {
             state.secondaryLabel = mContext.getResources().getString(nightMode
                     ? R.string.quick_settings_dark_mode_secondary_label_until_sunrise
                     : R.string.quick_settings_dark_mode_secondary_label_on_at_sunset);
@@ -99,9 +102,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
             state.secondaryLabel = null;
         }
         state.value = nightMode;
-        state.label = mContext.getString(powerSave
-                ? R.string.quick_settings_ui_mode_night_label_battery_saver
-                : R.string.quick_settings_ui_mode_night_label);
+        state.label = mContext.getString(R.string.quick_settings_ui_mode_night_label);
         state.icon = mIcon;
         state.contentDescription = TextUtils.isEmpty(state.secondaryLabel)
                 ? state.label
