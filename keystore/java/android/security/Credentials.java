@@ -65,6 +65,9 @@ public class Credentials {
     /** Key prefix for VPN. */
     public static final String VPN = "VPN_";
 
+    /** Key prefix for platform VPNs. */
+    public static final String PLATFORM_VPN = "PLATFORM_VPN_";
+
     /** Key prefix for WIFI. */
     public static final String WIFI = "WIFI_";
 
