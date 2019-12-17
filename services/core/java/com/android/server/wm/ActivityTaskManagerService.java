@@ -28,7 +28,7 @@ import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STOP_APP_SWITCHES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
+import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
@@ -1419,7 +1419,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     int handleIncomingUser(int callingPid, int callingUid, int userId, String name) {
         return mAmInternal.handleIncomingUser(callingPid, callingUid, userId, false /* allowAll */,
-                ALLOW_FULL_ONLY, name, null /* callerPackage */);
+                ALLOW_NON_FULL, name, null /* callerPackage */);
     }
 
     @Override

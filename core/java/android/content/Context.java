@@ -1800,7 +1800,7 @@ public abstract class Context {
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     @SystemApi
     public void startActivityAsUser(@RequiresPermission @NonNull Intent intent,
             @NonNull UserHandle user) {
@@ -1848,7 +1848,7 @@ public abstract class Context {
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     @UnsupportedAppUsage
     public void startActivityAsUser(@RequiresPermission Intent intent, @Nullable Bundle options,
             UserHandle userId) {
@@ -1954,7 +1954,7 @@ public abstract class Context {
      * @see #startActivities(Intent[])
      * @see PackageManager#resolveActivity
      */
-    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public int startActivitiesAsUser(Intent[] intents, Bundle options, UserHandle userHandle) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
