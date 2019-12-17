@@ -984,13 +984,16 @@ public class NavigationBarView extends FrameLayout implements
 
         if (isGesturalMode(mNavBarMode)) {
             // Update the nav bar background to match the height of the visible nav bar
-            int height = mIsVertical
+            int height = newVertical
                     ? getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_height_landscape)
                     : getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_height);
-            int frameHeight = getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.navigation_bar_frame_height);
+            int frameHeight = newVertical
+                    ? getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.navigation_bar_frame_height_landscape)
+                    : getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.navigation_bar_frame_height);
             mBarTransitions.setBackgroundFrame(new Rect(0, frameHeight - height, w, h));
         }
 
