@@ -59,7 +59,7 @@ import java.util.List;
  * @hide
  */
 public class TouchExplorer extends BaseEventStreamTransformation
-        implements AccessibilityGestureDetector.Listener {
+        implements GestureManifold.Listener {
 
     static final boolean DEBUG = false;
 
@@ -104,7 +104,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
     private final ExitGestureDetectionModeDelayed mExitGestureDetectionModeDelayed;
 
     // Helper to detect gestures.
-    private final AccessibilityGestureDetector mGestureDetector;
+    private final GestureManifold  mGestureDetector;
 
     // Helper class to track received pointers.
     private final TouchState.ReceivedPointerTracker mReceivedPointerTracker;
@@ -142,7 +142,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
      *                one created in place, or for testing purpose.
      */
     public TouchExplorer(Context context, AccessibilityManagerService service,
-            AccessibilityGestureDetector detector) {
+            GestureManifold detector) {
         mContext = context;
         mAms = service;
         mState = new TouchState();
@@ -161,7 +161,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 AccessibilityEvent.TYPE_TOUCH_INTERACTION_END,
                 mDetermineUserIntentTimeout);
         if (detector == null) {
-            mGestureDetector = new AccessibilityGestureDetector(context, this);
+            mGestureDetector = new GestureManifold(context, this, mState);
         } else {
             mGestureDetector = detector;
         }
@@ -285,7 +285,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
     }
 
     @Override
-    public void onDoubleTapAndHold(MotionEvent event, int policyFlags) {
+    public void onDoubleTapAndHold() {
         // Ignore the event if we aren't touch interacting.
         if (!mState.isTouchInteracting()) {
             return;
@@ -303,7 +303,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
     }
 
     @Override
-    public boolean onDoubleTap(MotionEvent event, int policyFlags) {
+    public boolean onDoubleTap() {
         if (!mState.isTouchInteracting()) {
             return false;
         }
@@ -319,7 +319,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
         // Announce the end of a new touch interaction.
         mDispatcher.sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
-
+        mSendTouchInteractionEndDelayed.cancel();
         // Try to use the standard accessibility API to click
         if (!mAms.performActionOnAccessibilityFocusedItem(
                 AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK)) {
@@ -356,7 +356,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
     }
 
     @Override
-    public boolean onGestureCancelled(MotionEvent event, int policyFlags) {
+    public boolean onGestureCancelled(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         if (mState.isGestureDetecting()) {
             endGestureDetection(event.getActionMasked() == MotionEvent.ACTION_UP);
             return true;

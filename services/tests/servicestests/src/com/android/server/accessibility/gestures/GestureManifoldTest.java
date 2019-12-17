@@ -24,12 +24,11 @@ import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.util.DisplayMetrics;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
+
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,9 +36,9 @@ import org.junit.Test;
 import java.util.ArrayList;
 
 /**
- * Tests for AccessibilityGestureDetector
+ * Tests for GestureManifold
  */
-public class AccessibilityGestureDetectorTest {
+public class GestureManifoldTest {
 
     // Constants for testRecognizeGesturePath()
     private static final PointF PATH_START = new PointF(300f, 300f);
@@ -47,24 +46,21 @@ public class AccessibilityGestureDetectorTest {
     private static final long PATH_STEP_MILLISEC = 100;
 
     // Data used by all tests
-    private AccessibilityGestureDetector mDetector;
-    private AccessibilityGestureDetector.Listener mResultListener;
+    private GestureManifold mManifold;
+    private TouchState mState;
+    private GestureManifold.Listener mResultListener;
 
     @Before
     public void setUp() {
-        // Construct a mock Context.
-        DisplayMetrics displayMetricsMock = mock(DisplayMetrics.class);
-        displayMetricsMock.xdpi = 500;
-        displayMetricsMock.ydpi = 500;
-        Resources mockResources = mock(Resources.class);
-        when(mockResources.getDisplayMetrics()).thenReturn(displayMetricsMock);
-        Context contextMock = mock(Context.class);
-        when(contextMock.getResources()).thenReturn(mockResources);
+        Context context = InstrumentationRegistry.getContext();
+        // Construct a testable GestureManifold.
+        mResultListener = mock(GestureManifold.Listener.class);
+        mState = new TouchState();
+        mManifold = new GestureManifold(context, mResultListener, mState);
+        // Play the role of touch explorer in updating the shared state.
+        when(mResultListener.onGestureStarted()).thenReturn(onGestureStarted());
 
-        // Construct a testable AccessibilityGestureDetector.
-        mResultListener = mock(AccessibilityGestureDetector.Listener.class);
-        GestureDetector doubleTapDetectorMock = mock(GestureDetector.class);
-        mDetector = new AccessibilityGestureDetector(contextMock, mResultListener, doubleTapDetectorMock);
+
     }
 
 
@@ -141,8 +137,8 @@ public class AccessibilityGestureDetectorTest {
         // For each path step from start (non-inclusive) to end ... add a motion point.
         for (int step = 1; step < numSteps; ++step) {
             path.add(new PointF(
-                (start.x + (stepX * (float) step)),
-                (start.y + (stepY * (float) step))));
+                    (start.x + (stepX * (float) step)),
+                    (start.y + (stepY * (float) step))));
         }
     }
 
@@ -170,12 +166,22 @@ public class AccessibilityGestureDetectorTest {
                     point.x, point.y, 0);
 
             // Send event.
-            mDetector.onMotionEvent(event, event, policyFlags);
+            mState.onReceivedMotionEvent(event);
+            mManifold.onMotionEvent(event, event, policyFlags);
             eventTimeMs += PATH_STEP_MILLISEC;
+            if (mState.isClear()) {
+                mState.startTouchInteracting();
+            }
         }
 
+        mState.clear();
         // Check that correct gesture was recognized.
         verify(mResultListener).onGestureCompleted(
                 argThat(gestureEvent -> gestureEvent.getGestureId() == gestureId));
+    }
+
+    private boolean onGestureStarted() {
+        mState.startGestureDetecting();
+        return false;
     }
 }
