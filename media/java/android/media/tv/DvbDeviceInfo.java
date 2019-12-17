@@ -16,6 +16,8 @@
 
 package android.media.tv;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -26,10 +28,11 @@ import android.util.Log;
  *
  * @hide
  */
+@SystemApi
 public final class DvbDeviceInfo implements Parcelable {
     static final String TAG = "DvbDeviceInfo";
 
-    public static final @android.annotation.NonNull Parcelable.Creator<DvbDeviceInfo> CREATOR =
+    public static final @NonNull Parcelable.Creator<DvbDeviceInfo> CREATOR =
             new Parcelable.Creator<DvbDeviceInfo>() {
                 @Override
                 public DvbDeviceInfo createFromParcel(Parcel source) {
@@ -86,7 +89,7 @@ public final class DvbDeviceInfo implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mAdapterId);
         dest.writeInt(mDeviceId);
     }
