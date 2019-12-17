@@ -531,6 +531,12 @@ public class AndroidFuture<T> extends CompletableFuture<T> implements Parcelable
                     try {
                         AndroidFuture.this.complete((T) resultContainer.get());
                     } catch (Throwable t) {
+                        // If resultContainer was completed exceptionally, get() wraps the
+                        // underlying exception in an ExecutionException. Unwrap it now to avoid
+                        // double-layering ExecutionExceptions.
+                        if (t instanceof ExecutionException && t.getCause() != null) {
+                            t = t.getCause();
+                        }
                         completeExceptionally(t);
                     }
                 }
