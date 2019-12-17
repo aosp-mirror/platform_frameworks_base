@@ -639,10 +639,6 @@
 
     <protected-broadcast android:name="android.intent.action.DEVICE_CUSTOMIZATION_READY" />
 
-    <!-- NETWORK_SET_TIME moved from com.android.phone to system server. It should ultimately be
-         removed. -->
-    <protected-broadcast android:name="android.telephony.action.NETWORK_SET_TIME" />
-
     <!-- For tether entitlement recheck-->
     <protected-broadcast
         android:name="com.android.server.connectivity.tethering.PROVISIONING_RECHECK_ALARM" />
