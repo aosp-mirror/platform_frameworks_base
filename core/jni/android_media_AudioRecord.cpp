@@ -763,7 +763,7 @@ android_media_AudioRecord_native_getMetrics(JNIEnv *env, jobject thiz)
     }
 
     // get what we have for the metrics from the record session
-    MediaAnalyticsItem *item = NULL;
+    mediametrics::Item *item = NULL;
 
     status_t err = lpRecord->getMetrics(item);
     if (err != OK) {
