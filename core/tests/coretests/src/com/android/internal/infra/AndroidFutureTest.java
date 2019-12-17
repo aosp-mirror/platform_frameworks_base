@@ -111,7 +111,7 @@ public class AndroidFutureTest {
     }
 
     @Test
-    public void testWriteToParcel_Exceptionally() throws Exception {
+    public void testWriteToParcel_Exception() throws Exception {
         Parcel parcel = Parcel.obtain();
         AndroidFuture<Integer> future1 = new AndroidFuture<>();
         future1.completeExceptionally(new UnsupportedOperationException());
@@ -121,6 +121,32 @@ public class AndroidFutureTest {
         AndroidFuture future2 = AndroidFuture.CREATOR.createFromParcel(parcel);
         ExecutionException executionException =
                 expectThrows(ExecutionException.class, future2::get);
+        assertThat(executionException.getCause()).isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    public void testWriteToParcel_Incomplete() throws Exception {
+        Parcel parcel = Parcel.obtain();
+        AndroidFuture<Integer> future1 = new AndroidFuture<>();
+        future1.writeToParcel(parcel, 0);
+
+        parcel.setDataPosition(0);
+        AndroidFuture future2 = AndroidFuture.CREATOR.createFromParcel(parcel);
+        future2.complete(5);
+        assertThat(future1.get()).isEqualTo(5);
+    }
+
+    @Test
+    public void testWriteToParcel_Incomplete_Exception() throws Exception {
+        Parcel parcel = Parcel.obtain();
+        AndroidFuture<Integer> future1 = new AndroidFuture<>();
+        future1.writeToParcel(parcel, 0);
+
+        parcel.setDataPosition(0);
+        AndroidFuture future2 = AndroidFuture.CREATOR.createFromParcel(parcel);
+        future2.completeExceptionally(new UnsupportedOperationException());
+        ExecutionException executionException =
+                expectThrows(ExecutionException.class, future1::get);
         assertThat(executionException.getCause()).isInstanceOf(UnsupportedOperationException.class);
     }
 }
