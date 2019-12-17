@@ -66,6 +66,7 @@ import android.net.CaptivePortal;
 import android.net.ConnectionInfo;
 import android.net.ConnectivityManager;
 import android.net.ICaptivePortal;
+import android.net.IConnectivityDiagnosticsCallback;
 import android.net.IConnectivityManager;
 import android.net.IDnsResolver;
 import android.net.IIpConnectivityMetrics;
@@ -7306,5 +7307,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             return mTNS;
         }
+    }
+
+    @Override
+    public void registerConnectivityDiagnosticsCallback(
+            @NonNull IConnectivityDiagnosticsCallback callback, @NonNull NetworkRequest request) {
+        // TODO(b/146444622): implement register IConnectivityDiagnosticsCallback functionality
+        throw new UnsupportedOperationException(
+                "registerConnectivityDiagnosticsCallback not yet implemented");
+    }
+
+    @Override
+    public void unregisterConnectivityDiagnosticsCallback(
+            @NonNull IConnectivityDiagnosticsCallback callback) {
+        // TODO(b/146444622): implement register IConnectivityDiagnosticsCallback functionality
+        throw new UnsupportedOperationException(
+                "unregisterConnectivityDiagnosticsCallback not yet implemented");
     }
 }
