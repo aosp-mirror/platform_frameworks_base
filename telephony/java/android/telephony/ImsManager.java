@@ -16,7 +16,10 @@
 
 package android.telephony.ims;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.telephony.SubscriptionManager;
 
@@ -25,12 +28,15 @@ import android.telephony.SubscriptionManager;
  *
  * @hide
  */
+@SystemApi
+@TestApi
 @SystemService(Context.TELEPHONY_IMS_SERVICE)
 public class ImsManager {
 
     private Context mContext;
 
-    public ImsManager(Context context) {
+    /** @hide */
+    public ImsManager(@NonNull Context context) {
         mContext = context;
     }
 
@@ -41,6 +47,7 @@ public class ImsManager {
      * @throws IllegalArgumentException if the subscription is invalid.
      * @return a ImsRcsManager instance with the specific subscription ID.
      */
+    @NonNull
     public ImsRcsManager getImsRcsManager(int subscriptionId) {
         if (!SubscriptionManager.isValidSubscriptionId(subscriptionId)) {
             throw new IllegalArgumentException("Invalid subscription ID: " + subscriptionId);
@@ -56,6 +63,7 @@ public class ImsManager {
      * @throws IllegalArgumentException if the subscription is invalid.
      * @return a ImsMmTelManager instance with the specific subscription ID.
      */
+    @NonNull
     public ImsMmTelManager getImsMmTelManager(int subscriptionId) {
         if (!SubscriptionManager.isValidSubscriptionId(subscriptionId)) {
             throw new IllegalArgumentException("Invalid subscription ID: " + subscriptionId);

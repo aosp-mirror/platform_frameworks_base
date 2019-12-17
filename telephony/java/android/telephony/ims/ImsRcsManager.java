@@ -20,6 +20,8 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -30,6 +32,7 @@ import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsRcsController;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.RcsFeature;
+import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.util.Log;
 
 import java.util.concurrent.Executor;
@@ -42,6 +45,8 @@ import java.util.function.Consumer;
  * Use {@link ImsManager#getImsRcsManager(int)} to create an instance of this manager.
  * @hide
  */
+@SystemApi
+@TestApi
 public class ImsRcsManager implements RegistrationManager {
     private static final String TAG = "ImsRcsManager";
 
@@ -105,7 +110,7 @@ public class ImsRcsManager implements RegistrationManager {
          *
          * @param capabilities The new availability of the capabilities.
          */
-        public void onAvailabilityChanged(RcsFeature.RcsImsCapabilities capabilities) {
+        public void onAvailabilityChanged(@NonNull RcsFeature.RcsImsCapabilities capabilities) {
         }
 
         /**@hide*/
@@ -142,6 +147,7 @@ public class ImsRcsManager implements RegistrationManager {
 
     /**{@inheritDoc}*/
     @Override
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void registerImsRegistrationCallback(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull RegistrationCallback c)
@@ -159,6 +165,7 @@ public class ImsRcsManager implements RegistrationManager {
 
     /**{@inheritDoc}*/
     @Override
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterImsRegistrationCallback(
             @NonNull RegistrationManager.RegistrationCallback c) {
         if (c == null) {
@@ -170,6 +177,7 @@ public class ImsRcsManager implements RegistrationManager {
 
     /**{@inheritDoc}*/
     @Override
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void getRegistrationState(@NonNull @CallbackExecutor Executor executor,
             @NonNull @ImsRegistrationState Consumer<Integer> stateCallback) {
         if (stateCallback == null) {
@@ -184,6 +192,7 @@ public class ImsRcsManager implements RegistrationManager {
 
     /**{@inheritDoc}*/
     @Override
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void getRegistrationTransportType(@NonNull @CallbackExecutor Executor executor,
             @NonNull @AccessNetworkConstants.TransportType
                     Consumer<Integer> transportTypeCallback) {
@@ -219,7 +228,7 @@ public class ImsRcsManager implements RegistrationManager {
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void registerRcsAvailabilityCallback(@CallbackExecutor Executor executor,
+    public void registerRcsAvailabilityCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull AvailabilityCallback c) throws ImsException {
         if (c == null) {
             throw new IllegalArgumentException("Must include a non-null AvailabilityCallback.");
@@ -231,13 +240,13 @@ public class ImsRcsManager implements RegistrationManager {
         IImsRcsController imsRcsController = getIImsRcsController();
         if (imsRcsController == null) {
             Log.e(TAG, "Register availability callback: IImsRcsController is null");
-            throw new ImsException("Can not find remote IMS service",
+            throw new ImsException("Cannot find remote IMS service",
                     ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
 
         c.setExecutor(executor);
         try {
-            imsRcsController.registerRcsAvailabilityCallback(c.getBinder());
+            imsRcsController.registerRcsAvailabilityCallback(mSubId, c.getBinder());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#registerRcsAvailabilityCallback", e);
             throw new ImsException("Remote IMS Service is not available",
@@ -267,12 +276,12 @@ public class ImsRcsManager implements RegistrationManager {
         IImsRcsController imsRcsController = getIImsRcsController();
         if (imsRcsController == null) {
             Log.e(TAG, "Unregister availability callback: IImsRcsController is null");
-            throw new ImsException("Can not find remote IMS service",
+            throw new ImsException("Cannot find remote IMS service",
                     ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
 
         try {
-            imsRcsController.unregisterRcsAvailabilityCallback(c.getBinder());
+            imsRcsController.unregisterRcsAvailabilityCallback(mSubId, c.getBinder());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#unregisterRcsAvailabilityCallback", e);
             throw new ImsException("Remote IMS Service is not available",
@@ -287,6 +296,9 @@ public class ImsRcsManager implements RegistrationManager {
      * RCS capabilities provided over-the-top by applications.
      *
      * @param capability The RCS capability to query.
+     * @param radioTech The radio tech that this capability failed for, defined as
+     * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE} or
+     * {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}.
      * @return true if the RCS capability is capable for this subscription, false otherwise. This
      * does not necessarily mean that we are registered for IMS and the capability is available, but
      * rather the subscription is capable of this service over IMS.
@@ -297,17 +309,17 @@ public class ImsRcsManager implements RegistrationManager {
      * See {@link ImsException#getCode()} for more information on the error codes.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isCapable(@RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability)
-            throws ImsException {
+    public boolean isCapable(@RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability,
+            @ImsRegistrationImplBase.ImsRegistrationTech int radioTech) throws ImsException {
         IImsRcsController imsRcsController = getIImsRcsController();
         if (imsRcsController == null) {
             Log.e(TAG, "isCapable: IImsRcsController is null");
-            throw new ImsException("Can not find remote IMS service",
+            throw new ImsException("Cannot find remote IMS service",
                     ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
 
         try {
-            return imsRcsController.isCapable(mSubId, capability);
+            return imsRcsController.isCapable(mSubId, capability, radioTech);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#isCapable", e);
             throw new ImsException("Remote IMS Service is not available",
@@ -336,7 +348,7 @@ public class ImsRcsManager implements RegistrationManager {
         IImsRcsController imsRcsController = getIImsRcsController();
         if (imsRcsController == null) {
             Log.e(TAG, "isAvailable: IImsRcsController is null");
-            throw new ImsException("Can not find remote IMS service",
+            throw new ImsException("Cannot find remote IMS service",
                     ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
 
