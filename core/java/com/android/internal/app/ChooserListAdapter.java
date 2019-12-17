@@ -38,16 +38,21 @@ import com.android.internal.R;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 import com.android.internal.app.chooser.ChooserTargetInfo;
 import com.android.internal.app.chooser.DisplayResolveInfo;
+import com.android.internal.app.chooser.MultiDisplayResolveInfo;
 import com.android.internal.app.chooser.SelectableTargetInfo;
 import com.android.internal.app.chooser.TargetInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ChooserListAdapter extends ResolverListAdapter {
     private static final String TAG = "ChooserListAdapter";
     private static final boolean DEBUG = false;
+
+    private boolean mEnableStackedApps = true;
 
     public static final int NO_POSITION = -1;
     public static final int TARGET_BAD = -1;
@@ -218,7 +223,25 @@ public class ChooserListAdapter extends ResolverListAdapter {
 
     void updateAlphabeticalList() {
         mSortedList.clear();
-        mSortedList.addAll(mDisplayList);
+        if (mEnableStackedApps) {
+            // Consolidate multiple targets from same app.
+            Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
+            for (DisplayResolveInfo info : mDisplayList) {
+                String packageName = info.getResolvedComponentName().getPackageName();
+                if (consolidated.get(packageName) != null) {
+                    // create consolidated target
+                    MultiDisplayResolveInfo multiDisplayResolveInfo =
+                            new MultiDisplayResolveInfo(packageName, info);
+                    multiDisplayResolveInfo.addTarget(consolidated.get(packageName));
+                    consolidated.put(packageName, multiDisplayResolveInfo);
+                } else {
+                    consolidated.put(packageName, info);
+                }
+            }
+            mSortedList.addAll(consolidated.values());
+        } else {
+            mSortedList.addAll(mDisplayList);
+        }
         Collections.sort(mSortedList, new ChooserActivity.AzInfoComparator(mContext));
     }
 
@@ -270,7 +293,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     }
 
     int getAlphaTargetCount() {
-        int standardCount = super.getCount();
+        int standardCount = mSortedList.size();
         return standardCount > mChooserListCommunicator.getMaxRankedTargets() ? standardCount : 0;
     }
 
