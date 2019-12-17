@@ -18,11 +18,12 @@ package com.android.systemui.util.concurrency;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 
 import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.dagger.qualifiers.BgHandler;
+import com.android.systemui.dagger.qualifiers.BgLooper;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.MainLooper;
 
 import java.util.concurrent.Executor;
 
@@ -38,8 +39,8 @@ public abstract class ConcurrencyModule {
      * Provide a Background-Thread Executor by default.
      */
     @Provides
-    public static Executor provideExecutor(@BgHandler Handler handler) {
-        return new ExecutorImpl(handler);
+    public static Executor provideExecutor(@BgLooper Looper looper) {
+        return new ExecutorImpl(new Handler(looper));
     }
 
     /**
@@ -47,8 +48,8 @@ public abstract class ConcurrencyModule {
      */
     @Provides
     @Background
-    public static Executor provideBackgroundExecutor(@BgHandler Handler handler) {
-        return new ExecutorImpl(handler);
+    public static Executor provideBackgroundExecutor(@BgLooper Looper looper) {
+        return new ExecutorImpl(new Handler(looper));
     }
 
     /**
@@ -64,8 +65,8 @@ public abstract class ConcurrencyModule {
      * Provide a Background-Thread Executor by default.
      */
     @Provides
-    public static DelayableExecutor provideDelayableExecutor(@BgHandler Handler handler) {
-        return new ExecutorImpl(handler);
+    public static DelayableExecutor provideDelayableExecutor(@BgLooper Looper looper) {
+        return new ExecutorImpl(new Handler(looper));
     }
 
     /**
@@ -73,8 +74,8 @@ public abstract class ConcurrencyModule {
      */
     @Provides
     @Background
-    public static DelayableExecutor provideBackgroundDelayableExecutor(@BgHandler Handler handler) {
-        return new ExecutorImpl(handler);
+    public static DelayableExecutor provideBackgroundDelayableExecutor(@BgLooper Looper looper) {
+        return new ExecutorImpl(new Handler(looper));
     }
 
     /**
@@ -82,7 +83,7 @@ public abstract class ConcurrencyModule {
      */
     @Provides
     @Main
-    public static DelayableExecutor provideMainDelayableExecutor(@MainHandler Handler handler) {
-        return new ExecutorImpl(handler);
+    public static DelayableExecutor provideMainDelayableExecutor(@MainLooper Looper looper) {
+        return new ExecutorImpl(new Handler(looper));
     }
 }
