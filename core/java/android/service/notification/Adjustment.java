@@ -124,6 +124,13 @@ public final class Adjustment implements Parcelable {
     public static final String KEY_IMPORTANCE = "key_importance";
 
     /**
+     * Data type: float, a ranking score from 0 (lowest) to 1 (highest).
+     * Used to rank notifications inside that fall under the same classification (i.e. alerting,
+     * silenced).
+     */
+    public static final String KEY_RANKING_SCORE = "key_ranking_score";
+
+    /**
      * Create a notification adjustment.
      *
      * @param pkg The package of the notification.

@@ -23,6 +23,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.spy;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -268,6 +269,18 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         Collections.sort(actual, new NotificationComparator(mContext));
 
         assertThat(actual, contains(expected.toArray()));
+    }
+
+    @Test
+    public void testRankingScoreOverrides() {
+        NotificationComparator comp = new NotificationComparator(mContext);
+        NotificationRecord recordMinCallNonInterruptive = spy(mRecordMinCallNonInterruptive);
+        assertTrue(comp.compare(mRecordMinCall, recordMinCallNonInterruptive) < 0);
+
+        when(recordMinCallNonInterruptive.getRankingScore()).thenReturn(1f);
+        assertTrue(comp.compare(mRecordMinCall, recordMinCallNonInterruptive) > 0);
+        assertTrue(comp.compare(mRecordCheater, recordMinCallNonInterruptive) > 0);
+        assertTrue(comp.compare(mRecordColorizedCall, recordMinCallNonInterruptive) < 0);
     }
 
     @Test

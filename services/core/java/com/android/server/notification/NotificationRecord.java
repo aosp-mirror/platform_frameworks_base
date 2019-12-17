@@ -144,6 +144,7 @@ public final class NotificationRecord {
     private int mSystemImportance = IMPORTANCE_UNSPECIFIED;
     private int mAssistantImportance = IMPORTANCE_UNSPECIFIED;
     private int mImportance = IMPORTANCE_UNSPECIFIED;
+    private float mRankingScore = 0f;
     // Field used in global sort key to bypass normal notifications
     private int mCriticality = CriticalNotificationExtractor.NORMAL;
     // A MetricsEvent.NotificationImportanceExplanation, tracking source of mImportance.
@@ -655,6 +656,9 @@ public final class NotificationRecord {
                     importance = Math.min(IMPORTANCE_HIGH, importance);
                     setAssistantImportance(importance);
                 }
+                if (signals.containsKey(Adjustment.KEY_RANKING_SCORE)) {
+                    mRankingScore = signals.getFloat(Adjustment.KEY_RANKING_SCORE);
+                }
                 if (!signals.isEmpty() && adjustment.getIssuer() != null) {
                     mAdjustmentIssuer = adjustment.getIssuer();
                 }
@@ -770,6 +774,10 @@ public final class NotificationRecord {
 
     public int getImportance() {
         return mImportance;
+    }
+
+    public float getRankingScore() {
+        return mRankingScore;
     }
 
     public CharSequence getImportanceExplanation() {
