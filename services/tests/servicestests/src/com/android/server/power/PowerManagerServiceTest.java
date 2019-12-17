@@ -62,6 +62,7 @@ import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.platform.test.annotations.FlakyTest;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.view.Display;
@@ -734,6 +735,7 @@ public class PowerManagerServiceTest {
         assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
     }
 
+    @FlakyTest
     @Test
     public void testInattentiveSleep_goesToSleepWithWakeLock() throws Exception {
         final String pkg = mContextSpy.getOpPackageName();
