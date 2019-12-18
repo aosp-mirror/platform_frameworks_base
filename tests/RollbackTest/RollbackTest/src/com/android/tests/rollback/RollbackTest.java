@@ -1098,4 +1098,28 @@ public class RollbackTest {
             InstallUtils.dropShellPermissionIdentity();
         }
     }
+
+    /**
+     * Test we can't enable rollback for non-whitelisted app without
+     * TEST_MANAGE_ROLLBACKS permission
+     */
+    @Test
+    public void testNonRollbackWhitelistedApp() throws Exception {
+        try {
+            InstallUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.MANAGE_ROLLBACKS);
+
+            Uninstall.packages(TestApp.A);
+            Install.single(TestApp.A1).commit();
+            assertThat(RollbackUtils.getAvailableRollback(TestApp.A)).isNull();
+
+            Install.single(TestApp.A2).setEnableRollback().commit();
+            Thread.sleep(TimeUnit.SECONDS.toMillis(2));
+            assertThat(RollbackUtils.getAvailableRollback(TestApp.A)).isNull();
+        } finally {
+            InstallUtils.dropShellPermissionIdentity();
+        }
+    }
 }

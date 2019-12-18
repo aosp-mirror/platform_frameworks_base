@@ -40,6 +40,7 @@ import com.android.cts.install.lib.TestApp;
 import com.android.cts.install.lib.Uninstall;
 import com.android.cts.rollback.lib.Rollback;
 import com.android.cts.rollback.lib.RollbackUtils;
+import com.android.internal.R;
 
 import libcore.io.IoUtils;
 
@@ -339,6 +340,37 @@ public class StagedRollbackTest {
         RollbackManager rm = RollbackUtils.getRollbackManager();
         assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
                         getNetworkStackPackageName())).isNull();
+    }
+
+    private static String getModuleMetadataPackageName() {
+        return InstrumentationRegistry.getInstrumentation().getContext()
+                .getResources().getString(R.string.config_defaultModuleMetadataProvider);
+    }
+
+    @Test
+    public void testRollbackWhitelistedApp_Phase1() throws Exception {
+        // Remove available rollbacks
+        String pkgName = getModuleMetadataPackageName();
+        RollbackUtils.getRollbackManager().expireRollbackForPackage(pkgName);
+        assertThat(RollbackUtils.getAvailableRollback(pkgName)).isNull();
+
+        // Overwrite existing permissions. We don't want TEST_MANAGE_ROLLBACKS which allows us
+        // to enable rollback for any app
+        InstallUtils.adoptShellPermissionIdentity(
+                Manifest.permission.INSTALL_PACKAGES,
+                Manifest.permission.MANAGE_ROLLBACKS);
+
+        // Re-install a whitelisted app with rollbacks enabled
+        String filePath = InstrumentationRegistry.getInstrumentation().getContext()
+                .getPackageManager().getPackageInfo(pkgName, 0).applicationInfo.sourceDir;
+        TestApp app = new TestApp("ModuleMetadata", pkgName, -1, false, new File(filePath));
+        Install.single(app).setStaged().setEnableRollback()
+                .addInstallFlags(PackageManager.INSTALL_REPLACE_EXISTING).commit();
+    }
+
+    @Test
+    public void testRollbackWhitelistedApp_Phase2() throws Exception {
+        assertThat(RollbackUtils.getAvailableRollback(getModuleMetadataPackageName())).isNotNull();
     }
 
     private static void runShellCommand(String cmd) {

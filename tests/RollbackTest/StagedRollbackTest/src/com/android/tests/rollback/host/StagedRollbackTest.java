@@ -175,6 +175,16 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runPhase("testPreviouslyAbandonedRollbacks_Phase3");
     }
 
+    /**
+     * Tests we can enable rollback for a whitelisted app.
+     */
+    @Test
+    public void testRollbackWhitelistedApp() throws Exception {
+        runPhase("testRollbackWhitelistedApp_Phase1");
+        getDevice().reboot();
+        runPhase("testRollbackWhitelistedApp_Phase2");
+    }
+
     private void crashProcess(String processName, int numberOfCrashes) throws Exception {
         String pid = "";
         String lastPid = "invalid";
