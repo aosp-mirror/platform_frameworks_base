@@ -40,7 +40,6 @@ android_test {
         "platformprotosnano",
         "hamcrest-library",
         "servicestests-utils",
-        "xml-writer-device-lib",
     ],
 
     aidl: {
