@@ -146,7 +146,8 @@ public class UserLifecycleTests {
 
             final CountDownLatch latch = new CountDownLatch(1);
             registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userId);
-            // Don't use this.startUserInBackground() since only waiting until ACTION_USER_STARTED.
+            // Don't use this.startUserInBackgroundAndWaitForUnlock() since only waiting until
+            // ACTION_USER_STARTED.
             mIam.startUserInBackground(userId);
             latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
 
@@ -155,6 +156,48 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
         }
     }
+
+    /**
+     * Measures the time until ACTION_USER_STARTED is received.
+     */
+    @Test
+    public void startUser() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int userId = createUserNoFlags();
+            final CountDownLatch latch = new CountDownLatch(1);
+            registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userId);
+            mRunner.resumeTiming();
+
+            mIam.startUserInBackground(userId);
+            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+
+            mRunner.pauseTiming();
+            removeUser(userId);
+            mRunner.resumeTiming();
+        }
+    }
+
+    /**
+     * Measures the time until unlock listener is triggered and user is unlocked.
+     */
+    @Test
+    public void startAndUnlockUser() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int userId = createUserNoFlags();
+            mRunner.resumeTiming();
+
+            // Waits for UserState.mUnlockProgress.finish().
+            startUserInBackgroundAndWaitForUnlock(userId);
+
+            mRunner.pauseTiming();
+            removeUser(userId);
+            mRunner.resumeTiming();
+        }
+    }
+
+
 
     @Test
     public void switchUser() throws Exception {
@@ -309,7 +352,7 @@ public class UserLifecycleTests {
             final int userId = createManagedProfile();
             mRunner.resumeTiming();
 
-            startUserInBackground(userId);
+            startUserInBackgroundAndWaitForUnlock(userId);
 
             mRunner.pauseTiming();
             removeUser(userId);
@@ -326,11 +369,11 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             final int userId = createManagedProfile();
             // Start the profile initially, then stop it. Similar to setQuietModeEnabled.
-            startUserInBackground(userId);
+            startUserInBackgroundAndWaitForUnlock(userId);
             stopUser(userId, true);
             mRunner.resumeTiming();
 
-            startUserInBackground(userId);
+            startUserInBackgroundAndWaitForUnlock(userId);
 
             mRunner.pauseTiming();
             removeUser(userId);
@@ -352,7 +395,7 @@ public class UserLifecycleTests {
             installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
             mRunner.resumeTiming();
 
-            startUserInBackground(userId);
+            startUserInBackgroundAndWaitForUnlock(userId);
             startApp(userId, DUMMY_PACKAGE_NAME);
 
             mRunner.pauseTiming();
@@ -376,13 +419,13 @@ public class UserLifecycleTests {
             final int userId = createManagedProfile();
             WindowManagerGlobal.getWindowManagerService().dismissKeyguard(null, null);
             installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
-            startUserInBackground(userId);
+            startUserInBackgroundAndWaitForUnlock(userId);
             startApp(userId, DUMMY_PACKAGE_NAME);
             stopUser(userId, true);
             TimeUnit.SECONDS.sleep(1); // Brief cool-down before re-starting profile.
             mRunner.resumeTiming();
 
-            startUserInBackground(userId);
+            startUserInBackgroundAndWaitForUnlock(userId);
             startApp(userId, DUMMY_PACKAGE_NAME);
 
             mRunner.pauseTiming();
@@ -423,7 +466,7 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
 
             final int userId = createManagedProfile();
-            startUserInBackground(userId);
+            startUserInBackgroundAndWaitForUnlock(userId);
             installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
             startApp(userId, DUMMY_PACKAGE_NAME);
 
@@ -441,7 +484,7 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createManagedProfile();
-            startUserInBackground(userId);
+            startUserInBackgroundAndWaitForUnlock(userId);
             mRunner.resumeTiming();
 
             stopUser(userId, true);
@@ -467,7 +510,7 @@ public class UserLifecycleTests {
                 final int userId = createManagedProfile();
                 mRunner.resumeTiming();
 
-                startUserInBackground(userId);
+                startUserInBackgroundAndWaitForUnlock(userId);
 
                 mRunner.pauseTiming();
                 removeUser(userId);
@@ -490,7 +533,7 @@ public class UserLifecycleTests {
                 final int userId = createManagedProfile();
                 mRunner.resumeTiming();
 
-                startUserInBackground(userId);
+                startUserInBackgroundAndWaitForUnlock(userId);
 
                 mRunner.pauseTiming();
                 removeUser(userId);
@@ -526,18 +569,19 @@ public class UserLifecycleTests {
     }
 
     /**
-     * Start user in background and wait for it to unlock (equivalent to ACTION_USER_UNLOCKED).
-     * To start in foreground instead, see {@link #switchUser(int)}.
-     * This should always be used for profiles since profiles cannot be started in foreground.
+     * Start user in background and wait for it to unlock by waiting for
+     * UserState.mUnlockProgress.finish().
+     * <p> To start in foreground instead, see {@link #switchUser(int)}.
+     * <p> This should always be used for profiles since profiles cannot be started in foreground.
      */
-    private void startUserInBackground(int userId) {
+    private void startUserInBackgroundAndWaitForUnlock(int userId) {
         final ProgressWaiter waiter = new ProgressWaiter();
         try {
             mIam.startUserInBackgroundWithListener(userId, waiter);
             boolean success = waiter.waitForFinish(TIMEOUT_IN_SECOND);
             attestTrue("Failed to start user " + userId + " in background.", success);
         } catch (RemoteException e) {
-            Log.e(TAG, "startUserInBackground failed", e);
+            Log.e(TAG, "startUserInBackgroundAndWaitForUnlock failed", e);
         }
     }
 
