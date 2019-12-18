@@ -819,10 +819,17 @@ public class ChooserActivity extends ResolverActivity {
         return new PackageMonitor() {
             @Override
             public void onSomePackagesChanged() {
-                mAdapter.handlePackagesChanged();
-                bindProfileView();
+                handlePackagesChanged();
             }
         };
+    }
+
+    /**
+     * Update UI to reflect changes in data.
+     */
+    public void handlePackagesChanged() {
+        mAdapter.handlePackagesChanged();
+        bindProfileView();
     }
 
     private void onCopyButtonClicked(View v) {
