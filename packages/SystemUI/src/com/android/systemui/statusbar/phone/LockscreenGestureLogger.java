@@ -35,8 +35,6 @@ import javax.inject.Singleton;
 @Singleton
 public class LockscreenGestureLogger {
     private ArrayMap<Integer, Integer> mLegacyMap;
-    private LogMaker mLogMaker = new LogMaker(MetricsEvent.VIEW_UNKNOWN)
-            .setType(MetricsEvent.TYPE_ACTION);
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     @Inject
@@ -48,7 +46,7 @@ public class LockscreenGestureLogger {
     }
 
     public void write(int gesture, int length, int velocity) {
-        mMetricsLogger.write(mLogMaker.setCategory(gesture)
+        mMetricsLogger.write(new LogMaker(gesture)
                 .setType(MetricsEvent.TYPE_ACTION)
                 .addTaggedData(MetricsEvent.FIELD_GESTURE_LENGTH, length)
                 .addTaggedData(MetricsEvent.FIELD_GESTURE_VELOCITY, velocity));
@@ -64,7 +62,7 @@ public class LockscreenGestureLogger {
      */
     public void writeAtFractionalPosition(
             int category, int xPercent, int yPercent, int rotation) {
-        mMetricsLogger.write(mLogMaker.setCategory(category)
+        mMetricsLogger.write(new LogMaker(category)
                 .setType(MetricsEvent.TYPE_ACTION)
                 .addTaggedData(MetricsEvent.FIELD_GESTURE_X_PERCENT, xPercent)
                 .addTaggedData(MetricsEvent.FIELD_GESTURE_Y_PERCENT, yPercent)
