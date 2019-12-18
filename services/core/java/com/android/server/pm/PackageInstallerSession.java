@@ -2372,6 +2372,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (mIncrementalFileStorages != null) {
             try {
                 mIncrementalFileStorages.addFile(new InstallationFile(name, lengthBytes, metadata));
+                //TODO(b/136132412): merge incremental and callback installation schemes
+                return;
             } catch (IOException ex) {
                 throw new IllegalStateException(
                         "Failed to add and configure Incremental File: " + name, ex);

@@ -266,7 +266,7 @@ public final class IncrementalFileStorages {
     }
 
     private String getTempDir() {
-        final String tmpDirRoot = "/data/tmp";
+        final String tmpDirRoot = "/data/incremental/tmp";
         final Random random = new Random();
         final Path tmpDir =
                 Paths.get(tmpDirRoot, String.valueOf(random.nextInt(Integer.MAX_VALUE - 1)));
