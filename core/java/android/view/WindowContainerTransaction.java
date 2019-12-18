@@ -168,6 +168,18 @@ public class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Sets whether a container or its children should be hidden. When {@code false}, the existing
+     * visibility of the container applies, but when {@code true} the container will be forced
+     * to be hidden.
+     */
+    public WindowContainerTransaction setHidden(IWindowContainer container, boolean hidden) {
+        Change chg = getOrCreateChange(container.asBinder());
+        chg.mHidden = hidden;
+        chg.mChangeMask |= Change.CHANGE_HIDDEN;
+        return this;
+    }
+
+    /**
      * Set the smallestScreenWidth of a container.
      */
     public WindowContainerTransaction setSmallestScreenWidthDp(IWindowContainer container,
@@ -250,9 +262,11 @@ public class WindowContainerTransaction implements Parcelable {
         public static final int CHANGE_FOCUSABLE = 1;
         public static final int CHANGE_BOUNDS_TRANSACTION = 1 << 1;
         public static final int CHANGE_PIP_CALLBACK = 1 << 2;
+        public static final int CHANGE_HIDDEN = 1 << 3;
 
         private final Configuration mConfiguration = new Configuration();
         private boolean mFocusable = true;
+        private boolean mHidden = false;
         private int mChangeMask = 0;
         private @ActivityInfo.Config int mConfigSetMask = 0;
         private @WindowConfiguration.WindowConfig int mWindowSetMask = 0;
@@ -268,6 +282,7 @@ public class WindowContainerTransaction implements Parcelable {
         protected Change(Parcel in) {
             mConfiguration.readFromParcel(in);
             mFocusable = in.readBoolean();
+            mHidden = in.readBoolean();
             mChangeMask = in.readInt();
             mConfigSetMask = in.readInt();
             mWindowSetMask = in.readInt();
@@ -296,12 +311,20 @@ public class WindowContainerTransaction implements Parcelable {
             return mConfiguration;
         }
 
-        /** Gets the requested focusable value */
+        /** Gets the requested focusable state */
         public boolean getFocusable() {
             if ((mChangeMask & CHANGE_FOCUSABLE) == 0) {
                 throw new RuntimeException("Focusable not set. check CHANGE_FOCUSABLE first");
             }
             return mFocusable;
+        }
+
+        /** Gets the requested hidden state */
+        public boolean getHidden() {
+            if ((mChangeMask & CHANGE_HIDDEN) == 0) {
+                throw new RuntimeException("Hidden not set. check CHANGE_HIDDEN first");
+            }
+            return mHidden;
         }
 
         public int getChangeMask() {
@@ -369,6 +392,7 @@ public class WindowContainerTransaction implements Parcelable {
         public void writeToParcel(Parcel dest, int flags) {
             mConfiguration.writeToParcel(dest, flags);
             dest.writeBoolean(mFocusable);
+            dest.writeBoolean(mHidden);
             dest.writeInt(mChangeMask);
             dest.writeInt(mConfigSetMask);
             dest.writeInt(mWindowSetMask);

@@ -1510,7 +1510,7 @@ class ActivityStack extends Task {
      */
     @StackVisibility
     int getVisibility(ActivityRecord starting) {
-        if (!isAttached() || mForceHidden) {
+        if (!isAttached() || isForceHidden()) {
             return STACK_VISIBILITY_INVISIBLE;
         }
 

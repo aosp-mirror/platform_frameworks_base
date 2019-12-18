@@ -431,7 +431,10 @@ class Task extends WindowContainer<WindowContainer> {
     private boolean mForceShowForAllUsers;
 
     /** When set, will force the task to report as invisible. */
-    boolean mForceHidden = false;
+    static final int FLAG_FORCE_HIDDEN_FOR_PINNED_TASK = 1;
+    static final int FLAG_FORCE_HIDDEN_FOR_TASK_ORG = 1 << 1;
+    private int mForceHiddenFlags = 0;
+
 
     SurfaceControl.Transaction mMainWindowSizeChangeTransaction;
 
@@ -3031,7 +3034,7 @@ class Task extends WindowContainer<WindowContainer> {
      */
     @VisibleForTesting
     boolean isTranslucent(ActivityRecord starting) {
-        if (!isAttached() || mForceHidden) {
+        if (!isAttached() || isForceHidden()) {
             return true;
         }
         final PooledPredicate p = PooledLambda.obtainPredicate(Task::isOpaqueActivity,
@@ -4026,17 +4029,17 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
         // Let the old organizer know it has lost control.
-        if (mTaskOrganizer != null) {
-            sendTaskVanished();
-        }
+        sendTaskVanished();
         mTaskOrganizer = organizer;
         sendTaskAppeared();
+        onTaskOrganizerChanged();
     }
 
     // Called on Binder death.
     void taskOrganizerDied() {
         mTaskOrganizer = null;
         mLastTaskOrganizerWindowingMode = -1;
+        onTaskOrganizerChanged();
     }
 
     /**
@@ -4069,6 +4072,14 @@ class Task extends WindowContainer<WindowContainer> {
                 mWmService.mAtmService.mTaskOrganizerController.getTaskOrganizer(windowingMode);
         setTaskOrganizer(org);
         mLastTaskOrganizerWindowingMode = windowingMode;
+    }
+
+    private void onTaskOrganizerChanged() {
+        if (mTaskOrganizer == null) {
+            // If this task is no longer controlled by a task organizer, then reset the force hidden
+            // state
+            setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, false /* set */);
+        }
     }
 
     @Override
@@ -4179,6 +4190,31 @@ class Task extends WindowContainer<WindowContainer> {
             PooledLambda.__(ActivityRecord.class), windowingMode);
         forAllActivities(c);
         c.recycle();
+    }
+
+    /**
+     * Sets/unsets the forced-hidden state flag for this task depending on {@param set}.
+     * @return Whether the force hidden state changed
+     */
+    boolean setForceHidden(int flags, boolean set) {
+        int newFlags = mForceHiddenFlags;
+        if (set) {
+            newFlags |= flags;
+        } else {
+            newFlags &= ~flags;
+        }
+        if (mForceHiddenFlags == newFlags) {
+            return false;
+        }
+        mForceHiddenFlags = newFlags;
+        return true;
+    }
+
+    /**
+     * Returns whether this task is currently forced to be hidden for any reason.
+     */
+    protected boolean isForceHidden() {
+        return mForceHiddenFlags != 0;
     }
 
     @Override

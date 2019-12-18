@@ -75,6 +75,7 @@ import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_ONL
 import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
 import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
 import static com.android.server.wm.RootWindowContainer.TAG_STATES;
+import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_WHITELISTED;
@@ -1565,9 +1566,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
              * stopping list by handling the idle.
              */
             stack.cancelAnimation();
-            stack.mForceHidden = true;
+            stack.setForceHidden(FLAG_FORCE_HIDDEN_FOR_PINNED_TASK, true /* set */);
             stack.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
-            stack.mForceHidden = false;
+            stack.setForceHidden(FLAG_FORCE_HIDDEN_FOR_PINNED_TASK, false /* set */);
             activityIdleInternal(null /* idleActivity */, false /* fromTimeout */,
                     true /* processPausingActivities */, null /* configuration */);
 
