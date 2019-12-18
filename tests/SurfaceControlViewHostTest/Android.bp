@@ -15,7 +15,7 @@
 //
 
 android_test {
-    name: "WindowlessWmTest",
+    name: "SurfaceControlViewHostTest",
     srcs: ["**/*.java"],
     platform_apis: true,
     certificate: "platform",

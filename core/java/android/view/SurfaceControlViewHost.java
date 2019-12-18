@@ -29,23 +29,53 @@ import android.os.IBinder;
  * @hide
  */
 @TestApi
-public class WindowlessViewRoot {
+public class SurfaceControlViewHost {
     private ViewRootImpl mViewRoot;
     private WindowlessWindowManager mWm;
 
+    private SurfaceControl mSurfaceControl;
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public class SurfacePackage {
+        final SurfaceControl mSurfaceControl;
+        // TODO: Accessibility ID goes here
+
+        SurfacePackage(SurfaceControl sc) {
+            mSurfaceControl = sc;
+        }
+
+        public @NonNull SurfaceControl getSurfaceControl() {
+            return mSurfaceControl;
+        }
+    }
+
     /** @hide */
-    public WindowlessViewRoot(@NonNull Context c, @NonNull Display d,
+    public SurfaceControlViewHost(@NonNull Context c, @NonNull Display d,
             @NonNull WindowlessWindowManager wwm) {
         mWm = wwm;
         mViewRoot = new ViewRootImpl(c, d, mWm);
     }
 
-    public WindowlessViewRoot(@NonNull Context c, @NonNull Display d,
-            @NonNull SurfaceControl rootSurface,
+    public SurfaceControlViewHost(@NonNull Context c, @NonNull Display d,
             @Nullable IBinder hostInputToken) {
-        mWm = new WindowlessWindowManager(c.getResources().getConfiguration(), rootSurface,
+        mSurfaceControl = new SurfaceControl.Builder()
+            .setContainerLayer()
+            .setName("SurfaceControlViewHost")
+            .build();
+        mWm = new WindowlessWindowManager(c.getResources().getConfiguration(), mSurfaceControl,
                 hostInputToken);
         mViewRoot = new ViewRootImpl(c, d, mWm);
+    }
+
+    public @Nullable SurfacePackage getSurfacePackage() {
+        if (mSurfaceControl != null) {
+            return new SurfacePackage(mSurfaceControl);
+        } else {
+            return null;
+        }
     }
 
     public void addView(View view, WindowManager.LayoutParams attrs) {
