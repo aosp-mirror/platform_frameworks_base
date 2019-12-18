@@ -124,6 +124,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
@@ -261,7 +262,7 @@ public class NetworkPolicyManagerServiceTest {
 
     private static final int USER_ID = 0;
     private static final int FAKE_SUB_ID = 3737373;
-    private static final String FAKE_SUBSCRIBER_ID = "FAKE_SUB_ID";
+    private static final String FAKE_SUBSCRIBER_ID = "FAKE_SUBSCRIBER_ID";
     private static final int DEFAULT_CYCLE_DAY = 1;
     private static final int INVALID_CARRIER_CONFIG_VALUE = -9999;
     private long mDefaultWarningBytes; // filled in with the actual default before tests are run
@@ -1461,10 +1462,9 @@ public class NetworkPolicyManagerServiceTest {
 
     private PersistableBundle setupUpdateMobilePolicyCycleTests() throws RemoteException {
         when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[0]);
-        when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{FAKE_SUB_ID});
-        when(mTelephonyManager.getSubscriberId(FAKE_SUB_ID)).thenReturn(FAKE_SUBSCRIBER_ID);
-        when(mTelephonyManager.createForSubscriptionId(FAKE_SUB_ID))
-                .thenReturn(mock(TelephonyManager.class));
+
+        setupTelephonySubscriptionManagers(FAKE_SUB_ID, FAKE_SUBSCRIBER_ID);
+
         PersistableBundle bundle = CarrierConfigManager.getDefaultConfig();
         when(mCarrierConfigManager.getConfigForSubId(FAKE_SUB_ID)).thenReturn(bundle);
         setNetworkPolicies(buildDefaultFakeMobilePolicy());
@@ -1474,10 +1474,9 @@ public class NetworkPolicyManagerServiceTest {
     @Test
     public void testUpdateMobilePolicyCycleWithNullConfig() throws RemoteException {
         when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[0]);
-        when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{FAKE_SUB_ID});
-        when(mTelephonyManager.getSubscriberId(FAKE_SUB_ID)).thenReturn(FAKE_SUBSCRIBER_ID);
-        when(mTelephonyManager.createForSubscriptionId(FAKE_SUB_ID))
-                .thenReturn(mock(TelephonyManager.class));
+
+        setupTelephonySubscriptionManagers(FAKE_SUB_ID, FAKE_SUBSCRIBER_ID);
+
         when(mCarrierConfigManager.getConfigForSubId(FAKE_SUB_ID)).thenReturn(null);
         setNetworkPolicies(buildDefaultFakeMobilePolicy());
         // smoke test to make sure no errors are raised
@@ -1930,11 +1929,7 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private void expectMobileDefaults() throws Exception {
-        when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(
-                new int[] { TEST_SUB_ID });
-        when(mTelephonyManager.getSubscriberId(TEST_SUB_ID)).thenReturn(TEST_IMSI);
-        when(mTelephonyManager.createForSubscriptionId(TEST_SUB_ID))
-                .thenReturn(mock(TelephonyManager.class));
+        setupTelephonySubscriptionManagers(TEST_SUB_ID, TEST_IMSI);
         doNothing().when(mTelephonyManager).setPolicyDataEnabled(anyBoolean(), anyInt());
         expectNetworkState(false /* roaming */);
     }
@@ -2091,6 +2086,38 @@ public class NetworkPolicyManagerServiceTest {
         final T mock = mock(clazz);
         LocalServices.addService(clazz, mock);
         return mock;
+    }
+
+    /**
+     * Creates a mock {@link TelephonyManager} and {@link SubscriptionManager}.
+     */
+    private void setupTelephonySubscriptionManagers(int subscriptionId, String subscriberId) {
+        when(mSubscriptionManager.getActiveSubscriptionInfoList()).thenReturn(
+                createSubscriptionInfoList(subscriptionId));
+
+        TelephonyManager subTelephonyManager;
+        subTelephonyManager = mock(TelephonyManager.class);
+        when(subTelephonyManager.getSubscriptionId()).thenReturn(subscriptionId);
+        when(subTelephonyManager.getSubscriberId()).thenReturn(subscriberId);
+        when(mTelephonyManager.createForSubscriptionId(subscriptionId))
+                .thenReturn(subTelephonyManager);
+    }
+
+    /**
+     * Creates mock {@link SubscriptionInfo} from subscription id.
+     */
+    private List<SubscriptionInfo> createSubscriptionInfoList(int subId) {
+        final List<SubscriptionInfo> sub = new ArrayList<>();
+        sub.add(createSubscriptionInfo(subId));
+        return sub;
+    }
+
+    /**
+     * Creates mock {@link SubscriptionInfo} from subscription id.
+     */
+    private SubscriptionInfo createSubscriptionInfo(int subId) {
+        return new SubscriptionInfo(subId, null, -1, null, null, -1, -1,
+                null, -1, null, null, null, null, false, null, null);
     }
 
     /**
