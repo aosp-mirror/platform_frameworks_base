@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.metrics.LogMaker;
+import android.os.Build;
 import android.util.Log;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassifier;
@@ -101,7 +102,8 @@ public final class SmartSelectionEventTracker {
     private boolean mSmartSelectionTriggered;
     private String mModelName;
 
-    @UnsupportedAppUsage(trackingBug = 136637107)
+    @UnsupportedAppUsage(trackingBug = 136637107, maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "See {@link android.view.textclassifier.TextClassifier}.")
     public SmartSelectionEventTracker(@NonNull Context context, @WidgetType int widgetType) {
         mWidgetType = widgetType;
         mWidgetVersion = null;
@@ -120,7 +122,8 @@ public final class SmartSelectionEventTracker {
      *
      * @param event the selection event
      */
-    @UnsupportedAppUsage(trackingBug = 136637107)
+    @UnsupportedAppUsage(trackingBug = 136637107, maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "See {@link android.view.textclassifier.TextClassifier}.")
     public void logEvent(@NonNull SelectionEvent event) {
         Objects.requireNonNull(event);
 
@@ -444,7 +447,8 @@ public final class SmartSelectionEventTracker {
          *
          * @param start  the word index of the selected word
          */
-        @UnsupportedAppUsage(trackingBug = 136637107)
+        @UnsupportedAppUsage(trackingBug = 136637107, maxTargetSdk = Build.VERSION_CODES.Q,
+                publicAlternatives = "See {@link android.view.textclassifier.TextClassifier}.")
         public static SelectionEvent selectionStarted(int start) {
             return new SelectionEvent(
                     start, start + 1, EventType.SELECTION_STARTED,
@@ -458,7 +462,8 @@ public final class SmartSelectionEventTracker {
          * @param start  the start word (inclusive) index of the selection
          * @param end  the end word (exclusive) index of the selection
          */
-        @UnsupportedAppUsage(trackingBug = 136637107)
+        @UnsupportedAppUsage(trackingBug = 136637107, maxTargetSdk = Build.VERSION_CODES.Q,
+                publicAlternatives = "See {@link android.view.textclassifier.TextClassifier}.")
         public static SelectionEvent selectionModified(int start, int end) {
             return new SelectionEvent(
                     start, end, EventType.SELECTION_MODIFIED,
@@ -474,7 +479,8 @@ public final class SmartSelectionEventTracker {
          * @param classification  the TextClassification object returned by the TextClassifier that
          *      classified the selected text
          */
-        @UnsupportedAppUsage(trackingBug = 136637107)
+        @UnsupportedAppUsage(trackingBug = 136637107, maxTargetSdk = Build.VERSION_CODES.Q,
+                publicAlternatives = "See {@link android.view.textclassifier.TextClassifier}.")
         public static SelectionEvent selectionModified(
                 int start, int end, @NonNull TextClassification classification) {
             final String entityType = classification.getEntityCount() > 0
@@ -494,7 +500,8 @@ public final class SmartSelectionEventTracker {
          * @param selection  the TextSelection object returned by the TextClassifier for the
          *      specified selection
          */
-        @UnsupportedAppUsage(trackingBug = 136637107)
+        @UnsupportedAppUsage(trackingBug = 136637107, maxTargetSdk = Build.VERSION_CODES.Q,
+                publicAlternatives = "See {@link android.view.textclassifier.TextClassifier}.")
         public static SelectionEvent selectionModified(
                 int start, int end, @NonNull TextSelection selection) {
             final boolean smartSelection = getSourceClassifier(selection.getId())
@@ -523,7 +530,8 @@ public final class SmartSelectionEventTracker {
          * @param end  the end word (exclusive) index of the selection
          * @param actionType  the action that was performed on the selection
          */
-        @UnsupportedAppUsage(trackingBug = 136637107)
+        @UnsupportedAppUsage(trackingBug = 136637107, maxTargetSdk = Build.VERSION_CODES.Q,
+                publicAlternatives = "See {@link android.view.textclassifier.TextClassifier}.")
         public static SelectionEvent selectionAction(
                 int start, int end, @ActionType int actionType) {
             return new SelectionEvent(
@@ -541,7 +549,8 @@ public final class SmartSelectionEventTracker {
          * @param classification  the TextClassification object returned by the TextClassifier that
          *      classified the selected text
          */
-        @UnsupportedAppUsage(trackingBug = 136637107)
+        @UnsupportedAppUsage(trackingBug = 136637107, maxTargetSdk = Build.VERSION_CODES.Q,
+                publicAlternatives = "See {@link android.view.textclassifier.TextClassifier}.")
         public static SelectionEvent selectionAction(
                 int start, int end, @ActionType int actionType,
                 @NonNull TextClassification classification) {
