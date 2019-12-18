@@ -108,6 +108,19 @@ final class TunerConstants {
     public static final int DVR_SETTINGS_RECORD = Constants.DvrType.RECORD;
     public static final int DVR_SETTINGS_PLAYBACK = Constants.DvrType.PLAYBACK;
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({RESULT_SUCCESS, RESULT_UNAVAILABLE, RESULT_NOT_INITIALIZED, RESULT_INVALID_STATE,
+            RESULT_INVALID_ARGUMENT, RESULT_OUT_OF_MEMORY, RESULT_UNKNOWN_ERROR})
+    public @interface Result {}
+
+    public static final int RESULT_SUCCESS = Constants.Result.SUCCESS;
+    public static final int RESULT_UNAVAILABLE = Constants.Result.UNAVAILABLE;
+    public static final int RESULT_NOT_INITIALIZED = Constants.Result.NOT_INITIALIZED;
+    public static final int RESULT_INVALID_STATE = Constants.Result.INVALID_STATE;
+    public static final int RESULT_INVALID_ARGUMENT = Constants.Result.INVALID_ARGUMENT;
+    public static final int RESULT_OUT_OF_MEMORY = Constants.Result.OUT_OF_MEMORY;
+    public static final int RESULT_UNKNOWN_ERROR = Constants.Result.UNKNOWN_ERROR;
+
     private TunerConstants() {
     }
 }
