@@ -35,6 +35,7 @@ import android.os.UserHandle;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -82,7 +83,7 @@ public abstract class RoleControllerService extends Service {
             public void grantDefaultRoles(RemoteCallback callback) {
                 enforceCallerSystemUid("grantDefaultRoles");
 
-                Preconditions.checkNotNull(callback, "callback cannot be null");
+                Objects.requireNonNull(callback, "callback cannot be null");
 
                 mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
                         RoleControllerService::grantDefaultRoles, RoleControllerService.this,
@@ -97,7 +98,7 @@ public abstract class RoleControllerService extends Service {
                 Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
                 Preconditions.checkStringNotEmpty(packageName,
                         "packageName cannot be null or empty");
-                Preconditions.checkNotNull(callback, "callback cannot be null");
+                Objects.requireNonNull(callback, "callback cannot be null");
 
                 mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
                         RoleControllerService::onAddRoleHolder, RoleControllerService.this,
@@ -112,7 +113,7 @@ public abstract class RoleControllerService extends Service {
                 Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
                 Preconditions.checkStringNotEmpty(packageName,
                         "packageName cannot be null or empty");
-                Preconditions.checkNotNull(callback, "callback cannot be null");
+                Objects.requireNonNull(callback, "callback cannot be null");
 
                 mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
                         RoleControllerService::onRemoveRoleHolder, RoleControllerService.this,
@@ -124,7 +125,7 @@ public abstract class RoleControllerService extends Service {
                 enforceCallerSystemUid("onClearRoleHolders");
 
                 Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
-                Preconditions.checkNotNull(callback, "callback cannot be null");
+                Objects.requireNonNull(callback, "callback cannot be null");
 
                 mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
                         RoleControllerService::onClearRoleHolders, RoleControllerService.this,
@@ -146,7 +147,7 @@ public abstract class RoleControllerService extends Service {
                 Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
                 Preconditions.checkStringNotEmpty(packageName,
                         "packageName cannot be null or empty");
-                Preconditions.checkNotNull(callback, "callback cannot be null");
+                Objects.requireNonNull(callback, "callback cannot be null");
 
                 boolean qualified = onIsApplicationQualifiedForRole(roleName, packageName);
                 callback.sendResult(qualified ? Bundle.EMPTY : null);
@@ -160,7 +161,7 @@ public abstract class RoleControllerService extends Service {
                 Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
                 Preconditions.checkStringNotEmpty(packageName,
                         "packageName cannot be null or empty");
-                Preconditions.checkNotNull(callback, "callback cannot be null");
+                Objects.requireNonNull(callback, "callback cannot be null");
 
                 boolean visible = onIsApplicationVisibleForRole(roleName, packageName);
                 callback.sendResult(visible ? Bundle.EMPTY : null);
@@ -171,7 +172,7 @@ public abstract class RoleControllerService extends Service {
                 enforceCallingPermission(Manifest.permission.MANAGE_ROLE_HOLDERS, null);
 
                 Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
-                Preconditions.checkNotNull(callback, "callback cannot be null");
+                Objects.requireNonNull(callback, "callback cannot be null");
 
                 boolean visible = onIsRoleVisible(roleName);
                 callback.sendResult(visible ? Bundle.EMPTY : null);
