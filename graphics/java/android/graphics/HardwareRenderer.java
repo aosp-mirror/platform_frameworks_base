@@ -28,7 +28,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 import android.util.TimeUtils;
-import android.view.FrameMetricsObserver;
 import android.view.IGraphicsStats;
 import android.view.IGraphicsStatsCallback;
 import android.view.NativeVectorDrawableAnimator;
@@ -37,8 +36,6 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.TextureLayer;
 import android.view.animation.AnimationUtils;
-
-import com.android.internal.util.VirtualRefBasePtr;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -598,9 +595,8 @@ public class HardwareRenderer {
      *
      * @hide
      */
-    public void addFrameMetricsObserver(FrameMetricsObserver observer) {
-        long nativeObserver = nAddFrameMetricsObserver(mNativeProxy, observer);
-        observer.mNative = new VirtualRefBasePtr(nativeObserver);
+    public void addObserver(HardwareRendererObserver observer) {
+        nAddObserver(mNativeProxy, observer.getNativeInstance());
     }
 
     /**
@@ -608,9 +604,8 @@ public class HardwareRenderer {
      *
      * @hide
      */
-    public void removeFrameMetricsObserver(FrameMetricsObserver observer) {
-        nRemoveFrameMetricsObserver(mNativeProxy, observer.mNative.get());
-        observer.mNative = null;
+    public void removeObserver(HardwareRendererObserver observer) {
+        nRemoveObserver(mNativeProxy, observer.getNativeInstance());
     }
 
     /**
@@ -1170,10 +1165,9 @@ public class HardwareRenderer {
     private static native void nSetFrameCompleteCallback(long nativeProxy,
             FrameCompleteCallback callback);
 
-    private static native long nAddFrameMetricsObserver(long nativeProxy,
-            FrameMetricsObserver observer);
+    private static native void nAddObserver(long nativeProxy, long nativeObserver);
 
-    private static native void nRemoveFrameMetricsObserver(long nativeProxy, long nativeObserver);
+    private static native void nRemoveObserver(long nativeProxy, long nativeObserver);
 
     private static native int nCopySurfaceInto(Surface surface,
             int srcLeft, int srcTop, int srcRight, int srcBottom, long bitmapHandle);
