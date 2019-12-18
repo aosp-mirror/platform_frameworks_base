@@ -16,8 +16,7 @@
 
 package javax.microedition.khronos.egl;
 
-import android.annotation.UnsupportedAppUsage;
-import java.lang.String;
+import android.compat.annotation.UnsupportedAppUsage;
 
 public interface EGL10 extends EGL {
     int EGL_SUCCESS                     = 0x3000;
