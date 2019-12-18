@@ -16,14 +16,6 @@
 
 package com.android.server;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.HashMap;
-
-import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.DumpUtils;
-import com.android.server.location.ComprehensiveCountryDetector;
-
 import android.content.Context;
 import android.location.Country;
 import android.location.CountryListener;
@@ -36,17 +28,25 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.DumpUtils;
+import com.android.server.location.ComprehensiveCountryDetector;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.HashMap;
+
 /**
- * This class detects the country that the user is in through
- * {@link ComprehensiveCountryDetector}.
+ * This class detects the country that the user is in through {@link ComprehensiveCountryDetector}.
  *
  * @hide
  */
-public class CountryDetectorService extends ICountryDetector.Stub implements Runnable {
+public class CountryDetectorService extends ICountryDetector.Stub {
 
     /**
-     * The class represents the remote listener, it will also removes itself
-     * from listener list when the remote process was died.
+     * The class represents the remote listener, it will also removes itself from listener list when
+     * the remote process was died.
      */
     private final class Receiver implements IBinder.DeathRecipient {
         private final ICountryListener mListener;
@@ -79,9 +79,11 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
         }
     }
 
-    private final static String TAG = "CountryDetector";
+    private static final String TAG = "CountryDetector";
 
-    /** Whether to dump the state of the country detector service to bugreports */
+    /**
+     * Whether to dump the state of the country detector service to bugreports
+     */
     private static final boolean DEBUG = false;
 
     private final HashMap<IBinder, Receiver> mReceivers;
@@ -92,15 +94,21 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
     private CountryListener mLocationBasedDetectorListener;
 
     public CountryDetectorService(Context context) {
+        this(context, BackgroundThread.getHandler());
+    }
+
+    @VisibleForTesting
+    CountryDetectorService(Context context, Handler handler) {
         super();
-        mReceivers = new HashMap<IBinder, Receiver>();
+        mReceivers = new HashMap<>();
         mContext = context;
+        mHandler = handler;
     }
 
     @Override
     public Country detectCountry() {
         if (!mSystemReady) {
-            return null;   // server not yet active
+            return null; // server not yet active
         } else {
             return mCountryDetector.detectCountry();
         }
@@ -154,9 +162,8 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
         }
     }
 
-
     protected void notifyReceivers(Country country) {
-        synchronized(mReceivers) {
+        synchronized (mReceivers) {
             for (Receiver receiver : mReceivers.values()) {
                 try {
                     receiver.getListener().onCountryDetected(country);
@@ -170,38 +177,23 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
 
     void systemRunning() {
         // Shall we wait for the initialization finish.
-        BackgroundThread.getHandler().post(this);
+        mHandler.post(
+                () -> {
+                    initialize();
+                    mSystemReady = true;
+                });
     }
 
     private void initialize() {
         mCountryDetector = new ComprehensiveCountryDetector(mContext);
-        mLocationBasedDetectorListener = new CountryListener() {
-            public void onCountryDetected(final Country country) {
-                mHandler.post(new Runnable() {
-                    public void run() {
-                        notifyReceivers(country);
-                    }
-                });
-            }
-        };
-    }
-
-    public void run() {
-        mHandler = new Handler();
-        initialize();
-        mSystemReady = true;
+        mLocationBasedDetectorListener = country -> mHandler.post(() -> notifyReceivers(country));
     }
 
     protected void setCountryListener(final CountryListener listener) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mCountryDetector.setCountryListener(listener);
-            }
-        });
+        mHandler.post(() -> mCountryDetector.setCountryListener(listener));
     }
 
-    // For testing
+    @VisibleForTesting
     boolean isSystemReady() {
         return mSystemReady;
     }
