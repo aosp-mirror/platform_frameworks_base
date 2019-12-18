@@ -3800,5 +3800,5 @@
   <!-- Assistant handles -->
   <java-symbol type="dimen" name="assist_handle_shadow_radius" />
 
-
+  <java-symbol type="bool" name="config_customBugreport" />
 </resources>

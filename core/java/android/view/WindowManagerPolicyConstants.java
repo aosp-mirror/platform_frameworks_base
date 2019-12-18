@@ -72,6 +72,12 @@ public interface WindowManagerPolicyConstants {
             "android.intent.action.USER_ACTIVITY_NOTIFICATION";
 
     /**
+     * Broadcast sent when a (custom) bugreport is requested.
+     */
+    String ACTION_CUSTOM_BUGREPORT_REQUESTED =
+            "android.intent.action.CUSTOM_BUGREPORT_REQUESTED";
+
+    /**
      * Sticky broadcast of the current HDMI plugged state.
      */
     String ACTION_HDMI_PLUGGED = "android.intent.action.HDMI_PLUGGED";
