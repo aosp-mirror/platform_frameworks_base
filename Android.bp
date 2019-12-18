@@ -1660,6 +1660,8 @@ filegroup {
         "core/java/android/util/LocalLog.java",
         "core/java/android/util/TimeUtils.java",
         "core/java/com/android/internal/os/SomeArgs.java",
+        "core/java/com/android/internal/util/AsyncChannel.java",
+        "core/java/com/android/internal/util/BitwiseInputStream.java",
         "core/java/com/android/internal/util/FastXmlSerializer.java",
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IState.java",
