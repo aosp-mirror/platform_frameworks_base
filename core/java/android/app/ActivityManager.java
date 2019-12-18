@@ -1120,8 +1120,8 @@ public class ActivityManager {
         }
 
         /**
-         * Copies this the values from another TaskDescription, but preserves the hidden fields
-         * if they weren't set on {@code other}
+         * Copies values from another TaskDescription, but preserves the hidden fields if they
+         * weren't set on {@code other}. Public fields will be overwritten anyway.
          * @hide
          */
         public void copyFromPreserveHiddenFields(TaskDescription other) {
@@ -1130,6 +1130,7 @@ public class ActivityManager {
             mIconRes = other.mIconRes;
             mIconFilename = other.mIconFilename;
             mColorPrimary = other.mColorPrimary;
+
             if (other.mColorBackground != 0) {
                 mColorBackground = other.mColorBackground;
             }
@@ -1139,12 +1140,20 @@ public class ActivityManager {
             if (other.mNavigationBarColor != 0) {
                 mNavigationBarColor = other.mNavigationBarColor;
             }
+
             mEnsureStatusBarContrastWhenTransparent = other.mEnsureStatusBarContrastWhenTransparent;
             mEnsureNavigationBarContrastWhenTransparent =
                     other.mEnsureNavigationBarContrastWhenTransparent;
-            mResizeMode = other.mResizeMode;
-            mMinWidth = other.mMinWidth;
-            mMinHeight = other.mMinHeight;
+
+            if (other.mResizeMode != RESIZE_MODE_RESIZEABLE) {
+                mResizeMode = other.mResizeMode;
+            }
+            if (other.mMinWidth != -1) {
+                mMinWidth = other.mMinWidth;
+            }
+            if (other.mMinHeight != -1) {
+                mMinHeight = other.mMinHeight;
+            }
         }
 
         private TaskDescription(Parcel source) {
