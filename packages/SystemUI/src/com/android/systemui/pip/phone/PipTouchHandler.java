@@ -194,7 +194,8 @@ public class PipTouchHandler {
         mMenuController.addListener(mMenuListener);
         mDismissViewController = new PipDismissViewController(context);
         mSnapAlgorithm = new PipSnapAlgorithm(mContext);
-        mFlingAnimationUtils = new FlingAnimationUtils(context, 2.5f);
+        mFlingAnimationUtils = new FlingAnimationUtils(context.getResources().getDisplayMetrics(),
+                2.5f);
         mGestures = new PipTouchGesture[] {
                 mDefaultMovementGesture
         };

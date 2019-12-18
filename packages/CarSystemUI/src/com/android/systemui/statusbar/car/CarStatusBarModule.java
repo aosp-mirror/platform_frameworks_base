@@ -43,6 +43,7 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -191,7 +192,8 @@ public class CarStatusBarModule {
             CarServiceProvider carServiceProvider,
             Lazy<PowerManagerHelper> powerManagerHelperLazy,
             Lazy<FullscreenUserSwitcher> fullscreenUserSwitcherLazy,
-            CarNavigationBarController carNavigationBarController) {
+            CarNavigationBarController carNavigationBarController,
+            FlingAnimationUtils.Builder flingAnimationUtilsBuilder) {
         return new CarStatusBar(
                 context,
                 featureFlags,
@@ -268,6 +270,7 @@ public class CarStatusBarModule {
                 carServiceProvider,
                 powerManagerHelperLazy,
                 fullscreenUserSwitcherLazy,
-                carNavigationBarController);
+                carNavigationBarController,
+                flingAnimationUtilsBuilder);
     }
 }

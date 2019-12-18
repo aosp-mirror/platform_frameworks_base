@@ -179,7 +179,8 @@ public class ExpandHelper implements Gefingerpoken {
         mTouchSlop = configuration.getScaledTouchSlop();
 
         mSGD = new ScaleGestureDetector(context, mScaleGestureListener);
-        mFlingAnimationUtils = new FlingAnimationUtils(context, EXPAND_DURATION);
+        mFlingAnimationUtils = new FlingAnimationUtils(mContext.getResources().getDisplayMetrics(),
+                EXPAND_DURATION);
     }
 
     @VisibleForTesting
