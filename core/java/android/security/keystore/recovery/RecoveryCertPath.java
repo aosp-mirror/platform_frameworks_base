@@ -20,13 +20,12 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.util.Preconditions;
-
 import java.io.ByteArrayInputStream;
 import java.security.cert.CertPath;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.util.Objects;
 
 /**
  * The certificate path of the recovery service.
@@ -67,7 +66,7 @@ public final class RecoveryCertPath implements Parcelable {
     }
 
     private RecoveryCertPath(@NonNull byte[] encodedCertPath) {
-        mEncodedCertPath = Preconditions.checkNotNull(encodedCertPath);
+        mEncodedCertPath = Objects.requireNonNull(encodedCertPath);
     }
 
     private RecoveryCertPath(Parcel in) {
@@ -98,13 +97,13 @@ public final class RecoveryCertPath implements Parcelable {
     @NonNull
     private static byte[] encodeCertPath(@NonNull CertPath certPath)
             throws CertificateEncodingException {
-        Preconditions.checkNotNull(certPath);
+        Objects.requireNonNull(certPath);
         return certPath.getEncoded(CERT_PATH_ENCODING);
     }
 
     @NonNull
     private static CertPath decodeCertPath(@NonNull byte[] bytes) throws CertificateException {
-        Preconditions.checkNotNull(bytes);
+        Objects.requireNonNull(bytes);
         CertificateFactory certFactory;
         try {
             certFactory = CertificateFactory.getInstance("X.509");

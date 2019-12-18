@@ -22,7 +22,7 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 /**
  * Helper class with data necessary recover a single application key, given a recovery key.
@@ -106,8 +106,8 @@ public final class WrappedApplicationKey implements Parcelable {
          * @throws NullPointerException if some required fields were not set.
          */
         public @NonNull WrappedApplicationKey build() {
-            Preconditions.checkNotNull(mInstance.mAlias);
-            Preconditions.checkNotNull(mInstance.mEncryptedKeyMaterial);
+            Objects.requireNonNull(mInstance.mAlias);
+            Objects.requireNonNull(mInstance.mEncryptedKeyMaterial);
             return mInstance;
         }
     }
@@ -120,8 +120,8 @@ public final class WrappedApplicationKey implements Parcelable {
      */
     @Deprecated
     public WrappedApplicationKey(@NonNull String alias, @NonNull byte[] encryptedKeyMaterial) {
-        mAlias = Preconditions.checkNotNull(alias);
-        mEncryptedKeyMaterial = Preconditions.checkNotNull(encryptedKeyMaterial);
+        mAlias = Objects.requireNonNull(alias);
+        mEncryptedKeyMaterial = Objects.requireNonNull(encryptedKeyMaterial);
     }
 
     /**
