@@ -102,6 +102,9 @@ public class ExternalStorageProvider extends FileSystemProvider {
             DocumentsContract.EXTERNAL_STORAGE_PRIMARY_EMULATED_ROOT_ID;
     private static final String ROOT_ID_HOME = "home";
 
+    private static final String GET_DOCUMENT_URI_CALL = "get_document_uri";
+    private static final String GET_MEDIA_URI_CALL = "get_media_uri";
+
     private StorageManager mStorageManager;
     private UserManager mUserManager;
 
@@ -665,7 +668,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
                     }
                     break;
                 }
-                case MediaStore.GET_DOCUMENT_URI_CALL: {
+                case GET_DOCUMENT_URI_CALL: {
                     // All callers must go through MediaProvider
                     getContext().enforceCallingPermission(
                             android.Manifest.permission.WRITE_MEDIA_STORAGE, TAG);
@@ -684,7 +687,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
                         throw new IllegalStateException("File in " + path + " is not found.", e);
                     }
                 }
-                case MediaStore.GET_MEDIA_URI_CALL: {
+                case GET_MEDIA_URI_CALL: {
                     // All callers must go through MediaProvider
                     getContext().enforceCallingPermission(
                             android.Manifest.permission.WRITE_MEDIA_STORAGE, TAG);

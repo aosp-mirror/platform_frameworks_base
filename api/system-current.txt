@@ -7277,8 +7277,12 @@ package android.provider {
   }
 
   public final class MediaStore {
+    method @NonNull public static android.net.Uri rewriteToLegacy(@NonNull android.net.Uri);
     method @NonNull public static android.net.Uri scanFile(@NonNull android.content.ContentResolver, @NonNull java.io.File);
     method public static void scanVolume(@NonNull android.content.ContentResolver, @NonNull String);
+    method public static void waitForIdle(@NonNull android.content.ContentResolver);
+    field public static final String AUTHORITY_LEGACY = "media_legacy";
+    field @NonNull public static final android.net.Uri AUTHORITY_LEGACY_URI;
   }
 
   public abstract class SearchIndexableData {
