@@ -65,6 +65,7 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -143,6 +144,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private RowInflaterTask mAsyncInflationTask;
     @Mock private NotificationRowBinder mMockedRowBinder;
     @Mock private NotifLog mNotifLog;
+    @Mock private FeatureFlags mFeatureFlags;
 
     private int mId;
     private NotificationEntry mEntry;
@@ -219,6 +221,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntry.expandedIcon = mock(StatusBarIconView.class);
 
+        when(mFeatureFlags.isNewNotifPipelineEnabled()).thenReturn(false);
+        when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
         mEntryManager = new TestableNotificationEntryManager(
                 mNotifLog,
                 mGroupManager,
@@ -230,7 +234,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                         mNotifLog,
                         mock(NotificationSectionsFeatureManager.class),
                         mock(PeopleNotificationIdentifier.class)),
-                mEnvironment
+                mEnvironment,
+                mFeatureFlags
         );
         mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mHeadsUpManager);
         mEntryManager.addNotificationEntryListener(mEntryListener);
@@ -242,7 +247,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                         mock(StatusBarStateController.class),
                         mock(NotificationLogger.class));
         notificationRowBinder.setUpWithPresenter(
-                mPresenter, mListContainer, mHeadsUpManager, mEntryManager, mBindCallback);
+                mPresenter, mListContainer, mHeadsUpManager, mBindCallback);
+        notificationRowBinder.setInflationCallback(mEntryManager);
         notificationRowBinder.setNotificationClicker(mock(NotificationClicker.class));
         mEntryManager.setRowBinder(notificationRowBinder);
 

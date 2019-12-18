@@ -34,6 +34,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
@@ -131,6 +132,7 @@ public class NotificationEntryManager implements
     private final KeyguardEnvironment mKeyguardEnvironment;
     private final NotificationGroupManager mGroupManager;
     private final NotificationRankingManager mRankingManager;
+    private final FeatureFlags mFeatureFlags;
 
     private NotificationPresenter mPresenter;
     private RankingMap mLatestRankingMap;
@@ -170,11 +172,13 @@ public class NotificationEntryManager implements
             NotifLog notifLog,
             NotificationGroupManager groupManager,
             NotificationRankingManager rankingManager,
-            KeyguardEnvironment keyguardEnvironment) {
+            KeyguardEnvironment keyguardEnvironment,
+            FeatureFlags featureFlags) {
         mNotifLog = notifLog;
         mGroupManager = groupManager;
         mRankingManager = rankingManager;
         mKeyguardEnvironment = keyguardEnvironment;
+        mFeatureFlags = featureFlags;
     }
 
     /** Once called, the NEM will start processing notification events from system server. */
@@ -529,9 +533,12 @@ public class NotificationEntryManager implements
         NotificationEntry entry = new NotificationEntry(notification, ranking);
 
         Dependency.get(LeakDetector.class).trackInstance(entry);
+
         // Construct the expanded view.
-        requireBinder().inflateViews(entry, () -> performRemoveNotification(notification,
-                REASON_CANCEL));
+        if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            requireBinder().inflateViews(entry, () -> performRemoveNotification(notification,
+                    REASON_CANCEL));
+        }
 
         abortExistingInflation(key, "addNotification");
         mPendingNotifications.put(key, entry);
@@ -574,8 +581,11 @@ public class NotificationEntryManager implements
             listener.onPreEntryUpdated(entry);
         }
 
-        requireBinder().inflateViews(entry, () -> performRemoveNotification(notification,
-                REASON_CANCEL));
+        if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            requireBinder().inflateViews(entry, () -> performRemoveNotification(notification,
+                    REASON_CANCEL));
+        }
+
         updateNotifications("updateNotificationInternal");
 
         if (DEBUG) {

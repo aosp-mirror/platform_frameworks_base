@@ -109,14 +109,16 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     public void setUpWithPresenter(NotificationPresenter presenter,
             NotificationListContainer listContainer,
             HeadsUpManager headsUpManager,
-            NotificationContentInflater.InflationCallback inflationCallback,
             BindRowCallback bindRowCallback) {
         mPresenter = presenter;
         mListContainer = listContainer;
         mHeadsUpManager = headsUpManager;
-        mInflationCallback = inflationCallback;
         mBindRowCallback = bindRowCallback;
         mOnAppOpsClickListener = mGutsManager::openGuts;
+    }
+
+    public void setInflationCallback(NotificationContentInflater.InflationCallback callback) {
+        mInflationCallback = callback;
     }
 
     public void setNotificationClicker(NotificationClicker clicker) {

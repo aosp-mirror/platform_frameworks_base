@@ -1272,7 +1272,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
 
-        mEntryManager.setRowBinder(rowBinder);
+        if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+            mEntryManager.setRowBinder(rowBinder);
+            rowBinder.setInflationCallback(mEntryManager);
+        }
+
         mRemoteInputUriController.attach(mEntryManager);
 
         rowBinder.setNotificationClicker(new NotificationClicker(
@@ -1282,7 +1286,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationListController.bind();
 
         if (mFeatureFlags.isNewNotifPipelineEnabled()) {
-            mNewNotifPipeline.get().initialize(mNotificationListener);
+            mNewNotifPipeline.get().initialize(mNotificationListener, rowBinder);
         }
         mEntryManager.attach(mNotificationListener);
     }

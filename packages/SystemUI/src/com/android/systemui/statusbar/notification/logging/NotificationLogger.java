@@ -294,6 +294,9 @@ public class NotificationLogger implements StateListener {
         }
     }
 
+    /**
+     * Logs Notification inflation error
+     */
     private void logNotificationError(
             StatusBarNotification notification,
             Exception exception) {
