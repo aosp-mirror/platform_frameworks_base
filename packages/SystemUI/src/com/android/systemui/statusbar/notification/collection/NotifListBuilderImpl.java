@@ -20,9 +20,12 @@ import static com.android.systemui.statusbar.notification.collection.GroupEntry.
 import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpList;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_BUILD_PENDING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_BUILD_STARTED;
-import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_FILTERING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_FINALIZING;
+import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_GROUPING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_IDLE;
+import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_PRE_GROUP_FILTERING;
+import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_PRE_RENDER_FILTERING;
+import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_RESETTING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_SORTING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_TRANSFORMING;
 
@@ -63,16 +66,17 @@ public class NotifListBuilderImpl implements NotifListBuilder {
     private final SystemClock mSystemClock;
     private final NotifLog mNotifLog;
 
-    private final List<ListEntry> mNotifList = new ArrayList<>();
+    private List<ListEntry> mNotifList = new ArrayList<>();
+    private List<ListEntry> mNewNotifList = new ArrayList<>();
 
     private final PipelineState mPipelineState = new PipelineState();
     private final Map<String, GroupEntry> mGroups = new ArrayMap<>();
     private Collection<NotificationEntry> mAllEntries = Collections.emptyList();
-    private final List<ListEntry> mNewEntries = new ArrayList<>();
     private int mIterationCount = 0;
 
-    private final List<NotifFilter> mNotifFilters = new ArrayList<>();
+    private final List<NotifFilter> mNotifPreGroupFilters = new ArrayList<>();
     private final List<NotifPromoter> mNotifPromoters = new ArrayList<>();
+    private final List<NotifFilter> mNotifPreRenderFilters = new ArrayList<>();
     private final List<NotifComparator> mNotifComparators = new ArrayList<>();
     private SectionsProvider mSectionsProvider = new DefaultSectionsProvider();
 
@@ -138,12 +142,21 @@ public class NotifListBuilderImpl implements NotifListBuilder {
     }
 
     @Override
-    public void addFilter(NotifFilter filter) {
+    public void addPreGroupFilter(NotifFilter filter) {
         Assert.isMainThread();
         mPipelineState.requireState(STATE_IDLE);
 
-        mNotifFilters.add(filter);
-        filter.setInvalidationListener(this::onFilterInvalidated);
+        mNotifPreGroupFilters.add(filter);
+        filter.setInvalidationListener(this::onPreGroupFilterInvalidated);
+    }
+
+    @Override
+    public void addPreRenderFilter(NotifFilter filter) {
+        Assert.isMainThread();
+        mPipelineState.requireState(STATE_IDLE);
+
+        mNotifPreRenderFilters.add(filter);
+        filter.setInvalidationListener(this::onPreRenderFilterInvalidated);
     }
 
     @Override
@@ -202,15 +215,15 @@ public class NotifListBuilderImpl implements NotifListBuilder {
                 }
             };
 
-    private void onFilterInvalidated(NotifFilter filter) {
+    private void onPreGroupFilterInvalidated(NotifFilter filter) {
         Assert.isMainThread();
 
-        mNotifLog.log(NotifEvent.FILTER_INVALIDATED, String.format(
+        mNotifLog.log(NotifEvent.PRE_GROUP_FILTER_INVALIDATED, String.format(
                 "Filter \"%s\" invalidated; pipeline state is %d",
                 filter.getName(),
                 mPipelineState.getState()));
 
-        rebuildListIfBefore(STATE_FILTERING);
+        rebuildListIfBefore(STATE_PRE_GROUP_FILTERING);
     }
 
     private void onPromoterInvalidated(NotifPromoter filter) {
@@ -235,6 +248,17 @@ public class NotifListBuilderImpl implements NotifListBuilder {
         rebuildListIfBefore(STATE_SORTING);
     }
 
+    private void onPreRenderFilterInvalidated(NotifFilter filter) {
+        Assert.isMainThread();
+
+        mNotifLog.log(NotifEvent.PRE_RENDER_FILTER_INVALIDATED, String.format(
+                "Filter \"%s\" invalidated; pipeline state is %d",
+                filter.getName(),
+                mPipelineState.getState()));
+
+        rebuildListIfBefore(STATE_PRE_RENDER_FILTERING);
+    }
+
     private void onNotifComparatorInvalidated(NotifComparator comparator) {
         Assert.isMainThread();
 
@@ -244,6 +268,17 @@ public class NotifListBuilderImpl implements NotifListBuilder {
                 mPipelineState.getState()));
 
         rebuildListIfBefore(STATE_SORTING);
+    }
+
+    /**
+     * Points mNotifList to the list stored in mNewNotifList.
+     * Reuses the (emptied) mNotifList as mNewNotifList.
+     */
+    private void applyNewNotifList() {
+        mNotifList.clear();
+        List<ListEntry> emptyList = mNotifList;
+        mNotifList = mNewNotifList;
+        mNewNotifList = emptyList;
     }
 
     /**
@@ -261,35 +296,47 @@ public class NotifListBuilderImpl implements NotifListBuilder {
         mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
         mPipelineState.setState(STATE_BUILD_STARTED);
 
-        // Step 1: Filtering and initial grouping
-        // Filter out any notifs that shouldn't be shown right now and cluster any that are part of
-        // a group
-        mPipelineState.incrementTo(STATE_FILTERING);
-        mNotifList.clear();
-        mNewEntries.clear();
-        filterAndGroup(mAllEntries, mNotifList, mNewEntries);
-        pruneIncompleteGroups(mNotifList, mNewEntries);
+        // Step 1: Reset notification states
+        mPipelineState.incrementTo(STATE_RESETTING);
+        resetNotifs();
 
-        // Step 2: Group transforming
+        // Step 2: Filter out any notifications that shouldn't be shown right now
+        mPipelineState.incrementTo(STATE_PRE_GROUP_FILTERING);
+        filterNotifs(mAllEntries, mNotifList, mNotifPreGroupFilters);
+
+        // Step 3: Group notifications with the same group key and set summaries
+        mPipelineState.incrementTo(STATE_GROUPING);
+        groupNotifs(mNotifList, mNewNotifList);
+        applyNewNotifList();
+        pruneIncompleteGroups(mNotifList);
+
+        // Step 4: Group transforming
         // Move some notifs out of their groups and up to top-level (mostly used for heads-upping)
-        dispatchOnBeforeTransformGroups(mReadOnlyNotifList, mNewEntries);
+        dispatchOnBeforeTransformGroups(mReadOnlyNotifList);
         mPipelineState.incrementTo(STATE_TRANSFORMING);
         promoteNotifs(mNotifList);
-        pruneIncompleteGroups(mNotifList, mNewEntries);
+        pruneIncompleteGroups(mNotifList);
 
-        // Step 3: Sort
+        // Step 5: Sort
         // Assign each top-level entry a section, then sort the list by section and then within
         // section by our list of custom comparators
         dispatchOnBeforeSort(mReadOnlyNotifList);
         mPipelineState.incrementTo(STATE_SORTING);
         sortList();
 
-        // Step 4: Lock in our group structure and log anything that's changed since the last run
+        // Step 6: Filter out entries after pre-group filtering, grouping, promoting and sorting
+        // Now filters can see grouping information to determine whether to filter or not
+        mPipelineState.incrementTo(STATE_PRE_RENDER_FILTERING);
+        filterNotifs(mNotifList, mNewNotifList, mNotifPreRenderFilters);
+        applyNewNotifList();
+        pruneIncompleteGroups(mNotifList);
+
+        // Step 7: Lock in our group structure and log anything that's changed since the last run
         mPipelineState.incrementTo(STATE_FINALIZING);
         logParentingChanges();
         freeEmptyGroups();
 
-        // Step 5: Dispatch the new list, first to any listeners and then to the view layer
+        // Step 6: Dispatch the new list, first to any listeners and then to the view layer
         mNotifLog.log(NotifEvent.DISPATCH_FINAL_LIST, "List finalized, is:\n"
                 + dumpList(mNotifList));
         dispatchOnBeforeRenderList(mReadOnlyNotifList);
@@ -297,20 +344,14 @@ public class NotifListBuilderImpl implements NotifListBuilder {
             mOnRenderListListener.onRenderList(mReadOnlyNotifList);
         }
 
-        // Step 6: We're done!
+        // Step 7: We're done!
         mNotifLog.log(NotifEvent.LIST_BUILD_COMPLETE,
                 "Notif list build #" + mIterationCount + " completed");
         mPipelineState.setState(STATE_IDLE);
         mIterationCount++;
     }
 
-    private void filterAndGroup(
-            Collection<NotificationEntry> entries,
-            List<ListEntry> out,
-            List<ListEntry> newlyVisibleEntries) {
-
-        long now = mSystemClock.uptimeMillis();
-
+    private void resetNotifs() {
         for (GroupEntry group : mGroups.values()) {
             group.setPreviousParent(group.getParent());
             group.setParent(null);
@@ -318,22 +359,57 @@ public class NotifListBuilderImpl implements NotifListBuilder {
             group.setSummary(null);
         }
 
-        for (NotificationEntry entry : entries) {
+        for (NotificationEntry entry : mAllEntries) {
             entry.setPreviousParent(entry.getParent());
             entry.setParent(null);
 
-            // See if we should filter out this notification
-            boolean shouldFilterOut = applyFilters(entry, now);
-            if (shouldFilterOut) {
-                continue;
-            }
-
             if (entry.mFirstAddedIteration == -1) {
                 entry.mFirstAddedIteration = mIterationCount;
-                newlyVisibleEntries.add(entry);
             }
+        }
 
-            // Otherwise, group it
+        mNotifList.clear();
+    }
+
+    private void filterNotifs(Collection<? extends ListEntry> entries,
+            List<ListEntry> out, List<NotifFilter> filters) {
+        final long now = mSystemClock.uptimeMillis();
+        for (ListEntry entry : entries)  {
+            if (entry instanceof GroupEntry) {
+                final GroupEntry groupEntry = (GroupEntry) entry;
+
+                // apply filter on its summary
+                final NotificationEntry summary = groupEntry.getRepresentativeEntry();
+                if (applyFilters(summary, now, filters)) {
+                    groupEntry.setSummary(null);
+                    annulAddition(summary);
+                }
+
+                // apply filter on its children
+                final List<NotificationEntry> children = groupEntry.getRawChildren();
+                for (int j = children.size() - 1; j >= 0; j--) {
+                    final NotificationEntry child = children.get(j);
+                    if (applyFilters(child, now, filters)) {
+                        children.remove(child);
+                        annulAddition(child);
+                    }
+                }
+
+                out.add(groupEntry);
+            } else {
+                if (applyFilters((NotificationEntry) entry, now, filters)) {
+                    annulAddition(entry);
+                } else {
+                    out.add(entry);
+                }
+            }
+        }
+    }
+
+    private void groupNotifs(List<ListEntry> entries, List<ListEntry> out) {
+        for (ListEntry listEntry : entries) {
+            // since grouping hasn't happened yet, all notifs are NotificationEntries
+            NotificationEntry entry = (NotificationEntry) listEntry;
             if (entry.getSbn().isGroup()) {
                 final String topLevelKey = entry.getSbn().getGroupKey();
 
@@ -341,7 +417,6 @@ public class NotifListBuilderImpl implements NotifListBuilder {
                 if (group == null) {
                     group = new GroupEntry(topLevelKey);
                     group.mFirstAddedIteration = mIterationCount;
-                    newlyVisibleEntries.add(group);
                     mGroups.put(topLevelKey, group);
                 }
                 if (group.getParent() == null) {
@@ -367,9 +442,9 @@ public class NotifListBuilderImpl implements NotifListBuilder {
                         if (entry.getSbn().getPostTime()
                                 > existingSummary.getSbn().getPostTime()) {
                             group.setSummary(entry);
-                            annulAddition(existingSummary, out, newlyVisibleEntries);
+                            annulAddition(existingSummary, out);
                         } else {
-                            annulAddition(entry, out, newlyVisibleEntries);
+                            annulAddition(entry, out);
                         }
                     }
                 } else {
@@ -411,10 +486,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
         }
     }
 
-    private void pruneIncompleteGroups(
-            List<ListEntry> shadeList,
-            List<ListEntry> newlyVisibleEntries) {
-
+    private void pruneIncompleteGroups(List<ListEntry> shadeList) {
         for (int i = 0; i < shadeList.size(); i++) {
             final ListEntry tle = shadeList.get(i);
 
@@ -431,7 +503,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
                     shadeList.add(summary);
 
                     group.setSummary(null);
-                    annulAddition(group, shadeList, newlyVisibleEntries);
+                    annulAddition(group, shadeList);
 
                 } else if (group.getSummary() == null
                         || children.size() < MIN_CHILDREN_FOR_GROUP) {
@@ -444,7 +516,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
                     if (group.getSummary() != null) {
                         final NotificationEntry summary = group.getSummary();
                         group.setSummary(null);
-                        annulAddition(summary, shadeList, newlyVisibleEntries);
+                        annulAddition(summary, shadeList);
                     }
 
                     for (int j = 0; j < children.size(); j++) {
@@ -454,7 +526,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
                     }
                     children.clear();
 
-                    annulAddition(group, shadeList, newlyVisibleEntries);
+                    annulAddition(group, shadeList);
                 }
             }
         }
@@ -468,10 +540,7 @@ public class NotifListBuilderImpl implements NotifListBuilder {
      * Before calling this method, the entry must already have been removed from its parent. If
      * it's a group, its summary must be null and its children must be empty.
      */
-    private void annulAddition(
-            ListEntry entry,
-            List<ListEntry> shadeList,
-            List<ListEntry> newlyVisibleEntries) {
+    private void annulAddition(ListEntry entry, List<ListEntry> shadeList) {
 
         // This function does very little, but if any of its assumptions are violated (and it has a
         // lot of them), it will put the system into an inconsistent state. So we check all of them
@@ -508,13 +577,18 @@ public class NotifListBuilderImpl implements NotifListBuilder {
             }
         }
 
+        annulAddition(entry);
+
+    }
+
+    /**
+     * Erases bookkeeping traces stored on an entry when it is removed from the notif list.
+     * This can happen if the entry is removed from a group that was broken up or if the entry was
+     * filtered out during any of the filtering steps.
+     */
+    private void annulAddition(ListEntry entry) {
         entry.setParent(null);
         if (entry.mFirstAddedIteration == mIterationCount) {
-            if (!newlyVisibleEntries.remove(entry)) {
-                throw new IllegalStateException("Cannot late-filter entry " + entry.getKey() + " "
-                        + entry + " from " + newlyVisibleEntries + " "
-                        + entry.mFirstAddedIteration);
-            }
             entry.mFirstAddedIteration = -1;
         }
     }
@@ -606,8 +680,8 @@ public class NotifListBuilderImpl implements NotifListBuilder {
         return cmp;
     };
 
-    private boolean applyFilters(NotificationEntry entry, long now) {
-        NotifFilter filter = findRejectingFilter(entry, now);
+    private boolean applyFilters(NotificationEntry entry, long now, List<NotifFilter> filters) {
+        NotifFilter filter = findRejectingFilter(entry, now, filters);
 
         if (filter != entry.mExcludingFilter) {
             if (entry.mExcludingFilter == null) {
@@ -637,9 +711,12 @@ public class NotifListBuilderImpl implements NotifListBuilder {
         return filter != null;
     }
 
-    @Nullable private NotifFilter findRejectingFilter(NotificationEntry entry, long now) {
-        for (int i = 0; i < mNotifFilters.size(); i++) {
-            NotifFilter filter = mNotifFilters.get(i);
+    @Nullable private static NotifFilter findRejectingFilter(NotificationEntry entry, long now,
+            List<NotifFilter> filters) {
+        final int size = filters.size();
+
+        for (int i = 0; i < size; i++) {
+            NotifFilter filter = filters.get(i);
             if (filter.shouldFilterOut(entry, now)) {
                 return filter;
             }
@@ -691,12 +768,9 @@ public class NotifListBuilderImpl implements NotifListBuilder {
         }
     }
 
-    private void dispatchOnBeforeTransformGroups(
-            List<ListEntry> entries,
-            List<ListEntry> newlyVisibleEntries) {
+    private void dispatchOnBeforeTransformGroups(List<ListEntry> entries) {
         for (int i = 0; i < mOnBeforeTransformGroupsListeners.size(); i++) {
-            mOnBeforeTransformGroupsListeners.get(i)
-                    .onBeforeTransformGroups(entries, newlyVisibleEntries);
+            mOnBeforeTransformGroupsListeners.get(i).onBeforeTransformGroups(entries);
         }
     }
 

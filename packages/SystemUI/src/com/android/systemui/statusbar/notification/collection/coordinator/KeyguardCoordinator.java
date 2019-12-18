@@ -85,7 +85,7 @@ public class KeyguardCoordinator implements Coordinator {
     @Override
     public void attach(NotifCollection notifCollection, NotifListBuilder notifListBuilder) {
         setupInvalidateNotifListCallbacks();
-        notifListBuilder.addFilter(mNotifFilter);
+        notifListBuilder.addPreRenderFilter(mNotifFilter);
     }
 
     private final NotifFilter mNotifFilter = new NotifFilter(TAG) {
@@ -131,9 +131,8 @@ public class KeyguardCoordinator implements Coordinator {
                     }
                 }
 
-                // ... neither this notification nor its summary have high enough priority
+                // ... neither this notification nor its group have high enough priority
                 // to be shown on the lockscreen
-                // TODO: grouping hasn't happened yet (b/145134683)
                 if (entry.getParent() != null) {
                     final GroupEntry parent = entry.getParent();
                     if (priorityExceedsLockscreenShowingThreshold(parent)) {
@@ -152,11 +151,10 @@ public class KeyguardCoordinator implements Coordinator {
         }
         if (NotificationUtils.useNewInterruptionModel(mContext)
                 && hideSilentNotificationsOnLockscreen()) {
-            // TODO: make sure in the NewNotifPipeline that entry.isHighPriority() has been
-            //  correctly updated before reaching this point (b/145134683)
             return entry.isHighPriority();
         } else {
-            return !entry.getRepresentativeEntry().getRanking().isAmbient();
+            return entry.getRepresentativeEntry() != null
+                    && !entry.getRepresentativeEntry().getRanking().isAmbient();
         }
     }
 
