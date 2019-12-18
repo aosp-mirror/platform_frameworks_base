@@ -60,6 +60,7 @@ public class AnimatingActivityRegistryTest extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 144611135)
     public void testDeferring() {
         final ActivityRecord activity1 = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
