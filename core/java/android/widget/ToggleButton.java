@@ -58,6 +58,9 @@ public class ToggleButton extends CompoundButton {
         mTextOff = a.getText(com.android.internal.R.styleable.ToggleButton_textOff);
         mDisabledAlpha = a.getFloat(com.android.internal.R.styleable.ToggleButton_disabledAlpha, 0.5f);
         syncTextState();
+        // Default state is derived from on/off-text, so state has to be updated when on/off-text
+        // are updated.
+        setDefaultStateDescritption();
         a.recycle();
     }
 
