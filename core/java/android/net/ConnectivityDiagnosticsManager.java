@@ -19,11 +19,13 @@ package android.net;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -53,8 +55,14 @@ import java.util.concurrent.Executor;
  * </ul>
  */
 public class ConnectivityDiagnosticsManager {
+    private final Context mContext;
+    private final IConnectivityManager mService;
+
     /** @hide */
-    public ConnectivityDiagnosticsManager() {}
+    public ConnectivityDiagnosticsManager(Context context, IConnectivityManager service) {
+        mContext = Preconditions.checkNotNull(context, "missing context");
+        mService = Preconditions.checkNotNull(service, "missing IConnectivityManager");
+    }
 
     /** @hide */
     @VisibleForTesting
