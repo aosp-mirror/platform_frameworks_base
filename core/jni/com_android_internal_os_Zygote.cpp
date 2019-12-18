@@ -715,8 +715,16 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
   CreateDir(user_source, 0751, AID_ROOT, AID_ROOT, fail_fn);
 
   if (isFuse) {
-    BindMount(mount_mode == MOUNT_EXTERNAL_PASS_THROUGH ? pass_through_source : user_source,
-              "/storage", fail_fn);
+    if (mount_mode == MOUNT_EXTERNAL_PASS_THROUGH || mount_mode ==
+        MOUNT_EXTERNAL_INSTALLER || mount_mode == MOUNT_EXTERNAL_FULL) {
+      // For now, MediaProvider, installers and "full" get the pass_through mount
+      // view, which is currently identical to the sdcardfs write view.
+      //
+      // TODO(b/146189163): scope down MOUNT_EXTERNAL_INSTALLER
+      BindMount(pass_through_source, "/storage", fail_fn);
+    } else {
+      BindMount(user_source, "/storage", fail_fn);
+    }
   } else {
     const std::string& storage_source = ExternalStorageViews[mount_mode];
     BindMount(storage_source, "/storage", fail_fn);
