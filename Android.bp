@@ -799,11 +799,7 @@ cc_library {
 filegroup {
     name: "incremental_aidl",
     srcs: [
-        "core/java/android/os/incremental/IIncrementalManagerNative.aidl",
-        "core/java/android/os/incremental/IIncrementalManager.aidl",
-        "core/java/android/os/incremental/IncrementalDataLoaderParamsParcel.aidl",
         "core/java/android/os/incremental/IncrementalFileSystemControlParcel.aidl",
-        "core/java/android/os/incremental/NamedParcelFileDescriptor.aidl",
     ],
     path: "core/java",
 }
@@ -812,6 +808,17 @@ filegroup {
     name: "dataloader_aidl",
     srcs: [
         "core/java/android/content/pm/IDataLoaderStatusListener.aidl",
+        "core/java/android/os/incremental/IncrementalDataLoaderParamsParcel.aidl",
+        "core/java/android/os/incremental/NamedParcelFileDescriptor.aidl",
+    ],
+    path: "core/java",
+}
+
+filegroup {
+    name: "incremental_manager_aidl",
+    srcs: [
+        "core/java/android/os/incremental/IIncrementalManager.aidl",
+        "core/java/android/os/incremental/IIncrementalManagerNative.aidl",
     ],
     path: "core/java",
 }
@@ -820,9 +827,6 @@ aidl_interface {
     name: "libincremental_aidl",
     srcs: [
         ":incremental_aidl",
-    ],
-    imports: [
-        "libdataloader_aidl",
     ],
     backend: {
         java: {
@@ -842,6 +846,9 @@ aidl_interface {
     srcs: [
         ":dataloader_aidl",
     ],
+    imports: [
+        "libincremental_aidl",
+    ],
     backend: {
         java: {
             sdk_version: "28",
@@ -850,7 +857,29 @@ aidl_interface {
             enabled: true,
         },
         ndk: {
+            enabled: false,
+        },
+    },
+}
+
+aidl_interface {
+    name: "libincremental_manager_aidl",
+    srcs: [
+        ":incremental_manager_aidl",
+    ],
+    imports: [
+        "libincremental_aidl",
+        "libdataloader_aidl",
+    ],
+    backend: {
+        java: {
+            sdk_version: "28",
+        },
+        cpp: {
             enabled: true,
+        },
+        ndk: {
+            enabled: false,
         },
     },
 }
