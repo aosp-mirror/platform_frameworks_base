@@ -42,6 +42,7 @@ import android.view.ViewGroup;
 import android.widget.RemoteViews;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.filters.Suppress;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.InflationTask;
@@ -64,7 +65,7 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
-@Ignore
+@Suppress
 public class NotificationContentInflaterTest extends SysuiTestCase {
 
     private NotificationContentInflater mNotificationInflater;

@@ -31,6 +31,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.filters.Suppress;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.CarrierText;
@@ -64,7 +65,7 @@ import java.util.Optional;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
-@Ignore
+@Suppress
 public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     private MetricsLogger mMockMetricsLogger;
