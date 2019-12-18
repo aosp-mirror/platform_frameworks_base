@@ -53,7 +53,6 @@ android_library {
     ],
 
     libs: [
-        "telephony-common",
         "android.car",
     ],
 
@@ -108,7 +107,6 @@ android_library {
     ],
     libs: [
         "android.test.runner",
-        "telephony-common",
         "android.test.base",
         "android.car",
     ],
@@ -129,7 +127,6 @@ android_app {
     ],
 
     libs: [
-        "telephony-common",
         "android.car",
     ],
 
