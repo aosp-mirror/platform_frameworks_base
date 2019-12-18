@@ -101,30 +101,6 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         return mService.getLong(SYNTHETIC_PASSWORD_HANDLE_KEY, 0, userId) != 0;
     }
 
-    @Test
-    public void testPasswordMigration() throws RemoteException {
-        final LockscreenCredential password = newPassword("testPasswordMigration-password");
-
-        disableSyntheticPassword();
-        assertTrue(mService.setLockCredential(password, nonePassword(), PRIMARY_USER_ID));
-        long sid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
-        final byte[] primaryStorageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
-        enableSyntheticPassword();
-        // Performs migration
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
-                password, 0, PRIMARY_USER_ID)
-                    .getResponseCode());
-        assertEquals(sid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
-        assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
-
-        // SP-based verification
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
-                password, 0, PRIMARY_USER_ID)
-                        .getResponseCode());
-        assertArrayNotEquals(primaryStorageKey,
-                mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
-    }
-
     protected void initializeCredentialUnderSP(LockscreenCredential password, int userId)
             throws RemoteException {
         enableSyntheticPassword();
@@ -250,81 +226,6 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         mService.onUnlockUser(PRIMARY_USER_ID);
         flushHandlerTasks();
         verify(mAuthSecretService).primaryUserCredential(any(ArrayList.class));
-    }
-
-    @Test
-    public void testManagedProfileUnifiedChallengeMigration() throws RemoteException {
-        LockscreenCredential UnifiedPassword = newPassword("unified-pwd");
-        disableSyntheticPassword();
-        mService.setLockCredential(UnifiedPassword, nonePassword(), PRIMARY_USER_ID);
-        mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
-        final long primarySid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
-        final long profileSid = mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID);
-        byte[] primaryStorageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
-        byte[] profileStorageKey = mStorageManager.getUserUnlockToken(MANAGED_PROFILE_USER_ID);
-        assertTrue(primarySid != 0);
-        assertTrue(profileSid != 0);
-        assertTrue(profileSid != primarySid);
-
-        // do migration
-        enableSyntheticPassword();
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
-                UnifiedPassword, 0, PRIMARY_USER_ID)
-                        .getResponseCode());
-
-        // verify
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
-                UnifiedPassword, 0, PRIMARY_USER_ID)
-                        .getResponseCode());
-        assertEquals(primarySid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
-        assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
-        assertArrayNotEquals(primaryStorageKey,
-                mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
-        assertArrayNotEquals(profileStorageKey,
-                mStorageManager.getUserUnlockToken(MANAGED_PROFILE_USER_ID));
-        assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
-        assertTrue(hasSyntheticPassword(MANAGED_PROFILE_USER_ID));
-    }
-
-    @Test
-    public void testManagedProfileSeparateChallengeMigration() throws RemoteException {
-        LockscreenCredential primaryPassword = newPassword("primary");
-        LockscreenCredential profilePassword = newPassword("profile");
-        disableSyntheticPassword();
-        mService.setLockCredential(primaryPassword, nonePassword(), PRIMARY_USER_ID);
-        mService.setLockCredential(profilePassword, nonePassword(), MANAGED_PROFILE_USER_ID);
-        final long primarySid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
-        final long profileSid = mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID);
-        byte[] primaryStorageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
-        byte[] profileStorageKey = mStorageManager.getUserUnlockToken(MANAGED_PROFILE_USER_ID);
-        assertTrue(primarySid != 0);
-        assertTrue(profileSid != 0);
-        assertTrue(profileSid != primarySid);
-
-        // do migration
-        enableSyntheticPassword();
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
-                primaryPassword, 0, PRIMARY_USER_ID)
-                        .getResponseCode());
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
-                profilePassword, 0, MANAGED_PROFILE_USER_ID)
-                .getResponseCode());
-
-        // verify
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
-                primaryPassword, 0, PRIMARY_USER_ID)
-                .getResponseCode());
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
-                profilePassword, 0, MANAGED_PROFILE_USER_ID)
-                .getResponseCode());
-        assertEquals(primarySid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
-        assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
-        assertArrayNotEquals(primaryStorageKey,
-                mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
-        assertArrayNotEquals(profileStorageKey,
-                mStorageManager.getUserUnlockToken(MANAGED_PROFILE_USER_ID));
-        assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
-        assertTrue(hasSyntheticPassword(MANAGED_PROFILE_USER_ID));
     }
 
     @Test
