@@ -246,6 +246,7 @@
 
         <activity
             android:name=".BugreportWarningActivity"
+            android:theme="@android:style/Theme.DeviceDefault.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
             android:exported="false" />
