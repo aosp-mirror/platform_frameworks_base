@@ -772,4 +772,8 @@
     <dimen name="resolver_small_margin">18dp</dimen>
     <dimen name="resolver_edge_margin">24dp</dimen>
     <dimen name="resolver_elevation">1dp</dimen>
+
+    <!-- Assistant handles -->
+    <dimen name="assist_handle_shadow_radius">2dp</dimen>
+
 </resources>
