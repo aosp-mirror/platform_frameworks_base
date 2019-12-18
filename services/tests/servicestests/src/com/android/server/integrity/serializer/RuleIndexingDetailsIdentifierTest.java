@@ -19,6 +19,7 @@ package com.android.server.integrity.serializer;
 import static com.android.server.integrity.serializer.RuleIndexingDetails.APP_CERTIFICATE_INDEXED;
 import static com.android.server.integrity.serializer.RuleIndexingDetails.NOT_INDEXED;
 import static com.android.server.integrity.serializer.RuleIndexingDetails.PACKAGE_NAME_INDEXED;
+import static com.android.server.integrity.serializer.RuleIndexingDetailsIdentifier.splitRulesIntoIndexBuckets;
 import static com.android.server.testutils.TestUtils.assertExpectException;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -35,133 +36,172 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /** Unit tests for {@link RuleIndexingDetailsIdentifier}. */
 @RunWith(JUnit4.class)
 public class RuleIndexingDetailsIdentifierTest {
 
+    private static final String SAMPLE_APP_CERTIFICATE = "testcert";
+    private static final String SAMPLE_INSTALLER_NAME = "com.test.installer";
+    private static final String SAMPLE_INSTALLER_CERTIFICATE = "installercert";
+    private static final String SAMPLE_PACKAGE_NAME = "com.test.package";
+
+    private static final AtomicFormula ATOMIC_FORMULA_WITH_PACKAGE_NAME =
+            new AtomicFormula.StringAtomicFormula(
+                    AtomicFormula.PACKAGE_NAME,
+                    SAMPLE_PACKAGE_NAME,
+                    /* isHashedValue= */ false);
+    private static final AtomicFormula ATOMIC_FORMULA_WITH_APP_CERTIFICATE =
+            new AtomicFormula.StringAtomicFormula(
+                    AtomicFormula.APP_CERTIFICATE,
+                    SAMPLE_APP_CERTIFICATE,
+                    /* isHashedValue= */ false);
+    private static final AtomicFormula ATOMIC_FORMULA_WITH_INSTALLER_NAME =
+            new AtomicFormula.StringAtomicFormula(
+                    AtomicFormula.INSTALLER_NAME,
+                    SAMPLE_INSTALLER_NAME,
+                    /* isHashedValue= */ false);
+    private static final AtomicFormula ATOMIC_FORMULA_WITH_INSTALLER_CERTIFICATE =
+            new AtomicFormula.StringAtomicFormula(
+                    AtomicFormula.INSTALLER_CERTIFICATE,
+                    SAMPLE_INSTALLER_CERTIFICATE,
+                    /* isHashedValue= */ false);
+    private static final AtomicFormula ATOMIC_FORMULA_WITH_VERSION_CODE =
+            new AtomicFormula.IntAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.EQ, 12);
+    private static final AtomicFormula ATOMIC_FORMULA_WITH_ISPREINSTALLED =
+            new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, /* booleanValue= */
+                    true);
+
+
+    private static final Rule RULE_WITH_PACKAGE_NAME =
+            new Rule(
+                    new CompoundFormula(
+                            CompoundFormula.AND,
+                            Arrays.asList(
+                                    ATOMIC_FORMULA_WITH_PACKAGE_NAME,
+                                    ATOMIC_FORMULA_WITH_INSTALLER_NAME)),
+                    Rule.DENY);
+    private static final Rule RULE_WITH_APP_CERTIFICATE =
+            new Rule(
+                    new CompoundFormula(
+                            CompoundFormula.AND,
+                            Arrays.asList(
+                                    ATOMIC_FORMULA_WITH_APP_CERTIFICATE,
+                                    ATOMIC_FORMULA_WITH_INSTALLER_NAME)),
+                    Rule.DENY);
+    private static final Rule RULE_WITH_INSTALLER_RESTRICTIONS =
+            new Rule(
+                    new CompoundFormula(
+                            CompoundFormula.AND,
+                            Arrays.asList(
+                                    ATOMIC_FORMULA_WITH_INSTALLER_NAME,
+                                    ATOMIC_FORMULA_WITH_INSTALLER_CERTIFICATE)),
+                    Rule.DENY);
+
+    private static final Rule RULE_WITH_NONSTRING_RESTRICTIONS =
+            new Rule(
+                    new CompoundFormula(
+                            CompoundFormula.AND,
+                            Arrays.asList(
+                                    ATOMIC_FORMULA_WITH_VERSION_CODE,
+                                    ATOMIC_FORMULA_WITH_ISPREINSTALLED)),
+                    Rule.DENY);
+
     @Test
     public void getIndexType_nullRule() {
-        Rule rule = null;
+        List<Rule> ruleList = null;
 
         assertExpectException(
                 IllegalArgumentException.class,
                 /* expectedExceptionMessageRegex= */
-                "Indexing type cannot be determined for null rule.",
-                () -> RuleIndexingDetailsIdentifier.getIndexingDetails(rule));
+                "Index buckets cannot be created for null rule list.",
+                () -> splitRulesIntoIndexBuckets(ruleList));
     }
 
     @Test
     public void getIndexType_invalidFormula() {
-        Rule rule = new Rule(getInvalidFormula(), Rule.DENY);
+        List<Rule> ruleList = new ArrayList();
+        ruleList.add(new Rule(getInvalidFormula(), Rule.DENY));
 
         assertExpectException(
                 IllegalArgumentException.class,
                 /* expectedExceptionMessageRegex= */ "Invalid formula tag type.",
-                () -> RuleIndexingDetailsIdentifier.getIndexingDetails(rule));
+                () -> splitRulesIntoIndexBuckets(ruleList));
     }
 
     @Test
     public void getIndexType_ruleContainingPackageNameFormula() {
-        String packageName = "com.test.app";
-        String installerName = "com.test.installer";
-        Rule rule =
-                new Rule(
-                        new CompoundFormula(
-                                CompoundFormula.AND,
-                                Arrays.asList(
-                                        new AtomicFormula.StringAtomicFormula(
-                                                AtomicFormula.PACKAGE_NAME,
-                                                packageName,
-                                                /* isHashedValue= */ false),
-                                        new AtomicFormula.StringAtomicFormula(
-                                                AtomicFormula.INSTALLER_NAME,
-                                                installerName,
-                                                /* isHashedValue= */ false))),
-                        Rule.DENY);
+        List<Rule> ruleList = new ArrayList();
+        ruleList.add(RULE_WITH_PACKAGE_NAME);
 
-        RuleIndexingDetails result = RuleIndexingDetailsIdentifier.getIndexingDetails(rule);
+        Map<Integer, Map<String, List<Rule>>> result = splitRulesIntoIndexBuckets(ruleList);
 
-        assertThat(result.getIndexType()).isEqualTo(PACKAGE_NAME_INDEXED);
-        assertThat(result.getRuleKey()).isEqualTo(packageName);
+        // Verify the resulting map content.
+        assertThat(result.keySet())
+                .containsExactly(NOT_INDEXED, PACKAGE_NAME_INDEXED, APP_CERTIFICATE_INDEXED);
+        assertThat(result.get(NOT_INDEXED)).isEmpty();
+        assertThat(result.get(APP_CERTIFICATE_INDEXED)).isEmpty();
+        assertThat(result.get(PACKAGE_NAME_INDEXED).keySet()).containsExactly(SAMPLE_PACKAGE_NAME);
+        assertThat(result.get(PACKAGE_NAME_INDEXED).get(SAMPLE_PACKAGE_NAME))
+                .containsExactly(RULE_WITH_PACKAGE_NAME);
     }
 
     @Test
     public void getIndexType_ruleContainingAppCertificateFormula() {
-        String appCertificate = "cert1";
-        String installerName = "com.test.installer";
-        Rule rule =
-                new Rule(
-                        new CompoundFormula(
-                                CompoundFormula.AND,
-                                Arrays.asList(
-                                        new AtomicFormula.StringAtomicFormula(
-                                                AtomicFormula.APP_CERTIFICATE,
-                                                appCertificate,
-                                                /* isHashedValue= */ false),
-                                        new AtomicFormula.StringAtomicFormula(
-                                                AtomicFormula.INSTALLER_NAME,
-                                                installerName,
-                                                /* isHashedValue= */ false))),
-                        Rule.DENY);
+        List<Rule> ruleList = new ArrayList();
+        ruleList.add(RULE_WITH_APP_CERTIFICATE);
 
+        Map<Integer, Map<String, List<Rule>>> result = splitRulesIntoIndexBuckets(ruleList);
 
-        RuleIndexingDetails result = RuleIndexingDetailsIdentifier.getIndexingDetails(rule);
-
-        assertThat(result.getIndexType()).isEqualTo(APP_CERTIFICATE_INDEXED);
-        assertThat(result.getRuleKey()).isEqualTo(appCertificate);
+        assertThat(result.keySet())
+                .containsExactly(NOT_INDEXED, PACKAGE_NAME_INDEXED, APP_CERTIFICATE_INDEXED);
+        assertThat(result.get(NOT_INDEXED)).isEmpty();
+        assertThat(result.get(PACKAGE_NAME_INDEXED)).isEmpty();
+        assertThat(result.get(APP_CERTIFICATE_INDEXED).keySet())
+                .containsExactly(SAMPLE_APP_CERTIFICATE);
+        assertThat(result.get(APP_CERTIFICATE_INDEXED).get(SAMPLE_APP_CERTIFICATE))
+                .containsExactly(RULE_WITH_APP_CERTIFICATE);
     }
 
     @Test
     public void getIndexType_ruleWithUnindexedCompoundFormula() {
-        String installerCertificate = "cert1";
-        String installerName = "com.test.installer";
-        Rule rule =
-                new Rule(
-                        new CompoundFormula(
-                                CompoundFormula.AND,
-                                Arrays.asList(
-                                        new AtomicFormula.StringAtomicFormula(
-                                                AtomicFormula.INSTALLER_CERTIFICATE,
-                                                installerCertificate,
-                                                /* isHashedValue= */ false),
-                                        new AtomicFormula.StringAtomicFormula(
-                                                AtomicFormula.INSTALLER_NAME,
-                                                installerName,
-                                                /* isHashedValue= */ false))),
-                        Rule.DENY);
+        List<Rule> ruleList = new ArrayList();
+        ruleList.add(RULE_WITH_INSTALLER_RESTRICTIONS);
 
-        assertThat(RuleIndexingDetailsIdentifier.getIndexingDetails(rule).getIndexType())
-                .isEqualTo(NOT_INDEXED);
+        Map<Integer, Map<String, List<Rule>>> result = splitRulesIntoIndexBuckets(ruleList);
+
+        assertThat(result.keySet())
+                .containsExactly(NOT_INDEXED, PACKAGE_NAME_INDEXED, APP_CERTIFICATE_INDEXED);
+        assertThat(result.get(PACKAGE_NAME_INDEXED)).isEmpty();
+        assertThat(result.get(APP_CERTIFICATE_INDEXED)).isEmpty();
+        assertThat(result.get(NOT_INDEXED).keySet()).containsExactly("N/A");
+        assertThat(result.get(NOT_INDEXED).get("N/A"))
+                .containsExactly(RULE_WITH_INSTALLER_RESTRICTIONS);
     }
 
     @Test
-    public void getIndexType_rulContainingCompoundFormulaWithIntAndBoolean() {
-        int appVersion = 12;
-        Rule rule =
-                new Rule(
-                        new CompoundFormula(
-                                CompoundFormula.AND,
-                                Arrays.asList(
-                                        new AtomicFormula.BooleanAtomicFormula(
-                                                AtomicFormula.PRE_INSTALLED,
-                                                /* booleanValue= */ true),
-                                        new AtomicFormula.IntAtomicFormula(
-                                                AtomicFormula.VERSION_CODE,
-                                                AtomicFormula.EQ,
-                                                appVersion))),
-                        Rule.DENY);
+    public void getIndexType_ruleContainingCompoundFormulaWithIntAndBoolean() {
+        List<Rule> ruleList = new ArrayList();
+        ruleList.add(RULE_WITH_NONSTRING_RESTRICTIONS);
 
-        assertThat(RuleIndexingDetailsIdentifier.getIndexingDetails(rule).getIndexType())
-                .isEqualTo(NOT_INDEXED);
+        Map<Integer, Map<String, List<Rule>>> result = splitRulesIntoIndexBuckets(ruleList);
+
+        assertThat(result.keySet())
+                .containsExactly(NOT_INDEXED, PACKAGE_NAME_INDEXED, APP_CERTIFICATE_INDEXED);
+        assertThat(result.get(PACKAGE_NAME_INDEXED)).isEmpty();
+        assertThat(result.get(APP_CERTIFICATE_INDEXED)).isEmpty();
+        assertThat(result.get(NOT_INDEXED).keySet()).containsExactly("N/A");
+        assertThat(result.get(NOT_INDEXED).get("N/A"))
+                .containsExactly(RULE_WITH_NONSTRING_RESTRICTIONS);
     }
 
     @Test
     public void getIndexType_negatedRuleContainingPackageNameFormula() {
-        String packageName = "com.test.app";
-        String installerName = "com.test.installer";
-        Rule rule =
+        Rule negatedRule =
                 new Rule(
                         new CompoundFormula(
                                 CompoundFormula.NOT,
@@ -169,18 +209,47 @@ public class RuleIndexingDetailsIdentifierTest {
                                         new CompoundFormula(
                                                 CompoundFormula.AND,
                                                 Arrays.asList(
-                                                        new AtomicFormula.StringAtomicFormula(
-                                                                AtomicFormula.PACKAGE_NAME,
-                                                                packageName,
-                                                                /* isHashedValue= */ false),
-                                                        new AtomicFormula.StringAtomicFormula(
-                                                                AtomicFormula.INSTALLER_NAME,
-                                                                installerName,
-                                                                /* isHashedValue= */ false))))),
+                                                        ATOMIC_FORMULA_WITH_PACKAGE_NAME,
+                                                        ATOMIC_FORMULA_WITH_APP_CERTIFICATE)))),
                         Rule.DENY);
+        List<Rule> ruleList = new ArrayList();
+        ruleList.add(negatedRule);
 
-        assertThat(RuleIndexingDetailsIdentifier.getIndexingDetails(rule).getIndexType())
-                .isEqualTo(NOT_INDEXED);
+        Map<Integer, Map<String, List<Rule>>> result = splitRulesIntoIndexBuckets(ruleList);
+
+        assertThat(result.keySet())
+                .containsExactly(NOT_INDEXED, PACKAGE_NAME_INDEXED, APP_CERTIFICATE_INDEXED);
+        assertThat(result.get(PACKAGE_NAME_INDEXED)).isEmpty();
+        assertThat(result.get(APP_CERTIFICATE_INDEXED)).isEmpty();
+        assertThat(result.get(NOT_INDEXED).keySet()).containsExactly("N/A");
+        assertThat(result.get(NOT_INDEXED).get("N/A")).containsExactly(negatedRule);
+    }
+
+    @Test
+    public void getIndexType_allRulesTogether() {
+        List<Rule> ruleList = new ArrayList();
+        ruleList.add(RULE_WITH_PACKAGE_NAME);
+        ruleList.add(RULE_WITH_APP_CERTIFICATE);
+        ruleList.add(RULE_WITH_INSTALLER_RESTRICTIONS);
+        ruleList.add(RULE_WITH_NONSTRING_RESTRICTIONS);
+
+        Map<Integer, Map<String, List<Rule>>> result = splitRulesIntoIndexBuckets(ruleList);
+
+        assertThat(result.keySet())
+                .containsExactly(NOT_INDEXED, PACKAGE_NAME_INDEXED, APP_CERTIFICATE_INDEXED);
+
+        assertThat(result.get(PACKAGE_NAME_INDEXED).keySet()).containsExactly(SAMPLE_PACKAGE_NAME);
+        assertThat(result.get(PACKAGE_NAME_INDEXED).get(SAMPLE_PACKAGE_NAME))
+                .containsExactly(RULE_WITH_PACKAGE_NAME);
+
+        assertThat(result.get(APP_CERTIFICATE_INDEXED).keySet())
+                .containsExactly(SAMPLE_APP_CERTIFICATE);
+        assertThat(result.get(APP_CERTIFICATE_INDEXED).get(SAMPLE_APP_CERTIFICATE))
+                .containsExactly(RULE_WITH_APP_CERTIFICATE);
+
+        assertThat(result.get(NOT_INDEXED).keySet()).containsExactly("N/A");
+        assertThat(result.get(NOT_INDEXED).get("N/A")).containsExactly(
+                RULE_WITH_INSTALLER_RESTRICTIONS, RULE_WITH_NONSTRING_RESTRICTIONS);
     }
 
     private Formula getInvalidFormula() {
