@@ -26,6 +26,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.internal.util.custom.PowerMenuConstants.*;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
@@ -322,7 +323,18 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         return items;
     }
 
+    private boolean isInLockTaskMode() {
+        try {
+            return ActivityManagerNative.getDefault().isInLockTaskMode();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     private boolean isAdvancedRestartPossible() {
+        if (isInLockTaskMode()){
+            return false;
+        }
         boolean keyguardLocked = mKeyguardManager.inKeyguardRestrictedInputMode() && mKeyguardManager.isKeyguardSecure();
         boolean advancedRestartEnabled = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.ADVANCED_REBOOT, 0) == 1;
@@ -414,7 +426,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
             if (GLOBAL_ACTION_KEY_POWER.equals(actionKey)) {
                 continue;
-            } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
+            } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey) && !isInLockTaskMode()) {
                 mItems.add(mAirplaneModeOn);
             } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
                 if (Settings.Global.getInt(mContext.getContentResolver(),
@@ -425,7 +437,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 if (mShowSilentToggle) {
                     mItems.add(mSilentModeAction);
                 }
-            } else if (GLOBAL_ACTION_KEY_USERS.equals(actionKey)) {
+            } else if (GLOBAL_ACTION_KEY_USERS.equals(actionKey) && !isInLockTaskMode()) {
                 List<UserInfo> users = ((UserManager) mContext.getSystemService(
                         Context.USER_SERVICE)).getUsers();
                 if (users.size() > 1) {
@@ -433,7 +445,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 }
             } else if (GLOBAL_ACTION_KEY_SETTINGS.equals(actionKey)) {
                 mItems.add(getSettingsAction());
-            } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey)) {
+            } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey) && !isInLockTaskMode()) {
                 if (Settings.Secure.getIntForUser(mContext.getContentResolver(),
                             Settings.Secure.LOCKDOWN_IN_POWER_MENU, 0, getCurrentUser().id) != 0
                         && shouldDisplayLockdown()) {
