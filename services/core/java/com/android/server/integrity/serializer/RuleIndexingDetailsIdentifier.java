@@ -25,26 +25,58 @@ import android.content.integrity.CompoundFormula;
 import android.content.integrity.Formula;
 import android.content.integrity.Rule;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /** A helper class for identifying the indexing type and key of a given rule. */
 class RuleIndexingDetailsIdentifier {
 
-    /** Determines the indexing type and key for a given rule. */
-    public static RuleIndexingDetails getIndexingDetails(Rule rule) {
-        if (rule == null) {
-            throw new IllegalArgumentException("Indexing type cannot be determined for null rule.");
+    private static final String DEFAULT_RULE_KEY = "N/A";
+
+    /**
+     * Splits a given rule list into three indexing categories.
+     *
+     * TODO(b/145488708): Instead of this structure, sort the values in the map and just return a
+     * sorted list.
+     */
+    public static Map<Integer, Map<String, List<Rule>>> splitRulesIntoIndexBuckets(
+            List<Rule> rules) {
+        if (rules == null) {
+            throw new IllegalArgumentException(
+                    "Index buckets cannot be created for null rule list.");
         }
-        return getIndexingDetails(rule.getFormula());
+
+        Map<Integer, Map<String, List<Rule>>> typeOrganizedRuleMap = new HashMap();
+        typeOrganizedRuleMap.put(NOT_INDEXED, new HashMap());
+        typeOrganizedRuleMap.put(PACKAGE_NAME_INDEXED, new HashMap());
+        typeOrganizedRuleMap.put(APP_CERTIFICATE_INDEXED, new HashMap());
+
+        for (Rule rule : rules) {
+            RuleIndexingDetails indexingDetails = getIndexingDetails(rule.getFormula());
+            String ruleKey =
+                    indexingDetails.getIndexType() != NOT_INDEXED
+                            ? indexingDetails.getRuleKey()
+                            : DEFAULT_RULE_KEY;
+
+            if (!typeOrganizedRuleMap.get(indexingDetails.getIndexType()).containsKey(ruleKey)) {
+                typeOrganizedRuleMap
+                        .get(indexingDetails.getIndexType())
+                        .put(ruleKey, new ArrayList());
+            }
+
+            typeOrganizedRuleMap
+                    .get(indexingDetails.getIndexType())
+                    .get(ruleKey)
+                    .add(rule);
+        }
+
+        return typeOrganizedRuleMap;
     }
 
     private static RuleIndexingDetails getIndexingDetails(Formula formula) {
-        if (formula == null) {
-            throw new IllegalArgumentException(
-                    "Indexing type cannot be determined for null formula.");
-        }
-
         switch (formula.getTag()) {
             case Formula.COMPOUND_FORMULA_TAG:
                 return getIndexingDetailsForCompoundFormula((CompoundFormula) formula);
