@@ -17,12 +17,11 @@
 
 package android.media.effect;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterFactory;
 import android.filterfw.core.FilterFunction;
 import android.filterfw.core.Frame;
-import android.media.effect.EffectContext;
 
 /**
  * Effect subclass for effects based on a single Filter. Subclasses need only invoke the
