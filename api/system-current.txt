@@ -7937,6 +7937,13 @@ package android.telephony {
   public class CbGeoUtils {
   }
 
+  public static class CbGeoUtils.Circle implements android.telephony.CbGeoUtils.Geometry {
+    ctor public CbGeoUtils.Circle(@NonNull android.telephony.CbGeoUtils.LatLng, double);
+    method public boolean contains(@NonNull android.telephony.CbGeoUtils.LatLng);
+    method @NonNull public android.telephony.CbGeoUtils.LatLng getCenter();
+    method public double getRadius();
+  }
+
   public static interface CbGeoUtils.Geometry {
     method public boolean contains(@NonNull android.telephony.CbGeoUtils.LatLng);
   }
@@ -7947,6 +7954,12 @@ package android.telephony {
     method @NonNull public android.telephony.CbGeoUtils.LatLng subtract(@NonNull android.telephony.CbGeoUtils.LatLng);
     field public final double lat;
     field public final double lng;
+  }
+
+  public static class CbGeoUtils.Polygon implements android.telephony.CbGeoUtils.Geometry {
+    ctor public CbGeoUtils.Polygon(@NonNull java.util.List<android.telephony.CbGeoUtils.LatLng>);
+    method public boolean contains(@NonNull android.telephony.CbGeoUtils.LatLng);
+    method @NonNull public java.util.List<android.telephony.CbGeoUtils.LatLng> getVertices();
   }
 
   public class CellBroadcastIntents {
