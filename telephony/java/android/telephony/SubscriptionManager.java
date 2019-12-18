@@ -912,9 +912,9 @@ public class SubscriptionManager {
      * <p>
      * Contains {@link #EXTRA_SUBSCRIPTION_INDEX} to indicate which subscription
      * changed.
-     *
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @RequiresPermission(android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS)
     public static final String ACTION_SUBSCRIPTION_PLANS_CHANGED
