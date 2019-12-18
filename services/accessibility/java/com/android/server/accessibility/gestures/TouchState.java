@@ -71,7 +71,10 @@ public class TouchState {
     // Helper class to track received pointers.
     // Todo: collapse or hide this class so multiple classes don't modify it.
     private final ReceivedPointerTracker mReceivedPointerTracker;
+    // The most recently received motion event.
     private MotionEvent mLastReceivedEvent;
+    // The accompanying raw event without any transformations.
+    private MotionEvent mLastReceivedRawEvent;
 
     public TouchState() {
         mReceivedPointerTracker = new ReceivedPointerTracker();
@@ -96,6 +99,9 @@ public class TouchState {
     public void onReceivedMotionEvent(MotionEvent rawEvent) {
         if (mLastReceivedEvent != null) {
             mLastReceivedEvent.recycle();
+        }
+        if (mLastReceivedRawEvent != null) {
+            mLastReceivedRawEvent.recycle();
         }
         mLastReceivedEvent = MotionEvent.obtain(rawEvent);
         mReceivedPointerTracker.onMotionEvent(rawEvent);
@@ -245,7 +251,6 @@ public class TouchState {
         // Primary pointer which is either the first that went down
         // or if it goes up the next one that most recently went down.
         private int mPrimaryPointerId;
-
 
         ReceivedPointerTracker() {
             clear();

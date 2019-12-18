@@ -39,11 +39,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.net.ISocketKeepaliveCallback;
+import android.net.InvalidPacketException;
 import android.net.KeepalivePacketData;
 import android.net.NattKeepalivePacketData;
 import android.net.NetworkAgent;
 import android.net.NetworkUtils;
-import android.net.SocketKeepalive.InvalidPacketException;
 import android.net.SocketKeepalive.InvalidSocketException;
 import android.net.TcpKeepalivePacketData;
 import android.net.util.IpUtils;
@@ -657,7 +657,10 @@ public class KeepaliveTracker {
         final TcpKeepalivePacketData packet;
         try {
             packet = TcpKeepaliveController.getTcpKeepalivePacket(fd);
-        } catch (InvalidPacketException | InvalidSocketException e) {
+        } catch (InvalidSocketException e) {
+            notifyErrorCallback(cb, e.error);
+            return;
+        } catch (InvalidPacketException e) {
             notifyErrorCallback(cb, e.error);
             return;
         }

@@ -208,8 +208,8 @@ interface IDevicePolicyManager {
     void setRestrictionsProvider(in ComponentName who, in ComponentName provider);
     ComponentName getRestrictionsProvider(int userHandle);
 
-    void setUserRestriction(in ComponentName who, in String key, boolean enable);
-    Bundle getUserRestrictions(in ComponentName who);
+    void setUserRestriction(in ComponentName who, in String key, boolean enable, boolean parent);
+    Bundle getUserRestrictions(in ComponentName who, boolean parent);
     void addCrossProfileIntentFilter(in ComponentName admin, in IntentFilter filter, int flags);
     void clearCrossProfileIntentFilters(in ComponentName admin);
 

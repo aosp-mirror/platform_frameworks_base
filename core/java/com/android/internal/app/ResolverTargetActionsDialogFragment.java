@@ -24,14 +24,19 @@ import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 
 import com.android.internal.R;
+import com.android.internal.app.chooser.DisplayResolveInfo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Shows a dialog with actions to take on a chooser target
+ * Shows a dialog with actions to take on a chooser target.
  */
 public class ResolverTargetActionsDialogFragment extends DialogFragment
         implements DialogInterface.OnClickListener {
@@ -42,6 +47,10 @@ public class ResolverTargetActionsDialogFragment extends DialogFragment
     // Sync with R.array.resolver_target_actions_* resources
     private static final int TOGGLE_PIN_INDEX = 0;
     private static final int APP_INFO_INDEX = 1;
+
+    private List<DisplayResolveInfo> mTargetInfos = new ArrayList<>();
+    private List<CharSequence> mLabels = new ArrayList<>();
+    private boolean[] mPinned;
 
     public ResolverTargetActionsDialogFragment() {
     }
@@ -55,15 +64,43 @@ public class ResolverTargetActionsDialogFragment extends DialogFragment
         setArguments(args);
     }
 
+    public ResolverTargetActionsDialogFragment(CharSequence title, ComponentName name,
+            List<DisplayResolveInfo> targets, List<CharSequence> labels) {
+        Bundle args = new Bundle();
+        args.putCharSequence(TITLE_KEY, title);
+        args.putParcelable(NAME_KEY, name);
+        mTargetInfos = targets;
+        mLabels = labels;
+        setArguments(args);
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final Bundle args = getArguments();
         final int itemRes = args.getBoolean(PINNED_KEY, false)
                 ? R.array.resolver_target_actions_unpin
                 : R.array.resolver_target_actions_pin;
+        String[] defaultActions = getResources().getStringArray(itemRes);
+        CharSequence[] items;
+
+        if (mTargetInfos == null || mTargetInfos.size() < 2) {
+            items = defaultActions;
+        } else {
+            // Pin item for each sub-item
+            items = new CharSequence[mTargetInfos.size() + 1];
+            for (int i = 0; i < mTargetInfos.size(); i++) {
+                items[i] = mTargetInfos.get(i).isPinned()
+                         ? getResources().getString(R.string.unpin_specific_target, mLabels.get(i))
+                         : getResources().getString(R.string.pin_specific_target, mLabels.get(i));
+            }
+            // "App info"
+            items[mTargetInfos.size()] = defaultActions[1];
+        }
+
+
         return new Builder(getContext())
                 .setCancelable(true)
-                .setItems(itemRes, this)
+                .setItems(items, this)
                 .setTitle(args.getCharSequence(TITLE_KEY))
                 .create();
     }
@@ -72,27 +109,41 @@ public class ResolverTargetActionsDialogFragment extends DialogFragment
     public void onClick(DialogInterface dialog, int which) {
         final Bundle args = getArguments();
         ComponentName name = args.getParcelable(NAME_KEY);
-        switch (which) {
-            case TOGGLE_PIN_INDEX:
-                SharedPreferences sp = ChooserActivity.getPinnedSharedPrefs(getContext());
-                final String key = name.flattenToString();
-                boolean currentVal = sp.getBoolean(name.flattenToString(), false);
-                if (currentVal) {
-                    sp.edit().remove(key).apply();
-                } else {
-                    sp.edit().putBoolean(key, true).apply();
-                }
-
-                // Force the chooser to requery and resort things
-                getActivity().recreate();
-                break;
-            case APP_INFO_INDEX:
-                Intent in = new Intent().setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        .setData(Uri.fromParts("package", name.getPackageName(), null))
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-                startActivity(in);
-                break;
+        if (which == 0 || (mTargetInfos.size() > 0 && which < mTargetInfos.size())) {
+            if (mTargetInfos == null || mTargetInfos.size() == 0) {
+                pinComponent(name);
+            } else {
+                pinComponent(mTargetInfos.get(which).getResolvedComponentName());
+            }
+            // Force the chooser to requery and resort things
+            getActivity().recreate();
+        } else {
+            // Last item in dialog is App Info
+            Intent in = new Intent().setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    .setData(Uri.fromParts("package", name.getPackageName(), null))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+            startActivity(in);
         }
         dismiss();
     }
+
+    private void pinComponent(ComponentName name) {
+        SharedPreferences sp = ChooserActivity.getPinnedSharedPrefs(getContext());
+        final String key = name.flattenToString();
+        boolean currentVal = sp.getBoolean(name.flattenToString(), false);
+        if (currentVal) {
+            sp.edit().remove(key).apply();
+        } else {
+            sp.edit().putBoolean(key, true).apply();
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        // Dismiss on config changed (eg: rotation)
+        // TODO: Maintain state on config change
+        super.onConfigurationChanged(newConfig);
+        dismiss();
+    }
+
 }

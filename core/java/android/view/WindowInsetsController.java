@@ -30,7 +30,6 @@ import java.lang.annotation.RetentionPolicy;
  * Interface to control windows that generate insets.
  *
  * TODO Needs more information and examples once the API is more baked.
- * @hide pending unhide
  */
 public interface WindowInsetsController {
 
@@ -64,7 +63,10 @@ public interface WindowInsetsController {
      */
     int APPEARANCE_LIGHT_NAVIGATION_BARS = 1 << 4;
 
-    /** Determines the appearance of system bars. */
+    /**
+     * Determines the appearance of system bars.
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {APPEARANCE_OPAQUE_STATUS_BARS, APPEARANCE_OPAQUE_NAVIGATION_BARS,
             APPEARANCE_LOW_PROFILE_BARS, APPEARANCE_LIGHT_STATUS_BARS,
@@ -75,33 +77,40 @@ public interface WindowInsetsController {
     /**
      * The default option for {@link #setSystemBarsBehavior(int)}. System bars will be forcibly
      * shown on any user interaction on the corresponding display if navigation bars are hidden by
-     * {@link #hide(int)} or {@link WindowInsetsAnimationController#changeInsets(Insets)}.
+     * {@link #hide(int)} or
+     * {@link WindowInsetsAnimationController#setInsetsAndAlpha(Insets, float, float)}.
+     * @hide
      */
     int BEHAVIOR_SHOW_BARS_BY_TOUCH = 0;
 
     /**
      * Option for {@link #setSystemBarsBehavior(int)}: Window would like to remain interactive when
      * hiding navigation bars by calling {@link #hide(int)} or
-     * {@link WindowInsetsAnimationController#changeInsets(Insets)}.
+     * {@link WindowInsetsAnimationController#setInsetsAndAlpha(Insets, float, float)}.
      *
      * <p>When system bars are hidden in this mode, they can be revealed with system gestures, such
      * as swiping from the edge of the screen where the bar is hidden from.</p>
+     * @hide
      */
     int BEHAVIOR_SHOW_BARS_BY_SWIPE = 1;
 
     /**
      * Option for {@link #setSystemBarsBehavior(int)}: Window would like to remain interactive when
      * hiding navigation bars by calling {@link #hide(int)} or
-     * {@link WindowInsetsAnimationController#changeInsets(Insets)}.
+     * {@link WindowInsetsAnimationController#setInsetsAndAlpha(Insets, float, float)}.
      *
      * <p>When system bars are hidden in this mode, they can be revealed temporarily with system
      * gestures, such as swiping from the edge of the screen where the bar is hidden from. These
      * transient system bars will overlay app’s content, may have some degree of transparency, and
      * will automatically hide after a short timeout.</p>
+     * @hide
      */
     int BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE = 2;
 
-    /** Determines the behavior of system bars when hiding them by calling {@link #hide}. */
+    /**
+     * Determines the behavior of system bars when hiding them by calling {@link #hide}.
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {BEHAVIOR_SHOW_BARS_BY_TOUCH, BEHAVIOR_SHOW_BARS_BY_SWIPE,
             BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE})
@@ -139,23 +148,27 @@ public interface WindowInsetsController {
      * the position of the windows in the system causing insets directly.
      *
      * @param types The {@link InsetsType}s the application has requested to control.
+     * @param durationMillis duration of animation in
+     *                       {@link java.util.concurrent.TimeUnit#MILLISECONDS}
      * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when the
      *                 windows are ready to be controlled, among other callbacks.
      * @hide
      */
-    void controlWindowInsetsAnimation(@InsetsType int types,
+    void controlWindowInsetsAnimation(@InsetsType int types, long durationMillis,
             @NonNull WindowInsetsAnimationControlListener listener);
 
     /**
      * Lets the application control the animation for showing the IME in a frame-by-frame manner by
      * modifying the position of the IME when it's causing insets.
      *
+     * @param durationMillis duration of the animation in
+     *                       {@link java.util.concurrent.TimeUnit#MILLISECONDS}
      * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when the
      *                 IME are ready to be controlled, among other callbacks.
      */
-    default void controlInputMethodAnimation(
+    default void controlInputMethodAnimation(long durationMillis,
             @NonNull WindowInsetsAnimationControlListener listener) {
-        controlWindowInsetsAnimation(ime(), listener);
+        controlWindowInsetsAnimation(ime(), durationMillis, listener);
     }
 
     /**
@@ -166,7 +179,7 @@ public interface WindowInsetsController {
      * the event by observing {@link View#onApplyWindowInsets} and checking visibility with
      * {@link WindowInsets#isVisible}.
      *
-     * @see #controlInputMethodAnimation(WindowInsetsAnimationControlListener)
+     * @see #controlInputMethodAnimation(long, WindowInsetsAnimationControlListener)
      * @see #hideInputMethod()
      */
     default void showInputMethod() {
@@ -181,7 +194,7 @@ public interface WindowInsetsController {
      * the event by observing {@link View#onApplyWindowInsets} and checking visibility with
      * {@link WindowInsets#isVisible}.
      *
-     * @see #controlInputMethodAnimation(WindowInsetsAnimationControlListener)
+     * @see #controlInputMethodAnimation(long, WindowInsetsAnimationControlListener)
      * @see #showInputMethod()
      */
     default void hideInputMethod() {

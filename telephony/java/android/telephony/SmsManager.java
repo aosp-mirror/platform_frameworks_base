@@ -1998,6 +1998,27 @@ public final class SmsManager {
         }
     }
 
+    /**
+     * Gets the total capacity of SMS storage on RUIM and SIM cards
+     *
+     * @return the total capacity count of SMS on RUIM and SIM cards
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public int getSmsCapacityOnIcc() {
+        int ret = 0;
+        try {
+            ISms iccISms = getISmsService();
+            if (iccISms != null) {
+                ret = iccISms.getSmsCapacityOnIccForSubscriber(getSubscriptionId());
+            }
+        } catch (RemoteException ex) {
+            //ignore it
+        }
+        return ret;
+    }
+
     // see SmsMessage.getStatusOnIcc
 
     /** Free space (TS 51.011 10.5.3 / 3GPP2 C.S0023 3.4.27). */

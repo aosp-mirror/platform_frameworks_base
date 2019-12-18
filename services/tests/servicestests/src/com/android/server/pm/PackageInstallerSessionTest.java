@@ -173,6 +173,7 @@ public class PackageInstallerSessionTest {
                 /* createdMillis */ 0L,
                 /* stageDir */ mTmpDir,
                 /* stageCid */ null,
+                /* files */ null,
                 /* prepared */ true,
                 /* committed */ true,
                 /* sealed */ false,  // Setting to true would trigger some PM logic.

@@ -1139,4 +1139,16 @@
     <dimen name="qs_media_width">350dp</dimen>
     <dimen name="qs_media_padding">8dp</dimen>
     <dimen name="qs_media_corner_radius">10dp</dimen>
+
+    <dimen name="magnification_border_size">5dp</dimen>
+    <dimen name="magnification_frame_move_short">5dp</dimen>
+    <dimen name="magnification_frame_move_long">25dp</dimen>
+    <dimen name="magnification_drag_view_width">100dp</dimen>
+    <dimen name="magnification_drag_view_height">35dp</dimen>
+    <dimen name="magnification_controls_size">90dp</dimen>
+    <dimen name="magnifier_left_right_controls_width">35dp</dimen>
+    <dimen name="magnifier_left_right_controls_height">45dp</dimen>
+    <dimen name="magnifier_up_down_controls_width">45dp</dimen>
+    <dimen name="magnifier_up_down_controls_height">40dp</dimen>
+
 </resources>

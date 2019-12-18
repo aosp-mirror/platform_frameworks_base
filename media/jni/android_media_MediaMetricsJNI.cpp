@@ -18,7 +18,7 @@
 
 #include <binder/Parcel.h>
 #include <jni.h>
-#include <media/MediaAnalyticsItem.h>
+#include <media/MediaMetricsItem.h>
 #include <nativehelper/JNIHelp.h>
 
 #include "android_media_MediaMetricsJNI.h"
@@ -52,7 +52,7 @@ struct BundleHelper {
     const jmethodID constructID;
     jobject const bundle;
 
-    // We use templated put to access MediaAnalyticsItem based on data type not type enum.
+    // We use templated put to access mediametrics::Item based on data type not type enum.
     // See std::variant and std::visit.
     template<typename T>
     void put(jstring keyName, const T& value) = delete;
@@ -97,7 +97,7 @@ struct BundleHelper {
 
 // place the attributes into a java PersistableBundle object
 jobject MediaMetricsJNI::writeMetricsToBundle(
-        JNIEnv* env, MediaAnalyticsItem *item, jobject bundle)
+        JNIEnv* env, mediametrics::Item *item, jobject bundle)
 {
     BundleHelper bh(env, bundle);
 

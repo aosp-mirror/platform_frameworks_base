@@ -53,6 +53,8 @@ public class ManagedProfileLifecycleStressTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testCreateStartDelete() throws Exception {
+        // Disable package verifier for ADB installs.
+        getDevice().executeShellCommand("settings put global verifier_verify_adb_installs 0");
         int iteration = 0;
         final long deadline = System.nanoTime() + TimeUnit.MINUTES.toNanos(TIME_LIMIT_MINUTES);
         while (System.nanoTime() < deadline) {

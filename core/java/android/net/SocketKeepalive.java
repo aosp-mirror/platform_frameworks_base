@@ -147,17 +147,6 @@ public abstract class SocketKeepalive implements AutoCloseable {
         }
     }
 
-    /**
-     * This packet is invalid.
-     * See the error code for details.
-     * @hide
-     */
-    public static class InvalidPacketException extends ErrorCodeException {
-        public InvalidPacketException(final int error) {
-            super(error);
-        }
-    }
-
     @NonNull final IConnectivityManager mService;
     @NonNull final Network mNetwork;
     @NonNull final ParcelFileDescriptor mPfd;

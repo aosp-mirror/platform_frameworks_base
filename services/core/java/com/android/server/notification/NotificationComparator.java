@@ -59,6 +59,12 @@ public class NotificationComparator
             return -1 * Boolean.compare(isLeftHighImportance, isRightHighImportance);
         }
 
+        // If a score has been assigned by notification assistant service, use this service
+        // rank results within each bucket instead of this comparator implementation.
+        if (left.getRankingScore() != right.getRankingScore()) {
+            return -1 * Float.compare(left.getRankingScore(), right.getRankingScore());
+        }
+
         // first all colorized notifications
         boolean leftImportantColorized = isImportantColorized(left);
         boolean rightImportantColorized = isImportantColorized(right);

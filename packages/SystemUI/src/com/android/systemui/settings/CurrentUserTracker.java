@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.UserHandle;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -97,7 +98,7 @@ public abstract class CurrentUserTracker {
             if (!mReceiverRegistered) {
                 mCurrentUserId = ActivityManager.getCurrentUser();
                 IntentFilter filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-                mBroadcastDispatcher.registerReceiver(this, filter);
+                mBroadcastDispatcher.registerReceiver(this, filter, null, UserHandle.ALL);
                 mReceiverRegistered = true;
             }
         }

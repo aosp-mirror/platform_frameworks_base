@@ -32,7 +32,6 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -117,11 +116,6 @@ public class NotificationFilter {
         }
 
         if (entry.getRanking().isSuspended()) {
-            return true;
-        }
-
-        if (!StatusBar.ENABLE_CHILD_NOTIFICATIONS
-                && mGroupManager.isChildInGroupWithSummary(sbn)) {
             return true;
         }
 

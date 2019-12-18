@@ -914,8 +914,8 @@
     <string name="quick_settings_secondary_label_until">Until <xliff:g id="time" example="7 am">%s</xliff:g></string>
     <!-- QuickSettings: Label for the toggle to activate dark theme (A.K.A Dark Mode). [CHAR LIMIT=20] -->
     <string name="quick_settings_ui_mode_night_label">Dark theme</string>
-    <!-- QuickSettings: Label for the dark theme tile when enabled by battery saver. [CHAR LIMIT=40] -->
-    <string name="quick_settings_ui_mode_night_label_battery_saver">Dark theme\nBattery saver</string>
+    <!-- QuickSettings: Secondary text for the dark theme tile when enabled by battery saver. [CHAR LIMIT=20] -->
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver">Battery saver</string>
     <!-- QuickSettings: Secondary text for when the Dark Mode will be enabled at sunset. [CHAR LIMIT=20] -->
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset">On at sunset</string>
     <!-- QuickSettings: Secondary text for when the Dark Mode will be on until sunrise. [CHAR LIMIT=20] -->
@@ -2492,4 +2492,12 @@
 
     <!-- Title of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=25] -->
     <string name="inattentive_sleep_warning_title">Standby</string>
+
+    <!-- Window Magnification strings -->
+    <!-- Title for Magnification Overlay Window [CHAR LIMIT=NONE] -->
+    <string name="magnification_overlay_title">Magnification Overlay Window</string>
+    <!-- Title for Magnification Window [CHAR LIMIT=NONE] -->
+    <string name="magnification_window_title">Magnification Window</string>
+    <!-- Title for Magnification Controls Window [CHAR LIMIT=NONE] -->
+    <string name="magnification_controls_title">Magnification Window Controls</string>
 </resources>

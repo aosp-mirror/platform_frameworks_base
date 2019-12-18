@@ -577,7 +577,7 @@ public class MtpDatabase implements AutoCloseable {
         try {
             // note - we are relying on a special case in MediaProvider.update() to update
             // the paths for all children in the case where this is a directory.
-            final Uri objectsUri = MediaStore.Files.getMtpObjectsUri(obj.getVolumeName());
+            final Uri objectsUri = MediaStore.Files.getContentUri(obj.getVolumeName());
             mMediaProvider.update(objectsUri, values, PATH_WHERE, whereArgs);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in mMediaProvider.update", e);
@@ -658,7 +658,7 @@ public class MtpDatabase implements AutoCloseable {
                 // Old parent exists in MediaProvider - perform a move
                 // note - we are relying on a special case in MediaProvider.update() to update
                 // the paths for all children in the case where this is a directory.
-                final Uri objectsUri = MediaStore.Files.getMtpObjectsUri(obj.getVolumeName());
+                final Uri objectsUri = MediaStore.Files.getContentUri(obj.getVolumeName());
                 mMediaProvider.update(objectsUri, values, PATH_WHERE, whereArgs);
             } else {
                 // Old parent doesn't exist - add the object
@@ -873,7 +873,7 @@ public class MtpDatabase implements AutoCloseable {
     }
 
     private int findInMedia(MtpStorageManager.MtpObject obj, Path path) {
-        final Uri objectsUri = MediaStore.Files.getMtpObjectsUri(obj.getVolumeName());
+        final Uri objectsUri = MediaStore.Files.getContentUri(obj.getVolumeName());
 
         int ret = -1;
         Cursor c = null;
@@ -893,7 +893,7 @@ public class MtpDatabase implements AutoCloseable {
     }
 
     private void deleteFromMedia(MtpStorageManager.MtpObject obj, Path path, boolean isDir) {
-        final Uri objectsUri = MediaStore.Files.getMtpObjectsUri(obj.getVolumeName());
+        final Uri objectsUri = MediaStore.Files.getContentUri(obj.getVolumeName());
         try {
             // Delete the object(s) from MediaProvider, but ignore errors.
             if (isDir) {
@@ -921,71 +921,12 @@ public class MtpDatabase implements AutoCloseable {
 
     @VisibleForNative
     private int[] getObjectReferences(int handle) {
-        MtpStorageManager.MtpObject obj = mManager.getObject(handle);
-        if (obj == null)
-            return null;
-        // Translate this handle to the MediaProvider Handle
-        handle = findInMedia(obj, obj.getPath());
-        if (handle == -1)
-            return null;
-        Uri uri = Files.getMtpReferencesUri(obj.getVolumeName(), handle);
-        Cursor c = null;
-        try {
-            c = mMediaProvider.query(uri, PATH_PROJECTION, null, null, null, null);
-            if (c == null) {
-                return null;
-            }
-                ArrayList<Integer> result = new ArrayList<>();
-                while (c.moveToNext()) {
-                    // Translate result handles back into handles for this session.
-                    String refPath = c.getString(0);
-                    MtpStorageManager.MtpObject refObj = mManager.getByPath(refPath);
-                    if (refObj != null) {
-                        result.add(refObj.getId());
-                    }
-                }
-                return result.stream().mapToInt(Integer::intValue).toArray();
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getObjectList", e);
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
         return null;
     }
 
     @VisibleForNative
     private int setObjectReferences(int handle, int[] references) {
-        MtpStorageManager.MtpObject obj = mManager.getObject(handle);
-        if (obj == null)
-            return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
-        // Translate this handle to the MediaProvider Handle
-        handle = findInMedia(obj, obj.getPath());
-        if (handle == -1)
-            return MtpConstants.RESPONSE_GENERAL_ERROR;
-        Uri uri = Files.getMtpReferencesUri(obj.getVolumeName(), handle);
-        ArrayList<ContentValues> valuesList = new ArrayList<>();
-        for (int id : references) {
-            // Translate each reference id to the MediaProvider Id
-            MtpStorageManager.MtpObject refObj = mManager.getObject(id);
-            if (refObj == null)
-                continue;
-            int refHandle = findInMedia(refObj, refObj.getPath());
-            if (refHandle == -1)
-                continue;
-            ContentValues values = new ContentValues();
-            values.put(Files.FileColumns._ID, refHandle);
-            valuesList.add(values);
-        }
-        try {
-            if (mMediaProvider.bulkInsert(uri, valuesList.toArray(new ContentValues[0])) > 0) {
-                return MtpConstants.RESPONSE_OK;
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setObjectReferences", e);
-        }
-        return MtpConstants.RESPONSE_GENERAL_ERROR;
+        return MtpConstants.RESPONSE_OPERATION_NOT_SUPPORTED;
     }
 
     @VisibleForNative

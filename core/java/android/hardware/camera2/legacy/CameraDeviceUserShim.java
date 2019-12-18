@@ -24,6 +24,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
+import android.hardware.camera2.ICameraOfflineSession;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
@@ -786,6 +787,12 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         }
 
         return mLegacyDevice.getAudioRestriction();
+    }
+
+    @Override
+    public ICameraOfflineSession switchToOffline(ICameraDeviceCallbacks cbs,
+            Surface[] offlineOutputs) {
+        throw new UnsupportedOperationException("Legacy device does not support switchToOffline");
     }
 
     @Override

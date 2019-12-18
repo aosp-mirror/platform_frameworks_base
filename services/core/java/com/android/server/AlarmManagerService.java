@@ -22,6 +22,8 @@ import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE;
 import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
 import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
+import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
+import static android.os.UserHandle.USER_SYSTEM;
 
 import android.annotation.UserIdInt;
 import android.app.Activity;
@@ -41,10 +43,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PermissionInfo;
+import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -222,15 +221,6 @@ class AlarmManagerService extends SystemService {
     long mLastTimeChangeClockTime;
     long mLastTimeChangeRealtime;
     int mNumTimeChanged;
-
-    // Bookkeeping about the identity of the "System UI" package, determined at runtime.
-
-    /**
-     * This permission must be defined by the canonical System UI package,
-     * with protection level "signature".
-     */
-    private static final String SYSTEM_UI_SELF_PERMISSION =
-            "android.permission.systemui.IDENTITY";
 
     /**
      * At boot we use SYSTEM_UI_SELF_PERMISSION to look up the definer's uid.
@@ -3201,7 +3191,7 @@ class AlarmManagerService extends SystemService {
     }
 
     void removeUserLocked(int userHandle) {
-        if (userHandle == UserHandle.USER_SYSTEM) {
+        if (userHandle == USER_SYSTEM) {
             // If we're told we're removing the system user, ignore it.
             return;
         }
@@ -3845,21 +3835,9 @@ class AlarmManagerService extends SystemService {
         }
 
         int getSystemUiUid() {
-            int sysUiUid = -1;
-            final PackageManager pm = mContext.getPackageManager();
-            try {
-                PermissionInfo sysUiPerm = pm.getPermissionInfo(SYSTEM_UI_SELF_PERMISSION, 0);
-                ApplicationInfo sysUi = pm.getApplicationInfo(sysUiPerm.packageName, 0);
-                if ((sysUi.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0) {
-                    sysUiUid = sysUi.uid;
-                } else {
-                    Slog.e(TAG, "SysUI permission " + SYSTEM_UI_SELF_PERMISSION
-                            + " defined by non-privileged app " + sysUi.packageName
-                            + " - ignoring");
-                }
-            } catch (NameNotFoundException e) {
-            }
-            return sysUiUid;
+            PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
+            return pm.getPackageUid(pm.getSystemUiServiceComponent().getPackageName(),
+                    MATCH_SYSTEM_ONLY, USER_SYSTEM);
         }
 
         ClockReceiver getClockReceiver(AlarmManagerService service) {

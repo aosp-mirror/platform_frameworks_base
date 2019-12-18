@@ -19,6 +19,7 @@ package android.inputmethodservice;
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
 import android.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -28,6 +29,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.InputChannel;
+import android.view.autofill.AutofillId;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
@@ -39,6 +41,7 @@ import android.view.inputmethod.InputMethodSubtype;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
 import com.android.internal.view.IInputMethodSession;
@@ -72,6 +75,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_SHOW_SOFT_INPUT = 60;
     private static final int DO_HIDE_SOFT_INPUT = 70;
     private static final int DO_CHANGE_INPUTMETHOD_SUBTYPE = 80;
+    private static final int DO_CREATE_INLINE_SUGGESTIONS_REQUEST = 90;
 
     final WeakReference<AbstractInputMethodService> mTarget;
     final Context mContext;
@@ -225,6 +229,11 @@ class IInputMethodWrapper extends IInputMethod.Stub
             case DO_CHANGE_INPUTMETHOD_SUBTYPE:
                 inputMethod.changeInputMethodSubtype((InputMethodSubtype)msg.obj);
                 return;
+            case DO_CREATE_INLINE_SUGGESTIONS_REQUEST:
+                SomeArgs args = (SomeArgs) msg.obj;
+                inputMethod.onCreateInlineSuggestionsRequest((ComponentName) args.arg1,
+                        (AutofillId) args.arg2, (IInlineSuggestionsRequestCallback) args.arg3);
+                return;
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -263,6 +272,15 @@ class IInputMethodWrapper extends IInputMethod.Stub
             IInputMethodPrivilegedOperations privOps) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageIOO(DO_INITIALIZE_INTERNAL, displayId, token, privOps));
+    }
+
+    @BinderThread
+    @Override
+    public void onCreateInlineSuggestionsRequest(ComponentName componentName, AutofillId autofillId,
+            IInlineSuggestionsRequestCallback cb) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageOOO(DO_CREATE_INLINE_SUGGESTIONS_REQUEST, componentName,
+                        autofillId, cb));
     }
 
     @BinderThread

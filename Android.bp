@@ -200,34 +200,9 @@ filegroup {
 }
 
 filegroup {
-    name: "framework-wifi-sources",
-    srcs: [
-        "wifi/java/**/*.java",
-        "wifi/java/**/*.aidl",
-    ],
-    exclude_srcs: [
-        ":framework-wifi-non-updatable-sources"
-    ],
-    path: "wifi/java",
-}
-
-filegroup {
-    name: "framework-wifi-non-updatable-sources",
-    srcs: [
-        // TODO(b/146011398) package android.net.wifi is now split amongst 2 jars: framework.jar and
-        // framework-wifi.jar. This is not a good idea, should move WifiNetworkScoreCache
-        // to a separate package.
-        "wifi/java/android/net/wifi/WifiNetworkScoreCache.java",
-        "wifi/java/android/net/wifi/WifiCondManager.java",
-        "wifi/java/android/net/wifi/wificond/*.java",
-    ],
-}
-
-filegroup {
     name: "framework-non-updatable-sources",
     srcs: [
         // Java/AIDL sources under frameworks/base
-        ":framework-appsearch-sources",
         ":framework-blobstore-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
@@ -247,9 +222,8 @@ filegroup {
         ":framework-telecomm-sources",
         ":framework-telephony-common-sources",
         ":framework-telephony-sources",
-        ":framework-wifi-sources",
+        ":framework-wifi-annotations",
         ":framework-wifi-non-updatable-sources",
-	":libwificond_ipc_aidl",
         ":PacProcessor-aidl-sources",
         ":ProxyHandler-aidl-sources",
 
@@ -287,9 +261,11 @@ filegroup {
 filegroup {
     name: "framework-updatable-sources",
     srcs: [
+        ":framework-appsearch-sources",
         ":framework-sdkext-sources",
         ":framework-statsd-sources",
         ":updatable-media-srcs",
+        ":framework-wifi-updatable-sources",
     ]
 }
 
@@ -425,7 +401,7 @@ java_defaults {
 
 filegroup {
     name: "framework-jarjar-rules",
-    srcs: ["jarjar_rules_hidl.txt"],
+    srcs: ["framework-jarjar-rules.txt"],
 }
 
 filegroup {
@@ -451,8 +427,10 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
     libs: [
+        "framework-appsearch-stubs",
         // TODO(b/146167933): Use framework-statsd-stubs
         "framework-statsd",
+        "framework-wifi-stubs",
     ],
     installable: true,
     javac_shard_size: 150,
@@ -489,9 +467,12 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
+        "framework-appsearch", // TODO(b/146218515): should be framework-appsearch-stubs
         "framework-sdkext-stubs-systemapi",
         // TODO(b/146167933): Use framework-statsd-stubs instead.
         "framework-statsd",
+        // TODO(b/140299412): should be framework-wifi-stubs
+        "framework-wifi",
         // TODO(jiyong): add more stubs for APEXes here
     ],
     sdk_version: "core_platform",
@@ -1679,6 +1660,8 @@ filegroup {
         "core/java/android/util/LocalLog.java",
         "core/java/android/util/TimeUtils.java",
         "core/java/com/android/internal/os/SomeArgs.java",
+        "core/java/com/android/internal/util/AsyncChannel.java",
+        "core/java/com/android/internal/util/BitwiseInputStream.java",
         "core/java/com/android/internal/util/FastXmlSerializer.java",
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IState.java",

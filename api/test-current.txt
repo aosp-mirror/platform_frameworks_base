@@ -2832,6 +2832,7 @@ package android.service.notification {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.notification.Adjustment> CREATOR;
     field public static final String KEY_CONTEXTUAL_ACTIONS = "key_contextual_actions";
     field public static final String KEY_IMPORTANCE = "key_importance";
+    field public static final String KEY_RANKING_SCORE = "key_ranking_score";
     field public static final String KEY_SNOOZE_CRITERIA = "key_snooze_criteria";
     field public static final String KEY_TEXT_REPLIES = "key_text_replies";
     field public static final String KEY_USER_SENTIMENT = "key_user_sentiment";
@@ -3160,6 +3161,10 @@ package android.telephony {
     method public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber);
     field @RequiresPermission("android.permission.READ_ACTIVE_EMERGENCY_SESSION") public static final int LISTEN_OUTGOING_EMERGENCY_CALL = 268435456; // 0x10000000
     field @RequiresPermission("android.permission.READ_ACTIVE_EMERGENCY_SESSION") public static final int LISTEN_OUTGOING_EMERGENCY_SMS = 536870912; // 0x20000000
+  }
+
+  public final class PreciseDataConnectionState implements android.os.Parcelable {
+    ctor @Deprecated public PreciseDataConnectionState(int, int, int, @NonNull String, @Nullable android.net.LinkProperties, int);
   }
 
   public class ServiceState implements android.os.Parcelable {

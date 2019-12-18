@@ -2544,6 +2544,28 @@
     <string name="config_customAdbPublicKeyConfirmationSecondaryUserComponent"
             >com.android.systemui/com.android.systemui.usb.UsbDebuggingSecondaryUserActivity</string>
 
+    <!-- Component name of the activity that shows the usb containment status. -->
+    <string name="config_usbContaminantActivity" translatable="false"
+            >com.android.systemui/com.android.systemui.usb.UsbContaminantActivity</string>
+
+    <!-- Component name of the activity that shows the request for access to a usb device. -->
+    <string name="config_usbPermissionActivity" translatable="false"
+            >com.android.systemui/com.android.systemui.usb.UsbPermissionActivity</string>
+
+    <!-- Component name of the activity that shows more information about a usb accessory. -->
+    <string name="config_usbAccessoryUriActivity" translatable="false"
+            >com.android.systemui/com.android.systemui.usb.UsbAccessoryUriActivity</string>
+
+    <!-- Component name of the activity that confirms the activity to start when a usb device is
+         plugged in. -->
+    <string name="config_usbConfirmActivity" translatable="false"
+            >com.android.systemui/com.android.systemui.usb.UsbConfirmActivity</string>
+
+    <!-- Component name of the activity to select the activity to start when a usb device is plugged
+         in. -->
+    <string name="config_usbResolverActivity" translatable="false"
+            >com.android.systemui/com.android.systemui.usb.UsbResolverActivity</string>
+
     <!-- Name of the dialog that is used to request the user's consent to VPN connection -->
     <string name="config_customVpnConfirmDialogComponent" translatable="false"
             >com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog</string>
@@ -2674,11 +2696,45 @@
          property. If this is false, then the following recents config flags are ignored. -->
     <bool name="config_hasRecents">true</bool>
 
-    <!-- Component name for the activity that will be presenting the Recents UI, which will receive special permissions for API related
-          to fetching and presenting recent tasks. The default configuration uses Launcehr3QuickStep as default launcher and points to
-          the corresponding recents component. When using a different default launcher, change this appropriately or use the default
-          systemui implementation: com.android.systemui/.recents.RecentsActivity -->
-    <string name="config_recentsComponentName" translatable="false">com.android.launcher3/com.android.quickstep.RecentsActivity</string>
+    <!-- Component name for the activity that will be presenting the Recents UI, which will receive
+         special permissions for API related to fetching and presenting recent tasks. The default
+         configuration uses Launcehr3QuickStep as default launcher and points to the corresponding
+         recents component. When using a different default launcher, change this appropriately or
+         use the default systemui implementation: com.android.systemui/.recents.RecentsActivity -->
+    <string name="config_recentsComponentName" translatable="false"
+            >com.android.launcher3/com.android.quickstep.RecentsActivity</string>
+
+    <!-- SystemUi service component -->
+    <string name="config_systemUIServiceComponent" translatable="false"
+            >com.android.systemui/com.android.systemui.SystemUIService</string>
+
+    <!-- Keyguard component -->
+    <string name="config_keyguardComponent" translatable="false"
+            >com.android.systemui/com.android.systemui.keyguard.KeyguardService</string>
+
+    <!-- Screen record dialog component -->
+    <string name="config_screenRecorderComponent" translatable="false"
+            >com.android.systemui/com.android.systemui.screenrecord.ScreenRecordDialog</string>
+
+    <!-- The component name of a special dock app that merely launches a dream.
+         We don't want to launch this app when docked because it causes an unnecessary
+         activity transition.  We just want to start the dream. -->
+    <string name="config_somnambulatorComponent" translatable="false"
+            >com.android.systemui/com.android.systemui.Somnambulator</string>
+
+    <!-- The component name of a special dock app that merely launches a dream.
+         We don't want to launch this app when docked because it causes an unnecessary
+         activity transition.  We just want to start the dream.. -->
+    <string name="config_screenshotServiceComponent" translatable="false"
+            >com.android.systemui/com.android.systemui.screenshot.TakeScreenshotService</string>
+
+    <!-- The component notified when there is an error while taking a screenshot. -->
+    <string name="config_screenshotErrorReceiverComponent" translatable="false"
+            >com.android.systemui/com.android.systemui.screenshot.ScreenshotServiceErrorReceiver</string>
+
+    <!-- The component for the activity shown to grant permissions for a slice. -->
+    <string name="config_slicePermissionComponent" translatable="false"
+            >com.android.systemui/com.android.systemui.SlicePermissionActivity</string>
 
     <!-- The minimum number of visible recent tasks to be presented to the user through the
          SystemUI. Can be -1 if there is no minimum limit. -->
@@ -2850,10 +2906,6 @@
 
     <!-- Whether to use voip audio mode for ims call -->
     <bool name="config_use_voip_mode_for_ims">false</bool>
-
-    <!-- ImsService package name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_ims_package"/>
 
     <!-- String array containing numbers that shouldn't be logged. Country-specific. -->
     <string-array name="unloggable_phone_numbers" />
@@ -3032,9 +3084,6 @@
     <!-- Specifies the maximum burn-in offset vertically. -->
     <integer name="config_burnInProtectionMaxVerticalOffset">0</integer>
 
-    <!-- Keyguard component -->
-    <string name="config_keyguardComponent" translatable="false">com.android.systemui/com.android.systemui.keyguard.KeyguardService</string>
-
     <!-- Limit for the number of face templates per user -->
     <integer name="config_faceMaxTemplatesPerUser">1</integer>
 
@@ -3073,7 +3122,9 @@
 
          The path is assumed to be specified in display coordinates with pixel units and in
          the display's native orientation, with the origin of the coordinate system at the
-         center top of the display.
+         center top of the display. Optionally, you can append either `@left` or `@right` to the
+         end of the path string, in order to change the path origin to either the top left,
+         or top right of the display.
 
          To facilitate writing device-independent emulation overlays, the marker `@dp` can be
          appended after the path string to interpret coordinates in dp instead of px units.

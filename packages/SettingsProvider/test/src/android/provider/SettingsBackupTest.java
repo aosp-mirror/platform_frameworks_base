@@ -734,7 +734,8 @@ public class SettingsBackupTest {
                  Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE,
                  Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE,
                  Settings.Secure.FACE_UNLOCK_RE_ENROLL,
-                 Settings.Secure.TAP_GESTURE);
+                 Settings.Secure.TAP_GESTURE,
+                 Settings.Secure.WINDOW_MAGNIFICATION);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {

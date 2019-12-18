@@ -176,6 +176,9 @@ def read_and_dump_likely_data(icu_data_dir):
     dump_representative_locales(representative_locales)
     return likely_script_dict
 
+def escape_script_variable_name(script):
+    """Escape characters, e.g. '~', in a C++ variable name"""
+    return script.replace("~", "_")
 
 def read_parent_data(icu_data_dir):
     """Read locale parent data from ICU data files."""
@@ -221,7 +224,7 @@ def dump_parent_data(script_organized_dict):
     for script in sorted_scripts:
         parent_dict = script_organized_dict[script]
         print ('const std::unordered_map<uint32_t, uint32_t> %s_PARENTS({'
-            % script.upper())
+            % escape_script_variable_name(script.upper()))
         for locale in sorted(parent_dict.keys()):
             parent = parent_dict[locale]
             print '    {0x%08Xu, 0x%08Xu}, // %s -> %s' % (
@@ -239,7 +242,7 @@ def dump_parent_data(script_organized_dict):
     for script in sorted_scripts:
         print "    {{'%c', '%c', '%c', '%c'}, &%s_PARENTS}," % (
             script[0], script[1], script[2], script[3],
-            script.upper())
+            escape_script_variable_name(script.upper()))
     print '};'
 
 

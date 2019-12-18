@@ -26,6 +26,9 @@ mainline_stubs_args =
     "--hide Typo " +
     "--hide UnavailableSymbol "
 
+// TODO: remove this server classes are cleaned up.
+mainline_stubs_args += "--hide-package com.android.server "
+
 stubs_defaults {
     name: "framework-module-stubs-defaults-publicapi",
     args: mainline_stubs_args,
@@ -34,6 +37,6 @@ stubs_defaults {
 
 stubs_defaults {
     name: "framework-module-stubs-defaults-systemapi",
-    args: mainline_stubs_args + " --show-annotation android.annotation.SystemApi ",
+    args: mainline_stubs_args + " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\) ",
     installable: false,
 }

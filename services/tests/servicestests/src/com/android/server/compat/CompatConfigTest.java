@@ -22,15 +22,13 @@ import android.content.pm.ApplicationInfo;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.compat.annotation.Change;
-import com.android.compat.annotation.XmlWriter;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.UUID;
 
 @RunWith(AndroidJUnit4.class)
@@ -50,18 +48,10 @@ public class CompatConfigTest {
         return dir;
     }
 
-    private void writeChangesToFile(Change[] changes, File f) {
-        XmlWriter writer = new XmlWriter();
-        for (Change change: changes) {
-            writer.addChange(change);
-        }
-        try {
-            f.createNewFile();
-            writer.write(new FileOutputStream(f));
-        } catch (IOException e) {
-            throw new RuntimeException(
-                    "Encountered an error while writing compat config file", e);
-        }
+    private void writeToFile(File dir, String filename, String content) throws IOException {
+        OutputStream os = new FileOutputStream(new File(dir, filename));
+        os.write(content.getBytes());
+        os.close();
     }
 
     @Test
@@ -173,13 +163,15 @@ public class CompatConfigTest {
     }
 
     @Test
-    public void testReadConfig() {
-        Change[] changes = {new Change(1234L, "MY_CHANGE1", false, 2, null), new Change(1235L,
-                "MY_CHANGE2", true, null, "description"), new Change(1236L, "MY_CHANGE3", false,
-                null, "")};
+    public void testReadConfig() throws IOException {
+        String configXml = "<config>"
+                + "<compat-change id=\"1234\" name=\"MY_CHANGE1\" enableAfterTargetSdk=\"2\" />"
+                + "<compat-change id=\"1235\" name=\"MY_CHANGE2\" disabled=\"true\" />"
+                + "<compat-change id=\"1236\" name=\"MY_CHANGE3\" />"
+                + "</config>";
 
         File dir = createTempDir();
-        writeChangesToFile(changes, new File(dir.getPath() + "/platform_compat_config.xml"));
+        writeToFile(dir, "platform_compat_config.xml", configXml);
 
         CompatConfig pc = new CompatConfig();
         pc.initConfigFromLib(dir);
@@ -191,17 +183,18 @@ public class CompatConfigTest {
     }
 
     @Test
-    public void testReadConfigMultipleFiles() {
-        Change[] changes1 = {new Change(1234L, "MY_CHANGE1", false, 2, null)};
-        Change[] changes2 = {new Change(1235L, "MY_CHANGE2", true, null, ""), new Change(1236L,
-                "MY_CHANGE3", false, null, null)};
+    public void testReadConfigMultipleFiles() throws IOException {
+        String configXml1 = "<config>"
+                + "<compat-change id=\"1234\" name=\"MY_CHANGE1\" enableAfterTargetSdk=\"2\" />"
+                + "</config>";
+        String configXml2 = "<config>"
+                + "<compat-change id=\"1235\" name=\"MY_CHANGE2\" disabled=\"true\" />"
+                + "<compat-change id=\"1236\" name=\"MY_CHANGE3\" />"
+                + "</config>";
 
         File dir = createTempDir();
-        writeChangesToFile(changes1,
-                new File(dir.getPath() + "/libcore_platform_compat_config.xml"));
-        writeChangesToFile(changes2,
-                new File(dir.getPath() + "/frameworks_platform_compat_config.xml"));
-
+        writeToFile(dir, "libcore_platform_compat_config.xml", configXml1);
+        writeToFile(dir, "frameworks_platform_compat_config.xml", configXml2);
 
         CompatConfig pc = new CompatConfig();
         pc.initConfigFromLib(dir);

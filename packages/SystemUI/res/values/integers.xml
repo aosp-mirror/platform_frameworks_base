@@ -32,4 +32,6 @@
     <!-- Ratio of "right" end of status bar that will swipe to QS. -->
     <integer name="qs_split_fraction">2</integer>
 
+    <integer name="magnification_default_scale">2</integer>
+
 </resources>

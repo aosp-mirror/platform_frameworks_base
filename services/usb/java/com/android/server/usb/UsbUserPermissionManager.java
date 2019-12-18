@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -515,8 +516,8 @@ class UsbUserPermissionManager {
         intent.putExtra(Intent.EXTRA_UID, uid);
         intent.putExtra(UsbManager.EXTRA_CAN_BE_DEFAULT, canBeDefault);
         intent.putExtra(UsbManager.EXTRA_PACKAGE, packageName);
-        intent.setClassName("com.android.systemui",
-                "com.android.systemui.usb.UsbPermissionActivity");
+        intent.setComponent(ComponentName.unflattenFromString(userContext.getResources().getString(
+                com.android.internal.R.string.config_usbPermissionActivity)));
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         try {

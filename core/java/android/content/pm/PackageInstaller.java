@@ -231,6 +231,15 @@ public class PackageInstaller {
     public static final String EXTRA_CALLBACK = "android.content.pm.extra.CALLBACK";
 
     /**
+     * Streaming installation pending.
+     * Caller should make sure DataLoader is able to prepare image and reinitiate the operation.
+     *
+     * @see #EXTRA_SESSION_ID
+     * {@hide}
+     */
+    public static final int STATUS_PENDING_STREAMING = -2;
+
+    /**
      * User action is currently required to proceed. You can launch the intent
      * activity described by {@link Intent#EXTRA_INTENT} to involve the user and
      * continue.
@@ -1059,13 +1068,56 @@ public class PackageInstaller {
             }
         }
 
+
+        /**
+         * Adds a file to session. On commit this file will be pulled from dataLoader.
+         *
+         * @param name arbitrary, unique name of your choosing to identify the
+         *            APK being written. You can open a file again for
+         *            additional writes (such as after a reboot) by using the
+         *            same name. This name is only meaningful within the context
+         *            of a single install session.
+         * @param lengthBytes total size of the file being written.
+         *            The system may clear various caches as needed to allocate
+         *            this space.
+         * @param metadata additional info use by dataLoader to pull data for the file.
+         * @throws SecurityException if called after the session has been
+         *             sealed or abandoned
+         * @throws IllegalStateException if called for non-callback session
+         * {@hide}
+         */
+        public void addFile(@NonNull String name, long lengthBytes, @NonNull byte[] metadata) {
+            try {
+                mSession.addFile(name, lengthBytes, metadata);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Removes a file.
+         *
+         * @param name name of a file, e.g. split.
+         * @throws SecurityException if called after the session has been
+         *             sealed or abandoned
+         * @throws IllegalStateException if called for non-callback session
+         * {@hide}
+         */
+        public void removeFile(@NonNull String name) {
+            try {
+                mSession.removeFile(name);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
         /**
          * Attempt to commit everything staged in this session. This may require
          * user intervention, and so it may not happen immediately. The final
          * result of the commit will be reported through the given callback.
          * <p>
-         * Once this method is called, the session is sealed and no additional
-         * mutations may be performed on the session. If the device reboots
+         * Once this method is called, the session is sealed and no additional mutations may be
+         * performed on the session. In case of device reboot or data loader transient failure
          * before the session has been finalized, you may commit the session again.
          * <p>
          * If the installer is the device owner or the affiliated profile owner, there will be no
@@ -1216,27 +1268,6 @@ public class PackageInstaller {
                 throw new RuntimeException(e);
             } catch (ExecutionException e) {
                 throw new RuntimeException(e);
-            }
-        }
-
-        /**
-         * Configure files for an installation session.
-         *
-         * Currently only for Incremental installation session. Once this method is called,
-         * the files and their paths, as specified in the parameters, will be created and properly
-         * configured in the Incremental File System.
-         *
-         * TODO(b/136132412): update this and InstallationFile class with latest API design.
-         *
-         * @throws IllegalStateException if {@link SessionParams#incrementalParams} is null.
-         *
-         * @hide
-         */
-        public void addFile(@NonNull String name, long size, @NonNull byte[] metadata) {
-            try {
-                mSession.addFile(name, size, metadata);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -1429,6 +1460,9 @@ public class PackageInstaller {
         public long requiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
         /** {@hide} */
         public IncrementalDataLoaderParams incrementalParams;
+        /** TODO(b/146080380): add a class name to make it fully compatible with ComponentName.
+         * {@hide} */
+        public String dataLoaderPackageName;
 
         /**
          * Construct parameters for a new package install session.
@@ -1468,6 +1502,7 @@ public class PackageInstaller {
                 incrementalParams = new IncrementalDataLoaderParams(
                         dataLoaderParamsParcel);
             }
+            dataLoaderPackageName = source.readString();
         }
 
         /** {@hide} */
@@ -1492,6 +1527,7 @@ public class PackageInstaller {
             ret.isStaged = isStaged;
             ret.requiredInstalledVersionCode = requiredInstalledVersionCode;
             ret.incrementalParams = incrementalParams;
+            ret.dataLoaderPackageName = dataLoaderPackageName;
             return ret;
         }
 
@@ -1831,6 +1867,20 @@ public class PackageInstaller {
             this.incrementalParams = incrementalParams;
         }
 
+        /**
+         * Set the data provider params for the session.
+         * This also switches installation into callback mode and disallow direct writes into
+         * staging folder.
+         * TODO(b/146080380): unify dataprovider params with Incremental.
+         *
+         * @param dataLoaderPackageName name of the dataLoader package
+         * {@hide}
+         */
+        @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
+        public void setDataLoaderPackageName(String dataLoaderPackageName) {
+            this.dataLoaderPackageName = dataLoaderPackageName;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
@@ -1851,6 +1901,7 @@ public class PackageInstaller {
             pw.printPair("isMultiPackage", isMultiPackage);
             pw.printPair("isStaged", isStaged);
             pw.printPair("requiredInstalledVersionCode", requiredInstalledVersionCode);
+            pw.printPair("dataLoaderPackageName", dataLoaderPackageName);
             pw.println();
         }
 
@@ -1885,6 +1936,7 @@ public class PackageInstaller {
             } else {
                 dest.writeParcelable(null, flags);
             }
+            dest.writeString(dataLoaderPackageName);
         }
 
         public static final Parcelable.Creator<SessionParams>

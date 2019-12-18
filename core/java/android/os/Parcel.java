@@ -1815,8 +1815,12 @@ public final class Parcel {
         p.writeToParcel(this, parcelableFlags);
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * Flatten the name of the class of the Parcelable into this Parcel.
+     *
+     * @param p The Parcelable object to be written.
+     * @see #readParcelableCreator
+     */
     public final void writeParcelableCreator(@NonNull Parcelable p) {
         String name = p.getClass().getName();
         writeString(name);
@@ -3011,8 +3015,19 @@ public final class Parcel {
         return (T) creator.createFromParcel(this);
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * Read and return a Parcelable.Creator from the parcel. The given class loader will be used to
+     * load the {@link Parcelable.Creator}. If it is null, the default class loader will be used.
+     *
+     * @param loader A ClassLoader from which to instantiate the {@link Parcelable.Creator}
+     * object, or null for the default class loader.
+     * @return the previously written {@link Parcelable.Creator}, or null if a null Creator was
+     * written.
+     * @throws BadParcelableException Throws BadParcelableException if there was an error trying to
+     * read the {@link Parcelable.Creator}.
+     *
+     * @see #writeParcelableCreator
+     */
     @Nullable
     public final Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader loader) {
         String name = readString();

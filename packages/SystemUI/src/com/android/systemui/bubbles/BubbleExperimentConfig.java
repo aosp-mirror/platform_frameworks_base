@@ -32,6 +32,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -39,8 +42,11 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.people.PeopleHubNotificationListenerKt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -227,15 +233,29 @@ public class BubbleExperimentConfig {
         List<Person> personList = getPeopleFromNotification(entry);
         if (personList.size() > 0) {
             final Person person = personList.get(0);
-
             if (person != null) {
                 icon = person.getIcon();
+                if (icon == null) {
+                    // Lets try and grab the icon constructed by the layout
+                    Drawable d = PeopleHubNotificationListenerKt.extractAvatarFromRow(entry);
+                    if (d instanceof  BitmapDrawable) {
+                        icon = Icon.createWithBitmap(((BitmapDrawable) d).getBitmap());
+                    }
+                }
             }
         }
         if (icon == null) {
-            icon = notification.getLargeIcon() != null
-                    ? notification.getLargeIcon()
-                    : notification.getSmallIcon();
+            boolean shouldTint = notification.getLargeIcon() == null;
+            icon = shouldTint
+                    ? notification.getSmallIcon()
+                    : notification.getLargeIcon();
+            if (shouldTint) {
+                int notifColor = entry.getSbn().getNotification().color;
+                notifColor = ColorUtils.setAlphaComponent(notifColor, 255);
+                notifColor = ContrastColorUtil.findContrastColor(notifColor, Color.WHITE,
+                        true /* findFg */, 3f);
+                icon.setTint(notifColor);
+            }
         }
         if (intent != null) {
             return new Notification.BubbleMetadata.Builder()
@@ -285,7 +305,7 @@ public class BubbleExperimentConfig {
     }
 
     static boolean isShortcutIntent(PendingIntent intent) {
-        return intent.equals(sDummyShortcutIntent);
+        return intent != null && intent.equals(sDummyShortcutIntent);
     }
 
     static List<Person> getPeopleFromNotification(NotificationEntry entry) {

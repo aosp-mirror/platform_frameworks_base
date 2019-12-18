@@ -38,6 +38,9 @@ import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -140,6 +143,14 @@ import java.util.regex.Pattern;
 @SystemService(Context.TELEPHONY_SERVICE)
 public class TelephonyManager {
     private static final String TAG = "TelephonyManager";
+
+    /**
+     * To expand the error codes for {@link TelephonyManager#updateAvailableNetworks} and
+     * {@link TelephonyManager#setPreferredOpportunisticDataSubscription}.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    private static final long CALLBACK_ON_MORE_ERROR_CODE_CHANGE = 130595455L;
 
     /**
      * The key to use when placing the result of {@link #requestModemActivityInfo(ResultReceiver)}
@@ -788,18 +799,6 @@ public class TelephonyManager {
      * @hide
      */
     public static final String EXTRA_DATA_APN = PhoneConstants.DATA_APN_KEY;
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
-     * for an String representation of the data interface.
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getParcelableExtra(String name)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_DATA_LINK_PROPERTIES_KEY = PhoneConstants.DATA_LINK_PROPERTIES_KEY;
 
     /**
      * Broadcast intent action for letting the default dialer to know to show voicemail
@@ -5118,6 +5117,7 @@ public class TelephonyManager {
             DATA_CONNECTING,
             DATA_CONNECTED,
             DATA_SUSPENDED,
+            DATA_DISCONNECTING,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DataState{}
@@ -5134,6 +5134,12 @@ public class TelephonyManager {
      * traffic is temporarily unavailable. For example, in a 2G network,
      * data activity may be suspended when a voice call arrives. */
     public static final int DATA_SUSPENDED      = 3;
+    /**
+     * Data connection state: Disconnecting.
+     *
+     * IP traffic may be available but will cease working imminently.
+     */
+    public static final int DATA_DISCONNECTING = 4;
 
     /**
      * Returns a constant indicating the current data connection state
@@ -5143,14 +5149,21 @@ public class TelephonyManager {
      * @see #DATA_CONNECTING
      * @see #DATA_CONNECTED
      * @see #DATA_SUSPENDED
+     * @see #DATA_DISCONNECTING
      */
     public int getDataState() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return DATA_DISCONNECTED;
-            return telephony.getDataStateForSubId(
+            int state = telephony.getDataStateForSubId(
                     getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
+            if (state == TelephonyManager.DATA_DISCONNECTING
+                    && VMRuntime.getRuntime().getTargetSdkVersion() < Build.VERSION_CODES.R) {
+                return TelephonyManager.DATA_CONNECTED;
+            }
+
+            return state;
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return DATA_DISCONNECTED;
@@ -5171,6 +5184,7 @@ public class TelephonyManager {
             case DATA_CONNECTING: return "CONNECTING";
             case DATA_CONNECTED: return "CONNECTED";
             case DATA_SUSPENDED: return "SUSPENDED";
+            case DATA_DISCONNECTING: return "DISCONNECTING";
         }
         return "UNKNOWN(" + state + ")";
     }
@@ -10285,19 +10299,25 @@ public class TelephonyManager {
     }
 
     /**
-     * Action set from carrier signalling broadcast receivers to enable/disable radio
-     * Permissions {@link android.Manifest.permission.MODIFY_PHONE_STATE} is required.
-     * @param subId the subscription ID that this action applies to.
+     * Carrier action to enable or disable the radio.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
      * @param enabled control enable or disable radio.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void carrierActionSetRadioEnabled(int subId, boolean enabled) {
+    public void setRadioEnabled(boolean enabled) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.carrierActionSetRadioEnabled(subId, enabled);
+                service.carrierActionSetRadioEnabled(
+                        getSubId(SubscriptionManager.getDefaultDataSubscriptionId()), enabled);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#carrierActionSetRadioEnabled", e);
@@ -10305,20 +10325,25 @@ public class TelephonyManager {
     }
 
     /**
-     * Action set from carrier signalling broadcast receivers to start/stop reporting default
-     * network available events
-     * Permissions {@link android.Manifest.permission.MODIFY_PHONE_STATE} is required.
-     * @param subId the subscription ID that this action applies to.
+     * Carrier action to start or stop reporting default network available events.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
      * @param report control start/stop reporting network status.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void carrierActionReportDefaultNetworkStatus(int subId, boolean report) {
+    public void reportDefaultNetworkStatus(boolean report) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.carrierActionReportDefaultNetworkStatus(subId, report);
+                service.carrierActionReportDefaultNetworkStatus(
+                        getSubId(SubscriptionManager.getDefaultDataSubscriptionId()), report);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#carrierActionReportDefaultNetworkStatus", e);
@@ -10326,18 +10351,24 @@ public class TelephonyManager {
     }
 
     /**
-     * Action set from carrier signalling broadcast receivers to reset all carrier actions
-     * Permissions {@link android.Manifest.permission.MODIFY_PHONE_STATE} is required.
-     * @param subId the subscription ID that this action applies to.
+     * Reset all carrier actions previously set by {@link #setRadioEnabled},
+     * {@link #reportDefaultNetworkStatus} and {@link #setCarrierDataEnabled}.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void carrierActionResetAll(int subId) {
+    public void resetAllCarrierActions() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.carrierActionResetAll(subId);
+                service.carrierActionResetAll(
+                        getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#carrierActionResetAll", e);
@@ -11350,7 +11381,11 @@ public class TelephonyManager {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     executor.execute(() -> {
-                        callback.accept(SET_OPPORTUNISTIC_SUB_REMOTE_SERVICE_EXCEPTION);
+                        if (Compatibility.isChangeEnabled(CALLBACK_ON_MORE_ERROR_CODE_CHANGE)) {
+                            callback.accept(SET_OPPORTUNISTIC_SUB_REMOTE_SERVICE_EXCEPTION);
+                        } else {
+                            callback.accept(SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION);
+                        }
                     });
                 } finally {
                     Binder.restoreCallingIdentity(identity);
@@ -11447,7 +11482,11 @@ public class TelephonyManager {
                     final long identity = Binder.clearCallingIdentity();
                     try {
                         executor.execute(() -> {
-                            callback.accept(UPDATE_AVAILABLE_NETWORKS_REMOTE_SERVICE_EXCEPTION);
+                            if (Compatibility.isChangeEnabled(CALLBACK_ON_MORE_ERROR_CODE_CHANGE)) {
+                                callback.accept(UPDATE_AVAILABLE_NETWORKS_REMOTE_SERVICE_EXCEPTION);
+                            } else {
+                                callback.accept(UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE);
+                            }
                         });
                     } finally {
                         Binder.restoreCallingIdentity(identity);

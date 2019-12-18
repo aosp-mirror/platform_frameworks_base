@@ -246,9 +246,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         StatusBarStateController.StateListener, ActivityLaunchAnimator.Callback {
     public static final boolean MULTIUSER_DEBUG = false;
 
-    public static final boolean ENABLE_CHILD_NOTIFICATIONS
-            = SystemProperties.getBoolean("debug.child_notifs", true);
-
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
     protected static final int MSG_PRELOAD_RECENT_APPS = 1022;
     protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
@@ -813,6 +810,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        mWallpaperSupported =
+                mContext.getSystemService(WallpaperManager.class).isWallpaperSupported();
 
         // Connect in to the status bar manager service
         mCommandQueue.addCallback(this);
@@ -825,9 +824,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         createAndAddWindows(result);
-
-        mWallpaperSupported =
-                mContext.getSystemService(WallpaperManager.class).isWallpaperSupported();
 
         if (mWallpaperSupported) {
             // Make sure we always have the most current wallpaper info.
@@ -1061,7 +1057,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (ENABLE_LOCKSCREEN_WALLPAPER && mWallpaperSupported) {
             mLockscreenWallpaper = mLockscreenWallpaperLazy.get();
-            mLockscreenWallpaper.setHandler(mHandler);
         }
 
         mKeyguardIndicationController =
@@ -1271,6 +1266,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mFeatureFlags.isNewNotifPipelineEnabled()) {
             mNewNotifPipeline.get().initialize(mNotificationListener);
         }
+        mEntryManager.attach(mNotificationListener);
     }
 
     /**

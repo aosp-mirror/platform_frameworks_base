@@ -34,6 +34,7 @@ import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -225,8 +226,8 @@ public class UsbPortManager {
 
             Intent intent = new Intent();
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.setClassName("com.android.systemui",
-                    "com.android.systemui.usb.UsbContaminantActivity");
+            intent.setComponent(ComponentName.unflattenFromString(r.getString(
+                    com.android.internal.R.string.config_usbContaminantActivity)));
             intent.putExtra(UsbManager.EXTRA_PORT, ParcelableUsbPort.of(currentPortInfo.mUsbPort));
 
             PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,

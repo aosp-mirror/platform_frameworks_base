@@ -29,6 +29,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
+import android.hardware.camera2.ICameraOfflineSession;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
@@ -863,6 +864,38 @@ public class CameraDeviceImpl extends CameraDevice
 
             mRemoteDevice.updateOutputConfiguration(streamId, config);
             mConfiguredOutputs.put(streamId, config);
+        }
+    }
+
+    public void switchToOffline(ICameraDeviceCallbacks cbs, Surface[] offlineOutputs)
+            throws CameraAccessException {
+        if ((offlineOutputs == null) || (offlineOutputs.length == 0)) {
+            throw new IllegalArgumentException("Invalid offline outputs!");
+        }
+        if (cbs == null) {
+            throw new IllegalArgumentException("Invalid device callbacks!");
+        }
+
+        ICameraOfflineSession offlineSession = null;
+        synchronized(mInterfaceLock) {
+            int streamId = -1;
+            for (Surface surface : offlineOutputs) {
+                for (int i = 0; i < mConfiguredOutputs.size(); i++) {
+                    if (surface == mConfiguredOutputs.valueAt(i).getSurface()) {
+                        streamId = mConfiguredOutputs.keyAt(i);
+                        break;
+                    }
+                }
+                if (streamId == -1) {
+                    throw new IllegalArgumentException("Offline surface is not part of this" +
+                            " session");
+                }
+            }
+
+            offlineSession = mRemoteDevice.switchToOffline(cbs,
+                    offlineOutputs);
+            // TODO: Initialize CameraOfflineSession wrapper, clear 'mConfiguredOutputs',
+            // and update request tracking
         }
     }
 

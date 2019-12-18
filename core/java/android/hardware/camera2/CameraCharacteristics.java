@@ -935,7 +935,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>List of the maximum number of regions that can be used for metering in
      * auto-exposure (AE), auto-white balance (AWB), and auto-focus (AF);
-     * this corresponds to the the maximum number of elements in
+     * this corresponds to the maximum number of elements in
      * {@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}, {@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions},
      * and {@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}.</p>
      * <p><b>Range of valid values:</b><br></p>
@@ -955,7 +955,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>The maximum number of metering regions that can be used by the auto-exposure (AE)
      * routine.</p>
-     * <p>This corresponds to the the maximum allowed number of elements in
+     * <p>This corresponds to the maximum allowed number of elements in
      * {@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}.</p>
      * <p><b>Range of valid values:</b><br>
      * Value will be &gt;= 0. For FULL-capability devices, this
@@ -973,7 +973,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>The maximum number of metering regions that can be used by the auto-white balance (AWB)
      * routine.</p>
-     * <p>This corresponds to the the maximum allowed number of elements in
+     * <p>This corresponds to the maximum allowed number of elements in
      * {@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions}.</p>
      * <p><b>Range of valid values:</b><br>
      * Value will be &gt;= 0.</p>
@@ -989,7 +989,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>The maximum number of metering regions that can be used by the auto-focus (AF) routine.</p>
-     * <p>This corresponds to the the maximum allowed number of elements in
+     * <p>This corresponds to the maximum allowed number of elements in
      * {@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}.</p>
      * <p><b>Range of valid values:</b><br>
      * Value will be &gt;= 0. For FULL-capability devices, this
@@ -1987,6 +1987,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME MONOCHROME}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA SECURE_IMAGE_DATA}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA SYSTEM_CAMERA}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING OFFLINE_PROCESSING}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -2006,6 +2007,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME
      * @see #REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA
      * @see #REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING
      */
     @PublicKey
     @NonNull

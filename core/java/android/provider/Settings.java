@@ -8392,6 +8392,20 @@ public final class Settings {
                 "navigation_mode";
 
         /**
+         * Scale factor for the back gesture inset size on the left side of the screen.
+         * @hide
+         */
+        public static final String BACK_GESTURE_INSET_SCALE_LEFT =
+                "back_gesture_inset_scale_left";
+
+        /**
+         * Scale factor for the back gesture inset size on the right side of the screen.
+         * @hide
+         */
+        public static final String BACK_GESTURE_INSET_SCALE_RIGHT =
+                "back_gesture_inset_scale_right";
+
+        /**
          * Controls whether aware is enabled.
          * @hide
          */
@@ -8414,6 +8428,12 @@ public final class Settings {
          * @hide
          */
         public static final String PEOPLE_STRIP = "people_strip";
+
+        /**
+         * Controls if window magnification is enabled.
+         * @hide
+         */
+        public static final String WINDOW_MAGNIFICATION = "window_magnification";
 
         /**
          * Keys we no longer back up under the current schema, but want to continue to
@@ -14228,6 +14248,20 @@ public final class Settings {
      * already exists.
      */
     public static final int ADD_WIFI_RESULT_ALREADY_EXISTS = 2;
+
+    /**
+     * Activity Action: Allows user to select current bug report handler.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_BUGREPORT_HANDLER_SETTINGS =
+            "android.settings.BUGREPORT_HANDLER_SETTINGS";
 
     private static final String[] PM_WRITE_SETTINGS = {
         android.Manifest.permission.WRITE_SETTINGS

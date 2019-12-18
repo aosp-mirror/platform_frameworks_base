@@ -205,10 +205,10 @@ public final class ModemActivityInfo implements Parcelable {
     }
 
     /**
+     * Indicate if the ModemActivityInfo is invalid due to modem's invalid reporting.
+     *
      * @return {@code true} if this {@link ModemActivityInfo} record is valid,
      * {@code false} otherwise.
-     *
-     * @hide
      */
     public boolean isValid() {
         for (TransmitPower powerInfo : getTransmitPowerInfo()) {

@@ -23,6 +23,8 @@ import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.AnyThread;
@@ -35,6 +37,7 @@ import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -47,6 +50,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -70,11 +75,14 @@ import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
+import android.view.autofill.AutofillId;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
+import android.view.inputmethod.InlineSuggestionsRequest;
+import android.view.inputmethod.InlineSuggestionsResponse;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
@@ -91,11 +99,14 @@ import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
+import com.android.internal.view.IInlineSuggestionsRequestCallback;
+import com.android.internal.view.IInlineSuggestionsResponseCallback;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 
 /**
@@ -436,6 +447,14 @@ public class InputMethodService extends AbstractInputMethodService {
     final Insets mTmpInsets = new Insets();
     final int[] mTmpLocation = new int[2];
 
+    @Nullable
+    private InlineSuggestionsRequestInfo mInlineSuggestionsRequestInfo = null;
+
+    @Nullable
+    private InlineSuggestionsResponseCallbackImpl mInlineSuggestionsResponseCallback = null;
+
+    private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
+
     final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer = info -> {
         onComputeInsets(mTmpInsets);
         if (isExtractViewShown()) {
@@ -491,6 +510,18 @@ public class InputMethodService extends AbstractInputMethodService {
             InputMethodPrivilegedOperationsRegistry.put(token, mPrivOps);
             updateInputMethodDisplay(displayId);
             attachToken(token);
+        }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @MainThread
+        @Override
+        public void onCreateInlineSuggestionsRequest(ComponentName componentName,
+                AutofillId autofillId, IInlineSuggestionsRequestCallback cb) {
+            Log.d(TAG, "InputMethodService received onCreateInlineSuggestionsRequest()");
+            handleOnCreateInlineSuggestionsRequest(componentName, autofillId, cb);
         }
 
         /**
@@ -670,6 +701,103 @@ public class InputMethodService extends AbstractInputMethodService {
         }
     }
 
+    // TODO(b/137800469): Add detailed docs explaining the inline suggestions process.
+    /**
+     * Returns an {@link InlineSuggestionsRequest} to be sent to Autofill.
+     *
+     * <p>Should be implemented by subclasses.</p>
+     */
+    public @Nullable InlineSuggestionsRequest onCreateInlineSuggestionsRequest() {
+        return null;
+    }
+
+    /**
+     * Called when Autofill responds back with {@link InlineSuggestionsResponse} containing
+     * inline suggestions.
+     *
+     * <p>Should be implemented by subclasses.</p>
+     *
+     * @param response {@link InlineSuggestionsResponse} passed back by Autofill.
+     * @return Whether the IME will use and render  the inline suggestions.
+     */
+    public boolean onInlineSuggestionsResponse(@NonNull InlineSuggestionsResponse response) {
+        return false;
+    }
+
+    /**
+     * Returns whether inline suggestions are enabled on this service.
+     *
+     * TODO(b/137800469): check XML for value.
+     */
+    private boolean isInlineSuggestionsEnabled() {
+        return true;
+    }
+
+    /**
+     * Sends an {@link InlineSuggestionsRequest} obtained from
+     * {@link #onCreateInlineSuggestionsRequest()} to the current Autofill Session through
+     * {@link IInlineSuggestionsRequestCallback#onInlineSuggestionsRequest}.
+     */
+    private void makeInlineSuggestionsRequest() {
+        if (mInlineSuggestionsRequestInfo == null) {
+            Log.w(TAG, "makeInlineSuggestionsRequest() called with null requestInfo cache");
+            return;
+        }
+
+        final IInlineSuggestionsRequestCallback requestCallback =
+                mInlineSuggestionsRequestInfo.mCallback;
+        try {
+            final InlineSuggestionsRequest request = onCreateInlineSuggestionsRequest();
+            if (request == null) {
+                Log.w(TAG, "onCreateInlineSuggestionsRequest() returned null request");
+                requestCallback.onInlineSuggestionsUnsupported();
+            } else {
+                if (mInlineSuggestionsResponseCallback == null) {
+                    mInlineSuggestionsResponseCallback =
+                            new InlineSuggestionsResponseCallbackImpl(this,
+                                    mInlineSuggestionsRequestInfo.mComponentName,
+                                    mInlineSuggestionsRequestInfo.mFocusedId);
+                }
+                requestCallback.onInlineSuggestionsRequest(request,
+                        mInlineSuggestionsResponseCallback);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "makeInlinedSuggestionsRequest() remote exception:" + e);
+        }
+    }
+
+    private void handleOnCreateInlineSuggestionsRequest(@NonNull ComponentName componentName,
+            @NonNull AutofillId autofillId, @NonNull IInlineSuggestionsRequestCallback callback) {
+        mInlineSuggestionsRequestInfo = new InlineSuggestionsRequestInfo(componentName, autofillId,
+                callback);
+
+        if (!isInlineSuggestionsEnabled()) {
+            try {
+                callback.onInlineSuggestionsUnsupported();
+            } catch (RemoteException e) {
+                Log.w(TAG, "handleMakeInlineSuggestionsRequest() RemoteException:" + e);
+            }
+            return;
+        }
+
+        if (!mInputStarted) {
+            Log.w(TAG, "onStartInput() not called yet");
+            return;
+        }
+
+        makeInlineSuggestionsRequest();
+    }
+
+    private void handleOnInlineSuggestionsResponse(@NonNull ComponentName componentName,
+            @NonNull AutofillId autofillId, @NonNull InlineSuggestionsResponse response) {
+        if (!mInlineSuggestionsRequestInfo.validate(componentName)) {
+            Log.d(TAG, "Response component=" + componentName + " differs from request component="
+                    + mInlineSuggestionsRequestInfo.mComponentName + ", ignoring response");
+            return;
+        }
+        onInlineSuggestionsResponse(response);
+    }
+
     private void notifyImeHidden() {
         setImeWindowStatus(IME_ACTIVE | IME_INVISIBLE, mBackDisposition);
         onPreRenderedWindowVisibilityChanged(false /* setVisible */);
@@ -685,6 +813,63 @@ public class InputMethodService extends AbstractInputMethodService {
         Rect r = new Rect(0, visibleTopInsets, inputFrameRootView.getWidth(),
                 inputFrameRootView.getHeight());
         inputFrameRootView.setSystemGestureExclusionRects(Collections.singletonList(r));
+    }
+
+    /**
+     * Internal implementation of {@link IInlineSuggestionsResponseCallback}.
+     */
+    private static final class InlineSuggestionsResponseCallbackImpl
+            extends IInlineSuggestionsResponseCallback.Stub {
+        private final WeakReference<InputMethodService> mInputMethodService;
+
+        private final ComponentName mRequestComponentName;
+        private final AutofillId mRequestAutofillId;
+
+        private InlineSuggestionsResponseCallbackImpl(InputMethodService inputMethodService,
+                ComponentName componentName, AutofillId autofillId) {
+            mInputMethodService = new WeakReference<>(inputMethodService);
+            mRequestComponentName = componentName;
+            mRequestAutofillId = autofillId;
+        }
+
+        @Override
+        public void onInlineSuggestionsResponse(InlineSuggestionsResponse response)
+                throws RemoteException {
+            final InputMethodService service = mInputMethodService.get();
+            if (service != null) {
+                service.mHandler.sendMessage(obtainMessage(
+                        InputMethodService::handleOnInlineSuggestionsResponse, service,
+                        mRequestComponentName, mRequestAutofillId, response));
+            }
+        }
+    }
+
+    /**
+     * Information about incoming requests from Autofill Frameworks for inline suggestions.
+     */
+    private static final class InlineSuggestionsRequestInfo {
+        final ComponentName mComponentName;
+        final AutofillId mFocusedId;
+        final IInlineSuggestionsRequestCallback mCallback;
+
+        InlineSuggestionsRequestInfo(ComponentName componentName, AutofillId focusedId,
+                IInlineSuggestionsRequestCallback callback) {
+            this.mComponentName = componentName;
+            this.mFocusedId = focusedId;
+            this.mCallback = callback;
+        }
+
+        /**
+         * Returns whether the cached {@link ComponentName} matches the passed in activity.
+         */
+        public boolean validate(ComponentName componentName) {
+            final boolean result = componentName.equals(mComponentName);
+            if (!result) {
+                Log.d(TAG, "Cached request info ComponentName=" + mComponentName
+                        + " differs from received ComponentName=" + componentName);
+            }
+            return result;
+        }
     }
 
     /**

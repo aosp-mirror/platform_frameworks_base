@@ -59,6 +59,8 @@ LOCAL_JAVA_LIBRARIES := \
 
 LOCAL_PACKAGE_NAME := FrameworksWifiApiTests
 LOCAL_PRIVATE_PLATFORM_APIS := true
-LOCAL_COMPATIBILITY_SUITE := device-tests
+LOCAL_COMPATIBILITY_SUITE := \
+    device-tests \
+    mts \
 
 include $(BUILD_PACKAGE)

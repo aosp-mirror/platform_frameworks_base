@@ -300,6 +300,18 @@ public abstract class AccessibilityService extends Service {
     public static final int GESTURE_SWIPE_DOWN_AND_RIGHT = 16;
 
     /**
+     * The user has performed a double tap gesture on the touch screen.
+     * @hide
+     */
+    public static final int GESTURE_DOUBLE_TAP = 17;
+
+    /**
+     * The user has performed a double tap and hold gesture on the touch screen.
+     * @hide
+     */
+    public static final int GESTURE_DOUBLE_TAP_AND_HOLD = 18;
+
+    /**
      * The {@link Intent} that must be declared as handled by the service.
      */
     public static final String SERVICE_INTERFACE =

@@ -82,6 +82,7 @@ import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
 import com.android.server.autofill.RemoteAugmentedAutofillService.RemoteAugmentedAutofillServiceCallbacks;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.infra.AbstractPerUserSystemService;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -168,6 +169,8 @@ final class AutofillManagerServiceImpl
     @Nullable
     private ServiceInfo mRemoteAugmentedAutofillServiceInfo;
 
+    private final InputMethodManagerInternal mInputMethodManagerInternal;
+
     AutofillManagerServiceImpl(AutofillManagerService master, Object lock,
             LocalLog uiLatencyHistory, LocalLog wtfHistory, int userId, AutoFillUI ui,
             AutofillCompatState autofillCompatState,
@@ -179,6 +182,7 @@ final class AutofillManagerServiceImpl
         mUi = ui;
         mFieldClassificationStrategy = new FieldClassificationStrategy(getContext(), userId);
         mAutofillCompatState = autofillCompatState;
+        mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
 
         updateLocked(disabled);
     }
@@ -493,7 +497,7 @@ final class AutofillManagerServiceImpl
                 sessionId, taskId, uid, activityToken, appCallbackToken, hasCallback,
                 mUiLatencyHistory, mWtfHistory, serviceComponentName,
                 componentName, compatMode, bindInstantServiceAllowed, forAugmentedAutofillOnly,
-                flags);
+                flags, mInputMethodManagerInternal);
         mSessions.put(newSession.id, newSession);
 
         return newSession;

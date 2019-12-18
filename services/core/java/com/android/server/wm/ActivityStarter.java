@@ -98,6 +98,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
@@ -1309,9 +1310,11 @@ class ActivityStarter {
             String resolvedType, int userId) {
         if (auxiliaryResponse != null && auxiliaryResponse.needsPhaseTwo) {
             // request phase two resolution
-            mService.getPackageManagerInternalLocked().requestInstantAppResolutionPhaseTwo(
+            PackageManagerInternal packageManager = mService.getPackageManagerInternalLocked();
+            boolean isRequesterInstantApp = packageManager.isInstantApp(callingPackage, userId);
+            packageManager.requestInstantAppResolutionPhaseTwo(
                     auxiliaryResponse, originalIntent, resolvedType, callingPackage,
-                    verificationBundle, userId);
+                    isRequesterInstantApp, verificationBundle, userId);
         }
         return InstantAppResolver.buildEphemeralInstallerIntent(
                 originalIntent,

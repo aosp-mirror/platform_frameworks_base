@@ -1162,7 +1162,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
 
         verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
-                eq(UserHandle.USER_SYSTEM), eq(null),
+                eq(UserHandle.USER_SYSTEM),
+                eq(null),
                 eq(UserManagerInternal.OWNER_TYPE_DEVICE_OWNER));
 
         verify(getServices().usageStatsManagerInternal).setActiveAdminApps(
@@ -1966,7 +1967,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // TODO Make sure restrictions are written to the file.
     }
 
-    // TODO: (b/138709470) test addUserRestriction as PO of an organization-owned device
     public void testSetUserRestriction_asPoOfOrgOwnedDevice() throws Exception {
         final int MANAGED_PROFILE_USER_ID = DpmMockContext.CALLER_USER_HANDLE;
         final int MANAGED_PROFILE_ADMIN_UID =
@@ -1979,16 +1979,26 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().userManager.getProfileParent(MANAGED_PROFILE_USER_ID))
                 .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
 
+        parentDpm.addUserRestriction(admin1, UserManager.DISALLOW_CONFIG_DATE_TIME);
+        verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(MANAGED_PROFILE_USER_ID),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_CONFIG_DATE_TIME),
+                eq(UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE));
+        reset(getServices().userManagerInternal);
+
+        parentDpm.clearUserRestriction(admin1, UserManager.DISALLOW_CONFIG_DATE_TIME);
+        reset(getServices().userManagerInternal);
+
         parentDpm.setCameraDisabled(admin1, true);
         verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
-                eq(UserHandle.USER_SYSTEM),
+                eq(MANAGED_PROFILE_USER_ID),
                 MockUtils.checkUserRestrictions(UserManager.DISALLOW_CAMERA),
                 eq(UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE));
         reset(getServices().userManagerInternal);
 
         parentDpm.setCameraDisabled(admin1, false);
         verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
-                eq(UserHandle.USER_SYSTEM),
+                eq(MANAGED_PROFILE_USER_ID),
                 MockUtils.checkUserRestrictions(),
                 eq(UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE));
         reset(getServices().userManagerInternal);

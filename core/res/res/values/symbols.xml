@@ -295,7 +295,6 @@
   <java-symbol type="bool" name="config_enableBurnInProtection" />
   <java-symbol type="bool" name="config_hotswapCapable" />
   <java-symbol type="bool" name="config_mms_content_disposition_support" />
-  <java-symbol type="string" name="config_ims_package" />
   <java-symbol type="string" name="config_wwan_network_service_package" />
   <java-symbol type="string" name="config_wlan_network_service_package" />
   <java-symbol type="string" name="config_wwan_network_service_class" />
@@ -360,6 +359,17 @@
   <java-symbol type="bool" name="config_use16BitTaskSnapshotPixelFormat" />
   <java-symbol type="bool" name="config_hasRecents" />
   <java-symbol type="string" name="config_recentsComponentName" />
+  <java-symbol type="string" name="config_systemUIServiceComponent" />
+  <java-symbol type="string" name="config_screenRecorderComponent" />
+  <java-symbol type="string" name="config_somnambulatorComponent" />
+  <java-symbol type="string" name="config_screenshotServiceComponent" />
+  <java-symbol type="string" name="config_screenshotErrorReceiverComponent" />
+  <java-symbol type="string" name="config_slicePermissionComponent" />
+  <java-symbol type="string" name="config_usbContaminantActivity" />
+  <java-symbol type="string" name="config_usbPermissionActivity" />
+  <java-symbol type="string" name="config_usbAccessoryUriActivity" />
+  <java-symbol type="string" name="config_usbConfirmActivity" />
+  <java-symbol type="string" name="config_usbResolverActivity" />
   <java-symbol type="integer" name="config_minNumVisibleRecentTasks_lowRam" />
   <java-symbol type="integer" name="config_maxNumVisibleRecentTasks_lowRam" />
   <java-symbol type="integer" name="config_minNumVisibleRecentTasks_grid" />
@@ -2947,6 +2957,8 @@
   <!-- Resolver target actions -->
   <java-symbol type="array" name="resolver_target_actions_pin" />
   <java-symbol type="array" name="resolver_target_actions_unpin" />
+  <java-symbol type="string" name="pin_specific_target" />
+  <java-symbol type="string" name="unpin_specific_target" />
 
   <java-symbol type="array" name="non_removable_euicc_slots" />
 

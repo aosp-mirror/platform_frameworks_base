@@ -50,7 +50,10 @@ public class InlineContentView extends SurfaceView {
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
-                // TODO(b/137800469): implement this.
+                new SurfaceControl.Transaction()
+                        .setVisibility(surfaceControl, false)
+                        .reparent(surfaceControl, null)
+                        .apply();
             }
         });
     }

@@ -30,12 +30,12 @@ import android.app.ActivityThread;
 import android.app.AppCompatCallbacks;
 import android.app.INotificationManager;
 import android.app.usage.UsageStatsManagerInternal;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
@@ -148,6 +148,7 @@ import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.signedconfig.SignedConfigService;
 import com.android.server.soundtrigger.SoundTriggerService;
+import com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
 import com.android.server.telecom.TelecomLoaderService;
@@ -1555,6 +1556,10 @@ public final class SystemServer {
             }
             t.traceEnd();
 
+            t.traceBegin("StartSoundTriggerMiddlewareService");
+            mSystemServiceManager.startService(SoundTriggerMiddlewareService.Lifecycle.class);
+            t.traceEnd();
+
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_BROADCAST_RADIO)) {
                 t.traceBegin("StartBroadcastRadioService");
                 mSystemServiceManager.startService(BroadcastRadioService.class);
@@ -2395,9 +2400,9 @@ public final class SystemServer {
     }
 
     private static void startSystemUi(Context context, WindowManagerService windowManager) {
+        PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
         Intent intent = new Intent();
-        intent.setComponent(new ComponentName("com.android.systemui",
-                "com.android.systemui.SystemUIService"));
+        intent.setComponent(pm.getSystemUiServiceComponent());
         intent.addFlags(Intent.FLAG_DEBUG_TRIAGED_MISSING);
         //Slog.d(TAG, "Starting service: " + intent);
         context.startServiceAsUser(intent, UserHandle.SYSTEM);

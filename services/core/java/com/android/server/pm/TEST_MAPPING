@@ -24,7 +24,20 @@
       ]
     },
     {
-      "name": "PackageManagerShellCommandTest"
+      "name": "CtsContentTestCases",
+      "options": [
+        {
+          "include-filter": "android.content.pm.cts.PackageManagerShellCommandTest"
+        }
+      ]
+    },
+    {
+      "name": "GtsSecurityHostTestCases",
+      "options": [
+        {
+          "include-filter": "com.google.android.security.gts.PackageVerifierTest"
+        }
+      ]
     }
   ],
   "postsubmit": [

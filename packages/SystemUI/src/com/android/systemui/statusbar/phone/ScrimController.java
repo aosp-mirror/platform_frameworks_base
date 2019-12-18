@@ -360,7 +360,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             return false;
         }
 
-        if (mState == ScrimState.AOD && mDozeParameters.getAlwaysOn()) {
+        if (mState == ScrimState.AOD
+                && (mDozeParameters.getAlwaysOn() || mDockManager.isDocked())) {
             return true;
         }
 
@@ -560,7 +561,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     }
 
     protected void scheduleUpdate() {
-        if (mUpdatePending) return;
+        if (mUpdatePending || mScrimBehind == null) return;
 
         // Make sure that a frame gets scheduled.
         mScrimBehind.invalidate();

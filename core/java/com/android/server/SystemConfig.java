@@ -25,6 +25,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -228,7 +229,7 @@ public class SystemConfig {
      * Map of system pre-defined, uniquely named actors; keys are namespace,
      * value maps actor name to package name.
      */
-    private ArrayMap<String, ArrayMap<String, String>> mNamedActors = null;
+    private Map<String, Map<String, String>> mNamedActors = null;
 
     public static SystemConfig getInstance() {
         if (!isSystemProcess()) {
@@ -412,7 +413,7 @@ public class SystemConfig {
     }
 
     @NonNull
-    public Map<String, ? extends Map<String, String>> getNamedActors() {
+    public Map<String, Map<String, String>> getNamedActors() {
         return mNamedActors != null ? mNamedActors : Collections.emptyMap();
     }
 
@@ -498,6 +499,19 @@ public class SystemConfig {
                 Environment.getSystemExtDirectory(), "etc", "sysconfig"), ALLOW_ALL);
         readPermissions(Environment.buildPath(
                 Environment.getSystemExtDirectory(), "etc", "permissions"), ALLOW_ALL);
+
+        // Skip loading configuration from apex if it is not a system process.
+        if (!isSystemProcess()) {
+            return;
+        }
+        // Read configuration of libs from apex module.
+        // TODO: Use a solid way to filter apex module folders?
+        for (File f: FileUtils.listFilesOrEmpty(Environment.getApexDirectory())) {
+            if (f.isFile() || f.getPath().contains("@")) {
+                continue;
+            }
+            readPermissions(Environment.buildPath(f, "etc", "permissions"), ALLOW_LIBS);
+        }
     }
 
     @VisibleForTesting
@@ -1069,7 +1083,7 @@ public class SystemConfig {
                                 mNamedActors = new ArrayMap<>();
                             }
 
-                            ArrayMap<String, String> nameToPkgMap = mNamedActors.get(namespace);
+                            Map<String, String> nameToPkgMap = mNamedActors.get(namespace);
                             if (nameToPkgMap == null) {
                                 nameToPkgMap = new ArrayMap<>();
                                 mNamedActors.put(namespace, nameToPkgMap);

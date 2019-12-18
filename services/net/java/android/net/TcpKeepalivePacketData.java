@@ -19,7 +19,6 @@ import static android.net.SocketKeepalive.ERROR_INVALID_IP_ADDRESS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.net.SocketKeepalive.InvalidPacketException;
 import android.net.util.IpUtils;
 import android.os.Parcel;
 import android.os.Parcelable;

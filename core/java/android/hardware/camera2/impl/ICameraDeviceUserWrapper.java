@@ -28,6 +28,8 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.ICameraDeviceUser;
+import android.hardware.camera2.ICameraDeviceCallbacks;
+import android.hardware.camera2.ICameraOfflineSession;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
@@ -242,6 +244,17 @@ public class ICameraDeviceUserWrapper {
             throws CameraAccessException {
         try {
             mRemoteDevice.updateOutputConfiguration(streamId, config);
+        } catch (Throwable t) {
+            CameraManager.throwAsPublicException(t);
+            throw new UnsupportedOperationException("Unexpected exception", t);
+        }
+    }
+
+    public ICameraOfflineSession switchToOffline(ICameraDeviceCallbacks cbs,
+            Surface[] offlineOutputs)
+            throws CameraAccessException {
+        try {
+            return mRemoteDevice.switchToOffline(cbs, offlineOutputs);
         } catch (Throwable t) {
             CameraManager.throwAsPublicException(t);
             throw new UnsupportedOperationException("Unexpected exception", t);

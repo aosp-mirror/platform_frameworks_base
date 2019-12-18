@@ -4946,8 +4946,12 @@
     <!-- Resolver target actions strings -->
     <!-- Pin this app to the top of the Sharesheet app list. [CHAR LIMIT=60]-->
     <string name="pin_target">Pin</string>
+    <!-- Pin this app to the top of the Sharesheet app list. [CHAR LIMIT=60]-->
+    <string name="pin_specific_target">Pin <xliff:g id="label" example="Tweet">%1$s</xliff:g></string>
     <!-- Un-pin this app in the Sharesheet, so that it is sorted normally. [CHAR LIMIT=60]-->
-    <string name="unpin_target">Unpin</string>
+    <string name="unpin_target">Unpin </string>
+    <!-- Un-pin this app in the Sharesheet, so that it is sorted normally. [CHAR LIMIT=60]-->
+    <string name="unpin_specific_target">Unpin <xliff:g id="label" example="Tweet">%1$s</xliff:g></string>
     <!-- View application info for a target. -->
     <string name="app_info">App info</string>
 

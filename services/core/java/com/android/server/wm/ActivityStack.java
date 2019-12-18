@@ -3594,7 +3594,10 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             pw.println(prefix + "* " + task);
             task.dump(pw, prefix + "  ");
             final ArrayList<ActivityRecord> activities = new ArrayList<>();
-            forAllActivities((Consumer<ActivityRecord>) activities::add);
+            // Add activities by traversing the hierarchy from bottom to top, since activities
+            // are dumped in reverse order in {@link ActivityStackSupervisor#dumpHistoryList()}.
+            forAllActivities((Consumer<ActivityRecord>) activities::add,
+                    false /* traverseTopToBottom */);
             dumpHistoryList(fd, pw, activities, prefix, "Hist", true, !dumpAll, dumpClient,
                     dumpPackage, false, null, task);
         });
