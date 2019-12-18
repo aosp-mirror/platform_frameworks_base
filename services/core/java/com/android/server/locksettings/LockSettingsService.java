@@ -1606,7 +1606,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         if (credential.isNone()) {
-            clearUserKeyProtection(userId);
+            clearUserKeyProtection(userId, null);
             gateKeeperClearSecureUserId(userId);
             mStorage.writeCredentialHash(CredentialHash.createEmptyHash(), userId);
             // Still update PASSWORD_TYPE_KEY if we are running in pre-synthetic password code path,
@@ -1797,9 +1797,17 @@ public class LockSettingsService extends ILockSettings.Stub {
         addUserKeyAuth(userId, token, secretFromCredential(credential));
     }
 
-    private void clearUserKeyProtection(int userId) {
+    private void clearUserKeyProtection(int userId, byte[] secret) {
         if (DEBUG) Slog.d(TAG, "clearUserKeyProtection user=" + userId);
-        addUserKeyAuth(userId, null, null);
+        final UserInfo userInfo = mUserManager.getUserInfo(userId);
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            mStorageManager.clearUserKeyAuth(userId, userInfo.serialNumber, null, secret);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("clearUserKeyAuth failed user=" + userId);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
     }
 
     private static byte[] secretFromCredential(LockscreenCredential credential) {
@@ -2547,7 +2555,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             setAuthlessUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
             setKeystorePassword(auth.deriveKeyStorePassword(), userId);
         } else {
-            clearUserKeyProtection(userId);
+            clearUserKeyProtection(userId, null);
             setKeystorePassword(null, userId);
             gateKeeperClearSecureUserId(userId);
         }
@@ -2752,7 +2760,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // during boot. Vold storage needs to be unlocked before manipulation of the keys can
             // succeed.
             unlockUserKey(userId, null, auth.deriveDiskEncryptionKey());
-            clearUserKeyProtection(userId);
+            clearUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
             fixateNewestUserKeyAuth(userId);
             unlockKeystore(auth.deriveKeyStorePassword(), userId);
             setKeystorePassword(null, userId);

@@ -36,6 +36,15 @@ public class FakeStorageManager {
         getUserAuth(userId).add(new Pair<>(token, secret));
     }
 
+    public void clearUserKeyAuth(int userId, int serialNumber, byte[] token, byte[] secret) {
+        ArrayList<Pair<byte[], byte[]>> auths = getUserAuth(userId);
+        if (token == null && secret == null) {
+            return;
+        }
+        auths.remove(new Pair<>(token, secret));
+        auths.add(new Pair<>(null, null));
+    }
+
     public void fixateNewestUserKeyAuth(int userId) {
         ArrayList<Pair<byte[], byte[]>> auths = mAuth.get(userId);
         Pair<byte[], byte[]> latest = auths.get(auths.size() - 1);
