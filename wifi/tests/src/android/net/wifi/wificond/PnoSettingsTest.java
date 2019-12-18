@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 /**
- * Unit tests for {@link android.net.wifi.wificond.PnoSettingsResult}.
+ * Unit tests for {@link android.net.wifi.wificond.PnoSettings}.
  */
 @SmallTest
 public class PnoSettingsTest {
@@ -52,14 +52,14 @@ public class PnoSettingsTest {
     @Before
     public void setUp() {
         mPnoNetwork1 = new PnoNetwork();
-        mPnoNetwork1.ssid = TEST_SSID_1;
-        mPnoNetwork1.isHidden = true;
-        mPnoNetwork1.frequencies = TEST_FREQUENCIES_1;
+        mPnoNetwork1.setSsid(TEST_SSID_1);
+        mPnoNetwork1.setHidden(true);
+        mPnoNetwork1.setFrequenciesMhz(TEST_FREQUENCIES_1);
 
         mPnoNetwork2 = new PnoNetwork();
-        mPnoNetwork2.ssid = TEST_SSID_2;
-        mPnoNetwork2.isHidden = false;
-        mPnoNetwork2.frequencies = TEST_FREQUENCIES_2;
+        mPnoNetwork2.setSsid(TEST_SSID_2);
+        mPnoNetwork2.setHidden(false);
+        mPnoNetwork2.setFrequenciesMhz(TEST_FREQUENCIES_2);
     }
 
     /**
@@ -69,10 +69,10 @@ public class PnoSettingsTest {
     @Test
     public void canSerializeAndDeserialize() {
         PnoSettings pnoSettings = new PnoSettings();
-        pnoSettings.intervalMs = TEST_INTERVAL_MS;
-        pnoSettings.min2gRssi = TEST_MIN_2G_RSSI;
-        pnoSettings.min5gRssi = TEST_MIN_5G_RSSI;
-        pnoSettings.pnoNetworks = new ArrayList<>(Arrays.asList(mPnoNetwork1, mPnoNetwork2));
+        pnoSettings.setIntervalMillis(TEST_INTERVAL_MS);
+        pnoSettings.setMin2gRssiDbm(TEST_MIN_2G_RSSI);
+        pnoSettings.setMin5gRssiDbm(TEST_MIN_5G_RSSI);
+        pnoSettings.setPnoNetworks(new ArrayList<>(Arrays.asList(mPnoNetwork1, mPnoNetwork2)));
 
         Parcel parcel = Parcel.obtain();
         pnoSettings.writeToParcel(parcel, 0);
@@ -90,16 +90,16 @@ public class PnoSettingsTest {
     @Test
     public void testAsHashMapKey() {
         PnoSettings pnoSettings1 = new PnoSettings();
-        pnoSettings1.intervalMs = TEST_INTERVAL_MS;
-        pnoSettings1.min2gRssi = TEST_MIN_2G_RSSI;
-        pnoSettings1.min5gRssi = TEST_MIN_5G_RSSI;
-        pnoSettings1.pnoNetworks = new ArrayList<>(Arrays.asList(mPnoNetwork1, mPnoNetwork2));
+        pnoSettings1.setIntervalMillis(TEST_INTERVAL_MS);
+        pnoSettings1.setMin2gRssiDbm(TEST_MIN_2G_RSSI);
+        pnoSettings1.setMin5gRssiDbm(TEST_MIN_5G_RSSI);
+        pnoSettings1.setPnoNetworks(new ArrayList<>(Arrays.asList(mPnoNetwork1, mPnoNetwork2)));
 
         PnoSettings pnoSettings2 = new PnoSettings();
-        pnoSettings2.intervalMs = TEST_INTERVAL_MS;
-        pnoSettings2.min2gRssi = TEST_MIN_2G_RSSI;
-        pnoSettings2.min5gRssi = TEST_MIN_5G_RSSI;
-        pnoSettings2.pnoNetworks = new ArrayList<>(Arrays.asList(mPnoNetwork1, mPnoNetwork2));
+        pnoSettings2.setIntervalMillis(TEST_INTERVAL_MS);
+        pnoSettings2.setMin2gRssiDbm(TEST_MIN_2G_RSSI);
+        pnoSettings2.setMin5gRssiDbm(TEST_MIN_5G_RSSI);
+        pnoSettings2.setPnoNetworks(new ArrayList<>(Arrays.asList(mPnoNetwork1, mPnoNetwork2)));
 
         assertEquals(pnoSettings1, pnoSettings2);
         assertEquals(pnoSettings1.hashCode(), pnoSettings2.hashCode());

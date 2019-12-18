@@ -16,26 +16,129 @@
 
 package android.net.wifi.wificond;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
- * PnoSettings for wificond
+ * Configuration for a PNO (preferred network offload). A mechanism by which scans are offloaded
+ * from the host device to the Wi-Fi chip.
  *
  * @hide
  */
-public class PnoSettings implements Parcelable {
-    public int intervalMs;
-    public int min2gRssi;
-    public int min5gRssi;
-    public int min6gRssi;
-    public ArrayList<PnoNetwork> pnoNetworks;
+@SystemApi
+public final class PnoSettings implements Parcelable {
+    private int mIntervalMs;
+    private int mMin2gRssi;
+    private int mMin5gRssi;
+    private int mMin6gRssi;
+    private List<PnoNetwork> mPnoNetworks;
 
-    /** public constructor */
+    /** Construct an uninitialized PnoSettings object */
     public PnoSettings() { }
+
+    /**
+     * Get the requested PNO scan interval in milliseconds.
+     *
+     * @return An interval in milliseconds.
+     */
+    public int getIntervalMillis() {
+        return mIntervalMs;
+    }
+
+    /**
+     * Set the requested PNO scan interval in milliseconds.
+     *
+     * @param intervalMs An interval in milliseconds.
+     */
+    public void setIntervalMillis(int intervalMs) {
+        this.mIntervalMs = intervalMs;
+    }
+
+    /**
+     * Get the requested minimum RSSI threshold (in dBm) for APs to report in scan results in the
+     * 2.4GHz band.
+     *
+     * @return An RSSI value in dBm.
+     */
+    public int getMin2gRssiDbm() {
+        return mMin2gRssi;
+    }
+
+    /**
+     * Set the requested minimum RSSI threshold (in dBm) for APs to report in scan scan results in
+     * the 2.4GHz band.
+     *
+     * @param min2gRssiDbm An RSSI value in dBm.
+     */
+    public void setMin2gRssiDbm(int min2gRssiDbm) {
+        this.mMin2gRssi = min2gRssiDbm;
+    }
+
+    /**
+     * Get the requested minimum RSSI threshold (in dBm) for APs to report in scan results in the
+     * 5GHz band.
+     *
+     * @return An RSSI value in dBm.
+     */
+    public int getMin5gRssiDbm() {
+        return mMin5gRssi;
+    }
+
+    /**
+     * Set the requested minimum RSSI threshold (in dBm) for APs to report in scan scan results in
+     * the 5GHz band.
+     *
+     * @param min5gRssiDbm An RSSI value in dBm.
+     */
+    public void setMin5gRssiDbm(int min5gRssiDbm) {
+        this.mMin5gRssi = min5gRssiDbm;
+    }
+
+    /**
+     * Get the requested minimum RSSI threshold (in dBm) for APs to report in scan results in the
+     * 6GHz band.
+     *
+     * @return An RSSI value in dBm.
+     */
+    public int getMin6gRssiDbm() {
+        return mMin6gRssi;
+    }
+
+    /**
+     * Set the requested minimum RSSI threshold (in dBm) for APs to report in scan scan results in
+     * the 6GHz band.
+     *
+     * @param min6gRssiDbm An RSSI value in dBm.
+     */
+    public void setMin6gRssiDbm(int min6gRssiDbm) {
+        this.mMin6gRssi = min6gRssiDbm;
+    }
+
+    /**
+     * Return the configured list of specific networks to search for in a PNO scan.
+     *
+     * @return A list of {@link PnoNetwork} objects, possibly empty if non configured.
+     */
+    @NonNull public List<PnoNetwork> getPnoNetworks() {
+        return mPnoNetworks;
+    }
+
+    /**
+     * Set the list of specified networks to scan for in a PNO scan. The networks (APs) are
+     * specified using {@link PnoNetwork}s. An empty list indicates that all networks are scanned
+     * for.
+     *
+     * @param pnoNetworks A (possibly empty) list of {@link PnoNetwork} objects.
+     */
+    public void setPnoNetworks(@NonNull List<PnoNetwork> pnoNetworks) {
+        this.mPnoNetworks = pnoNetworks;
+    }
 
     /** override comparator */
     @Override
@@ -48,17 +151,17 @@ public class PnoSettings implements Parcelable {
         if (settings == null) {
             return false;
         }
-        return intervalMs == settings.intervalMs
-                && min2gRssi == settings.min2gRssi
-                && min5gRssi == settings.min5gRssi
-                && min6gRssi == settings.min6gRssi
-                && pnoNetworks.equals(settings.pnoNetworks);
+        return mIntervalMs == settings.mIntervalMs
+                && mMin2gRssi == settings.mMin2gRssi
+                && mMin5gRssi == settings.mMin5gRssi
+                && mMin6gRssi == settings.mMin6gRssi
+                && mPnoNetworks.equals(settings.mPnoNetworks);
     }
 
     /** override hash code */
     @Override
     public int hashCode() {
-        return Objects.hash(intervalMs, min2gRssi, min5gRssi, min6gRssi, pnoNetworks);
+        return Objects.hash(mIntervalMs, mMin2gRssi, mMin5gRssi, mMin6gRssi, mPnoNetworks);
     }
 
     /** implement Parcelable interface */
@@ -72,27 +175,27 @@ public class PnoSettings implements Parcelable {
      * |flag| is ignored.
      **/
     @Override
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(intervalMs);
-        out.writeInt(min2gRssi);
-        out.writeInt(min5gRssi);
-        out.writeInt(min6gRssi);
-        out.writeTypedList(pnoNetworks);
+    public void writeToParcel(@NonNull Parcel out, int flags) {
+        out.writeInt(mIntervalMs);
+        out.writeInt(mMin2gRssi);
+        out.writeInt(mMin5gRssi);
+        out.writeInt(mMin6gRssi);
+        out.writeTypedList(mPnoNetworks);
     }
 
     /** implement Parcelable interface */
-    public static final Parcelable.Creator<PnoSettings> CREATOR =
+    @NonNull public static final Parcelable.Creator<PnoSettings> CREATOR =
             new Parcelable.Creator<PnoSettings>() {
         @Override
         public PnoSettings createFromParcel(Parcel in) {
             PnoSettings result = new PnoSettings();
-            result.intervalMs = in.readInt();
-            result.min2gRssi = in.readInt();
-            result.min5gRssi = in.readInt();
-            result.min6gRssi = in.readInt();
+            result.mIntervalMs = in.readInt();
+            result.mMin2gRssi = in.readInt();
+            result.mMin5gRssi = in.readInt();
+            result.mMin6gRssi = in.readInt();
 
-            result.pnoNetworks = new ArrayList<PnoNetwork>();
-            in.readTypedList(result.pnoNetworks, PnoNetwork.CREATOR);
+            result.mPnoNetworks = new ArrayList<>();
+            in.readTypedList(result.mPnoNetworks, PnoNetwork.CREATOR);
 
             return result;
         }

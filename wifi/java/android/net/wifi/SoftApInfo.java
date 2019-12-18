@@ -16,15 +16,12 @@
 
 package android.net.wifi;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -85,26 +82,12 @@ public final class SoftApInfo implements Parcelable {
      */
     public static final int CHANNEL_WIDTH_160MHZ = 6;
 
-    /**
-     * @hide
-     */
-    @IntDef(prefix = { "CHANNEL_WIDTH_" }, value = {
-            CHANNEL_WIDTH_INVALID,
-            CHANNEL_WIDTH_20MHZ_NOHT,
-            CHANNEL_WIDTH_20MHZ,
-            CHANNEL_WIDTH_40MHZ,
-            CHANNEL_WIDTH_80MHZ,
-            CHANNEL_WIDTH_80MHZ_PLUS_MHZ,
-            CHANNEL_WIDTH_160MHZ,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Bandwidth {}
 
 
     /** The frequency which AP resides on.  */
     private int mFrequency = 0;
 
-    @Bandwidth
+    @WifiAnnotations.Bandwidth
     private int mBandwidth = CHANNEL_WIDTH_INVALID;
 
     /**
@@ -127,9 +110,9 @@ public final class SoftApInfo implements Parcelable {
      *
      * @return One of {@link #CHANNEL_WIDTH_20MHZ}, {@link #CHANNEL_WIDTH_40MHZ},
      * {@link #CHANNEL_WIDTH_80MHZ}, {@link #CHANNEL_WIDTH_160MHZ},
-     * {@link #CHANNEL_WIDTH_80MHZ_PLUS_MHZ} or {@link #CHANNEL_WIDTH_UNKNOWN}.
+     * {@link #CHANNEL_WIDTH_80MHZ_PLUS_MHZ} or {@link #CHANNEL_WIDTH_INVALID}.
      */
-    @Bandwidth
+    @WifiAnnotations.Bandwidth
     public int getBandwidth() {
         return mBandwidth;
     }
@@ -138,7 +121,7 @@ public final class SoftApInfo implements Parcelable {
      * Set AP Channel bandwidth.
      * @hide
      */
-    public void setBandwidth(@Bandwidth int bandwidth) {
+    public void setBandwidth(@WifiAnnotations.Bandwidth int bandwidth) {
         mBandwidth = bandwidth;
     }
 

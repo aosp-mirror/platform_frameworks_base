@@ -16,6 +16,8 @@
 
 package android.net.wifi.wificond;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -23,17 +25,85 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * PnoNetwork for wificond
+ * Configuration for a PNO (preferred network offload) network used in {@link PnoSettings}. A PNO
+ * network allows configuration of a specific network to search for.
  *
  * @hide
  */
-public class PnoNetwork implements Parcelable {
+@SystemApi
+public final class PnoNetwork implements Parcelable {
+    private boolean mIsHidden;
+    private byte[] mSsid;
+    private int[] mFrequencies;
 
-    public boolean isHidden;
-    public byte[] ssid;
-    public int[] frequencies;
+    /**
+     * Indicates whether the PNO network configuration is for a hidden SSID - i.e. a network which
+     * does not broadcast its SSID and must be queried explicitly.
+     *
+     * @return True if the configuration is for a hidden network, false otherwise.
+     */
+    public boolean isHidden() {
+        return mIsHidden;
+    }
 
-    /** public constructor */
+    /**
+     * Configure whether the PNO network configuration is for a hidden SSID - i.e. a network which
+     * does not broadcast its SSID and must be queried explicitly.
+     *
+     * @param isHidden True if the configuration is for a hidden network, false otherwise.
+     */
+    public void setHidden(boolean isHidden) {
+        mIsHidden = isHidden;
+    }
+
+    /**
+     * Get the raw bytes for the SSID of the PNO network being scanned for.
+     *
+     * @return A byte array.
+     */
+    @NonNull public byte[] getSsid() {
+        return mSsid;
+    }
+
+    /**
+     * Set the raw bytes for the SSID of the PNO network being scanned for.
+     *
+     * @param ssid A byte array.
+     */
+    public void setSsid(@NonNull byte[] ssid) {
+        if (ssid == null) {
+            throw new IllegalArgumentException("null argument");
+        }
+        this.mSsid = ssid;
+    }
+
+    /**
+     * Get the frequencies (in MHz) on which to PNO scan for the current network is being searched
+     * for. A null return (i.e. no frequencies configured) indicates that the network is search for
+     * on all supported frequencies.
+     *
+     * @return A array of frequencies (in MHz), a null indicates no configured frequencies.
+     */
+    @NonNull public int[] getFrequenciesMhz() {
+        return mFrequencies;
+    }
+
+    /**
+     * Set the frequencies (in MHz) on which to PNO scan for the current network is being searched
+     * for. A null configuration (i.e. no frequencies configured) indicates that the network is
+     * search for on all supported frequencies.
+     *
+     * @param frequenciesMhz an array of frequencies (in MHz), null indicating no configured
+     *                       frequencies.
+     */
+    public void setFrequenciesMhz(@NonNull int[] frequenciesMhz) {
+        if (frequenciesMhz == null) {
+            throw new IllegalArgumentException("null argument");
+        }
+        this.mFrequencies = frequenciesMhz;
+    }
+
+    /** Construct an uninitialized PnoNetwork object */
     public PnoNetwork() { }
 
     /** override comparator */
@@ -44,18 +114,18 @@ public class PnoNetwork implements Parcelable {
             return false;
         }
         PnoNetwork network = (PnoNetwork) rhs;
-        return Arrays.equals(ssid, network.ssid)
-                && Arrays.equals(frequencies, network.frequencies)
-                && isHidden == network.isHidden;
+        return Arrays.equals(mSsid, network.mSsid)
+                && Arrays.equals(mFrequencies, network.mFrequencies)
+                && mIsHidden == network.mIsHidden;
     }
 
     /** override hash code */
     @Override
     public int hashCode() {
         return Objects.hash(
-                isHidden,
-                Arrays.hashCode(ssid),
-                Arrays.hashCode(frequencies));
+                mIsHidden,
+                Arrays.hashCode(mSsid),
+                Arrays.hashCode(mFrequencies));
     }
 
     /** implement Parcelable interface */
@@ -69,21 +139,27 @@ public class PnoNetwork implements Parcelable {
      * |flag| is ignored.
      */
     @Override
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(isHidden ? 1 : 0);
-        out.writeByteArray(ssid);
-        out.writeIntArray(frequencies);
+    public void writeToParcel(@NonNull Parcel out, int flags) {
+        out.writeInt(mIsHidden ? 1 : 0);
+        out.writeByteArray(mSsid);
+        out.writeIntArray(mFrequencies);
     }
 
     /** implement Parcelable interface */
-    public static final Parcelable.Creator<PnoNetwork> CREATOR =
+    @NonNull public static final Parcelable.Creator<PnoNetwork> CREATOR =
             new Parcelable.Creator<PnoNetwork>() {
         @Override
         public PnoNetwork createFromParcel(Parcel in) {
             PnoNetwork result = new PnoNetwork();
-            result.isHidden = in.readInt() != 0 ? true : false;
-            result.ssid = in.createByteArray();
-            result.frequencies = in.createIntArray();
+            result.mIsHidden = in.readInt() != 0 ? true : false;
+            result.mSsid = in.createByteArray();
+            if (result.mSsid == null) {
+                result.mSsid = new byte[0];
+            }
+            result.mFrequencies = in.createIntArray();
+            if (result.mFrequencies == null) {
+                result.mFrequencies = new int[0];
+            }
             return result;
         }
 
