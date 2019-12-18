@@ -20,6 +20,7 @@
 #include <jni.h>
 #include <media/MediaMetricsItem.h>
 #include <nativehelper/JNIHelp.h>
+#include <variant>
 
 #include "android_media_MediaMetricsJNI.h"
 #include "android_os_Parcel.h"
@@ -74,6 +75,23 @@ struct BundleHelper {
     }
 
     template<>
+    void put(jstring keyName, const std::string& value) {
+        env->CallVoidMethod(bundle, putStringID, keyName, env->NewStringUTF(value.c_str()));
+    }
+
+    template<>
+    void put(jstring keyName, const std::pair<int64_t, int64_t>& value) {
+        ; // rate is currently ignored
+    }
+
+    template<>
+    void put(jstring keyName, const std::monostate& value) {
+        ; // none is currently ignored
+    }
+
+    // string char * helpers
+
+    template<>
     void put(jstring keyName, const char * const& value) {
         env->CallVoidMethod(bundle, putStringID, keyName, env->NewStringUTF(value));
     }
@@ -81,11 +99,6 @@ struct BundleHelper {
     template<>
     void put(jstring keyName, char * const& value) {
         env->CallVoidMethod(bundle, putStringID, keyName, env->NewStringUTF(value));
-    }
-
-    template<>
-    void put(jstring keyName, const std::pair<int64_t, int64_t>& value) {
-        ; // rate is currently ignored
     }
 
     // We allow both jstring and non-jstring variants.
