@@ -694,6 +694,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mFalsingManager = Dependency.get(FalsingManager.class);
+        mWallpaperSupported =
+                mContext.getSystemService(WallpaperManager.class).isWallpaperSupported();
 
         // Connect in to the status bar manager service
         mCommandQueue = getComponent(CommandQueue.class);
@@ -707,9 +709,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         createAndAddWindows(result);
-
-        mWallpaperSupported =
-                mContext.getSystemService(WallpaperManager.class).isWallpaperSupported();
 
         if (mWallpaperSupported) {
             // Make sure we always have the most current wallpaper info.
@@ -3055,9 +3054,20 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mState == StatusBarState.FULLSCREEN_USER_SWITCHER;
     }
 
+    private boolean isAutomotive() {
+        return mContext != null
+                && mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+    }
+
     private boolean updateIsKeyguard() {
         boolean wakeAndUnlocking = mBiometricUnlockController.getMode()
                 == BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
+
+        if (mScreenLifecycle == null && isAutomotive()) {
+            // TODO(b/146144370): workaround to avoid NPE when device goes into STR (Suspend to RAM)
+            Log.w(TAG, "updateIsKeyguard(): mScreenLifeCycle not set yet");
+            mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
+        }
 
         // For dozing, keyguard needs to be shown whenever the device is non-interactive. Otherwise
         // there's no surface we can show to the user. Note that the device goes fully interactive
