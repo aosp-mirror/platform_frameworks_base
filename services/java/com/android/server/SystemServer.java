@@ -105,6 +105,7 @@ import com.android.server.emergency.EmergencyAffordanceService;
 import com.android.server.gpu.GpuService;
 import com.android.server.hdmi.HdmiControlService;
 import com.android.server.incident.IncidentCompanionService;
+import com.android.server.incremental.IncrementalManagerService;
 import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
 import com.android.server.inputmethod.InputMethodSystemProperty;
@@ -324,6 +325,7 @@ public final class SystemServer {
     private ContentResolver mContentResolver;
     private EntropyMixer mEntropyMixer;
     private DataLoaderManagerService mDataLoaderManagerService;
+    private IncrementalManagerService mIncrementalManagerService;
 
     private boolean mOnlyCore;
     private boolean mFirstBoot;
@@ -704,6 +706,11 @@ public final class SystemServer {
         t.traceBegin("StartDataLoaderManagerService");
         mDataLoaderManagerService = mSystemServiceManager.startService(
                 DataLoaderManagerService.class);
+        t.traceEnd();
+
+        // Incremental service needs to be started before package manager
+        t.traceBegin("StartIncrementalManagerService");
+        mIncrementalManagerService = IncrementalManagerService.start(mSystemContext);
         t.traceEnd();
 
         // Power manager needs to be started early because other services need it.
@@ -2065,6 +2072,12 @@ public final class SystemServer {
         t.traceBegin("MakePackageManagerServiceReady");
         mPackageManagerService.systemReady();
         t.traceEnd();
+
+        if (mIncrementalManagerService != null) {
+            t.traceBegin("MakeIncrementalManagerServiceReady");
+            mIncrementalManagerService.systemReady();
+            t.traceEnd();
+        }
 
         t.traceBegin("MakeDisplayManagerServiceReady");
         try {
