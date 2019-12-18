@@ -22,12 +22,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Helper object for setting and getting entity scores for classified text.
@@ -42,7 +41,7 @@ final class EntityConfidence implements Parcelable {
     EntityConfidence() {}
 
     EntityConfidence(@NonNull EntityConfidence source) {
-        Preconditions.checkNotNull(source);
+        Objects.requireNonNull(source);
         mEntityConfidence.putAll(source.mEntityConfidence);
         mSortedEntities.addAll(source.mSortedEntities);
     }
@@ -56,7 +55,7 @@ final class EntityConfidence implements Parcelable {
      *               1 (high confidence).
      */
     EntityConfidence(@NonNull Map<String, Float> source) {
-        Preconditions.checkNotNull(source);
+        Objects.requireNonNull(source);
 
         // Prune non-existent entities and clamp to 1.
         mEntityConfidence.ensureCapacity(source.size());

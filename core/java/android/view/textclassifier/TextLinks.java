@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -155,7 +156,7 @@ public final class TextLinks implements Parcelable {
             @NonNull Spannable text,
             @ApplyStrategy int applyStrategy,
             @Nullable Function<TextLink, TextLinkSpan> spanFactory) {
-        Preconditions.checkNotNull(text);
+        Objects.requireNonNull(text);
         return new TextLinksParams.Builder()
                 .setApplyStrategy(applyStrategy)
                 .setSpanFactory(spanFactory)
@@ -223,10 +224,10 @@ public final class TextLinks implements Parcelable {
          */
         private TextLink(int start, int end, @NonNull EntityConfidence entityConfidence,
                 @NonNull Bundle extras, @Nullable URLSpan urlSpan) {
-            Preconditions.checkNotNull(entityConfidence);
+            Objects.requireNonNull(entityConfidence);
             Preconditions.checkArgument(!entityConfidence.getEntities().isEmpty());
             Preconditions.checkArgument(start <= end);
-            Preconditions.checkNotNull(extras);
+            Objects.requireNonNull(extras);
             mStart = start;
             mEnd = end;
             mEntityScores = entityConfidence;
@@ -455,7 +456,7 @@ public final class TextLinks implements Parcelable {
             @Nullable private Bundle mExtras;
 
             public Builder(@NonNull CharSequence text) {
-                mText = Preconditions.checkNotNull(text);
+                mText = Objects.requireNonNull(text);
             }
 
             /**
@@ -654,7 +655,7 @@ public final class TextLinks implements Parcelable {
          * @param fullText The full text to annotate with links
          */
         public Builder(@NonNull String fullText) {
-            mFullText = Preconditions.checkNotNull(fullText);
+            mFullText = Objects.requireNonNull(fullText);
             mLinks = new ArrayList<>();
         }
 

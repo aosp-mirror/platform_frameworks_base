@@ -105,14 +105,14 @@ public final class SmartSelectionEventTracker {
     public SmartSelectionEventTracker(@NonNull Context context, @WidgetType int widgetType) {
         mWidgetType = widgetType;
         mWidgetVersion = null;
-        mContext = Preconditions.checkNotNull(context);
+        mContext = Objects.requireNonNull(context);
     }
 
     public SmartSelectionEventTracker(
             @NonNull Context context, @WidgetType int widgetType, @Nullable String widgetVersion) {
         mWidgetType = widgetType;
         mWidgetVersion = widgetVersion;
-        mContext = Preconditions.checkNotNull(context);
+        mContext = Objects.requireNonNull(context);
     }
 
     /**
@@ -122,7 +122,7 @@ public final class SmartSelectionEventTracker {
      */
     @UnsupportedAppUsage(trackingBug = 136637107)
     public void logEvent(@NonNull SelectionEvent event) {
-        Preconditions.checkNotNull(event);
+        Objects.requireNonNull(event);
 
         if (event.mEventType != SelectionEvent.EventType.SELECTION_STARTED && mSessionId == null
                 && DEBUG_LOG_ENABLED) {
@@ -435,8 +435,8 @@ public final class SmartSelectionEventTracker {
             mStart = start;
             mEnd = end;
             mEventType = eventType;
-            mEntityType = Preconditions.checkNotNull(entityType);
-            mVersionTag = Preconditions.checkNotNull(versionTag);
+            mEntityType = Objects.requireNonNull(entityType);
+            mVersionTag = Objects.requireNonNull(versionTag);
         }
 
         /**

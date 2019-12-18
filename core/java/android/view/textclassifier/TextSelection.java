@@ -36,6 +36,7 @@ import com.android.internal.util.Preconditions;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Information about where text selection should be.
@@ -165,7 +166,7 @@ public final class TextSelection implements Parcelable {
         public Builder setEntityType(
                 @NonNull @EntityType String type,
                 @FloatRange(from = 0.0, to = 1.0) float confidenceScore) {
-            Preconditions.checkNotNull(type);
+            Objects.requireNonNull(type);
             mEntityConfidence.put(type, confidenceScore);
             return this;
         }

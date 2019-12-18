@@ -31,9 +31,9 @@ import android.view.textclassifier.TextClassifier.TextClassifierType;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -71,7 +71,7 @@ public final class TextClassificationManager {
 
     /** @hide */
     public TextClassificationManager(Context context) {
-        mContext = Preconditions.checkNotNull(context);
+        mContext = Objects.requireNonNull(context);
         mSessionFactory = mDefaultSessionFactory;
         mSettingsObserver = new SettingsObserver(this);
     }
@@ -157,10 +157,10 @@ public final class TextClassificationManager {
     @NonNull
     public TextClassifier createTextClassificationSession(
             @NonNull TextClassificationContext classificationContext) {
-        Preconditions.checkNotNull(classificationContext);
+        Objects.requireNonNull(classificationContext);
         final TextClassifier textClassifier =
                 mSessionFactory.createTextClassificationSession(classificationContext);
-        Preconditions.checkNotNull(textClassifier, "Session Factory should never return null");
+        Objects.requireNonNull(textClassifier, "Session Factory should never return null");
         return textClassifier;
     }
 
@@ -170,8 +170,8 @@ public final class TextClassificationManager {
      */
     public TextClassifier createTextClassificationSession(
             TextClassificationContext classificationContext, TextClassifier textClassifier) {
-        Preconditions.checkNotNull(classificationContext);
-        Preconditions.checkNotNull(textClassifier);
+        Objects.requireNonNull(classificationContext);
+        Objects.requireNonNull(textClassifier);
         return new TextClassificationSession(classificationContext, textClassifier);
     }
 
@@ -280,7 +280,7 @@ public final class TextClassificationManager {
 
     /** @hide */
     public static TextClassificationConstants getSettings(Context context) {
-        Preconditions.checkNotNull(context);
+        Objects.requireNonNull(context);
         final TextClassificationManager tcm =
                 context.getSystemService(TextClassificationManager.class);
         if (tcm != null) {

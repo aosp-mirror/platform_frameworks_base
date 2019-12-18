@@ -20,9 +20,8 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -118,7 +117,7 @@ public final class TextClassificationSessionId implements Parcelable {
                 @Override
                 public TextClassificationSessionId createFromParcel(Parcel parcel) {
                     return new TextClassificationSessionId(
-                            Preconditions.checkNotNull(parcel.readString()));
+                            Objects.requireNonNull(parcel.readString()));
                 }
 
                 @Override

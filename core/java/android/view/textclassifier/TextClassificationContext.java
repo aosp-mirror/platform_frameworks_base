@@ -24,9 +24,8 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.view.textclassifier.TextClassifier.WidgetType;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * A representation of the context in which text classification would be performed.
@@ -44,8 +43,8 @@ public final class TextClassificationContext implements Parcelable {
             String packageName,
             String widgetType,
             String widgetVersion) {
-        mPackageName = Preconditions.checkNotNull(packageName);
-        mWidgetType = Preconditions.checkNotNull(widgetType);
+        mPackageName = Objects.requireNonNull(packageName);
+        mWidgetType = Objects.requireNonNull(widgetType);
         mWidgetVersion = widgetVersion;
     }
 
@@ -121,8 +120,8 @@ public final class TextClassificationContext implements Parcelable {
          * @return this builder
          */
         public Builder(@NonNull String packageName, @NonNull @WidgetType String widgetType) {
-            mPackageName = Preconditions.checkNotNull(packageName);
-            mWidgetType = Preconditions.checkNotNull(widgetType);
+            mPackageName = Objects.requireNonNull(packageName);
+            mWidgetType = Objects.requireNonNull(widgetType);
         }
 
         /**
