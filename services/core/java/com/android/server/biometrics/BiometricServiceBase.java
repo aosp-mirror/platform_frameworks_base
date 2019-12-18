@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics;
 
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 
 import android.app.ActivityManager;
@@ -1211,6 +1212,11 @@ public abstract class BiometricServiceBase extends SystemService
      * @return authenticator id for the calling user
      */
     protected long getAuthenticatorId(String opPackageName) {
+        if (isKeyguard(opPackageName)) {
+            // If an app tells us it's keyguard, check that it actually is.
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+        }
+
         final int userId = getUserOrWorkProfileId(opPackageName, UserHandle.getCallingUserId());
         return mAuthenticatorIds.getOrDefault(userId, 0L);
     }
