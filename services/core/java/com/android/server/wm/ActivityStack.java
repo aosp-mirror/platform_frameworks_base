@@ -3986,6 +3986,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             final PooledConsumer c = PooledLambda.obtainConsumer(Task::alignToAdjustedBounds,
                     PooledLambda.__(Task.class), adjusted ? mAdjustedBounds : getRawBounds(),
                     insetBounds, alignBottom);
+            forAllTasks(c);
             c.recycle();
         }
 
