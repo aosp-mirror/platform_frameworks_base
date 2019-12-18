@@ -57,6 +57,7 @@ import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
 import com.android.internal.os.RoSystemProperties;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -1838,6 +1839,35 @@ public class UserManager {
      */
     public static boolean isUserTypeDemo(String userType) {
         return USER_TYPE_FULL_DEMO.equals(userType);
+    }
+
+    /**
+     * Returns the enum defined in the statsd UserLifecycleJourneyReported atom corresponding to the
+     * user type.
+     * @hide
+     */
+    public static int getUserTypeForStatsd(@NonNull String userType) {
+        switch (userType) {
+            case USER_TYPE_FULL_SYSTEM:
+                return FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__FULL_SYSTEM;
+            case USER_TYPE_FULL_SECONDARY:
+                return FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__FULL_SECONDARY;
+            case USER_TYPE_FULL_GUEST:
+                return FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__FULL_GUEST;
+            case USER_TYPE_FULL_DEMO:
+                return FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__FULL_DEMO;
+            case USER_TYPE_FULL_RESTRICTED:
+                return FrameworkStatsLog
+                        .USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__FULL_RESTRICTED;
+            case USER_TYPE_PROFILE_MANAGED:
+                return FrameworkStatsLog
+                        .USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__PROFILE_MANAGED;
+            case USER_TYPE_SYSTEM_HEADLESS:
+                return FrameworkStatsLog
+                        .USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__SYSTEM_HEADLESS;
+            default:
+                return FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN;
+        }
     }
 
     /**
