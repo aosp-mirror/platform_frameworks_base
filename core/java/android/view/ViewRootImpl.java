@@ -192,6 +192,13 @@ public final class ViewRootImpl implements ViewParent,
      * @see #USE_NEW_INSETS_PROPERTY
      * @hide
      */
+    public static int sNewInsetsMode =
+            SystemProperties.getInt(USE_NEW_INSETS_PROPERTY, 0);
+
+    /**
+     * @see #USE_NEW_INSETS_PROPERTY
+     * @hide
+     */
     public static final int NEW_INSETS_MODE_NONE = 0;
 
     /**
@@ -205,13 +212,6 @@ public final class ViewRootImpl implements ViewParent,
      * @hide
      */
     public static final int NEW_INSETS_MODE_FULL = 2;
-
-    /**
-     * @see #USE_NEW_INSETS_PROPERTY
-     * @hide
-     */
-    public static int sNewInsetsMode =
-            SystemProperties.getInt(USE_NEW_INSETS_PROPERTY, NEW_INSETS_MODE_IME);
 
     /**
      * Set this system property to true to force the view hierarchy to render
