@@ -5986,6 +5986,7 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.USER_ACTIVITY}) public void userActivity(long, int, int);
     field public static final int POWER_SAVE_MODE_TRIGGER_DYNAMIC = 1; // 0x1
     field public static final int POWER_SAVE_MODE_TRIGGER_PERCENTAGE = 0; // 0x0
+    field public static final String REBOOT_USERSPACE = "userspace";
     field public static final int USER_ACTIVITY_EVENT_ACCESSIBILITY = 3; // 0x3
     field public static final int USER_ACTIVITY_EVENT_BUTTON = 1; // 0x1
     field public static final int USER_ACTIVITY_EVENT_OTHER = 0; // 0x0
