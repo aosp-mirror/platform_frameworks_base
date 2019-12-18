@@ -16,6 +16,9 @@
 
 package com.android.server.integrity.serializer;
 
+import static com.android.server.integrity.serializer.RuleIndexingDetails.APP_CERTIFICATE_INDEXED;
+import static com.android.server.integrity.serializer.RuleIndexingDetails.NOT_INDEXED;
+import static com.android.server.integrity.serializer.RuleIndexingDetails.PACKAGE_NAME_INDEXED;
 import static com.android.server.testutils.TestUtils.assertExpectException;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -34,9 +37,9 @@ import org.junit.runners.JUnit4;
 
 import java.util.Arrays;
 
-/** Unit tests for {@link RuleIndexTypeIdentifier}. */
+/** Unit tests for {@link RuleIndexingDetailsIdentifier}. */
 @RunWith(JUnit4.class)
-public class RuleIndexTypeIdentifierTest {
+public class RuleIndexingDetailsIdentifierTest {
 
     @Test
     public void getIndexType_nullRule() {
@@ -46,7 +49,7 @@ public class RuleIndexTypeIdentifierTest {
                 IllegalArgumentException.class,
                 /* expectedExceptionMessageRegex= */
                 "Indexing type cannot be determined for null rule.",
-                () -> RuleIndexTypeIdentifier.getIndexType(rule));
+                () -> RuleIndexingDetailsIdentifier.getIndexingDetails(rule));
     }
 
     @Test
@@ -56,7 +59,7 @@ public class RuleIndexTypeIdentifierTest {
         assertExpectException(
                 IllegalArgumentException.class,
                 /* expectedExceptionMessageRegex= */ "Invalid formula tag type.",
-                () -> RuleIndexTypeIdentifier.getIndexType(rule));
+                () -> RuleIndexingDetailsIdentifier.getIndexingDetails(rule));
     }
 
     @Test
@@ -78,8 +81,10 @@ public class RuleIndexTypeIdentifierTest {
                                                 /* isHashedValue= */ false))),
                         Rule.DENY);
 
-        assertThat(RuleIndexTypeIdentifier.getIndexType(rule))
-                .isEqualTo(RuleIndexTypeIdentifier.PACKAGE_NAME_INDEXED);
+        RuleIndexingDetails result = RuleIndexingDetailsIdentifier.getIndexingDetails(rule);
+
+        assertThat(result.getIndexType()).isEqualTo(PACKAGE_NAME_INDEXED);
+        assertThat(result.getRuleKey()).isEqualTo(packageName);
     }
 
     @Test
@@ -101,8 +106,11 @@ public class RuleIndexTypeIdentifierTest {
                                                 /* isHashedValue= */ false))),
                         Rule.DENY);
 
-        assertThat(RuleIndexTypeIdentifier.getIndexType(rule))
-                .isEqualTo(RuleIndexTypeIdentifier.APP_CERTIFICATE_INDEXED);
+
+        RuleIndexingDetails result = RuleIndexingDetailsIdentifier.getIndexingDetails(rule);
+
+        assertThat(result.getIndexType()).isEqualTo(APP_CERTIFICATE_INDEXED);
+        assertThat(result.getRuleKey()).isEqualTo(appCertificate);
     }
 
     @Test
@@ -124,8 +132,8 @@ public class RuleIndexTypeIdentifierTest {
                                                 /* isHashedValue= */ false))),
                         Rule.DENY);
 
-        assertThat(RuleIndexTypeIdentifier.getIndexType(rule))
-                .isEqualTo(RuleIndexTypeIdentifier.NOT_INDEXED);
+        assertThat(RuleIndexingDetailsIdentifier.getIndexingDetails(rule).getIndexType())
+                .isEqualTo(NOT_INDEXED);
     }
 
     @Test
@@ -145,8 +153,8 @@ public class RuleIndexTypeIdentifierTest {
                                                 appVersion))),
                         Rule.DENY);
 
-        assertThat(RuleIndexTypeIdentifier.getIndexType(rule))
-                .isEqualTo(RuleIndexTypeIdentifier.NOT_INDEXED);
+        assertThat(RuleIndexingDetailsIdentifier.getIndexingDetails(rule).getIndexType())
+                .isEqualTo(NOT_INDEXED);
     }
 
     @Test
@@ -171,8 +179,8 @@ public class RuleIndexTypeIdentifierTest {
                                                                 /* isHashedValue= */ false))))),
                         Rule.DENY);
 
-        assertThat(RuleIndexTypeIdentifier.getIndexType(rule))
-                .isEqualTo(RuleIndexTypeIdentifier.NOT_INDEXED);
+        assertThat(RuleIndexingDetailsIdentifier.getIndexingDetails(rule).getIndexType())
+                .isEqualTo(NOT_INDEXED);
     }
 
     private Formula getInvalidFormula() {
@@ -215,4 +223,3 @@ public class RuleIndexTypeIdentifierTest {
         };
     }
 }
-
