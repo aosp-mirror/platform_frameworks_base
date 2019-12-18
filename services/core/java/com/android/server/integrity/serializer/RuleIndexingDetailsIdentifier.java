@@ -49,7 +49,8 @@ class RuleIndexingDetailsIdentifier {
             case Formula.COMPOUND_FORMULA_TAG:
                 return getIndexingDetailsForCompoundFormula((CompoundFormula) formula);
             case Formula.STRING_ATOMIC_FORMULA_TAG:
-                return getIndexingDetailsForAtomicStringFormula((AtomicFormula) formula);
+                return getIndexingDetailsForStringAtomicFormula(
+                        (AtomicFormula.StringAtomicFormula) formula);
             case Formula.INT_ATOMIC_FORMULA_TAG:
             case Formula.BOOLEAN_ATOMIC_FORMULA_TAG:
                 // Package name and app certificate related formulas are string atomic formulas.
@@ -102,26 +103,16 @@ class RuleIndexingDetailsIdentifier {
         }
     }
 
-    private static RuleIndexingDetails getIndexingDetailsForAtomicStringFormula(
-            AtomicFormula atomicFormula) {
+    private static RuleIndexingDetails getIndexingDetailsForStringAtomicFormula(
+            AtomicFormula.StringAtomicFormula atomicFormula) {
         switch (atomicFormula.getKey()) {
             case AtomicFormula.PACKAGE_NAME:
-                return new RuleIndexingDetails(PACKAGE_NAME_INDEXED,
-                        getValueFromAtomicRuleString(atomicFormula.toString()));
+                return new RuleIndexingDetails(PACKAGE_NAME_INDEXED, atomicFormula.getValue());
             case AtomicFormula.APP_CERTIFICATE:
-                return new RuleIndexingDetails(APP_CERTIFICATE_INDEXED,
-                        getValueFromAtomicRuleString(atomicFormula.toString()));
+                return new RuleIndexingDetails(APP_CERTIFICATE_INDEXED, atomicFormula.getValue());
             default:
                 return new RuleIndexingDetails(NOT_INDEXED);
         }
-    }
-
-    // The AtomRule API does not allow direct access to the {@link AtomicFormula} value. However,
-    // this value is printed as "(%s %s %s)" where the last %s stands for the value. This method
-    // parses the last.
-    private static String getValueFromAtomicRuleString(String ruleString) {
-        // TODO (b/145488708): Make an API change and get rid of this trick.
-        return ruleString.split(" ")[2].split("[)]")[0];
     }
 }
 
