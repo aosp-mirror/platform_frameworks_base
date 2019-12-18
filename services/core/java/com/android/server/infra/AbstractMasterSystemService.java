@@ -762,6 +762,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             if (mUpdatingPackageNames != null) {
                 pw.print("Packages being updated: "); pw.println(mUpdatingPackageNames);
             }
+            dumpSupportedUsers(pw, prefix);
             if (mServiceNameResolver != null) {
                 pw.print(prefix); pw.print("Name resolver: ");
                 mServiceNameResolver.dumpShort(pw); pw.println();

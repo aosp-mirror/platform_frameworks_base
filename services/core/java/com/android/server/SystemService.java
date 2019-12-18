@@ -29,6 +29,10 @@ import android.os.UserManager;
 
 import com.android.server.pm.UserManagerService;
 
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The base class for services running in the system process. Override and implement
  * the lifecycle event callback methods as needed.
@@ -161,6 +165,25 @@ public abstract class SystemService {
      */
     public boolean isSupported(@NonNull UserInfo userInfo) {
         return true;
+    }
+
+    /**
+     * Helper method used to dump which users are {@link #onStartUser(UserInfo) supported}.
+     */
+    protected void dumpSupportedUsers(@NonNull PrintWriter pw, @NonNull String prefix) {
+        final List<UserInfo> allUsers = UserManager.get(mContext).getUsers();
+        final List<Integer> supportedUsers = new ArrayList<>(allUsers.size());
+        for (UserInfo user : allUsers) {
+            supportedUsers.add(user.id);
+        }
+        if (allUsers.isEmpty()) {
+            pw.print(prefix); pw.println("No supported users");
+        } else {
+            final int size = supportedUsers.size();
+            pw.print(prefix); pw.print(size); pw.print(" supported user");
+            if (size > 1) pw.print("s");
+            pw.print(": "); pw.println(supportedUsers);
+        }
     }
 
     /**
