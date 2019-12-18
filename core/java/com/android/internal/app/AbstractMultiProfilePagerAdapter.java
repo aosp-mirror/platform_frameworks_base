@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package com.android.internal.app;
+
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -23,9 +24,9 @@ import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.PagerAdapter;
-
-import com.android.internal.util.Preconditions;
 import com.android.internal.widget.ViewPager;
+
+import java.util.Objects;
 
 /**
  * Skeletal {@link PagerAdapter} implementation of a work or personal profile page for
@@ -42,7 +43,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     private int mCurrentPage;
 
     AbstractMultiProfilePagerAdapter(Context context, int currentPage) {
-        mContext = Preconditions.checkNotNull(context);
+        mContext = Objects.requireNonNull(context);
         mCurrentPage = currentPage;
     }
 

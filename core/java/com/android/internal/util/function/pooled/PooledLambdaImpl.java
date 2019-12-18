@@ -25,7 +25,6 @@ import android.util.Pools;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.DecConsumer;
 import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.DecPredicate;
@@ -545,7 +544,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
                             + ", k = " + k
                             + ")");
         }
-        r.mFunc = Preconditions.checkNotNull(func);
+        r.mFunc = Objects.requireNonNull(func);
         r.setFlags(MASK_FUNC_TYPE, LambdaType.encode(fNumArgs, fReturnType));
         r.setFlags(MASK_EXPOSED_AS, LambdaType.encode(numPlaceholders, fReturnType));
         if (ArrayUtils.size(r.mArgs) < fNumArgs) r.mArgs = new Object[fNumArgs];
