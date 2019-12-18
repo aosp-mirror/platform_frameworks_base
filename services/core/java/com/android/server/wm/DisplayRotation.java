@@ -442,13 +442,17 @@ public class DisplayRotation {
         final int lastOrientation = mLastOrientation;
         final int rotation = rotationForOrientation(lastOrientation, oldRotation);
         ProtoLog.v(WM_DEBUG_ORIENTATION,
-                "Computed rotation=%d for display id=%d based on lastOrientation=%d and "
-                        + "oldRotation=%d",
-                rotation, displayId, lastOrientation, oldRotation);
+                "Computed rotation=%s (%d) for display id=%d based on lastOrientation=%s (%d) and "
+                        + "oldRotation=%s (%d)",
+                Surface.rotationToString(rotation), rotation,
+                displayId,
+                ActivityInfo.screenOrientationToString(lastOrientation), lastOrientation,
+                Surface.rotationToString(oldRotation), oldRotation);
 
         ProtoLog.v(WM_DEBUG_ORIENTATION,
-                "Display id=%d selected orientation %d, got rotation %d", displayId,
-                        lastOrientation, rotation);
+                "Display id=%d selected orientation %s (%d), got rotation %s (%d)", displayId,
+                ActivityInfo.screenOrientationToString(lastOrientation), lastOrientation,
+                Surface.rotationToString(rotation), rotation);
 
         if (oldRotation == rotation) {
             // No change.

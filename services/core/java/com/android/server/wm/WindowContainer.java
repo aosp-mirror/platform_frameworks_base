@@ -30,6 +30,7 @@ import static android.view.SurfaceControl.Transaction;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -132,6 +133,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     protected final WindowList<E> mChildren = new WindowList<E>();
 
     // The specified orientation for this window container.
+    @ActivityInfo.ScreenOrientation
     protected int mOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
     private final Pools.SynchronizedPool<ForAllWindowsConsumerWrapper> mConsumerWrapperPool =
@@ -984,6 +986,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
+    @ActivityInfo.ScreenOrientation
     int getOrientation() {
         return getOrientation(mOrientation);
     }
@@ -1036,6 +1039,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             if (wc.fillsParent() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
                 // Use the orientation if the container fills its parent or requested an explicit
                 // orientation that isn't SCREEN_ORIENTATION_UNSPECIFIED.
+                ProtoLog.v(WM_DEBUG_ORIENTATION, "%s is requesting orientation %d (%s)", toString(),
+                        orientation, ActivityInfo.screenOrientationToString(orientation));
                 return orientation;
             }
         }
