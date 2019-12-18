@@ -442,6 +442,7 @@ java_library {
     ],
     // For backwards compatibility.
     stem: "framework",
+    apex_available: ["//apex_available:platform"],
 }
 
 // This "framework" module is NOT installed to the device. It's
@@ -463,6 +464,7 @@ java_library {
         // TODO(jiyong): add more stubs for APEXes here
     ],
     sdk_version: "core_platform",
+    apex_available: ["//apex_available:platform"],
 }
 
 java_library {
@@ -470,6 +472,7 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-all-sources"],
     installable: false,
+    apex_available: ["//apex_available:platform"],
 }
 
 java_library {
