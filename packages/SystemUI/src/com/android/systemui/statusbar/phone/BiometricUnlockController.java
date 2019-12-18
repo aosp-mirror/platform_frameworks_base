@@ -37,7 +37,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
-import com.android.systemui.dagger.qualifiers.MainResources;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -165,7 +165,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             StatusBarWindowController statusBarWindowController,
             KeyguardStateController keyguardStateController, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            @MainResources Resources resources,
+            @Main Resources resources,
             KeyguardBypassController keyguardBypassController, DozeParameters dozeParameters,
             MetricsLogger metricsLogger, DumpController dumpController) {
         mContext = context;

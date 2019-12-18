@@ -23,7 +23,7 @@ import android.util.Log;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
 
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 
 import javax.inject.Inject;
@@ -52,7 +52,7 @@ public class AutoHideController {
     };
 
     @Inject
-    public AutoHideController(Context context, @MainHandler Handler handler,
+    public AutoHideController(Context context, @Main Handler handler,
             NotificationRemoteInputManager notificationRemoteInputManager,
             IWindowManager iWindowManager) {
         mHandler = handler;

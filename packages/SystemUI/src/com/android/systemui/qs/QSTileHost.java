@@ -34,8 +34,8 @@ import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.BgLooper;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
@@ -96,8 +96,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     public QSTileHost(Context context,
             StatusBarIconController iconController,
             QSFactoryImpl defaultFactory,
-            @MainHandler Handler mainHandler,
-            @BgLooper Looper bgLooper,
+            @Main Handler mainHandler,
+            @Background Looper bgLooper,
             PluginManager pluginManager,
             TunerService tunerService,
             Provider<AutoTileManager> autoTiles,

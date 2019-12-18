@@ -30,7 +30,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
 import com.android.systemui.classifier.brightline.FalsingDataProvider;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingPlugin;
 import com.android.systemui.plugins.PluginListener;
@@ -61,7 +61,7 @@ public class FalsingManagerProxy implements FalsingManager {
 
     @Inject
     FalsingManagerProxy(Context context, PluginManager pluginManager,
-            @MainHandler Handler handler,
+            @Main Handler handler,
             ProximitySensor proximitySensor,
             DeviceConfigProxy deviceConfig) {
         mProximitySensor = proximitySensor;

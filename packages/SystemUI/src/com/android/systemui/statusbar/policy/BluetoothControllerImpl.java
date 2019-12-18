@@ -34,8 +34,8 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
-import com.android.systemui.dagger.qualifiers.BgLooper;
-import com.android.systemui.dagger.qualifiers.MainLooper;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -75,8 +75,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     /**
      */
     @Inject
-    public BluetoothControllerImpl(Context context, @BgLooper Looper bgLooper,
-            @MainLooper Looper mainLooper, @Nullable LocalBluetoothManager localBluetoothManager) {
+    public BluetoothControllerImpl(Context context, @Background Looper bgLooper,
+            @Main Looper mainLooper, @Nullable LocalBluetoothManager localBluetoothManager) {
         mLocalBluetoothManager = localBluetoothManager;
         mBgHandler = new Handler(bgLooper);
         mHandler = new H(mainLooper);

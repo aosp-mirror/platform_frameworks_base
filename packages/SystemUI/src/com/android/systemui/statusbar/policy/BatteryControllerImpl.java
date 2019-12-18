@@ -34,8 +34,8 @@ import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.fuelgauge.Estimate;
 import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.BgHandler;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.power.EnhancedEstimates;
 
 import java.io.FileDescriptor;
@@ -82,7 +82,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     @Inject
     BatteryControllerImpl(Context context, EnhancedEstimates enhancedEstimates,
             PowerManager powerManager, BroadcastDispatcher broadcastDispatcher,
-            @MainHandler Handler mainHandler, @BgHandler Handler bgHandler) {
+            @Main Handler mainHandler, @Background Handler bgHandler) {
         mContext = context;
         mMainHandler = mainHandler;
         mBgHandler = bgHandler;

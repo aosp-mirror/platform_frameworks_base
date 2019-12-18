@@ -24,7 +24,7 @@ import android.util.ArraySet;
 
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.appops.AppOpsController;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.NotifLifetimeExtender;
@@ -63,7 +63,7 @@ public class ForegroundCoordinator implements Coordinator {
     public ForegroundCoordinator(
             ForegroundServiceController foregroundServiceController,
             AppOpsController appOpsController,
-            @MainHandler Handler mainHandler) {
+            @Main Handler mainHandler) {
         mForegroundServiceController = foregroundServiceController;
         mAppOpsController = appOpsController;
         mMainHandler = mainHandler;

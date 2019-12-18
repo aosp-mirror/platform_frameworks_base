@@ -18,14 +18,16 @@ package com.android.systemui.util.concurrency;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.Process;
 
 import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.dagger.qualifiers.BgLooper;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dagger.qualifiers.MainLooper;
 
 import java.util.concurrent.Executor;
+
+import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
@@ -35,11 +37,51 @@ import dagger.Provides;
  */
 @Module
 public abstract class ConcurrencyModule {
+    /** Background Looper */
+    @Provides
+    @Singleton
+    @Background
+    public static Looper provideBgLooper() {
+        HandlerThread thread = new HandlerThread("SysUiBg",
+                Process.THREAD_PRIORITY_BACKGROUND);
+        thread.start();
+        return thread.getLooper();
+    }
+
+    /** Main Looper */
+    @Provides
+    @Main
+    public static  Looper provideMainLooper() {
+        return Looper.getMainLooper();
+    }
+
+    /**
+     * Background Handler.
+     *
+     * Prefer the Background Executor when possible.
+     */
+    @Provides
+    @Background
+    public static Handler provideBgHandler(@Background Looper bgLooper) {
+        return new Handler(bgLooper);
+    }
+
+    /**
+     * Main Handler.
+     *
+     * Prefer the Main Executor when possible.
+     */
+    @Provides
+    @Main
+    public static Handler provideMainHandler(@Main Looper mainLooper) {
+        return new Handler(mainLooper);
+    }
+
     /**
      * Provide a Background-Thread Executor by default.
      */
     @Provides
-    public static Executor provideExecutor(@BgLooper Looper looper) {
+    public static Executor provideExecutor(@Background Looper looper) {
         return new ExecutorImpl(new Handler(looper));
     }
 
@@ -48,7 +90,7 @@ public abstract class ConcurrencyModule {
      */
     @Provides
     @Background
-    public static Executor provideBackgroundExecutor(@BgLooper Looper looper) {
+    public static Executor provideBackgroundExecutor(@Background Looper looper) {
         return new ExecutorImpl(new Handler(looper));
     }
 
@@ -65,7 +107,7 @@ public abstract class ConcurrencyModule {
      * Provide a Background-Thread Executor by default.
      */
     @Provides
-    public static DelayableExecutor provideDelayableExecutor(@BgLooper Looper looper) {
+    public static DelayableExecutor provideDelayableExecutor(@Background Looper looper) {
         return new ExecutorImpl(new Handler(looper));
     }
 
@@ -74,7 +116,7 @@ public abstract class ConcurrencyModule {
      */
     @Provides
     @Background
-    public static DelayableExecutor provideBackgroundDelayableExecutor(@BgLooper Looper looper) {
+    public static DelayableExecutor provideBackgroundDelayableExecutor(@Background Looper looper) {
         return new ExecutorImpl(new Handler(looper));
     }
 
@@ -83,7 +125,7 @@ public abstract class ConcurrencyModule {
      */
     @Provides
     @Main
-    public static DelayableExecutor provideMainDelayableExecutor(@MainLooper Looper looper) {
+    public static DelayableExecutor provideMainDelayableExecutor(@Main Looper looper) {
         return new ExecutorImpl(new Handler(looper));
     }
 }

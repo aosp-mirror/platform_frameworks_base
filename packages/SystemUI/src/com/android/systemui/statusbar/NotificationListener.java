@@ -30,7 +30,7 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     public NotificationListener(
             Context context,
             NotificationManager notificationManager,
-            @MainHandler Handler mainHandler) {
+            @Main Handler mainHandler) {
         mContext = context;
         mNotificationManager = notificationManager;
         mMainHandler = mainHandler;

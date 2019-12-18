@@ -93,7 +93,7 @@ import com.android.systemui.R;
 import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.model.SysUiState;
@@ -274,7 +274,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             CommandQueue commandQueue, Divider divider,
             Optional<Recents> recentsOptional, Lazy<StatusBar> statusBarLazy,
             ShadeController shadeController,
-            @MainHandler Handler mainHandler) {
+            @Main Handler mainHandler) {
         mAccessibilityManagerWrapper = accessibilityManagerWrapper;
         mDeviceProvisionedController = deviceProvisionedController;
         mStatusBarStateController = statusBarStateController;
