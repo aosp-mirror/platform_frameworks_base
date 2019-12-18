@@ -46,15 +46,15 @@ public class SurfaceControlViewHostTest extends Activity implements SurfaceHolde
 
         mView.setZOrderOnTop(true);
         mView.getHolder().addCallback(this);
+
+        addEmbeddedView();
     }
 
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
+    void addEmbeddedView() {
         mVr = new SurfaceControlViewHost(this, this.getDisplay(),
                 mView.getInputToken());
 
-        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        t.reparent(mVr.getSurfacePackage().getSurfaceControl(), mView.getSurfaceControl()).apply();
+        mView.setChildSurfacePackage(mVr.getSurfacePackage());
 
         Button v = new Button(this);
         v.setBackgroundColor(Color.BLUE);
@@ -67,6 +67,10 @@ public class SurfaceControlViewHostTest extends Activity implements SurfaceHolde
             new WindowManager.LayoutParams(500, 500, WindowManager.LayoutParams.TYPE_APPLICATION,
                     0, PixelFormat.OPAQUE);
         mVr.addView(v, lp);
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
     }
 
     @Override

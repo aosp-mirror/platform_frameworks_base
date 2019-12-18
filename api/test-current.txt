@@ -4425,6 +4425,7 @@ package android.view {
 
   public class SurfaceView extends android.view.View {
     method @Nullable public android.os.IBinder getInputToken();
+    method public void setChildSurfacePackage(@NonNull android.view.SurfaceControlViewHost.SurfacePackage);
   }
 
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {

@@ -20,6 +20,7 @@ import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_OVERLA
 import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_SUBLAYER;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_PANEL_SUBLAYER;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -43,6 +44,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceControl.Transaction;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.SurfaceControlViewHost;
 
 import com.android.internal.view.SurfaceCallbackHelper;
 
@@ -204,6 +206,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     // The token of embedded windowless view hierarchy.
     private IBinder mEmbeddedViewHierarchy;
+    SurfaceControlViewHost.SurfacePackage mSurfacePackage;
 
     public SurfaceView(Context context) {
         this(context, null);
@@ -877,6 +880,11 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     } else {
                         mTmpTransaction.hide(mSurfaceControl);
                     }
+
+                    if (mSurfacePackage != null) {
+                        reparentSurfacePackage(mTmpTransaction, mSurfacePackage);
+                    }
+
                     updateBackgroundVisibility(mTmpTransaction);
                     if (mUseAlpha) {
                         mTmpTransaction.setAlpha(mSurfaceControl, alpha);
@@ -1534,6 +1542,29 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         final ViewRootImpl viewRoot = getViewRootImpl();
         if (viewRoot == null) return;
         viewRoot.setUseBLASTSyncTransaction();
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void setChildSurfacePackage(@NonNull SurfaceControlViewHost.SurfacePackage p) {
+        final SurfaceControl sc = p != null ? p.getSurfaceControl() : null;
+        final SurfaceControl lastSc = mSurfacePackage != null ?
+            mSurfacePackage.getSurfaceControl() : null;
+        if (mSurfaceControl != null && lastSc != null) {
+            mTmpTransaction.reparent(lastSc, null).apply();
+        } else if (mSurfaceControl != null) {
+            reparentSurfacePackage(mTmpTransaction, p);
+            mTmpTransaction.apply();
+        }
+        mSurfacePackage = p;
+    }
+
+    private void reparentSurfacePackage(SurfaceControl.Transaction t,
+            SurfaceControlViewHost.SurfacePackage p) {
+        // TODO: Link accessibility IDs here.
+        t.reparent(p.getSurfaceControl(), mSurfaceControl);
     }
 
     /**
