@@ -31,6 +31,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
 
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
@@ -165,6 +166,7 @@ public class TaskStackTests extends WindowTestsBase {
         final ActivityStack stack2 = createTaskStackOnDisplay(dc);
 
         // Reparent
+        clearInvocations(task1); // reset the number of onDisplayChanged for task.
         stack1.reparent(dc, true /* onTop */);
         assertEquals(dc, stack1.getDisplayContent());
         final int stack1PositionInParent = stack1.getParent().mChildren.indexOf(stack1);

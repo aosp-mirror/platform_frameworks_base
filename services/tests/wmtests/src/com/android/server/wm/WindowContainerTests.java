@@ -763,6 +763,25 @@ public class WindowContainerTests extends WindowTestsBase {
         assertTrue(child.handlesOrientationChangeFromDescendant());
     }
 
+    @Test
+    public void testOnDisplayChanged() {
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
+        final ActivityRecord activity =
+                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
+
+        final DisplayContent newDc = createNewDisplay();
+        mDisplayContent.removeStack(stack);
+        newDc.setStackOnDisplay(stack, POSITION_TOP);
+
+        verify(stack).onDisplayChanged(newDc);
+        verify(task).onDisplayChanged(newDc);
+        verify(activity).onDisplayChanged(newDc);
+        assertEquals(newDc, stack.mDisplayContent);
+        assertEquals(newDc, task.mDisplayContent);
+        assertEquals(newDc, activity.mDisplayContent);
+    }
+
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
     private static class TestWindowContainer extends WindowContainer<TestWindowContainer> {
         private final int mLayer;

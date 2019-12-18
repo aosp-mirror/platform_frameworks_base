@@ -116,7 +116,7 @@ class WindowToken extends WindowContainer<WindowState> {
         mOwnerCanManageAppTokens = ownerCanManageAppTokens;
         mRoundedCornerOverlay = roundedCornerOverlay;
         if (dc != null) {
-            onDisplayChanged(dc);
+            dc.addWindowToken(token, this);
         }
     }
 

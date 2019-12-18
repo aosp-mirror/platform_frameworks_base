@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -427,31 +426,25 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             final int stackId = mStackId >= 0 ? mStackId : mDisplay.getNextStackId();
             final ActivityStack stack;
             final ActivityStackSupervisor supervisor = mRootActivityContainer.mStackSupervisor;
-            if (mWindowingMode == WINDOWING_MODE_PINNED) {
-                stack = new ActivityStack(mDisplay, stackId, supervisor,
-                        mWindowingMode, ACTIVITY_TYPE_STANDARD, mOnTop);
-            } else {
-                stack = new ActivityStack(mDisplay, stackId, supervisor,
-                        mWindowingMode, mActivityType, mOnTop);
 
-                if (mCreateActivity) {
-                    new ActivityBuilder(supervisor.mService)
-                            .setCreateTask(true)
-                            .setStack(stack)
-                            .build();
-                    if (mOnTop) {
-                        // We move the task to front again in order to regain focus after activity
-                        // added to the stack.
-                        // Or {@link DisplayContent#mPreferredTopFocusableStack} could be other
-                        // stacks (e.g. home stack).
-                        stack.moveToFront("createActivityStack");
-                    } else {
-                        stack.moveToBack("createActivityStack", null);
-                    }
+            stack = mDisplay.createStackUnchecked(mWindowingMode, mActivityType, stackId, mOnTop);
+
+            if (mCreateActivity) {
+                new ActivityBuilder(supervisor.mService)
+                        .setCreateTask(true)
+                        .setStack(stack)
+                        .build();
+                if (mOnTop) {
+                    // We move the task to front again in order to regain focus after activity
+                    // added to the stack. Or {@link DisplayContent#mPreferredTopFocusableStack}
+                    // could be other stacks (e.g. home stack).
+                    stack.moveToFront("createActivityStack");
+                } else {
+                    stack.moveToBack("createActivityStack", null);
                 }
             }
-
             spyOn(stack);
+
             doNothing().when(stack).startActivityLocked(
                     any(), any(), anyBoolean(), anyBoolean(), any());
 

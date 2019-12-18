@@ -28,6 +28,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
 
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -126,6 +127,7 @@ public class TaskTests extends WindowTestsBase {
         final ActivityStack stack2 = createTaskStackOnDisplay(dc);
         final Task task2 = createTaskInStack(stack2, 0 /* userId */);
         // Reparent and check state
+        clearInvocations(task);  // reset the number of onDisplayChanged for task.
         task.reparent(stack2, 0, false /* moveParents */, "testReparent_BetweenDisplays");
         assertEquals(stack2, task.getParent());
         assertEquals(0, task.getParent().mChildren.indexOf(task));

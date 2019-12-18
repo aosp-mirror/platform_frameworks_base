@@ -315,6 +315,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mParent.onChildAdded(this);
         }
         if (!mReparenting) {
+            if (mParent != null && mParent.mDisplayContent != null
+                    && mDisplayContent != mParent.mDisplayContent) {
+                onDisplayChanged(mParent.mDisplayContent);
+            }
             onParentChanged(mParent, oldParent);
         }
     }
