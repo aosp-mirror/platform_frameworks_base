@@ -252,6 +252,11 @@ public class CarBatteryController extends BroadcastReceiver implements BatteryCo
     }
 
     @Override
+    public boolean isPluggedIn() {
+        return true;
+    }
+
+    @Override
     public boolean isPowerSave() {
         // Power save is not valid for the car, so always return false.
         return false;

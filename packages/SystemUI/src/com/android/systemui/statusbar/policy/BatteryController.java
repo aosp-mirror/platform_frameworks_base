@@ -38,6 +38,11 @@ public interface BatteryController extends DemoMode, Dumpable,
     void setPowerSaveMode(boolean powerSave);
 
     /**
+     * Returns {@code true} if the device is currently plugged in.
+     */
+    boolean isPluggedIn();
+
+    /**
      * Returns {@code true} if the device is currently in power save mode.
      */
     boolean isPowerSave();

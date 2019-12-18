@@ -213,7 +213,7 @@ public class FalsingManagerImpl implements FalsingManager {
 
     private void onSessionStart() {
         if (FalsingLog.ENABLED) {
-            FalsingLog.i("onSessionStart", "classifierEnabled=" + isClassiferEnabled());
+            FalsingLog.i("onSessionStart", "classifierEnabled=" + isClassifierEnabled());
             clearPendingWtf();
         }
         mBouncerOn = false;
@@ -246,7 +246,7 @@ public class FalsingManagerImpl implements FalsingManager {
         }
     }
 
-    public boolean isClassiferEnabled() {
+    public boolean isClassifierEnabled() {
         return mHumanInteractionClassifier.isEnabled();
     }
 
@@ -544,7 +544,7 @@ public class FalsingManagerImpl implements FalsingManager {
 
     public void dump(PrintWriter pw) {
         pw.println("FALSING MANAGER");
-        pw.print("classifierEnabled="); pw.println(isClassiferEnabled() ? 1 : 0);
+        pw.print("classifierEnabled="); pw.println(isClassifierEnabled() ? 1 : 0);
         pw.print("mSessionActive="); pw.println(mSessionActive ? 1 : 0);
         pw.print("mBouncerOn="); pw.println(mSessionActive ? 1 : 0);
         pw.print("mState="); pw.println(StatusBarState.toShortString(mState));

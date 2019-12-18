@@ -25,17 +25,21 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.classifier.Classifier;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.sensors.ProximitySensor;
 
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Queue;
 
 /**
  * FalsingManager designed to make clear why a touch was rejected.
@@ -44,16 +48,20 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     static final boolean DEBUG = false;
     private static final String TAG = "FalsingManager";
+    private static final int RECENT_INFO_LOG_SIZE = 20;
 
     private final FalsingDataProvider mDataProvider;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ProximitySensor mProximitySensor;
+    private final DockManager mDockManager;
     private boolean mSessionStarted;
     private MetricsLogger mMetricsLogger;
     private int mIsFalseTouchCalls;
     private boolean mShowingAod;
     private boolean mScreenOn;
     private boolean mJustUnlockedWithFace;
+    private static final Queue<String> RECENT_INFO_LOG =
+            new ArrayDeque<>(RECENT_INFO_LOG_SIZE + 1);
 
     private final List<FalsingClassifier> mClassifiers;
 
@@ -71,14 +79,14 @@ public class BrightLineFalsingManager implements FalsingManager {
                 }
             };
 
-    public BrightLineFalsingManager(
-            FalsingDataProvider falsingDataProvider,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
-            ProximitySensor proximitySensor,
-            DeviceConfigProxy deviceConfigProxy) {
+    public BrightLineFalsingManager(FalsingDataProvider falsingDataProvider,
+            KeyguardUpdateMonitor keyguardUpdateMonitor, ProximitySensor proximitySensor,
+            DeviceConfigProxy deviceConfigProxy,
+            DockManager dockManager) {
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDataProvider = falsingDataProvider;
         mProximitySensor = proximitySensor;
+        mDockManager = dockManager;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
 
         mMetricsLogger = new MetricsLogger();
@@ -134,29 +142,30 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     @Override
-    public boolean isClassiferEnabled() {
+    public boolean isClassifierEnabled() {
         return true;
     }
 
     @Override
     public boolean isFalseTouch() {
-        boolean r = !mJustUnlockedWithFace && mClassifiers.stream().anyMatch(falsingClassifier -> {
-            boolean result = falsingClassifier.isFalseTouch();
-            if (result) {
-                logInfo(String.format(
-                        (Locale) null,
-                        "{classifier=%s, interactionType=%d}",
-                        falsingClassifier.getClass().getName(),
-                        mDataProvider.getInteractionType()));
-                String reason = falsingClassifier.getReason();
-                if (reason != null) {
-                    logInfo(reason);
-                }
-            } else {
-                logDebug(falsingClassifier.getClass().getName() + ": false");
-            }
-            return result;
-        });
+        boolean r = !mJustUnlockedWithFace && !mDockManager.isDocked()
+                && mClassifiers.stream().anyMatch(falsingClassifier -> {
+                    boolean result = falsingClassifier.isFalseTouch();
+                    if (result) {
+                        logInfo(String.format(
+                                (Locale) null,
+                                "{classifier=%s, interactionType=%d}",
+                                falsingClassifier.getClass().getName(),
+                                mDataProvider.getInteractionType()));
+                        String reason = falsingClassifier.getReason();
+                        if (reason != null) {
+                            logInfo(reason);
+                        }
+                    } else {
+                        logDebug(falsingClassifier.getClass().getName() + ": false");
+                    }
+                    return result;
+                });
 
         logDebug("Is false touch? " + r);
 
@@ -336,7 +345,18 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     @Override
-    public void dump(PrintWriter printWriter) {
+    public void dump(PrintWriter pw) {
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+        ipw.println("BRIGHTLINE FALSING MANAGER");
+        ipw.print("classifierEnabled="); pw.println(isClassifierEnabled() ? 1 : 0);
+        ipw.print("mJustUnlockedWithFace="); pw.println(mJustUnlockedWithFace ? 1 : 0);
+        ipw.print("isDocked="); pw.println(mDockManager.isDocked() ? 1 : 0);
+        ipw.println();
+        ipw.println("Recent falsing info:");
+        ipw.increaseIndent();
+        for (String msg : RECENT_INFO_LOG) {
+            ipw.println(msg);
+        }
     }
 
     @Override
@@ -357,6 +377,10 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     static void logInfo(String msg) {
         Log.i(TAG, msg);
+        RECENT_INFO_LOG.add(msg);
+        while (RECENT_INFO_LOG.size() > RECENT_INFO_LOG_SIZE) {
+            RECENT_INFO_LOG.remove();
+        }
     }
 
     static void logError(String msg) {
