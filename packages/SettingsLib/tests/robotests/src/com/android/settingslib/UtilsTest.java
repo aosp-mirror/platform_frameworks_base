@@ -34,6 +34,8 @@ import android.media.AudioManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.telephony.AccessNetworkConstants;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.text.TextUtils;
 
@@ -69,6 +71,8 @@ public class UtilsTest {
     private LocationManager mLocationManager;
     @Mock
     private ServiceState mServiceState;
+    @Mock
+    private NetworkRegistrationInfo mNetworkRegistrationInfo;
 
     @Before
     public void setUp() {
@@ -207,6 +211,7 @@ public class UtilsTest {
     @Test
     public void isInService_voiceInService_returnTrue() {
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+
         assertThat(Utils.isInService(mServiceState)).isTrue();
     }
 
@@ -214,15 +219,23 @@ public class UtilsTest {
     public void isInService_voiceOutOfServiceDataInService_returnTrue() {
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
         when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WLAN)).thenReturn(mNetworkRegistrationInfo);
+        when(mNetworkRegistrationInfo.getRegistrationState()).thenReturn(
+                NetworkRegistrationInfo.REGISTRATION_STATE_UNKNOWN);
+
         assertThat(Utils.isInService(mServiceState)).isTrue();
     }
 
     @Test
     public void isInService_voiceOutOfServiceDataInServiceOnIwLan_returnFalse() {
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
-        when(mServiceState.getDataNetworkType())
-                .thenReturn(ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN);
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WLAN)).thenReturn(mNetworkRegistrationInfo);
+        when(mNetworkRegistrationInfo.getRegistrationState()).thenReturn(
+                NetworkRegistrationInfo.REGISTRATION_STATE_HOME);
         when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+
         assertThat(Utils.isInService(mServiceState)).isFalse();
     }
 
@@ -230,12 +243,14 @@ public class UtilsTest {
     public void isInService_voiceOutOfServiceDataOutOfService_returnFalse() {
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
         when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+
         assertThat(Utils.isInService(mServiceState)).isFalse();
     }
 
     @Test
     public void isInService_ServiceStatePowerOff_returnFalse() {
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_POWER_OFF);
+
         assertThat(Utils.isInService(mServiceState)).isFalse();
     }
 
@@ -248,6 +263,7 @@ public class UtilsTest {
     @Test
     public void getCombinedServiceState_ServiceStatePowerOff_returnPowerOff() {
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_POWER_OFF);
+
         assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
                 ServiceState.STATE_POWER_OFF);
     }
@@ -255,6 +271,7 @@ public class UtilsTest {
     @Test
     public void getCombinedServiceState_voiceInService_returnInService() {
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+
         assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
                 ServiceState.STATE_IN_SERVICE);
     }
@@ -263,14 +280,33 @@ public class UtilsTest {
     public void getCombinedServiceState_voiceOutOfServiceDataInService_returnInService() {
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
         when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WLAN)).thenReturn(mNetworkRegistrationInfo);
+        when(mNetworkRegistrationInfo.getRegistrationState()).thenReturn(
+                NetworkRegistrationInfo.REGISTRATION_STATE_UNKNOWN);
+
         assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
                 ServiceState.STATE_IN_SERVICE);
+    }
+
+    @Test
+    public void getCombinedServiceState_voiceOutOfServiceDataInServiceOnIwLan_returnOutOfService() {
+        when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WLAN)).thenReturn(mNetworkRegistrationInfo);
+        when(mNetworkRegistrationInfo.getRegistrationState()).thenReturn(
+                NetworkRegistrationInfo.REGISTRATION_STATE_HOME);
+
+        assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
+                ServiceState.STATE_OUT_OF_SERVICE);
     }
 
     @Test
     public void getCombinedServiceState_voiceOutOfServiceDataOutOfService_returnOutOfService() {
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
         when(mServiceState.getDataRegState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+
         assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
                 ServiceState.STATE_OUT_OF_SERVICE);
     }
