@@ -334,6 +334,10 @@ message Atom {
         MediaProviderIdleMaintenance media_provider_idle_maintenance =
             237 [(module) = "mediaprovider"];
         RebootEscrowRecoveryReported reboot_escrow_recovery_reported = 238;
+        BootTimeEventDuration boot_time_event_duration_reported = 239;
+        BootTimeEventElapsedTime boot_time_event_elapsed_time_reported = 240;
+        BootTimeEventUtcTime boot_time_event_utc_time_reported = 241;
+        BootTimeEventErrorCode boot_time_event_error_code_reported = 242;
     }
 
     // Pulled events will start at field 10000.
@@ -3923,6 +3927,207 @@ message MediaProviderIdleMaintenance {
     optional float normalized_stale_thumbnails = 4;
     // Number of items found to be expired, normalized per file
     optional float normalized_expired_media = 5;
+}
+
+/**
+ * Represents boot time event with duration in ms.
+ *
+ * Logged from: bootstat and various system server components. Check each enums for details.
+ */
+message BootTimeEventDuration {
+    enum DurationEvent {
+        UNKNOWN = 0;
+        // Bootloader time excluding BOOTLOADER_UI_WAIT + boot complete time. Logged from bootstat.
+        ABSOLUTE_BOOT_TIME = 1;
+        // Bootloader's 1st stage execution time.
+        // Logged from bootstat.
+        BOOTLOADER_FIRST_STAGE_EXEC = 2;
+        // Bootloader's 1st stage loading time.
+        // Logged from bootstat.
+        BOOTLOADER_FIRST_STAGE_LOAD = 3;
+        // Bootloader's kernel loading time.
+        // Logged from bootstat.
+        BOOTLOADER_KERNEL_LOAD = 4;
+        // Bootloader's 2nd stage execution time.
+        // Logged from bootstat.
+        BOOTLOADER_SECOND_STAGE_EXEC = 5;
+        // Bootloader's 2nd stage loading time.
+        // Logged from bootstat.
+        BOOTLOADER_SECOND_STAGE_LOAD = 6;
+        // Duration for Bootloader to show unlocked device's warning UI. This should not happen
+        // for locked device.
+        // Logged from bootstat.
+        BOOTLOADER_UI_WAIT = 7;
+        // Total time spend in bootloader. This is the sum of all BOOTLOADER_* listed above.
+        // Logged from bootstat.
+        BOOTLOADER_TOTAL = 8;
+        // Shutdown duration inside init for the reboot before the current boot up.
+        // Logged from f/b/services/.../BootReceiver.java.
+        SHUTDOWN_DURATION = 9;
+        // Total time for mounting of disk devices during bootup.
+        // Logged from f/b/services/.../BootReceiver.java.
+        MOUNT_DEFAULT_DURATION = 10;
+        // Total time for early stage mounting of disk devices during bootup.
+        // Logged from f/b/services/.../BootReceiver.java.
+        MOUNT_EARLY_DURATION = 11;
+        // Total time for late stage mounting of disk devices during bootup.
+        // Logged from f/b/services/.../BootReceiver.java.
+        MOUNT_LATE_DURATION = 12;
+        // Average time to scan non-system app after OTA
+        // Logged from f/b/services/.../PackageManagerService.java
+        OTA_PACKAGE_MANAGER_INIT_TIME = 13;
+        // Time to initialize Package manager after OTA
+        // Logged from f/b/services/.../PackageManagerService.java
+        OTA_PACKAGE_MANAGER_DATA_APP_AVG_SCAN_TIME = 14;
+        // Time to scan all system app from Package manager after OTA
+        // Logged from f/b/services/.../PackageManagerService.java
+        OTA_PACKAGE_MANAGER_SYSTEM_APP_AVG_SCAN_TIME = 15;
+        // Init's total time for cold boot stage.
+        // Logged from bootstat.
+        COLDBOOT_WAIT = 16;
+        // Init's total time for initializing selinux.
+        // Logged from bootstat.
+        SELINUX_INIT = 17;
+        // Time since last factory reset.
+        // Logged from bootstat.
+        FACTORY_RESET_TIME_SINCE_RESET = 18;
+    }
+
+    // Type of the event.
+    optional DurationEvent event = 1;
+    // Duration of the event in ms.
+    optional int64 duration_millis = 2;
+}
+
+/**
+ * Represents the start of specific boot time event during bootup in ms. This is usually a time
+ * since boot-up.
+ *
+ * Logged from: bootstat and various system server components. Check each enums for details.
+ */
+message BootTimeEventElapsedTime {
+    enum ElapsedTimeEvent {
+        UNKNOWN = 0;
+        // Time when init starts 1st stage. Logged from bootstat.
+        ANDROID_INIT_STAGE_1 = 1;
+        // Time when sys.boot_completed prop is set.
+        // Logged from bootstat.
+        BOOT_COMPLETE = 2;
+        // BOOT_COMPLETE for encrypted device.
+        BOOT_COMPLETE_ENCRYPTION = 3;
+        // BOOT_COMPLETE for device with no encryption.
+        BOOT_COMPLETE_NO_ENCRYPTION = 4;
+        // Adjusted BOOT_COMPLETE for encrypted device extracting decryption time.
+        BOOT_COMPLETE_POST_DESCRYPT = 5;
+        // BOOT_COMPLETE after factory reset.
+        FACTORY_RESET_BOOT_COMPLETE = 6;
+        // BOOT_COMPLETE_NO_ENCRYPTION after factory reset.
+        FACTORY_RESET_BOOT_COMPLETE_NO_ENCRYPTION = 7;
+        // BOOT_COMPLETE_POST_DESCRYPT after factory reset.
+        FACTORY_RESET_BOOT_COMPLETE_POST_DESCRYPT = 8;
+        // BOOT_COMPLETE after OTA.
+        OTA_BOOT_COMPLETE = 9;
+        // BOOT_COMPLETE_NO_ENCRYPTION after OTA.
+        OTA_BOOT_COMPLETE_NO_ENCRYPTION = 10;
+        // BOOT_COMPLETE_POST_DESCRYPT after OTA.
+        OTA_BOOT_COMPLETE_POST_DESCRYPT = 11;
+        // Time when the system starts sending LOCKED_BOOT_COMPLETED broadcast.
+        // Logged from  f/b/services/.../UserController.java
+        FRAMEWORK_LOCKED_BOOT_COMPLETED = 12;
+        // Time when the system starts sending BOOT_COMPLETED broadcast.
+        // Logged from  f/b/services/.../UserController.java
+        FRAMEWORK_BOOT_COMPLETED = 13;
+        // Time when the package manager starts init.
+        // Logged from f/b/services/.../SystemServer.java
+        PACKAGE_MANAGER_INIT_START = 14;
+        // Time when package manager is ready
+        // Logged from f/b/services/.../SystemServer.java
+        PACKAGE_MANAGER_INIT_READY = 15;
+        // Represents the time when user has entered unlock credential for system with user pin.
+        // Logged from bootstat.
+        POST_DECRYPT = 16;
+        // Represents the start of zygote's init.
+        // Logged from zygote itself.
+        ZYGOTE_INIT_START = 17;
+        // Represents the start of secondary zygote's init.
+        // TODO: add logging to zygote
+        SECONDARY_ZYGOTE_INIT_START = 18;
+        // Represents the start of system server's init.
+        // Logged from f/b/services/.../SystemServer.java
+        SYSTEM_SERVER_INIT_START = 19;
+        // Represents the completion of system server's init.
+        // Logged from f/b/services/.../SystemServer.java
+        SYSTEM_SERVER_READY = 20;
+        // Represents the start of launcher during boot-up.
+        // TODO: add logging
+        LAUNCHER_START = 21;
+        // Represents the completion of launcher's initial rendering. User can use other apps from
+        // launcher from this point.
+        // TODO: add logging
+        LAUNCHER_SHOWN = 22;
+    }
+
+    // Type of the event.
+    optional ElapsedTimeEvent event = 1;
+    // Time since bootup for the event.
+    // It should be acquired from SystemClock elapsedRealtime() call or equivalent.
+    optional int64 time_millis = 2;
+}
+
+/**
+ * Boot time events with UTC time.
+ *
+ * Logged from: bootstat and various system server components. Check each enums for details.
+ */
+message BootTimeEventUtcTime {
+    enum UtcTimeEvent {
+        UNKNOWN = 0;
+        // Time of the bootstat's marking of 1st boot after the last factory reset.
+        // Logged from bootstat.
+        FACTORY_RESET_RESET_TIME = 1;
+        // The time when bootstat records FACTORY_RESET_* events. This is close to
+        // BOOT_COMPLETE time for the current bootup.
+        // Logged from bootstat.
+        FACTORY_RESET_CURRENT_TIME = 2;
+        // DUplicate of FACTORY_RESET_RESET_TIME added for debugging purpose.
+        // Logged from bootstat.
+        FACTORY_RESET_RECORD_VALUE = 3;
+    }
+
+    // Type of the event.
+    optional UtcTimeEvent event = 1;
+    // UTC time for the event.
+    optional int64 utc_time_secs = 2;
+}
+
+/**
+ * Boot time events representing specific error code during bootup.
+ * Meaning of error code can be different per each event type.
+ *
+ * Logged from: bootstat and various system server components. Check each enums for details.
+ */
+message BootTimeEventErrorCode {
+    enum ErrorCodeEvent {
+        UNKNOWN = 0;
+        // Linux error code for time() call to get the current UTC time.
+        // Logged from bootstat.
+        FACTORY_RESET_CURRENT_TIME_FAILURE = 1;
+        // Represents UmountStat before the reboot for the current boot up. Error codes defined
+        // as UMOUNT_STAT_* from init/reboot.cpp.
+        // Logged from f/b/services/.../BootReceiver.java.
+        SHUTDOWN_UMOUNT_STAT = 2;
+        // Reprepsents fie system mounting error code for the current boot. Error codes defined
+        // as combination of FsStatFlags from system/core/fs_mgr/fs_mgr.cpp.
+        // Logged from f/b/services/.../BootReceiver.java.
+        FS_MGR_FS_STAT = 3;
+    }
+
+    // Type of the event.
+    optional ErrorCodeEvent event = 1;
+    // error code defined per each event type.
+    // For example, this can have a value of FsStatFlags.FS_STAT_FULL_MOUNT_FAILED for the event of
+    // FS_MGR_FS_STAT.
+    optional int32 error_code = 2;
 }
 
 //////////////////////////////////////////////////////////////////////
