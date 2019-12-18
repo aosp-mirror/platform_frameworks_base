@@ -31,6 +31,8 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
 import static com.android.server.testutils.TestUtils.assertExpectException;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
@@ -62,6 +64,7 @@ import android.app.Notification;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.PasswordMetrics;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
@@ -2020,6 +2023,116 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 DpmTestUtils.newRestrictions(),
                 dpm.getUserRestrictions(admin1)
         );
+    }
+
+    public void testSetFactoryResetProtectionPolicyWithDO() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+
+        when(getServices().persistentDataBlockManagerInternal.getAllowedUid()).thenReturn(
+                DpmMockContext.CALLER_UID);
+
+        FactoryResetProtectionPolicy policy = new FactoryResetProtectionPolicy.Builder()
+                .setFactoryResetProtectionAccounts(new ArrayList<>())
+                .setFactoryResetProtectionDisabled(true)
+                .build();
+        dpm.setFactoryResetProtectionPolicy(admin1, policy);
+
+        FactoryResetProtectionPolicy result = dpm.getFactoryResetProtectionPolicy(admin1);
+        assertThat(result).isEqualTo(policy);
+        assertPoliciesAreEqual(policy, result);
+
+        verify(mContext.spiedContext).sendBroadcastAsUser(
+                MockUtils.checkIntentAction(
+                        DevicePolicyManager.ACTION_RESET_PROTECTION_POLICY_CHANGED),
+                MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE));
+    }
+
+    public void testSetFactoryResetProtectionPolicyFailWithPO() throws Exception {
+        setupProfileOwner();
+
+        FactoryResetProtectionPolicy policy = new FactoryResetProtectionPolicy.Builder()
+                .setFactoryResetProtectionDisabled(true)
+                .build();
+
+        assertExpectException(SecurityException.class, null,
+                () -> dpm.setFactoryResetProtectionPolicy(admin1, policy));
+    }
+
+    public void testSetFactoryResetProtectionPolicyWithPOOfOrganizationOwnedDevice()
+            throws Exception {
+        setupProfileOwner();
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
+
+        when(getServices().persistentDataBlockManagerInternal.getAllowedUid()).thenReturn(
+                DpmMockContext.CALLER_UID);
+
+        List<String> accounts = new ArrayList<>();
+        accounts.add("Account 1");
+        accounts.add("Account 2");
+
+        FactoryResetProtectionPolicy policy = new FactoryResetProtectionPolicy.Builder()
+                .setFactoryResetProtectionAccounts(accounts)
+                .build();
+
+        dpm.setFactoryResetProtectionPolicy(admin1, policy);
+
+        FactoryResetProtectionPolicy result = dpm.getFactoryResetProtectionPolicy(admin1);
+        assertThat(result).isEqualTo(policy);
+        assertPoliciesAreEqual(policy, result);
+
+        verify(mContext.spiedContext, times(2)).sendBroadcastAsUser(
+                MockUtils.checkIntentAction(
+                        DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
+                MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE));
+        verify(mContext.spiedContext).sendBroadcastAsUser(
+                MockUtils.checkIntentAction(
+                        DevicePolicyManager.ACTION_PROFILE_OWNER_CHANGED),
+                MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE));
+        verify(mContext.spiedContext).sendBroadcastAsUser(
+                MockUtils.checkIntentAction(
+                        DevicePolicyManager.ACTION_RESET_PROTECTION_POLICY_CHANGED),
+                MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE));
+    }
+
+    public void testGetFactoryResetProtectionPolicyWithFrpManagementAgent()
+            throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        when(getServices().persistentDataBlockManagerInternal.getAllowedUid()).thenReturn(
+                DpmMockContext.CALLER_UID);
+
+        FactoryResetProtectionPolicy policy = new FactoryResetProtectionPolicy.Builder()
+                .setFactoryResetProtectionAccounts(new ArrayList<>())
+                .setFactoryResetProtectionDisabled(true)
+                .build();
+
+        dpm.setFactoryResetProtectionPolicy(admin1, policy);
+
+        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        dpm.setActiveAdmin(admin1, /*replace=*/ false);
+        FactoryResetProtectionPolicy result = dpm.getFactoryResetProtectionPolicy(null);
+        assertThat(result).isEqualTo(policy);
+        assertPoliciesAreEqual(policy, result);
+
+        verify(mContext.spiedContext).sendBroadcastAsUser(
+                MockUtils.checkIntentAction(
+                        DevicePolicyManager.ACTION_RESET_PROTECTION_POLICY_CHANGED),
+                MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE));
+    }
+
+    private void assertPoliciesAreEqual(FactoryResetProtectionPolicy expectedPolicy,
+            FactoryResetProtectionPolicy actualPolicy) {
+        assertThat(actualPolicy.isFactoryResetProtectionDisabled()).isEqualTo(
+                expectedPolicy.isFactoryResetProtectionDisabled());
+        assertAccountsAreEqual(expectedPolicy.getFactoryResetProtectionAccounts(),
+                actualPolicy.getFactoryResetProtectionAccounts());
+    }
+
+    private void assertAccountsAreEqual(List<String> expectedAccounts,
+            List<String> actualAccounts) {
+        assertThat(actualAccounts).containsExactlyElementsIn(expectedAccounts);
     }
 
     public void testGetMacAddress() throws Exception {

@@ -680,6 +680,11 @@ public class PersistentDataBlockService extends SystemService {
             writeDataBuffer(getTestHarnessModeDataOffset(), ByteBuffer.allocate(size));
         }
 
+        @Override
+        public int getAllowedUid() {
+            return mAllowedUid;
+        }
+
         private void writeInternal(byte[] data, long offset, int dataLength) {
             checkArgument(data == null || data.length > 0, "data must be null or non-empty");
             checkArgument(
