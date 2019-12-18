@@ -45,12 +45,14 @@ public class SuspendedAppActivity extends AlertActivity
     public static final String EXTRA_SUSPENDING_PACKAGE =
             PACKAGE_NAME + ".extra.SUSPENDING_PACKAGE";
     public static final String EXTRA_DIALOG_INFO = PACKAGE_NAME + ".extra.DIALOG_INFO";
+    public static final String EXTRA_ACTIVITY_OPTIONS = PACKAGE_NAME + ".extra.ACTIVITY_OPTIONS";
 
     private Intent mMoreDetailsIntent;
     private int mUserId;
     private PackageManager mPm;
     private Resources mSuspendingAppResources;
     private SuspendDialogInfo mSuppliedDialogInfo;
+    private Bundle mOptions;
 
     private CharSequence getAppLabel(String packageName) {
         try {
@@ -143,6 +145,7 @@ public class SuspendedAppActivity extends AlertActivity
         getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
 
         final Intent intent = getIntent();
+        mOptions = intent.getBundleExtra(EXTRA_ACTIVITY_OPTIONS);
         mUserId = intent.getIntExtra(Intent.EXTRA_USER_ID, -1);
         if (mUserId < 0) {
             Slog.wtf(TAG, "Invalid user: " + mUserId);
@@ -178,20 +181,22 @@ public class SuspendedAppActivity extends AlertActivity
     public void onClick(DialogInterface dialog, int which) {
         switch (which) {
             case AlertDialog.BUTTON_NEUTRAL:
-                startActivityAsUser(mMoreDetailsIntent, UserHandle.of(mUserId));
-                Slog.i(TAG, "Started more details activity");
+                startActivityAsUser(mMoreDetailsIntent, mOptions, UserHandle.of(mUserId));
+                Slog.i(TAG, "Started activity: " + mMoreDetailsIntent.getAction()
+                        + " in user " + mUserId);
                 break;
         }
         finish();
     }
 
     public static Intent createSuspendedAppInterceptIntent(String suspendedPackage,
-            String suspendingPackage, SuspendDialogInfo dialogInfo, int userId) {
+            String suspendingPackage, SuspendDialogInfo dialogInfo, Bundle options, int userId) {
         return new Intent()
                 .setClassName("android", SuspendedAppActivity.class.getName())
                 .putExtra(EXTRA_SUSPENDED_PACKAGE, suspendedPackage)
                 .putExtra(EXTRA_DIALOG_INFO, dialogInfo)
                 .putExtra(EXTRA_SUSPENDING_PACKAGE, suspendingPackage)
+                .putExtra(EXTRA_ACTIVITY_OPTIONS, options)
                 .putExtra(Intent.EXTRA_USER_ID, userId)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);

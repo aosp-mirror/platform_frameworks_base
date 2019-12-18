@@ -635,7 +635,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                             mPackageManagerInternal.getSuspendedDialogInfo(providerPackage,
                                     suspendingPackage, providerUserId);
                     onClickIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(
-                            providerPackage, suspendingPackage, dialogInfo, providerUserId);
+                            providerPackage, suspendingPackage, dialogInfo, null, providerUserId);
                 }
             } else if (provider.maskedByQuietProfile) {
                 showBadge = true;
