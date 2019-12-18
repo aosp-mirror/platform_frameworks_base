@@ -22,9 +22,12 @@ import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.system.Os;
 import android.system.OsConstants;
+import android.util.Pair;
 import android.webkit.WebViewZygote;
 
 import dalvik.system.VMRuntime;
+
+import java.util.Map;
 
 /**
  * Tools for managing OS processes.
@@ -521,6 +524,8 @@ public class Process {
      * @param isTopApp whether the process starts for high priority application.
      * @param disabledCompatChanges null-ok list of disabled compat changes for the process being
      *                             started.
+     * @param pkgDataInfoMap Map from related package names to private data directory
+     *                       volume UUID and inode number.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
      * @throws RuntimeException on fatal start failure
@@ -541,11 +546,14 @@ public class Process {
                                            @Nullable String packageName,
                                            boolean isTopApp,
                                            @Nullable long[] disabledCompatChanges,
+                                           @Nullable Map<String, Pair<String, Long>>
+                                                   pkgDataInfoMap,
                                            @Nullable String[] zygoteArgs) {
         return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    /*useUsapPool=*/ true, isTopApp, disabledCompatChanges, zygoteArgs);
+                    /*useUsapPool=*/ true, isTopApp, disabledCompatChanges,
+                    pkgDataInfoMap, zygoteArgs);
     }
 
     /** @hide */
@@ -563,10 +571,13 @@ public class Process {
                                                   @Nullable String packageName,
                                                   @Nullable long[] disabledCompatChanges,
                                                   @Nullable String[] zygoteArgs) {
+        // Webview zygote can't access app private data files, so doesn't need to know its data
+        // info.
         return WebViewZygote.getProcess().start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    /*useUsapPool=*/ false, /*isTopApp=*/ false, disabledCompatChanges, zygoteArgs);
+                    /*useUsapPool=*/ false, /*isTopApp=*/ false, disabledCompatChanges,
+                    /* pkgDataInfoMap */ null, zygoteArgs);
     }
 
     /**

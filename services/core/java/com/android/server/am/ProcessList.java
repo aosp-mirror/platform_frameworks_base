@@ -59,6 +59,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.os.AppZygote;
@@ -78,6 +79,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
+import android.provider.DeviceConfig;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -85,6 +87,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.LongSparseArray;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -117,12 +120,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Activity manager code dealing with processes.
  */
 public final class ProcessList {
     static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessList" : TAG_AM;
+
+    // A device config to control the minimum target SDK to enable app data isolation
+    static final String ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY =
+            "persist.zygote.app_data_isolation";
+
+    // A device config to control the minimum target SDK to enable app data isolation
+    static final String ANDROID_APP_DATA_ISOLATION_MIN_SDK = "android_app_data_isolation_min_sdk";
 
     // The minimum time we allow between crashes, for us to consider this
     // application to be bad and stop and its services and reject broadcasts.
@@ -336,6 +347,8 @@ public final class ProcessList {
     private static LmkdConnection sLmkdConnection = null;
 
     private boolean mOomLevelsSet = false;
+
+    private boolean mAppDataIsolationEnabled = false;
 
     /**
      * Temporary to avoid allocations.  Protected by main lock.
@@ -621,6 +634,10 @@ public final class ProcessList {
         mService = service;
         mActiveUids = activeUids;
         mPlatformCompat = platformCompat;
+        // Get this after boot, and won't be changed until it's rebooted, as we don't
+        // want some apps enabled while some apps disabled
+        mAppDataIsolationEnabled =
+                SystemProperties.getBoolean(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
 
         if (sKillHandler == null) {
             sKillThread = new ServiceThread(TAG + ":kill",
@@ -1853,6 +1870,32 @@ public final class ProcessList {
         }
     }
 
+    private boolean shouldIsolateAppData(ProcessRecord app) {
+        if (!mAppDataIsolationEnabled) {
+            return false;
+        }
+        if (!UserHandle.isApp(app.uid)) {
+            return false;
+        }
+        final int minTargetSdk = DeviceConfig.getInt(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                ANDROID_APP_DATA_ISOLATION_MIN_SDK, Build.VERSION_CODES.R);
+        return app.info.targetSdkVersion >= minTargetSdk;
+    }
+
+    private Map<String, Pair<String, Long>> getPackageAppDataInfoMap(PackageManagerInternal pmInt,
+            String[] packages, int uid) {
+        Map<String, Pair<String, Long>> result = new ArrayMap<>(packages.length);
+        int userId = UserHandle.getUserId(uid);
+        for (String packageName : packages) {
+            String volumeUuid = pmInt.getPackage(packageName).getVolumeUuid();
+            long inode = pmInt.getCeDataInode(packageName, userId);
+            if (inode != 0) {
+                result.put(packageName, Pair.create(volumeUuid, inode));
+            }
+        }
+        return result;
+    }
+
     private Process.ProcessStartResult startProcess(HostingRecord hostingRecord, String entryPoint,
             ProcessRecord app, int uid, int[] gids, int runtimeFlags, int mountExternal,
             String seInfo, String requiredAbi, String instructionSet, String invokeWith,
@@ -1867,6 +1910,21 @@ public final class ProcessList {
                 // group won't be lost when the process is attaching. The actual state will be
                 // refreshed when computing oom-adj.
                 app.setHasForegroundActivities(true);
+            }
+
+            final Map<String, Pair<String, Long>> pkgDataInfoMap;
+
+            if (shouldIsolateAppData(app)) {
+                // Get all packages belongs to the same shared uid. sharedPackages is empty array
+                // if it doesn't have shared uid.
+                final PackageManagerInternal pmInt = mService.getPackageManagerInternalLocked();
+                final String sharedUserId = pmInt.getSharedUserIdForPackage(app.info.packageName);
+                final String[] sharedPackages = pmInt.getPackagesForSharedUserId(sharedUserId,
+                        app.userId);
+                pkgDataInfoMap = getPackageAppDataInfoMap(pmInt, sharedPackages.length == 0
+                        ? new String[]{app.info.packageName} : sharedPackages, uid);
+            } else {
+                pkgDataInfoMap = null;
             }
 
             final Process.ProcessStartResult startResult;
@@ -1884,13 +1942,13 @@ public final class ProcessList {
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
                         /*useUsapPool=*/ false, isTopApp, app.mDisabledCompatChanges,
-                        new String[]{PROC_START_SEQ_IDENT + app.startSeq});
+                        pkgDataInfoMap, new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             } else {
                 startResult = Process.start(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, invokeWith, app.info.packageName, isTopApp,
-                        app.mDisabledCompatChanges,
+                        app.mDisabledCompatChanges, pkgDataInfoMap,
                         new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             }
             checkSlow(startTime, "startProcess: returned from zygote!");

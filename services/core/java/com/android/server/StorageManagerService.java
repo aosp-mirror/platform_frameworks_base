@@ -144,6 +144,7 @@ import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.pm.Installer;
 import com.android.server.storage.AppFuseBridge;
 import com.android.server.storage.StorageSessionController;
 import com.android.server.storage.StorageSessionController.ExternalStorageServiceException;
@@ -366,6 +367,8 @@ class StorageManagerService extends IStorageManager.Stub
     private volatile int mMediaStoreAuthorityAppId = -1;
 
     private volatile int mCurrentUserId = UserHandle.USER_SYSTEM;
+
+    private final Installer mInstaller;
 
     /** Holding lock for AppFuse business */
     private final Object mAppFuseLock = new Object();
@@ -1245,6 +1248,13 @@ class StorageManagerService extends IStorageManager.Stub
                     vol.state = newState;
                     onVolumeStateChangedLocked(vol, oldState, newState);
                 }
+                try {
+                    if (vol.type == VolumeInfo.TYPE_PRIVATE && state == VolumeInfo.STATE_MOUNTED) {
+                        mInstaller.onPrivateVolumeMounted(vol.getFsUuid());
+                    }
+                } catch (Installer.InstallerException e) {
+                    Slog.i(TAG, "Failed when private volume mounted " + vol, e);
+                }
             }
         }
 
@@ -1290,6 +1300,13 @@ class StorageManagerService extends IStorageManager.Stub
 
             if (vol != null) {
                 mStorageSessionController.onVolumeRemove(vol);
+                try {
+                    if (vol.type == VolumeInfo.TYPE_PRIVATE) {
+                        mInstaller.onPrivateVolumeRemoved(vol.getFsUuid());
+                    }
+                } catch (Installer.InstallerException e) {
+                    Slog.i(TAG, "Failed when private volume unmounted " + vol, e);
+                }
             }
         }
     };
@@ -1600,6 +1617,9 @@ class StorageManagerService extends IStorageManager.Stub
         mObbActionHandler = new ObbActionHandler(IoThread.get().getLooper());
 
         mStorageSessionController = new StorageSessionController(mContext, mIsFuseEnabled);
+
+        mInstaller = new Installer(mContext);
+        mInstaller.onStart();
 
         // Initialize the last-fstrim tracking if necessary
         File dataDir = Environment.getDataDirectory();
@@ -1974,6 +1994,13 @@ class StorageManagerService extends IStorageManager.Stub
         try {
             mVold.unmount(vol.id);
             mStorageSessionController.onVolumeUnmount(vol);
+            try {
+                if (vol.type == VolumeInfo.TYPE_PRIVATE) {
+                    mInstaller.onPrivateVolumeRemoved(vol.getFsUuid());
+                }
+            } catch (Installer.InstallerException e) {
+                Slog.e(TAG, "Failed unmount mirror data", e);
+            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }

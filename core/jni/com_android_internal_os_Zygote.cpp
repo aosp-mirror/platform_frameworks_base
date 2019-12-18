@@ -31,6 +31,8 @@
 // sys/mount.h has to come before linux/fs.h due to redefinition of MS_RDONLY, MS_BIND, etc
 #include <sys/mount.h>
 #include <linux/fs.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 #include <array>
 #include <atomic>
@@ -40,6 +42,7 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 
 #include <android/fdsan.h>
 #include <arpa/inet.h>
@@ -51,6 +54,7 @@
 #include <mntent.h>
 #include <paths.h>
 #include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/capability.h>
 #include <sys/cdefs.h>
@@ -158,6 +162,17 @@ static std::atomic_uint32_t gUsapPoolCount = 0;
  * ZygoteServer.
  */
 static int gUsapPoolEventFD = -1;
+
+static constexpr int DEFAULT_DATA_DIR_PERMISSION = 0751;
+
+/**
+ * Property to control if app data isolation is enabled.
+ */
+static const std::string ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY =
+    "persist.zygote.app_data_isolation";
+
+static constexpr const uint64_t UPPER_HALF_WORD_MASK = 0xFFFF'FFFF'0000'0000;
+static constexpr const uint64_t LOWER_HALF_WORD_MASK = 0x0000'0000'FFFF'FFFF;
 
 /**
  * The maximum value that the gUSAPPoolSizeMax variable may take.  This value
@@ -663,12 +678,22 @@ static int UnmountTree(const char* path) {
   return 0;
 }
 
-static void CreateDir(const std::string& dir, mode_t mode, uid_t uid, gid_t gid,
+static void PrepareDir(const std::string& dir, mode_t mode, uid_t uid, gid_t gid,
                       fail_fn_t fail_fn) {
   if (fs_prepare_dir(dir.c_str(), mode, uid, gid) != 0) {
     fail_fn(CREATE_ERROR("fs_prepare_dir failed on %s: %s",
                          dir.c_str(), strerror(errno)));
   }
+}
+
+static void PrepareDirIfNotPresent(const std::string& dir, mode_t mode, uid_t uid, gid_t gid,
+                      fail_fn_t fail_fn) {
+  struct stat sb;
+  if (TEMP_FAILURE_RETRY(stat(dir.c_str(), &sb)) != -1) {
+    // Directory exists already
+    return;
+  }
+  PrepareDir(dir, mode, uid, gid, fail_fn);
 }
 
 static void BindMount(const std::string& source_dir, const std::string& target_dir,
@@ -677,6 +702,15 @@ static void BindMount(const std::string& source_dir, const std::string& target_d
                                MS_BIND | MS_REC, nullptr)) == -1) {
     fail_fn(CREATE_ERROR("Failed to mount %s to %s: %s",
                          source_dir.c_str(), target_dir.c_str(), strerror(errno)));
+  }
+}
+
+static void MountAppDataTmpFs(const std::string& target_dir,
+                      fail_fn_t fail_fn) {
+  if (TEMP_FAILURE_RETRY(mount("tmpfs", target_dir.c_str(), "tmpfs",
+                               MS_NOSUID | MS_NODEV | MS_NOEXEC, "uid=0,gid=0,mode=0751")) == -1) {
+    fail_fn(CREATE_ERROR("Failed to mount tmpfs to %s: %s",
+                         target_dir.c_str(), strerror(errno)));
   }
 }
 
@@ -712,7 +746,7 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
   const std::string pass_through_source = StringPrintf("/mnt/pass_through/%d", user_id);
   bool isFuse = GetBoolProperty(kPropFuse, false);
 
-  CreateDir(user_source, 0751, AID_ROOT, AID_ROOT, fail_fn);
+  PrepareDir(user_source, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT, fail_fn);
 
   if (isFuse) {
     if (mount_mode == MOUNT_EXTERNAL_PASS_THROUGH || mount_mode ==
@@ -1016,6 +1050,231 @@ static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
   return pid;
 }
 
+// Create an app data directory over tmpfs overlayed CE / DE storage, and bind mount it
+// from the actual app data directory in data mirror.
+static void createAndMountAppData(std::string_view package_name,
+    std::string_view mirror_pkg_dir_name, std::string_view mirror_data_path,
+    std::string_view actual_data_path, fail_fn_t fail_fn) {
+
+  char mirrorAppDataPath[PATH_MAX];
+  char actualAppDataPath[PATH_MAX];
+  snprintf(mirrorAppDataPath, PATH_MAX, "%s/%s", mirror_data_path.data(),
+      mirror_pkg_dir_name.data());
+  snprintf(actualAppDataPath, PATH_MAX, "%s/%s", actual_data_path.data(), package_name.data());
+
+  PrepareDir(actualAppDataPath, 0700, AID_ROOT, AID_ROOT, fail_fn);
+
+  // Bind mount from original app data directory in mirror.
+  BindMount(mirrorAppDataPath, actualAppDataPath, fail_fn);
+}
+
+// Get the directory name stored in /data/data. If device is unlocked it should be the same as
+// package name, otherwise it will be an encrypted name but with same inode number.
+static std::string getAppDataDirName(std::string_view parent_path, std::string_view package_name,
+      long long ce_data_inode, fail_fn_t fail_fn) {
+  // Check if directory exists
+  char tmpPath[PATH_MAX];
+  snprintf(tmpPath, PATH_MAX, "%s/%s", parent_path.data(), package_name.data());
+  struct stat s;
+  int err = stat(tmpPath, &s);
+  if (err == 0) {
+    // Directory exists, so return the directory name
+    return package_name.data();
+  } else {
+    if (errno != ENOENT) {
+      fail_fn(CREATE_ERROR("Unexpected error in getAppDataDirName: %s", strerror(errno)));
+      return nullptr;
+    }
+    // Directory doesn't exist, try to search the name from inode
+    DIR* dir = opendir(parent_path.data());
+    if (dir == nullptr) {
+      fail_fn(CREATE_ERROR("Failed to opendir %s", parent_path.data()));
+    }
+    struct dirent* ent;
+    while ((ent = readdir(dir))) {
+      if (ent->d_ino == ce_data_inode) {
+        closedir(dir);
+        return ent->d_name;
+      }
+    }
+    closedir(dir);
+
+    // Fallback due to b/145989852, ce_data_inode stored in package manager may be corrupted
+    // if ino_t is 32 bits.
+    ino_t fixed_ce_data_inode = 0;
+    if ((ce_data_inode & UPPER_HALF_WORD_MASK) == UPPER_HALF_WORD_MASK) {
+      fixed_ce_data_inode = ce_data_inode & LOWER_HALF_WORD_MASK;
+    } else if ((ce_data_inode & LOWER_HALF_WORD_MASK) == LOWER_HALF_WORD_MASK) {
+      fixed_ce_data_inode = ((ce_data_inode >> 32) & LOWER_HALF_WORD_MASK);
+    }
+    if (fixed_ce_data_inode != 0) {
+      dir = opendir(parent_path.data());
+      if (dir == nullptr) {
+        fail_fn(CREATE_ERROR("Failed to opendir %s", parent_path.data()));
+      }
+      while ((ent = readdir(dir))) {
+        if (ent->d_ino == fixed_ce_data_inode) {
+          long long d_ino = ent->d_ino;
+          ALOGW("Fallback success inode %lld -> %lld", ce_data_inode, d_ino);
+          closedir(dir);
+          return ent->d_name;
+        }
+      }
+      closedir(dir);
+    }
+    // Fallback done
+
+    fail_fn(CREATE_ERROR("Unable to find %s:%lld in %s", package_name.data(),
+        ce_data_inode, parent_path.data()));
+    return nullptr;
+  }
+}
+
+// Isolate app's data directory, by mounting a tmpfs on CE DE storage,
+// and create and bind mount app data in related_packages.
+static void isolateAppDataPerPackage(int userId, std::string_view package_name,
+    std::string_view volume_uuid, long long ce_data_inode, std::string_view actualCePath,
+    std::string_view actualDePath, fail_fn_t fail_fn) {
+
+  char mirrorCePath[PATH_MAX];
+  char mirrorDePath[PATH_MAX];
+  char mirrorCeParent[PATH_MAX];
+  snprintf(mirrorCeParent, PATH_MAX, "/data_mirror/data_ce/%s", volume_uuid.data());
+  snprintf(mirrorCePath, PATH_MAX, "%s/%d", mirrorCeParent, userId);
+  snprintf(mirrorDePath, PATH_MAX, "/data_mirror/data_de/%s/%d", volume_uuid.data(), userId);
+
+  createAndMountAppData(package_name, package_name, mirrorDePath, actualDePath, fail_fn);
+
+  std::string ce_data_path = getAppDataDirName(mirrorCePath, package_name, ce_data_inode, fail_fn);
+  createAndMountAppData(package_name, ce_data_path, mirrorCePath, actualCePath, fail_fn);
+}
+
+/**
+ * Make other apps data directory not visible in CE, DE storage.
+ *
+ * Apps without app data isolation can detect if another app is installed on system,
+ * by "touching" other apps data directory like /data/data/com.whatsapp, if it returns
+ * "Permission denied" it means apps installed, otherwise it returns "File not found".
+ * Traditional file permissions or SELinux can only block accessing those directories but
+ * can't fix fingerprinting like this.
+ * We fix it by "overlaying" data directory, and only relevant app data packages exists
+ * in data directories.
+ *
+ * Steps:
+ * 1). Collect a list of all related apps (apps with same uid and whitelisted apps) data info
+ * (package name, data stored volume uuid, and inode number of its CE data directory)
+ * 2). Mount tmpfs on /data/data, /data/user(_de) and /mnt/expand, so apps no longer
+ * able to access apps data directly.
+ * 3). For each related app, create its app data directory and bind mount the actual content
+ * from apps data mirror directory. This works on both CE and DE storage, as DE storage
+ * is always available even storage is FBE locked, while we use inode number to find
+ * the encrypted DE directory in mirror so we can still bind mount it successfully.
+ *
+ * Example:
+ * 0). Assuming com.android.foo CE data is stored in /data/data and no shared uid
+ * 1). Mount a tmpfs on /data/data, /data/user, /data/user_de, /mnt/expand
+ * List = ["com.android.foo", "null" (volume uuid "null"=default),
+ * 123456 (inode number)]
+ * 2). On DE storage, we create a directory /data/user_de/0/com.com.android.foo, and bind
+ * mount (in the app's mount namespace) it from /data_mirror/data_de/0/com.android.foo.
+ * 3). We do similar for CE storage. But in direct boot mode, as /data_mirror/data_ce/0/ is
+ * encrypted, we can't find a directory with name com.android.foo on it, so we will
+ * use the inode number to find the right directory instead, which that directory content will
+ * be decrypted after storage is decrypted.
+ *
+ */
+static void isolateAppData(JNIEnv* env, jobjectArray pkg_data_info_list,
+    uid_t uid, const char* process_name, jstring managed_nice_name,
+    fail_fn_t fail_fn) {
+
+  const userid_t userId = multiuser_get_user_id(uid);
+
+  auto extract_fn = std::bind(ExtractJString, env, process_name, managed_nice_name, _1);
+
+  int size = (pkg_data_info_list != nullptr) ? env->GetArrayLength(pkg_data_info_list) : 0;
+  // Size should be a multiple of 3, as it contains list of <package_name, volume_uuid, inode>
+  if ((size % 3) != 0) {
+    fail_fn(CREATE_ERROR("Wrong pkg_inode_list size %d", size));
+  }
+
+  // Mount tmpfs on all possible data directories, so app no longer see the original apps data.
+  char internalCePath[PATH_MAX];
+  char internalLegacyCePath[PATH_MAX];
+  char internalDePath[PATH_MAX];
+  char externalPrivateMountPath[PATH_MAX];
+
+  snprintf(internalCePath, PATH_MAX, "/data/user");
+  snprintf(internalLegacyCePath, PATH_MAX, "/data/data");
+  snprintf(internalDePath, PATH_MAX, "/data/user_de");
+  snprintf(externalPrivateMountPath, PATH_MAX, "/mnt/expand");
+
+  MountAppDataTmpFs(internalLegacyCePath, fail_fn);
+  MountAppDataTmpFs(internalCePath, fail_fn);
+  MountAppDataTmpFs(internalDePath, fail_fn);
+  MountAppDataTmpFs(externalPrivateMountPath, fail_fn);
+
+  for (int i = 0; i < size; i += 3) {
+    jstring package_str = (jstring) (env->GetObjectArrayElement(pkg_data_info_list, i));
+    std::string packageName = extract_fn(package_str).value();
+
+    jstring vol_str = (jstring) (env->GetObjectArrayElement(pkg_data_info_list, i + 1));
+    std::string volUuid = extract_fn(vol_str).value();
+
+    jstring inode_str = (jstring) (env->GetObjectArrayElement(pkg_data_info_list, i + 2));
+    std::string inode = extract_fn(inode_str).value();
+    std::string::size_type sz;
+    long long ceDataInode = std::stoll(inode, &sz);
+
+    std::string actualCePath, actualDePath;
+    if (volUuid.compare("null") != 0) {
+      // Volume that is stored in /mnt/expand
+      char volPath[PATH_MAX];
+      char volCePath[PATH_MAX];
+      char volDePath[PATH_MAX];
+      char volCeUserPath[PATH_MAX];
+      char volDeUserPath[PATH_MAX];
+
+      snprintf(volPath, PATH_MAX, "/mnt/expand/%s", volUuid.c_str());
+      snprintf(volCePath, PATH_MAX, "%s/user", volPath);
+      snprintf(volDePath, PATH_MAX, "%s/user_de", volPath);
+      snprintf(volCeUserPath, PATH_MAX, "%s/%d", volCePath, userId);
+      snprintf(volDeUserPath, PATH_MAX, "%s/%d", volDePath, userId);
+
+      PrepareDirIfNotPresent(volPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT, fail_fn);
+      PrepareDirIfNotPresent(volCePath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT, fail_fn);
+      PrepareDirIfNotPresent(volDePath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT, fail_fn);
+      PrepareDirIfNotPresent(volCeUserPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT,
+          fail_fn);
+      PrepareDirIfNotPresent(volDeUserPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT,
+          fail_fn);
+
+      actualCePath = volCeUserPath;
+      actualDePath = volDeUserPath;
+    } else {
+      // Internal volume that stored in /data
+      char internalCeUserPath[PATH_MAX];
+      char internalDeUserPath[PATH_MAX];
+      snprintf(internalCeUserPath, PATH_MAX, "/data/user/%d", userId);
+      snprintf(internalDeUserPath, PATH_MAX, "/data/user_de/%d", userId);
+      // If it's user 0, create a symlink /data/user/0 -> /data/data,
+      // otherwise create /data/user/$USER
+      if (userId == 0) {
+        symlink(internalLegacyCePath, internalCeUserPath);
+        actualCePath = internalLegacyCePath;
+      } else {
+        PrepareDirIfNotPresent(internalCeUserPath, DEFAULT_DATA_DIR_PERMISSION,
+            AID_ROOT, AID_ROOT, fail_fn);
+        actualCePath = internalCeUserPath;
+      }
+      PrepareDirIfNotPresent(internalDeUserPath, DEFAULT_DATA_DIR_PERMISSION,
+          AID_ROOT, AID_ROOT, fail_fn);
+      actualDePath = internalDeUserPath;
+    }
+    isolateAppDataPerPackage(userId, packageName, volUuid, ceDataInode,
+        actualCePath, actualDePath, fail_fn);
+  }
+}
+
 // Utility routine to specialize a zygote child process.
 static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
                              jint runtime_flags, jobjectArray rlimits,
@@ -1023,7 +1282,8 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
                              jint mount_external, jstring managed_se_info,
                              jstring managed_nice_name, bool is_system_server,
                              bool is_child_zygote, jstring managed_instruction_set,
-                             jstring managed_app_data_dir, bool is_top_app) {
+                             jstring managed_app_data_dir, bool is_top_app,
+                             jobjectArray pkg_data_info_list) {
   const char* process_name = is_system_server ? "system_server" : "zygote";
   auto fail_fn = std::bind(ZygoteFailure, env, process_name, managed_nice_name, _1);
   auto extract_fn = std::bind(ExtractJString, env, process_name, managed_nice_name, _1);
@@ -1058,6 +1318,16 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   }
 
   MountEmulatedStorage(uid, mount_external, use_native_bridge, fail_fn);
+
+  // System services, isolated process, webview/app zygote, old target sdk app, should
+  // give a null in same_uid_pkgs and private_volumes so they don't need app data isolation.
+  // Isolated process / webview / app zygote should be gated by SELinux and file permission
+  // so they can't even traverse CE / DE directories.
+  if (pkg_data_info_list != nullptr
+      && GetBoolProperty(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, false)) {
+    isolateAppData(env, pkg_data_info_list, uid, process_name, managed_nice_name,
+        fail_fn);
+  }
 
   // If this zygote isn't root, it won't be able to create a process group,
   // since the directory is owned by root.
@@ -1425,7 +1695,8 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         jint runtime_flags, jobjectArray rlimits,
         jint mount_external, jstring se_info, jstring nice_name,
         jintArray managed_fds_to_close, jintArray managed_fds_to_ignore, jboolean is_child_zygote,
-        jstring instruction_set, jstring app_data_dir, jboolean is_top_app) {
+        jstring instruction_set, jstring app_data_dir, jboolean is_top_app,
+        jobjectArray pkg_data_info_list) {
     jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
     if (UNLIKELY(managed_fds_to_close == nullptr)) {
@@ -1457,7 +1728,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
                        capabilities, capabilities,
                        mount_external, se_info, nice_name, false,
                        is_child_zygote == JNI_TRUE, instruction_set, app_data_dir,
-                       is_top_app == JNI_TRUE);
+                       is_top_app == JNI_TRUE, pkg_data_info_list);
     }
     return pid;
 }
@@ -1481,10 +1752,13 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
                          fds_to_ignore,
                          true);
   if (pid == 0) {
+      // System server prcoess does not need data isolation so no need to
+      // know pkg_data_info_list.
       SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
                        permitted_capabilities, effective_capabilities,
                        MOUNT_EXTERNAL_DEFAULT, nullptr, nullptr, true,
-                       false, nullptr, nullptr, /* is_top_app= */ false);
+                       false, nullptr, nullptr, /* is_top_app= */ false,
+                       /* pkg_data_info_list */ nullptr);
   } else if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       ALOGI("System server process %d has been created", pid);
@@ -1607,14 +1881,15 @@ static void com_android_internal_os_Zygote_nativeSpecializeAppProcess(
     JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
     jint runtime_flags, jobjectArray rlimits,
     jint mount_external, jstring se_info, jstring nice_name,
-    jboolean is_child_zygote, jstring instruction_set, jstring app_data_dir, jboolean is_top_app) {
+    jboolean is_child_zygote, jstring instruction_set, jstring app_data_dir, jboolean is_top_app,
+    jobjectArray pkg_data_info_list) {
   jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
   SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
                    capabilities, capabilities,
                    mount_external, se_info, nice_name, false,
                    is_child_zygote == JNI_TRUE, instruction_set, app_data_dir,
-                   is_top_app == JNI_TRUE);
+                   is_top_app == JNI_TRUE, pkg_data_info_list);
 }
 
 /**
@@ -1775,7 +2050,7 @@ static void com_android_internal_os_Zygote_nativeBoostUsapPriority(JNIEnv* env, 
 
 static const JNINativeMethod gMethods[] = {
     { "nativeForkAndSpecialize",
-      "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/String;Z)I",
+      "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/String;Z[Ljava/lang/String;)I",
       (void *) com_android_internal_os_Zygote_nativeForkAndSpecialize },
     { "nativeForkSystemServer", "(II[II[[IJJ)I",
       (void *) com_android_internal_os_Zygote_nativeForkSystemServer },
@@ -1788,7 +2063,7 @@ static const JNINativeMethod gMethods[] = {
     { "nativeForkUsap", "(II[IZ)I",
       (void *) com_android_internal_os_Zygote_nativeForkUsap },
     { "nativeSpecializeAppProcess",
-      "(II[II[[IILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Z)V",
+      "(II[II[[IILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Z[Ljava/lang/String;)V",
       (void *) com_android_internal_os_Zygote_nativeSpecializeAppProcess },
     { "nativeInitNativeState", "(Z)V",
       (void *) com_android_internal_os_Zygote_nativeInitNativeState },

@@ -580,6 +580,30 @@ public class Installer extends SystemService {
         }
     }
 
+    /**
+     * Bind mount private volume CE and DE mirror storage.
+     */
+    public void onPrivateVolumeMounted(String volumeUuid) throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.onPrivateVolumeMounted(volumeUuid);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Unmount private volume CE and DE mirror storage.
+     */
+    public void onPrivateVolumeRemoved(String volumeUuid) throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.onPrivateVolumeRemoved(volumeUuid);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     public boolean prepareAppProfile(String pkg, @UserIdInt int userId, @AppIdInt int appId,
             String profileName, String codePath, String dexMetadataPath) throws InstallerException {
         if (!checkBeforeRemote()) return false;
