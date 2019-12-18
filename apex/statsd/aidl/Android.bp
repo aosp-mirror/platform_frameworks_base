@@ -17,6 +17,18 @@
 // TODO(b/145815909): move StatsDimensionsValue.aidl and StatsLogEventWrapper.aidl here
 filegroup {
     name: "statsd_aidl",
+    srcs: [
+        "android/os/IPullAtomCallback.aidl",
+        "android/os/IPullAtomResultReceiver.aidl",
+        "android/os/IStatsCompanionService.aidl",
+        "android/os/IStatsd.aidl",
+        "android/os/IStatsPullerCallback.aidl",
+        "android/util/StatsEventParcel.aidl",
+    ],
+}
+
+filegroup {
+    name: "statsd_java_aidl",
     srcs: ["**/*.aidl"],
 }
 
