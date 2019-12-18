@@ -2185,4 +2185,18 @@ public class WifiManagerTest {
         result = WifiManager.parseDppChannelList(channelList);
         assertEquals(result.size(), 0);
     }
+
+    /**
+     * Test getWifiConfigsForMatchedNetworkSuggestions for given scanResults.
+     */
+    @Test
+    public void testGetWifiConfigsForMatchedNetworkSuggestions() throws Exception {
+        List<WifiConfiguration> testResults = new ArrayList<>();
+        testResults.add(new WifiConfiguration());
+
+        when(mWifiService.getWifiConfigForMatchedNetworkSuggestionsSharedWithUser(any(List.class)))
+                .thenReturn(testResults);
+        assertEquals(testResults, mWifiManager
+                .getWifiConfigForMatchedNetworkSuggestionsSharedWithUser(new ArrayList<>()));
+    }
 }

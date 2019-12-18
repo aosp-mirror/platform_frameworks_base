@@ -589,4 +589,10 @@ public class BaseWifiService extends IWifiManager.Stub {
     public int calculateSignalLevel(int rssi) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public List<WifiConfiguration> getWifiConfigForMatchedNetworkSuggestionsSharedWithUser(
+            List<ScanResult> scanResults) {
+        throw new UnsupportedOperationException();
+    }
 }
