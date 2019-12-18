@@ -16,17 +16,22 @@
 
 package com.android.server.display;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.ShellCommand;
+import android.os.UserHandle;
+import android.provider.Settings;
 
 import java.io.PrintWriter;
 
 class DisplayManagerShellCommand extends ShellCommand {
     private static final String TAG = "DisplayManagerShellCommand";
 
-    private final DisplayManagerService.BinderService mService;
+    private final DisplayManagerService mService;
 
-    DisplayManagerShellCommand(DisplayManagerService.BinderService service) {
+    DisplayManagerShellCommand(DisplayManagerService service) {
         mService = service;
     }
 
@@ -96,7 +101,19 @@ class DisplayManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: brightness should be a number between 0 and 1");
             return 1;
         }
-        mService.setBrightness((int) (brightness * 255));
+
+        final Context context = mService.getContext();
+        context.enforceCallingOrSelfPermission(
+                Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
+                "Permission required to set the display's brightness");
+        final long token = Binder.clearCallingIdentity();
+        try {
+            Settings.System.putIntForUser(context.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS, (int) (brightness * 255),
+                    UserHandle.USER_CURRENT);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
         return 0;
     }
 
