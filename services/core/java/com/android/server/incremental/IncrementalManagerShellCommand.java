@@ -24,6 +24,7 @@ import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.DataLoaderParams;
 import android.content.pm.InstallationFile;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
@@ -31,7 +32,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.ShellCommand;
-import android.os.incremental.IncrementalDataLoaderParams;
 import android.util.Slog;
 
 import java.io.FileDescriptor;
@@ -111,7 +111,7 @@ public final class IncrementalManagerShellCommand extends ShellCommand {
             pw.println("File names and sizes don't match.");
             return ERROR_DATA_LOADER_INIT;
         }
-        final IncrementalDataLoaderParams params = new IncrementalDataLoaderParams(
+        final DataLoaderParams params = new DataLoaderParams(
                 "", LOADER_PACKAGE_NAME, dataLoaderDynamicArgs);
         PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);

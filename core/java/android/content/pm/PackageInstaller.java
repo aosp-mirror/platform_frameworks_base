@@ -50,8 +50,6 @@ import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.os.incremental.IncrementalDataLoaderParams;
-import android.os.incremental.IncrementalDataLoaderParamsParcel;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.ArraySet;
@@ -1459,7 +1457,7 @@ public class PackageInstaller {
         /** {@hide} */
         public long requiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
         /** {@hide} */
-        public IncrementalDataLoaderParams incrementalParams;
+        public DataLoaderParams incrementalParams;
         /** TODO(b/146080380): add a class name to make it fully compatible with ComponentName.
          * {@hide} */
         public String dataLoaderPackageName;
@@ -1496,10 +1494,10 @@ public class PackageInstaller {
             isMultiPackage = source.readBoolean();
             isStaged = source.readBoolean();
             requiredInstalledVersionCode = source.readLong();
-            IncrementalDataLoaderParamsParcel dataLoaderParamsParcel = source.readParcelable(
-                    IncrementalDataLoaderParamsParcel.class.getClassLoader());
+            DataLoaderParamsParcel dataLoaderParamsParcel = source.readParcelable(
+                    DataLoaderParamsParcel.class.getClassLoader());
             if (dataLoaderParamsParcel != null) {
-                incrementalParams = new IncrementalDataLoaderParams(
+                incrementalParams = new DataLoaderParams(
                         dataLoaderParamsParcel);
             }
             dataLoaderPackageName = source.readString();
@@ -1863,7 +1861,7 @@ public class PackageInstaller {
          * {@hide}
          */
         @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
-        public void setIncrementalParams(@NonNull IncrementalDataLoaderParams incrementalParams) {
+        public void setIncrementalParams(@NonNull DataLoaderParams incrementalParams) {
             this.incrementalParams = incrementalParams;
         }
 

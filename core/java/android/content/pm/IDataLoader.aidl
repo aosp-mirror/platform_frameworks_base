@@ -30,5 +30,4 @@ oneway interface IDataLoader {
    void start(in List<InstallationFile> fileInfos);
    void stop();
    void destroy();
-   void onFileCreated(long inode, in byte[] metadata);
 }

@@ -16,8 +16,8 @@
 
 package android.os.incremental;
 
-import android.os.incremental.IncrementalFileSystemControlParcel;
-import android.os.incremental.IncrementalDataLoaderParamsParcel;
+import android.content.pm.FileSystemControlParcel;
+import android.content.pm.DataLoaderParamsParcel;
 import android.content.pm.IDataLoaderStatusListener;
 
 /**
@@ -27,8 +27,8 @@ import android.content.pm.IDataLoaderStatusListener;
  */
 interface IIncrementalManager {
     boolean prepareDataLoader(int mountId,
-        in IncrementalFileSystemControlParcel control,
-        in IncrementalDataLoaderParamsParcel params,
+        in FileSystemControlParcel control,
+        in DataLoaderParamsParcel params,
         in IDataLoaderStatusListener listener);
     boolean startDataLoader(int mountId);
     void showHealthBlockedUI(int mountId);

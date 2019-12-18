@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.content.pm.DataLoaderParams;
 import android.os.RemoteException;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -104,7 +105,7 @@ public final class IncrementalManager {
      */
     @Nullable
     public IncrementalStorage createStorage(@NonNull String path,
-            @NonNull IncrementalDataLoaderParams params, @CreateMode int createMode,
+            @NonNull DataLoaderParams params, @CreateMode int createMode,
             boolean autoStartDataLoader) {
         try {
             final int id = mNativeService.createStorage(path, params.getData(), createMode);

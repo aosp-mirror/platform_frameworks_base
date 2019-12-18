@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.incremental.nativeadb;
+package android.content.pm;
 
-import android.service.dataloader.DataLoaderService;
+import android.os.ParcelFileDescriptor;
 
-/** This code is used for testing only. */
-public class NativeAdbDataLoaderService extends DataLoaderService {
-    public static final String TAG = "NativeAdbDataLoaderService";
-    static {
-        System.loadLibrary("nativeadbdataloaderservice_jni");
-    }
-
-    @Override
-    public DataLoader onCreateDataLoader() {
-        return null;
-    }
+/**
+ * A named ParcelFileDescriptor.
+ * @hide
+ */
+parcelable NamedParcelFileDescriptor {
+    @utf8InCpp String name;
+    ParcelFileDescriptor fd;
 }
