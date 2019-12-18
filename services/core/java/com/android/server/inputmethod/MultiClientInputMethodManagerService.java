@@ -59,10 +59,12 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.InputChannel;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
+import android.view.autofill.AutofillId;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputMethodInfo;
@@ -82,6 +84,7 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
@@ -186,6 +189,18 @@ public final class MultiClientInputMethodManagerService {
                         public List<InputMethodInfo> getEnabledInputMethodListAsUser(
                                 @UserIdInt int userId) {
                             return userIdToInputMethodInfoMapper.getAsList(userId);
+                        }
+
+                        @Override
+                        public void onCreateInlineSuggestionsRequest(ComponentName componentName,
+                                AutofillId autofillId, IInlineSuggestionsRequestCallback cb) {
+                            try {
+                                //TODO(b/137800469): support multi client IMEs.
+                                cb.onInlineSuggestionsUnsupported();
+                            } catch (RemoteException e) {
+                                Log.w("MultiClientIMManager", "RemoteException calling"
+                                        + " onInlineSuggestionsUnsupported: " + e);
+                            }
                         }
                     });
         }
