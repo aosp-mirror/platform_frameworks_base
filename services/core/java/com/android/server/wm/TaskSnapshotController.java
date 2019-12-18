@@ -89,6 +89,14 @@ class TaskSnapshotController {
     @VisibleForTesting
     static final int SNAPSHOT_MODE_NONE = 2;
 
+    /**
+     * Constant for <code>scaleFactor</code> when calling {@link #snapshotTask} which is
+     * interpreted as using the most appropriate scale ratio for the system.
+     * This may yield a smaller ratio on low memory devices.
+     */
+    @VisibleForTesting
+    static final float SNAPSHOT_SCALE_AUTO = -1f;
+
     private final WindowManagerService mService;
 
     private final TaskSnapshotCache mCache;
@@ -260,6 +268,84 @@ class TaskSnapshotController {
         });
     }
 
+    /**
+     * Validates the state of the Task is appropriate to capture a snapshot, collects
+     * information from the task and populates the builder.
+     *
+     * @param task the task to capture
+     * @param scaleFraction the scale fraction between 0-1.0, or {@link #SNAPSHOT_SCALE_AUTO}
+     *                      to automatically select
+     * @param pixelFormat the desired pixel format, or {@link PixelFormat#UNKNOWN} to
+     *                    automatically select
+     * @param builder the snapshot builder to populate
+     *
+     * @return true if the state of the task is ok to proceed
+     */
+    private boolean prepareTaskSnapshot(Task task, float scaleFraction, int pixelFormat,
+            TaskSnapshot.Builder builder) {
+        if (!mService.mPolicy.isScreenOn()) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
+            }
+            return false;
+        }
+        final ActivityRecord activity = findAppTokenForSnapshot(task);
+        if (activity == null) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.w(TAG_WM, "Failed to take screenshot. No visible windows for " + task);
+            }
+            return false;
+        }
+        if (activity.hasCommittedReparentToAnimationLeash()) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.w(TAG_WM, "Failed to take screenshot. App is animating " + activity);
+            }
+            return false;
+        }
+
+        final WindowState mainWindow = activity.findMainWindow();
+        if (mainWindow == null) {
+            Slog.w(TAG_WM, "Failed to take screenshot. No main window for " + task);
+            return false;
+        }
+
+        builder.setIsRealSnapshot(true);
+        builder.setId(System.currentTimeMillis());
+        builder.setContentInsets(getInsets(mainWindow));
+
+        final boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
+
+        if (scaleFraction == SNAPSHOT_SCALE_AUTO) {
+            builder.setScaleFraction(isLowRamDevice
+                    ? mPersister.getReducedScale()
+                    : mFullSnapshotScale);
+            builder.setReducedResolution(isLowRamDevice);
+        } else {
+            builder.setScaleFraction(scaleFraction);
+            builder.setReducedResolution(scaleFraction < 1.0f);
+        }
+
+        final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
+        final boolean isShowWallpaper = (mainWindow.getAttrs().flags & FLAG_SHOW_WALLPAPER) != 0;
+
+        if (pixelFormat == PixelFormat.UNKNOWN) {
+            pixelFormat = mPersister.use16BitFormat() && activity.fillsParent()
+                    && !(isWindowTranslucent && isShowWallpaper)
+                    ? PixelFormat.RGB_565
+                    : PixelFormat.RGBA_8888;
+        }
+
+        final boolean isTranslucent = PixelFormat.formatHasAlpha(pixelFormat)
+                && (!activity.fillsParent() || isWindowTranslucent);
+
+        builder.setTopActivityComponent(activity.mActivityComponent);
+        builder.setIsTranslucent(isTranslucent);
+        builder.setOrientation(activity.getTask().getConfiguration().orientation);
+        builder.setWindowingMode(task.getWindowingMode());
+        builder.setSystemUiVisibility(getSystemUiVisibility(task));
+        return true;
+    }
+
     @Nullable
     SurfaceControl.ScreenshotGraphicBuffer createTaskSnapshot(@NonNull Task task,
             float scaleFraction) {
@@ -288,63 +374,31 @@ class TaskSnapshotController {
         return screenshotBuffer;
     }
 
-    @Nullable private TaskSnapshot snapshotTask(Task task) {
-        if (!mService.mPolicy.isScreenOn()) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
-            }
+    @Nullable
+    TaskSnapshot snapshotTask(Task task) {
+        return snapshotTask(task, SNAPSHOT_SCALE_AUTO, PixelFormat.UNKNOWN);
+    }
+
+    @Nullable
+    TaskSnapshot snapshotTask(Task task, float scaleFraction, int pixelFormat) {
+        TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
+
+        if (!prepareTaskSnapshot(task, scaleFraction, pixelFormat, builder)) {
+            // Failed some pre-req. Has been logged.
             return null;
         }
 
-        final ActivityRecord activity = findAppTokenForSnapshot(task);
-        if (activity == null) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.w(TAG_WM, "Failed to take screenshot. No visible windows for " + task);
-            }
-            return null;
-        }
-        if (activity.hasCommittedReparentToAnimationLeash()) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.w(TAG_WM, "Failed to take screenshot. App is animating " + activity);
-            }
-            return null;
-        }
-
-        final boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
-        final float scaleFraction = isLowRamDevice
-                ? mPersister.getReducedScale()
-                : mFullSnapshotScale;
-
-        final WindowState mainWindow = activity.findMainWindow();
-        if (mainWindow == null) {
-            Slog.w(TAG_WM, "Failed to take screenshot. No main window for " + task);
-            return null;
-        }
-        final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
-        final boolean isShowWallpaper = (mainWindow.getAttrs().flags & FLAG_SHOW_WALLPAPER) != 0;
-        final int pixelFormat = mPersister.use16BitFormat() && activity.fillsParent()
-                && !(isWindowTranslucent && isShowWallpaper)
-                ? PixelFormat.RGB_565
-                : PixelFormat.RGBA_8888;
         final SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer =
-                createTaskSnapshot(task, scaleFraction, pixelFormat);
+                createTaskSnapshot(task, builder.getScaleFraction(),
+                builder.getPixelFormat());
 
         if (screenshotBuffer == null) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.w(TAG_WM, "Failed to take screenshot for " + task);
-            }
+            // Failed to acquire image. Has been logged.
             return null;
         }
-        final boolean isTranslucent = PixelFormat.formatHasAlpha(pixelFormat)
-                && (!activity.fillsParent() || isWindowTranslucent);
-        return new TaskSnapshot(
-                System.currentTimeMillis() /* id */,
-                activity.mActivityComponent, screenshotBuffer.getGraphicBuffer(),
-                screenshotBuffer.getColorSpace(),
-                activity.getTask().getConfiguration().orientation,
-                getInsets(mainWindow), isLowRamDevice /* reduced */, scaleFraction /* scale */,
-                true /* isRealSnapshot */, task.getWindowingMode(), getSystemUiVisibility(task),
-                isTranslucent);
+        builder.setSnapshot(screenshotBuffer.getGraphicBuffer());
+        builder.setColorSpace(screenshotBuffer.getColorSpace());
+        return builder.build();
     }
 
     private boolean shouldDisableSnapshots() {
