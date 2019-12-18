@@ -43,6 +43,10 @@ android_test {
         "servicestests-utils",
         "service-appsearch",
         "service-jobscheduler",
+        // TODO: remove once Android migrates to JUnit 4.12,
+        // which provides assertThrows
+        "testng",
+
     ],
 
     aidl: {

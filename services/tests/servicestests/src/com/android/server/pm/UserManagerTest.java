@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
+import static org.testng.Assert.assertThrows;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -140,20 +141,15 @@ public final class UserManagerTest {
         assertThat(userInfo).isNotNull();
 
         List<UserInfo> list = mUserManager.getUsers();
-        boolean found = false;
         for (UserInfo user : list) {
             if (user.id == userInfo.id && user.name.equals("Guest 1")
                     && user.isGuest()
                     && !user.isAdmin()
                     && !user.isPrimary()) {
-                found = true;
-                Bundle restrictions = mUserManager.getUserRestrictions(user.getUserHandle());
-                assertWithMessage("Guest user should have DISALLOW_CONFIG_WIFI=true by default")
-                        .that(restrictions.getBoolean(UserManager.DISALLOW_CONFIG_WIFI))
-                        .isTrue();
+                return;
             }
         }
-        assertThat(found).isTrue();
+        fail("Didn't find a guest: " + list);
     }
 
     @MediumTest
@@ -206,14 +202,7 @@ public final class UserManagerTest {
     @MediumTest
     @Test
     public void testRemoveUserByHandle_ThrowsException() {
-        synchronized (mUserRemoveLock) {
-            try {
-                mUserManager.removeUser(null);
-                fail("Expected IllegalArgumentException on passing in a null UserHandle.");
-            } catch (IllegalArgumentException expected) {
-                // Do nothing - exception is expected.
-            }
-        }
+        assertThrows(IllegalArgumentException.class, () -> mUserManager.removeUser(null));
     }
 
     /** Tests creating a FULL user via specifying userType. */
@@ -343,7 +332,6 @@ public final class UserManagerTest {
                 UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
         assertThat(userInfo).isNotNull();
         final int userId = userInfo.id;
-        final UserHandle userHandle = new UserHandle(userId);
 
         assertThat(mUserManager.hasBadge(userId)).isEqualTo(userTypeDetails.hasBadge());
         assertThat(mUserManager.getUserIconBadgeResId(userId))
@@ -353,13 +341,13 @@ public final class UserManagerTest {
         assertThat(mUserManager.getUserBadgeNoBackgroundResId(userId))
                 .isEqualTo(userTypeDetails.getBadgeNoBackground());
         assertThat(mUserManager.isProfile(userId)).isEqualTo(userTypeDetails.isProfile());
-        assertThat(mUserManager.getUserTypeForUser(userHandle))
+        assertThat(mUserManager.getUserTypeForUser(asHandle(userId)))
                 .isEqualTo(userTypeDetails.getName());
 
         final int badgeIndex = userInfo.profileBadge;
         assertThat(mUserManager.getUserBadgeColor(userId)).isEqualTo(
                 Resources.getSystem().getColor(userTypeDetails.getBadgeColor(badgeIndex), null));
-        assertThat(mUserManager.getBadgedLabelForUser("Test", userHandle)).isEqualTo(
+        assertThat(mUserManager.getBadgedLabelForUser("Test", asHandle(userId))).isEqualTo(
                 Resources.getSystem().getString(userTypeDetails.getBadgeLabel(badgeIndex), "Test"));
     }
 
@@ -438,9 +426,8 @@ public final class UserManagerTest {
     @MediumTest
     @Test
     public void testCreateUser_disallowAddUser() throws Exception {
-        final int creatorId = isAutomotive() ? ActivityManager.getCurrentUser()
-                : mUserManager.getPrimaryUser().id;
-        final UserHandle creatorHandle = new UserHandle(creatorId);
+        final int creatorId = ActivityManager.getCurrentUser();
+        final UserHandle creatorHandle = asHandle(creatorId);
         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, creatorHandle);
         try {
             UserInfo createadInfo = createUser("SecondaryUser", /*flags=*/ 0);
@@ -457,7 +444,7 @@ public final class UserManagerTest {
     public void testCreateProfileForUser_disallowAddManagedProfile() throws Exception {
         assumeManagedUsersSupported();
         final int primaryUserId = mUserManager.getPrimaryUser().id;
-        final UserHandle primaryUserHandle = new UserHandle(primaryUserId);
+        final UserHandle primaryUserHandle = asHandle(primaryUserId);
         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
                 primaryUserHandle);
         try {
@@ -476,7 +463,7 @@ public final class UserManagerTest {
     public void testCreateProfileForUserEvenWhenDisallowed() throws Exception {
         assumeManagedUsersSupported();
         final int primaryUserId = mUserManager.getPrimaryUser().id;
-        final UserHandle primaryUserHandle = new UserHandle(primaryUserId);
+        final UserHandle primaryUserHandle = asHandle(primaryUserId);
         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
                 primaryUserHandle);
         try {
@@ -495,7 +482,7 @@ public final class UserManagerTest {
     public void testCreateProfileForUser_disallowAddUser() throws Exception {
         assumeManagedUsersSupported();
         final int primaryUserId = mUserManager.getPrimaryUser().id;
-        final UserHandle primaryUserHandle = new UserHandle(primaryUserId);
+        final UserHandle primaryUserHandle = asHandle(primaryUserId);
         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, primaryUserHandle);
         try {
             UserInfo userInfo = createProfileForUser("Managed",
@@ -540,8 +527,7 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
-    public void testGetUserCreationTime() throws Exception {
-        // TODO: should add a regular user instead of a profile, so it can be tested everywhere
+    public void testGetManagedProfileCreationTime() throws Exception {
         assumeManagedUsersSupported();
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         final long startTime = System.currentTimeMillis();
@@ -556,38 +542,40 @@ public final class UserManagerTest {
             assertWithMessage("creationTime must be 0 if the time is not > EPOCH_PLUS_30_years")
                     .that(profile.creationTime).isEqualTo(0);
         }
-        assertThat(mUserManager.getUserCreationTime(
-                new UserHandle(profile.id))).isEqualTo(profile.creationTime);
+        assertThat(mUserManager.getUserCreationTime(asHandle(profile.id)))
+                .isEqualTo(profile.creationTime);
 
         long ownerCreationTime = mUserManager.getUserInfo(primaryUserId).creationTime;
-        assertThat(mUserManager.getUserCreationTime(
-                new UserHandle(primaryUserId))).isEqualTo(ownerCreationTime);
+        assertThat(mUserManager.getUserCreationTime(asHandle(primaryUserId)))
+            .isEqualTo(ownerCreationTime);
+    }
+
+    @MediumTest
+    @Test
+    public void testGetUserCreationTime() throws Exception {
+        long startTime = System.currentTimeMillis();
+        UserInfo user = createUser("User", /* flags= */ 0);
+        long endTime = System.currentTimeMillis();
+        assertThat(user).isNotNull();
+        assertWithMessage("creationTime must be set when the user is created")
+            .that(user.creationTime).isIn(Range.closed(startTime, endTime));
     }
 
     @SmallTest
     @Test
     public void testGetUserCreationTime_nonExistentUser() throws Exception {
-        try {
-            int noSuchUserId = 100500;
-            mUserManager.getUserCreationTime(new UserHandle(noSuchUserId));
-            fail("SecurityException should be thrown for nonexistent user");
-        } catch (Exception e) {
-            assertWithMessage("SecurityException should be thrown for nonexistent user").that(e)
-                    .isInstanceOf(SecurityException.class);
-        }
+        int noSuchUserId = 100500;
+        assertThrows(SecurityException.class,
+                () -> mUserManager.getUserCreationTime(asHandle(noSuchUserId)));
     }
 
     @SmallTest
     @Test
     public void testGetUserCreationTime_otherUser() throws Exception {
         UserInfo user = createUser("User 1", 0);
-        try {
-            mUserManager.getUserCreationTime(new UserHandle(user.id));
-            fail("SecurityException should be thrown for other user");
-        } catch (Exception e) {
-            assertWithMessage("SecurityException should be thrown for other user").that(e)
-                    .isInstanceOf(SecurityException.class);
-        }
+        assertThat(user).isNotNull();
+        assertThrows(SecurityException.class,
+                () -> mUserManager.getUserCreationTime(asHandle(user.id)));
     }
 
     private boolean findUser(int id) {
@@ -658,11 +646,11 @@ public final class UserManagerTest {
         UserInfo testUser = createUser("User 1", 0);
 
         mUserManager.setUserRestriction(
-                UserManager.DISALLOW_INSTALL_APPS, true, new UserHandle(testUser.id));
+                UserManager.DISALLOW_INSTALL_APPS, true, asHandle(testUser.id));
         mUserManager.setUserRestriction(
-                UserManager.DISALLOW_CONFIG_WIFI, false, new UserHandle(testUser.id));
+                UserManager.DISALLOW_CONFIG_WIFI, false, asHandle(testUser.id));
 
-        Bundle stored = mUserManager.getUserRestrictions(new UserHandle(testUser.id));
+        Bundle stored = mUserManager.getUserRestrictions(asHandle(testUser.id));
         // Note this will fail if DO already sets those restrictions.
         assertThat(stored.getBoolean(UserManager.DISALLOW_CONFIG_WIFI)).isFalse();
         assertThat(stored.getBoolean(UserManager.DISALLOW_UNINSTALL_APPS)).isFalse();
@@ -738,15 +726,8 @@ public final class UserManagerTest {
 
     @Test
     public void testSwitchUserByHandle_ThrowsException() {
-        synchronized (mUserSwitchLock) {
-            try {
-                ActivityManager am = mContext.getSystemService(ActivityManager.class);
-                am.switchUser(null);
-                fail("Expected IllegalArgumentException on passing in a null UserHandle.");
-            } catch (IllegalArgumentException expected) {
-                // Do nothing - exception is expected.
-            }
-        }
+        ActivityManager am = mContext.getSystemService(ActivityManager.class);
+        assertThrows(IllegalArgumentException.class, () -> am.switchUser(null));
     }
 
     @MediumTest
@@ -902,5 +883,9 @@ public final class UserManagerTest {
 
     private boolean isAutomotive() {
         return mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+    }
+
+    private static UserHandle asHandle(int userId) {
+        return new UserHandle(userId);
     }
 }
