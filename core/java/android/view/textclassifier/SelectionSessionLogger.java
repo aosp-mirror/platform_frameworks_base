@@ -24,7 +24,6 @@ import android.metrics.LogMaker;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.util.Preconditions;
 
 import java.text.BreakIterator;
 import java.util.List;
@@ -65,12 +64,12 @@ public final class SelectionSessionLogger {
 
     @VisibleForTesting
     public SelectionSessionLogger(@NonNull MetricsLogger metricsLogger) {
-        mMetricsLogger = Preconditions.checkNotNull(metricsLogger);
+        mMetricsLogger = Objects.requireNonNull(metricsLogger);
     }
 
     /** Emits a selection event to the logs. */
     public void writeEvent(@NonNull SelectionEvent event) {
-        Preconditions.checkNotNull(event);
+        Objects.requireNonNull(event);
         final LogMaker log = new LogMaker(MetricsEvent.TEXT_SELECTION_SESSION)
                 .setType(getLogType(event))
                 .setSubtype(getLogSubType(event))
@@ -240,7 +239,7 @@ public final class SelectionSessionLogger {
      * Returns a token iterator for tokenizing text for logging purposes.
      */
     public static BreakIterator getTokenIterator(@NonNull Locale locale) {
-        return BreakIterator.getWordInstance(Preconditions.checkNotNull(locale));
+        return BreakIterator.getWordInstance(Objects.requireNonNull(locale));
     }
 
     /**
@@ -249,9 +248,9 @@ public final class SelectionSessionLogger {
     public static String createId(
             String text, int start, int end, Context context, int modelVersion,
             List<Locale> locales) {
-        Preconditions.checkNotNull(text);
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(locales);
+        Objects.requireNonNull(text);
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(locales);
         final StringJoiner localesJoiner = new StringJoiner(",");
         for (Locale locale : locales) {
             localesJoiner.add(locale.toLanguageTag());

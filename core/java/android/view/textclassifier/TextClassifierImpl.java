@@ -130,9 +130,9 @@ public final class TextClassifierImpl implements TextClassifier {
 
     public TextClassifierImpl(
             Context context, TextClassificationConstants settings, TextClassifier fallback) {
-        mContext = Preconditions.checkNotNull(context);
-        mFallback = Preconditions.checkNotNull(fallback);
-        mSettings = Preconditions.checkNotNull(settings);
+        mContext = Objects.requireNonNull(context);
+        mFallback = Objects.requireNonNull(fallback);
+        mSettings = Objects.requireNonNull(settings);
         mGenerateLinksLogger = new GenerateLinksLogger(mSettings.getGenerateLinksLogSampleRate());
         mAnnotatorModelFileManager = new ModelFileManager(
                 new ModelFileManager.ModelFileSupplierImpl(
@@ -180,7 +180,7 @@ public final class TextClassifierImpl implements TextClassifier {
     @Override
     @WorkerThread
     public TextSelection suggestSelection(TextSelection.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         try {
             final int rangeLength = request.getEndIndex() - request.getStartIndex();
@@ -245,7 +245,7 @@ public final class TextClassifierImpl implements TextClassifier {
     @Override
     @WorkerThread
     public TextClassification classifyText(TextClassification.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         try {
             final int rangeLength = request.getEndIndex() - request.getStartIndex();
@@ -285,7 +285,7 @@ public final class TextClassifierImpl implements TextClassifier {
     @Override
     @WorkerThread
     public TextLinks generateLinks(@NonNull TextLinks.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkTextLength(request.getText(), getMaxGenerateLinksTextLength());
         Utils.checkMainThread();
 
@@ -399,7 +399,7 @@ public final class TextClassifierImpl implements TextClassifier {
     /** @inheritDoc */
     @Override
     public TextLanguage detectLanguage(@NonNull TextLanguage.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         try {
             final TextLanguage.Builder builder = new TextLanguage.Builder();
@@ -420,7 +420,7 @@ public final class TextClassifierImpl implements TextClassifier {
 
     @Override
     public ConversationActions suggestConversationActions(ConversationActions.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         try {
             ActionsSuggestionsModel actionsImpl = getActionsImpl();

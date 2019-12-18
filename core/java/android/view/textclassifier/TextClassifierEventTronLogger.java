@@ -29,7 +29,7 @@ import android.metrics.LogMaker;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 
 /**
@@ -50,12 +50,12 @@ public final class TextClassifierEventTronLogger {
 
     @VisibleForTesting
     public TextClassifierEventTronLogger(MetricsLogger metricsLogger) {
-        mMetricsLogger = Preconditions.checkNotNull(metricsLogger);
+        mMetricsLogger = Objects.requireNonNull(metricsLogger);
     }
 
     /** Emits a text classifier event to the logs. */
     public void writeEvent(TextClassifierEvent event) {
-        Preconditions.checkNotNull(event);
+        Objects.requireNonNull(event);
 
         int category = getCategory(event);
         if (category == -1) {

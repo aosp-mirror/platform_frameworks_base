@@ -30,6 +30,7 @@ import com.google.android.textclassifier.RemoteActionTemplate;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Creates intents based on {@link RemoteActionTemplate} objects for a ClassificationResult.
@@ -44,8 +45,8 @@ public final class TemplateClassificationIntentFactory implements Classification
 
     public TemplateClassificationIntentFactory(TemplateIntentFactory templateIntentFactory,
             ClassificationIntentFactory fallback) {
-        mTemplateIntentFactory = Preconditions.checkNotNull(templateIntentFactory);
-        mFallback = Preconditions.checkNotNull(fallback);
+        mTemplateIntentFactory = Objects.requireNonNull(templateIntentFactory);
+        mFallback = Objects.requireNonNull(fallback);
     }
 
     /**

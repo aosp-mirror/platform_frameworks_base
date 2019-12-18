@@ -25,11 +25,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * This class represents events that are sent by components to the {@link TextClassifier} to report
@@ -549,7 +549,7 @@ public abstract class TextClassifierEvent implements Parcelable {
          */
         @NonNull
         public T setEntityTypes(@NonNull String... entityTypes) {
-            Preconditions.checkNotNull(entityTypes);
+            Objects.requireNonNull(entityTypes);
             mEntityTypes = new String[entityTypes.length];
             System.arraycopy(entityTypes, 0, mEntityTypes, 0, entityTypes.length);
             return self();
@@ -587,7 +587,7 @@ public abstract class TextClassifierEvent implements Parcelable {
          */
         @NonNull
         public T setScores(@NonNull float... scores) {
-            Preconditions.checkNotNull(scores);
+            Objects.requireNonNull(scores);
             mScores = new float[scores.length];
             System.arraycopy(scores, 0, mScores, 0, scores.length);
             return self();
@@ -652,7 +652,7 @@ public abstract class TextClassifierEvent implements Parcelable {
          */
         @NonNull
         public T setExtras(@NonNull Bundle extras) {
-            mExtras = Preconditions.checkNotNull(extras);
+            mExtras = Objects.requireNonNull(extras);
             return self();
         }
 

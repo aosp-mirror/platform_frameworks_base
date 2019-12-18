@@ -33,8 +33,8 @@ import android.service.textclassifier.TextClassifierService;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -61,10 +61,10 @@ public final class SystemTextClassifier implements TextClassifier {
                 throws ServiceManager.ServiceNotFoundException {
         mManagerService = ITextClassifierService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.TEXT_CLASSIFICATION_SERVICE));
-        mSettings = Preconditions.checkNotNull(settings);
+        mSettings = Objects.requireNonNull(settings);
         mFallback = context.getSystemService(TextClassificationManager.class)
                 .getTextClassifier(TextClassifier.LOCAL);
-        mPackageName = Preconditions.checkNotNull(context.getOpPackageName());
+        mPackageName = Objects.requireNonNull(context.getOpPackageName());
         mUserId = context.getUserId();
     }
 
@@ -74,7 +74,7 @@ public final class SystemTextClassifier implements TextClassifier {
     @Override
     @WorkerThread
     public TextSelection suggestSelection(TextSelection.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         try {
             request.setCallingPackageName(mPackageName);
@@ -98,7 +98,7 @@ public final class SystemTextClassifier implements TextClassifier {
     @Override
     @WorkerThread
     public TextClassification classifyText(TextClassification.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         try {
             request.setCallingPackageName(mPackageName);
@@ -122,7 +122,7 @@ public final class SystemTextClassifier implements TextClassifier {
     @Override
     @WorkerThread
     public TextLinks generateLinks(@NonNull TextLinks.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
 
         if (!mSettings.isSmartLinkifyEnabled() && request.isLegacyFallback()) {
@@ -147,7 +147,7 @@ public final class SystemTextClassifier implements TextClassifier {
 
     @Override
     public void onSelectionEvent(SelectionEvent event) {
-        Preconditions.checkNotNull(event);
+        Objects.requireNonNull(event);
         Utils.checkMainThread();
 
         try {
@@ -160,7 +160,7 @@ public final class SystemTextClassifier implements TextClassifier {
 
     @Override
     public void onTextClassifierEvent(@NonNull TextClassifierEvent event) {
-        Preconditions.checkNotNull(event);
+        Objects.requireNonNull(event);
         Utils.checkMainThread();
 
         try {
@@ -178,7 +178,7 @@ public final class SystemTextClassifier implements TextClassifier {
 
     @Override
     public TextLanguage detectLanguage(TextLanguage.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
 
         try {
@@ -199,7 +199,7 @@ public final class SystemTextClassifier implements TextClassifier {
 
     @Override
     public ConversationActions suggestConversationActions(ConversationActions.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
 
         try {
@@ -260,7 +260,7 @@ public final class SystemTextClassifier implements TextClassifier {
     void initializeRemoteSession(
             @NonNull TextClassificationContext classificationContext,
             @NonNull TextClassificationSessionId sessionId) {
-        mSessionId = Preconditions.checkNotNull(sessionId);
+        mSessionId = Objects.requireNonNull(sessionId);
         try {
             classificationContext.setUserId(mUserId);
             mManagerService.onCreateTextClassificationSession(classificationContext, mSessionId);
