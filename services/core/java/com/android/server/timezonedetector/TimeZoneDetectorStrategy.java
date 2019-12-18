@@ -385,7 +385,7 @@ public class TimeZoneDetectorStrategy {
     }
 
     private static boolean isOriginAutomatic(@Origin int origin) {
-        return origin == ORIGIN_PHONE;
+        return origin != ORIGIN_MANUAL;
     }
 
     @GuardedBy("this")
@@ -456,15 +456,17 @@ public class TimeZoneDetectorStrategy {
      * Dumps internal state such as field values.
      */
     public synchronized void dumpState(PrintWriter pw, String[] args) {
-        pw.println("TimeZoneDetectorStrategy:");
-        pw.println("mCallback.isTimeZoneDetectionEnabled()="
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, " ");
+        ipw.println("TimeZoneDetectorStrategy:");
+
+        ipw.increaseIndent(); // level 1
+        ipw.println("mCallback.isTimeZoneDetectionEnabled()="
                 + mCallback.isAutoTimeZoneDetectionEnabled());
-        pw.println("mCallback.isDeviceTimeZoneInitialized()="
+        ipw.println("mCallback.isDeviceTimeZoneInitialized()="
                 + mCallback.isDeviceTimeZoneInitialized());
-        pw.println("mCallback.getDeviceTimeZone()="
+        ipw.println("mCallback.getDeviceTimeZone()="
                 + mCallback.getDeviceTimeZone());
 
-        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, " ");
         ipw.println("Time zone change log:");
         ipw.increaseIndent(); // level 2
         mTimeZoneChangesLog.dump(ipw);
@@ -485,8 +487,6 @@ public class TimeZoneDetectorStrategy {
         ipw.decreaseIndent(); // level 2
         ipw.decreaseIndent(); // level 1
         ipw.flush();
-
-        pw.flush();
     }
 
     /**
