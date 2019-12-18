@@ -56,6 +56,7 @@ enum Root {
     ROOT_VIDEOS = 9;
     ROOT_MTP = 10;
     ROOT_THIRD_PARTY_APP = 11;
+    ROOT_DOCUMENTS = 12;
 }
 
 enum ContextScope {
