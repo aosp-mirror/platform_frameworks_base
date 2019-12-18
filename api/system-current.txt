@@ -7500,6 +7500,7 @@ package android.service.euicc {
   public abstract class EuiccService extends android.app.Service {
     ctor public EuiccService();
     method public void dump(@NonNull java.io.PrintWriter);
+    method public int encodeSmdxSubjectAndReasonCode(@Nullable String, @Nullable String) throws java.lang.IllegalArgumentException, java.lang.NumberFormatException, java.lang.UnsupportedOperationException;
     method @CallSuper public android.os.IBinder onBind(android.content.Intent);
     method public abstract int onDeleteSubscription(int, String);
     method public android.service.euicc.DownloadSubscriptionResult onDownloadSubscription(int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean, boolean, @Nullable android.os.Bundle);
