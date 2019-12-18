@@ -34,6 +34,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 
 /**
@@ -525,6 +527,22 @@ public class Environment {
      */
     public static File getPackageCacheDirectory() {
         return new File(getDataSystemDirectory(), "package_cache");
+    }
+
+    /**
+     * Return locations where media files (such as ringtones, notification
+     * sounds, or alarm sounds) may be located on internal storage. These are
+     * typically indexed under {@link MediaStore#VOLUME_INTERNAL}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static @NonNull Collection<File> getInternalMediaDirectories() {
+        final ArrayList<File> res = new ArrayList<>();
+        res.add(new File(Environment.getRootDirectory(), "media"));
+        res.add(new File(Environment.getOemDirectory(), "media"));
+        res.add(new File(Environment.getProductDirectory(), "media"));
+        return res;
     }
 
     /**

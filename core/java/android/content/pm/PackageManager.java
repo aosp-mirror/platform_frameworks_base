@@ -1513,16 +1513,6 @@ public abstract class PackageManager {
     public static final int DELETE_DONT_KILL_APP = 0x00000008;
 
     /**
-     * Flag parameter for {@link #deletePackage} to indicate that any
-     * contributed media should also be deleted during this uninstall. The
-     * meaning of "contributed" means it won't automatically be deleted when the
-     * app is uninstalled.
-     *
-     * @hide
-     */
-    public static final int DELETE_CONTRIBUTED_MEDIA = 0x00000010;
-
-    /**
      * Flag parameter for {@link #deletePackage} to indicate that package deletion
      * should be chatty.
      *
