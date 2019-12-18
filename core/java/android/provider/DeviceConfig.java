@@ -787,6 +787,14 @@ public final class DeviceConfig {
     }
 
     /**
+     * Returns list of namespaces that can be read without READ_DEVICE_CONFIG_PERMISSION;
+     * @hide
+     */
+    public static @NonNull List<String> getPublicNamespaces() {
+        return PUBLIC_NAMESPACES;
+    }
+
+    /**
      * Interface for monitoring changes to properties. Implementations will receive callbacks when
      * properties change, including a {@link Properties} object which contains a single namespace
      * and all of the properties which changed for that namespace. This includes properties which
