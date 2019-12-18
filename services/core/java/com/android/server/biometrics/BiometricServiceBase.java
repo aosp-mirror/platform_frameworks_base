@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics;
 
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 
 import android.app.ActivityManager;
@@ -1013,8 +1014,13 @@ public abstract class BiometricServiceBase extends SystemService
 
     private boolean isForegroundActivity(int uid, int pid) {
         try {
-            List<ActivityManager.RunningAppProcessInfo> procs =
+            final List<ActivityManager.RunningAppProcessInfo> procs =
                     ActivityManager.getService().getRunningAppProcesses();
+            if (procs == null) {
+                Slog.e(getTag(), "Processes null, defaulting to true");
+                return true;
+            }
+
             int N = procs.size();
             for (int i = 0; i < N; i++) {
                 ActivityManager.RunningAppProcessInfo proc = procs.get(i);
@@ -1206,6 +1212,11 @@ public abstract class BiometricServiceBase extends SystemService
      * @return authenticator id for the calling user
      */
     protected long getAuthenticatorId(String opPackageName) {
+        if (isKeyguard(opPackageName)) {
+            // If an app tells us it's keyguard, check that it actually is.
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+        }
+
         final int userId = getUserOrWorkProfileId(opPackageName, UserHandle.getCallingUserId());
         return mAuthenticatorIds.getOrDefault(userId, 0L);
     }
