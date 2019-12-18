@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.collection;
 
 import android.annotation.Nullable;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.notification.collection.provider.DerivedMember;
 import com.android.systemui.statusbar.notification.collection.provider.IsHighPriorityProvider;
@@ -68,8 +67,7 @@ public abstract class ListEntry {
         return mParent;
     }
 
-    @VisibleForTesting
-    public void setParent(@Nullable GroupEntry parent) {
+    void setParent(@Nullable GroupEntry parent) {
         if (!Objects.equals(mParent, parent)) {
             invalidateParent();
             mParent = parent;

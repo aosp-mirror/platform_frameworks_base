@@ -48,7 +48,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotifServiceListener;
 import com.android.systemui.statusbar.RankingBuilder;
