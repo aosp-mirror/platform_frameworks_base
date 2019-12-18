@@ -64,4 +64,8 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     }
 
     public void setLocationEnabled(ComponentName who, boolean locationEnabled) {}
+
+    public boolean isOrganizationOwnedDeviceWithManagedProfile() {
+        return false;
+    }
 }
