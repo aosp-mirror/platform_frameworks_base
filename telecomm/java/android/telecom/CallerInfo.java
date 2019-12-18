@@ -17,7 +17,7 @@
 package android.telecom;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -41,8 +41,8 @@ import com.android.i18n.phonenumbers.NumberParseException;
 import com.android.i18n.phonenumbers.PhoneNumberUtil;
 import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.android.i18n.phonenumbers.geocoding.PhoneNumberOfflineGeocoder;
-
 import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.Locale;
 
 
