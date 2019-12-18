@@ -16,16 +16,12 @@
 
 package com.android.commands.svc;
 
-/**
- * @deprecated Please use adb shell cmd phone data enabled/disable instead.
- */
-@Deprecated
+import android.os.ServiceManager;
+import android.os.RemoteException;
+import android.content.Context;
+import com.android.internal.telephony.ITelephony;
+
 public class DataCommand extends Svc.Command {
-
-    private static final String DECPRECATED_MESSAGE =
-            "adb shell svc data enable/disable is deprecated;"
-            + "please use adb shell cmd phone data enable/disable instead.";
-
     public DataCommand() {
         super("data");
     }
@@ -37,10 +33,36 @@ public class DataCommand extends Svc.Command {
     public String longHelp() {
         return shortHelp() + "\n"
                 + "\n"
-                + DECPRECATED_MESSAGE;
+                + "usage: svc data [enable|disable]\n"
+                + "         Turn mobile data on or off.\n\n";
     }
 
     public void run(String[] args) {
-        System.err.println(DECPRECATED_MESSAGE);
+        boolean validCommand = false;
+        if (args.length >= 2) {
+            boolean flag = false;
+            if ("enable".equals(args[1])) {
+                flag = true;
+                validCommand = true;
+            } else if ("disable".equals(args[1])) {
+                flag = false;
+                validCommand = true;
+            }
+            if (validCommand) {
+                ITelephony phoneMgr
+                        = ITelephony.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_SERVICE));
+                try {
+                    if (flag) {
+                        phoneMgr.enableDataConnectivity();
+                    } else
+                        phoneMgr.disableDataConnectivity();
+                }
+                catch (RemoteException e) {
+                    System.err.println("Mobile data operation failed: " + e);
+                }
+                return;
+            }
+        }
+        System.err.println(longHelp());
     }
 }
