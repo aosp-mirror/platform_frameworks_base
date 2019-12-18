@@ -1060,6 +1060,31 @@ public abstract class Context {
     public abstract File getFilesDir();
 
     /**
+     * Returns the absolute path to the directory that is related to the crate on the filesystem.
+     * <p>
+     *     The crateId require a validated file name. It can't contain any "..", ".",
+     *     {@link File#separatorChar} etc..
+     * </p>
+     * <p>
+     * The returned path may change over time if the calling app is moved to an
+     * adopted storage device, so only relative paths should be persisted.
+     * </p>
+     * <p>
+     * No additional permissions are required for the calling app to read or
+     * write files under the returned path.
+     *</p>
+     *
+     * @param crateId the relative validated file name under {@link Context#getDataDir()}/crates
+     * @return the crate directory file.
+     * @hide
+     */
+    @NonNull
+    @TestApi
+    public File getCrateDir(@NonNull String crateId) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Returns the absolute path to the directory on the filesystem similar to
      * {@link #getFilesDir()}. The difference is that files placed under this
      * directory will be excluded from automatic backup to remote storage. See
