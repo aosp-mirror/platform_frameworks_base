@@ -124,7 +124,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.ActivityIntentHelper;
-import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.AutoReinflateContainer;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.DemoMode;
@@ -897,8 +896,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarKeyguardViewManager,
                 mStatusBarWindowViewController,
                 mNotificationPanel, mAmbientIndicationContainer);
-
-        Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
 
         mConfigurationController.addCallback(this);
 

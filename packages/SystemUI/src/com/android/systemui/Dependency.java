@@ -210,7 +210,6 @@ public class Dependency {
     private final ArrayMap<Object, LazyDependencyCreator> mProviders = new ArrayMap<>();
 
     @Inject Lazy<ActivityStarter> mActivityStarter;
-    @Inject Lazy<ActivityStarterDelegate> mActivityStarterDelegate;
     @Inject Lazy<BroadcastDispatcher> mBroadcastDispatcher;
     @Inject Lazy<AsyncSensorManager> mAsyncSensorManager;
     @Inject Lazy<BluetoothController> mBluetoothController;
@@ -341,7 +340,6 @@ public class Dependency {
         mProviders.put(MAIN_LOOPER, mMainLooper::get);
         mProviders.put(MAIN_HANDLER, mMainHandler::get);
         mProviders.put(ActivityStarter.class, mActivityStarter::get);
-        mProviders.put(ActivityStarterDelegate.class, mActivityStarterDelegate::get);
         mProviders.put(BroadcastDispatcher.class, mBroadcastDispatcher::get);
 
         mProviders.put(AsyncSensorManager.class, mAsyncSensorManager::get);
