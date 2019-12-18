@@ -25,6 +25,7 @@ import static android.app.Notification.FLAG_INSISTENT;
 import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
+import static android.app.NotificationChannel.CONVERSATION_CHANNEL_ID_FORMAT;
 import static android.app.NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED;
@@ -236,6 +237,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.TriPredicate;
 import com.android.server.DeviceIdleInternal;
@@ -2219,8 +2221,8 @@ public class NotificationManagerService extends SystemService {
         maybeNotifyChannelOwner(pkg, uid, preUpdate, channel);
 
         if (!fromListener) {
-            final NotificationChannel modifiedChannel =
-                    mPreferencesHelper.getNotificationChannel(pkg, uid, channel.getId(), false);
+            final NotificationChannel modifiedChannel = mPreferencesHelper.getNotificationChannel(
+                    pkg, uid, channel.getId(), false);
             mListeners.notifyNotificationChannelChanged(
                     pkg, UserHandle.getUserHandleForUid(uid),
                     modifiedChannel, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
@@ -3017,21 +3019,43 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void createNotificationChannels(String pkg,
-                ParceledListSlice channelsList) throws RemoteException {
+                ParceledListSlice channelsList) {
             checkCallerIsSystemOrSameApp(pkg);
             createNotificationChannelsImpl(pkg, Binder.getCallingUid(), channelsList);
         }
 
         @Override
         public void createNotificationChannelsForPackage(String pkg, int uid,
-                ParceledListSlice channelsList) throws RemoteException {
-            checkCallerIsSystem();
+                ParceledListSlice channelsList) {
+            enforceSystemOrSystemUI("only system can call this");
             createNotificationChannelsImpl(pkg, uid, channelsList);
+        }
+
+        @Override
+        public void createConversationNotificationChannelForPackage(String pkg, int uid,
+                NotificationChannel parentChannel, String conversationId) {
+            enforceSystemOrSystemUI("only system can call this");
+            Preconditions.checkNotNull(parentChannel);
+            Preconditions.checkNotNull(conversationId);
+            String parentId = parentChannel.getId();
+            NotificationChannel conversationChannel = parentChannel;
+            conversationChannel.setId(String.format(
+                    CONVERSATION_CHANNEL_ID_FORMAT, parentId, conversationId));
+            conversationChannel.setConversationId(parentId, conversationId);
+            createNotificationChannelsImpl(
+                    pkg, uid, new ParceledListSlice(Arrays.asList(conversationChannel)));
         }
 
         @Override
         public NotificationChannel getNotificationChannel(String callingPkg, int userId,
                 String targetPkg, String channelId) {
+            return getConversationNotificationChannel(
+                    callingPkg, userId, targetPkg, channelId, null);
+        }
+
+        @Override
+        public NotificationChannel getConversationNotificationChannel(String callingPkg, int userId,
+                String targetPkg, String channelId, String conversationId) {
             if (canNotifyAsPackage(callingPkg, targetPkg, userId)
                     || isCallingUidSystem()) {
                 int targetUid = -1;
@@ -3041,7 +3065,8 @@ public class NotificationManagerService extends SystemService {
                     /* ignore */
                 }
                 return mPreferencesHelper.getNotificationChannel(
-                        targetPkg, targetUid, channelId, false /* includeDeleted */);
+                        targetPkg, targetUid, channelId, conversationId,
+                        false /* includeDeleted */);
             }
             throw new SecurityException("Pkg " + callingPkg
                     + " cannot read channels for " + targetPkg + " in " + userId);
@@ -3070,6 +3095,30 @@ public class NotificationManagerService extends SystemService {
                     NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
             handleSavePolicyFile();
         }
+
+        @Override
+        public void deleteConversationNotificationChannels(String pkg, int uid,
+                String conversationId) {
+            checkCallerIsSystem();
+            final int callingUid = Binder.getCallingUid();
+            List<NotificationChannel> channels =
+                    mPreferencesHelper.getNotificationChannelsByConversationId(
+                            pkg, uid, conversationId);
+            if (!channels.isEmpty()) {
+                for (NotificationChannel nc : channels) {
+                    cancelAllNotificationsInt(MY_UID, MY_PID, pkg, nc.getId(), 0, 0, true,
+                            UserHandle.getUserId(callingUid), REASON_CHANNEL_BANNED, null);
+                    mPreferencesHelper.deleteNotificationChannel(pkg, callingUid, nc.getId());
+                    mListeners.notifyNotificationChannelChanged(pkg,
+                            UserHandle.getUserHandleForUid(callingUid),
+                            mPreferencesHelper.getNotificationChannel(
+                                    pkg, callingUid, nc.getId(), true),
+                            NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
+                }
+                handleSavePolicyFile();
+            }
+        }
+
 
         @Override
         public NotificationChannelGroup getNotificationChannelGroup(String pkg, String groupId) {
@@ -5203,7 +5252,8 @@ public class NotificationManagerService extends SystemService {
             channelId = (new Notification.TvExtender(notification)).getChannelId();
         }
         final NotificationChannel channel = mPreferencesHelper.getNotificationChannel(pkg,
-                notificationUid, channelId, false /* includeDeleted */);
+                notificationUid, channelId, notification.getShortcutId(),
+                false /* includeDeleted */);
         if (channel == null) {
             final String noChannelStr = "No Channel found for "
                     + "pkg=" + pkg

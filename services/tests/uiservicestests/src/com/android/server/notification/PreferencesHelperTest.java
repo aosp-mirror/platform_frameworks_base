@@ -15,6 +15,7 @@
  */
 package com.android.server.notification;
 
+import static android.app.NotificationChannel.CONVERSATION_CHANNEL_ID_FORMAT;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
@@ -224,6 +225,26 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(expected.getGroup(), actual.getGroup());
         assertEquals(expected.getAudioAttributes(), actual.getAudioAttributes());
         assertEquals(expected.getLightColor(), actual.getLightColor());
+        assertEquals(expected.getParentChannelId(), actual.getParentChannelId());
+        assertEquals(expected.getConversationId(), actual.getConversationId());
+    }
+
+    private void compareChannelsParentChild(NotificationChannel parent,
+            NotificationChannel actual, String conversationId) {
+        assertEquals(parent.getName(), actual.getName());
+        assertEquals(parent.getDescription(), actual.getDescription());
+        assertEquals(parent.shouldVibrate(), actual.shouldVibrate());
+        assertEquals(parent.shouldShowLights(), actual.shouldShowLights());
+        assertEquals(parent.getImportance(), actual.getImportance());
+        assertEquals(parent.getLockscreenVisibility(), actual.getLockscreenVisibility());
+        assertEquals(parent.getSound(), actual.getSound());
+        assertEquals(parent.canBypassDnd(), actual.canBypassDnd());
+        assertTrue(Arrays.equals(parent.getVibrationPattern(), actual.getVibrationPattern()));
+        assertEquals(parent.getGroup(), actual.getGroup());
+        assertEquals(parent.getAudioAttributes(), actual.getAudioAttributes());
+        assertEquals(parent.getLightColor(), actual.getLightColor());
+        assertEquals(parent.getId(), actual.getParentChannelId());
+        assertEquals(conversationId, actual.getConversationId());
     }
 
     private void compareGroups(NotificationChannelGroup expected, NotificationChannelGroup actual) {
@@ -2785,5 +2806,41 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 mHelper.getNotificationChannel(pkg, uidList0[0], channelId, false).getImportance());
         assertEquals(user10Importance, mHelper.getNotificationChannel(
                 pkg, uidList10[0], channelId, false).getImportance());
+    }
+
+    @Test
+    public void testGetConversationNotificationChannel() {
+        String conversationId = "friend";
+
+        NotificationChannel parent =
+                new NotificationChannel("parent", "messages", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, parent, true, false);
+
+        NotificationChannel friend = new NotificationChannel(String.format(
+                CONVERSATION_CHANNEL_ID_FORMAT, parent.getId(), conversationId),
+                "messages", IMPORTANCE_DEFAULT);
+        friend.setConversationId(parent.getId(), conversationId);
+        mHelper.createNotificationChannel(PKG_O, UID_O, friend, true, false);
+
+        compareChannelsParentChild(parent, mHelper.getNotificationChannel(
+                PKG_O, UID_O, parent.getId(), conversationId, false), conversationId);
+    }
+
+    @Test
+    public void testConversationNotificationChannelsRequireParents() {
+        String parentId = "does not exist";
+        String conversationId = "friend";
+
+        NotificationChannel friend = new NotificationChannel(String.format(
+                CONVERSATION_CHANNEL_ID_FORMAT, parentId, conversationId),
+                "messages", IMPORTANCE_DEFAULT);
+        friend.setConversationId(parentId, conversationId);
+
+        try {
+            mHelper.createNotificationChannel(PKG_O, UID_O, friend, true, false);
+            fail("allowed creation of conversation channel without a parent");
+        } catch (IllegalArgumentException e) {
+            // good
+        }
     }
 }

@@ -41,10 +41,15 @@ public interface RankingConfig {
             int uid, boolean includeDeleted, boolean includeNonGrouped, boolean includeEmpty);
     boolean createNotificationChannel(String pkg, int uid, NotificationChannel channel,
             boolean fromTargetApp, boolean hasDndAccess);
-    void updateNotificationChannel(String pkg, int uid, NotificationChannel channel, boolean fromUser);
-    NotificationChannel getNotificationChannel(String pkg, int uid, String channelId, boolean includeDeleted);
+    void updateNotificationChannel(String pkg, int uid, NotificationChannel channel,
+            boolean fromUser);
+    NotificationChannel getNotificationChannel(String pkg, int uid, String channelId,
+            boolean includeDeleted);
+    NotificationChannel getNotificationChannel(String pkg, int uid, String channelId,
+            String conversationId, boolean includeDeleted);
     void deleteNotificationChannel(String pkg, int uid, String channelId);
     void permanentlyDeleteNotificationChannel(String pkg, int uid, String channelId);
     void permanentlyDeleteNotificationChannels(String pkg, int uid);
-    ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid, boolean includeDeleted);
+    ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid,
+            boolean includeDeleted);
 }
