@@ -62,6 +62,7 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Android magnifier widget. Can be used by any view which is attached to a window.
@@ -1154,7 +1155,7 @@ public final class Magnifier {
          * @param view the view this magnifier is attached to
          */
         public Builder(@NonNull View view) {
-            mView = Preconditions.checkNotNull(view);
+            mView = Objects.requireNonNull(view);
             applyDefaults();
         }
 

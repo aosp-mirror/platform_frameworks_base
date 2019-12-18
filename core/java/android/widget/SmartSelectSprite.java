@@ -38,13 +38,12 @@ import android.text.Layout;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A utility class for creating and animating the Smart Select animation.
@@ -75,7 +74,7 @@ final class SmartSelectSprite {
         private final int mTextSelectionLayout;
 
         RectangleWithTextSelectionLayout(RectF rectangle, int textSelectionLayout) {
-            mRectangle = Preconditions.checkNotNull(rectangle);
+            mRectangle = Objects.requireNonNull(rectangle);
             mTextSelectionLayout = textSelectionLayout;
         }
 
@@ -342,7 +341,7 @@ final class SmartSelectSprite {
                 context,
                 android.R.interpolator.fast_out_linear_in);
         mFillColor = highlightColor;
-        mInvalidator = Preconditions.checkNotNull(invalidator);
+        mInvalidator = Objects.requireNonNull(invalidator);
     }
 
     /**
