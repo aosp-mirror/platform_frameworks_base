@@ -48,21 +48,29 @@ public class WifiP2pConfig implements Parcelable {
      */
     public WpsInfo wps;
 
-    /**
-     * The network name of a group, should be configured by helper method
-     */
+    /** Get the network name of this P2P configuration, or null if unset. */
+    @Nullable
+    public String getNetworkName() {
+        return networkName;
+    }
+
     /** @hide */
     public String networkName = "";
 
-    /**
-     * The passphrase of a group, should be configured by helper method
-     */
+    /** Get the passphrase of this P2P configuration, or null if unset. */
+    @Nullable
+    public String getPassphrase() {
+        return passphrase;
+    }
+
     /** @hide */
     public String passphrase = "";
 
-    /**
-     * The required band for Group Owner
-     */
+    /** Get the required band for the group owner. */
+    public int getGroupOwnerBand() {
+        return groupOwnerBand;
+    }
+
     /** @hide */
     public int groupOwnerBand = GROUP_OWNER_BAND_AUTO;
 
@@ -122,6 +130,15 @@ public class WifiP2pConfig implements Parcelable {
     /** @hide */
     @UnsupportedAppUsage
     public int netId = WifiP2pGroup.PERSISTENT_NET_ID;
+
+    /**
+     * Get the network ID of this P2P configuration.
+     * @return either a non-negative network ID, or one of {@link WifiP2pGroup#PERSISTENT_NET_ID} or
+     * {@link WifiP2pGroup#TEMPORARY_NET_ID}.
+     */
+    public int getNetworkId() {
+        return netId;
+    }
 
     public WifiP2pConfig() {
         //set defaults

@@ -39,18 +39,15 @@ public class WifiP2pGroup implements Parcelable {
 
     /**
      * The temporary network id.
-     *
-     * @hide
+     * @see #getNetworkId()
      */
-    @UnsupportedAppUsage
     public static final int TEMPORARY_NET_ID = -1;
 
     /**
      * The persistent network id.
      * If a matching persistent profile is found, use it.
      * Otherwise, create a new persistent profile.
-     *
-     * @hide
+     * @see #getNetworkId()
      */
     public static final int PERSISTENT_NET_ID = -2;
 
