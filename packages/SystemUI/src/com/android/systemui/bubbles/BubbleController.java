@@ -150,6 +150,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     private BubbleData mBubbleData;
     @Nullable private BubbleStackView mStackView;
+    private BubbleIconFactory mBubbleIconFactory;
 
     // Tracks the id of the current (foreground) user.
     private int mCurrentUserId;
@@ -182,6 +183,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     /** Last known orientation, used to detect orientation changes in {@link #onConfigChanged}. */
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
+
+    private boolean mInflateSynchronously;
 
     /**
      * Listener to be notified when some states of the bubbles change.
@@ -352,6 +355,16 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mUserBlockedBubbles = new HashSet<>();
 
         mScreenshotHelper = new ScreenshotHelper(context);
+        mBubbleIconFactory = new BubbleIconFactory(context);
+    }
+
+    /**
+     * Sets whether to perform inflation on the same thread as the caller. This method should only
+     * be used in tests, not in production.
+     */
+    @VisibleForTesting
+    void setInflateSynchronously(boolean inflateSynchronously) {
+        mInflateSynchronously = inflateSynchronously;
     }
 
     /**
@@ -415,15 +428,22 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     @Override
     public void onUiModeChanged() {
-        if (mStackView != null) {
-            mStackView.onThemeChanged();
-        }
+        updateForThemeChanges();
     }
 
     @Override
     public void onOverlayChanged() {
+        updateForThemeChanges();
+    }
+
+    private void updateForThemeChanges() {
         if (mStackView != null) {
             mStackView.onThemeChanged();
+        }
+        mBubbleIconFactory = new BubbleIconFactory(mContext);
+        for (Bubble b: mBubbleData.getBubbles()) {
+            // Reload each bubble
+            b.inflate(null /* callback */, mContext, mStackView, mBubbleIconFactory);
         }
     }
 
@@ -508,14 +528,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         return (isSummary && isSuppressedSummary) || isBubbleAndSuppressed;
     }
 
-    void selectBubble(Bubble bubble) {
-        mBubbleData.setSelectedBubble(bubble);
-    }
-
     @VisibleForTesting
     void selectBubble(String key) {
         Bubble bubble = mBubbleData.getBubbleWithKey(key);
-        selectBubble(bubble);
+        mBubbleData.setSelectedBubble(bubble);
     }
 
     /**
@@ -562,11 +578,19 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     void updateBubble(NotificationEntry notif, boolean suppressFlyout, boolean showInShade) {
+        if (mStackView == null) {
+            // Lazy init stack view when a bubble is created
+            ensureStackViewCreated();
+        }
         // If this is an interruptive notif, mark that it's interrupted
         if (notif.getImportance() >= NotificationManager.IMPORTANCE_HIGH) {
             notif.setInterruption();
         }
-        mBubbleData.notificationEntryUpdated(notif, suppressFlyout, showInShade);
+        Bubble bubble = mBubbleData.getOrCreateBubble(notif);
+        bubble.setInflateSynchronously(mInflateSynchronously);
+        bubble.inflate(
+                b -> mBubbleData.notificationEntryUpdated(b, suppressFlyout, showInShade),
+                mContext, mStackView, mBubbleIconFactory);
     }
 
     /**
@@ -783,16 +807,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         @Override
         public void applyUpdate(BubbleData.Update update) {
-            if (mStackView == null && update.addedBubble != null) {
-                // Lazy init stack view when the first bubble is added.
-                ensureStackViewCreated();
-            }
-
-            // If not yet initialized, ignore all other changes.
-            if (mStackView == null) {
-                return;
-            }
-
             if (update.addedBubble != null) {
                 mStackView.addBubble(update.addedBubble);
             }

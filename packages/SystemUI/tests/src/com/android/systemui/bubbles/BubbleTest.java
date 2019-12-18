@@ -58,7 +58,7 @@ public class BubbleTest extends SysuiTestCase {
         mEntry = new NotificationEntryBuilder()
                 .setNotification(mNotif)
                 .build();
-        mBubble = new Bubble(mContext, mEntry);
+        mBubble = new Bubble(mEntry);
     }
 
     @Test
