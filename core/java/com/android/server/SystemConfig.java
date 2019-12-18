@@ -218,6 +218,7 @@ public class SystemConfig {
     final ArrayMap<String, ArraySet<String>> mAllowedAssociations = new ArrayMap<>();
 
     private final ArraySet<String> mBugreportWhitelistedPackages = new ArraySet<>();
+    private final ArraySet<String> mAppDataIsolationWhitelistedApps = new ArraySet<>();
 
     // Map of packagesNames to userTypes. Stored temporarily until cleared by UserManagerService().
     private ArrayMap<String, Set<String>> mPackageToUserTypeWhitelist = new ArrayMap<>();
@@ -387,6 +388,10 @@ public class SystemConfig {
 
     public Set<String> getRollbackWhitelistedPackages() {
         return mRollbackWhitelistedPackages;
+    }
+
+    public ArraySet<String> getAppDataIsolationWhitelistedApps() {
+        return mAppDataIsolationWhitelistedApps;
     }
 
     /**
@@ -1042,6 +1047,16 @@ public class SystemConfig {
                             associations.add(allowed);
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "app-data-isolation-whitelisted-app": {
+                        String pkgname = parser.getAttributeValue(null, "package");
+                        if (pkgname == null) {
+                            Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            mAppDataIsolationWhitelistedApps.add(pkgname);
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
