@@ -14,13 +14,13 @@
      limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.tethering.tests.unit">
+          package="com.android.networkstack.tethering.tests.unit">
 
     <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />
     </application>
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:targetPackage="com.android.tethering.tests.unit"
+        android:targetPackage="com.android.networkstack.tethering.tests.unit"
         android:label="Tethering service tests">
     </instrumentation>
 </manifest>
