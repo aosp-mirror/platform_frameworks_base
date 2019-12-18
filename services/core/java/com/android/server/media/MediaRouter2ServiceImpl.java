@@ -183,8 +183,9 @@ class MediaRouter2ServiceImpl {
     }
 
     public void setControlCategories(@NonNull IMediaRouter2Client client,
-            @Nullable List<String> categories) {
+            @NonNull List<String> categories) {
         Objects.requireNonNull(client, "client must not be null");
+        Objects.requireNonNull(categories, "categories must not be null");
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -390,8 +391,11 @@ class MediaRouter2ServiceImpl {
 
     private void setControlCategoriesLocked(Client2Record clientRecord, List<String> categories) {
         if (clientRecord != null) {
-            clientRecord.mControlCategories = categories;
+            if (clientRecord.mControlCategories.equals(categories)) {
+                return;
+            }
 
+            clientRecord.mControlCategories = categories;
             clientRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::updateClientUsage,
                             clientRecord.mUserRecord.mHandler, clientRecord));
