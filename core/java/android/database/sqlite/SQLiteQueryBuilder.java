@@ -823,6 +823,7 @@ public class SQLiteQueryBuilder {
         switch (token.toUpperCase(Locale.US)) {
             case "COLLATE": case "ASC": case "DESC":
             case "BINARY": case "RTRIM": case "NOCASE":
+            case "LOCALIZED": case "UNICODE":
                 return;
         }
         throw new IllegalArgumentException("Invalid token " + token);
