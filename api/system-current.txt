@@ -9663,6 +9663,8 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultDataSubId(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultSmsSubId(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultVoiceSubscriptionId(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setDisplayName(@Nullable String, int, int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setIconTint(@ColorInt int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setPreferredDataSubscriptionId(int, boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setSubscriptionEnabled(int, boolean);
     field @NonNull public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;

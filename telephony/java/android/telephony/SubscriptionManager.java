@@ -21,6 +21,7 @@ import static android.net.NetworkPolicyManager.OVERRIDE_UNMETERED;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.ColorInt;
 import android.annotation.DurationMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -1674,14 +1675,15 @@ public class SubscriptionManager {
     }
 
     /**
-     * Set SIM icon tint color by simInfo index
+     * Set SIM icon tint color for subscription ID
      * @param tint the RGB value of icon tint color of the SIM
-     * @param subId the unique SubInfoRecord index in database
+     * @param subId the unique Subscritpion ID in database
      * @return the number of records updated
      * @hide
      */
-    @UnsupportedAppUsage
-    public int setIconTint(int tint, int subId) {
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public int setIconTint(@ColorInt int tint, int subId) {
         if (VDBG) logd("[setIconTint]+ tint:" + tint + " subId:" + subId);
         return setSubscriptionPropertyHelper(subId, "setIconTint",
                 (iSub)-> iSub.setIconTint(tint, subId)
@@ -1689,15 +1691,17 @@ public class SubscriptionManager {
     }
 
     /**
-     * Set display name by simInfo index with name source
+     * Set the display name for a subscription ID
      * @param displayName the display name of SIM card
-     * @param subId the unique SubscriptionInfo index in database
+     * @param subId the unique Subscritpion ID in database
      * @param nameSource SIM display name source
      * @return the number of records updated or < 0 if invalid subId
      * @hide
      */
-    @UnsupportedAppUsage
-    public int setDisplayName(String displayName, int subId, @SimDisplayNameSource int nameSource) {
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public int setDisplayName(@Nullable String displayName, int subId,
+            @SimDisplayNameSource int nameSource) {
         if (VDBG) {
             logd("[setDisplayName]+  displayName:" + displayName + " subId:" + subId
                     + " nameSource:" + nameSource);
