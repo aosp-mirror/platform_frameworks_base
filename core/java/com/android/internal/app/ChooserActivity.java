@@ -859,12 +859,19 @@ public class ChooserActivity extends ResolverActivity implements
         return new PackageMonitor() {
             @Override
             public void onSomePackagesChanged() {
-                // TODO(arangelov): Dispatch this to all adapters when we have the helper methods
-                // in a follow-up CL
-                mChooserMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
-                updateProfileViewButton();
+                handlePackagesChanged();
             }
         };
+    }
+
+    /**
+     * Update UI to reflect changes in data.
+     */
+    public void handlePackagesChanged() {
+        // TODO(arangelov): Dispatch this to all adapters when we have the helper methods
+        // in a follow-up CL
+        mChooserMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
+        updateProfileViewButton();
     }
 
     private void onCopyButtonClicked(View v) {
