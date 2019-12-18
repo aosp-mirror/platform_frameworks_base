@@ -125,7 +125,7 @@ public class AudioDeviceInventory {
                     + " codec: " + Integer.toHexString(mDeviceCodecFormat) + "]";
         }
 
-        String getKey() {
+        @NonNull String getKey() {
             return makeDeviceListKey(mDeviceType, mDeviceAddress);
         }
 
@@ -133,7 +133,7 @@ public class AudioDeviceInventory {
          * Generate a unique key for the mConnectedDevices List by composing the device "type"
          * and the "address" associated with a specific instance of that device type
          */
-        private static String makeDeviceListKey(int device, String deviceAddress) {
+        @NonNull private static String makeDeviceListKey(int device, String deviceAddress) {
             return "0x" + Integer.toHexString(device) + ":" + deviceAddress;
         }
     }
@@ -726,8 +726,8 @@ public class AudioDeviceInventory {
                 DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address);
 
         mConnectedDevices.remove(deviceToRemoveKey);
-        if (!mApmConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP)
-                .equals(deviceToRemoveKey)) {
+        if (!deviceToRemoveKey
+                .equals(mApmConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP))) {
             // removing A2DP device not currently used by AudioPolicy, log but don't act on it
             AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
                     "A2DP device " + address + " made unavailable, was not used")).printLog(TAG));
