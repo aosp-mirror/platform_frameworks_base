@@ -142,6 +142,7 @@ object PhysicsAnimatorTestUtils {
      */
     @JvmStatic
     @Throws(InterruptedException::class)
+    @Suppress("UNCHECKED_CAST")
     fun <T : Any> blockUntilAnimationsEnd(
         properties: FloatPropertyCompat<in T>
     ) {
@@ -327,6 +328,7 @@ object PhysicsAnimatorTestUtils {
     /**
      * Returns all of the values that have ever been reported to update listeners, per property.
      */
+    @Suppress("UNCHECKED_CAST")
     fun <T : Any> getAnimationUpdateFrames(animator: PhysicsAnimator<T>):
             UpdateFramesPerProperty<T> {
         return animatorTestHelpers[animator]?.getUpdates() as UpdateFramesPerProperty<T>
@@ -340,6 +342,7 @@ object PhysicsAnimatorTestUtils {
         animatorTestHelpers[animator]?.clearUpdates()
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun <T> getAnimationTestHelper(animator: PhysicsAnimator<T>): AnimatorTestHelper<T> {
         return animatorTestHelpers[animator] as AnimatorTestHelper<T>
     }
