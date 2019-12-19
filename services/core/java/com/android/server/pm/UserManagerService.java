@@ -3977,6 +3977,10 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean isUserNameSet(@UserIdInt int userId) {
+        if (!hasManageUsersOrPermission(android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED)) {
+            throw new SecurityException("You need MANAGE_USERS or GET_ACCOUNTS_PRIVILEGED "
+                    + "permissions to: get whether user name is set");
+        }
         synchronized (mUsersLock) {
             final UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.name != null;

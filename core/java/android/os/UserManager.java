@@ -1550,6 +1550,9 @@ public class UserManager {
      * set by the user and is not a placeholder string provided by the system.
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.GET_ACCOUNTS_PRIVILEGED})
     public boolean isUserNameSet() {
         try {
             return mService.isUserNameSet(getUserHandle());
