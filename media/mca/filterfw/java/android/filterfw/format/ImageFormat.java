@@ -17,7 +17,7 @@
 
 package android.filterfw.format;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.UnsupportedAppUsage;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.MutableFrameFormat;
 import android.graphics.Bitmap;

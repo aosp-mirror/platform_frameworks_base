@@ -17,8 +17,9 @@
 
 package com.google.android.mms.util;
 
-import android.compat.annotation.UnsupportedAppUsage;
 import android.util.Log;
+
+import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.util.HashMap;
 

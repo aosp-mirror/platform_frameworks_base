@@ -19,7 +19,7 @@
 
 package android.opengl;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.UnsupportedAppUsage;
 
 /** OpenGL ES 2.0
  */

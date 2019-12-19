@@ -17,7 +17,9 @@
 
 package android.filterfw.core;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.UnsupportedAppUsage;
+import android.filterfw.core.KeyValueMap;
+import android.filterfw.core.MutableFrameFormat;
 
 import java.util.Arrays;
 import java.util.Map.Entry;

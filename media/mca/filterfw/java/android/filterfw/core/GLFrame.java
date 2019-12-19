@@ -17,10 +17,15 @@
 
 package android.filterfw.core;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.UnsupportedAppUsage;
+import android.filterfw.core.Frame;
+import android.filterfw.core.FrameFormat;
+import android.filterfw.core.FrameManager;
+import android.filterfw.core.NativeFrame;
+import android.filterfw.core.StopWatchMap;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.opengl.GLES20;
+import android.graphics.Rect;
 
 import java.nio.ByteBuffer;
 

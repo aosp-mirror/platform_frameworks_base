@@ -18,7 +18,6 @@
 package com.google.android.mms.util;
 
 import android.app.ActivityManager;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -27,6 +26,8 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
+
+import dalvik.annotation.compat.UnsupportedAppUsage;
 
 public final class SqliteWrapper {
     private static final String TAG = "SqliteWrapper";
