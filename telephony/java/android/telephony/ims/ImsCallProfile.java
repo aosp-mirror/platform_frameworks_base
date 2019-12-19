@@ -32,6 +32,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -833,7 +834,7 @@ public final class ImsCallProfile implements Parcelable {
         }
 
         int startSize = extras.size();
-        Bundle filtered = extras.filterValues();
+        Bundle filtered = TelephonyUtils.filterValues(extras);
         int endSize = filtered.size();
         if (startSize != endSize) {
             Log.i(TAG, "maybeCleanseExtras: " + (startSize - endSize) + " extra values were "
