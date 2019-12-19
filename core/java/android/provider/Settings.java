@@ -8474,6 +8474,29 @@ public final class Settings {
         public static final String WINDOW_MAGNIFICATION = "window_magnification";
 
         /**
+         * Controls magnification mode when magnification is enabled via a system-wide
+         * triple tap gesture or the accessibility shortcut.
+         *
+         * @see#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
+         * @see#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
+         * @hide
+         */
+        public static final String ACCESSIBILITY_MAGNIFICATION_MODE =
+                "accessibility_magnification_mode";
+
+        /**
+         * Magnification mode value that magnifies whole display.
+         * @hide
+         */
+        public static final int ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN = 0x1;
+
+        /**
+         * Magnification mode value that magnifies magnify particular region in a window
+         * @hide
+         */
+        public static final int ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW = 0x2;
+
+        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *

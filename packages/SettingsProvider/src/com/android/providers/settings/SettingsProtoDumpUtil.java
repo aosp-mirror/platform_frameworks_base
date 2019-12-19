@@ -1820,6 +1820,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
                 SecureSettingsProto.Accessibility.INTERACTIVE_UI_TIMEOUT_MS);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
+                SecureSettingsProto.Accessibility.ACCESSIBILITY_MAGNIFICATION_MODE);
         p.end(accessibilityToken);
 
         dumpSetting(s, p,

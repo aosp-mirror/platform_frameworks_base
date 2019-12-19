@@ -75,6 +75,8 @@ message SecureSettingsProto {
         // Settings for accessibility timeout
         optional SettingProto non_interactive_ui_timeout_ms = 32 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto interactive_ui_timeout_ms = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Settings for magnification mode
+        optional SettingProto accessibility_magnification_mode = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Accessibility accessibility = 2;
 

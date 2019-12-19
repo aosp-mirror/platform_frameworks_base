@@ -239,5 +239,9 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.DISPLAY_DENSITY_FORCED, NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.TAP_GESTURE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.PEOPLE_STRIP, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
+                new InclusiveIntegerRangeValidator(
+                        Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
+                        Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW));
     }
 }
