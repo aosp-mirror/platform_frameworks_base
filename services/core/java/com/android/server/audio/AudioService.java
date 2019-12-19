@@ -686,7 +686,7 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = defaultCallVolume;
         } else {
             AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] =
-                    (maxCallVolume * 3) / 4;
+                    (MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] * 3) / 4;
         }
 
         int maxMusicVolume = SystemProperties.getInt("ro.config.media_vol_steps", -1);
