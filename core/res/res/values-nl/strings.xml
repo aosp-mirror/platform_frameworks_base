@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Hiermee kan de app sticky broadcasts verzenden die achterblijven nadat de uitzending is afgelopen. Overmatig gebruik kan de tv traag instabiel maken doordat er te veel geheugen wordt gebruikt."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Hiermee kan de app sticky broadcasts verzenden die behouden blijven nadat de broadcast is beëindigd. Bij overmatig gebruik kan de telefoon traag of instabiel worden omdat er te veel geheugenruimte wordt gebruikt."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"je contacten lezen"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je tablet, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke personen. Met deze toestemming kunnen apps je contactgegevens opslaan, en schadelijke apps kunnen zonder je medeweten contactgegevens delen."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je tv, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke personen. Met deze toestemming kunnen apps je contactgegevens opslaan, en schadelijke apps kunnen zonder je medeweten contactgegevens delen."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je telefoon, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke personen. Met deze toestemming kunnen apps je contactgegevens opslaan, en schadelijke apps kunnen zonder je medeweten contactgegevens delen."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"je contacten aanpassen"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tablet, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tv, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je telefoon, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tablet. Met dit recht kunnen apps contactgegevens verwijderen."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je telefoon. Met dit recht kunnen apps contactgegevens verwijderen."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"gesprekslijst lezen"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Deze app kan je gespreksgeschiedenis lezen."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"gesprekslijst schrijven"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"alleen toegang tot geschatte locatie (op basis van netwerk) op de voorgrond"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Deze app kan je locatie ophalen op basis van netwerkbronnen zoals zendmasten en wifi-netwerken, maar alleen wanneer de app zich op de voorgrond bevindt. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je tablet."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Deze app kan je locatie ophalen op basis van netwerkbronnen zoals zendmasten en wifi-netwerken, maar alleen wanneer de app zich op de voorgrond bevindt. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je tv."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Deze app kan je geschatte locatie alleen opvragen als de app op de voorgrond wordt gebruikt. De app kan deze locatieservices alleen gebruiken als ze zijn ingeschakeld en beschikbaar zijn in de auto."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Deze app kan je locatie ophalen op basis van netwerkbronnen zoals zendmasten en wifi-netwerken, maar alleen wanneer de app zich op de voorgrond bevindt. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je telefoon."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"toegang tot locatie op de achtergrond"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Als dit wordt verleend als aanvulling op toegang tot de geschatte of precieze locatie, kan de app toegang tot de locatie krijgen terwijl de app actief is op de achtergrond."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Alarmgeluiden"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Meldingsgeluiden"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Onbekend"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Kan niet verbinden met <xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Tik om de privacyinstellingen aan te passen en probeer het opnieuw"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Privacyinstelling wijzigen?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> wil mogelijk verbinding maken via het MAC-adres van je apparaat (een uniek identificatienummer). Hierdoor kan de locatie van je apparaat worden bijgehouden door apparaten in de buurt. \n\nAls je doorgaat, wijzigt <xliff:g id="SSID_1">%1$s</xliff:g> je privacyinstelling en probeert opnieuw verbinding te maken."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Instelling wijzigen"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Instelling geüpdatet. Probeer opnieuw verbinding te maken."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Kan privacyinstelling niet wijzigen"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Netwerk niet gevonden"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">Wifi-netwerken beschikbaar</item>
       <item quantity="one">Wifi-netwerk beschikbaar</item>

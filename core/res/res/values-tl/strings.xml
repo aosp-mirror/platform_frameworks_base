@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Nagbibigay-daan sa app na magpadala ng mga sticky broadcast, na nananatili pagkatapos ng broadcast. Ang labis na paggamit nito ay maaaring magsanhi sa TV na maging mabagal o hindi matatag sa pamamagitan ng paggamit nito ng masyadong maraming memory."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Pinapayagan ang app na magpadala ng mga sticky na pag-broadcast, na nananatili pagkatapos ng pag-broadcast. Maaaring pabagalin o gawing hindi matatag ng labis na paggamit ang telepono sa pamamagitan ng pagdulot dito na gumamit ng masyadong maraming memory."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"basahin ang iyong mga contact"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Pinapayagan ang app na magbasa ng data tungkol sa mga contact na naka-imbak sa iyong tablet, kabilang ang dalas kung kailan ka tumawag, nag-email, o nakipag-ugnayan sa iba pang mga paraan sa mga tukoy na indibidwal. Pinapayagan ng pahintulot na ito ang apps na i-save ang data ng iyong contact, at maaaring magbahagi ang nakakahamak na apps ng data ng contact nang hindi mo nalalaman."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Nagbibigay-daan sa app na mabasa ang data tungkol sa iyong mga contact na nakaimbak sa iyong TV, kabilang ang dalas ng iyong pagtawag, pag-email o pakikipag-ugnayan sa iba pang mga paraan sa mga partikular na indibidwal. Nagbibigay-daan sa mga app ang pahintulot na ito na i-save ang iyong data sa pakikipag-ugnayan at maaaring magbahagi ang mga nakakahamak na app ng data sa pakikipag-ugnayan nang hindi mo nalalaman."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Pinapayagan ang app na magbasa ng data tungkol sa mga contact na naka-imbak sa iyong telepono, kabilang ang dalas kung kailan ka tumawag, nag-email, o nakipag-ugnayan sa iba pang mga paraan sa mga tukoy na indibidwal. Pinapayagan ng pahintulot na ito ang apps na i-save ang data ng iyong contact, at maaaring magbahagi ang nakakahamak na apps ng data ng contact nang hindi mo nalalaman."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"baguhin ang iyong mga contact"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Pinapayagan ang app na baguhin ang data tungkol sa iyong mga contact na naka-imbak sa iyong tablet, kabilang ang dalas kung kailan ka tumawag, nag-email, o nakipag-ugnayan sa iba pang mga paraan sa mga tukoy na contact. Pinapayagan ng pahintulot na ito ang apps na magtanggal ng data ng contact."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Nagbibigay-daan sa app na baguhin ang data tungkol sa iyong mga contact na naka-imbak sa iyong TV, kabilang ang dalas kung kailan ka tumawag, nag-email, o nakipag-ugnayan sa iba pang mga paraan sa mga partikular na contact. Nagbibigay-daan ang pahintulot na ito sa mga app na mag-delete ng data sa pakikipag-ugnayan."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Pinapayagan ang app na baguhin ang data tungkol sa iyong mga contact na naka-imbak sa iyong telepono, kabilang ang dalas kung kailan ka tumawag, nag-email, o nakipag-ugnayan sa iba pang mga paraan sa mga tukoy na contact. Pinapayagan ng pahintulot na ito ang apps na magtanggal ng data ng contact."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Nagbibigay-daan sa app na baguhin ang data tungkol sa iyong mga contact na naka-store sa tablet mo. Nagbibigay-daan ang pahintulot na ito sa mga app na mag-delete ng data ng contact."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Nagbibigay-daan sa app na baguhin ang data tungkol sa iyong mga contact na naka-store sa telepono mo. Nagbibigay-daan ang pahintulot na ito sa mga app na mag-delete ng data ng contact."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"basahin ang log ng tawag"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Mababasa ng app na ito ang iyong history ng tawag."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"isulat ang log ng tawag"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"i-access lang ang tinatantiyang lokasyon (batay sa network) sa foreground"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Makukuha ng app na ito ang iyong lokasyon batay sa mga source ng network gaya ng mga cell tower at Wi-Fi network ngunit magagawa lang ito kapag nasa foreground ang app. Ang mga serbisyo ng lokasyon na ito ay dapat naka-on at available sa iyong tablet para magamit ng app ang mga ito."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Makukuha ng app na ito ang iyong lokasyon batay sa mga source ng network gaya ng mga cell tower at Wi-Fi network, ngunit magagawa lang ito kapag nasa foreground ang app. Ang mga serbisyo ng lokasyon na ito ay dapat naka-on at available sa iyong TV para magamit ng app ang mga ito."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Makukuha lang ng app na ito ang iyong tinatantyang lokasyon kapag nasa foreground ito. Ang mga serbisyo ng lokasyon na ito ay dapat naka-on at available sa iyong sasakyan para magamit ng app ang mga ito."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Makukuha ng app na ito ang iyong lokasyon batay sa mga source ng network gaya ng mga cell tower at Wi-Fi network, ngunit magagawa lang ito kapag nasa foreground ang app. Ang mga serbisyo ng lokasyon na ito ay dapat naka-on at available sa iyong telepono para magamit ng app ang mga ito."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"i-access ang lokasyon sa background"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Kung papahintulutan ito bukod pa sa pag-access sa tinataya o tumpak na lokasyon, maaaring i-access ng app ang lokasyon habang tumatakbo sa background."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Mga tunog ng alarm"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Mga tunog ng notification"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Hindi Alam"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Hindi makakonekta sa <xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"I-tap para baguhin ang mga setting ng privacy at subukan ulit"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Baguhin ang setting ng privacy?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Baka gusto ng <xliff:g id="SSID_0">%1$s</xliff:g> na kumonekta gamit ang MAC address, na isang natatanging pagkakakilanlan, ng iyong device. Dahil dito, baka masubaybayan ng mga kalapit na device ang lokasyon ng iyong device. \n\nKung magpapatuloy ka, babaguhin ng <xliff:g id="SSID_1">%1$s</xliff:g> ang setting ng iyong privacy at susubukan nitong kumonekta ulit."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Baguhin ang setting"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Na-update ang setting. Subukang kumonekta ulit."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Hindi puwedeng baguhin ang setting ng privacy"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Hindi nakita ang network"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="one">Available ang mga Wi-Fi network</item>
       <item quantity="other">Available ang mga Wi-Fi network</item>

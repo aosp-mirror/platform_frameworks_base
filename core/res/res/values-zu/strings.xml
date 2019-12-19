@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Ivumela uhlelo lokusebenza ukuthi lithumele ukusakaza okunamathelayo, okuhlalayo ngemuva kokuphela kokusakaza. Ukusetshenziswa okungaphezulu kungenza i-TV ihambe kancane noma ingazinzi ngokuyenza ukuthi isebenzise imemori enkulu kakhulu."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Ivumela uhlelo lokusebenza ukuthumela ukusakaza okunamathelayo, okusalayo emva kokuba ukusakazwa sekuphelile. Ukusebenzisa kakhulu kuhle kwenze ifoni ukuthi ingasheshi noma ingahlali kahle ngokuyibangela ukusebenzisa imemori eningi."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"funda oxhumana nabo"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Ivumela uhlelo lokusebenza ukufunda idatha mayelana noxhumana nabo abalondolozwe kuthebhulethi yakho, kufaka phakathi nobuningi obushayele, wathumela i-imeyili, noma oxhumene nabo ngezinye izindlela nomuntu oyedwa. Le mvume ivumela izinhlelo zokusebenza ukulondoloza idatha yoxhumana nabo, izinhlelo zokusebenza ezingalungile zingaba idatha yokuxhumana ngaphandle kolwazi lakho."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Ivumela uhlelo lokusebenza ukuthi lifunde idatha mayelana noxhumana nabo abagcinwe ku-TV yakho, okufaka imvamisa oshaye ngayo, wathumela ama-imeyili, noma waxhumana ngezinye izindlela nabantu abathile. Le mvume ivumela izinhlelo zokusebenza ukuthi zilondoloze idatha yoxhumana nabo, futhi izinhlelo zokusebenza ezinobungozi zingabelana ngedatha yokuxhumana ngaphandle kolwazi lakho."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Ivumela uhlelo lokusebenza ukufunda idatha mayelana noxhumana nabo abalondolozwe efonini yakho, kufaka phakathi nobuningi obushayele, wathumela i-imeyili, noma oxhumene nabo ngezinye izindlela nomuntu oyedwa. Le mvume ivumela izinhlelo zokusebenza ukulondoloza idatha yoxhumana nabo, izinhlelo zokusebenza ezingalungile zingaba idatha yokuxhumana ngaphandle kolwazi lakho."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"shintsha oxhumana nabo"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Ivumela uhlelo lokusebenza ukushintsha idatha mayelana noxhumana nabo abalondolozwe kuthebhulethi yakho, kufaka phakathi ubuningi bokushayela, ukuthumela i-imeyili, noma oxhumene nabo ngezinye izindlela. Le mvume ivumela izinhlelo zokusebenza ukususa idatha yoxhumana nabo."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Ivumela uhlelo lokusebenza ukuguqula idatha emayelana noxhumana nabo abagcinwe ku-TV yakho, okufaka imvamisa oshaye ngayo, wathumela ama-imeyili, noma waxhumana ngezinye izindlela noxhumana nabo abathile. Le mvume ivumela izinhlelo zokusebenza ukususa idatha yoxhumana nabo."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Ivumela uhlelo lokusebenza ukushintsha idatha mayelana noxhumana nabo abalondolozwe efonini yakho, kufaka phakathi ubuningi bokushayela, ukuthumela i-imeyili, noma oxhumene nabo ngezinye izindlela. Le mvume ivumela izinhlelo zokusebenza ukususa idatha yoxhumana nabo."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Ivumela uhlelo lokusebenza ukushintsha idatha mayelana noxhumana nabo abalondolozwe kuthebhulethi yakho. Le mvume ivumela izinhlelo zokusebenza ukususa idatha yoxhumana nabo."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Ivumela uhlelo lokusebenza ukushintsha idatha mayelana noxhumana nabo abalondolozwe efonini yakho. Le mvume ivumela izinhlelo zokusebenza ukususa idatha yoxhumana nabo."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"funda irekhodi lamakholi"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Lolu hlelo lokusebenza lungafunda umlando wakho wekholi."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"bhala irekhodi lamakholi"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"finyelela indawo eseduze (esuselwa kunethiwekhi) kuphela ngaphambili"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Lolu hlelo lokusebenza lungathola indawo yakho kusukela kumithombo yenethiwekhi efana nezinqaba zeselula namanethiwekhi e-Wi-Fi, kodwa kuphela uma uhlelo lokusebenza lungaphambili. Lawa masevisi endawo kumele avulwe futhi atholakale kuthebulethi yakho ukuze uhlelo lokusebenza lukwazi ukuwasebenzisa."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Lolu hlelo lokusebenza lungathola indawo yakho kusukela kumithombo yenethiwekhi efana nezinqaba zeselula namanethiwekhi e-Wi-Fi, kodwa kuphela uma uhlelo lokusebenza lungaphambili. Lawa masevisi endawo kumele avulwe futhi atholakale ku-TV yakho ukuze uhlelo lokusebenza lukwazi ukuwasebenzisa."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Lolu hlelo lokusebenza lungakutholela indawo enembile kuphela uma ingaphambili. Lawa masevisi endawo kumele avulwe futhi atholakale kumoto ukuze uhlelo lokusebenza lukwazi ukuwasebenzisa."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Lolu hlelo lokusebenza lungathola indawo yakho kusukela kumithombo yenethiwekhi efana nezinqaba zeselula kanye namanethiwekhi e-Wi-Fi, kodwa kuphela uma uhlelo lokusebenza lungaphambili. Lawa masevisi endawo kumele avulwe futhi atholakale kufoni yakho ukuze uhlelo lokusebenza lukwazi ukuwasebenzisa."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"finyelela kundawo ngemuva"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Uma lokhu kunikezwa ngokungeziwe ekufinyeleleni okulinganiselwe noma okunembile kwendawo uhlelo lokusebenza lungafinyelela kundawo ngenkathi lusebenza ngemuva."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Imisindo ye-alamu"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Imisindo yezaziso"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Akwaziwa"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Ayikwazi ukuxhumeka ku-<xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Thepha ukuze ushintshe izilungiselelo zobumfihlo uphinde uzame futhi"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Shintsha isilungiselelo sobumfihlo?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"I-<xliff:g id="SSID_0">%1$s</xliff:g> ingafuna ukuxhumeka isebenzisa ikheli lakho ledivayisi ye-MAC, inkomba ehlukile. Lokhu kungavumela indawo yedivayisi yakho ukuthi ilandelelwe amadivayisi aseduze. \n\nUma uqhubeka, i-<xliff:g id="SSID_1">%1$s</xliff:g> izoshintsha isilungiselelo sakho sobumfihlo iphinde izame ukuxhumeka futhi."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Shintsha isilungiselelo"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Isilungiselelo sibuyekeziwe. Zama ukuxhuma futhi."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Ayikwazi ukushintsha isilungiselelo sobumfihlo"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Inethiwekhi ayitholiwe"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="one">Amanethiwekhi we-Wi-Fi ayatholakala</item>
       <item quantity="other">Amanethiwekhi we-Wi-Fi ayatholakala</item>

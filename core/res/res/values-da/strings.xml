@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Giver appen lov til at sende klæbende udsendelser, som ikke forsvinder, når udsendelsen er slut. Overdreven brug kan gøre fjernsynet langsomt eller ustabilt ved at få det til at bruge for meget hukommelse."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Tillader, at appen kan sende klæbende udsendelser, der forbliver tilbage, når udsendelsen er slut. Overdreven brug kan gøre din telefon langsom eller ustabil ved at tvinge den til at bruge for meget hukommelse."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"læse dine kontakter"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Tillader, at appen kan læse data om de kontakter, der er gemt på din tablet, f.eks. hvor ofte du har ringet til, sendt mail til eller på anden måde kommunikeret med bestemte personer. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Giver appen lov til at læse data om dine kontakter, der er gemt på dit tv, herunder hvor ofte du har ringet, mailet eller på andre måder kommunikeret med bestemte personer. Denne tilladelse gør det muligt for apps at gemme dine kontaktoplysninger, og ondsindede apps kan dele kontaktoplysninger uden din viden."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Tillader, at appen kan læse data om de kontakter, der er gemt på din telefon, f.eks. hvor ofte du har ringet til, sendt mail til eller på anden måde kommunikeret med bestemte personer. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"ændre dine kontakter"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din tablet, f.eks. hvor ofte du har ringet til dem, sendt dem en mail eller på anden måde kommunikeret med bestemte kontakter. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Giver appen lov til at ændre data om dine kontakter, der er gemt på dit tv, herunder hvor ofte du har ringet, mailet eller på anden måde kommunikeret med bestemte kontakter. Denne tilladelse gør det muligt for apps at slette kontaktoplysninger."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din telefon, f.eks. hvor ofte du har ringet til dem, sendt en mail til dem eller på anden måde kommunikeret med bestemte kontakter. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din tablet. Denne tilladelse giver apps mulighed for at slette kontaktdata."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din telefon. Denne tilladelse giver apps mulighed for at slette kontaktdata."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"læse opkaldsliste"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Denne app kan læse din opkaldshistorik."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"skriv opkaldsliste"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"få kun adgang til omtrentlig placering (netværksbaseret) i forgrunden"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Denne app kan fastslå din placering ved hjælp af netværkskilder som f.eks. mobilmaster og Wi-Fi-netværk, men kun når appen er i forgrunden. Disse placeringstjenester skal være aktiverede og tilgængelige på din tablet, før appen kan bruge dem."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Denne app kan fastslå din placering ved hjælp af netværkskilder som f.eks. mobilmaster og Wi-Fi-netværk, men kun når appen er i forgrunden. Disse placeringstjenester skal være aktiverede og tilgængelige på dit fjernsyn, før appen kan bruge dem."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Denne app kan kun finde din omtrentlige placering, når den er i forgrunden. Disse placeringstjenester skal være aktiverede og tilgængelige i din bil, før appen kan bruge dem."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Denne app kan fastslå din placering ved hjælp af netværkskilder som f.eks. mobilmaster og Wi-Fi-netværk, men kun når appen er i forgrunden. Disse placeringstjenester skal være aktiveret og tilgængelige på din telefon, før appen kan bruge dem."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"adgang til placering i baggrunden"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Hvis appen godkendes, og der gives adgang til den omtrentlige eller nøjagtige placering, kan appen registrere placeringen, mens den kører i baggrunden."</string>
@@ -907,7 +912,7 @@
     <string name="factorytest_no_action" msgid="339252838115675515">"Der blev ikke fundet nogen pakke, som leverer handlingen FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"Genstart"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"På siden på \"<xliff:g id="TITLE">%s</xliff:g>\" står der:"</string>
-    <string name="js_dialog_title_default" msgid="3769524569903332476">"Javascript"</string>
+    <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"Bekræft navigation"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"Forlad denne side"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"Bliv på denne side"</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Alarmlyde"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Notifikationslyde"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Ukendt"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Der kan ikke oprettes forbindelse til <xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Tryk for at ændre privatlivsindstillingerne, og prøv igen"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Vil du ændre privatlivsindstillingen?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> vil muligvis gerne oprette forbindelse via din enheds MAC-adresse, som er et unikt id. Dette kan give enheder i nærheden tilladelse til at spore din enheds placering. \n\nHvis du fortsætter, ændrer <xliff:g id="SSID_1">%1$s</xliff:g> din privatlivsindstilling, og den prøver at oprette forbindelse igen."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Skift indstilling"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Indstillingen er opdateret. Prøv at oprette forbindelse igen."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Privatlivsindstillingen kan ikke ændres"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Netværket blev ikke fundet"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="one">Tilgængelige Wi-Fi-netværk</item>
       <item quantity="other">Tilgængelige Wi-Fi-netværk</item>

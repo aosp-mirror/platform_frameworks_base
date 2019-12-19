@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Proqrama yayım bitdikdən sonra qalan yapışqanlı yayımlar göndərmək imkanı verir. Hədsiz istifadə TV-ni zəiflədə və onun daha çox yaddaşdan istifadə etməsinə səbəb olaraq qeyri-stabil edə bilər."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Tətbiqə yayım bitdikdən sonra da qalan çətin yayımlar göndərməyə imkan verir. Hədsiz istifadə çox yaddaş istifadəsinə səbəb olmaqla telefonu yavaş və qeyri-stabil edə bilər."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"kontakrlatınızı oxumaq"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Tətbiqə planşetinizdə yerləşən kontaktları oxumaq icazəsi verir, tez-tez zəng elədiyiniz, emailləşdiyiniz və ya əlaqə saxladığınız xüsusi individuallar daxil olmaqla. Bu icazə tətbiqlərə kontakt məlumatlarınızı saxlamağa və zərərli tətbiqlərə kontakt məlumatlarını sizin bilginiz olmada paylaşma imkanı yaradır."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Proqrama TV-nizdə saxlanan əlaqələr haqqında məlumatları, o cümlədən zəng etdiyiniz, e-poçt məktubu göndərdiyiniz və ya konkret şəxslərlə başqa şəkildə ünsiyyət qurduğunuz tezliyi oxumaq imkanı verir. Bu icazə proqramlara əlaqə məlumatlarınızı saxlamaq imkanı verir və zərərli proqramlar sizin xəbəriniz olmadan əlaqə məlumatlarınızı paylaşa bilər."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Tətbiqə tez-tez zəng elədiyiniz, e-məktub göndərdiyiniz və ya əlaqə saxladığınız xüsusi individuallar daxil olmaqla telefonunuzda yerləşən kontaktları oxumaq icazəsi verir. Bu icazə tətbiqlərə kontakt məlumatlarınızı saxlamağa və zərərli tətbiqlərə kontakt məlumatlarını sizin xəbəriniz olmada paylaşma imkanı yaradır."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"kontaktlarınızı dəyişdirir"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Tətbiqə planşetinizdəki zəng etmək tezliyiniz, elektron poçtlarınız, ünsiyyətləriniz haqqında məlumatları dəyişməyə imkan verir. Bu icazə kontakt məlumatlarının silinməsinə də imkan verir."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Proqrama TV-nizdə saxlanan əlaqələr haqqında məlumatları, o cümlədən zəng etdiyiniz, e-poçt məktubu göndərdiyiniz və ya konkret şəxslərlə başqa şəkildə ünsiyyət qurduğunuz tezliyi dəyişdirmək imkanı verir. Bu icazə proqramlara əlaqə məlumatlarınızı silmək imkanı verir."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Tətbiqə Sizin zəng etmək tezliyiniz, elektron poçtlarınız, ünsiyyətləriniz haqqında məlumatları dəyişməyə imkan verir. Buna kontaktların silinməsi imkanı də daxildir."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Tətbiqə planşetinizdə saxlanan kontaktlar haqqında datanı dəyişdirmək icazəsi verir. Bu icazə tətbiqlərə kontakt datasını silmək imkanı verir."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Tətbiqə telefonunuzda saxlanan kontaktlar haqqında datanı dəyişdirmək icazəsi verir. Bu icazə tətbiqlərə kontakt datasını silmək imkanı verir."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"zəng qeydiyyatını oxu"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Bu tətbiq zəng tarixçənizi oxuya bilər."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"zəng loqu yazır"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"yalnız ön planda təxmini məkana (şəbəkəyə əsaslanan) giriş"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Bu tətbiq baza stansiyaları və Wi-Fi şəbəkələri kimi şəbəkə mənbələrinə əsaslanaraq məkanınızı əldə edə bilər. Bu, yalnız tətbiq ön planda olduqda mümkündür. Tətbiqin istifadə edə bilməsi üçün bu məkan xidmətləri aktiv edilməli və planşetdə əlçatan olmalıdır."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Bu tətbiq baza stansiyaları və Wi-Fi kimi şəbəkə mənbələrinə əsaslanaraq məkanınızı əldə edə bilər. Bu, yalnız tətbiq ön planda olduqda mümkündür. Tətbiqin istifadə edə bilməsi üçün bu məkan xidmətləri aktiv edilməli və TV-də əlçatan olmalıdır."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Bu tətbiq yalnız ön fonda olduqda təqribi məkanınızı əldə edə bilər. Tətbiqin istifadə edə bilməsi üçün bu məkan xidmətləri aktiv edilməli və avtomobildə əlçatan olmalıdır."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Bu tətbiq baza stansiyaları və Wi-Fi kimi şəbəkə mənbələrinə əsaslanaraq məkanınızı əldə edə bilər. Bu, yalnız tətbiq ön planda olduqda mümkündür. Tətbiqin istifadə edə bilməsi üçün bu məkan xidmətləri aktiv edilməli və telefonda əlçatan olmalıdır."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"arxa fonda məkan girişi"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Bu, təqribi və ya dəqiq məkan girişinə əlavə olaraq verilərsə, tətbiq arxa fonda işləyərkən məkana daxil ola bilər."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Zəngli saat səsləri"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Bildiriş səsləri"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Naməlum"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> şəbəkəsinə qoşulmaq mümkün deyil"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Toxunaraq məxfilik ayarını dəyişin və yenidən cəhd edin"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Məxfilik ayarı dəyişdirilsin?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> unikal identifikator olan cihazınızın MAC ünvanını istifadə edərək qoşulmaq istəyə bilər. Bu, yaxın cihazların sizin cihazınızın məkanını izləməsinə imkan verə bilər. \n\nDavam etsəniz, <xliff:g id="SSID_1">%1$s</xliff:g> məxfilik ayarınızı dəyişəcək və yenidən qoşulmağa cəhd edəcək."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Ayarı dəyişin"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Ayar güncəlləndi. Yenidən qoşulmağa çalışın."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Məxfilik ayarını dəyişmək mümkün deyil"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Şəbəkə tapılmadı"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">Əlçatan Wi-Fi şəbəkələri</item>
       <item quantity="one">Əlçatan Wi-Fi şəbəkəsi</item>

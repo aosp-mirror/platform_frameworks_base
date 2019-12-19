@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Laat die program toe om taai uitsendings te stuur wat bly nadat die uitsending verby is. Buitensporige gebruik sal die TV dalk stadig of onbestendig maak deur te veroorsaak dat dit te veel berging gebruik."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Laat die program toe om taai uitsendings te stuur, wat agterbly nadat die uitsending klaar is. Oormatige gebruik kan die foon stadig of onstabiel maak deurdat dit te veel geheue gebruik."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"lees jou kontakte"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Laat die program toe om inligting oor jou kontakte wat op jou tablet gestoor is, te lees, insluitend die gereeldheid van oproepe wat jy gemaak het, e-posse wat jy gestuur het, of ander maniere waarop jy met spesifieke individue gekommunikeer het. Hierdie toestemming laat programme toe om jou kontakdata te stoor, en kwaadwillige programme kan moontlik kontakdata sonder jou kennis deel."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Laat die program toe om data te lees oor jou kontakte wat in jou TV geberg is, insluitend hoe gereeld jy spesifieke individue gebel, ge-e-pos of op ander maniere met hulle gekommunikeer het. Hierdie toestemming laat programme toe om jou kontakdata te stoor, en kwaadwillige programme kan kontakdata deel sonder dat jy dit weet."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Laat die program toe om inligting oor jou kontakte wat op jou foon gestoor is, te lees, insluitend die gereeldheid van oproepe wat jy gemaak het, e-posse wat jy gestuur het, of ander maniere waarop jy met spesifieke individue gekommunikeer het. Hierdie toestemming laat programme toe om jou kontakdata te stoor, en kwaadwillige programme kan moontlik kontakdata sonder jou kennis deel."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"verander jou kontakte"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Laat die program toe om data oor jou kontakte wat op jou tablet gestoor is te verander, insluitend die gereeldheid van oproepe wat jy gemaak het, e-posse wat jy gestuur het, of ander maniere waarop jy met spesifieke individue gekommunikeer het. Hierdie toestemming laat programme toe om kontakdata uit te vee."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Laat die program toe om die data oor jou kontakte wat op jou TV gestoor is te verander, insluitend hoe gereeld jy spesifieke kontakte gebel, ge-e-pos of op ander maniere met hulle gekommunikeer het. Hierdie toestemming laat programme toe om kontakdata uit te vee."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Laat die program toe om data oor jou kontakte wat op jou foon gestoor is te verander, insluitend die gereeldheid waarop jy oproepe gemaak het, gee-pos het, of op ander maniere met spesifieke kontakte gekommunikeer het. Hierdie toestemming laat programme toe om kontakdata te skrap."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Laat die program toe om die data te wysig oor jou kontakte wat op jou tablet geberg is. Hierdie toestemming laat programme toe om kontakdata uit te vee."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Laat die program toe om die data te wysig oor jou kontakte wat op jou foon geberg is. Hierdie toestemming laat programme toe om kontakdata uit te vee."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"lees oproeprekord"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Hierdie program kan jou oproepgeskiedenis lees."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"skryf oproeprekord"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"kry benaderde ligging (netwerkgegrond) net op die voorgrond"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Hierdie program kan jou ligging kry op grond van netwerkhulpbronne soos selfoontorings en Wi-Fi-netwerke, maar net wanneer die program op die voorgrond is. Die program kan hierdie liggingdienste net gebruik as hulle aangeskakel is en op jou tablet beskikbaar is."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Hierdie program kan jou ligging kry op grond van netwerkhulpbronne soos selfoontorings en Wi-Fi-netwerke, maar net wanneer die program op die voorgrond is. Die program kan hierdie liggingdienste net gebruik as hulle aangeskakel is en op jou TV beskikbaar is."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Hierdie program kan jou benaderde ligging net kry wanneer dit op die voorgrond is. Hierdie liggingdienste moet aangeskakel wees en in jou motor beskikbaar wees sodat die program hulle kan gebruik."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Hierdie program kan jou ligging kry op grond van netwerkhulpbronne soos selfoontorings en Wi-Fi-netwerke, maar net wanneer die program op die voorgrond is. Die program kan hierdie liggingdienste net gebruik as hulle aangeskakel is en op jou foon beskikbaar is."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"kry ligging op die agtergrond"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"As dit bo en behalwe toegang tot die benaderde of presiese ligging verleen word, kan die program die ligging kry terwyl dit op die agtergrond werk."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Wekkerklanke"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Kennisgewingsklanke"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Onbekend"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Kan nie aan <xliff:g id="SSID">%1$s</xliff:g> koppel nie"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Tik om privaatheidinstellings te verander en herprobeer"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Verander privaatheidinstelling?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> salk dalk wil koppel met jou toestel se MAC-adres, \'n unieke identifiseerder. Dit kan dit vir toestelle in die omtrek moontlik maak om jou toestel se ligging na te spoor. \n\nAs jy voortgaan, sal <xliff:g id="SSID_1">%1$s</xliff:g> jou privaatheidinstelling verander en weer probeer koppel."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Verander instelling"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Instelling is opgedateer. Probeer weer koppel."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Kan nie privaatheidinstelling verander nie"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Kon nie netwerk kry nie"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">Wi-Fi netwerke beskikbaar</item>
       <item quantity="one">Wi-Fi-netwerk beskikbaar</item>
