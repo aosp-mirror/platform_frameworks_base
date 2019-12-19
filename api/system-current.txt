@@ -365,6 +365,7 @@ package android.app {
     field public static final String OPSTR_GPS = "android:gps";
     field public static final String OPSTR_INSTANT_APP_START_FOREGROUND = "android:instant_app_start_foreground";
     field public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
+    field public static final String OPSTR_MANAGE_EXTERNAL_STORAGE = "android:manage_external_storage";
     field public static final String OPSTR_MANAGE_IPSEC_TUNNELS = "android:manage_ipsec_tunnels";
     field public static final String OPSTR_MUTE_MICROPHONE = "android:mute_microphone";
     field public static final String OPSTR_NEIGHBORING_CELLS = "android:neighboring_cells";
