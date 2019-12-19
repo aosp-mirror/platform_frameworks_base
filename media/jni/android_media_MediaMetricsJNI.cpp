@@ -18,6 +18,7 @@
 
 #include <binder/Parcel.h>
 #include <jni.h>
+#include <media/IMediaMetricsService.h>
 #include <media/MediaMetricsItem.h>
 #include <nativehelper/JNIHelp.h>
 #include <variant>
@@ -150,14 +151,12 @@ static jint android_media_MediaMetrics_submit_bytebuffer(
         return (jint)BAD_VALUE;
     }
 
-    // TODO: directly record item to MediaMetrics service.
-    mediametrics::Item item;
-    if (item.readFromByteString((char *)buffer, length) != NO_ERROR) {
-        ALOGW("%s: cannot read from byte string", __func__);
-        return (jint)BAD_VALUE;
+    sp<IMediaMetricsService> service = mediametrics::BaseItem::getService();
+    if (service == nullptr) {
+        ALOGW("Cannot retrieve mediametrics service");
+        return (jint)NO_INIT;
     }
-    item.selfrecord();
-    return (jint)NO_ERROR;
+    return (jint)service->submitBuffer((char *)buffer, length);
 }
 
 // Helper function to convert a native PersistableBundle to a Java
