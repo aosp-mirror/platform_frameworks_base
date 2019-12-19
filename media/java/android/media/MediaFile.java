@@ -20,7 +20,7 @@ import static android.content.ContentResolver.MIME_TYPE_DEFAULT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.mtp.MtpConstants;
 
 import libcore.content.type.MimeMap;

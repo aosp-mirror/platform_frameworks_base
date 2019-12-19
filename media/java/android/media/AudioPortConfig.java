@@ -16,7 +16,7 @@
 
 package android.media;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * An AudioPortConfig contains a possible configuration of an audio port chosen

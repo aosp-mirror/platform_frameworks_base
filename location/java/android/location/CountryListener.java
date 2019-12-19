@@ -16,7 +16,7 @@
 
 package android.location;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * The listener for receiving the notification when the country is detected or

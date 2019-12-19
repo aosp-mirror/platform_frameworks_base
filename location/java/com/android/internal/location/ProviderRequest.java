@@ -16,7 +16,7 @@
 
 package com.android.internal.location;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.location.LocationRequest;
 import android.os.Parcel;
 import android.os.Parcelable;
