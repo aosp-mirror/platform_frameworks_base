@@ -485,6 +485,86 @@ public class Annotation {
             PreciseCallState.PRECISE_CALL_STATE_DISCONNECTING})
     public @interface PreciseCallStates {}
 
+    @IntDef(value = {
+            DisconnectCause.NOT_VALID,
+            DisconnectCause.NOT_DISCONNECTED,
+            DisconnectCause.INCOMING_MISSED,
+            DisconnectCause.NORMAL,
+            DisconnectCause.LOCAL,
+            DisconnectCause.BUSY,
+            DisconnectCause.CONGESTION,
+            DisconnectCause.MMI,
+            DisconnectCause.INVALID_NUMBER,
+            DisconnectCause.NUMBER_UNREACHABLE,
+            DisconnectCause.SERVER_UNREACHABLE,
+            DisconnectCause.INVALID_CREDENTIALS,
+            DisconnectCause.OUT_OF_NETWORK,
+            DisconnectCause.SERVER_ERROR,
+            DisconnectCause.TIMED_OUT,
+            DisconnectCause.LOST_SIGNAL,
+            DisconnectCause.LIMIT_EXCEEDED,
+            DisconnectCause.INCOMING_REJECTED,
+            DisconnectCause.POWER_OFF,
+            DisconnectCause.OUT_OF_SERVICE,
+            DisconnectCause.ICC_ERROR,
+            DisconnectCause.CALL_BARRED,
+            DisconnectCause.FDN_BLOCKED,
+            DisconnectCause.CS_RESTRICTED,
+            DisconnectCause.CS_RESTRICTED_NORMAL,
+            DisconnectCause.CS_RESTRICTED_EMERGENCY,
+            DisconnectCause.UNOBTAINABLE_NUMBER,
+            DisconnectCause.CDMA_LOCKED_UNTIL_POWER_CYCLE,
+            DisconnectCause.CDMA_DROP,
+            DisconnectCause.CDMA_INTERCEPT,
+            DisconnectCause.CDMA_REORDER,
+            DisconnectCause.CDMA_SO_REJECT,
+            DisconnectCause.CDMA_RETRY_ORDER,
+            DisconnectCause.CDMA_ACCESS_FAILURE,
+            DisconnectCause.CDMA_PREEMPTED,
+            DisconnectCause.CDMA_NOT_EMERGENCY,
+            DisconnectCause.CDMA_ACCESS_BLOCKED,
+            DisconnectCause.ERROR_UNSPECIFIED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DisconnectCauses {
+    }
+
+    @IntDef(value = {
+            PreciseDisconnectCause.NOT_VALID,
+            PreciseDisconnectCause.NO_DISCONNECT_CAUSE_AVAILABLE,
+            PreciseDisconnectCause.UNOBTAINABLE_NUMBER,
+            PreciseDisconnectCause.NORMAL,
+            PreciseDisconnectCause.BUSY,
+            PreciseDisconnectCause.NUMBER_CHANGED,
+            PreciseDisconnectCause.STATUS_ENQUIRY,
+            PreciseDisconnectCause.NORMAL_UNSPECIFIED,
+            PreciseDisconnectCause.NO_CIRCUIT_AVAIL,
+            PreciseDisconnectCause.TEMPORARY_FAILURE,
+            PreciseDisconnectCause.SWITCHING_CONGESTION,
+            PreciseDisconnectCause.CHANNEL_NOT_AVAIL,
+            PreciseDisconnectCause.QOS_NOT_AVAIL,
+            PreciseDisconnectCause.BEARER_NOT_AVAIL,
+            PreciseDisconnectCause.ACM_LIMIT_EXCEEDED,
+            PreciseDisconnectCause.CALL_BARRED,
+            PreciseDisconnectCause.FDN_BLOCKED,
+            PreciseDisconnectCause.IMSI_UNKNOWN_IN_VLR,
+            PreciseDisconnectCause.IMEI_NOT_ACCEPTED,
+            PreciseDisconnectCause.CDMA_LOCKED_UNTIL_POWER_CYCLE,
+            PreciseDisconnectCause.CDMA_DROP,
+            PreciseDisconnectCause.CDMA_INTERCEPT,
+            PreciseDisconnectCause.CDMA_REORDER,
+            PreciseDisconnectCause.CDMA_SO_REJECT,
+            PreciseDisconnectCause.CDMA_RETRY_ORDER,
+            PreciseDisconnectCause.CDMA_ACCESS_FAILURE,
+            PreciseDisconnectCause.CDMA_PREEMPTED,
+            PreciseDisconnectCause.CDMA_NOT_EMERGENCY,
+            PreciseDisconnectCause.CDMA_ACCESS_BLOCKED,
+            PreciseDisconnectCause.ERROR_UNSPECIFIED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PreciseDisconnectCauses {
+    }
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"RIL_RADIO_TECHNOLOGY_" }, value = {
             ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN,
