@@ -26,9 +26,9 @@ import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -2863,7 +2863,7 @@ public final class InputMethodManager {
     }
 
     /**
-     * This is kept due to {@link android.annotation.UnsupportedAppUsage}.
+     * This is kept due to {@link android.compat.annotation.UnsupportedAppUsage}.
      *
      * <p>TODO(Bug 113914148): Check if we can remove this.  We have accidentally exposed
      * WindowManagerInternal#getInputMethodWindowVisibleHeight to app developers and some of them
