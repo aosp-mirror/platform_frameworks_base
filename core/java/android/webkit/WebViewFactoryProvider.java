@@ -175,6 +175,15 @@ public interface WebViewFactoryProvider {
     WebViewDatabase getWebViewDatabase(Context context);
 
     /**
+     * Gets the singleton PacProcessor instance.
+     * @return the PacProcessor instance
+     */
+    @NonNull
+    default PacProcessor getPacProcessor() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    /**
      * Gets the classloader used to load internal WebView implementation classes. This interface
      * should only be used by the WebView Support Library.
      */
