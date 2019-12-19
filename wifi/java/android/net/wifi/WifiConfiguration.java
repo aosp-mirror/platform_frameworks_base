@@ -36,14 +36,9 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.BackupUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
@@ -2768,54 +2763,4 @@ public class WifiConfiguration implements Parcelable {
                 return new WifiConfiguration[size];
             }
         };
-
-    /**
-     * Serialize the Soft AP configuration contained in this object for backup.
-     * @hide
-     */
-    @NonNull
-    // TODO(b/144368124): this method should be removed once we migrate to SoftApConfiguration
-    public byte[] getBytesForBackup() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream out = new DataOutputStream(baos);
-
-        out.writeInt(BACKUP_VERSION);
-        BackupUtils.writeString(out, SSID);
-        out.writeInt(apBand);
-        out.writeInt(apChannel);
-        BackupUtils.writeString(out, preSharedKey);
-        out.writeInt(getAuthType());
-        out.writeBoolean(hiddenSSID);
-        return baos.toByteArray();
-    }
-
-    /**
-     * Deserialize a byte array containing Soft AP configuration into a WifiConfiguration object.
-     * @return The deserialized WifiConfiguration containing Soft AP configuration, or null if
-     * the version contains a bad dataset e.g. Version 1
-     * @throws BackupUtils.BadVersionException if the version is unrecognized
-     * @hide
-     */
-    @Nullable
-    // TODO(b/144368124): this method should be removed once we migrate to SoftApConfiguration
-    public static WifiConfiguration getWifiConfigFromBackup(@NonNull DataInputStream in)
-            throws IOException, BackupUtils.BadVersionException {
-        WifiConfiguration config = new WifiConfiguration();
-        int version = in.readInt();
-        if (version < 1 || version > BACKUP_VERSION) {
-            throw new BackupUtils.BadVersionException("Unknown Backup Serialization Version");
-        }
-
-        if (version == 1) return null; // Version 1 is a bad dataset.
-
-        config.SSID = BackupUtils.readString(in);
-        config.apBand = in.readInt();
-        config.apChannel = in.readInt();
-        config.preSharedKey = BackupUtils.readString(in);
-        config.allowedKeyManagement.set(in.readInt());
-        if (version >= 3) {
-            config.hiddenSSID = in.readBoolean();
-        }
-        return config;
-    }
 }
