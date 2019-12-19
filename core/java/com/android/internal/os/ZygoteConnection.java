@@ -258,7 +258,7 @@ class ZygoteConnection {
                 parsedArgs.mRuntimeFlags, rlimits, parsedArgs.mMountExternal, parsedArgs.mSeInfo,
                 parsedArgs.mNiceName, fdsToClose, fdsToIgnore, parsedArgs.mStartChildZygote,
                 parsedArgs.mInstructionSet, parsedArgs.mAppDataDir, parsedArgs.mTargetSdkVersion,
-                parsedArgs.mIsTopApp);
+                parsedArgs.mIsTopApp, parsedArgs.mPkgDataInfoList);
 
         try {
             if (pid == 0) {

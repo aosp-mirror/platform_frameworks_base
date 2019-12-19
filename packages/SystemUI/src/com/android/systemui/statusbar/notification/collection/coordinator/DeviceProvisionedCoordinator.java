@@ -55,7 +55,7 @@ public class DeviceProvisionedCoordinator implements Coordinator {
     public void attach(NotifCollection notifCollection, NotifListBuilder notifListBuilder) {
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
 
-        notifListBuilder.addFilter(mNotifFilter);
+        notifListBuilder.addPreGroupFilter(mNotifFilter);
     }
 
     private final NotifFilter mNotifFilter = new NotifFilter(TAG) {

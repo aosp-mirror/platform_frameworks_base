@@ -39,9 +39,9 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleData.TimeSource;
-import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import com.google.common.collect.ImmutableList;
@@ -85,6 +85,8 @@ public class BubbleDataTest extends SysuiTestCase {
     private Bubble mBubbleB2;
     private Bubble mBubbleB3;
     private Bubble mBubbleC1;
+    private Bubble mBubbleInterruptive;
+    private Bubble mBubbleDismissed;
 
     private BubbleData mBubbleData;
 
@@ -119,18 +121,20 @@ public class BubbleDataTest extends SysuiTestCase {
         modifyRanking(mEntryInterruptive)
                 .setVisuallyInterruptive(true)
                 .build();
+        mBubbleInterruptive = new Bubble(mEntryInterruptive);
 
         ExpandableNotificationRow row = mNotificationTestHelper.createBubble();
         mEntryDismissed = createBubbleEntry(1, "dismissed", "package.d");
         mEntryDismissed.setRow(row);
+        mBubbleDismissed = new Bubble(mEntryDismissed);
 
-        mBubbleA1 = new Bubble(mContext, mEntryA1);
-        mBubbleA2 = new Bubble(mContext, mEntryA2);
-        mBubbleA3 = new Bubble(mContext, mEntryA3);
-        mBubbleB1 = new Bubble(mContext, mEntryB1);
-        mBubbleB2 = new Bubble(mContext, mEntryB2);
-        mBubbleB3 = new Bubble(mContext, mEntryB3);
-        mBubbleC1 = new Bubble(mContext, mEntryC1);
+        mBubbleA1 = new Bubble(mEntryA1);
+        mBubbleA2 = new Bubble(mEntryA2);
+        mBubbleA3 = new Bubble(mEntryA3);
+        mBubbleB1 = new Bubble(mEntryB1);
+        mBubbleB2 = new Bubble(mEntryB2);
+        mBubbleB3 = new Bubble(mEntryB3);
+        mBubbleC1 = new Bubble(mEntryC1);
 
         mBubbleData = new BubbleData(getContext());
 
@@ -180,7 +184,7 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryUpdated(mEntryC1, /* suppressFlyout */ true, /* showInShade */
+        mBubbleData.notificationEntryUpdated(mBubbleC1, /* suppressFlyout */ true, /* showInShade */
                 true);
 
         // Verify
@@ -195,7 +199,7 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryUpdated(mEntryInterruptive,
+        mBubbleData.notificationEntryUpdated(mBubbleInterruptive,
                 false /* suppressFlyout */, true  /* showInShade */);
 
         // Verify
@@ -210,11 +214,11 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryUpdated(mEntryC1, false /* suppressFlyout */,
+        mBubbleData.notificationEntryUpdated(mBubbleC1, false /* suppressFlyout */,
                 true /* showInShade */);
         verifyUpdateReceived();
 
-        mBubbleData.notificationEntryUpdated(mEntryC1, false /* suppressFlyout */,
+        mBubbleData.notificationEntryUpdated(mBubbleC1, false /* suppressFlyout */,
                 true /* showInShade */);
         verifyUpdateReceived();
 
@@ -229,16 +233,16 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryUpdated(mEntryDismissed, false /* suppressFlyout */,
-                false /* showInShade */);
+        mBubbleData.notificationEntryUpdated(mBubbleDismissed, false /* suppressFlyout */,
+                true /* showInShade */);
         verifyUpdateReceived();
 
         // Make it look like user swiped away row
         mEntryDismissed.getRow().dismiss(false /* refocusOnDismiss */);
-        assertThat(mBubbleData.getBubbleWithKey(mEntryDismissed.getKey()).showInShade()).isFalse();
+        assertThat(mBubbleData.getBubbleWithKey(mBubbleDismissed.getKey()).showInShade()).isFalse();
 
-        mBubbleData.notificationEntryUpdated(mEntryDismissed, false /* suppressFlyout */,
-                false /* showInShade */);
+        mBubbleData.notificationEntryUpdated(mBubbleDismissed, false /* suppressFlyout */,
+                true /* showInShade */);
         verifyUpdateReceived();
 
         // Verify
@@ -974,7 +978,10 @@ public class BubbleDataTest extends SysuiTestCase {
 
     private void sendUpdatedEntryAtTime(NotificationEntry entry, long postTime) {
         setPostTime(entry, postTime);
-        mBubbleData.notificationEntryUpdated(entry, false /* suppressFlyout*/,
+        // BubbleController calls this:
+        Bubble b = mBubbleData.getOrCreateBubble(entry);
+        // And then this
+        mBubbleData.notificationEntryUpdated(b, false /* suppressFlyout*/,
                 true /* showInShade */);
     }
 

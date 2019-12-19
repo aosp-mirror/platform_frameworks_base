@@ -38,6 +38,11 @@ import android.annotation.NonNull;
  *       public void cleanup() {
  *          guard.close();
  *          ...;
+ *          if (Build.VERSION.SDK_INT >= 28) {
+ *              Reference.reachabilityFence(this);
+ *          }
+ *          // For full correctness in the absence of a close() call, other methods may also need
+ *          // reachabilityFence() calls.
  *       }
  *
  *       protected void finalize() throws Throwable {
@@ -75,7 +80,9 @@ import android.annotation.NonNull;
  *       public void cleanup() {
  *          guard.close();
  *          ...;
- *          Reference.reachabilityFence(this);
+ *          if (Build.VERSION.SDK_INT >= 28) {
+ *              Reference.reachabilityFence(this);
+ *          }
  *          // For full correctness in the absence of a close() call, other methods may also need
  *          // reachabilityFence() calls.
  *       }

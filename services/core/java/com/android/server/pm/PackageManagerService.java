@@ -17962,14 +17962,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             mPermissionManager.resetRuntimePermissions(pkg, nextUserId);
-            // Also delete contributed media, when requested
-            if ((flags & PackageManager.DELETE_CONTRIBUTED_MEDIA) != 0) {
-                try {
-                    MediaStore.deleteContributedMedia(mContext, ps.name, UserHandle.of(nextUserId));
-                } catch (IOException e) {
-                    Slog.w(TAG, "Failed to delete contributed media for " + ps.name, e);
-                }
-            }
         }
 
         if (outInfo != null) {
@@ -22631,6 +22623,18 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageManagerService.this
                     .getPackageInfoInternal(packageName, PackageManager.VERSION_CODE_HIGHEST,
                             flags, filterCallingUid, userId);
+        }
+
+        @Override
+        public long getCeDataInode(String packageName, int userId) {
+            synchronized (mLock) {
+                final PackageSetting ps = mSettings.mPackages.get(packageName);
+                if (ps != null) {
+                    return ps.getCeDataInode(userId);
+                }
+                Slog.e(TAG, "failed to find package " + packageName);
+                return 0;
+            }
         }
 
         @Override

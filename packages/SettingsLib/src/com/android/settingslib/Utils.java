@@ -1,7 +1,5 @@
 package com.android.settingslib;
 
-import static android.telephony.ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN;
-
 import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +23,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.print.PrintManager;
 import android.provider.Settings;
+import android.telephony.AccessNetworkConstants;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -412,15 +412,30 @@ public class Utils {
         // service" or "emergency calls only" text that indicates that voice
         // is not available. Note that we ignore the IWLAN service state
         // because that state indicates the use of VoWIFI and not cell service
-        int state = serviceState.getState();
-        int dataState = serviceState.getDataRegState();
+        final int state = serviceState.getState();
+        final int dataState = serviceState.getDataRegState();
+
         if (state == ServiceState.STATE_OUT_OF_SERVICE
                 || state == ServiceState.STATE_EMERGENCY_ONLY) {
-            if (dataState == ServiceState.STATE_IN_SERVICE
-                    && serviceState.getDataNetworkType() != RIL_RADIO_TECHNOLOGY_IWLAN) {
+            if (dataState == ServiceState.STATE_IN_SERVICE && isNotInIwlan(serviceState)) {
                 return ServiceState.STATE_IN_SERVICE;
             }
         }
         return state;
+    }
+
+    private static boolean isNotInIwlan(ServiceState serviceState) {
+        final NetworkRegistrationInfo networkRegWlan = serviceState.getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
+        if (networkRegWlan == null) {
+            return true;
+        }
+
+        final boolean isInIwlan = (networkRegWlan.getRegistrationState()
+                == NetworkRegistrationInfo.REGISTRATION_STATE_HOME)
+                || (networkRegWlan.getRegistrationState()
+                == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING);
+        return !isInIwlan;
     }
 }

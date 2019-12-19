@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.os.incremental;
+package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,12 +29,12 @@ import java.util.stream.Collectors;
  * Hide for now.
  * @hide
  */
-public class IncrementalDataLoaderParams {
-    @NonNull private final IncrementalDataLoaderParamsParcel mData;
+public class DataLoaderParams {
+    @NonNull private final DataLoaderParamsParcel mData;
 
-    public IncrementalDataLoaderParams(@NonNull String url, @NonNull String packageName,
+    public DataLoaderParams(@NonNull String url, @NonNull String packageName,
             @Nullable Map<String, ParcelFileDescriptor> namedFds) {
-        IncrementalDataLoaderParamsParcel data = new IncrementalDataLoaderParamsParcel();
+        DataLoaderParamsParcel data = new DataLoaderParamsParcel();
         data.staticArgs = url;
         data.packageName = packageName;
         if (namedFds == null || namedFds.isEmpty()) {
@@ -52,7 +52,7 @@ public class IncrementalDataLoaderParams {
         mData = data;
     }
 
-    public IncrementalDataLoaderParams(@NonNull IncrementalDataLoaderParamsParcel data) {
+    public DataLoaderParams(@NonNull DataLoaderParamsParcel data) {
         mData = data;
     }
 
@@ -70,7 +70,7 @@ public class IncrementalDataLoaderParams {
         return mData.packageName;
     }
 
-    public final @NonNull IncrementalDataLoaderParamsParcel getData() {
+    public final @NonNull DataLoaderParamsParcel getData() {
         return mData;
     }
 

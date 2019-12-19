@@ -20,9 +20,11 @@
 #include <jni.h>
 #include <media/MediaMetricsItem.h>
 #include <nativehelper/JNIHelp.h>
+#include <variant>
 
 #include "android_media_MediaMetricsJNI.h"
 #include "android_os_Parcel.h"
+#include "android_runtime/AndroidRuntime.h"
 
 // This source file is compiled and linked into:
 // core/jni/ (libandroid_runtime.so)
@@ -73,6 +75,23 @@ struct BundleHelper {
     }
 
     template<>
+    void put(jstring keyName, const std::string& value) {
+        env->CallVoidMethod(bundle, putStringID, keyName, env->NewStringUTF(value.c_str()));
+    }
+
+    template<>
+    void put(jstring keyName, const std::pair<int64_t, int64_t>& value) {
+        ; // rate is currently ignored
+    }
+
+    template<>
+    void put(jstring keyName, const std::monostate& value) {
+        ; // none is currently ignored
+    }
+
+    // string char * helpers
+
+    template<>
     void put(jstring keyName, const char * const& value) {
         env->CallVoidMethod(bundle, putStringID, keyName, env->NewStringUTF(value));
     }
@@ -80,11 +99,6 @@ struct BundleHelper {
     template<>
     void put(jstring keyName, char * const& value) {
         env->CallVoidMethod(bundle, putStringID, keyName, env->NewStringUTF(value));
-    }
-
-    template<>
-    void put(jstring keyName, const std::pair<int64_t, int64_t>& value) {
-        ; // rate is currently ignored
     }
 
     // We allow both jstring and non-jstring variants.
@@ -122,6 +136,28 @@ jobject MediaMetricsJNI::writeMetricsToBundle(
         prop.visit([&] (auto &value) { bh.put(name, value); });
     }
     return bh.bundle;
+}
+
+// Implementation of MediaMetrics.native_submit_bytebuffer(),
+// Delivers the byte buffer to the mediametrics service.
+static jint android_media_MediaMetrics_submit_bytebuffer(
+        JNIEnv* env, jobject thiz, jobject byteBuffer, jint length)
+{
+    const jbyte* buffer =
+            reinterpret_cast<const jbyte*>(env->GetDirectBufferAddress(byteBuffer));
+    if (buffer == nullptr) {
+        ALOGE("Error retrieving source of audio data to play, can't play");
+        return (jint)BAD_VALUE;
+    }
+
+    // TODO: directly record item to MediaMetrics service.
+    mediametrics::Item item;
+    if (item.readFromByteString((char *)buffer, length) != NO_ERROR) {
+        ALOGW("%s: cannot read from byte string", __func__);
+        return (jint)BAD_VALUE;
+    }
+    item.selfrecord();
+    return (jint)NO_ERROR;
 }
 
 // Helper function to convert a native PersistableBundle to a Java
@@ -191,5 +227,18 @@ jobject MediaMetricsJNI::nativeToJavaPersistableBundle(JNIEnv *env,
     return newBundle;
 }
 
-};  // namespace android
+// ----------------------------------------------------------------------------
 
+static constexpr JNINativeMethod gMethods[] = {
+    {"native_submit_bytebuffer", "(Ljava/nio/ByteBuffer;I)I",
+            (void *)android_media_MediaMetrics_submit_bytebuffer},
+};
+
+// Registers the native methods, called from core/jni/AndroidRuntime.cpp
+int register_android_media_MediaMetrics(JNIEnv *env)
+{
+    return AndroidRuntime::registerNativeMethods(
+            env, "android/media/MediaMetrics", gMethods, std::size(gMethods));
+}
+
+};  // namespace android

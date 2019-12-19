@@ -16,13 +16,11 @@
 
 package android.provider;
 
-import android.database.Cursor;
-
 public interface BaseColumns {
     /**
      * The unique ID for a row.
      */
-    @Column(Cursor.FIELD_TYPE_INTEGER)
+    // @Column(Cursor.FIELD_TYPE_INTEGER)
     public static final String _ID = "_id";
 
     /**

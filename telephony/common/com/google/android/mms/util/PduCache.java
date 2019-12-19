@@ -17,13 +17,12 @@
 
 package com.google.android.mms.util;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentUris;
 import android.content.UriMatcher;
 import android.net.Uri;
 import android.provider.Telephony.Mms;
 import android.util.Log;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.util.HashMap;
 import java.util.HashSet;

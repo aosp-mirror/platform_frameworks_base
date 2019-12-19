@@ -20,6 +20,7 @@ import android.annotation.WorkerThread;
 import android.view.textclassifier.SelectionEvent.InvocationMethod;
 
 import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 /**
  * Session-aware TextClassifier.
@@ -37,8 +38,8 @@ final class TextClassificationSession implements TextClassifier {
     private boolean mDestroyed;
 
     TextClassificationSession(TextClassificationContext context, TextClassifier delegate) {
-        mClassificationContext = Preconditions.checkNotNull(context);
-        mDelegate = Preconditions.checkNotNull(delegate);
+        mClassificationContext = Objects.requireNonNull(context);
+        mDelegate = Objects.requireNonNull(delegate);
         mSessionId = new TextClassificationSessionId();
         mEventHelper = new SelectionEventHelper(mSessionId, mClassificationContext);
         initializeRemoteSession();
@@ -149,8 +150,8 @@ final class TextClassificationSession implements TextClassifier {
 
         SelectionEventHelper(
                 TextClassificationSessionId sessionId, TextClassificationContext context) {
-            mSessionId = Preconditions.checkNotNull(sessionId);
-            mContext = Preconditions.checkNotNull(context);
+            mSessionId = Objects.requireNonNull(sessionId);
+            mContext = Objects.requireNonNull(context);
         }
 
         /**

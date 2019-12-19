@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ServiceConnection;
 import android.net.Uri;
@@ -197,7 +198,7 @@ public class MediaScannerConnection implements ServiceConnection {
     private static Uri scanFileQuietly(ContentProviderClient client, File file) {
         Uri uri = null;
         try {
-            uri = MediaStore.scanFile(client, file.getCanonicalFile());
+            uri = MediaStore.scanFile(ContentResolver.wrap(client), file.getCanonicalFile());
             Log.d(TAG, "Scanned " + file + " to " + uri);
         } catch (Exception e) {
             Log.w(TAG, "Failed to scan " + file + ": " + e);

@@ -21,17 +21,15 @@ import android.annotation.CurrentTimeMillisLong;
 import android.annotation.CurrentTimeSecondsLong;
 import android.annotation.DurationMillisLong;
 import android.annotation.IntDef;
-import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
-import android.app.AppGlobals;
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ContentProviderClient;
@@ -45,39 +43,28 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageDecoder;
-import android.graphics.Point;
 import android.graphics.PostProcessor;
 import android.media.ExifInterface;
-import android.media.MediaFile;
 import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Environment;
-import android.os.FileUtils;
 import android.os.OperationCanceledException;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.UserHandle;
-import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
-import android.os.storage.VolumeInfo;
-import android.os.storage.VolumeRecord;
-import android.service.media.CameraPrewarmService;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
-
-import com.android.internal.annotations.GuardedBy;
+import android.util.Size;
 
 import libcore.util.HexEncoding;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -162,9 +149,6 @@ public final class MediaStore {
     /** {@hide} */
     public static final String SCAN_VOLUME_CALL = "scan_volume";
     /** {@hide} */
-    public static final String SUICIDE_CALL = "suicide";
-
-    /** {@hide} */
     public static final String CREATE_WRITE_REQUEST_CALL = "create_write_request";
     /** {@hide} */
     public static final String CREATE_TRASH_REQUEST_CALL = "create_trash_request";
@@ -173,42 +157,19 @@ public final class MediaStore {
     /** {@hide} */
     public static final String CREATE_DELETE_REQUEST_CALL = "create_delete_request";
 
-    /**
-     * Extra used with {@link #SCAN_FILE_CALL} or {@link #SCAN_VOLUME_CALL} to indicate that
-     * the file path originated from shell.
-     *
-     * {@hide}
-     */
-    public static final String EXTRA_ORIGINATED_FROM_SHELL =
-            "android.intent.extra.originated_from_shell";
-
-    /**
-     * The method name used by the media scanner and mtp to tell the media provider to
-     * rescan and reclassify that have become unhidden because of renaming folders or
-     * removing nomedia files
-     * @hide
-     */
-    @Deprecated
-    public static final String UNHIDE_CALL = "unhide";
-
-    /**
-     * The method name used by the media scanner service to reload all localized ringtone titles due
-     * to a locale change.
-     * @hide
-     */
-    public static final String RETRANSLATE_CALL = "update_titles";
 
     /** {@hide} */
     public static final String GET_VERSION_CALL = "get_version";
+
     /** {@hide} */
     public static final String GET_DOCUMENT_URI_CALL = "get_document_uri";
     /** {@hide} */
     public static final String GET_MEDIA_URI_CALL = "get_media_uri";
 
     /** {@hide} */
-    public static final String GET_CONTRIBUTED_MEDIA_CALL = "get_contributed_media";
+    public static final String EXTRA_URI = "uri";
     /** {@hide} */
-    public static final String DELETE_CONTRIBUTED_MEDIA_CALL = "delete_contributed_media";
+    public static final String EXTRA_URI_PERMISSIONS = "uriPermissions";
 
     /** {@hide} */
     public static final String EXTRA_CLIP_DATA = "clip_data";
@@ -391,10 +352,10 @@ public final class MediaStore {
      * service.
      * <p>
      * This meta-data should reference the fully qualified class name of the prewarm service
-     * extending {@link CameraPrewarmService}.
+     * extending {@code CameraPrewarmService}.
      * <p>
      * The prewarm service will get bound and receive a prewarm signal
-     * {@link CameraPrewarmService#onPrewarm()} when a camera launch intent fire might be imminent.
+     * {@code CameraPrewarmService#onPrewarm()} when a camera launch intent fire might be imminent.
      * An application implementing a prewarm service should do the absolute minimum amount of work
      * to initialize the camera in order to reduce startup time in likely case that shortly after a
      * camera launch intent would be sent.
@@ -772,197 +733,6 @@ public final class MediaStore {
      */
     public static boolean getRequireOriginal(@NonNull Uri uri) {
         return parseBoolean(uri.getQueryParameter(MediaStore.PARAM_REQUIRE_ORIGINAL));
-    }
-
-    /**
-     * Create a new pending media item using the given parameters. Pending items
-     * are expected to have a short lifetime, and owners should either
-     * {@link PendingSession#publish()} or {@link PendingSession#abandon()} a
-     * pending item within a few hours after first creating it.
-     *
-     * @return token which can be passed to {@link #openPending(Context, Uri)}
-     *         to work with this pending item.
-     * @see MediaColumns#IS_PENDING
-     * @see MediaStore#setIncludePending(Uri)
-     * @see MediaStore#createPending(Context, PendingParams)
-     * @removed
-     */
-    @Deprecated
-    public static @NonNull Uri createPending(@NonNull Context context,
-            @NonNull PendingParams params) {
-        return context.getContentResolver().insert(params.insertUri, params.insertValues);
-    }
-
-    /**
-     * Open a pending media item to make progress on it. You can open a pending
-     * item multiple times before finally calling either
-     * {@link PendingSession#publish()} or {@link PendingSession#abandon()}.
-     *
-     * @param uri token which was previously returned from
-     *            {@link #createPending(Context, PendingParams)}.
-     * @removed
-     */
-    @Deprecated
-    public static @NonNull PendingSession openPending(@NonNull Context context, @NonNull Uri uri) {
-        return new PendingSession(context, uri);
-    }
-
-    /**
-     * Parameters that describe a pending media item.
-     *
-     * @removed
-     */
-    @Deprecated
-    public static class PendingParams {
-        /** {@hide} */
-        public final Uri insertUri;
-        /** {@hide} */
-        public final ContentValues insertValues;
-
-        /**
-         * Create parameters that describe a pending media item.
-         *
-         * @param insertUri the {@code content://} Uri where this pending item
-         *            should be inserted when finally published. For example, to
-         *            publish an image, use
-         *            {@link MediaStore.Images.Media#getContentUri(String)}.
-         */
-        public PendingParams(@NonNull Uri insertUri, @NonNull String displayName,
-                @NonNull String mimeType) {
-            this.insertUri = Objects.requireNonNull(insertUri);
-            final long now = System.currentTimeMillis() / 1000;
-            this.insertValues = new ContentValues();
-            this.insertValues.put(MediaColumns.DISPLAY_NAME, Objects.requireNonNull(displayName));
-            this.insertValues.put(MediaColumns.MIME_TYPE, Objects.requireNonNull(mimeType));
-            this.insertValues.put(MediaColumns.DATE_ADDED, now);
-            this.insertValues.put(MediaColumns.DATE_MODIFIED, now);
-            this.insertValues.put(MediaColumns.IS_PENDING, 1);
-            this.insertValues.put(MediaColumns.DATE_EXPIRES,
-                    (System.currentTimeMillis() + DateUtils.DAY_IN_MILLIS) / 1000);
-        }
-
-        public void setRelativePath(@Nullable String relativePath) {
-            if (relativePath == null) {
-                this.insertValues.remove(MediaColumns.RELATIVE_PATH);
-            } else {
-                this.insertValues.put(MediaColumns.RELATIVE_PATH, relativePath);
-            }
-        }
-
-        /**
-         * Optionally set the Uri from where the file has been downloaded. This is used
-         * for files being added to {@link Downloads} table.
-         *
-         * @see DownloadColumns#DOWNLOAD_URI
-         */
-        public void setDownloadUri(@Nullable Uri downloadUri) {
-            if (downloadUri == null) {
-                this.insertValues.remove(DownloadColumns.DOWNLOAD_URI);
-            } else {
-                this.insertValues.put(DownloadColumns.DOWNLOAD_URI, downloadUri.toString());
-            }
-        }
-
-        /**
-         * Optionally set the Uri indicating HTTP referer of the file. This is used for
-         * files being added to {@link Downloads} table.
-         *
-         * @see DownloadColumns#REFERER_URI
-         */
-        public void setRefererUri(@Nullable Uri refererUri) {
-            if (refererUri == null) {
-                this.insertValues.remove(DownloadColumns.REFERER_URI);
-            } else {
-                this.insertValues.put(DownloadColumns.REFERER_URI, refererUri.toString());
-            }
-        }
-    }
-
-    /**
-     * Session actively working on a pending media item. Pending items are
-     * expected to have a short lifetime, and owners should either
-     * {@link PendingSession#publish()} or {@link PendingSession#abandon()} a
-     * pending item within a few hours after first creating it.
-     *
-     * @removed
-     */
-    @Deprecated
-    public static class PendingSession implements AutoCloseable {
-        /** {@hide} */
-        private final Context mContext;
-        /** {@hide} */
-        private final Uri mUri;
-
-        /** {@hide} */
-        public PendingSession(Context context, Uri uri) {
-            mContext = Objects.requireNonNull(context);
-            mUri = Objects.requireNonNull(uri);
-        }
-
-        /**
-         * Open the underlying file representing this media item. When a media
-         * item is successfully completed, you should
-         * {@link ParcelFileDescriptor#close()} and then {@link #publish()} it.
-         *
-         * @see #notifyProgress(int)
-         */
-        public @NonNull ParcelFileDescriptor open() throws FileNotFoundException {
-            return mContext.getContentResolver().openFileDescriptor(mUri, "rw");
-        }
-
-        /**
-         * Open the underlying file representing this media item. When a media
-         * item is successfully completed, you should
-         * {@link OutputStream#close()} and then {@link #publish()} it.
-         *
-         * @see #notifyProgress(int)
-         */
-        public @NonNull OutputStream openOutputStream() throws FileNotFoundException {
-            return mContext.getContentResolver().openOutputStream(mUri);
-        }
-
-        /**
-         * Notify of current progress on this pending media item. Gallery
-         * applications may choose to surface progress information of this
-         * pending item.
-         *
-         * @param progress a percentage between 0 and 100.
-         */
-        public void notifyProgress(@IntRange(from = 0, to = 100) int progress) {
-            final Uri withProgress = mUri.buildUpon()
-                    .appendQueryParameter(PARAM_PROGRESS, Integer.toString(progress)).build();
-            mContext.getContentResolver().notifyChange(withProgress, null, 0);
-        }
-
-        /**
-         * When this media item is successfully completed, call this method to
-         * publish and make the final item visible to the user.
-         *
-         * @return the final {@code content://} Uri representing the newly
-         *         published media.
-         */
-        public @NonNull Uri publish() {
-            final ContentValues values = new ContentValues();
-            values.put(MediaColumns.IS_PENDING, 0);
-            values.putNull(MediaColumns.DATE_EXPIRES);
-            mContext.getContentResolver().update(mUri, values, null, null);
-            return mUri;
-        }
-
-        /**
-         * When this media item has failed to be completed, call this method to
-         * destroy the pending item record and any data related to it.
-         */
-        public void abandon() {
-            mContext.getContentResolver().delete(mUri, null, null);
-        }
-
-        @Override
-        public void close() {
-            // No resources to close, but at least we can inform people that no
-            // progress is being actively made.
-            notifyProgress(-1);
-        }
     }
 
     /**
@@ -1701,34 +1471,22 @@ public final class MediaStore {
             return ContentUris.withAppendedId(getContentUri(volumeName), rowId);
         }
 
-        /**
-         * For use only by the MTP implementation.
-         * @hide
-         */
+        /** {@hide} */
         @UnsupportedAppUsage
-        public static Uri getMtpObjectsUri(String volumeName) {
-            return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("object").build();
+        public static Uri getMtpObjectsUri(@NonNull String volumeName) {
+            return MediaStore.Files.getContentUri(volumeName);
         }
 
-        /**
-         * For use only by the MTP implementation.
-         * @hide
-         */
+        /** {@hide} */
         @UnsupportedAppUsage
-        public static final Uri getMtpObjectsUri(String volumeName,
-                long fileId) {
-            return ContentUris.withAppendedId(getMtpObjectsUri(volumeName), fileId);
+        public static final Uri getMtpObjectsUri(@NonNull String volumeName, long fileId) {
+            return MediaStore.Files.getContentUri(volumeName, fileId);
         }
 
-        /**
-         * Used to implement the MTP GetObjectReferences and SetObjectReferences commands.
-         * @hide
-         */
+        /** {@hide} */
         @UnsupportedAppUsage
-        public static final Uri getMtpReferencesUri(String volumeName,
-                long fileId) {
-            return getMtpObjectsUri(volumeName, fileId).buildUpon().appendPath("references")
-                    .build();
+        public static final Uri getMtpReferencesUri(@NonNull String volumeName, long fileId) {
+            return MediaStore.Files.getContentUri(volumeName, fileId);
         }
 
         /**
@@ -1851,9 +1609,21 @@ public final class MediaStore {
         public static final int FULL_SCREEN_KIND = 2;
         public static final int MICRO_KIND = 3;
 
-        public static final Point MINI_SIZE = new Point(512, 384);
-        public static final Point FULL_SCREEN_SIZE = new Point(1024, 786);
-        public static final Point MICRO_SIZE = new Point(96, 96);
+        public static final Size MINI_SIZE = new Size(512, 384);
+        public static final Size FULL_SCREEN_SIZE = new Size(1024, 786);
+        public static final Size MICRO_SIZE = new Size(96, 96);
+
+        public static @NonNull Size getKindSize(int kind) {
+            if (kind == ThumbnailConstants.MICRO_KIND) {
+                return ThumbnailConstants.MICRO_SIZE;
+            } else if (kind == ThumbnailConstants.FULL_SCREEN_KIND) {
+                return ThumbnailConstants.FULL_SCREEN_SIZE;
+            } else if (kind == ThumbnailConstants.MINI_KIND) {
+                return ThumbnailConstants.MINI_SIZE;
+            } else {
+                throw new IllegalArgumentException("Unsupported kind: " + kind);
+            }
+        }
     }
 
     /**
@@ -1957,22 +1727,22 @@ public final class MediaStore {
         }
     }
 
-    /** {@hide} */
+    /**
+     * @deprecated since this method doesn't have a {@link Context}, we can't
+     *             find the actual {@link StorageVolume} for the given path, so
+     *             only a vague guess is returned. Callers should use
+     *             {@link StorageManager#getStorageVolume(File)} instead.
+     * @hide
+     */
+    @Deprecated
     public static @NonNull String getVolumeName(@NonNull File path) {
-        if (FileUtils.contains(Environment.getStorageDirectory(), path)) {
-            final StorageManager sm = AppGlobals.getInitialApplication()
-                    .getSystemService(StorageManager.class);
-            final StorageVolume sv = sm.getStorageVolume(path);
-            if (sv != null) {
-                if (sv.isPrimary()) {
-                    return VOLUME_EXTERNAL_PRIMARY;
-                } else {
-                    return checkArgumentVolumeName(sv.getNormalizedUuid());
-                }
-            }
-            throw new IllegalStateException("Unknown volume at " + path);
+        // Ideally we'd find the relevant StorageVolume, but we don't have a
+        // Context to obtain it from, so the best we can do is assume
+        if (path.getAbsolutePath()
+                .startsWith(Environment.getStorageDirectory().getAbsolutePath())) {
+            return MediaStore.VOLUME_EXTERNAL;
         } else {
-            return VOLUME_INTERNAL;
+            return MediaStore.VOLUME_INTERNAL;
         }
     }
 
@@ -1985,7 +1755,7 @@ public final class MediaStore {
         /**
          * Currently outstanding thumbnail requests that can be cancelled.
          */
-        @GuardedBy("sPending")
+        // @GuardedBy("sPending")
         private static ArrayMap<Uri, CancellationSignal> sPending = new ArrayMap<>();
 
         /**
@@ -1997,16 +1767,7 @@ public final class MediaStore {
         @Deprecated
         static @Nullable Bitmap getThumbnail(@NonNull ContentResolver cr, @NonNull Uri uri,
                 int kind, @Nullable BitmapFactory.Options opts) {
-            final Point size;
-            if (kind == ThumbnailConstants.MICRO_KIND) {
-                size = ThumbnailConstants.MICRO_SIZE;
-            } else if (kind == ThumbnailConstants.FULL_SCREEN_KIND) {
-                size = ThumbnailConstants.FULL_SCREEN_SIZE;
-            } else if (kind == ThumbnailConstants.MINI_KIND) {
-                size = ThumbnailConstants.MINI_SIZE;
-            } else {
-                throw new IllegalArgumentException("Unsupported kind: " + kind);
-            }
+            final Size size = ThumbnailConstants.getKindSize(kind);
 
             CancellationSignal signal = null;
             synchronized (sPending) {
@@ -2018,7 +1779,7 @@ public final class MediaStore {
             }
 
             try {
-                return cr.loadThumbnail(uri, Point.convert(size), signal);
+                return cr.loadThumbnail(uri, size, signal);
             } catch (IOException e) {
                 Log.w(TAG, "Failed to obtain thumbnail for " + uri, e);
                 return null;
@@ -2215,26 +1976,14 @@ public final class MediaStore {
             @Deprecated
             public static final String insertImage(ContentResolver cr, String imagePath,
                     String name, String description) throws FileNotFoundException {
-                final File file = new File(imagePath);
-                final String mimeType = MediaFile.getMimeTypeForFile(imagePath);
-
-                if (TextUtils.isEmpty(name)) name = "Image";
-                final PendingParams params = new PendingParams(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, name, mimeType);
-
-                final Context context = AppGlobals.getInitialApplication();
-                final Uri pendingUri = createPending(context, params);
-                try (PendingSession session = openPending(context, pendingUri)) {
-                    try (InputStream in = new FileInputStream(file);
-                         OutputStream out = session.openOutputStream()) {
-                        FileUtils.copy(in, out);
-                    }
-                    return session.publish().toString();
-                } catch (Exception e) {
-                    Log.w(TAG, "Failed to insert image", e);
-                    context.getContentResolver().delete(pendingUri, null, null);
-                    return null;
+                final Bitmap source;
+                try {
+                    source = ImageDecoder
+                            .decodeBitmap(ImageDecoder.createSource(new File(imagePath)));
+                } catch (IOException e) {
+                    throw new FileNotFoundException(e.getMessage());
                 }
+                return insertImage(cr, source, name, description);
             }
 
             /**
@@ -2251,22 +2000,34 @@ public final class MediaStore {
              *             control over lifecycle.
              */
             @Deprecated
-            public static final String insertImage(ContentResolver cr, Bitmap source,
-                                                   String title, String description) {
+            public static final String insertImage(ContentResolver cr, Bitmap source, String title,
+                    String description) {
                 if (TextUtils.isEmpty(title)) title = "Image";
-                final PendingParams params = new PendingParams(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, title, "image/jpeg");
 
-                final Context context = AppGlobals.getInitialApplication();
-                final Uri pendingUri = createPending(context, params);
-                try (PendingSession session = openPending(context, pendingUri)) {
-                    try (OutputStream out = session.openOutputStream()) {
+                final long now = System.currentTimeMillis();
+                final ContentValues values = new ContentValues();
+                values.put(MediaColumns.DISPLAY_NAME, title);
+                values.put(MediaColumns.MIME_TYPE, "image/jpeg");
+                values.put(MediaColumns.DATE_ADDED, now / 1000);
+                values.put(MediaColumns.DATE_MODIFIED, now / 1000);
+                values.put(MediaColumns.DATE_EXPIRES, (now + DateUtils.DAY_IN_MILLIS) / 1000);
+                values.put(MediaColumns.IS_PENDING, 1);
+
+                final Uri uri = cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                try {
+                    try (OutputStream out = cr.openOutputStream(uri)) {
                         source.compress(Bitmap.CompressFormat.JPEG, 90, out);
                     }
-                    return session.publish().toString();
+
+                    // Everything went well above, publish it!
+                    values.clear();
+                    values.put(MediaColumns.IS_PENDING, 0);
+                    values.putNull(MediaColumns.DATE_EXPIRES);
+                    cr.update(uri, values, null, null);
+                    return uri.toString();
                 } catch (Exception e) {
                     Log.w(TAG, "Failed to insert image", e);
-                    context.getContentResolver().delete(pendingUri, null, null);
+                    cr.delete(uri, null, null);
                     return null;
                 }
             }
@@ -2524,6 +2285,14 @@ public final class MediaStore {
             public static final int MINI_KIND = ThumbnailConstants.MINI_KIND;
             public static final int FULL_SCREEN_KIND = ThumbnailConstants.FULL_SCREEN_KIND;
             public static final int MICRO_KIND = ThumbnailConstants.MICRO_KIND;
+
+            /**
+             * Return the typical {@link Size} (in pixels) used internally when
+             * the given thumbnail kind is requested.
+             */
+            public static @NonNull Size getKindSize(int kind) {
+                return ThumbnailConstants.getKindSize(kind);
+            }
 
             /**
              * The blob raw data of thumbnail
@@ -3780,6 +3549,14 @@ public final class MediaStore {
             public static final int MICRO_KIND = ThumbnailConstants.MICRO_KIND;
 
             /**
+             * Return the typical {@link Size} (in pixels) used internally when
+             * the given thumbnail kind is requested.
+             */
+            public static @NonNull Size getKindSize(int kind) {
+                return ThumbnailConstants.getKindSize(kind);
+            }
+
+            /**
              * The width of the thumbnal
              */
             @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
@@ -3811,54 +3588,44 @@ public final class MediaStore {
      */
     public static @NonNull Set<String> getExternalVolumeNames(@NonNull Context context) {
         final StorageManager sm = context.getSystemService(StorageManager.class);
-        final Set<String> volumeNames = new ArraySet<>();
-        for (VolumeInfo vi : sm.getVolumes()) {
-            if (vi.isVisibleForUser(UserHandle.myUserId()) && vi.isMountedReadable()) {
-                if (vi.isPrimary()) {
-                    volumeNames.add(VOLUME_EXTERNAL_PRIMARY);
-                } else {
-                    volumeNames.add(vi.getNormalizedFsUuid());
+        final Set<String> res = new ArraySet<>();
+        for (StorageVolume sv : sm.getStorageVolumes()) {
+            switch (sv.getState()) {
+                case Environment.MEDIA_MOUNTED:
+                case Environment.MEDIA_MOUNTED_READ_ONLY: {
+                    final String volumeName = sv.getMediaStoreVolumeName();
+                    if (volumeName != null) {
+                        res.add(volumeName);
+                    }
+                    break;
                 }
             }
         }
-        return volumeNames;
+        return res;
     }
 
     /**
-     * Return list of all specific volume names that have recently been part of
+     * Return list of all recent volume names that have been part of
      * {@link #VOLUME_EXTERNAL}.
      * <p>
-     * This includes both currently mounted volumes <em>and</em> recently
-     * mounted (but currently unmounted) volumes. Any indexed metadata for these
-     * volumes is preserved to optimize the speed of remounting at a later time.
-     *
-     * @hide
+     * These volume names are not currently mounted, but they're likely to
+     * reappear in the future, so apps are encouraged to preserve any indexed
+     * metadata related to these volumes to optimize user experiences.
+     * <p>
+     * Each specific volume name can be passed to APIs like
+     * {@link MediaStore.Images.Media#getContentUri(String)} to interact with
+     * media on that storage device.
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE)
     public static @NonNull Set<String> getRecentExternalVolumeNames(@NonNull Context context) {
         final StorageManager sm = context.getSystemService(StorageManager.class);
-
-        // We always have primary storage
-        final Set<String> volumeNames = new ArraySet<>();
-        volumeNames.add(VOLUME_EXTERNAL_PRIMARY);
-
-        final long lastWeek = System.currentTimeMillis() - DateUtils.WEEK_IN_MILLIS;
-        for (VolumeRecord rec : sm.getVolumeRecords()) {
-            // Skip volumes without valid UUIDs
-            if (TextUtils.isEmpty(rec.fsUuid)) continue;
-
-            final VolumeInfo vi = sm.findVolumeByUuid(rec.fsUuid);
-            if (vi != null && vi.isVisibleForUser(UserHandle.myUserId())
-                    && vi.isMountedReadable()) {
-                // We're mounted right now
-                volumeNames.add(rec.getNormalizedFsUuid());
-            } else if (rec.lastSeenMillis > 0 && rec.lastSeenMillis < lastWeek) {
-                // We're not mounted right now, but we've been seen recently
-                volumeNames.add(rec.getNormalizedFsUuid());
+        final Set<String> res = new ArraySet<>();
+        for (StorageVolume sv : sm.getRecentStorageVolumes()) {
+            final String volumeName = sv.getMediaStoreVolumeName();
+            if (volumeName != null) {
+                res.add(volumeName);
             }
         }
-        return volumeNames;
+        return res;
     }
 
     /**
@@ -3908,97 +3675,6 @@ public final class MediaStore {
         if ("1".equals(value)) return true;
         if ("true".equalsIgnoreCase(value)) return true;
         return false;
-    }
-
-    /**
-     * Return path where the given specific volume is mounted. Not valid for
-     * {@link #VOLUME_INTERNAL} or {@link #VOLUME_EXTERNAL}, since those are
-     * broad collections that cover many paths.
-     *
-     * @hide
-     */
-    @TestApi
-    public static @NonNull File getVolumePath(@NonNull String volumeName)
-            throws FileNotFoundException {
-        final StorageManager sm = AppGlobals.getInitialApplication()
-                .getSystemService(StorageManager.class);
-        return getVolumePath(sm.getVolumes(), volumeName);
-    }
-
-    /** {@hide} */
-    public static @NonNull File getVolumePath(@NonNull List<VolumeInfo> volumes,
-            @NonNull String volumeName) throws FileNotFoundException {
-        if (TextUtils.isEmpty(volumeName)) {
-            throw new IllegalArgumentException();
-        }
-
-        switch (volumeName) {
-            case VOLUME_INTERNAL:
-            case VOLUME_EXTERNAL:
-                throw new FileNotFoundException(volumeName + " has no associated path");
-        }
-
-        final boolean wantPrimary = VOLUME_EXTERNAL_PRIMARY.equals(volumeName);
-        for (VolumeInfo volume : volumes) {
-            final boolean matchPrimary = wantPrimary
-                    && volume.isPrimary();
-            final boolean matchSecondary = !wantPrimary
-                    && Objects.equals(volume.getNormalizedFsUuid(), volumeName);
-            if (matchPrimary || matchSecondary) {
-                final File path = volume.getPathForUser(UserHandle.myUserId());
-                if (path != null) {
-                    return path;
-                }
-            }
-        }
-        throw new FileNotFoundException("Failed to find path for " + volumeName);
-    }
-
-    /**
-     * Return paths that should be scanned for the given volume.
-     *
-     * @hide
-     */
-    @TestApi
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE)
-    public static @NonNull Collection<File> getVolumeScanPaths(@NonNull String volumeName)
-            throws FileNotFoundException {
-        if (TextUtils.isEmpty(volumeName)) {
-            throw new IllegalArgumentException();
-        }
-
-        final Context context = AppGlobals.getInitialApplication();
-        final UserManager um = context.getSystemService(UserManager.class);
-
-        final ArrayList<File> res = new ArrayList<>();
-        if (VOLUME_INTERNAL.equals(volumeName)) {
-            addCanonicalFile(res, new File(Environment.getRootDirectory(), "media"));
-            addCanonicalFile(res, new File(Environment.getOemDirectory(), "media"));
-            addCanonicalFile(res, new File(Environment.getProductDirectory(), "media"));
-        } else if (VOLUME_EXTERNAL.equals(volumeName)) {
-            for (String exactVolume : getExternalVolumeNames(context)) {
-                addCanonicalFile(res, getVolumePath(exactVolume));
-            }
-            if (um.isDemoUser()) {
-                addCanonicalFile(res, Environment.getDataPreloadsMediaDirectory());
-            }
-        } else {
-            addCanonicalFile(res, getVolumePath(volumeName));
-            if (VOLUME_EXTERNAL_PRIMARY.equals(volumeName) && um.isDemoUser()) {
-                addCanonicalFile(res, Environment.getDataPreloadsMediaDirectory());
-            }
-        }
-        return res;
-    }
-
-    private static void addCanonicalFile(List<File> list, File file) {
-        try {
-            list.add(file.getCanonicalFile());
-        } catch (IOException e) {
-            Log.w(TAG, "Failed to resolve " + file + ": " + e);
-            list.add(file);
-        }
     }
 
     /**
@@ -4084,10 +3760,10 @@ public final class MediaStore {
 
         try (ContentProviderClient client = resolver.acquireContentProviderClient(AUTHORITY)) {
             final Bundle in = new Bundle();
-            in.putParcelable(DocumentsContract.EXTRA_URI, mediaUri);
-            in.putParcelableList(DocumentsContract.EXTRA_URI_PERMISSIONS, uriPermissions);
+            in.putParcelable(EXTRA_URI, mediaUri);
+            in.putParcelableArrayList(EXTRA_URI_PERMISSIONS, new ArrayList<>(uriPermissions));
             final Bundle out = client.call(GET_DOCUMENT_URI_CALL, null, in);
-            return out.getParcelable(DocumentsContract.EXTRA_URI);
+            return out.getParcelable(EXTRA_URI);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -4114,134 +3790,43 @@ public final class MediaStore {
 
         try (ContentProviderClient client = resolver.acquireContentProviderClient(AUTHORITY)) {
             final Bundle in = new Bundle();
-            in.putParcelable(DocumentsContract.EXTRA_URI, documentUri);
-            in.putParcelableList(DocumentsContract.EXTRA_URI_PERMISSIONS, uriPermissions);
+            in.putParcelable(EXTRA_URI, documentUri);
+            in.putParcelableArrayList(EXTRA_URI_PERMISSIONS, new ArrayList<>(uriPermissions));
             final Bundle out = client.call(GET_MEDIA_URI_CALL, null, in);
-            return out.getParcelable(DocumentsContract.EXTRA_URI);
+            return out.getParcelable(EXTRA_URI);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
+    }
+
+    /** @hide */
+    @TestApi
+    public static void waitForIdle(@NonNull ContentResolver resolver) {
+        resolver.call(AUTHORITY, WAIT_FOR_IDLE_CALL, null, null);
     }
 
     /**
-     * Calculate size of media contributed by given package under the calling
-     * user. The meaning of "contributed" means it won't automatically be
-     * deleted when the app is uninstalled.
+     * Perform a blocking scan of the given {@link File}, returning the
+     * {@link Uri} of the scanned file.
      *
      * @hide
      */
+    @SystemApi
     @TestApi
-    @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA)
-    public static @BytesLong long getContributedMediaSize(Context context, String packageName,
-            UserHandle user) throws IOException {
-        final UserManager um = context.getSystemService(UserManager.class);
-        if (um.isUserUnlocked(user) && um.isUserRunning(user)) {
-            try {
-                final ContentResolver resolver = context
-                        .createPackageContextAsUser(packageName, 0, user).getContentResolver();
-                final Bundle in = new Bundle();
-                in.putString(Intent.EXTRA_PACKAGE_NAME, packageName);
-                final Bundle out = resolver.call(AUTHORITY, GET_CONTRIBUTED_MEDIA_CALL, null, in);
-                return out.getLong(Intent.EXTRA_INDEX);
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        } else {
-            throw new IOException("User " + user + " must be unlocked and running");
-        }
+    @SuppressLint("StreamFiles")
+    public static @NonNull Uri scanFile(@NonNull ContentResolver resolver, @NonNull File file) {
+        final Bundle out = resolver.call(AUTHORITY, SCAN_FILE_CALL, file.getAbsolutePath(), null);
+        return out.getParcelable(Intent.EXTRA_STREAM);
     }
 
     /**
-     * Delete all media contributed by given package under the calling user. The
-     * meaning of "contributed" means it won't automatically be deleted when the
-     * app is uninstalled.
+     * Perform a blocking scan of the given storage volume.
      *
      * @hide
      */
+    @SystemApi
     @TestApi
-    @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA)
-    public static void deleteContributedMedia(Context context, String packageName,
-            UserHandle user) throws IOException {
-        final UserManager um = context.getSystemService(UserManager.class);
-        if (um.isUserUnlocked(user) && um.isUserRunning(user)) {
-            try {
-                final ContentResolver resolver = context
-                        .createPackageContextAsUser(packageName, 0, user).getContentResolver();
-                final Bundle in = new Bundle();
-                in.putString(Intent.EXTRA_PACKAGE_NAME, packageName);
-                resolver.call(AUTHORITY, DELETE_CONTRIBUTED_MEDIA_CALL, null, in);
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        } else {
-            throw new IOException("User " + user + " must be unlocked and running");
-        }
-    }
-
-    /** @hide */
-    @TestApi
-    public static void waitForIdle(Context context) {
-        final ContentResolver resolver = context.getContentResolver();
-        try (ContentProviderClient client = resolver.acquireContentProviderClient(AUTHORITY)) {
-            client.call(WAIT_FOR_IDLE_CALL, null, null);
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
-    }
-
-    /** @hide */
-    public static void suicide(Context context) {
-        final ContentResolver resolver = context.getContentResolver();
-        try (ContentProviderClient client = resolver
-                .acquireUnstableContentProviderClient(AUTHORITY)) {
-            client.call(SUICIDE_CALL, null, null);
-        } catch (Exception ignored) {
-        }
-    }
-
-    /** @hide */
-    @TestApi
-    public static Uri scanFile(Context context, File file) {
-        return scan(context, SCAN_FILE_CALL, file, false);
-    }
-
-    /** @hide */
-    @TestApi
-    public static Uri scanFileFromShell(Context context, File file) {
-        return scan(context, SCAN_FILE_CALL, file, true);
-    }
-
-    /** @hide */
-    @TestApi
-    public static void scanVolume(Context context, File file) {
-        scan(context, SCAN_VOLUME_CALL, file, false);
-    }
-
-    /** @hide */
-    public static Uri scanFile(ContentProviderClient client, File file) {
-        return scan(client, SCAN_FILE_CALL, file, false);
-    }
-
-    /** @hide */
-    private static Uri scan(Context context, String method, File file,
-            boolean originatedFromShell) {
-        final ContentResolver resolver = context.getContentResolver();
-        try (ContentProviderClient client = resolver.acquireContentProviderClient(AUTHORITY)) {
-            return scan(client, method, file, originatedFromShell);
-        }
-    }
-
-    /** @hide */
-    private static Uri scan(ContentProviderClient client, String method, File file,
-            boolean originatedFromShell) {
-        try {
-            final Bundle in = new Bundle();
-            in.putParcelable(Intent.EXTRA_STREAM, Uri.fromFile(file));
-            in.putBoolean(EXTRA_ORIGINATED_FROM_SHELL, originatedFromShell);
-            final Bundle out = client.call(method, null, in);
-            return out.getParcelable(Intent.EXTRA_STREAM);
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
+    public static void scanVolume(@NonNull ContentResolver resolver, @NonNull String volumeName) {
+        resolver.call(AUTHORITY, SCAN_VOLUME_CALL, volumeName, null);
     }
 }

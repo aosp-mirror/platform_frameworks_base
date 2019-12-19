@@ -25,10 +25,9 @@ import android.text.util.Linkify.LinkifyMask;
 import android.view.textclassifier.TextLinks.TextLink;
 import android.view.textclassifier.TextLinks.TextLinkSpan;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -103,8 +102,8 @@ public final class TextLinksParams {
      */
     @TextLinks.Status
     public int apply(@NonNull Spannable text, @NonNull TextLinks textLinks) {
-        Preconditions.checkNotNull(text);
-        Preconditions.checkNotNull(textLinks);
+        Objects.requireNonNull(text);
+        Objects.requireNonNull(textLinks);
 
         final String textString = text.toString();
 

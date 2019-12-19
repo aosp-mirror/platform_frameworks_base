@@ -16,8 +16,10 @@
 
 package android.mtp;
 
+import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.ContentProviderClient;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -422,13 +424,13 @@ public class MtpDatabase implements AutoCloseable {
         }
         // Add the new file to MediaProvider
         if (succeeded) {
-            MediaStore.scanFile(mContext, obj.getPath().toFile());
+            MediaStore.scanFile(mContext.getContentResolver(), obj.getPath().toFile());
         }
     }
 
     @VisibleForNative
     private void rescanFile(String path, int handle, int format) {
-        MediaStore.scanFile(mContext, new File(path));
+        MediaStore.scanFile(mContext.getContentResolver(), new File(path));
     }
 
     @VisibleForNative
@@ -587,13 +589,13 @@ public class MtpDatabase implements AutoCloseable {
         if (obj.isDir()) {
             // for directories, check if renamed from something hidden to something non-hidden
             if (oldPath.getFileName().startsWith(".") && !newPath.startsWith(".")) {
-                MediaStore.scanFile(mContext, newPath.toFile());
+                MediaStore.scanFile(mContext.getContentResolver(), newPath.toFile());
             }
         } else {
             // for files, check if renamed from .nomedia to something else
             if (oldPath.getFileName().toString().toLowerCase(Locale.US).equals(NO_MEDIA)
                     && !newPath.getFileName().toString().toLowerCase(Locale.US).equals(NO_MEDIA)) {
-                MediaStore.scanFile(mContext, newPath.getParent().toFile());
+                MediaStore.scanFile(mContext.getContentResolver(), newPath.getParent().toFile());
             }
         }
         return MtpConstants.RESPONSE_OK;
@@ -662,7 +664,7 @@ public class MtpDatabase implements AutoCloseable {
                 mMediaProvider.update(objectsUri, values, PATH_WHERE, whereArgs);
             } else {
                 // Old parent doesn't exist - add the object
-                MediaStore.scanFile(mContext, path.toFile());
+                MediaStore.scanFile(mContext.getContentResolver(), path.toFile());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in mMediaProvider.update", e);
@@ -689,7 +691,7 @@ public class MtpDatabase implements AutoCloseable {
         if (!success) {
             return;
         }
-        MediaStore.scanFile(mContext, obj.getPath().toFile());
+        MediaStore.scanFile(mContext.getContentResolver(), obj.getPath().toFile());
     }
 
     @VisibleForNative
@@ -909,7 +911,7 @@ public class MtpDatabase implements AutoCloseable {
             String[] whereArgs = new String[]{path.toString()};
             if (mMediaProvider.delete(objectsUri, PATH_WHERE, whereArgs) > 0) {
                 if (!isDir && path.toString().toLowerCase(Locale.US).endsWith(NO_MEDIA)) {
-                    MediaStore.scanFile(mContext, path.getParent().toFile());
+                    MediaStore.scanFile(mContext.getContentResolver(), path.getParent().toFile());
                 }
             } else {
                 Log.i(TAG, "Mediaprovider didn't delete " + path);

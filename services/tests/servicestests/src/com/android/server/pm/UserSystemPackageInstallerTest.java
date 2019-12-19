@@ -26,6 +26,7 @@ import static com.android.server.pm.UserSystemPackageInstaller.USER_TYPE_PACKAGE
 import static com.android.server.pm.UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE;
 import static com.android.server.pm.UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_IGNORE_OTA;
 import static com.android.server.pm.UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST;
+import static com.android.server.pm.UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST_SYSTEM;
 import static com.android.server.pm.UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_LOG;
 
 import static org.junit.Assert.assertEquals;
@@ -262,39 +263,25 @@ public class UserSystemPackageInstallerTest {
 
         // No implicit whitelist, so only install pkg1.
         boolean implicit = false;
-        boolean isSysUser = false;
         assertTrue(UserSystemPackageInstaller.shouldInstallPackage(
-                pkg1, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+                pkg1, pkgBitSetMap, userWhitelist, implicit));
         assertFalse(UserSystemPackageInstaller.shouldInstallPackage(
-                pkg2, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+                pkg2, pkgBitSetMap, userWhitelist, implicit));
         assertFalse(UserSystemPackageInstaller.shouldInstallPackage(
-                pkg3, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+                pkg3, pkgBitSetMap, userWhitelist, implicit));
         assertFalse(UserSystemPackageInstaller.shouldInstallPackage(
-                pkg4, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+                pkg4, pkgBitSetMap, userWhitelist, implicit));
 
         // Use implicit whitelist, so install pkg1 and pkg4
         implicit = true;
-        isSysUser = false;
         assertTrue(UserSystemPackageInstaller.shouldInstallPackage(
-                pkg1, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+                pkg1, pkgBitSetMap, userWhitelist, implicit));
         assertFalse(UserSystemPackageInstaller.shouldInstallPackage(
-                pkg2, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+                pkg2, pkgBitSetMap, userWhitelist, implicit));
         assertFalse(UserSystemPackageInstaller.shouldInstallPackage(
-                pkg3, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+                pkg3, pkgBitSetMap, userWhitelist, implicit));
         assertTrue(UserSystemPackageInstaller.shouldInstallPackage(
-                pkg4, pkgBitSetMap, userWhitelist, implicit, isSysUser));
-
-        // For user 0 specifically, we always implicitly whitelist.
-        implicit = false;
-        isSysUser = true;
-        assertTrue(UserSystemPackageInstaller.shouldInstallPackage(
-                pkg1, pkgBitSetMap, userWhitelist, implicit, isSysUser));
-        assertFalse(UserSystemPackageInstaller.shouldInstallPackage(
-                pkg2, pkgBitSetMap, userWhitelist, implicit, isSysUser));
-        assertFalse(UserSystemPackageInstaller.shouldInstallPackage(
-                pkg3, pkgBitSetMap, userWhitelist, implicit, isSysUser));
-        assertTrue(UserSystemPackageInstaller.shouldInstallPackage(
-                pkg4, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+                pkg4, pkgBitSetMap, userWhitelist, implicit));
     }
 
     /**
@@ -400,30 +387,42 @@ public class UserSystemPackageInstallerTest {
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertFalse(mUserSystemPackageInstaller.isEnforceMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
         assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
         setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_LOG);
         assertTrue(mUserSystemPackageInstaller.isLogMode());
         assertFalse(mUserSystemPackageInstaller.isEnforceMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
         assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
         setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE);
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertTrue(mUserSystemPackageInstaller.isEnforceMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
         assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
         setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST);
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertFalse(mUserSystemPackageInstaller.isEnforceMode());
         assertTrue(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
+        assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
+
+        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST_SYSTEM);
+        assertFalse(mUserSystemPackageInstaller.isLogMode());
+        assertFalse(mUserSystemPackageInstaller.isEnforceMode());
+        assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertTrue(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
         assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
         setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IGNORE_OTA);
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertFalse(mUserSystemPackageInstaller.isEnforceMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
         assertTrue(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
         setUserTypePackageWhitelistMode(
@@ -431,6 +430,7 @@ public class UserSystemPackageInstallerTest {
         assertTrue(mUserSystemPackageInstaller.isLogMode());
         assertTrue(mUserSystemPackageInstaller.isEnforceMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
         assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
         setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST
@@ -438,6 +438,7 @@ public class UserSystemPackageInstallerTest {
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertTrue(mUserSystemPackageInstaller.isEnforceMode());
         assertTrue(mUserSystemPackageInstaller.isImplicitWhitelistMode());
+        assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
         assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
     }
 

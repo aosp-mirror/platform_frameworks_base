@@ -52,6 +52,7 @@ extern int register_android_graphics_ColorFilter(JNIEnv* env);
 extern int register_android_graphics_ColorSpace(JNIEnv* env);
 extern int register_android_graphics_DrawFilter(JNIEnv* env);
 extern int register_android_graphics_FontFamily(JNIEnv* env);
+extern int register_android_graphics_HardwareRendererObserver(JNIEnv* env);
 extern int register_android_graphics_Matrix(JNIEnv* env);
 extern int register_android_graphics_Paint(JNIEnv* env);
 extern int register_android_graphics_Path(JNIEnv* env);
@@ -71,7 +72,6 @@ extern int register_android_graphics_text_LineBreaker(JNIEnv *env);
 
 extern int register_android_util_PathParser(JNIEnv* env);
 extern int register_android_view_DisplayListCanvas(JNIEnv* env);
-extern int register_android_view_FrameMetricsObserver(JNIEnv* env);
 extern int register_android_view_RenderNode(JNIEnv* env);
 extern int register_android_view_TextureLayer(JNIEnv* env);
 extern int register_android_view_ThreadedRenderer(JNIEnv* env);
@@ -105,6 +105,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_ColorFilter),
     REG_JNI(register_android_graphics_DrawFilter),
     REG_JNI(register_android_graphics_FontFamily),
+    REG_JNI(register_android_graphics_HardwareRendererObserver),
     REG_JNI(register_android_graphics_ImageDecoder),
     REG_JNI(register_android_graphics_drawable_AnimatedImageDrawable),
     REG_JNI(register_android_graphics_Interpolator),
@@ -135,7 +136,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_util_PathParser),
     REG_JNI(register_android_view_RenderNode),
     REG_JNI(register_android_view_DisplayListCanvas),
-    REG_JNI(register_android_view_FrameMetricsObserver),
     REG_JNI(register_android_view_TextureLayer),
     REG_JNI(register_android_view_ThreadedRenderer),
 };

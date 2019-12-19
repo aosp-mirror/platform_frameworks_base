@@ -371,7 +371,8 @@ public class RecordingService extends Service {
         Bitmap thumbnailBitmap = null;
         try {
             ContentResolver resolver = getContentResolver();
-            Size size = Point.convert(MediaStore.ThumbnailConstants.MINI_SIZE);
+            DisplayMetrics metrics = getResources().getDisplayMetrics();
+            Size size = new Size(metrics.widthPixels, metrics.heightPixels / 2);
             thumbnailBitmap = resolver.loadThumbnail(uri, size, null);
         } catch (IOException e) {
             Log.e(TAG, "Error creating thumbnail: " + e.getMessage());

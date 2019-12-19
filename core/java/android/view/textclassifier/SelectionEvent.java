@@ -149,7 +149,7 @@ public final class SelectionEvent implements Parcelable {
         mAbsoluteStart = start;
         mAbsoluteEnd = end;
         mEventType = eventType;
-        mEntityType = Preconditions.checkNotNull(entityType);
+        mEntityType = Objects.requireNonNull(entityType);
         mResultId = resultId;
         mInvocationMethod = invocationMethod;
     }
@@ -257,7 +257,7 @@ public final class SelectionEvent implements Parcelable {
     public static SelectionEvent createSelectionModifiedEvent(
             int start, int end, @NonNull TextClassification classification) {
         Preconditions.checkArgument(end >= start, "end cannot be less than start");
-        Preconditions.checkNotNull(classification);
+        Objects.requireNonNull(classification);
         final String entityType = classification.getEntityCount() > 0
                 ? classification.getEntity(0)
                 : TextClassifier.TYPE_UNKNOWN;
@@ -281,7 +281,7 @@ public final class SelectionEvent implements Parcelable {
     public static SelectionEvent createSelectionModifiedEvent(
             int start, int end, @NonNull TextSelection selection) {
         Preconditions.checkArgument(end >= start, "end cannot be less than start");
-        Preconditions.checkNotNull(selection);
+        Objects.requireNonNull(selection);
         final String entityType = selection.getEntityCount() > 0
                 ? selection.getEntity(0)
                 : TextClassifier.TYPE_UNKNOWN;
@@ -329,7 +329,7 @@ public final class SelectionEvent implements Parcelable {
             int start, int end, @SelectionEvent.ActionType int actionType,
             @NonNull TextClassification classification) {
         Preconditions.checkArgument(end >= start, "end cannot be less than start");
-        Preconditions.checkNotNull(classification);
+        Objects.requireNonNull(classification);
         checkActionType(actionType);
         final String entityType = classification.getEntityCount() > 0
                 ? classification.getEntity(0)
@@ -398,7 +398,7 @@ public final class SelectionEvent implements Parcelable {
     }
 
     void setEntityType(@EntityType String entityType) {
-        mEntityType = Preconditions.checkNotNull(entityType);
+        mEntityType = Objects.requireNonNull(entityType);
     }
 
     /**

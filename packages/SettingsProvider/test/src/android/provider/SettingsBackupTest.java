@@ -215,7 +215,6 @@ public class SettingsBackupTest {
                     Settings.Global.DEFAULT_DNS_SERVER,
                     Settings.Global.DEFAULT_INSTALL_LOCATION,
                     Settings.Global.DEFAULT_RESTRICT_BACKGROUND_DATA,
-                    Settings.Global.DEFAULT_USER_ID_TO_BOOT_INTO,
                     Settings.Global.DESK_DOCK_SOUND,
                     Settings.Global.DESK_UNDOCK_SOUND,
                     Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT,

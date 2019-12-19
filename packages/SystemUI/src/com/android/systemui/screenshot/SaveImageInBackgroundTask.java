@@ -23,6 +23,8 @@ import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
@@ -48,7 +50,9 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
+import android.provider.MediaStore.MediaColumns;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -275,6 +279,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
 
         Context context = mParams.context;
+        ContentResolver resolver = context.getContentResolver();
         Bitmap image = mParams.image;
         Resources r = context.getResources();
 
@@ -284,23 +289,27 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                             mSmartActionsProvider, mSmartActionsEnabled, isManagedProfile(context));
 
             // Save the screenshot to the MediaStore
-            final MediaStore.PendingParams params = new MediaStore.PendingParams(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mImageFileName, "image/png");
-            params.setRelativePath(Environment.DIRECTORY_PICTURES + File.separator
-                    + Environment.DIRECTORY_SCREENSHOTS);
+            final ContentValues values = new ContentValues();
+            values.put(MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES
+                    + File.separator + Environment.DIRECTORY_SCREENSHOTS);
+            values.put(MediaColumns.DISPLAY_NAME, mImageFileName);
+            values.put(MediaColumns.MIME_TYPE, "image/png");
+            values.put(MediaColumns.DATE_ADDED, mImageTime / 1000);
+            values.put(MediaColumns.DATE_MODIFIED, mImageTime / 1000);
+            values.put(MediaColumns.DATE_EXPIRES, (mImageTime + DateUtils.DAY_IN_MILLIS) / 1000);
+            values.put(MediaColumns.IS_PENDING, 1);
 
-            final Uri uri = MediaStore.createPending(context, params);
-            final MediaStore.PendingSession session = MediaStore.openPending(context, uri);
+            final Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
             try {
                 // First, write the actual data for our screenshot
-                try (OutputStream out = session.openOutputStream()) {
+                try (OutputStream out = resolver.openOutputStream(uri)) {
                     if (!image.compress(Bitmap.CompressFormat.PNG, 100, out)) {
                         throw new IOException("Failed to compress");
                     }
                 }
 
                 // Next, write metadata to help index the screenshot
-                try (ParcelFileDescriptor pfd = session.open()) {
+                try (ParcelFileDescriptor pfd = resolver.openFile(uri, "rw", null)) {
                     final ExifInterface exif = new ExifInterface(pfd.getFileDescriptor());
 
                     exif.setAttribute(ExifInterface.TAG_SOFTWARE,
@@ -327,12 +336,15 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
                     exif.saveAttributes();
                 }
-                session.publish();
+
+                // Everything went well above, publish it!
+                values.clear();
+                values.put(MediaColumns.IS_PENDING, 0);
+                values.putNull(MediaColumns.DATE_EXPIRES);
+                resolver.update(uri, values, null, null);
             } catch (Exception e) {
-                session.abandon();
+                resolver.delete(uri, null);
                 throw e;
-            } finally {
-                IoUtils.closeQuietly(session);
             }
 
             populateNotificationActions(context, r, uri, smartActionsFuture, mNotificationBuilder);

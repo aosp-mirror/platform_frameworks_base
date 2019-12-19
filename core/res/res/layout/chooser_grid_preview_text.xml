@@ -45,7 +45,8 @@
         android:ellipsize="end"
         android:fontFamily="@android:string/config_headlineFontFamily"
         android:textColor="?android:attr/textColorPrimary"
-        android:maxLines="2"/>
+        android:maxLines="2"
+        android:focusable="true"/>
 
     <LinearLayout
         android:id="@+id/copy_button"

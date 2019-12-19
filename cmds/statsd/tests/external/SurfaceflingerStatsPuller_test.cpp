@@ -18,6 +18,7 @@
 #define LOG_TAG "SurfaceflingerStatsPuller_test"
 
 #include "src/external/SurfaceflingerStatsPuller.h"
+#include "statslog.h"
 
 #include <gtest/gtest.h>
 #include <log/log.h>

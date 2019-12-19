@@ -116,7 +116,7 @@ public class ResolverTargetActionsDialogFragment extends DialogFragment
                 pinComponent(mTargetInfos.get(which).getResolvedComponentName());
             }
             // Force the chooser to requery and resort things
-            getActivity().recreate();
+            ((ChooserActivity) getActivity()).handlePackagesChanged();
         } else {
             // Last item in dialog is App Info
             Intent in = new Intent().setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)

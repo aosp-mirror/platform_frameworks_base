@@ -30,7 +30,7 @@
 #include <gui/BufferQueue.h>
 #include <gui/Surface.h>
 
-#include "android_view_FrameMetricsObserver.h"
+#include "android_graphics_HardwareRendererObserver.h"
 
 #include <private/EGL/cache.h>
 
@@ -580,28 +580,21 @@ static void android_view_ThreadedRenderer_preload(JNIEnv*, jclass) {
 }
 
 // ----------------------------------------------------------------------------
-// FrameMetricsObserver
+// HardwareRendererObserver
 // ----------------------------------------------------------------------------
 
-static jlong android_view_ThreadedRenderer_addFrameMetricsObserver(JNIEnv* env,
-        jclass clazz, jlong proxyPtr, jobject fso) {
-    JavaVM* vm = nullptr;
-    if (env->GetJavaVM(&vm) != JNI_OK) {
-        LOG_ALWAYS_FATAL("Unable to get Java VM");
-        return 0;
-    }
-
+static void android_view_ThreadedRenderer_addObserver(JNIEnv* env, jclass clazz,
+        jlong proxyPtr, jlong observerPtr) {
+    HardwareRendererObserver* observer = reinterpret_cast<HardwareRendererObserver*>(observerPtr);
     renderthread::RenderProxy* renderProxy =
             reinterpret_cast<renderthread::RenderProxy*>(proxyPtr);
 
-    FrameMetricsObserver* observer = new FrameMetricsObserverProxy(vm, fso);
     renderProxy->addFrameMetricsObserver(observer);
-    return reinterpret_cast<jlong>(observer);
 }
 
-static void android_view_ThreadedRenderer_removeFrameMetricsObserver(JNIEnv* env, jclass clazz,
+static void android_view_ThreadedRenderer_removeObserver(JNIEnv* env, jclass clazz,
         jlong proxyPtr, jlong observerPtr) {
-    FrameMetricsObserver* observer = reinterpret_cast<FrameMetricsObserver*>(observerPtr);
+    HardwareRendererObserver* observer = reinterpret_cast<HardwareRendererObserver*>(observerPtr);
     renderthread::RenderProxy* renderProxy =
             reinterpret_cast<renderthread::RenderProxy*>(proxyPtr);
 
@@ -675,12 +668,8 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_view_ThreadedRenderer_setFrameCallback},
     { "nSetFrameCompleteCallback", "(JLandroid/graphics/HardwareRenderer$FrameCompleteCallback;)V",
             (void*)android_view_ThreadedRenderer_setFrameCompleteCallback },
-    { "nAddFrameMetricsObserver",
-            "(JLandroid/view/FrameMetricsObserver;)J",
-            (void*)android_view_ThreadedRenderer_addFrameMetricsObserver },
-    { "nRemoveFrameMetricsObserver",
-            "(JJ)V",
-            (void*)android_view_ThreadedRenderer_removeFrameMetricsObserver },
+    { "nAddObserver", "(JJ)V", (void*)android_view_ThreadedRenderer_addObserver },
+    { "nRemoveObserver", "(JJ)V", (void*)android_view_ThreadedRenderer_removeObserver },
     { "nCopySurfaceInto", "(Landroid/view/Surface;IIIIJ)I",
                 (void*)android_view_ThreadedRenderer_copySurfaceInto },
     { "nCreateHardwareBitmap", "(JII)Landroid/graphics/Bitmap;",

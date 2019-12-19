@@ -150,7 +150,7 @@ public final class TextClassification implements Parcelable {
         mLegacyIntent = legacyIntent;
         mLegacyOnClickListener = legacyOnClickListener;
         mActions = Collections.unmodifiableList(actions);
-        mEntityConfidence = Preconditions.checkNotNull(entityConfidence);
+        mEntityConfidence = Objects.requireNonNull(entityConfidence);
         mId = id;
         mExtras = extras;
     }
@@ -287,7 +287,7 @@ public final class TextClassification implements Parcelable {
      * @hide
      */
     public static OnClickListener createIntentOnClickListener(@NonNull final PendingIntent intent) {
-        Preconditions.checkNotNull(intent);
+        Objects.requireNonNull(intent);
         return v -> {
             try {
                 intent.send();

@@ -568,14 +568,45 @@ public final class Settings {
     /**
      * Activity Action: Show settings to enroll fingerprints, and setup PIN/Pattern/Pass if
      * necessary.
+     * @deprecated See {@link #ACTION_BIOMETRIC_ENROLL}.
      * <p>
      * Input: Nothing.
      * <p>
      * Output: Nothing.
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_FINGERPRINT_ENROLL =
             "android.settings.FINGERPRINT_ENROLL";
+
+    /**
+     * Activity Action: Show settings to enroll biometrics, and setup PIN/Pattern/Pass if
+     * necessary. By default, this prompts the user to enroll biometrics with strength
+     * Weak or above, as defined by the CDD. Only biometrics that meet or exceed Strong, as defined
+     * in the CDD are allowed to participate in Keystore operations.
+     * <p>
+     * Input: extras {@link #EXTRA_BIOMETRIC_MINIMUM_STRENGTH_REQUIRED} as an integer, with
+     * constants defined in {@link android.hardware.biometrics.BiometricManager.Authenticators},
+     * e.g. {@link android.hardware.biometrics.BiometricManager.Authenticators#BIOMETRIC_STRONG}.
+     * If not specified, the default behavior is
+     * {@link android.hardware.biometrics.BiometricManager.Authenticators#BIOMETRIC_WEAK}.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_BIOMETRIC_ENROLL =
+            "android.settings.BIOMETRIC_ENROLL";
+
+    /**
+     * Activity Extra: The minimum strength to request enrollment for.
+     * <p>
+     * This can be passed as an extra field to the {@link #ACTION_BIOMETRIC_ENROLL} intent to
+     * indicate that only enrollment for sensors that meet this strength should be shown. The
+     * value should be one of the biometric strength constants defined in
+     * {@link android.hardware.biometrics.BiometricManager.Authenticators}.
+     */
+    public static final String EXTRA_BIOMETRIC_MINIMUM_STRENGTH_REQUIRED =
+            "android.provider.extra.BIOMETRIC_MINIMUM_STRENGTH_REQUIRED";
 
     /**
      * Activity Action: Show settings to allow configuration of cast endpoints.
@@ -13651,13 +13682,6 @@ public final class Settings {
          * @hide
          */
         public static final String KERNEL_CPU_THREAD_READER = "kernel_cpu_thread_reader";
-
-        /**
-         * Default user id to boot into. They map to user ids, for example, 10, 11, 12.
-         *
-         * @hide
-         */
-        public static final String DEFAULT_USER_ID_TO_BOOT_INTO = "default_boot_into_user_id";
 
         /**
          * Persistent user id that is last logged in to.

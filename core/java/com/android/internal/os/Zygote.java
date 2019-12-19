@@ -151,6 +151,9 @@ public final class Zygote {
     /** Make the new process have top application priority. */
     public static final String START_AS_TOP_APP_ARG = "--is-top-app";
 
+    /** List of packages with the same uid, and its app data info: volume uuid and inode. */
+    public static final String PKG_DATA_INFO_MAP = "--pkg-data-info-map";
+
     /**
      * An extraArg passed when a zygote process is forking a child-zygote, specifying a name
      * in the abstract socket namespace. This socket name is what the new child zygote
@@ -254,6 +257,8 @@ public final class Zygote {
      * @param instructionSet null-ok the instruction set to use.
      * @param appDataDir null-ok the data directory of the app.
      * @param isTopApp true if the process is for top (high priority) application.
+     * @param pkgDataInfoList A list that stores related packages and its app data
+     * info: volume uuid and inode.
      *
      * @return 0 if this is the child, pid of the child
      * if this is the parent, or -1 on error.
@@ -261,12 +266,13 @@ public final class Zygote {
     static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
             int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir,
-            int targetSdkVersion, boolean isTopApp) {
+            int targetSdkVersion, boolean isTopApp, String[] pkgDataInfoList) {
         ZygoteHooks.preFork();
 
         int pid = nativeForkAndSpecialize(
                 uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
-                fdsToIgnore, startChildZygote, instructionSet, appDataDir, isTopApp);
+                fdsToIgnore, startChildZygote, instructionSet, appDataDir, isTopApp,
+                pkgDataInfoList);
         // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
             Zygote.disableExecuteOnly(targetSdkVersion);
@@ -286,7 +292,7 @@ public final class Zygote {
     private static native int nativeForkAndSpecialize(int uid, int gid, int[] gids,
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
             int[] fdsToClose, int[] fdsToIgnore, boolean startChildZygote, String instructionSet,
-            String appDataDir, boolean isTopApp);
+            String appDataDir, boolean isTopApp, String[] pkgDataInfoList);
 
     /**
      * Specialize an unspecialized app process.  The current VM must have been started
@@ -309,12 +315,16 @@ public final class Zygote {
      * @param instructionSet null-ok  The instruction set to use.
      * @param appDataDir null-ok  The data directory of the app.
      * @param isTopApp  True if the process is for top (high priority) application.
+     * @param pkgDataInfoList A list that stores related packages and its app data
+     * info: volume uuid and inode.
      */
     private static void specializeAppProcess(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName,
-            boolean startChildZygote, String instructionSet, String appDataDir, boolean isTopApp) {
+            boolean startChildZygote, String instructionSet, String appDataDir, boolean isTopApp,
+            String[] pkgDataInfoList) {
         nativeSpecializeAppProcess(uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo,
-                niceName, startChildZygote, instructionSet, appDataDir, isTopApp);
+                niceName, startChildZygote, instructionSet, appDataDir, isTopApp,
+                pkgDataInfoList);
 
         // Enable tracing as soon as possible for the child process.
         Trace.setTracingEnabled(true, runtimeFlags);
@@ -336,7 +346,8 @@ public final class Zygote {
 
     private static native void nativeSpecializeAppProcess(int uid, int gid, int[] gids,
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
-            boolean startChildZygote, String instructionSet, String appDataDir, boolean isTopApp);
+            boolean startChildZygote, String instructionSet, String appDataDir, boolean isTopApp,
+            String[] pkgDataInfoList);
 
     /**
      * Called to do any initialization before starting an application.
@@ -665,7 +676,8 @@ public final class Zygote {
             specializeAppProcess(args.mUid, args.mGid, args.mGids,
                                  args.mRuntimeFlags, rlimits, args.mMountExternal,
                                  args.mSeInfo, args.mNiceName, args.mStartChildZygote,
-                                 args.mInstructionSet, args.mAppDataDir, args.mIsTopApp);
+                                 args.mInstructionSet, args.mAppDataDir, args.mIsTopApp,
+                                 args.mPkgDataInfoList);
 
             disableExecuteOnly(args.mTargetSdkVersion);
 

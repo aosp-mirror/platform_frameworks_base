@@ -221,6 +221,12 @@ class ZygoteArguments {
     long[] mDisabledCompatChanges = null;
 
     /**
+     * A list that stores all related packages and its data info: volume uuid and inode.
+     * Null if it does need to do app data isolation.
+     */
+    String[] mPkgDataInfoList;
+
+    /**
      * Constructs instance and parses args
      *
      * @param args zygote command-line args
@@ -437,6 +443,8 @@ class ZygoteArguments {
                 for (int i = 0; i < length; i++) {
                     mDisabledCompatChanges[i] = Long.parseLong(params[i]);
                 }
+            } else if (arg.startsWith(Zygote.PKG_DATA_INFO_MAP)) {
+                mPkgDataInfoList = getAssignmentList(arg);
             } else {
                 break;
             }

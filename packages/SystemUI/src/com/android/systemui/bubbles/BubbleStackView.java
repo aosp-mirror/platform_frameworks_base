@@ -516,14 +516,7 @@ public class BubbleStackView extends FrameLayout {
      * Handle theme changes.
      */
     public void onThemeChanged() {
-        // Recreate icon factory to update default adaptive icon scale.
-        mBubbleIconFactory = new BubbleIconFactory(mContext);
         setUpFlyout();
-        for (Bubble b: mBubbleData.getBubbles()) {
-            b.getIconView().setBubbleIconFactory(mBubbleIconFactory);
-            b.getIconView().updateViews();
-            b.getExpandedView().applyThemeAttrs();
-        }
     }
 
     /** Respond to the phone being rotated by repositioning the stack and hiding any flyouts. */
@@ -748,10 +741,6 @@ public class BubbleStackView extends FrameLayout {
         if (mBubbleContainer.getChildCount() == 0) {
             mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
         }
-
-        bubble.setBubbleIconFactory(mBubbleIconFactory);
-        bubble.inflate(mInflater, this);
-        bubble.getIconView().updateViews();
 
         // Set the dot position to the opposite of the side the stack is resting on, since the stack
         // resting slightly off-screen would result in the dot also being off-screen.
@@ -1567,9 +1556,6 @@ public class BubbleStackView extends FrameLayout {
 
         mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
         if (mIsExpanded) {
-            // First update the view so that it calculates a new height (ensuring the y position
-            // calculation is correct)
-            mExpandedBubble.getExpandedView().updateView();
             final float y = getExpandedViewY();
             if (!mExpandedViewYAnim.isRunning()) {
                 // We're not animating so set the value

@@ -32,10 +32,10 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 
 import org.junit.Before;
@@ -63,7 +63,7 @@ public class RankingCoordinatorTest extends SysuiTestCase {
 
         ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
         mRankingCoordinator.attach(null, mNotifListBuilder);
-        verify(mNotifListBuilder, times(1)).addFilter(filterCaptor.capture());
+        verify(mNotifListBuilder, times(1)).addPreGroupFilter(filterCaptor.capture());
         mRankingFilter = filterCaptor.getValue();
     }
 

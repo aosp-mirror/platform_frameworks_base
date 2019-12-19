@@ -88,13 +88,14 @@ public class NotifEvent extends RichEvent {
             START_BUILD_LIST,
             DISPATCH_FINAL_LIST,
             LIST_BUILD_COMPLETE,
-            FILTER_INVALIDATED,
+            PRE_GROUP_FILTER_INVALIDATED,
             PROMOTER_INVALIDATED,
             SECTIONS_PROVIDER_INVALIDATED,
             COMPARATOR_INVALIDATED,
             PARENT_CHANGED,
             FILTER_CHANGED,
             PROMOTER_CHANGED,
+            PRE_RENDER_FILTER_INVALIDATED,
 
             // NotificationEntryManager events:
             NOTIF_ADDED,
@@ -127,6 +128,7 @@ public class NotifEvent extends RichEvent {
                     "ParentChanged",
                     "FilterChanged",
                     "PromoterChanged",
+                    "FinalFilterInvalidated",
 
                     // NEM event labels:
                     "NotifAdded",
@@ -152,14 +154,15 @@ public class NotifEvent extends RichEvent {
     public static final int START_BUILD_LIST = 2;
     public static final int DISPATCH_FINAL_LIST = 3;
     public static final int LIST_BUILD_COMPLETE = 4;
-    public static final int FILTER_INVALIDATED = 5;
+    public static final int PRE_GROUP_FILTER_INVALIDATED = 5;
     public static final int PROMOTER_INVALIDATED = 6;
     public static final int SECTIONS_PROVIDER_INVALIDATED = 7;
     public static final int COMPARATOR_INVALIDATED = 8;
     public static final int PARENT_CHANGED = 9;
     public static final int FILTER_CHANGED = 10;
     public static final int PROMOTER_CHANGED = 11;
-    private static final int TOTAL_LIST_BUILDER_EVENT_TYPES = 12;
+    public static final int PRE_RENDER_FILTER_INVALIDATED = 12;
+    private static final int TOTAL_LIST_BUILDER_EVENT_TYPES = 13;
 
     /**
      * Events related to {@link NotificationEntryManager}

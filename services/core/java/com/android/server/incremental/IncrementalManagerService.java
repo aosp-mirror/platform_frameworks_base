@@ -19,6 +19,8 @@ package com.android.server.incremental;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.DataLoaderManager;
+import android.content.pm.DataLoaderParamsParcel;
+import android.content.pm.FileSystemControlParcel;
 import android.content.pm.IDataLoader;
 import android.content.pm.IDataLoaderStatusListener;
 import android.os.Bundle;
@@ -27,8 +29,6 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.incremental.IIncrementalManager;
-import android.os.incremental.IncrementalDataLoaderParamsParcel;
-import android.os.incremental.IncrementalFileSystemControlParcel;
 import android.util.Slog;
 
 import java.io.FileDescriptor;
@@ -80,8 +80,8 @@ public class IncrementalManagerService extends IIncrementalManager.Stub  {
      * Finds data loader service provider and binds to it. This requires PackageManager.
      */
     @Override
-    public boolean prepareDataLoader(int mountId, IncrementalFileSystemControlParcel control,
-            IncrementalDataLoaderParamsParcel params,
+    public boolean prepareDataLoader(int mountId, FileSystemControlParcel control,
+            DataLoaderParamsParcel params,
             IDataLoaderStatusListener listener) {
         Bundle dataLoaderParams = new Bundle();
         dataLoaderParams.putCharSequence("packageName", params.packageName);
@@ -137,10 +137,6 @@ public class IncrementalManagerService extends IIncrementalManager.Stub  {
         if (dataLoader == null) {
             Slog.e(TAG, "Failed to retrieve data loader for ID=" + mountId);
             return;
-        }
-        try {
-            dataLoader.onFileCreated(inode, metadata);
-        } catch (RemoteException ex) {
         }
     }
 

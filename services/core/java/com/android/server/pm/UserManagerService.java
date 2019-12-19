@@ -84,7 +84,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.IntArray;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -1510,7 +1509,7 @@ public class UserManagerService extends IUserManager.Stub {
     public void setUserIcon(@UserIdInt int userId, Bitmap bitmap) {
         checkManageUsersPermission("update users");
         if (hasUserRestriction(UserManager.DISALLOW_SET_USER_ICON, userId)) {
-            Log.w(LOG_TAG, "Cannot set user icon. DISALLOW_SET_USER_ICON is enabled.");
+            Slog.w(LOG_TAG, "Cannot set user icon. DISALLOW_SET_USER_ICON is enabled.");
             return;
         }
         mLocalService.setUserIcon(userId, bitmap);
@@ -1558,7 +1557,7 @@ public class UserManagerService extends IUserManager.Stub {
             return ParcelFileDescriptor.open(
                     new File(iconPath), ParcelFileDescriptor.MODE_READ_ONLY);
         } catch (FileNotFoundException e) {
-            Log.e(LOG_TAG, "Couldn't find icon file", e);
+            Slog.e(LOG_TAG, "Couldn't find icon file", e);
         }
         return null;
     }
@@ -1656,7 +1655,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         if (DBG) {
-            Log.d(LOG_TAG, "setDevicePolicyUserRestrictions: "
+            Slog.d(LOG_TAG, "setDevicePolicyUserRestrictions: "
                     + " originatingUserId=" + originatingUserId
                     + " global=" + global + (globalChanged ? " (changed)" : "")
                     + " local=" + local + (localChanged ? " (changed)" : "")
@@ -1718,7 +1717,7 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mRestrictionsLock")
     private void invalidateEffectiveUserRestrictionsLR(@UserIdInt int userId) {
         if (DBG) {
-            Log.d(LOG_TAG, "invalidateEffectiveUserRestrictions userId=" + userId);
+            Slog.d(LOG_TAG, "invalidateEffectiveUserRestrictions userId=" + userId);
         }
         mCachedEffectiveUserRestrictions.remove(userId);
     }
@@ -1940,7 +1939,7 @@ public class UserManagerService extends IUserManager.Stub {
                     try {
                         mAppOpsService.setUserRestrictions(effective, mUserRestriconToken, userId);
                     } catch (RemoteException e) {
-                        Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
+                        Slog.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
                     }
                 }
             });
@@ -2012,7 +2011,7 @@ public class UserManagerService extends IUserManager.Stub {
                 try {
                     runningUsers = ActivityManager.getService().getRunningUserIds();
                 } catch (RemoteException e) {
-                    Log.w(LOG_TAG, "Unable to access ActivityManagerService");
+                    Slog.w(LOG_TAG, "Unable to access ActivityManagerService");
                     return;
                 }
                 // Then re-calculate the effective restrictions and apply, only for running users.
@@ -2596,7 +2595,7 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
         } catch (Resources.NotFoundException e) {
-            Log.e(LOG_TAG, "Couldn't find resource: config_defaultFirstUserRestrictions", e);
+            Slog.e(LOG_TAG, "Couldn't find resource: config_defaultFirstUserRestrictions", e);
         }
 
         if (!restrictions.isEmpty()) {
@@ -3056,7 +3055,7 @@ public class UserManagerService extends IUserManager.Stub {
                 ? UserManager.DISALLOW_ADD_MANAGED_PROFILE
                 : UserManager.DISALLOW_ADD_USER;
         if (hasUserRestriction(restriction, UserHandle.getCallingUserId())) {
-            Log.w(LOG_TAG, "Cannot add user. " + restriction + " is enabled.");
+            Slog.w(LOG_TAG, "Cannot add user. " + restriction + " is enabled.");
             return null;
         }
         return createUserInternalUnchecked(name, userType, flags, parentId,
@@ -3115,7 +3114,7 @@ public class UserManagerService extends IUserManager.Stub {
         DeviceStorageMonitorInternal dsm = LocalServices
                 .getService(DeviceStorageMonitorInternal.class);
         if (dsm.isMemoryLow()) {
-            Log.w(LOG_TAG, "Cannot add user. Not enough space on disk.");
+            Slog.w(LOG_TAG, "Cannot add user. Not enough space on disk.");
             return null;
         }
 
@@ -3138,36 +3137,36 @@ public class UserManagerService extends IUserManager.Stub {
                     if (parent == null) return null;
                 }
                 if (!preCreate && !canAddMoreUsersOfType(userTypeDetails)) {
-                    Log.e(LOG_TAG, "Cannot add more users of type " + userType
+                    Slog.e(LOG_TAG, "Cannot add more users of type " + userType
                             + ". Maximum number of that type already exists.");
                     return null;
                 }
                 // TODO(b/142482943): Perhaps let the following code apply to restricted users too.
                 if (isProfile && !canAddMoreProfilesToUser(userType, parentId, false)) {
-                    Log.e(LOG_TAG, "Cannot add more profiles of type " + userType
+                    Slog.e(LOG_TAG, "Cannot add more profiles of type " + userType
                             + " for user " + parentId);
                     return null;
                 }
                 if (!isGuest && !isProfile && !isDemo && isUserLimitReached()) {
                     // If we're not adding a guest/demo user or a profile and the 'user limit' has
                     // been reached, cannot add a user.
-                    Log.e(LOG_TAG, "Cannot add user. Maximum user limit is reached.");
+                    Slog.e(LOG_TAG, "Cannot add user. Maximum user limit is reached.");
                     return null;
                 }
                 // In legacy mode, restricted profile's parent can only be the owner user
                 if (isRestricted && !UserManager.isSplitSystemUser()
                         && (parentId != UserHandle.USER_SYSTEM)) {
-                    Log.w(LOG_TAG, "Cannot add restricted profile - parent user must be owner");
+                    Slog.w(LOG_TAG, "Cannot add restricted profile - parent user must be owner");
                     return null;
                 }
                 if (isRestricted && UserManager.isSplitSystemUser()) {
                     if (parent == null) {
-                        Log.w(LOG_TAG, "Cannot add restricted profile - parent user must be "
+                        Slog.w(LOG_TAG, "Cannot add restricted profile - parent user must be "
                                 + "specified");
                         return null;
                     }
                     if (!parent.info.canHaveProfile()) {
-                        Log.w(LOG_TAG, "Cannot add restricted profile - profiles cannot be "
+                        Slog.w(LOG_TAG, "Cannot add restricted profile - profiles cannot be "
                                 + "created for the specified parent user id " + parentId);
                         return null;
                     }
@@ -3318,7 +3317,7 @@ public class UserManagerService extends IUserManager.Stub {
                     + Integer.toHexString(preCreatedUser.flags) + ").");
             return null;
         }
-        Log.i(LOG_TAG, "Reusing pre-created user " + preCreatedUser.id + " of type "
+        Slog.i(LOG_TAG, "Reusing pre-created user " + preCreatedUser.id + " of type "
                 + userType + " and bestowing on it flags " + UserInfo.flagsToString(flags));
         preCreatedUser.name = name;
         preCreatedUser.flags = newFlags;
@@ -3483,7 +3482,7 @@ public class UserManagerService extends IUserManager.Stub {
         checkManageUsersPermission("Only the system can remove users");
         if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(
                 UserManager.DISALLOW_REMOVE_USER, false)) {
-            Log.w(LOG_TAG, "Cannot remove user. DISALLOW_REMOVE_USER is enabled.");
+            Slog.w(LOG_TAG, "Cannot remove user. DISALLOW_REMOVE_USER is enabled.");
             return false;
         }
 
@@ -3535,7 +3534,7 @@ public class UserManagerService extends IUserManager.Stub {
         String restriction = isManagedProfile
                 ? UserManager.DISALLOW_REMOVE_MANAGED_PROFILE : UserManager.DISALLOW_REMOVE_USER;
         if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
-            Log.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
+            Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
             return false;
         }
         return removeUserUnchecked(userId);
@@ -3553,25 +3552,25 @@ public class UserManagerService extends IUserManager.Stub {
             final UserData userData;
             int currentUser = ActivityManager.getCurrentUser();
             if (currentUser == userId) {
-                Log.w(LOG_TAG, "Current user cannot be removed.");
+                Slog.w(LOG_TAG, "Current user cannot be removed.");
                 return false;
             }
             synchronized (mPackagesLock) {
                 synchronized (mUsersLock) {
                     userData = mUsers.get(userId);
                     if (userId == UserHandle.USER_SYSTEM) {
-                        Log.e(LOG_TAG, "System user cannot be removed.");
+                        Slog.e(LOG_TAG, "System user cannot be removed.");
                         return false;
                     }
 
                     if (userData == null) {
-                        Log.e(LOG_TAG, String.format(
+                        Slog.e(LOG_TAG, String.format(
                                 "Cannot remove user %d, invalid user id provided.", userId));
                         return false;
                     }
 
                     if (mRemovingUserIds.get(userId)) {
-                        Log.e(LOG_TAG, String.format(
+                        Slog.e(LOG_TAG, String.format(
                                 "User %d is already scheduled for removal.", userId));
                         return false;
                     }
@@ -3591,7 +3590,7 @@ public class UserManagerService extends IUserManager.Stub {
             try {
                 mAppOpsService.removeUser(userId);
             } catch (RemoteException e) {
-                Log.w(LOG_TAG, "Unable to notify AppOpsService of removing user.", e);
+                Slog.w(LOG_TAG, "Unable to notify AppOpsService of removing user.", e);
             }
 
             // TODO(b/142482943): Send some sort of broadcast for profiles even if non-managed?
@@ -3616,7 +3615,7 @@ public class UserManagerService extends IUserManager.Stub {
                             }
                         });
             } catch (RemoteException e) {
-                Log.w(LOG_TAG, "Failed to stop user during removal.", e);
+                Slog.w(LOG_TAG, "Failed to stop user during removal.", e);
                 return false;
             }
             return res == ActivityManager.USER_OP_SUCCESS;
@@ -3828,7 +3827,7 @@ public class UserManagerService extends IUserManager.Stub {
                 readEntry(restrictions, values, parser);
             }
         } catch (IOException|XmlPullParserException e) {
-            Log.w(LOG_TAG, "Error parsing " + restrictionsFile.getBaseFile(), e);
+            Slog.w(LOG_TAG, "Error parsing " + restrictionsFile.getBaseFile(), e);
         } finally {
             IoUtils.closeQuietly(fis);
         }
@@ -4862,8 +4861,8 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private static void debug(String message) {
-        Log.d(LOG_TAG, message +
-                (DBG_WITH_STACKTRACE ? " called at\n" + Debug.getCallers(10, "  ") : ""));
+        Slog.d(LOG_TAG, message
+                + (DBG_WITH_STACKTRACE ? " called at\n" + Debug.getCallers(10, "  ") : ""));
     }
 
     /** @see #getMaxUsersOfTypePerParent(UserTypeDetails) */

@@ -23,7 +23,6 @@ import android.util.ArrayMap;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.util.Preconditions;
 
 import java.util.Locale;
 import java.util.Map;
@@ -66,9 +65,9 @@ public final class GenerateLinksLogger {
     /** Logs statistics about a call to generateLinks. */
     public void logGenerateLinks(CharSequence text, TextLinks links, String callingPackageName,
             long latencyMs) {
-        Preconditions.checkNotNull(text);
-        Preconditions.checkNotNull(links);
-        Preconditions.checkNotNull(callingPackageName);
+        Objects.requireNonNull(text);
+        Objects.requireNonNull(links);
+        Objects.requireNonNull(callingPackageName);
         if (!shouldLog()) {
             return;
         }

@@ -23,7 +23,6 @@ import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -51,7 +50,7 @@ public final class ModelFileManager {
     private List<ModelFile> mModelFiles;
 
     public ModelFileManager(Supplier<List<ModelFile>> modelFileSupplier) {
-        mModelFileSupplier = Preconditions.checkNotNull(modelFileSupplier);
+        mModelFileSupplier = Objects.requireNonNull(modelFileSupplier);
     }
 
     /**
@@ -106,12 +105,12 @@ public final class ModelFileManager {
                 File updatedModelFile,
                 Function<Integer, Integer> versionSupplier,
                 Function<Integer, String> supportedLocalesSupplier) {
-            mUpdatedModelFile = Preconditions.checkNotNull(updatedModelFile);
-            mFactoryModelDir = Preconditions.checkNotNull(factoryModelDir);
+            mUpdatedModelFile = Objects.requireNonNull(updatedModelFile);
+            mFactoryModelDir = Objects.requireNonNull(factoryModelDir);
             mModelFilenamePattern = Pattern.compile(
-                    Preconditions.checkNotNull(factoryModelFileNameRegex));
-            mVersionSupplier = Preconditions.checkNotNull(versionSupplier);
-            mSupportedLocalesSupplier = Preconditions.checkNotNull(supportedLocalesSupplier);
+                    Objects.requireNonNull(factoryModelFileNameRegex));
+            mVersionSupplier = Objects.requireNonNull(versionSupplier);
+            mSupportedLocalesSupplier = Objects.requireNonNull(supportedLocalesSupplier);
         }
 
         @Override
@@ -208,10 +207,10 @@ public final class ModelFileManager {
         public ModelFile(File file, int version, List<Locale> supportedLocales,
                 String supportedLocalesStr,
                 boolean languageIndependent) {
-            mFile = Preconditions.checkNotNull(file);
+            mFile = Objects.requireNonNull(file);
             mVersion = version;
-            mSupportedLocales = Preconditions.checkNotNull(supportedLocales);
-            mSupportedLocalesStr = Preconditions.checkNotNull(supportedLocalesStr);
+            mSupportedLocales = Objects.requireNonNull(supportedLocales);
+            mSupportedLocalesStr = Objects.requireNonNull(supportedLocalesStr);
             mLanguageIndependent = languageIndependent;
         }
 
@@ -232,7 +231,7 @@ public final class ModelFileManager {
 
         /** Returns whether the language supports any language in the given ranges. */
         public boolean isAnyLanguageSupported(List<Locale.LanguageRange> languageRanges) {
-            Preconditions.checkNotNull(languageRanges);
+            Objects.requireNonNull(languageRanges);
             return mLanguageIndependent || Locale.lookup(languageRanges, mSupportedLocales) != null;
         }
 

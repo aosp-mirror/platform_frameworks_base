@@ -16,10 +16,10 @@
 
 package com.android.incremental.nativeadb;
 
-import android.service.incremental.IncrementalDataLoaderService;
+import android.service.dataloader.DataLoaderService;
 
 /** This code is used for testing only. */
-public class NativeAdbDataLoaderService extends IncrementalDataLoaderService {
+public class NativeAdbDataLoaderService extends DataLoaderService {
     public static final String TAG = "NativeAdbDataLoaderService";
     static {
         System.loadLibrary("nativeadbdataloaderservice_jni");

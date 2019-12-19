@@ -38,6 +38,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a list of actions suggested by a {@link TextClassifier} on a given conversation.
@@ -66,7 +67,7 @@ public final class ConversationActions implements Parcelable {
     public ConversationActions(
             @NonNull List<ConversationAction> conversationActions, @Nullable String id) {
         mConversationActions =
-                Collections.unmodifiableList(Preconditions.checkNotNull(conversationActions));
+                Collections.unmodifiableList(Objects.requireNonNull(conversationActions));
         mId = id;
     }
 
@@ -149,7 +150,7 @@ public final class ConversationActions implements Parcelable {
             mAuthor = author;
             mReferenceTime = referenceTime;
             mText = text;
-            mExtras = Preconditions.checkNotNull(bundle);
+            mExtras = Objects.requireNonNull(bundle);
         }
 
         private Message(Parcel in) {
@@ -243,7 +244,7 @@ public final class ConversationActions implements Parcelable {
              *               {@link #PERSON_USER_OTHERS} to represent a remote user.
              */
             public Builder(@NonNull Person author) {
-                mAuthor = Preconditions.checkNotNull(author);
+                mAuthor = Objects.requireNonNull(author);
             }
 
             /** Sets the text of this message. */
@@ -329,8 +330,8 @@ public final class ConversationActions implements Parcelable {
                 int maxSuggestions,
                 @Nullable @Hint List<String> hints,
                 @NonNull Bundle extras) {
-            mConversation = Preconditions.checkNotNull(conversation);
-            mTypeConfig = Preconditions.checkNotNull(typeConfig);
+            mConversation = Objects.requireNonNull(conversation);
+            mTypeConfig = Objects.requireNonNull(typeConfig);
             mMaxSuggestions = maxSuggestions;
             mHints = hints;
             mExtras = extras;
@@ -483,7 +484,7 @@ public final class ConversationActions implements Parcelable {
              *     actions for.
              */
             public Builder(@NonNull List<Message> conversation) {
-                mConversation = Preconditions.checkNotNull(conversation);
+                mConversation = Objects.requireNonNull(conversation);
             }
 
             /**

@@ -46,7 +46,7 @@ public class RankingCoordinator implements Coordinator {
     public void attach(NotifCollection notifCollection, NotifListBuilder notifListBuilder) {
         mStatusBarStateController.addCallback(mStatusBarStateCallback);
 
-        notifListBuilder.addFilter(mNotifFilter);
+        notifListBuilder.addPreGroupFilter(mNotifFilter);
     }
 
     /**

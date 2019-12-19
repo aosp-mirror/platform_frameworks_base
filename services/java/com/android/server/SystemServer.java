@@ -105,6 +105,7 @@ import com.android.server.emergency.EmergencyAffordanceService;
 import com.android.server.gpu.GpuService;
 import com.android.server.hdmi.HdmiControlService;
 import com.android.server.incident.IncidentCompanionService;
+import com.android.server.incremental.IncrementalManagerService;
 import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
 import com.android.server.inputmethod.InputMethodSystemProperty;
@@ -209,8 +210,8 @@ public final class SystemServer {
             "com.android.server.print.PrintManagerService";
     private static final String COMPANION_DEVICE_MANAGER_SERVICE_CLASS =
             "com.android.server.companion.CompanionDeviceManagerService";
-    private static final String STATS_COMPANION_SERVICE_LIFECYCLE_CLASS =
-            "com.android.server.stats.StatsCompanionService$Lifecycle";
+    private static final String STATS_COMPANION_LIFECYCLE_CLASS =
+            "com.android.server.stats.StatsCompanion$Lifecycle";
     private static final String USB_SERVICE_CLASS =
             "com.android.server.usb.UsbService$Lifecycle";
     private static final String MIDI_SERVICE_CLASS =
@@ -324,6 +325,7 @@ public final class SystemServer {
     private ContentResolver mContentResolver;
     private EntropyMixer mEntropyMixer;
     private DataLoaderManagerService mDataLoaderManagerService;
+    private IncrementalManagerService mIncrementalManagerService;
 
     private boolean mOnlyCore;
     private boolean mFirstBoot;
@@ -704,6 +706,11 @@ public final class SystemServer {
         t.traceBegin("StartDataLoaderManagerService");
         mDataLoaderManagerService = mSystemServiceManager.startService(
                 DataLoaderManagerService.class);
+        t.traceEnd();
+
+        // Incremental service needs to be started before package manager
+        t.traceBegin("StartIncrementalManagerService");
+        mIncrementalManagerService = IncrementalManagerService.start(mSystemContext);
         t.traceEnd();
 
         // Power manager needs to be started early because other services need it.
@@ -1955,8 +1962,8 @@ public final class SystemServer {
         }
 
         // Statsd helper
-        t.traceBegin("StartStatsCompanionService");
-        mSystemServiceManager.startService(STATS_COMPANION_SERVICE_LIFECYCLE_CLASS);
+        t.traceBegin("StartStatsCompanion");
+        mSystemServiceManager.startService(STATS_COMPANION_LIFECYCLE_CLASS);
         t.traceEnd();
 
         // Incidentd and dumpstated helper
@@ -2065,6 +2072,12 @@ public final class SystemServer {
         t.traceBegin("MakePackageManagerServiceReady");
         mPackageManagerService.systemReady();
         t.traceEnd();
+
+        if (mIncrementalManagerService != null) {
+            t.traceBegin("MakeIncrementalManagerServiceReady");
+            mIncrementalManagerService.systemReady();
+            t.traceEnd();
+        }
 
         t.traceBegin("MakeDisplayManagerServiceReady");
         try {

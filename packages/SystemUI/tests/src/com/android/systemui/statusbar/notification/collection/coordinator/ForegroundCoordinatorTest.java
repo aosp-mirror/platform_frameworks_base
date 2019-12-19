@@ -36,11 +36,11 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.appops.AppOpsController;
-import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifLifetimeExtender;
 import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 
 import org.junit.Before;
@@ -85,7 +85,7 @@ public class ForegroundCoordinatorTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(NotifLifetimeExtender.class);
 
         mForegroundCoordinator.attach(mNotifCollection, mNotifListBuilder);
-        verify(mNotifListBuilder, times(1)).addFilter(filterCaptor.capture());
+        verify(mNotifListBuilder, times(1)).addPreGroupFilter(filterCaptor.capture());
         verify(mNotifCollection, times(1)).addNotificationLifetimeExtender(
                 lifetimeExtenderCaptor.capture());
 

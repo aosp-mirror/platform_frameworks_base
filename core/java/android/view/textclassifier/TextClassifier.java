@@ -46,6 +46,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -193,7 +194,7 @@ public interface TextClassifier {
     @WorkerThread
     @NonNull
     default TextSelection suggestSelection(@NonNull TextSelection.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         return new TextSelection.Builder(request.getStartIndex(), request.getEndIndex()).build();
     }
@@ -252,7 +253,7 @@ public interface TextClassifier {
     @WorkerThread
     @NonNull
     default TextClassification classifyText(@NonNull TextClassification.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         return TextClassification.EMPTY;
     }
@@ -313,7 +314,7 @@ public interface TextClassifier {
     @WorkerThread
     @NonNull
     default TextLinks generateLinks(@NonNull TextLinks.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         return new TextLinks.Builder(request.getText().toString()).build();
     }
@@ -346,7 +347,7 @@ public interface TextClassifier {
     @WorkerThread
     @NonNull
     default TextLanguage detectLanguage(@NonNull TextLanguage.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         return TextLanguage.EMPTY;
     }
@@ -358,7 +359,7 @@ public interface TextClassifier {
     @NonNull
     default ConversationActions suggestConversationActions(
             @NonNull ConversationActions.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         return new ConversationActions(Collections.emptyList(), null);
     }
@@ -427,9 +428,9 @@ public interface TextClassifier {
                 List<String> excludedEntityTypes,
                 List<String> hints,
                 boolean includeTypesFromTextClassifier) {
-            mIncludedTypes = Preconditions.checkNotNull(includedEntityTypes);
-            mExcludedTypes = Preconditions.checkNotNull(excludedEntityTypes);
-            mHints = Preconditions.checkNotNull(hints);
+            mIncludedTypes = Objects.requireNonNull(includedEntityTypes);
+            mExcludedTypes = Objects.requireNonNull(excludedEntityTypes);
+            mHints = Objects.requireNonNull(hints);
             mIncludeTypesFromTextClassifier = includeTypesFromTextClassifier;
         }
 

@@ -16,6 +16,7 @@
 
 package android.test.mock;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
@@ -208,6 +209,15 @@ public class MockContext extends Context {
 
     @Override
     public File getFilesDir() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc Context#getCrateDir()}
+     * @hide
+     */
+    @Override
+    public File getCrateDir(@NonNull String crateId) {
         throw new UnsupportedOperationException();
     }
 

@@ -26,7 +26,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -483,6 +483,103 @@ public class TelecomManager {
      */
     public static final String EXTRA_START_CALL_WITH_RTT =
             "android.telecom.extra.START_CALL_WITH_RTT";
+
+    /**
+     * Start an activity indicating that the completion of an outgoing call or an incoming call
+     * which was not blocked by the {@link CallScreeningService}, and which was NOT terminated
+     * while the call was in {@link Call#STATE_AUDIO_PROCESSING}.
+     *
+     * The {@link Uri} extra {@link #EXTRA_HANDLE} will contain the uri handle(phone number) for the
+     * call which completed.
+     *
+     * The integer extra {@link #EXTRA_DISCONNECT_CAUSE} will indicate the reason for the call
+     * disconnection. See {@link #EXTRA_DISCONNECT_CAUSE} for more information.
+     *
+     * The integer extra {@link #EXTRA_CALL_DURATION} will indicate the duration of the call. See
+     * {@link #EXTRA_CALL_DURATION} for more information.
+     */
+    public static final String ACTION_POST_CALL = "android.telecom.action.POST_CALL";
+
+    /**
+     * A {@link Uri} extra, which when set on the {@link #ACTION_POST_CALL} intent, indicates the
+     * uri handle(phone number) of the completed call.
+     */
+    public static final String EXTRA_HANDLE = "android.telecom.extra.HANDLE";
+
+    /**
+     * A integer value provided for completed calls to indicate the reason for the call
+     * disconnection.
+     * <p>
+     * Allowed values:
+     * <ul>
+     * <li>{@link DisconnectCause#UNKNOWN}</li>
+     * <li>{@link DisconnectCause#LOCAL}</li>
+     * <li>{@link DisconnectCause#REMOTE}</li>
+     * <li>{@link DisconnectCause#REJECTED}</li>
+     * <li>{@link DisconnectCause#MISSED}</li>
+     * </ul>
+     * </p>
+     */
+    public static final String EXTRA_DISCONNECT_CAUSE = "android.telecom.extra.DISCONNECT_CAUSE";
+
+    /**
+     * A integer value provided for completed calls to indicate the duration of the call.
+     * <p>
+     * Allowed values:
+     * <ul>
+     * <li>{@link #DURATION_VERY_SHORT}</li>
+     * <li>{@link #DURATION_SHORT}</li>
+     * <li>{@link #DURATION_MEDIUM}</li>
+     * <li>{@link #DURATION_LONG}</li>
+     * </ul>
+     * </p>
+     */
+    public static final String EXTRA_CALL_DURATION = "android.telecom.extra.CALL_DURATION";
+
+    /**
+     * A integer value for {@link #EXTRA_CALL_DURATION}, indicates the duration of the completed
+     * call was < 3 seconds.
+     */
+    public static final int DURATION_VERY_SHORT = 0;
+
+    /**
+     * A integer value for {@link #EXTRA_CALL_DURATION}, indicates the duration of the completed
+     * call was >= 3 seconds and < 60 seconds.
+     */
+    public static final int DURATION_SHORT = 1;
+
+    /**
+     * A integer value for {@link #EXTRA_CALL_DURATION}, indicates the duration of the completed
+     * call was >= 60 seconds and < 120 seconds.
+     */
+    public static final int DURATION_MEDIUM = 2;
+
+    /**
+     * A integer value for {@link #EXTRA_CALL_DURATION}, indicates the duration of the completed
+     * call was >= 120 seconds.
+     */
+    public static final int DURATION_LONG = 3;
+
+    /**
+     * The threshold between {@link #DURATION_VERY_SHORT} calls and {@link #DURATION_SHORT} calls in
+     * milliseconds.
+     * @hide
+     */
+    public static final long VERY_SHORT_CALL_TIME_MS = 3000;
+
+    /**
+     * The threshold between {@link #DURATION_SHORT} calls and {@link #DURATION_MEDIUM} calls in
+     * milliseconds.
+     * @hide
+     */
+    public static final long SHORT_CALL_TIME_MS = 60000;
+
+    /**
+     * The threshold between {@link #DURATION_MEDIUM} calls and {@link #DURATION_LONG} calls in
+     * milliseconds.
+     * @hide
+     */
+    public static final long MEDIUM_CALL_TIME_MS = 120000;
 
     /**
      * A boolean meta-data value indicating whether an {@link InCallService} implements an

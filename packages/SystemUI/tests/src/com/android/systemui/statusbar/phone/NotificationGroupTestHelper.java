@@ -26,8 +26,8 @@ import android.content.Context;
 import android.os.UserHandle;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**

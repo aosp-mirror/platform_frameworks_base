@@ -41,7 +41,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.logWithStack;
-import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 
 import android.annotation.CallSuper;
@@ -70,7 +69,6 @@ import android.view.animation.Animation;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
-import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 
@@ -243,6 +241,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     final Point mTmpPoint = new Point();
     protected final Rect mTmpRect = new Rect();
     final Rect mTmpPrevBounds = new Rect();
+
+    private MagnificationSpec mLastMagnificationSpec;
 
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
@@ -1726,10 +1726,22 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (shouldMagnify()) {
             t.setMatrix(mSurfaceControl, spec.scale, 0, 0, spec.scale)
                     .setPosition(mSurfaceControl, spec.offsetX, spec.offsetY);
+            mLastMagnificationSpec = spec;
         } else {
             for (int i = 0; i < mChildren.size(); i++) {
                 mChildren.get(i).applyMagnificationSpec(t, spec);
             }
+        }
+    }
+
+    void clearMagnificationSpec(Transaction t) {
+        if (mLastMagnificationSpec != null) {
+            t.setMatrix(mSurfaceControl, 1, 0, 0, 1)
+                .setPosition(mSurfaceControl, 0, 0);
+        }
+        mLastMagnificationSpec = null;
+        for (int i = 0; i < mChildren.size(); i++) {
+            mChildren.get(i).clearMagnificationSpec(t);
         }
     }
 
@@ -2151,15 +2163,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void waitForAllWindowsDrawn() {
-        final WindowManagerPolicy policy = mWmService.mPolicy;
         forAllWindows(w -> {
-            final boolean keyguard = policy.isKeyguardHostWindow(w.mAttrs);
-            if (w.isVisibleLw() && (w.mActivityRecord != null || keyguard)) {
-                w.mWinAnimator.mDrawState = DRAW_PENDING;
-                // Force add to mResizingWindows.
-                w.resetLastContentInsets();
-                mWaitingForDrawn.add(w);
-            }
+            w.requestDrawIfNeeded(mWaitingForDrawn);
         }, true /* traverseTopToBottom */);
     }
 

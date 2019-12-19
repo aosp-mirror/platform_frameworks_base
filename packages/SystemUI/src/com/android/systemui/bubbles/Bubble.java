@@ -16,6 +16,7 @@
 package com.android.systemui.bubbles;
 
 
+import static android.os.AsyncTask.Status.FINISHED;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
@@ -26,20 +27,17 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
@@ -59,19 +57,19 @@ class Bubble {
     private NotificationEntry mEntry;
     private final String mKey;
     private final String mGroupId;
-    private String mAppName;
-    private Drawable mUserBadgedAppIcon;
-    private ShortcutInfo mShortcutInfo;
-
-    private boolean mInflated;
-    private BadgedImageView mIconView;
-    private BubbleExpandedView mExpandedView;
-    private BubbleIconFactory mBubbleIconFactory;
 
     private long mLastUpdated;
     private long mLastAccessed;
 
-    private boolean mIsUserCreated;
+    // Items that are typically loaded later
+    private String mAppName;
+    private ShortcutInfo mShortcutInfo;
+    private BadgedImageView mIconView;
+    private BubbleExpandedView mExpandedView;
+
+    private boolean mInflated;
+    private BubbleViewInfoTask mInflationTask;
+    private boolean mInflateSynchronously;
 
     /**
      * Whether this notification should be shown in the shade when it is also displayed as a bubble.
@@ -94,37 +92,11 @@ class Bubble {
 
     /** Used in tests when no UI is required. */
     @VisibleForTesting(visibility = PRIVATE)
-    Bubble(Context context, NotificationEntry e) {
+    Bubble(NotificationEntry e) {
         mEntry = e;
         mKey = e.getKey();
         mLastUpdated = e.getSbn().getPostTime();
         mGroupId = groupId(e);
-
-        String shortcutId = e.getSbn().getNotification().getShortcutId();
-        if (BubbleExperimentConfig.useShortcutInfoToBubble(context)
-                && shortcutId != null) {
-            mShortcutInfo = BubbleExperimentConfig.getShortcutInfo(context,
-                    e.getSbn().getPackageName(),
-                    e.getSbn().getUser(), shortcutId);
-        }
-
-        PackageManager pm = context.getPackageManager();
-        ApplicationInfo info;
-        try {
-            info = pm.getApplicationInfo(
-                mEntry.getSbn().getPackageName(),
-                PackageManager.MATCH_UNINSTALLED_PACKAGES
-                    | PackageManager.MATCH_DISABLED_COMPONENTS
-                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                    | PackageManager.MATCH_DIRECT_BOOT_AWARE);
-            if (info != null) {
-                mAppName = String.valueOf(pm.getApplicationLabel(info));
-            }
-            Drawable appIcon = pm.getApplicationIcon(mEntry.getSbn().getPackageName());
-            mUserBadgedAppIcon = pm.getUserBadgedIcon(appIcon, mEntry.getSbn().getUser());
-        } catch (PackageManager.NameNotFoundException unused) {
-            mAppName = mEntry.getSbn().getPackageName();
-        }
     }
 
     public String getKey() {
@@ -143,12 +115,9 @@ class Bubble {
         return mEntry.getSbn().getPackageName();
     }
 
+    @Nullable
     public String getAppName() {
         return mAppName;
-    }
-
-    Drawable getUserBadgedAppIcon() {
-        return mUserBadgedAppIcon;
     }
 
     @Nullable
@@ -156,28 +125,12 @@ class Bubble {
         return mShortcutInfo;
     }
 
-    /**
-     * Whether shortcut information should be used to populate the bubble.
-     * <p>
-     * To populate the activity use {@link LauncherApps#startShortcut(ShortcutInfo, Rect, Bundle)}.
-     * To populate the icon use {@link LauncherApps#getShortcutIconDrawable(ShortcutInfo, int)}.
-     */
-    public boolean usingShortcutInfo() {
-        return BubbleExperimentConfig.isShortcutIntent(getBubbleIntent());
-    }
-
-    void setBubbleIconFactory(BubbleIconFactory factory) {
-        mBubbleIconFactory = factory;
-    }
-
-    boolean isInflated() {
-        return mInflated;
-    }
-
+    @Nullable
     BadgedImageView getIconView() {
         return mIconView;
     }
 
+    @Nullable
     BubbleExpandedView getExpandedView() {
         return mExpandedView;
     }
@@ -188,20 +141,62 @@ class Bubble {
         }
     }
 
-    void inflate(LayoutInflater inflater, BubbleStackView stackView) {
-        if (mInflated) {
-            return;
+    /**
+     * Sets whether to perform inflation on the same thread as the caller. This method should only
+     * be used in tests, not in production.
+     */
+    @VisibleForTesting
+    void setInflateSynchronously(boolean inflateSynchronously) {
+        mInflateSynchronously = inflateSynchronously;
+    }
+
+    /**
+     * Starts a task to inflate & load any necessary information to display a bubble.
+     *
+     * @param callback the callback to notify one the bubble is ready to be displayed.
+     * @param context the context for the bubble.
+     * @param stackView the stackView the bubble is eventually added to.
+     * @param iconFactory the iconfactory use to create badged images for the bubble.
+     */
+    void inflate(BubbleViewInfoTask.Callback callback,
+            Context context,
+            BubbleStackView stackView,
+            BubbleIconFactory iconFactory) {
+        if (isBubbleLoading()) {
+            mInflationTask.cancel(true /* mayInterruptIfRunning */);
         }
-        mIconView = (BadgedImageView) inflater.inflate(
-                R.layout.bubble_view, stackView, false /* attachToRoot */);
-        mIconView.setBubbleIconFactory(mBubbleIconFactory);
-        mIconView.setBubble(this);
+        mInflationTask = new BubbleViewInfoTask(this,
+                context,
+                stackView,
+                iconFactory,
+                callback);
+        if (mInflateSynchronously) {
+            mInflationTask.onPostExecute(mInflationTask.doInBackground());
+        } else {
+            mInflationTask.execute();
+        }
+    }
 
-        mExpandedView = (BubbleExpandedView) inflater.inflate(
-                R.layout.bubble_expanded_view, stackView, false /* attachToRoot */);
-        mExpandedView.setBubble(this, stackView);
+    private boolean isBubbleLoading() {
+        return mInflationTask != null && mInflationTask.getStatus() != FINISHED;
+    }
 
-        mInflated = true;
+    boolean isInflated() {
+        return mInflated;
+    }
+
+    void setViewInfo(BubbleViewInfoTask.BubbleViewInfo info) {
+        if (!isInflated()) {
+            mIconView = info.imageView;
+            mExpandedView = info.expandedView;
+            mInflated = true;
+        }
+
+        mShortcutInfo = info.shortcutInfo;
+        mAppName = info.appName;
+
+        mExpandedView.update(this);
+        mIconView.update(this, info.badgedBubbleImage, info.dotColor, info.dotPath);
     }
 
     /**
@@ -218,13 +213,12 @@ class Bubble {
         }
     }
 
-    void updateEntry(NotificationEntry entry) {
+    /**
+     * Sets the entry associated with this bubble.
+     */
+    void setEntry(NotificationEntry entry) {
         mEntry = entry;
         mLastUpdated = entry.getSbn().getPostTime();
-        if (mInflated) {
-            mIconView.update(this);
-            mExpandedView.update(this);
-        }
     }
 
     /**
@@ -239,13 +233,6 @@ class Bubble {
      */
     long getLastUpdateTime() {
         return mLastUpdated;
-    }
-
-    /**
-     * @return the timestamp in milliseconds when this bubble was last displayed in expanded state
-     */
-    long getLastAccessTime() {
-        return mLastAccessed;
     }
 
     /**
@@ -350,6 +337,16 @@ class Bubble {
         } else {
             return String.valueOf(data.getDesiredHeight());
         }
+    }
+
+    /**
+     * Whether shortcut information should be used to populate the bubble.
+     * <p>
+     * To populate the activity use {@link LauncherApps#startShortcut(ShortcutInfo, Rect, Bundle)}.
+     * To populate the icon use {@link LauncherApps#getShortcutIconDrawable(ShortcutInfo, int)}.
+     */
+    boolean usingShortcutInfo() {
+        return BubbleExperimentConfig.isShortcutIntent(getBubbleIntent());
     }
 
     @Nullable

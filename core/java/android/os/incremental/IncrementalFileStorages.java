@@ -35,6 +35,7 @@ import static dalvik.system.VMRuntime.getInstructionSet;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.DataLoaderParams;
 import android.content.pm.InstallationFile;
 import android.os.IVold;
 import android.os.RemoteException;
@@ -82,12 +83,12 @@ public final class IncrementalFileStorages {
     public IncrementalFileStorages(@NonNull String packageName,
             @NonNull File stageDir,
             @NonNull IncrementalManager incrementalManager,
-            @NonNull IncrementalDataLoaderParams incrementalDataLoaderParams) {
+            @NonNull DataLoaderParams dataLoaderParams) {
         mPackageName = packageName;
         mStageDir = stageDir;
         mIncrementalManager = incrementalManager;
-        if (incrementalDataLoaderParams.getPackageName().equals("local")) {
-            final String incrementalPath = incrementalDataLoaderParams.getStaticArgs();
+        if (dataLoaderParams.getPackageName().equals("local")) {
+            final String incrementalPath = dataLoaderParams.getStaticArgs();
             mDefaultStorage = mIncrementalManager.openStorage(incrementalPath);
             mDefaultDir = incrementalPath;
             return;
@@ -97,7 +98,7 @@ public final class IncrementalFileStorages {
             return;
         }
         mDefaultStorage = mIncrementalManager.createStorage(mDefaultDir,
-                incrementalDataLoaderParams,
+                dataLoaderParams,
                 IncrementalManager.CREATE_MODE_CREATE
                         | IncrementalManager.CREATE_MODE_TEMPORARY_BIND, false);
     }
@@ -265,7 +266,7 @@ public final class IncrementalFileStorages {
     }
 
     private String getTempDir() {
-        final String tmpDirRoot = "/data/tmp";
+        final String tmpDirRoot = "/data/incremental/tmp";
         final Random random = new Random();
         final Path tmpDir =
                 Paths.get(tmpDirRoot, String.valueOf(random.nextInt(Integer.MAX_VALUE - 1)));

@@ -252,6 +252,16 @@ public class ContextWrapper extends Context {
         return mBase.getFilesDir();
     }
 
+    /**
+     * {@inheritDoc Context#getCrateDir()}
+     * @hide
+     */
+    @NonNull
+    @Override
+    public File getCrateDir(@NonNull String cratedId) {
+        return mBase.getCrateDir(cratedId);
+    }
+
     @Override
     public File getNoBackupFilesDir() {
         return mBase.getNoBackupFilesDir();

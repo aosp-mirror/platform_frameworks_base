@@ -152,6 +152,8 @@ import android.os.Vibrator;
 import android.os.health.SystemHealthManager;
 import android.os.image.DynamicSystemManager;
 import android.os.image.IDynamicSystemService;
+import android.os.incremental.IIncrementalManagerNative;
+import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
@@ -1224,6 +1226,20 @@ public final class SystemServiceRegistry {
                         IBinder b = ServiceManager.getServiceOrThrow(
                                 Context.DATA_LOADER_MANAGER_SERVICE);
                         return new DataLoaderManager(IDataLoaderManager.Stub.asInterface(b));
+                    }});
+        //TODO(b/136132412): refactor this: 1) merge IIncrementalManager.aidl and
+        //IIncrementalManagerNative.aidl, 2) implement the binder interface in
+        //IncrementalManagerService.java, 3) use JNI to call native functions
+        registerService(Context.INCREMENTAL_SERVICE, IncrementalManager.class,
+                new CachedServiceFetcher<IncrementalManager>() {
+                    @Override
+                    public IncrementalManager createService(ContextImpl ctx) {
+                        IBinder b = ServiceManager.getService(Context.INCREMENTAL_SERVICE);
+                        if (b == null) {
+                            return null;
+                        }
+                        return new IncrementalManager(
+                                IIncrementalManagerNative.Stub.asInterface(b));
                     }});
         //CHECKSTYLE:ON IndentationCheck
 

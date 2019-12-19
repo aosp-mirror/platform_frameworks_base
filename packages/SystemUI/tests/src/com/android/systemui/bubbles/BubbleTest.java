@@ -28,8 +28,8 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +58,7 @@ public class BubbleTest extends SysuiTestCase {
         mEntry = new NotificationEntryBuilder()
                 .setNotification(mNotif)
                 .build();
-        mBubble = new Bubble(mContext, mEntry);
+        mBubble = new Bubble(mEntry);
     }
 
     @Test

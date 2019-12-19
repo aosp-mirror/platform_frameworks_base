@@ -697,6 +697,7 @@ package android.content {
   public abstract class Context {
     method @NonNull public android.content.Context createContextAsUser(@NonNull android.os.UserHandle, int);
     method @NonNull public android.content.Context createPackageContextAsUser(@NonNull String, int, @NonNull android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public java.io.File getCrateDir(@NonNull String);
     method public abstract android.view.Display getDisplay();
     method public abstract int getDisplayId();
     method public android.os.UserHandle getUser();
@@ -2467,14 +2468,9 @@ package android.provider {
   }
 
   public final class MediaStore {
-    method @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA) public static void deleteContributedMedia(android.content.Context, String, android.os.UserHandle) throws java.io.IOException;
-    method @RequiresPermission(android.Manifest.permission.CLEAR_APP_USER_DATA) public static long getContributedMediaSize(android.content.Context, String, android.os.UserHandle) throws java.io.IOException;
-    method @NonNull public static java.io.File getVolumePath(@NonNull String) throws java.io.FileNotFoundException;
-    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE) public static java.util.Collection<java.io.File> getVolumeScanPaths(@NonNull String) throws java.io.FileNotFoundException;
-    method public static android.net.Uri scanFile(android.content.Context, java.io.File);
-    method public static android.net.Uri scanFileFromShell(android.content.Context, java.io.File);
-    method public static void scanVolume(android.content.Context, java.io.File);
-    method public static void waitForIdle(android.content.Context);
+    method @NonNull public static android.net.Uri scanFile(@NonNull android.content.ContentResolver, @NonNull java.io.File);
+    method public static void scanVolume(@NonNull android.content.ContentResolver, @NonNull String);
+    method public static void waitForIdle(@NonNull android.content.ContentResolver);
   }
 
   public final class Settings {

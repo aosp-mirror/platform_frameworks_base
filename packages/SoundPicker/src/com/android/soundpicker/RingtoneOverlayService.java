@@ -101,7 +101,7 @@ public class RingtoneOverlayService extends Service {
     }
 
     private Uri scanFile(@NonNull final File file) {
-        return MediaStore.scanFile(this, file);
+        return MediaStore.scanFile(getContentResolver(), file);
     }
 
     private void set(@NonNull final String name, @NonNull final Uri uri) {

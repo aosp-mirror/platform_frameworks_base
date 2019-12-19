@@ -32,7 +32,8 @@ import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassifier;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
+
+import java.util.Objects;
 
 /**
  * Helper class to store the information from which RemoteActions are built.
@@ -86,9 +87,9 @@ public final class LabeledIntent {
         }
         this.titleWithoutEntity = titleWithoutEntity;
         this.titleWithEntity = titleWithEntity;
-        this.description = Preconditions.checkNotNull(description);
+        this.description = Objects.requireNonNull(description);
         this.descriptionWithAppName = descriptionWithAppName;
-        this.intent = Preconditions.checkNotNull(intent);
+        this.intent = Objects.requireNonNull(intent);
         this.requestCode = requestCode;
     }
 
@@ -198,8 +199,8 @@ public final class LabeledIntent {
         public final RemoteAction remoteAction;
 
         public Result(Intent resolvedIntent, RemoteAction remoteAction) {
-            this.resolvedIntent = Preconditions.checkNotNull(resolvedIntent);
-            this.remoteAction = Preconditions.checkNotNull(remoteAction);
+            this.resolvedIntent = Objects.requireNonNull(resolvedIntent);
+            this.remoteAction = Objects.requireNonNull(remoteAction);
         }
     }
 

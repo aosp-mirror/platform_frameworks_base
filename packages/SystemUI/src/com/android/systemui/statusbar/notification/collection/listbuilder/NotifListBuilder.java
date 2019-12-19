@@ -59,11 +59,12 @@ import java.util.List;
 public interface NotifListBuilder {
 
     /**
-     * Registers a filter with the pipeline. Filters are called on each notification in the order
-     * that they were registered. If any filter returns true, the notification is removed from the
-     * pipeline (and no other filters are called on that notif).
+     * Registers a filter with the pipeline before grouping, promoting and sorting occurs. Filters
+     * are called on each notification in the order that they were registered. If any filter
+     * returns true, the notification is removed from the pipeline (and no other filters are
+     * called on that notif).
      */
-    void addFilter(NotifFilter filter);
+    void addPreGroupFilter(NotifFilter filter);
 
     /**
      * Registers a promoter with the pipeline. Promoters are able to promote child notifications to
@@ -89,6 +90,15 @@ public interface NotifListBuilder {
      * zero, the pipeline falls back to sorting by rank (and, failing that, Notification.when).
      */
     void setComparators(List<NotifComparator> comparators);
+
+    /**
+     * Registers a filter with the pipeline to filter right before rendering the list (after
+     * pre-group filtering, grouping, promoting and sorting occurs). Filters are
+     * called on each notification in the order that they were registered. If any filter returns
+     * true, the notification is removed from the pipeline (and no other filters are called on that
+     * notif).
+     */
+    void addPreRenderFilter(NotifFilter filter);
 
     /**
      * Called after notifications have been filtered and after the initial grouping has been
