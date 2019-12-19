@@ -2394,10 +2394,14 @@ public class WifiConfiguration implements Parcelable {
         return key;
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * Get the IpConfiguration object associated with this WifiConfiguration.
+     * @hide
+     */
+    @NonNull
+    @SystemApi
     public IpConfiguration getIpConfiguration() {
-        return mIpConfiguration;
+        return new IpConfiguration(mIpConfiguration);
     }
 
     /**
