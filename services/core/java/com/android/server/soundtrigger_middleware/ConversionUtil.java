@@ -40,7 +40,6 @@ import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
 import android.os.HidlMemoryUtil;
 
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Utilities for type conversion between SoundTrigger HAL types and SoundTriggerMiddleware service
@@ -60,7 +59,8 @@ class ConversionUtil {
         aidlProperties.maxSoundModels = hidlProperties.maxSoundModels;
         aidlProperties.maxKeyPhrases = hidlProperties.maxKeyPhrases;
         aidlProperties.maxUsers = hidlProperties.maxUsers;
-        aidlProperties.recognitionModes = hidlProperties.recognitionModes;
+        aidlProperties.recognitionModes =
+                hidl2aidlRecognitionModes(hidlProperties.recognitionModes);
         aidlProperties.captureTransition = hidlProperties.captureTransition;
         aidlProperties.maxBufferMs = hidlProperties.maxBufferMs;
         aidlProperties.concurrentCapture = hidlProperties.concurrentCapture;
