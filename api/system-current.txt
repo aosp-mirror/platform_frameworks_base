@@ -4299,6 +4299,13 @@ package android.net {
     method public void setValidatedPrivateDnsServers(@NonNull java.util.Collection<java.net.InetAddress>);
   }
 
+  public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
+    ctor public MatchAllNetworkSpecifier();
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.MatchAllNetworkSpecifier> CREATOR;
+  }
+
   public class Network implements android.os.Parcelable {
     ctor public Network(@NonNull android.net.Network);
     method @NonNull public android.net.Network getPrivateDnsBypassingCopy();
