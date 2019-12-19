@@ -7992,6 +7992,30 @@ public class TelephonyManager {
     }
 
     /**
+     * Get the PLMN chosen for Manual Network Selection if active.
+     * Return empty string if in automatic selection.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
+     * READ_PRECISE_PHONE_STATE} or that the calling app has carrier privileges
+     * (see {@link #hasCarrierPrivileges})
+     *
+     * @return manually selected network info on success or empty string on failure
+     */
+    @SuppressAutoDoc // No support carrier privileges (b/72967236).
+    @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE)
+    public @NonNull String getManualNetworkSelectionPlmn() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null && isManualNetworkSelectionAllowed()) {
+                return telephony.getManualNetworkSelectionPlmn(getSubId());
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getManualNetworkSelectionPlmn RemoteException", ex);
+        }
+        return "";
+    }
+
+    /**
      * Query Telephony to see if there has recently been an emergency SMS sent to the network by the
      * user and we are still within the time interval after the emergency SMS was sent that we are
      * considered in Emergency SMS mode.
@@ -11043,15 +11067,18 @@ public class TelephonyManager {
     /**
      * Checks if manual network selection is allowed.
      *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
+     * READ_PRECISE_PHONE_STATE} or that the calling app has carrier privileges
+     * (see {@link #hasCarrierPrivileges})
+     *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
      * @return {@code true} if manual network selection is allowed, otherwise return {@code false}.
-     *
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SuppressAutoDoc // No support carrier privileges (b/72967236).
+    @RequiresPermission(anyOf = {android.Manifest.permission.READ_PRECISE_PHONE_STATE,
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE})
     public boolean isManualNetworkSelectionAllowed() {
         try {
             ITelephony telephony = getITelephony();
