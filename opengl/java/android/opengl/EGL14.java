@@ -18,11 +18,11 @@
 
 package android.opengl;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.SurfaceTexture;
 import android.view.Surface;
-import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.SurfaceHolder;
 
 /**
  * EGL 1.4

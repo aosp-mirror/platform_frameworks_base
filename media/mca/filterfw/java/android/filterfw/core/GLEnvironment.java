@@ -17,12 +17,13 @@
 
 package android.filterfw.core;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.UnsupportedAppUsage;
+import android.filterfw.core.NativeAllocatorTag;
 import android.graphics.SurfaceTexture;
-import android.media.MediaRecorder;
 import android.os.Looper;
 import android.util.Log;
 import android.view.Surface;
+import android.media.MediaRecorder;
 
 /**
  * @hide
