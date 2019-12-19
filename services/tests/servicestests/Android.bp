@@ -26,6 +26,7 @@ android_test {
         "services.core",
         "services.devicepolicy",
         "services.net",
+        "services.people",
         "services.usage",
         "guava",
         "androidx.test.core",
