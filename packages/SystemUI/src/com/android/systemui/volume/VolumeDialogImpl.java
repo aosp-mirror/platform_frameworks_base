@@ -160,6 +160,7 @@ public class VolumeDialogImpl implements VolumeDialog,
     private boolean mHovering = false;
     private boolean mShowActiveStreamOnly;
     private boolean mConfigChanged = false;
+    private boolean mIsAnimatingDismiss = false;
     private boolean mHasSeenODICaptionsTooltip;
     private ViewStub mODICaptionsTooltipViewStub;
     private View mODICaptionsTooltipView = null;
@@ -693,6 +694,7 @@ public class VolumeDialogImpl implements VolumeDialog,
 
         initSettingsH();
         mShowing = true;
+        mIsAnimatingDismiss = false;
         mDialog.show();
         Events.writeEvent(Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
         mController.notifyVisible(true);
@@ -737,6 +739,10 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
         mHandler.removeMessages(H.DISMISS);
         mHandler.removeMessages(H.SHOW);
+        if (mIsAnimatingDismiss) {
+            return;
+        }
+        mIsAnimatingDismiss = true;
         mDialogView.animate().cancel();
         if (mShowing) {
             mShowing = false;
@@ -752,6 +758,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                 .withEndAction(() -> mHandler.postDelayed(() -> {
                     mDialog.dismiss();
                     tryToRemoveCaptionsTooltip();
+                    mIsAnimatingDismiss = false;
                 }, 50));
         if (!isLandscape()) animator.translationX(mDialogView.getWidth() / 2.0f);
         animator.start();
