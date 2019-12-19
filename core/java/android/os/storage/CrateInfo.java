@@ -234,7 +234,7 @@ public final class CrateInfo implements Parcelable {
     }
 
     @NonNull
-    public static final Creator<CrateInfo> CREATOR = new Creator<>() {
+    public static final Creator<CrateInfo> CREATOR = new Creator<CrateInfo>() {
         @NonNull
         @Override
         public CrateInfo createFromParcel(@NonNull Parcel in) {
