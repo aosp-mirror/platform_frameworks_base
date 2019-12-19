@@ -39,6 +39,7 @@ public class WifiNetworkSuggestionTest {
     private static final String TEST_SSID_1 = "\"Test1234\"";
     private static final String TEST_PRESHARED_KEY = "Test123";
     private static final String TEST_FQDN = "fqdn";
+    private static final String TEST_WAPI_CERT_SUITE = "suite";
 
     /**
      * Validate correctness of WifiNetworkSuggestion object created by
@@ -190,6 +191,87 @@ public class WifiNetworkSuggestionTest {
         // allowedSuiteBCiphers are set according to the loaded certificate and cannot be tested
         // here.
         assertTrue(suggestion.isUserAllowedToManuallyConnect);
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkSuggestion.Builder#build()} for WAPI-PSK network.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForWapiPskNetwork() {
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWapiPassphrase(TEST_PRESHARED_KEY)
+                .build();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.WAPI_PSK));
+        assertTrue(suggestion.wifiConfiguration.allowedPairwiseCiphers
+                .get(WifiConfiguration.PairwiseCipher.SMS4));
+        assertTrue(suggestion.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.SMS4));
+        assertEquals("\"" + TEST_PRESHARED_KEY + "\"",
+                suggestion.wifiConfiguration.preSharedKey);
+    }
+
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkSuggestion.Builder#build()} for WAPI-CERT network.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForWapiCertNetwork() {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.WAPI_CERT);
+        enterpriseConfig.setWapiCertSuite(TEST_WAPI_CERT_SUITE);
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWapiEnterpriseConfig(enterpriseConfig)
+                .build();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.WAPI_CERT));
+        assertTrue(suggestion.wifiConfiguration.allowedPairwiseCiphers
+                .get(WifiConfiguration.PairwiseCipher.SMS4));
+        assertTrue(suggestion.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.SMS4));
+        assertNull(suggestion.wifiConfiguration.preSharedKey);
+        assertNotNull(suggestion.wifiConfiguration.enterpriseConfig);
+        assertEquals(WifiEnterpriseConfig.Eap.WAPI_CERT,
+                suggestion.wifiConfiguration.enterpriseConfig.getEapMethod());
+        assertEquals(TEST_WAPI_CERT_SUITE,
+                suggestion.wifiConfiguration.enterpriseConfig.getWapiCertSuite());
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkSuggestion.Builder#build()} for WAPI-CERT network
+     * which selects the certificate suite automatically.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForWapiCertAutoNetwork() {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.WAPI_CERT);
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWapiEnterpriseConfig(enterpriseConfig)
+                .build();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.WAPI_CERT));
+        assertTrue(suggestion.wifiConfiguration.allowedPairwiseCiphers
+                .get(WifiConfiguration.PairwiseCipher.SMS4));
+        assertTrue(suggestion.wifiConfiguration.allowedGroupCiphers
+                .get(WifiConfiguration.GroupCipher.SMS4));
+        assertNull(suggestion.wifiConfiguration.preSharedKey);
+        assertNotNull(suggestion.wifiConfiguration.enterpriseConfig);
+        assertEquals(WifiEnterpriseConfig.Eap.WAPI_CERT,
+                suggestion.wifiConfiguration.enterpriseConfig.getEapMethod());
+        assertEquals("",
+                suggestion.wifiConfiguration.enterpriseConfig.getWapiCertSuite());
     }
 
     /**
