@@ -224,12 +224,25 @@ public final class StatsLog extends StatsLogInternal {
     /**
      * Write an event to stats log using the raw format.
      *
-     * @param buffer    The encoded buffer of data to write..
+     * @param buffer    The encoded buffer of data to write.
      * @param size      The number of bytes from the buffer to write.
      * @hide
      */
+    // TODO(b/144935988): Mark deprecated.
     @SystemApi
-    public static native void writeRaw(@NonNull byte[] buffer, int size);
+    public static void writeRaw(@NonNull byte[] buffer, int size) {
+        // TODO(b/144935988): make this no-op once clients have migrated to StatsEvent.
+        writeImpl(buffer, size, 0);
+    }
+
+    /**
+     * Write an event to stats log using the raw format.
+     *
+     * @param buffer    The encoded buffer of data to write.
+     * @param size      The number of bytes from the buffer to write.
+     * @param atomId    The id of the atom to which the event belongs.
+     */
+    private static native void writeImpl(@NonNull byte[] buffer, int size, int atomId);
 
     private static void enforceDumpCallingPermission(Context context) {
         context.enforceCallingPermission(android.Manifest.permission.DUMP, "Need DUMP permission.");
