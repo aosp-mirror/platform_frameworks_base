@@ -70,6 +70,22 @@ enum DumpLatency {
     NO_TIME_CONSTRAINTS = 2
 };
 
+// Keep this in sync with BucketDropReason enum in stats_log.proto
+enum BucketDropReason {
+    // For ValueMetric, a bucket is dropped during a dump report request iff
+    // current bucket should be included, a pull is needed (pulled metric and
+    // condition is true), and we are under fast time constraints.
+    DUMP_REPORT_REQUESTED = 1,
+    EVENT_IN_WRONG_BUCKET = 2,
+    CONDITION_UNKNOWN = 3,
+    PULL_FAILED = 4,
+    PULL_DELAYED = 5,
+    DIMENSION_GUARDRAIL_REACHED = 6,
+    MULTIPLE_BUCKETS_SKIPPED = 7,
+    // Not an invalid bucket case, but the bucket is dropped.
+    BUCKET_TOO_SMALL = 8
+};
+
 struct Activation {
     Activation(const ActivationType& activationType, const int64_t ttlNs)
         : ttl_ns(ttlNs),
@@ -81,6 +97,28 @@ struct Activation {
     int64_t start_ns;
     ActivationState state;
     const ActivationType activationType;
+};
+
+struct DropEvent {
+    // Reason for dropping the bucket and/or marking the bucket invalid.
+    BucketDropReason reason;
+    // The timestamp of the drop event.
+    int64_t dropTimeNs;
+};
+
+struct SkippedBucket {
+    // Start time of the dropped bucket.
+    int64_t bucketStartTimeNs;
+    // End time of the dropped bucket.
+    int64_t bucketEndTimeNs;
+    // List of events that invalidated this bucket.
+    std::vector<DropEvent> dropEvents;
+
+    void reset() {
+        bucketStartTimeNs = 0;
+        bucketEndTimeNs = 0;
+        dropEvents.clear();
+    }
 };
 
 // A MetricProducer is responsible for compute one single metrics, creating stats log report, and
@@ -342,6 +380,12 @@ protected:
     void getMappedStateValue(const int32_t atomId, const HashableDimensionKey& queryKey,
                              FieldValue* value);
 
+    DropEvent buildDropEvent(const int64_t dropTimeNs, const BucketDropReason reason);
+
+    // Returns true if the number of drop events in the current bucket has
+    // exceeded the maximum number allowed, which is currently capped at 10.
+    bool maxDropEventsReached();
+
     const int64_t mMetricId;
 
     const ConfigKey mConfigKey;
@@ -402,6 +446,10 @@ protected:
     // MetricStateLinks defined in statsd_config that link fields in the state
     // atom to fields in the "what" atom.
     std::vector<Metric2State> mMetric2StateLinks;
+
+    SkippedBucket mCurrentSkippedBucket;
+    // Buckets that were invalidated and had their data dropped.
+    std::vector<SkippedBucket> mSkippedBuckets;
 
     FRIEND_TEST(CountMetricE2eTest, TestSlicedState);
     FRIEND_TEST(CountMetricE2eTest, TestSlicedStateWithMap);

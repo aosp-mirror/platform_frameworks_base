@@ -18,6 +18,23 @@ namespace android {
 namespace os {
 namespace statsd {
 
+StatsLogReport outputStreamToProto(ProtoOutputStream* proto) {
+    vector<uint8_t> bytes;
+    bytes.resize(proto->size());
+    size_t pos = 0;
+    sp<ProtoReader> reader = proto->data();
+
+    while (reader->readBuffer() != NULL) {
+        size_t toRead = reader->currentToRead();
+        std::memcpy(&((bytes)[pos]), reader->readBuffer(), toRead);
+        pos += toRead;
+        reader->move(toRead);
+    }
+
+    StatsLogReport report;
+    report.ParseFromArray(bytes.data(), bytes.size());
+    return report;
+}
 
 AtomMatcher CreateSimpleAtomMatcher(const string& name, int atomId) {
     AtomMatcher atom_matcher;

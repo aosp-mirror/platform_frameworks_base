@@ -191,11 +191,40 @@ message StatsLogReport {
 
   // Fields 2 and 3 are reserved.
 
+  // Keep this in sync with BucketDropReason enum in MetricProducer.h.
+  enum BucketDropReason {
+      // For ValueMetric, a bucket is dropped during a dump report request iff
+      // current bucket should be included, a pull is needed (pulled metric and
+      // condition is true), and we are under fast time constraints.
+      DUMP_REPORT_REQUESTED = 1;
+      EVENT_IN_WRONG_BUCKET = 2;
+      CONDITION_UNKNOWN = 3;
+      PULL_FAILED = 4;
+      PULL_DELAYED = 5;
+      DIMENSION_GUARDRAIL_REACHED = 6;
+      MULTIPLE_BUCKETS_SKIPPED = 7;
+      // Not an invalid bucket case, but the bucket is dropped.
+      BUCKET_TOO_SMALL = 8;
+  };
+
+  message DropEvent {
+      optional BucketDropReason drop_reason = 1;
+
+      optional int64 drop_time_millis = 2;
+  }
+
   message SkippedBuckets {
       optional int64 start_bucket_elapsed_nanos = 1;
+
       optional int64 end_bucket_elapsed_nanos = 2;
+
       optional int64 start_bucket_elapsed_millis = 3;
+
       optional int64 end_bucket_elapsed_millis = 4;
+
+      // The number of drop events is capped by StatsdStats::kMaxLoggedBucketDropEvents.
+      // The current maximum is 10 drop events.
+      repeated DropEvent drop_event = 5;
   }
 
   message EventMetricDataWrapper {
