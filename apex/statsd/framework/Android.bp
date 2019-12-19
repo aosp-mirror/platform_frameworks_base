@@ -24,7 +24,7 @@ java_library {
     name: "framework-statsd",
     installable: true,
     // TODO(b/146209659): Use system_current instead.
-    sdk_version: "core_platform",
+    sdk_version: "core_current",
     srcs: [
         ":framework-statsd-sources",
     ],
