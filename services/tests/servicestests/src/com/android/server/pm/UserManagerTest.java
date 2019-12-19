@@ -104,13 +104,11 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     private void removeExistingUsers() {
+        int currentUser = ActivityManager.getCurrentUser();
         List<UserInfo> list = mUserManager.getUsers();
         for (UserInfo user : list) {
-            // Keep system and primary user.
-            // We do not have to keep primary user, but in split system user mode, we need it
-            // until http://b/22976637 is fixed.  Right now in split system user mode, you need to
-            // switch to primary user and run tests under primary user.
-            if (user.id != UserHandle.USER_SYSTEM && !user.isPrimary()) {
+            // Keep system and current user
+            if (user.id != UserHandle.USER_SYSTEM && user.id != currentUser) {
                 removeUser(user.id);
             }
         }
@@ -122,7 +120,7 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     @MediumTest
-    public void testAddUser() throws Exception {
+    public void testAddGuest() throws Exception {
         UserInfo userInfo = createUser("Guest 1", UserInfo.FLAG_GUEST);
         assertTrue(userInfo != null);
 
@@ -150,7 +148,7 @@ public class UserManagerTest extends AndroidTestCase {
         assertTrue(user1 != null);
         assertTrue(user2 != null);
 
-        assertTrue(findUser(0));
+        assertTrue(findUser(UserHandle.USER_SYSTEM));
         assertTrue(findUser(user1.id));
         assertTrue(findUser(user2.id));
     }
@@ -255,10 +253,10 @@ public class UserManagerTest extends AndroidTestCase {
 
 
     @MediumTest
-    public void testAddGuest() throws Exception {
+    public void testThereCanBeOnlyOneGuest() throws Exception {
         UserInfo userInfo1 = createUser("Guest 1", UserInfo.FLAG_GUEST);
-        UserInfo userInfo2 = createUser("Guest 2", UserInfo.FLAG_GUEST);
         assertNotNull(userInfo1);
+        UserInfo userInfo2 = createUser("Guest 2", UserInfo.FLAG_GUEST);
         assertNull(userInfo2);
     }
 
@@ -288,6 +286,7 @@ public class UserManagerTest extends AndroidTestCase {
 
     @MediumTest
     public void testGetProfileParent() throws Exception {
+        if (!supportsManagedProfiles()) return;
         final int primaryUserId = mUserManager.getPrimaryUser().id;
 
         UserInfo userInfo = createProfileForUser("Profile",
@@ -304,6 +303,7 @@ public class UserManagerTest extends AndroidTestCase {
     /** Test that UserManager returns the correct badge information for a managed profile. */
     @MediumTest
     public void testProfileTypeInformation() throws Exception {
+        if (!supportsManagedProfiles()) return;
         final UserTypeDetails userTypeDetails =
                 UserTypeFactory.getUserTypes().get(UserManager.USER_TYPE_PROFILE_MANAGED);
         assertNotNull("No " + UserManager.USER_TYPE_PROFILE_MANAGED + " type on device",
@@ -342,6 +342,7 @@ public class UserManagerTest extends AndroidTestCase {
     // Make sure only one managed profile can be created
     @MediumTest
     public void testAddManagedProfile() throws Exception {
+        if (!supportsManagedProfiles()) return;
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         UserInfo userInfo1 = createProfileForUser("Managed 1",
                 UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
@@ -363,6 +364,7 @@ public class UserManagerTest extends AndroidTestCase {
     // Verify that disallowed packages are not installed in the managed profile.
     @MediumTest
     public void testAddManagedProfile_withDisallowedPackages() throws Exception {
+        if (!supportsManagedProfiles()) return;
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         UserInfo userInfo1 = createProfileForUser("Managed1",
                 UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
@@ -386,6 +388,7 @@ public class UserManagerTest extends AndroidTestCase {
     // still be installed later.
     @MediumTest
     public void testAddManagedProfile_disallowedPackagesInstalledLater() throws Exception {
+        if (!supportsManagedProfiles()) return;
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         UserInfo userInfo = createProfileForUser("Managed",
                 UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId, PACKAGES);
@@ -406,21 +409,23 @@ public class UserManagerTest extends AndroidTestCase {
     // Make sure createUser would fail if we have DISALLOW_ADD_USER.
     @MediumTest
     public void testCreateUser_disallowAddUser() throws Exception {
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
-        final UserHandle primaryUserHandle = new UserHandle(primaryUserId);
-        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, primaryUserHandle);
+        final int creatorId = isAutomotive() ? ActivityManager.getCurrentUser()
+                : mUserManager.getPrimaryUser().id;
+        final UserHandle creatorHandle = new UserHandle(creatorId);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, creatorHandle);
         try {
-            UserInfo userInfo = createUser("SecondaryUser", /*flags=*/ 0);
-            assertNull(userInfo);
+            UserInfo createadInfo = createUser("SecondaryUser", /*flags=*/ 0);
+            assertNull(createadInfo);
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, false,
-                    primaryUserHandle);
+                    creatorHandle);
         }
     }
 
     // Make sure createProfile would fail if we have DISALLOW_ADD_MANAGED_PROFILE.
     @MediumTest
     public void testCreateProfileForUser_disallowAddManagedProfile() throws Exception {
+        if (!supportsManagedProfiles()) return;
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         final UserHandle primaryUserHandle = new UserHandle(primaryUserId);
         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
@@ -438,6 +443,7 @@ public class UserManagerTest extends AndroidTestCase {
     // Make sure createProfileEvenWhenDisallowedForUser bypass DISALLOW_ADD_MANAGED_PROFILE.
     @MediumTest
     public void testCreateProfileForUserEvenWhenDisallowed() throws Exception {
+        if (!supportsManagedProfiles()) return;
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         final UserHandle primaryUserHandle = new UserHandle(primaryUserId);
         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
@@ -455,6 +461,7 @@ public class UserManagerTest extends AndroidTestCase {
     // createProfile succeeds even if DISALLOW_ADD_USER is set
     @MediumTest
     public void testCreateProfileForUser_disallowAddUser() throws Exception {
+        if (!supportsManagedProfiles()) return;
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         final UserHandle primaryUserHandle = new UserHandle(primaryUserId);
         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, primaryUserHandle);
@@ -470,6 +477,7 @@ public class UserManagerTest extends AndroidTestCase {
 
     @MediumTest
     public void testAddRestrictedProfile() throws Exception {
+        if (isAutomotive()) return;
         assertFalse("There should be no associated restricted profiles before the test",
                 mUserManager.hasRestrictedProfiles());
         UserInfo userInfo = createRestrictedProfile("Profile");
@@ -494,6 +502,8 @@ public class UserManagerTest extends AndroidTestCase {
 
     @MediumTest
     public void testGetUserCreationTime() throws Exception {
+        // TODO: should add a regular user instead of a profile, so it can be tested everywhere
+        if (!supportsManagedProfiles()) return;
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         final long startTime = System.currentTimeMillis();
         UserInfo profile = createProfileForUser("Managed 1",
@@ -834,4 +844,13 @@ public class UserManagerTest extends AndroidTestCase {
         return profile;
     }
 
+    // TODO: use assumeTrue() instead (doesn't currently work because JUnit3 tests fail when test
+    // throws AssumptionViolatedException)
+    private boolean supportsManagedProfiles() {
+        return mPackageManager.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS);
+    }
+
+    private boolean isAutomotive() {
+        return mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+    }
 }
