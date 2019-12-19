@@ -16,7 +16,7 @@
 
 package android.bluetooth;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelUuid;
