@@ -124,6 +124,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ApplicationPackageManager;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
@@ -2721,6 +2722,7 @@ public class PackageManagerService extends IPackageManager.Stub
         t.traceBegin("get system config");
         SystemConfig systemConfig = SystemConfig.getInstance();
         mAvailableFeatures = systemConfig.getAvailableFeatures();
+        ApplicationPackageManager.invalidateSysFeatureCache();
         t.traceEnd();
 
         mProtectedPackages = new ProtectedPackages(mContext);
