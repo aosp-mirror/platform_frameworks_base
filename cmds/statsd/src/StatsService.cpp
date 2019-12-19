@@ -266,7 +266,9 @@ status_t StatsService::onTransact(uint32_t code, const Parcel& data, Parcel* rep
                     IResultReceiver::asInterface(data.readStrongBinder());
 
             err = command(in, out, err, args, resultReceiver);
-            resultReceiver->send(err);
+            if (resultReceiver != nullptr) {
+                resultReceiver->send(err);
+            }
             return NO_ERROR;
         }
         default: { return BnStatsManager::onTransact(code, data, reply, flags); }
@@ -411,12 +413,19 @@ status_t StatsService::command(int in, int out, int err, Vector<String8>& args,
             return cmd_trigger_active_config_broadcast(out, args);
         }
         if (!args[0].compare(String8("data-subscribe"))) {
-            if (mShellSubscriber == nullptr) {
-                mShellSubscriber = new ShellSubscriber(mUidMap, mPullerManager);
+            {
+                std::lock_guard<std::mutex> lock(mShellSubscriberMutex);
+                if (mShellSubscriber == nullptr) {
+                    mShellSubscriber = new ShellSubscriber(mUidMap, mPullerManager);
+                }
             }
             int timeoutSec = -1;
             if (argCount >= 2) {
                 timeoutSec = atoi(args[1].c_str());
+            }
+            if (resultReceiver == nullptr) {
+                ALOGI("Null resultReceiver given, no subscription will be started");
+                return UNEXPECTED_NULL;
             }
             mShellSubscriber->startNewSubscription(in, out, resultReceiver, timeoutSec);
             return NO_ERROR;
