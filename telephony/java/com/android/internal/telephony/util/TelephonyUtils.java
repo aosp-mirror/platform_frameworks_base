@@ -22,6 +22,8 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
+import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 
@@ -107,5 +109,32 @@ public final class TelephonyUtils {
         } finally {
             Binder.restoreCallingIdentity(callingIdentity);
         }
+    }
+
+    /**
+     * Filter values in bundle to only basic types.
+     */
+    public static Bundle filterValues(Bundle bundle) {
+        Bundle ret = new Bundle(bundle);
+        for (String key : bundle.keySet()) {
+            Object value = bundle.get(key);
+            if ((value instanceof Integer) || (value instanceof Long)
+                    || (value instanceof Double) || (value instanceof String)
+                    || (value instanceof int[]) || (value instanceof long[])
+                    || (value instanceof double[]) || (value instanceof String[])
+                    || (value instanceof PersistableBundle) || (value == null)
+                    || (value instanceof Boolean) || (value instanceof boolean[])) {
+                continue;
+            }
+            if (value instanceof Bundle) {
+                ret.putBundle(key, filterValues((Bundle) value));
+                continue;
+            }
+            if (value.getClass().getName().startsWith("android.")) {
+                continue;
+            }
+            ret.remove(key);
+        }
+        return ret;
     }
 }
