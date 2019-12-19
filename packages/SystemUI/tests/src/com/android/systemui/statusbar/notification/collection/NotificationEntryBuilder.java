@@ -140,6 +140,28 @@ public class NotificationEntryBuilder {
         return this;
     }
 
+    /* Delegated to Notification.Builder (via SbnBuilder) */
+
+    public NotificationEntryBuilder setContentTitle(Context context, String contentTitle) {
+        mSbnBuilder.setContentTitle(context, contentTitle);
+        return this;
+    }
+
+    public NotificationEntryBuilder setContentText(Context context, String contentText) {
+        mSbnBuilder.setContentText(context, contentText);
+        return this;
+    }
+
+    public NotificationEntryBuilder setGroup(Context context, String groupKey) {
+        mSbnBuilder.setGroup(context, groupKey);
+        return this;
+    }
+
+    public NotificationEntryBuilder setGroupSummary(Context context, boolean isGroupSummary) {
+        mSbnBuilder.setGroupSummary(context, isGroupSummary);
+        return this;
+    }
+
     /* Delegated to RankingBuilder */
 
     public NotificationEntryBuilder setRank(int rank) {

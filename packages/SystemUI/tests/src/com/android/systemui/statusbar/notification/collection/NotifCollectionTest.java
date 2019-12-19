@@ -24,7 +24,6 @@ import static com.android.systemui.statusbar.notification.collection.NotifCollec
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,9 +34,7 @@ import static org.mockito.Mockito.verify;
 import android.annotation.Nullable;
 import android.os.RemoteException;
 import android.service.notification.NotificationListenerService.Ranking;
-import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.NotificationStats;
-import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
@@ -50,6 +47,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotifServiceListener;
 import com.android.systemui.statusbar.RankingBuilder;
+import com.android.systemui.statusbar.notification.collection.NoManSimulator.NotifEvent;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
 import com.android.systemui.util.Assert;
 
@@ -101,13 +99,14 @@ public class NotifCollectionTest extends SysuiTestCase {
         verify(mListenerService).addNotificationListener(mListenerCaptor.capture());
         mServiceListener = Objects.requireNonNull(mListenerCaptor.getValue());
 
-        mNoMan = new NoManSimulator(mServiceListener);
+        mNoMan = new NoManSimulator();
+        mNoMan.addListener(mServiceListener);
     }
 
     @Test
     public void testEventDispatchedWhenNotifPosted() {
         // WHEN a notification is posted
-        PostedNotif notif1 = mNoMan.postNotif(
+        NotifEvent notif1 = mNoMan.postNotif(
                 buildNotif(TEST_PACKAGE, 3)
                         .setRank(4747));
 
@@ -127,7 +126,7 @@ public class NotifCollectionTest extends SysuiTestCase {
                 .setRank(4747));
 
         // WHEN the notif is reposted
-        PostedNotif notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 3)
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 3)
                 .setRank(89));
 
         // THEN the listener is notified
@@ -145,7 +144,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         mNoMan.postNotif(buildNotif(TEST_PACKAGE, 3));
         clearInvocations(mCollectionListener);
 
-        PostedNotif notif = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
+        NotifEvent notif = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
         NotificationEntry entry = mCollectionListener.getEntry(notif.key);
         clearInvocations(mCollectionListener);
 
@@ -161,7 +160,7 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Test
     public void testRankingsAreUpdatedForOtherNotifs() {
         // GIVEN a collection with one notif
-        PostedNotif notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 3)
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 3)
                 .setRank(47));
         NotificationEntry entry1 = mCollectionListener.getEntry(notif1.key);
 
@@ -178,11 +177,11 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Test
     public void testRankingUpdateIsProperlyIssuedToEveryone() {
         // GIVEN a collection with a couple notifs
-        PostedNotif notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 3)
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 3)
                 .setRank(3));
-        PostedNotif notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 8)
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 8)
                 .setRank(2));
-        PostedNotif notif3 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 77)
+        NotifEvent notif3 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 77)
                 .setRank(1));
 
         NotificationEntry entry1 = mCollectionListener.getEntry(notif1.key);
@@ -217,7 +216,7 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Test
     public void testNotifEntriesAreNotPersistedAcrossRemovalAndReposting() {
         // GIVEN a notification that has been posted
-        PostedNotif notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 3));
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 3));
         NotificationEntry entry1 = mCollectionListener.getEntry(notif1.key);
 
         // WHEN the notification is retracted and then reposted
@@ -234,8 +233,8 @@ public class NotifCollectionTest extends SysuiTestCase {
         // GIVEN a collection with a couple notifications and a lifetime extender
         mCollection.addNotificationLifetimeExtender(mExtender1);
 
-        PostedNotif notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
-        PostedNotif notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88, "barTag"));
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88, "barTag"));
         NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
 
         // WHEN a notification is manually dismissed
@@ -267,9 +266,9 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Test(expected = IllegalStateException.class)
     public void testDismissingNonExistentNotificationThrows() {
         // GIVEN a collection that originally had three notifs, but where one was dismissed
-        PostedNotif notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
-        PostedNotif notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
-        PostedNotif notif3 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 99));
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
+        NotifEvent notif3 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 99));
         NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
         mNoMan.retractNotif(notif2.sbn, REASON_UNKNOWN);
 
@@ -292,8 +291,8 @@ public class NotifCollectionTest extends SysuiTestCase {
         mCollection.addNotificationLifetimeExtender(mExtender2);
         mCollection.addNotificationLifetimeExtender(mExtender3);
 
-        PostedNotif notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
-        PostedNotif notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
         NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
 
         // WHEN a notification is removed
@@ -320,8 +319,8 @@ public class NotifCollectionTest extends SysuiTestCase {
         mCollection.addNotificationLifetimeExtender(mExtender2);
         mCollection.addNotificationLifetimeExtender(mExtender3);
 
-        PostedNotif notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
-        PostedNotif notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
         NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
 
         // GIVEN a notification gets lifetime-extended by one of them
@@ -357,8 +356,8 @@ public class NotifCollectionTest extends SysuiTestCase {
         mCollection.addNotificationLifetimeExtender(mExtender2);
         mCollection.addNotificationLifetimeExtender(mExtender3);
 
-        PostedNotif notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
-        PostedNotif notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
         NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
 
         // GIVEN a notification gets lifetime-extended by a couple of them
@@ -392,8 +391,8 @@ public class NotifCollectionTest extends SysuiTestCase {
         mCollection.addNotificationLifetimeExtender(mExtender2);
         mCollection.addNotificationLifetimeExtender(mExtender3);
 
-        PostedNotif notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
-        PostedNotif notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
         NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
 
         // GIVEN a notification gets lifetime-extended by a couple of them
@@ -422,8 +421,8 @@ public class NotifCollectionTest extends SysuiTestCase {
         mExtender1.shouldExtendLifetime = true;
         mExtender2.shouldExtendLifetime = true;
 
-        PostedNotif notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
-        PostedNotif notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
         NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
 
         // GIVEN a notification gets lifetime-extended by a couple of them
@@ -452,8 +451,8 @@ public class NotifCollectionTest extends SysuiTestCase {
         mExtender1.shouldExtendLifetime = true;
         mExtender2.shouldExtendLifetime = true;
 
-        PostedNotif notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
-        PostedNotif notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
         NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
 
         // GIVEN a notification gets lifetime-extended by a couple of them
@@ -481,8 +480,8 @@ public class NotifCollectionTest extends SysuiTestCase {
         mExtender1.shouldExtendLifetime = true;
         mExtender2.shouldExtendLifetime = true;
 
-        PostedNotif notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
-        PostedNotif notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
         NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
 
         // GIVEN a notification gets lifetime-extended by a couple of them
@@ -491,7 +490,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         clearInvocations(mExtender1, mExtender2, mExtender3);
 
         // WHEN the notification is reposted
-        PostedNotif notif2a = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88)
+        NotifEvent notif2a = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88)
                 .setRank(4747)
                 .setExplanation("Some new explanation"));
 
@@ -510,53 +509,6 @@ public class NotifCollectionTest extends SysuiTestCase {
         return new NotificationEntryBuilder()
                 .setPkg(pkg)
                 .setId(id);
-    }
-
-    private static class NoManSimulator {
-        private final NotifServiceListener mListener;
-        private final Map<String, Ranking> mRankings = new ArrayMap<>();
-
-        private NoManSimulator(
-                NotifServiceListener listener) {
-            mListener = listener;
-        }
-
-        PostedNotif postNotif(NotificationEntryBuilder builder) {
-            NotificationEntry entry = builder.build();
-            mRankings.put(entry.getKey(), entry.getRanking());
-            mListener.onNotificationPosted(entry.getSbn(), buildRankingMap());
-            return new PostedNotif(entry.getSbn(), entry.getRanking());
-        }
-
-        void retractNotif(StatusBarNotification sbn, int reason) {
-            assertNotNull(mRankings.remove(sbn.getKey()));
-            mListener.onNotificationRemoved(sbn, buildRankingMap(), reason);
-        }
-
-        void issueRankingUpdate() {
-            mListener.onNotificationRankingUpdate(buildRankingMap());
-        }
-
-        void setRanking(String key, Ranking ranking) {
-            mRankings.put(key, ranking);
-        }
-
-        private RankingMap buildRankingMap() {
-            return new RankingMap(mRankings.values().toArray(new Ranking[0]));
-        }
-    }
-
-    private static class PostedNotif {
-        public final String key;
-        public final StatusBarNotification sbn;
-        public final Ranking ranking;
-
-        private PostedNotif(StatusBarNotification sbn,
-                Ranking ranking) {
-            this.key = sbn.getKey();
-            this.sbn = sbn;
-            this.ranking = ranking;
-        }
     }
 
     private static class RecordingCollectionListener implements NotifCollectionListener {
