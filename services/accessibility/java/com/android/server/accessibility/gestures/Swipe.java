@@ -26,6 +26,7 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 import java.util.ArrayList;
 
@@ -85,6 +86,10 @@ class Swipe extends GestureMatcher {
     private static final float MIN_CM_BETWEEN_SAMPLES = 0.25f;
     private final float mMinPixelsBetweenSamplesX;
     private final float mMinPixelsBetweenSamplesY;
+    // The minmimum distance the finger must travel before we evaluate the initial direction of the
+    // swipe.
+    // Anything less is still considered a touch.
+    private int mTouchSlop;
 
     // Constants for separating gesture segments
     private static final float ANGLE_THRESHOLD = 0.0f;
@@ -122,6 +127,7 @@ class Swipe extends GestureMatcher {
         final float pixelsPerCmY = displayMetrics.ydpi / 2.54f;
         mMinPixelsBetweenSamplesX = MIN_CM_BETWEEN_SAMPLES * pixelsPerCmX;
         mMinPixelsBetweenSamplesY = MIN_CM_BETWEEN_SAMPLES * pixelsPerCmY;
+        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         clear();
     }
 
@@ -165,7 +171,10 @@ class Swipe extends GestureMatcher {
                             + Float.toString(mGestureDetectionThreshold));
         }
         if (getState() == STATE_CLEAR) {
-            if (mStrokeBuffer.size() == 0) {
+            if (moveDelta < mTouchSlop) {
+                // This still counts as a touch not a swipe.
+                return;
+            } else if (mStrokeBuffer.size() == 0) {
                 // First, make sure the pointer is going in the right direction.
                 cancelAfterDelay(event, rawEvent, policyFlags);
                 int direction = toDirection(x - mBaseX, y - mBaseY);
