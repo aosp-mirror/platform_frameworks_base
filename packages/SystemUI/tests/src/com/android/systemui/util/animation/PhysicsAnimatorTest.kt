@@ -280,7 +280,12 @@ class PhysicsAnimatorTest : SysuiTestCase() {
 
         // Spring TRANSLATION_X to 100f, with an update and end listener provided.
         animator
-                .spring(DynamicAnimation.TRANSLATION_X, 100f, springConfig)
+                .spring(
+                        DynamicAnimation.TRANSLATION_X,
+                        100f,
+                        // Use very low stiffness to ensure that all of the keyframes we're testing
+                        // for are reported to the update listener.
+                        springConfig.apply { stiffness = SpringForce.STIFFNESS_VERY_LOW })
                 .addUpdateListener(mockUpdateListener)
                 .addEndListener(mockEndListener)
                 .start()
