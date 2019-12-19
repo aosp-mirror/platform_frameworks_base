@@ -541,9 +541,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void informAllUidsLocked(Context context) throws RemoteException {
         UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
         PackageManager pm = context.getPackageManager();
-        final List<UserInfo> users = um.getUsers(true);
+        final List<UserHandle> users = um.getUserHandles(true);
         if (DEBUG) {
-            Slog.d(TAG, "Iterating over " + users.size() + " profiles.");
+            Slog.d(TAG, "Iterating over " + users.size() + " userHandles.");
         }
 
         ParcelFileDescriptor[] fds;
@@ -570,11 +570,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 ProtoOutputStream output = new ProtoOutputStream(fout);
                 int numRecords = 0;
                 // Add in all the apps for every user/profile.
-                for (UserInfo profile : users) {
+                for (UserHandle userHandle : users) {
                     List<PackageInfo> pi =
                             pm.getInstalledPackagesAsUser(PackageManager.MATCH_UNINSTALLED_PACKAGES
                                             | PackageManager.MATCH_ANY_USER,
-                                    profile.id);
+                                    userHandle.getIdentifier());
                     for (int j = 0; j < pi.size(); j++) {
                         if (pi.get(j).applicationInfo != null) {
                             String installer;
