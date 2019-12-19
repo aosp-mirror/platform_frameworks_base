@@ -679,6 +679,7 @@ class PhysicsAnimator<T> private constructor (val target: T) {
         internal var instanceConstructor: (Any) -> PhysicsAnimator<*> = ::PhysicsAnimator
 
         @JvmStatic
+        @Suppress("UNCHECKED_CAST")
         fun <T : Any> getInstance(target: T): PhysicsAnimator<T> {
             if (!animators.containsKey(target)) {
                 animators[target] = instanceConstructor(target)
