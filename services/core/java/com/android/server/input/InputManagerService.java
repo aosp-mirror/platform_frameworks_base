@@ -64,7 +64,6 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -113,8 +112,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
-
 /*
  * Wraps the C++ InputManager and provides its callbacks.
  */
@@ -183,6 +182,10 @@ public class InputManagerService extends IInputManager.Stub
     final Object mInputFilterLock = new Object();
     IInputFilter mInputFilter; // guarded by mInputFilterLock
     InputFilterHost mInputFilterHost; // guarded by mInputFilterLock
+
+    // The associations of input devices to displays by port. Maps from input device port (String)
+    // to display id (int). Currently only accessed by InputReader.
+    private final Map<String, Integer> mStaticAssociations;
 
     private static native long nativeInit(InputManagerService service,
             Context context, MessageQueue messageQueue);
@@ -325,6 +328,7 @@ public class InputManagerService extends IInputManager.Stub
         mDoubleTouchGestureEnableFile = TextUtils.isEmpty(doubleTouchGestureEnablePath) ? null :
             new File(doubleTouchGestureEnablePath);
 
+        mStaticAssociations = loadStaticInputPortAssociations();
         LocalServices.addService(InputManagerInternal.class, new LocalService());
     }
 
@@ -1727,6 +1731,17 @@ public class InputManagerService extends IInputManager.Stub
         String dumpStr = nativeDump(mPtr);
         if (dumpStr != null) {
             pw.println(dumpStr);
+            dumpAssociations(pw);
+        }
+    }
+
+    private void dumpAssociations(PrintWriter pw) {
+        if (!mStaticAssociations.isEmpty()) {
+            pw.println("Static Associations:");
+            mStaticAssociations.forEach((k, v) -> {
+                pw.print("  port: " + k);
+                pw.println("  display: " + v);
+            });
         }
     }
 
@@ -1910,15 +1925,16 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     /**
-     * Flatten a list of pairs into a list, with value positioned directly next to the key
+     * Flatten a map into a string list, with value positioned directly next to the
+     * key.
      * @return Flattened list
      */
-    private static <T> List<T> flatten(@NonNull List<Pair<T, T>> pairs) {
-        List<T> list = new ArrayList<>(pairs.size() * 2);
-        for (Pair<T, T> pair : pairs) {
-            list.add(pair.first);
-            list.add(pair.second);
-        }
+    private static List<String> flatten(@NonNull Map<String, Integer> map) {
+        List<String> list = new ArrayList<>(map.size() * 2);
+        map.forEach((k, v)-> {
+            list.add(k);
+            list.add(v.toString());
+        });
         return list;
     }
 
@@ -1926,23 +1942,26 @@ public class InputManagerService extends IInputManager.Stub
      * Ports are highly platform-specific, so only allow these to be specified in the vendor
      * directory.
      */
-    // Native callback
-    private static String[] getInputPortAssociations() {
+    private static Map<String, Integer> loadStaticInputPortAssociations() {
         File baseDir = Environment.getVendorDirectory();
         File confFile = new File(baseDir, PORT_ASSOCIATIONS_PATH);
 
         try {
             InputStream stream = new FileInputStream(confFile);
-            List<Pair<String, String>> associations =
-                    ConfigurationProcessor.processInputPortAssociations(stream);
-            List<String> associationList = flatten(associations);
-            return associationList.toArray(new String[0]);
+            return ConfigurationProcessor.processInputPortAssociations(stream);
         } catch (FileNotFoundException e) {
             // Most of the time, file will not exist, which is expected.
         } catch (Exception e) {
             Slog.e(TAG, "Could not parse '" + confFile.getAbsolutePath() + "'", e);
         }
-        return new String[0];
+
+        return new HashMap<>();
+    }
+
+    // Native callback
+    private String[] getInputPortAssociations() {
+        List<String> associationList = flatten(mStaticAssociations);
+        return associationList.toArray(new String[0]);
     }
 
     /**

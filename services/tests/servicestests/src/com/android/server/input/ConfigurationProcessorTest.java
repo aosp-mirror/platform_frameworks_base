@@ -18,11 +18,9 @@ package com.android.server.input;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.content.Context;
-import android.util.Pair;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -32,7 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.InputStream;
-import java.util.List;
+import java.util.Map;
 
 /**
  * Build/Install/Run:
@@ -52,7 +50,7 @@ public class ConfigurationProcessorTest {
     public void testGetInputPortAssociations() {
         final int res = com.android.frameworks.servicestests.R.raw.input_port_associations;
         InputStream xml = mContext.getResources().openRawResource(res);
-        List<Pair<String, String>> associations = null;
+        Map<String, Integer> associations = null;
         try {
             associations = ConfigurationProcessor.processInputPortAssociations(xml);
         } catch (Exception e) {
@@ -60,8 +58,8 @@ public class ConfigurationProcessorTest {
         }
         assertNotNull(associations);
         assertEquals(2, associations.size());
-        assertTrue(associations.contains(Pair.create("USB1", "0")));
-        assertTrue(associations.contains(Pair.create("USB2", "1")));
+        assertEquals(0, associations.get("USB1").intValue());
+        assertEquals(1, associations.get("USB2").intValue());
     }
 
     @Test
@@ -69,7 +67,7 @@ public class ConfigurationProcessorTest {
         final int res =
                 com.android.frameworks.servicestests.R.raw.input_port_associations_bad_displayport;
         InputStream xml = mContext.getResources().openRawResource(res);
-        List<Pair<String, String>> associations = null;
+        Map<String, Integer> associations = null;
         try {
             associations = ConfigurationProcessor.processInputPortAssociations(xml);
         } catch (Exception e) {
