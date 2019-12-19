@@ -38,6 +38,8 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,6 +60,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock StatusBarWindowController mStatusBarWindowController;
     private @Mock BroadcastDispatcher mBroadcastDispatcher;
     private @Mock DismissCallbackRegistry mDismissCallbackRegistry;
+    private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
     private FalsingManagerFake mFalsingManager;
 
@@ -75,7 +78,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
             mViewMediator = new KeyguardViewMediator(
                     mContext, mFalsingManager, mLockPatternUtils, mBroadcastDispatcher,
                     mStatusBarWindowController, () -> mStatusBarKeyguardViewManager,
-                    mDismissCallbackRegistry);
+                    mDismissCallbackRegistry, mUiBgExecutor);
         });
     }
 

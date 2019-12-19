@@ -100,7 +100,7 @@ public class PipManager implements BasePipManager {
             mMenuController.onActivityPinned();
             mAppOpsListener.onActivityPinned(packageName);
 
-            Dependency.get(UiOffloadThread.class).submit(() -> {
+            Dependency.get(UiOffloadThread.class).execute(() -> {
                 WindowManagerWrapper.getInstance().setPipVisibility(true);
             });
         }
@@ -114,7 +114,7 @@ public class PipManager implements BasePipManager {
             mTouchHandler.onActivityUnpinned(topActivity);
             mAppOpsListener.onActivityUnpinned();
 
-            Dependency.get(UiOffloadThread.class).submit(() -> {
+            Dependency.get(UiOffloadThread.class).execute(() -> {
                 WindowManagerWrapper.getInstance().setPipVisibility(topActivity != null);
             });
         }

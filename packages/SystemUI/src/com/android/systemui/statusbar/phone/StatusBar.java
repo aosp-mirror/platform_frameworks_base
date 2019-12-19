@@ -136,13 +136,13 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
-import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -232,6 +232,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -471,7 +472,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
     private final ScrimController mScrimController;
     protected DozeScrimController mDozeScrimController;
-    private final UiOffloadThread mUiOffloadThread;
+    private final Executor mUiBgExecutor;
 
     protected boolean mDozing;
 
@@ -634,7 +635,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             NotificationAlertingManager notificationAlertingManager,
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
-            UiOffloadThread uiOffloadThread,
+            @UiBackground Executor uiBgExecutor,
             NotificationMediaManager notificationMediaManager,
             NotificationLockscreenUserManager lockScreenUserManager,
             NotificationRemoteInputManager remoteInputManager,
@@ -708,7 +709,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationAlertingManager = notificationAlertingManager;
         mDisplayMetrics = displayMetrics;
         mMetricsLogger = metricsLogger;
-        mUiOffloadThread = uiOffloadThread;
+        mUiBgExecutor = uiBgExecutor;
         mMediaManager = notificationMediaManager;
         mLockscreenUserManager = lockScreenUserManager;
         mRemoteInputManager = remoteInputManager;
@@ -885,7 +886,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController, mCommandQueue,
-                mBroadcastDispatcher);
+                mBroadcastDispatcher, mUiBgExecutor);
         mSignalPolicy = new StatusBarSignalPolicy(mContext, mIconController);
 
         mKeyguardStateController.addCallback(this);
@@ -2840,7 +2841,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 notificationLoad = 1;
             }
             final int finalNotificationLoad = notificationLoad;
-            mUiOffloadThread.submit(() -> {
+            mUiBgExecutor.execute(() -> {
                 try {
                     mBarService.onPanelRevealed(clearNotificationEffects,
                             finalNotificationLoad);
@@ -2849,7 +2850,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             });
         } else {
-            mUiOffloadThread.submit(() -> {
+            mUiBgExecutor.execute(() -> {
                 try {
                     mBarService.onPanelHidden();
                 } catch (RemoteException ex) {
@@ -4019,7 +4020,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     void awakenDreams() {
-        Dependency.get(UiOffloadThread.class).submit(() -> {
+        mUiBgExecutor.execute(() -> {
             try {
                 mDreamManager.awaken();
             } catch (RemoteException e) {

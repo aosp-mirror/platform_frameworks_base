@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.statusbar.notification.logging;
@@ -36,9 +36,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -47,6 +45,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import com.google.android.collect.Lists;
 
@@ -60,6 +60,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -82,6 +83,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
     private TestableNotificationLogger mLogger;
     private NotificationEntryListener mNotificationEntryListener;
     private ConcurrentLinkedQueue<AssertionError> mErrorQueue = new ConcurrentLinkedQueue<>();
+    private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setUp() {
@@ -98,7 +100,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 .build();
         mEntry.setRow(mRow);
 
-        mLogger = new TestableNotificationLogger(mListener, Dependency.get(UiOffloadThread.class),
+        mLogger = new TestableNotificationLogger(mListener, mUiBgExecutor,
                 mEntryManager, mock(StatusBarStateControllerImpl.class), mBarService,
                 mExpansionStateLogger);
         mLogger.setUpWithContainer(mListContainer);
@@ -130,7 +132,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         when(mEntryManager.getVisibleNotifications()).thenReturn(Lists.newArrayList(mEntry));
         mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         TestableLooper.get(this).processAllMessages();
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
 
         if(!mErrorQueue.isEmpty()) {
             throw mErrorQueue.poll();
@@ -140,7 +142,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         Mockito.reset(mBarService);
         mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         TestableLooper.get(this).processAllMessages();
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
 
         verify(mBarService, never()).onNotificationVisibilityChanged(any(), any());
     }
@@ -152,11 +154,11 @@ public class NotificationLoggerTest extends SysuiTestCase {
         when(mEntryManager.getVisibleNotifications()).thenReturn(Lists.newArrayList(mEntry));
         mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         TestableLooper.get(this).processAllMessages();
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
         Mockito.reset(mBarService);
 
         mLogger.stopNotificationLogging();
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
         // The visibility objects are recycled by NotificationLogger, so we can't use specific
         // matchers here.
         verify(mBarService, times(1)).onNotificationVisibilityChanged(any(), any());
@@ -165,12 +167,12 @@ public class NotificationLoggerTest extends SysuiTestCase {
     private class TestableNotificationLogger extends NotificationLogger {
 
         TestableNotificationLogger(NotificationListener notificationListener,
-                UiOffloadThread uiOffloadThread,
+                Executor uiBgExecutor,
                 NotificationEntryManager entryManager,
                 StatusBarStateControllerImpl statusBarStateController,
                 IStatusBarService barService,
                 ExpansionStateLogger expansionStateLogger) {
-            super(notificationListener, uiOffloadThread, entryManager, statusBarStateController,
+            super(notificationListener, uiBgExecutor, entryManager, statusBarStateController,
                     expansionStateLogger);
             mBarService = barService;
             // Make this on the current thread so we can wait for it during tests.

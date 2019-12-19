@@ -31,6 +31,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
 import com.android.systemui.classifier.brightline.FalsingDataProvider;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingPlugin;
 import com.android.systemui.plugins.PluginListener;
@@ -39,6 +40,7 @@ import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.sensors.ProximitySensor;
 
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -58,13 +60,16 @@ public class FalsingManagerProxy implements FalsingManager {
     private DeviceConfig.OnPropertiesChangedListener mDeviceConfigListener;
     private final DeviceConfigProxy mDeviceConfig;
     private boolean mBrightlineEnabled;
+    private Executor mUiBgExecutor;
 
     @Inject
     FalsingManagerProxy(Context context, PluginManager pluginManager,
             @Main Handler handler,
             ProximitySensor proximitySensor,
-            DeviceConfigProxy deviceConfig) {
+            DeviceConfigProxy deviceConfig,
+            @UiBackground Executor uiBgExecutor) {
         mProximitySensor = proximitySensor;
+        mUiBgExecutor = uiBgExecutor;
         mProximitySensor.setTag(PROXIMITY_SENSOR_TAG);
         mProximitySensor.setSensorDelay(SensorManager.SENSOR_DELAY_GAME);
         mDeviceConfig = deviceConfig;
@@ -87,7 +92,7 @@ public class FalsingManagerProxy implements FalsingManager {
             }
 
             public void onPluginDisconnected(FalsingPlugin plugin) {
-                mInternalFalsingManager = new FalsingManagerImpl(context);
+                mInternalFalsingManager = new FalsingManagerImpl(context, mUiBgExecutor);
             }
         };
 
@@ -117,7 +122,7 @@ public class FalsingManagerProxy implements FalsingManager {
             mInternalFalsingManager.cleanup();
         }
         if (!brightlineEnabled) {
-            mInternalFalsingManager = new FalsingManagerImpl(context);
+            mInternalFalsingManager = new FalsingManagerImpl(context, mUiBgExecutor);
         } else {
             mInternalFalsingManager = new BrightLineFalsingManager(
                     new FalsingDataProvider(context.getResources().getDisplayMetrics()),

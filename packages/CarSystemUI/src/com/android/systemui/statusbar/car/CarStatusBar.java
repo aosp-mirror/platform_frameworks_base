@@ -59,7 +59,6 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
@@ -68,6 +67,7 @@ import com.android.systemui.car.CarDeviceProvisionedListener;
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -141,6 +141,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -273,7 +274,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             NotificationAlertingManager notificationAlertingManager,
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
-            UiOffloadThread uiOffloadThread,
+            @UiBackground Executor uiBgExecutor,
             NotificationMediaManager notificationMediaManager,
             NotificationLockscreenUserManager lockScreenUserManager,
             NotificationRemoteInputManager remoteInputManager,
@@ -353,7 +354,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 notificationAlertingManager,
                 displayMetrics,
                 metricsLogger,
-                uiOffloadThread,
+                uiBgExecutor,
                 notificationMediaManager,
                 lockScreenUserManager,
                 remoteInputManager,
