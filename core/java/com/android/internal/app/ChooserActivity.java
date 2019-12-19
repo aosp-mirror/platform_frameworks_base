@@ -54,6 +54,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
@@ -931,20 +932,38 @@ public class ChooserActivity extends ResolverActivity {
 
         final Intent resolveIntent = new Intent();
         resolveIntent.setComponent(cn);
-        final ResolveInfo ri = getPackageManager().resolveActivity(resolveIntent, 0);
-        if (ri == null) {
+        final ResolveInfo ri = getPackageManager().resolveActivity(
+                resolveIntent, PackageManager.GET_META_DATA);
+        if (ri == null || ri.activityInfo == null) {
             Log.e(TAG, "Device-specified nearby sharing component (" + cn
                     + ") not available");
             return null;
         }
 
-        // TODO(b/144290152): CHIP_LABEL_METADATA_KEY / CHIP_ICON_METADATA_KEY
-
-        CharSequence name = ri.loadLabel(getPackageManager());
+        // Allow the nearby sharing component to provide a more appropriate icon and label
+        // for the chip.
+        CharSequence name = null;
+        Drawable icon = null;
+        final Bundle metaData = ri.activityInfo.metaData;
+        if (metaData != null) {
+            try {
+                final Resources pkgRes = getPackageManager().getResourcesForActivity(cn);
+                final int nameResId = metaData.getInt(CHIP_LABEL_METADATA_KEY);
+                name = pkgRes.getString(nameResId);
+                final int resId = metaData.getInt(CHIP_ICON_METADATA_KEY);
+                icon = pkgRes.getDrawable(resId);
+            } catch (NameNotFoundException ex) { }
+        }
+        if (TextUtils.isEmpty(name)) {
+            name = ri.loadLabel(getPackageManager());
+        }
+        if (icon == null) {
+            icon = ri.loadIcon(getPackageManager());
+        }
 
         final DisplayResolveInfo dri = new DisplayResolveInfo(
                 originalIntent, ri, name, "", null);
-        dri.setDisplayIcon(ri.loadIcon(getPackageManager()));
+        dri.setDisplayIcon(icon);
         return dri;
     }
 
@@ -976,7 +995,10 @@ public class ChooserActivity extends ResolverActivity {
         return createActionButton(
                 ti.getDisplayIcon(),
                 ti.getDisplayLabel(),
-                (View unused) -> safelyStartActivity(ti)
+                (View unused) -> {
+                    safelyStartActivity(ti);
+                    finish();
+                }
         );
     }
 
