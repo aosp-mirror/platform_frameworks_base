@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dagger;
+package com.android.systemui.tv;
 
+import com.android.systemui.dagger.SystemUIRootComponent;
+
+import dagger.Binds;
 import dagger.Module;
 
-/**
- * Dagger Module that collects related sub-modules together.
- *
- * See {@link ContextComponentResolver}
- */
-@Module(includes = {DefaultActivityBinder.class,
-                    DefaultBroadcastReceiverBinder.class,
-                    DefaultServiceBinder.class})
-public abstract class DefaultComponentBinder {
+@Module
+interface TvSystemUIBinder {
+    @Binds
+    SystemUIRootComponent bindSystemUIRootComponent(TvSystemUIRootComponent systemUIRootComponent);
 }

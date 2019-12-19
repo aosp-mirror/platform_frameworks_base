@@ -44,6 +44,7 @@ import dagger.Component;
         DependencyBinder.class,
         SystemServicesModule.class,
         SystemUIFactory.ContextHolder.class,
+        SystemUIBinder.class,
         SystemUIModule.class,
         SystemUIDefaultModule.class})
 public interface SystemUIRootComponent {
