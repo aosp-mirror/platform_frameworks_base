@@ -2,6 +2,9 @@
   "presubmit": [
     {
       "name": "CtsSdkExtTestCases"
+    },
+    {
+      "name": "apiextensions_e2e_tests"
     }
   ]
 }
