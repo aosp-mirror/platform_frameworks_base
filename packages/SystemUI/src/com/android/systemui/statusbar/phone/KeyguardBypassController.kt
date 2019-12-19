@@ -98,7 +98,12 @@ class KeyguardBypassController : Dumpable {
                 bypassEnabled = tunerService.getValue(key, dismissByDefault) != 0
             }
         }, Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD)
-        lockscreenUserManager.addUserChangedListener { pendingUnlockType = null }
+        lockscreenUserManager.addUserChangedListener(
+                object : NotificationLockscreenUserManager.UserChangedListener {
+                    override fun onUserChanged(userId: Int) {
+                        pendingUnlockType = null
+                    }
+                })
     }
 
     /**

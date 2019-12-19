@@ -117,51 +117,63 @@ public class NotificationLockscreenUserManagerImpl implements
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                updateCurrentProfilesCache();
-                Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
+            switch (action) {
+                case Intent.ACTION_USER_SWITCHED:
+                    mCurrentUserId = intent.getIntExtra(
+                            Intent.EXTRA_USER_HANDLE, UserHandle.USER_ALL);
+                    updateCurrentProfilesCache();
 
-                updateLockscreenNotificationSetting();
-                updatePublicMode();
-                // The filtering needs to happen before the update call below in order to make sure
-                // the presenter has the updated notifications from the new user
-                getEntryManager().reapplyFilterAndSort("user switched");
-                mPresenter.onUserSwitched(mCurrentUserId);
+                    Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
 
-                for (UserChangedListener listener : mListeners) {
-                    listener.onUserChanged(mCurrentUserId);
-                }
-            } else if (Intent.ACTION_USER_ADDED.equals(action)) {
-                updateCurrentProfilesCache();
-            } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
-                // Start the overview connection to the launcher service
-                Dependency.get(OverviewProxyService.class).startConnectionToCurrentUser();
-            } else if (NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION.equals(action)) {
-                final IntentSender intentSender = intent.getParcelableExtra(Intent.EXTRA_INTENT);
-                final String notificationKey = intent.getStringExtra(Intent.EXTRA_INDEX);
-                if (intentSender != null) {
-                    try {
-                        mContext.startIntentSender(intentSender, null, 0, 0, 0);
-                    } catch (IntentSender.SendIntentException e) {
-                        /* ignore */
+                    updateLockscreenNotificationSetting();
+                    updatePublicMode();
+                    // The filtering needs to happen before the update call below in order to
+                    // make sure
+                    // the presenter has the updated notifications from the new user
+                    getEntryManager().reapplyFilterAndSort("user switched");
+                    mPresenter.onUserSwitched(mCurrentUserId);
+
+                    for (UserChangedListener listener : mListeners) {
+                        listener.onUserChanged(mCurrentUserId);
                     }
-                }
-                if (notificationKey != null) {
-                    NotificationEntry entry =
-                            getEntryManager().getActiveNotificationUnfiltered(notificationKey);
-                    final int count = getEntryManager().getActiveNotificationsCount();
-                    final int rank = entry != null ? entry.getRanking().getRank() : 0;
-                    NotificationVisibility.NotificationLocation location =
-                            NotificationLogger.getNotificationLocation(entry);
-                    final NotificationVisibility nv = NotificationVisibility.obtain(notificationKey,
-                            rank, count, true, location);
-                    try {
-                        mBarService.onNotificationClick(notificationKey, nv);
-                    } catch (RemoteException exception) {
-                        /* ignore */
+                    break;
+                case Intent.ACTION_USER_ADDED:
+                case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
+                case Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE:
+                    updateCurrentProfilesCache();
+                    break;
+                case Intent.ACTION_USER_UNLOCKED:
+                    // Start the overview connection to the launcher service
+                    Dependency.get(OverviewProxyService.class).startConnectionToCurrentUser();
+                    break;
+                case NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION:
+                    final IntentSender intentSender = intent.getParcelableExtra(
+                            Intent.EXTRA_INTENT);
+                    final String notificationKey = intent.getStringExtra(Intent.EXTRA_INDEX);
+                    if (intentSender != null) {
+                        try {
+                            mContext.startIntentSender(intentSender, null, 0, 0, 0);
+                        } catch (IntentSender.SendIntentException e) {
+                            /* ignore */
+                        }
                     }
-                }
+                    if (notificationKey != null) {
+                        NotificationEntry entry =
+                                getEntryManager().getActiveNotificationUnfiltered(notificationKey);
+                        final int count = getEntryManager().getActiveNotificationsCount();
+                        final int rank = entry != null ? entry.getRanking().getRank() : 0;
+                        NotificationVisibility.NotificationLocation location =
+                                NotificationLogger.getNotificationLocation(entry);
+                        final NotificationVisibility nv = NotificationVisibility.obtain(
+                                notificationKey,
+                                rank, count, true, location);
+                        try {
+                            mBarService.onNotificationClick(notificationKey, nv);
+                        } catch (RemoteException exception) {
+                            /* ignore */
+                        }
+                    }
+                    break;
             }
         }
     };
@@ -266,6 +278,8 @@ public class NotificationLockscreenUserManagerImpl implements
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         mBroadcastDispatcher.registerReceiver(mBaseBroadcastReceiver, filter);
 
         IntentFilter internalFilter = new IntentFilter();
@@ -489,6 +503,11 @@ public class NotificationLockscreenUserManagerImpl implements
                 }
             }
         }
+        mMainHandler.post(() -> {
+            for (UserChangedListener listener : mListeners) {
+                listener.onCurrentProfilesChanged(mCurrentProfiles);
+            }
+        });
     }
 
     public boolean isAnyProfilePublicMode() {
@@ -553,6 +572,11 @@ public class NotificationLockscreenUserManagerImpl implements
     @Override
     public void addUserChangedListener(UserChangedListener listener) {
         mListeners.add(listener);
+    }
+
+    @Override
+    public void removeUserChangedListener(UserChangedListener listener) {
+        mListeners.remove(listener);
     }
 
 //    public void updatePublicMode() {

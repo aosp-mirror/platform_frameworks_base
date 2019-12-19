@@ -49,6 +49,12 @@ public interface NotificationLockscreenUserManager {
     /** Adds a listener to be notified when the current user changes. */
     void addUserChangedListener(UserChangedListener listener);
 
+    /**
+     * Removes a listener previously registered with
+     * {@link #addUserChangedListener(UserChangedListener)}
+     */
+    void removeUserChangedListener(UserChangedListener listener);
+
     SparseArray<UserInfo> getCurrentProfiles();
 
     void setLockscreenPublicMode(boolean isProfilePublic, int userId);
@@ -79,6 +85,7 @@ public interface NotificationLockscreenUserManager {
 
     /** Notified when the current user changes. */
     interface UserChangedListener {
-        void onUserChanged(int userId);
+        default void onUserChanged(int userId) {}
+        default void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles) {}
     }
 }
