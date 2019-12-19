@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Huruhusu programu kutuma matangazo ya kudumu, ambayo hubakia baada ya matangazo kuisha. Matumizi zaidi yanaweza kupunguza kasi ya runinga au ipoteze uthabiti kwa kusababisa itumie hifadhi kubwa mno."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Inaruhusu programu kutuma matangazo nata, ambayo hubakia baada ya matangazo kuisha. Matumizi zaidi yanaweza kufanya simu kufanya kazi polepole au kuifanya isiwe thabiti kwa kuisababisha itumie kumbukumbu kubwa zaidi."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"kusoma anwani zako"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Inaruhusu programu kusoma data kuhusu anwani zako zilizohifadhiwa kwenye kompyuta kibao yako, ikiwa ni pamoja na mara ngapi umepiga simu, kutuma barua pepe au kuwasiliana kwa njia zingine na watu fulani. Idhini hii inaruhusu programu kuhifadhi data yako ya anwani, na programu hasidi zinaweza kushiriki data ya anwani bila ya kujua kwako."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Huruhusu programu kusoma data kuhusu anwani zako zilizohifadhiwa kwenye runinga yako, pamoja na marudio ya upigaji wako wa simu, utumaji wa barua pepe, au mawasiliano kwa njia nyingine na watu maalum unaowasiliana nao. Idhini hii huruhusu programu kuhifadhi data yako ya mawasiliano, na programu hasidi zinaweza kushiriki data ya mawasiliano bila wewe kujua."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Inaruhusu programu kusoma data kuhusu anwani zako zilizohifadhiwa kwenye simu yako, ikiwa ni pamoja na mara ngapi umepiga simu, kutuma barua pepe au kuwasiliana kwa njia zingine na watu fulani. Idhini hii inaruhusu programu kuhifadhi data yako ya anwani, na programu hasidi zinaweza kushiriki data ya anwani bila ya kujua kwako."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"kurekebisha anwani zako"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Huruhusu programu kurekebisha data kuhusu anwani ulizohifadhi kwenye kompyuta kibao yako, ikiwa ni pamoja na mara ambazo umepiga simu, kutuma barua pepe au kuwasiliana kwa njia nyingine na anwani maalum. Idhini hii inaruhusu programu kufuta data ya anwani."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Huruhusu programu kurekebisha data kuhusu anwani zako zilizohifadhiwa kwenye runinga yako, pamoja na marudio ya upigaji wako wa simu, utumaji wa barua pepe, au mawasiliano kwa njia nyingine na watu maalum unaowasiliana nao. Ruhusa hii huruhusu programu kufuta data ya anwani."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Huruhusu programu kurekebisha data kuhusu anwani ulizohifadhi kwenye simu yako, ikiwa ni pamoja na mara ambazo umepiga simu, kutuma barua pepe au kuwasiliana kwa njia nyingine na anwani maalum. Idhini hii inaruhusu programu kufuta data ya anwani."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Huruhusu programu kubadilisha data kuhusu anwani zako zilizohifadhiwa kwenye kompyuta yako kibao. Idhini hii huruhusu programu kufuta data ya anwani."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Huruhusu programu kurekebisha data kuhusu anwani zako zilizohifadhiwa kwenye simu yako. Idhini hii huruhusu programu kufuta data ya anwani."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"kusoma rekodi ya simu"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Programu hii inaweza kusoma rekodi yako ya simu zilizopigwa."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"kuandika rekodi ya simu"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"fikia eneo linalokadiriwa (kulingana na mtandao) wakati tu programu inatumika kwenye skrini"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi, lakini hili hufanyika tu wakati programu inatumika kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye simu kibao yako ili programu iweze kuzitumia."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi, lakini hili hufanyika tu wakati programu inatumika kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye TV yako ili programu iweze kuzitumia."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Programu hii inaweza kukadiria mahali ulipo ikiwa tu umeifungua kwenye skrini. Ni lazima huduma hizi za mahali ziwashwe na zipatikane kwenye gari lako ili programu iweze kuzitumia."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi, lakini hili hufanyika tu wakati programu inatumika kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye simu yako ili programu iweze kuzitumia."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"ifikie mahali inapotumika chinichini"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Kama ruhusa hii itatolewa, mbali na idhini ya kufikia mahali panapokadiriwa au mahali mahususi, programu inaweza kufikia mahali wakati inatumika chinichini."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Sauti za kengele"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Sauti za arifa"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Haijulikani"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Imeshindwa kuunganisha kwenye <xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Gusa ili ubadilishe mipangilio ya faragha na ujaribu tena"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Ungependa kubadilisha mipangilio ya faragha?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Huenda <xliff:g id="SSID_0">%1$s</xliff:g> ikataka kuunganisha ikitumia anwani ya MAC ya kifaa chako, kitambulishi cha kipekee. Hatua hii inaweza kuruhusu vifaa vilivyo karibu nawe vifuatilie mahali kifaa chako kilipo. \n\nUkiendelea, <xliff:g id="SSID_1">%1$s</xliff:g> itabadilisha mipangilio yako ya faragha na ijaribu kuunganisha tena."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Badilisha mipangilio"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Imesasisha mipangilio. Jaribu kuunganisha tena."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Imeshindwa kubadilisha mipangilio ya faragha"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Mtandao haupatikani"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">Mitandao ya Wi-Fi inapatikana</item>
       <item quantity="one">Mtandao wa Wi-Fi unapatikana</item>

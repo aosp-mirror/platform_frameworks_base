@@ -284,7 +284,7 @@
     <string name="permgroupdesc_location" msgid="1995955142118450685">"このデバイスの位置情報へのアクセス"</string>
     <string name="permgrouprequest_location" msgid="5261379525646615507">"このデバイスの位置情報へのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"このアプリは、ユーザーがアプリを使用している間のみ位置情報にアクセスできます"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"このデバイスの位置情報に&lt;b&gt;常に&lt;/b&gt;?アクセスすることを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可します"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"このデバイスの位置情報に&lt;b&gt;常に&lt;/b&gt;アクセスすることを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"現在、アプリは、ユーザーがアプリを使用している場合のみ位置情報にアクセスできます"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"カレンダー"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"カレンダーへのアクセス"</string>
@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えてテレビの動作が遅くなったり不安定になったりする恐れがあります。"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えてモバイル デバイスの動作が遅くなったり不安定になったりする恐れがあります。"</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"連絡先の読み取り"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"タブレットに保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリに連絡先データの保存を許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"テレビに保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリに連絡先データの保存を許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"モバイル デバイスに保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリに連絡先データの保存を許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"連絡先の変更"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"タブレットに保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリが連絡先データを削除できるようになります。"</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"テレビに保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリが連絡先データを削除できるようになります。"</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"モバイルデバイスに保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリが連絡先データを削除できるようになります。"</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"タブレットに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"スマートフォンに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"通話履歴の読み取り"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"このアプリは通話履歴を読み取ることができます。"</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"通話履歴の書き込み"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"フォアグラウンドでのみ（ネットワークに基づく）おおよその位置情報にアクセス"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、タブレットでアプリがサービスを利用できるようにする必要があります。"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、テレビでアプリがサービスを利用できるようにする必要があります。"</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"このアプリは、フォアグラウンドでのみユーザーのおおよその位置情報を取得できます。これらの位置情報サービスを ON にして、車でアプリがサービスを利用できるようにする必要があります。"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"バックグラウンドでの位置情報へのアクセス"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"これが、おおよその位置情報または正確な位置情報へのアクセスの追加権限の場合、アプリはバックグラウンドでの実行中も位置情報にアクセスできます。"</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"アラーム音"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"通知音"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"不明"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> に接続できません"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"タップしてプライバシー設定を変更し、もう一度お試しください"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"プライバシー設定を変更しますか？"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> があなたのデバイスの MAC アドレス（固有の識別番号）を使用して接続できるようになります。これにより、付近のデバイスがあなたのデバイスの位置情報を追跡できるようになる可能性があります。\n\n続行すると、<xliff:g id="SSID_1">%1$s</xliff:g> があなたのプライバシー設定を変更し、もう一度接続を試みます。"</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"設定を変更"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"設定を更新しました。もう一度接続してみてください。"</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"プライバシー設定を変更できません"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"ネットワークが見つかりません"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">複数のWi-Fiネットワークが利用できます</item>
       <item quantity="one">Wi-Fiネットワークが利用できます</item>

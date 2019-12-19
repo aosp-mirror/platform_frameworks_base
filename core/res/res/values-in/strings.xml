@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Mengizinkan aplikasi untuk mengirim siaran lekat, yang tetap ada setelah siaran berakhir. Penggunaan yang berlebihan dapat membuat TV menjadi lambat atau tidak stabil karena menyebabkan penggunaan memori yang terlalu besar."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Memungkinkan aplikasi mengirim siaran permanen, yang tetap ada setelah siaran berakhir. Penggunaan yang berlebihan dapat membuat ponsel menjadi lambat atau tidak stabil dengan memicu penggunaan memori yang terlalu banyak."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"baca kontak Anda"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Memungkinkan aplikasi membaca data tentang kontak yang disimpan pada tablet Anda, termasuk frekuensi Anda dalam melakukan panggilan, mengirim email, atau berkomunikasi dengan cara lain dengan individu tertentu. Izin ini memungkinkan aplikasi menyimpan data kontak, dan aplikasi berbahaya dapat berbagi data kontak tanpa sepengetahuan Anda."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Mengizinkan aplikasi untuk membaca data tentang kontak yang disimpan di TV, termasuk seberapa sering Anda melakukan panggilan, mengirim email, atau berkomunikasi dalam cara lain dengan individu tertentu. Izin ini memungkinkan aplikasi untuk menyimpan data kontak, dan aplikasi yang berbahaya mungkin membagikan data kontak tanpa sepengetahuan Anda."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Memungkinkan aplikasi membaca data tentang kontak yang disimpan pada ponsel Anda, termasuk frekuensi Anda dalam melakukan panggilan, mengirim email, atau berkomunikasi dengan cara lain dengan individu tertentu. Izin ini memungkinkan aplikasi menyimpan data kontak, dan aplikasi berbahaya dapat berbagi data kontak tanpa sepengetahuan Anda."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"ubah kontak Anda"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Memungkinkan aplikasi mengubah data tentang kontak yang tersimpan dalam tablet Anda, termasuk frekuensi Anda dalam melakukan panggilan, mengirim email, atau berkomunikasi dalam cara lain dengan kontak tertentu. Izin ini memungkinkan aplikasi menghapus data kontak."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Mengizinkan aplikasi untuk mengubah data tentang kontak yang disimpan di TV, termasuk seberapa sering Anda melakukan panggilan, mengirim email, atau berkomunikasi dalam cara lain dengan kontak tertentu. Izin ini memungkinkan aplikasi menghapus data kontak."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Memungkinkan aplikasi mengubah data tentang kontak yang tersimpan dalam ponsel Anda, termasuk frekuensi Anda dalam melakukan panggilan, mengirim email, atau berkomunikasi dalam cara lain dengan kontak tertentu. Izin ini memungkinkan aplikasi menghapus data kontak."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Mengizinkan aplikasi mengubah data tentang kontak yang disimpan di tablet Anda. Izin ini mengizinkan aplikasi menghapus data kontak."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Mengizinkan aplikasi mengubah data tentang kontak yang disimpan di ponsel Anda. Izin ini mengizinkan aplikasi menghapus data kontak."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"membaca log panggilan"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Aplikasi ini dapat membaca histori panggilan."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"menulis log panggilan"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"akses perkiraan lokasi (berbasis jaringan) hanya di latar depan"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Aplikasi ini dapat mengetahui lokasi berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi, namun hanya jika aplikasi berada di latar depan. Layanan lokasi tersebut harus diaktifkan dan tersedia di tablet agar aplikasi dapat menggunakannya."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Aplikasi ini dapat mengetahui lokasi berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi, namun hanya jika aplikasi berada di latar depan. Layanan lokasi tersebut harus diaktifkan dan tersedia di TV agar aplikasi dapat menggunakannya."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Aplikasi ini bisa mendapatkan perkiraan lokasi Anda hanya saat berada di latar depan. Layanan lokasi ini harus diaktifkan dan tersedia di mobil Anda agar aplikasi dapat menggunakannya."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Aplikasi ini dapat mengetahui lokasi berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi, namun hanya jika aplikasi berada di latar depan. Layanan lokasi tersebut harus diaktifkan dan tersedia di ponsel agar aplikasi dapat menggunakannya."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"akses lokasi di latar belakang"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Jika aplikasi diberi izin tambahan ke akses lokasi perkiraan atau akurat, aplikasi dapat mengakses lokasi saat bekerja di latar belakang."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Suara alarm"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Suara notifikasi"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Tidak diketahui"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Tidak dapat terhubung ke <xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Ketuk untuk mengubah setelan privasi dan coba lagi"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Ubah setelan privasi?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> mungkin ingin terhubung menggunakan alamat MAC perangkat Anda, yaitu ID unik. Alamat ini memungkinkan lokasi perangkat dilacak oleh perangkat di sekitar. \n\nJika Anda melanjutkan, <xliff:g id="SSID_1">%1$s</xliff:g> akan mengubah setelan privasi dan mencoba terhubung lagi."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Ganti setelan"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Setelan diperbarui. Coba hubungkan lagi."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Tidak dapat mengubah setelan privasi"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Jaringan tidak ditemukan"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">Jaringan Wi-Fi tersedia</item>
       <item quantity="one">Jaringan Wi-Fi tersedia</item>

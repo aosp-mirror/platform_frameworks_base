@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Gjør at appen kan sende varige kringkastinger som blir værende etter at kringkastingen er ferdig. Overdreven bruk av dette kan gjøre TV-en treg eller ustabil fordi for mye minne blir brukt."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Lar appen sende faste kringkastinger («sticky broadcasts») som blir værende etter at kringkastingen er over. Overdreven bruk kan gjøre telefonen treg eller ustabil ved å bruke for mye minne."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"lese kontaktene dine"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Lar appen lese informasjon om kontaktene lagret på nettbrettet ditt, inkludert hvor ofte du har ringt, sendt e-post til, eller på andre måter kommunisert med spesifikke personer. Denne tillatelsen lar apper lagre kontaktdata. Merk at skadelige apper kan dele disse dataene uten at du vet om det."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Gjør at appen kan lese data om kontaktene du har lagret på TV-en, inkludert hvor ofte du har ringt, sendt e-post til eller på andre måter kommunisert med bestemte personer. Denne tillatelsen gjør at apper kan lagre kontaktdata, og skadelige apper kan dele kontaktdata uten at du vet om det."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Lar appen lese informasjon om kontaktene lagret på telefonen din, inkludert hvor ofte du har ringt, sendt e-post til eller på andre måter kommunisert med spesifikke personer. Denne tillatelsen lar apper lagre kontaktdata. Merk at skadelige apper kan dele disse dataene uten at du vet om det."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"endre kontaktene dine"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Lar appen endre informasjon om kontaktene lagret på nettbrettet ditt, inkludert hvor ofte du har ringt, sendt e-post til eller på andre måter kommunisert med bestemte kontakter. Denne tillatelsen lar apper slette kontaktdata."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Gjør at appen kan endre data om kontaktene du har lagret på TV-en, inkludert hvor ofte du har ringt, sendt e-post til eller på andre måter kommunisert med bestemte kontakter. Denne tillatelsen gjør at apper kan slette kontaktdata."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Lar appen endre informasjon om kontaktene lagret på telefonen din, inkludert hvor ofte du har ringt, sendt e-post til eller på andre måter kommunisert med bestemte kontakter. Denne tillatelsen lar apper slette kontaktdata."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Lar appen endre informasjon om kontaktene som er lagret på nettbrettet ditt. Denne tillatelsen lar apper slette kontaktdata."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Lar appen endre informasjon om kontaktene som er lagret på telefonen din. Denne tillatelsen lar apper slette kontaktdata."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"lese anropsloggen"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Denne appen kan lese anropsloggen din."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"endre anropsloggen"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"bare tilgang til omtrentlig posisjon (nettverksbasert) i forgrunnen"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Denne appen kan bare få posisjonen din basert på nettverkskilder, for eksempel mobilmaster og Wi-Fi-nettverk, når den er på i forgrunnen. Disse posisjonstjenestene må være slått på og tilgjengelige på nettbrettet ditt for at appen skal kunne bruke dem."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Denne appen kan bare få posisjonen din basert på nettverkskilder, for eksempel mobilmaster og Wi-Fi-nettverk, når den er på i forgrunnen. Disse posisjonstjenestene må være slått på og tilgjengelige på TV-en din for at appen skal kunne bruke dem."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Denne appen kan bare få den omtrentlige posisjonen din når den er i forgrunnen. Disse posisjonstjenestene må være slått på og tilgjengelige i bilen din for at appen skal kunne bruke dem."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Denne appen kan bare få posisjonen din basert på nettverkskilder, for eksempel mobilmaster og Wi-Fi-nettverk, når den er på i forgrunnen. Disse posisjonstjenestene må være slått på og tilgjengelige på telefonen din for at appen skal kunne bruke dem."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"tilgang til posisjon i bakgrunnen"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Hvis du gir denne tillatelsen, får appen tilgang til posisjonen mens den kjører i bakgrunnen, i tillegg til tilgang til omtrentlig eller presis posisjon."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Alarmlyder"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Varsellyder"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Ukjent"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Kan ikke koble til <xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Trykk for å endre personverninnstillingene og prøve på nytt"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Vil du endre personverninnstillingen?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> vil muligens koble seg til med enhetens MAC-adresse, en unik identifikator. Dette gjør at enhetens posisjon kan spores av enheter i nærheten. \n\nHvis du fortsetter, kommer <xliff:g id="SSID_1">%1$s</xliff:g> til å endre personverninnstillingen din og prøve å koble til igjen."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Endre innstillingen"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Innstillingen er oppdatert. Prøv å koble til igjen."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Kan ikke endre personverninnstillingen"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Fant ikke nettverket"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">Wi-Fi-nettverk er tilgjengelig</item>
       <item quantity="one">Wi-Fi-nettverk er tilgjengelig</item>

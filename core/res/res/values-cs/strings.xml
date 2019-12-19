@@ -396,13 +396,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Umožňuje aplikaci odesílat trvalá vysílání, která přetrvávají i po skončení vysílání. Nadměrné používání může televizi zpomalit či způsobit její nestabilitu, protože bude používat příliš mnoho paměti."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Umožňuje aplikaci odesílat trvalá vysílání, která přetrvávají i po skončení vysílání. Nadměrné používání může telefon zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"čtení kontaktů"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Umožňuje aplikaci číst údaje o kontaktech uložených v tabletu, včetně toho, jak často voláte, posíláte e‑maily nebo jinak komunikujete s konkrétními osobami. Toto oprávnění umožňuje aplikacím ukládat údaje o kontaktech. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Umožňuje aplikaci číst údaje o kontaktech uložených v televizi včetně toho, jak často voláte, posíláte e‑maily nebo jinými způsoby komunikujete s konkrétními kontakty. Toto oprávnění umožňuje aplikacím ukládat údaje o vašich kontaktech a škodlivé aplikace mohou sdílet údaje o kontaktech bez vašeho vědomí."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Umožňuje aplikaci číst údaje o kontaktech uložených v telefonu, včetně toho, jak často voláte, posíláte e‑maily nebo komunikujete jinými způsoby s konkrétními osobami. Toto oprávnění umožňuje aplikacím ukládat údaje o kontaktech. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"úprava kontaktů"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Umožňuje aplikaci upravit údaje o kontaktech uložených v tabletu včetně toho, jak často voláte, posíláte e‑maily nebo komunikujete jinými způsoby s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Umožňuje aplikaci upravit údaje o kontaktech uložených v televizi včetně toho, jak často voláte, posíláte e‑maily nebo jinými způsoby komunikujete s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Umožňuje aplikaci upravit údaje o kontaktech uložených v telefonu včetně toho, jak často voláte, posíláte e‑maily nebo komunikujete jinými způsoby s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Umožňuje aplikaci upravovat údaje o kontaktech uložené v tabletu. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Umožňuje aplikaci upravovat údaje o kontaktech uložení v telefonu. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"čtení seznamu hovorů"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Tato aplikace může číst historii volání."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"zápis do seznamu hovorů"</string>
@@ -426,6 +430,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"přístup k přibližené poloze (na základě sítě) jen na popředí"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Tato aplikace může zjistit vaši polohu podle zdrojů sítě, jako jsou vysílací věže nebo sítě Wi-Fi (ale pouze pokud je aplikace na popředí). Aby tyto služby určování polohy mohla aplikace používat, musí být v tabletu dostupné a musí být zapnuté."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Tato aplikace může zjistit vaši polohu podle zdrojů sítě, jako jsou vysílací věže nebo sítě Wi-Fi (ale pouze pokud je aplikace na popředí). Aby tyto služby určování polohy mohla aplikace používat, musí být v televizi dostupné a musí být zapnuté."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Tato aplikace může zjistit vaši přibližnou polohu, jen když běží na popředí. Aby tyto služby určování polohy mohla aplikace používat, musí být v autě dostupné a musí být zapnuté."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Tato aplikace může zjistit vaši polohu podle zdrojů sítě, jako jsou vysílací věže nebo sítě Wi-Fi (ale pouze pokud je aplikace na popředí). Aby tyto služby určování polohy mohla aplikace používat, musí být v telefonu dostupné a musí být zapnuté."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"přístup k poloze na pozadí"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Bude-li oprávnění uděleno dodatečně k přístupu k přibližné nebo přesné poloze, aplikace bude moci používat polohu při spuštění na pozadí."</string>
@@ -1279,6 +1284,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Zvuky budíku"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Zvuky upozornění"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Neznámé"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"K síti <xliff:g id="SSID">%1$s</xliff:g> se nelze připojit"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Klepnutím změníte nastavení ochrany soukromí a budete opakovat pokus"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Změnit nastavení ochrany soukromí?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Síť <xliff:g id="SSID_0">%1$s</xliff:g> se může chtít připojit za pomoci adresy MAC vašeho zařízení, což je unikátní identifikátor. Zařízení v okolí díky tomu mohou sledovat polohu vašeho zařízení. \n\nBudete-li pokračovat, síť <xliff:g id="SSID_1">%1$s</xliff:g> změní nastavení ochrany soukromí a pokusí se znovu připojit."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Změnit nastavení"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Nastavení bylo aktualizováno. Zkuste se připojit znovu."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Nastavení ochrany soukromí se nepodařilo změnit"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Síť nebyla nalezena"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="few">K dispozici jsou sítě Wi-Fi</item>
       <item quantity="many">K dispozici jsou sítě Wi-Fi</item>

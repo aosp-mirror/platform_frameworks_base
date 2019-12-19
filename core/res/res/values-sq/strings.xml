@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Lejon aplikacionin të dërgojë transmetime ngjitëse të cilat ngelen pas mbarimit të transmetimit. Përdorimi i tepërt mund ta bëjë televizorin të ngadaltë ose të paqëndrueshëm, duke e detyruar atë të përdorë më shumë kujtesë."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Lejon aplikacionin të dërgojë transmetime ngjitëse që qëndrojnë derisa të përfundojë transmetimi. Përdorimi i tepruar mund ta bëjë telefonin të ngadaltë ose të paqëndrueshëm duke e detyruar atë të përdorë shumë kujtesë."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"lexo kontaktet e tua"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Lejon aplikacionin të lexojë të dhëna rreth kontakteve të ruajtura në tabletin tënd, përfshirë shpeshtësinë me të cilën ke telefonuar, ke dërguar mail-a ose komunikuar në mënyra të tjera me individë të caktuar. Kjo leje u mundëson aplikacioneve të ruajnë të dhënat e tua të kontakteve, ndaj aplikacionet keqdashëse mund të ndajnë të dhëna të kontakteve pa dijeninë tënde."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Lejon aplikacionin të lexojë të dhëna rreth kontakteve të ruajtura në televizorin tënd, përfshirë shpeshtësinë me të cilën ke telefonuar, ke dërguar mail-a ose komunikuar në mënyra të tjera me individë të caktuar. Kjo leje u mundëson aplikacioneve të ruajnë të dhënat e tua të kontakteve, ndaj aplikacionet keqdashëse mund të ndajnë të dhëna të kontakteve pa dijeninë tënde."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Lejon aplikacionin të lexojë të dhëna rreth kontakteve të ruajtura në telefonin tënd, përfshirë shpeshtësinë me të cilën ke telefonuar, ke dërguar mail-a ose komunikuar në mënyra të tjera me individë të caktuar. Kjo leje u mundëson aplikacioneve të ruajnë të dhënat e tua të kontakteve, ndaj aplikacionet keqdashëse mund të ndajnë të dhëna të kontakteve pa dijeninë tënde."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"modifiko kontaktet"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Lejon aplikacionin të modifikojë të dhënat rreth kontakteve të tua të ruajtura në tabletin tënd, përfshi shpeshtësinë me të cilën ke telefonuar, ke dërguar mail-a apo ke komunikuar në rrugë të tjera me kontakte të veçanta. Kjo leje u mundëson aplikacioneve të fshijnë të dhënat e kontaktit."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Lejon aplikacionin të modifikojë të dhënat rreth kontakteve të tua të ruajtura në televizorin tënd, përfshi shpeshtësinë me të cilën ke telefonuar, ke dërguar mail-a apo komunikuar në rrugë të tjera me kontakte të veçanta. Kjo leje u mundëson aplikacioneve të fshijnë të dhënat e kontaktit."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Lejon aplikacionin të modifikojë të dhënat e kontakteve të tua të ruajtura në telefon, përfshirë shpeshtësinë me të cilën ke telefonuar, ke dërguar mail-a apo ke komunikuar në rrugë të tjera me kontakte të veçanta. Kjo leje iu mundëson aplikacioneve të fshijnë të dhënat e kontakteve."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Lejon aplikacionin të modifikojë të dhënat rreth kontakteve të tua të ruajtura në tabletin tënd. Kjo leje lejon që aplikacionet të fshijnë të dhënat e kontakteve."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Lejon aplikacionin të modifikojë të dhënat rreth kontakteve të tua të ruajtura në telefonin tënd. Kjo leje lejon që aplikacionet të fshijnë të dhënat e kontakteve."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"lexo ditarin e telefonatave"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Ky aplikacion mund të lexojë të gjithë historikun e telefonatave."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"shkruaj ditarin e telefonatave"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"qasu te vendndodhja e përafërt (bazuar te rrjeti) vetëm në plan të parë"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi, por vetëm kur aplikacioni është në plan të parë. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe të ofrohen në tabletin tënd që aplikacioni të mund t\'i përdorë."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi, por vetëm kur aplikacioni është në plan të parë. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe të ofrohen në televizorin tënd që aplikacioni të mund t\'i përdorë."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Ky aplikacion mund të marrë vendndodhjen tënde të përafërt vetëm kur është në plan të parë. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe të ofrohen në makinën tënde që aplikacioni të mund t\'i përdorë."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi, por vetëm kur aplikacioni është në plan të parë. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe të ofrohen në telefonin tënd që aplikacioni të mund t\'i përdorë."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"qasje te vendndodhja në sfond"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Nëse kjo jepet përveç qasjes te vendndodhja e përafërt ose të saktë, aplikacioni mund të qaset te vendndodhja ndërkohë që ekzekutohet në sfond."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Tingujt e alarmeve"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Tingujt e njoftimeve"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"E panjohur"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Nuk mund të lidhet me <xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Trokit për të ndryshuar cilësimet e privatësisë dhe provo përsëri"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Do ta ndryshosh cilësimin e privatësisë?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> mund të dëshirojë të lidhet duke përdorur adresën MAC të pajisjes sate, një identifikues unik. Kjo mund të lejojë monitorimin e vendndodhjes së pajisjes sate nga pajisjet në afërsi. \n\nNëse vazhdon, <xliff:g id="SSID_1">%1$s</xliff:g> do të ndryshojë cilësimin tënd të privatësisë dhe do të provojë të lidhet përsëri."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Ndrysho cilësimin"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Cilësimi u përditësua. Provo të lidhesh përsëri."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Cilësimi i privatësisë nuk mund të ndryshohet"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Rrjeti nuk u gjet"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">Rrjete Wi-Fi ofrohen për përdorim</item>
       <item quantity="one">Një rrjet Wi-Fi ofrohet për përdorim</item>

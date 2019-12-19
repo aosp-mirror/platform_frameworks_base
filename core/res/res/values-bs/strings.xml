@@ -393,13 +393,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Dozvoljava aplikaciji slanje ljepljivih informacija koje ostaju nakon prestanka emitiranja. Pretjeranom upotrebom može se usporiti ili destabilizirati rad TV-a zbog korištenja previše memorije."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Omogućava aplikaciji slanje ljepljivih informacija koje ostaju nakon prestanka emitiranja. Njihova pretjerana upotreba može usporiti ili destabilizirati rad telefona jer troši previše memorije."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"čitanje vaših kontakata"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Omogućava aplikaciji čitanje podataka o kontaktima koji su pohranjeni na vašem tabletu, uključujući učestalost vaših poziva, slanja e-pošte ili nekog drugog vida komunikacije sa određenim pojedincima. Ovo odobrenje omogućava aplikacijama da pohrane podatke o vašim kontaktima tako da ih zlonamjerne aplikacije mogu podijeliti bez vašeg znanja."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Dozvoljava aplikaciji da čita podatke o vašim kontaktima pohranjenim na TV-u, uključujući učestalost poziva, slanja e-pošte ili komuniciranja na bilo koji način s određenim osobama. Ovim odobrenjem aplikacijama se omogućava da sačuvaju podatke o kontaktima, a zlonamjerne aplikacije mogu bez vašeg znanja podijeliti ove podatke."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Omogućava aplikaciji čitanje podataka o kontaktima koji su pohranjeni na vašem telefonu, uključujući učestalost vaših poziva, slanja e-pošte ili nekog drugog vida komunikacije sa određenim pojedincima. Ovo odobrenje omogućava aplikacijama da pohrane podatke o vašim kontaktima tako da ih zlonamjerne aplikacije mogu podijeliti bez vašeg znanja."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"izmjena podataka o kontaktima"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Omogućava aplikaciji da izmijeni podatke o kontaktima koji su pohranjeni na vašem tabletu, uključujući učestalost vaših poziva, slanje e-pošte, ili neki drugi vid komunikacije sa određenim kontaktima. Ovo odobrenje omogućava aplikaciji da obriše podatke o kontaktima."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Dozvoljava aplikaciji izmjenu podataka o vašim kontaktima pohranjenim na TV-u, uključujući učestalost poziva, slanja e-pošte ili komuniciranja na bilo koji način s određenim kontaktima. Ovim odobrenjem aplikacijama se omogućava brisanje podataka o kontaktima."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Omogućava aplikaciji da izmijeni podatke o kontaktima koji su pohranjeni na vašem telefonu, uključujući učestalost vaših poziva, slanje e-pošte, ili neki drugi vid komunikacije sa određenim kontaktima. Ovo odobrenje omogućava aplikaciji da izbriše podatke o kontaktima."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Dozvoljava aplikaciji da vrši izmjene podataka o kontaktima pohranjenim na tabletu. Ovo odobrenje dozvoljava aplikacijama da izbrišu podatke o kontaktima."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Dozvoljava aplikaciji da vrši izmjene podataka o kontaktima pohranjenim na telefonu. Ovo odobrenje dozvoljava aplikacijama da izbrišu podatke o kontaktima."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"čitanje zapisnika poziva"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Ova aplikacija može čitati historiju vaših poziva."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"pisanje zapisnika poziva"</string>
@@ -423,6 +427,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"pristup približnoj lokaciji (utvrđena preko mreže) samo u prvom planu"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Ova aplikacija može odrediti vašu lokaciju na osnovu izvora mreže kao što su predajnici za mobilnu mrežu i WiFi mreže ali samo kada je aplikacija u prvom planu. Ove usluge za određivanje lokacije moraju biti uključene i omogućene na vašem tabletu kako bi ih aplikacija mogla koristiti."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Ova aplikacija može odrediti vašu lokaciju na osnovu izvora mreže kao što su predajnici za mobilnu mrežu i WiFi mreže ali samo kada je aplikacija u prvom planu. Ove usluge za određivanje lokacije moraju biti uključene i omogućene na vašem TV uređaju kako bi ih aplikacija mogla koristiti."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Ova aplikacija može odrediti vašu približnu lokaciju samo kada je u prvom planu. Te usluge lokacije moraju biti uključene i dostupne u vašem automobilu da ih aplikacija može koristiti."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Ova aplikacija može odrediti vašu lokaciju na osnovu izvora mreže kao što su predajnici za mobilnu mrežu i WiFi mreže ali samo kada je aplikacija u prvom planu. Ove usluge za određivanje lokacije moraju biti uključene i omogućene na vašem telefonu kako bi ih aplikacija mogla koristiti."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"pristup lokaciji u pozadini"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Ako je ovo odobreno, pored pristupa približnoj ili tačnoj lokaciji, aplikacija može pristupiti lokaciji dok radi u pozadini."</string>
@@ -1261,6 +1266,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Zvukovi alarma"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Zvukovi obavještenja"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Nepoznato"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Nije se moguće povezati s mrežom <xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Dodirnite da promijenite postavke privatnosti i pokušajte ponovo"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Promijeniti postavku privatnosti?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Moguće je da će se mreža <xliff:g id="SSID_0">%1$s</xliff:g> htjeti povezati pomoću MAC adrese vašeg uređaja, koja je jedinstveni identifikator. Na taj način se uređajima u blizini može dozvoliti da prate lokaciju vašeg uređaja. \n\nAko nastavite, mreža <xliff:g id="SSID_1">%1$s</xliff:g> će promijeniti vašu postavku privatnosti i pokušat će se ponovo povezati."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Promijeni postavku"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Postavka je ažurirana. Pokušajte se ponovo povezati."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Nije moguće promijeniti postavku privatnosti"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Mreža nije pronađena"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="one">WiFi mreže su dostupne</item>
       <item quantity="few">WiFi mreže su dostupne</item>

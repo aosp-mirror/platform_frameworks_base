@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Permite que o app envie transmissões aderentes, que permanecem depois que a transmissão termina. O uso excessivo pode fazer com que a TV fique lenta ou instável ao fazer com que ela use muita memória."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Permite que o app envie transmissões fixas, que permanecem depois que a transmissão termina. O uso excessivo pode deixar o telefone lento ou instável, fazendo com que ele use muita memória."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"ler seus contatos"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Permite que o app leia dados dos contatos armazenados no tablet, incluindo a frequência com que você chamou, enviou e-mails ou se comunicou de qualquer outra forma com indivíduos específicos. Esta permissão autoriza o app a salvar seus dados de contato, e apps maliciosos podem compartilhar esses dados de contato sem seu conhecimento."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Permite que o app leia os dados dos seus contatos armazenados na sua TV, incluindo a frequência com que você ligou, enviou e-mail ou se comunicou de outras formas com pessoas específicas. Essa permissão autoriza apps a salvarem seus dados de contato, e apps maliciosos podem compartilhar os dados de contato sem seu conhecimento."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Permite que o app leia dados dos contatos armazenados no telefone, incluindo a frequência com que você chamou, enviou e-mails ou se comunicou de qualquer outra forma com indivíduos específicos. Esta permissão autoriza o app a salvar seus dados de contato, e apps maliciosos podem compartilhar esses dados de contato sem seu conhecimento."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"modificar seus contatos"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Permite que o app modifique os dados sobre os contatos armazenados no tablet, incluindo a frequência com que você fez chamadas, enviou e-mails ou se comunicou de outras formas com contatos específicos. Esta permissão autoriza o app a excluir dados de contatos."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Permite que o app modifique os dados de contatos armazenados na sua TV, incluindo a frequência com que você fez chamadas, enviou e-mails ou se comunicou de outras formas com contatos específicos. Essa permissão autoriza o app a excluir dados de contatos."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Permite que o app modifique os dados dos contatos armazenados no telefone, incluindo a frequência com que você fez chamadas, enviou e-mails ou se comunicou de outras formas com contatos específicos. Esta permissão autoriza o app a excluir dados de contatos."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Permite que o app modifique os dados sobre os contatos armazenados no tablet. Essa permissão autoriza os apps a excluírem dados de contato."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Permite que o app modifique os dados sobre os contatos armazenados no smartphone. Essa permissão autoriza os apps a excluírem dados de contato."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"ler registro de chamadas"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Este app pode ler seu histórico de chamadas."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"salvar no registo de chamadas"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"acessar localização aproximada (baseada em rede) apenas em primeiro plano"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Esse app pode acessar sua localização com base em fontes de rede, como torres de celular e redes Wi-Fi, mas apenas quando está em primeiro plano. Esses serviços de localização precisam estar ativados e disponíveis no seu tablet para que o app possa usá-los."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Esse app pode acessar sua localização com base em fontes de rede, como torres de celular e redes Wi-Fi, mas apenas quando está em primeiro plano. Esses serviços de localização precisam estar ativados e disponíveis na sua TV para que o app possa usá-los."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Este app poderá acessar seu local aproximado somente quando estiver em primeiro plano. Esses serviços de localização precisam estar ativados e disponíveis no seu carro para que o app possa usá-los."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Esse app pode acessar sua localização com base em fontes de rede, como torres de celular e redes Wi-Fi, mas apenas quando está em primeiro plano. Esses serviços de localização precisam estar ativados e disponíveis no seu smartphone para que o app possa usá-los."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"acessar a localização em segundo plano"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Se essa permissão for concedida, além do acesso à localização precisa ou aproximada, o app poderá acessar a localização durante a execução em segundo plano."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Sons do alarme"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Sons de notificação"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Desconhecido"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Não foi possível se conectar à rede <xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Toque para mudar as configurações de privacidade e tentar novamente"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Mudar configuração de privacidade?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> pode querer se conectar usando o endereço MAC do seu dispositivo, um identificador único. Isso pode permitir que o local do dispositivo seja monitorado por dispositivos próximos. \n\nSe você continuar, <xliff:g id="SSID_1">%1$s</xliff:g> mudará sua configuração de privacidade e tentará se conectar novamente."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Mudar configuração"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Configuração atualizada. Tente conectar novamente."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Não foi possível mudar as configurações de privacidade"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Rede não encontrada"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="one">Redes Wi-Fi disponíveis</item>
       <item quantity="other">Redes Wi-Fi disponíveis</item>

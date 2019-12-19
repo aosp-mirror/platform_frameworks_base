@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Uygulamaya, yayın sona erdikten sonra da kalan, ziyaretçi çeken yayınlar gönderme izni verir. Aşırı kullanım çok fazla bellek kullanılmasına yol açarak TV\'yi yavaşlatabilir ya da kararsız hale getirebilir."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Uygulamaya, yayın bittikten sonra da kalan sabit yayınlar gönderme izni verir. Aşırı kullanılması çok fazla bellek harcanmasına neden olarak telefonunu yavaşlatabilir veya dengesiz hale getirebilir."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"kişilerinizi okuma"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Uygulamaya tabletinizde depolanan kişilerinizle ilgili verileri okuma izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi kaydetmesine olanak sağlar ve kötü amaçlı uygulamalar kişi verilerini haberiniz olmadan paylaşabilir."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Uygulamaya, belli kişileri arama, e-posta ile haberleşme veya başka yoldan iletişim kurma sıklığınız da dahil olmak üzere TV\'nizde kayıtlı kişiler ile ilgili verileri okuma izni verir. Bu izin, uygulamaların kişiler verilerinizi kaydetmesine olanak sağlar ve kötü amaçlı uygulamalar kişiler verilerinizi bilginiz olmaksızın paylaşabilir."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Uygulamaya telefonunuzda depolanan kişilerinizle ilgili verileri okuma izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi kaydetmesine olanak sağlar ve kötü amaçlı uygulamalar kişi verilerini sizden habersiz paylaşabilir."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"kişilerinizi değiştirme"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Uygulamaya tabletinizde depolanan kişilerinizle ilgili verileri değiştirme izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi silmesine olanak sağlar."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Uygulamaya, belirli kişileri arama, bu kişilerle e-posta aracılığıyla haberleşme veya başka yollardan iletişim kurma sıklığınız da dahil olmak üzere, TV\'nizde kayıtlı kişiler ile ilgili verileri değiştirme izni verir. Bu izin, uygulamaların kişi verilerinizi silmesine olanak sağlar."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Uygulamaya telefonunuzda depolanan kişilerinizle ilgili verileri değiştirme izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi silmesine olanak sağlar."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Uygulamaya tabletinizde kayıtlı kişileriniz ile ilgili verileri değiştirme izni verir. Bu izin, uygulamanın kişi verilerinizi silmesine olanak sağlar."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Uygulamaya telefonunuzda kayıtlı kişileriniz ile ilgili verileri değiştirme izni verir. Bu izin, uygulamanın kişi verilerinizi silmesine olanak sağlar."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"çağrı günlüğünü oku"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Bu uygulama, çağrı geçmişinizi okuyabilir."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"çağrı günlüğüne yaz"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"yalnızca ön planda yaklaşık konuma (ağa dayalı) erişme"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Bu uygulama baz istasyonları ve kablosuz ağlar gibi ağ kaynaklarını dikkate alarak konumunuzu bulabilir, ancak bunu yalnızca ön plandayken yapabilir. Uygulamanın bu hizmetleri kullanabilmesi için tabletinizde bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Bu uygulama baz istasyonları ve kablosuz ağlar gibi ağ kaynaklarını dikkate alarak konumunuzu bulabilir, ancak bunu yalnızca ön plandayken yapabilir. Uygulamanın bu hizmetleri kullanabilmesi için TV\'nizde bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Bu uygulama, yalnızca ön planda çalışırken yaklaşık konum bilginizi alabilir. Uygulamanın kullanabilmesi için bu konum hizmetlerinin açılması ve arabanızda kullanılabilir olması gerekir."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Bu uygulama baz istasyonları ve kablosuz ağlar gibi ağ kaynaklarını dikkate alarak konumunuzu bulabilir, ancak bunu yalnızca ön plandayken yapabilir. Uygulamanın bu hizmetleri kullanabilmesi için telefonunuzda bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"konum bilgisine arka planda eriş"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Bu izin, yaklaşık veya tam konum erişimine ek olarak verilirse uygulama, konum bilgisine arka planda çalışırken erişebilir."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Alarm sesleri"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Bildirim sesleri"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Bilinmiyor"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> ağına bağlanılamıyor"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Gizlilik ayarını değiştirip tekrar denemek için dokunun"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Gizlilik ayarı değiştirilsin mi?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g>, benzersiz bir tanımlayıcı olan, cihazınızın MAC adresini kullanarak bağlanmak isteyebilir. Bu, cihazınızın konumunun etraftaki cihazlar tarafından izlenmesine olanak sağlayabilir. \n\nDevam ederseniz <xliff:g id="SSID_1">%1$s</xliff:g>, gizlilik ayarınızı değiştirip tekrar bağlanmayı deneyecektir."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Ayarı değiştir"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Ayar güncellendi. Tekrar bağlanmayı deneyin."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Gizlilik ayarı değiştirilemiyor"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Ağ bulunamadı"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">Kablosuz ağlar var</item>
       <item quantity="one">Kablosuz ağ var</item>

@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"એપ્લિકેશનને સ્ટિકી બ્રોડકાસ્ટ્સ મોકલવાની મંજૂરી આપે છે, જે બ્રોડકાસ્ટ સમાપ્ત થયા પછી પણ રહે છે. અતિરિક્ત ઉપયોગ ટીવીને વધુ પડતી મેમરીનો ઉપયોગ કરવાને કારણે તેને ધીમું અથવા અસ્થિર બનાવી શકે છે."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"એપ્લિકેશનને સ્ટિકી બ્રોડકાસ્ટ્સ મોકલવાની મંજૂરી આપે છે, જે બ્રોડકાસ્ટ્સ સમાપ્ત થયા પછી પણ રહે છે. અતિરિક્ત ઉપયોગ ફોનને વધુ પડતી મેમરીનો ઉપયોગ કરવાને કારણે તેને ધીમું અથવા અસ્થિર બનાવી શકે છે."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"તમારા સંપર્કો વાંચો"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"એપ્લિકેશનને તમે કઈ આવૃત્તિ પર કૉલ કર્યો, ઇમેઇલ કરી અથવા વિશિષ્ટ વ્યક્તિઓ સાથે અન્ય રીતે સંચાર કર્યો તે સહિત તમારા ટેબ્લેટ પર સંગ્રહિત તમારા સંપર્કો વિશેનો ડેટા વાંચવાની મંજૂરી આપે છે. આ પરવાનગી ઍપ્લિકેશનોને તમારો સંપર્ક ડેટા સાચવવાની મંજૂરી આપે છે અને દુર્ભાવનાપૂર્ણ ઍપ્લિકેશનો તમારી જાણ વગર સંપર્ક ડેટાને શેર કરી શકે છે."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"એપ્લિકેશનને તમે કઈ આવૃત્તિ પર કૉલ કર્યો, ઇમેઇલ કરી અથવા વિશિષ્ટ વ્યક્તિઓ સાથે અન્ય રીતે સંચાર કર્યો તે સહિત તમારા TV પર સંગ્રહિત તમારા સંપર્કો વિશેનો ડેટા વાંચવાની મંજૂરી આપે છે. આ પરવાનગી ઍપ્લિકેશનોને તમારો સંપર્ક ડેટા સાચવવાની મંજૂરી આપે છે અને દુર્ભાવનાપૂર્ણ ઍપ્લિકેશનો તમારી જાણ વગર સંપર્ક ડેટાને શેર કરી શકે છે."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"એપ્લિકેશનને તમે કઈ આવૃત્તિ પર કૉલ કર્યો, ઇમેઇલ કરી અથવા વિશિષ્ટ વ્યક્તિઓ સાથે અન્ય રીતે સંચાર કર્યો તે સહિત તમારા ફોન પર સંગ્રહિત તમારા સંપર્કો વિશેનો ડેટા વાંચવાની મંજૂરી આપે છે. આ પરવાનગી ઍપ્લિકેશનોને તમારો સંપર્ક ડેટા સાચવવાની મંજૂરી આપે છે અને દુર્ભાવનાપૂર્ણ ઍપ્લિકેશનો તમારી જાણ વગર સંપર્ક ડેટાને શેર કરી શકે છે."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"તમારા સંપર્કો સંશોધિત કરો"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"એપ્લિકેશનને તમે કઈ આવૃત્તિ પર કૉલ કર્યો, ઇમેઇલ કરી અથવા વિશિષ્ટ સંપર્કો સાથે અન્ય રીતે સંચાર કર્યો તે સહિત તમારા ટેબ્લેટ પર સંગ્રહિત તમારા સંપર્કો વિશેનો ડેટા સંશોધિત કરવાની મંજૂરી આપે છે. આ પરવાનગી એપ્લિકેશન્સને સંપર્ક ડેટા કાઢી નાખવાની મંજૂરી આપે છે."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"એપ્લિકેશનને તમે કઈ આવૃત્તિ પર કૉલ કર્યો, ઇમેઇલ કરી અથવા વિશિષ્ટ વ્યક્તિઓ સાથે અન્ય રીતે સંચાર કર્યો તે સહિત તમારા ટીવી પર સંગ્રહિત તમારા સંપર્કો વિશેનો ડેટા સંશોધિત કરવાની મંજૂરી આપે છે. આ પરવાનગી એપ્લિકેશન્સને સંપર્ક ડેટા કાઢી નાખવાની મંજૂરી આપે છે."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"એપ્લિકેશનને તમે કઈ આવૃત્તિ પર કૉલ કર્યો, ઇમેઇલ કરી અથવા વિશિષ્ટ સંપર્કો સાથે અન્ય રીતે સંચાર કર્યો તે સહિત તમારા ફોન પર સંગ્રહિત તમારા સંપર્કો વિશેનો ડેટા સંશોધિત કરવાની મંજૂરી આપે છે. આ પરવાનગી એપ્લિકેશન્સને સંપર્ક ડેટા કાઢી નાખવાની મંજૂરી આપે છે."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"ઍપને તમારા ટૅબ્લેટ પર સ્ટોર કરેલા તમારા સંપર્કો વિશેનો ડેટા સંશોધિત કરવાની મંજૂરી આપે છે. આ પરવાનગી ઍપને સંપર્ક ડેટા ડિલીટ કરવાની મંજૂરી આપે છે."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"ઍપને તમારા ફોનમાં સ્ટોર કરેલા તમારા સંપર્કો વિશેનો ડેટા સંશોધિત કરવાની મંજૂરી આપે છે. આ પરવાનગી ઍપને સંપર્ક ડેટા ડિલીટ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"કૉલ લૉગ વાંચો"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"આ ઍપ્લિકેશન, તમારો કૉલ ઇતિહાસ વાંચી શકે છે."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"કૉલ લૉગ લખો"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"અંદાજિત જગ્યાને (નેટવર્ક આધારિત) માત્ર ફૉરગ્રાઉન્ડમાંથી ઍક્સેસ કરો"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"સેલ ટાવર અને વાઇ-ફાઇ નેટવર્ક જેવા નેટવર્ક સૉર્સનો ઉપયોગ કરીને આ અ‍ૅપ તમારી જગ્યા જાણી શકે છે, પરંતુ આ માત્ર ત્યારે શક્ય છે જ્યારે આ અ‍ૅપ ફૉરગ્રાઉન્ડમાં ચાલુ હોય. ઍપ આ જગ્યાની સેવાઓનો ઉપયોગ કરી શકે તે માટે તમારા ટૅબ્લેટ પર આ સેવાઓ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"સેલ ટાવર અને વાઇ-ફાઇ નેટવર્ક જેવા નેટવર્ક સૉર્સનો ઉપયોગ કરીને આ અ‍ૅપ તમારી જગ્યા જાણી શકે છે, પરંતુ આ માત્ર ત્યારે શક્ય છે જ્યારે આ અ‍ૅપ ફૉરગ્રાઉન્ડમાં ચાલુ હોય. ઍપ આ જગ્યાની સેવાઓનો ઉપયોગ કરી શકે તે માટે તમારા ટીવી પર આ સેવાઓ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"આ ઍપ ફોરગ્રાઉન્ડમાં હોય, ત્યારે જ તે તમે લગભગ કયા સ્થાને છો તેનો અંદાજ મેળવી શકે છે. ઍપ આ સ્થાન સેવાઓનો ઉપયોગ કરી શકે તે માટે તે સેવાઓ ચાલુ કરેલી હોવી અને તમારી કારમાં ઉપલબ્ધ હોવી જરૂરી છે."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"સેલ ટાવર અને વાઇ-ફાઇ નેટવર્ક જેવા નેટવર્ક સૉર્સનો ઉપયોગ કરીને આ અ‍ૅપ તમારી જગ્યા જાણી શકે છે, પરંતુ આ માત્ર ત્યારે શક્ય છે જ્યારે આ અ‍ૅપ ફૉરગ્રાઉન્ડમાં ચાલુ હોય. ઍપ આ જગ્યાની સેવાઓનો ઉપયોગ કરી શકે તે માટે તમારા ફોન પર આ સેવાઓ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"બૅકગ્રાઉન્ડમાં સ્થાન ઍક્સેસ કરો"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"જો અંદાજિત અથવા ચોક્કસ સ્થાનના ઍક્સેસ ઉપરાંત આને પરવાનગી આપવામાં આવી હશે, તો ઍપ બૅકગ્રાઉન્ડમાં ચાલતી હોય ત્યારે સ્થાનને ઍક્સેસ કરી શકશે."</string>
@@ -907,7 +912,7 @@
     <string name="factorytest_no_action" msgid="339252838115675515">"FACTORY_TEST ક્રિયા પ્રદાન કરનાર કોઈ પૅકેજ મળ્યું નહોતું."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"રીબૂટ કરો"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" પરનું પૃષ્ઠ કહે છે કે:"</string>
-    <string name="js_dialog_title_default" msgid="3769524569903332476">"Javascript"</string>
+    <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"નેવિગેશનની પુષ્ટિ કરો"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"આ પૃષ્ઠ છોડો"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"આ પૃષ્ઠ પર રહો"</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"એલાર્મ ધ્વનિઓ"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"સૂચના ધ્વનિઓ"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"અજાણી"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> સાથે કનેક્ટ કરી શકાતું નથી"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"પ્રાઇવસી સેટિંગ બદલવા અને ફરી પ્રયાસ કરવા ટૅપ કરો"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"પ્રાઇવસી સેટિંગ બદલીએ?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g>, કોઈ વિશિષ્ટ ઓળખકર્તા એવા તમારા ડિવાઇસના MAC ઍડ્રેસ વડે કનેક્ટ કરવા ઇચ્છતા હોઈ શકે છે. આમ કરવાથી, તમારા ડિવાઇસનું સ્થાન ટ્રૅક કરવાની મંજૂરી નજીકના કોઈ ડિવાઇસ દ્વારા મેળવવામાં આવી શકે છે. \n\nજો તમે ચાલુ રાખશો, તો <xliff:g id="SSID_1">%1$s</xliff:g> તમારા પ્રાઇવસી સેટિંગમાં ફેરફાર કરશે અને ફરીથી કનેક્ટ કરવાનો પ્રયાસ કરશે."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"સેટિંગ બદલો"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"સેટિંગ અપડેટ કર્યું. ફરીથી કનેક્ટ કરવાનો પ્રયાસ કરો."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"પ્રાઇવસી સેટિંગમાં ફેરફાર કરી શકાતો નથી"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"નેટવર્ક મળ્યું નથી"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="one">વાઇ-ફાઇ નેટવર્ક્સ ઉપલબ્ધ</item>
       <item quantity="other">વાઇ-ફાઇ નેટવર્ક્સ ઉપલબ્ધ</item>
