@@ -460,6 +460,7 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
+        "updatable_media_stubs",
         "framework-sdkext-stubs-systemapi",
         // TODO(jiyong): add more stubs for APEXes here
     ],
