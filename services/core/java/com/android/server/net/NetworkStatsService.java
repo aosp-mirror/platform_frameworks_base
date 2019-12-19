@@ -873,6 +873,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     + mPersistThreshold);
         }
 
+        final long oldGlobalAlertBytes = mGlobalAlertBytes;
+
         // update and persist if beyond new thresholds
         final long currentTime = mClock.millis();
         synchronized (mStatsLock) {
@@ -886,8 +888,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             mUidTagRecorder.maybePersistLocked(currentTime);
         }
 
-        // re-arm global alert
-        registerGlobalAlert();
+        if (oldGlobalAlertBytes != mGlobalAlertBytes) {
+            registerGlobalAlert();
+        }
     }
 
     @Override
