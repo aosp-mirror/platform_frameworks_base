@@ -52,28 +52,28 @@ public class FakeExecutorTest extends SysuiTestCase {
         FakeExecutor fakeExecutor = new FakeExecutor(clock);
         RunnableImpl runnable = new RunnableImpl();
 
-        assertEquals(0, clock.uptimeMillis());
+        assertEquals(10000, clock.uptimeMillis());
         assertEquals(0, runnable.mRunCount);
 
         // Execute two runnables. They should not run and should be left pending.
         fakeExecutor.execute(runnable);
         assertEquals(0, runnable.mRunCount);
-        assertEquals(0, clock.uptimeMillis());
+        assertEquals(10000, clock.uptimeMillis());
         assertEquals(1, fakeExecutor.numPending());
         fakeExecutor.execute(runnable);
         assertEquals(0, runnable.mRunCount);
-        assertEquals(0, clock.uptimeMillis());
+        assertEquals(10000, clock.uptimeMillis());
         assertEquals(2, fakeExecutor.numPending());
 
         // Run one pending runnable.
         assertTrue(fakeExecutor.runNextReady());
         assertEquals(1, runnable.mRunCount);
-        assertEquals(0, clock.uptimeMillis());
+        assertEquals(10000, clock.uptimeMillis());
         assertEquals(1, fakeExecutor.numPending());
         // Run a second pending runnable.
         assertTrue(fakeExecutor.runNextReady());
         assertEquals(2, runnable.mRunCount);
-        assertEquals(0, clock.uptimeMillis());
+        assertEquals(10000, clock.uptimeMillis());
         assertEquals(0, fakeExecutor.numPending());
 
         // No more runnables to run.
@@ -83,12 +83,12 @@ public class FakeExecutorTest extends SysuiTestCase {
         fakeExecutor.execute(runnable);
         fakeExecutor.execute(runnable);
         assertEquals(2, runnable.mRunCount);
-        assertEquals(0, clock.uptimeMillis());
+        assertEquals(10000, clock.uptimeMillis());
         assertEquals(2, fakeExecutor.numPending());
         // Execute all pending runnables in batch.
         assertEquals(2, fakeExecutor.runAllReady());
         assertEquals(4, runnable.mRunCount);
-        assertEquals(0, clock.uptimeMillis());
+        assertEquals(10000, clock.uptimeMillis());
         assertEquals(0, fakeExecutor.runAllReady());
     }
 
@@ -106,7 +106,7 @@ public class FakeExecutorTest extends SysuiTestCase {
         fakeExecutor.executeDelayed(runnable, 50);
         fakeExecutor.executeDelayed(runnable, 100);
         assertEquals(0, runnable.mRunCount);
-        assertEquals(0, clock.uptimeMillis());
+        assertEquals(10000, clock.uptimeMillis());
         assertEquals(3, fakeExecutor.numPending());
         // Delayed runnables should not advance the clock and therefore should not run.
         assertFalse(fakeExecutor.runNextReady());
@@ -140,7 +140,7 @@ public class FakeExecutorTest extends SysuiTestCase {
         fakeExecutor.executeDelayed(runnable, 50);
         fakeExecutor.executeDelayed(runnable, 100);
         assertEquals(0, runnable.mRunCount);
-        assertEquals(0, clock.uptimeMillis());
+        assertEquals(10000, clock.uptimeMillis());
         assertEquals(3, fakeExecutor.numPending());
         // Delayed runnables should not advance the clock and therefore should not run.
         assertFalse(fakeExecutor.runNextReady());
@@ -150,24 +150,24 @@ public class FakeExecutorTest extends SysuiTestCase {
         // Advance the clock to the next runnable. Check that it is run.
         assertEquals(1, fakeExecutor.advanceClockToNext());
         assertEquals(1, fakeExecutor.runAllReady());
-        assertEquals(1, clock.uptimeMillis());
+        assertEquals(10001, clock.uptimeMillis());
         assertEquals(2, fakeExecutor.numPending());
         assertEquals(1, runnable.mRunCount);
         assertEquals(49, fakeExecutor.advanceClockToNext());
         assertEquals(1, fakeExecutor.runAllReady());
-        assertEquals(50, clock.uptimeMillis());
+        assertEquals(10050, clock.uptimeMillis());
         assertEquals(1, fakeExecutor.numPending());
         assertEquals(2, runnable.mRunCount);
         assertEquals(50, fakeExecutor.advanceClockToNext());
         assertEquals(1, fakeExecutor.runAllReady());
-        assertEquals(100, clock.uptimeMillis());
+        assertEquals(10100, clock.uptimeMillis());
         assertEquals(0, fakeExecutor.numPending());
         assertEquals(3, runnable.mRunCount);
 
         // Nothing left to do
         assertEquals(0, fakeExecutor.advanceClockToNext());
         assertEquals(0, fakeExecutor.runAllReady());
-        assertEquals(100, clock.uptimeMillis());
+        assertEquals(10100, clock.uptimeMillis());
         assertEquals(0, fakeExecutor.numPending());
         assertEquals(3, runnable.mRunCount);
     }
@@ -193,7 +193,7 @@ public class FakeExecutorTest extends SysuiTestCase {
                     return null;
                 };
 
-        assertEquals(0, clock.uptimeMillis());
+        assertEquals(10000, clock.uptimeMillis());
         checkRunCounts.invoke(0, 0, 0, 0);
 
         fakeExecutor.execute(runnableA);
@@ -227,8 +227,8 @@ public class FakeExecutorTest extends SysuiTestCase {
 
         fakeExecutor.execute(runnableA);
         fakeExecutor.executeAtTime(runnableB, 0);  // this is in the past!
-        fakeExecutor.executeAtTime(runnableC, 1000);
-        fakeExecutor.executeAtTime(runnableD, 500);
+        fakeExecutor.executeAtTime(runnableC, 11000);
+        fakeExecutor.executeAtTime(runnableD, 10500);
 
         fakeExecutor.advanceClockToNext();
         fakeExecutor.runAllReady();

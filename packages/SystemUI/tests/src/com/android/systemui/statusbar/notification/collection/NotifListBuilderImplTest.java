@@ -727,7 +727,7 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
         mListBuilder.addPreGroupFilter(filter3);
 
         // GIVEN the SystemClock is set to a particular time:
-        mSystemClock.setUptimeMillis(47);
+        mSystemClock.setUptimeMillis(10047);
 
         // WHEN the pipeline is kicked off on a list of notifs
         addNotif(0, PACKAGE_1);
@@ -735,12 +735,12 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
         dispatchBuild();
 
         // THEN the value of `now` is the same for all calls to shouldFilterOut
-        verify(filter1).shouldFilterOut(mEntrySet.get(0), 47);
-        verify(filter2).shouldFilterOut(mEntrySet.get(0), 47);
-        verify(filter3).shouldFilterOut(mEntrySet.get(0), 47);
-        verify(filter1).shouldFilterOut(mEntrySet.get(1), 47);
-        verify(filter2).shouldFilterOut(mEntrySet.get(1), 47);
-        verify(filter3).shouldFilterOut(mEntrySet.get(1), 47);
+        verify(filter1).shouldFilterOut(mEntrySet.get(0), 10047);
+        verify(filter2).shouldFilterOut(mEntrySet.get(0), 10047);
+        verify(filter3).shouldFilterOut(mEntrySet.get(0), 10047);
+        verify(filter1).shouldFilterOut(mEntrySet.get(1), 10047);
+        verify(filter2).shouldFilterOut(mEntrySet.get(1), 10047);
+        verify(filter3).shouldFilterOut(mEntrySet.get(1), 10047);
     }
 
     @Test
