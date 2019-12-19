@@ -229,7 +229,7 @@ public final class LinkProperties implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public @NonNull List<String> getAllInterfaceNames() {
         List<String> interfaceNames = new ArrayList<>(mStackedLinks.size() + 1);
         if (mIfaceName != null) interfaceNames.add(mIfaceName);
@@ -249,7 +249,7 @@ public final class LinkProperties implements Parcelable {
      * @return An unmodifiable {@link List} of {@link InetAddress} for this link.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public @NonNull List<InetAddress> getAddresses() {
         final List<InetAddress> addresses = new ArrayList<>();
         for (LinkAddress linkAddress : mLinkAddresses) {
@@ -344,8 +344,8 @@ public final class LinkProperties implements Parcelable {
      * Returns all the addresses on this link and all the links stacked above it.
      * @hide
      */
-    @UnsupportedAppUsage
-    public List<LinkAddress> getAllLinkAddresses() {
+    @SystemApi
+    public @NonNull List<LinkAddress> getAllLinkAddresses() {
         List<LinkAddress> addresses = new ArrayList<>(mLinkAddresses);
         for (LinkProperties stacked: mStackedLinks.values()) {
             addresses.addAll(stacked.getAllLinkAddresses());
@@ -544,6 +544,7 @@ public final class LinkProperties implements Parcelable {
      * @return true if the PCSCF server was added, false otherwise.
      * @hide
      */
+    @SystemApi
     public boolean addPcscfServer(@NonNull InetAddress pcscfServer) {
         if (pcscfServer != null && !mPcscfs.contains(pcscfServer)) {
             mPcscfs.add(pcscfServer);
@@ -731,7 +732,7 @@ public final class LinkProperties implements Parcelable {
      * Returns all the routes on this link and all the links stacked above it.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public @NonNull List<RouteInfo> getAllRoutes() {
         List<RouteInfo> routes = new ArrayList<>(mRoutes);
         for (LinkProperties stacked: mStackedLinks.values()) {
@@ -1027,7 +1028,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if there is an IPv4 default route, {@code false} otherwise.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public boolean hasIpv4DefaultRoute() {
         for (RouteInfo r : mRoutes) {
             if (r.isIPv4Default()) {
@@ -1084,7 +1085,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if there is an IPv4 DNS server, {@code false} otherwise.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public boolean hasIpv4DnsServer() {
         for (InetAddress ia : mDnses) {
             if (ia instanceof Inet4Address) {
@@ -1112,7 +1113,7 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if there is an IPv6 DNS server, {@code false} otherwise.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public boolean hasIpv6DnsServer() {
         for (InetAddress ia : mDnses) {
             if (ia instanceof Inet6Address) {
