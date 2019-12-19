@@ -94,6 +94,7 @@ import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
+import com.android.systemui.statusbar.notification.stack.NotificationListItem;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -115,7 +116,8 @@ import java.util.function.Consumer;
  * the group summary (which contains 1 or more child notifications).
  */
 public class ExpandableNotificationRow extends ActivatableNotificationView
-        implements PluginListener<NotificationMenuRowPlugin>, SwipeableView {
+        implements PluginListener<NotificationMenuRowPlugin>, SwipeableView,
+        NotificationListItem {
 
     private static final boolean DEBUG = false;
     private static final int DEFAULT_DIVIDER_ALPHA = 0x29;
@@ -666,6 +668,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         layout.setHeights(minHeight, headsUpHeight, mNotificationMaxHeight);
     }
 
+    @NonNull
     public NotificationEntry getEntry() {
         return mEntry;
     }
@@ -767,6 +770,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         row.setIsChildInGroup(true, this);
     }
 
+    /**
+     * Same as {@link #addChildNotification(ExpandableNotificationRow, int)}, but takes a
+     * {@link NotificationListItem} instead
+     *
+     * @param childItem item
+     * @param childIndex index
+     */
+    public void addChildNotification(NotificationListItem childItem, int childIndex) {
+        addChildNotification((ExpandableNotificationRow) childItem.getView(), childIndex);
+    }
+
     public void removeChildNotification(ExpandableNotificationRow row) {
         if (mChildrenContainer != null) {
             mChildrenContainer.removeNotification(row);
@@ -774,6 +788,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         onChildrenCountChanged();
         row.setIsChildInGroup(false, null);
         row.setBottomRoundness(0.0f, false /* animate */);
+    }
+
+    @Override
+    public void removeChildNotification(NotificationListItem child) {
+        removeChildNotification((ExpandableNotificationRow) child.getView());
     }
 
     @Override
@@ -879,7 +898,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * @param callback the callback to invoked in case it is not allowed
      * @return whether the list order has changed
      */
-    public boolean applyChildOrder(List<ExpandableNotificationRow> childOrder,
+    public boolean applyChildOrder(List<? extends NotificationListItem> childOrder,
             VisualStabilityManager visualStabilityManager,
             VisualStabilityManager.Callback callback) {
         return mChildrenContainer != null && mChildrenContainer.applyChildOrder(childOrder,
@@ -1272,6 +1291,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             row.setIsChildInGroup(false, null);
         }
         onChildrenCountChanged();
+    }
+
+    @Override
+    public View getView() {
+        return this;
     }
 
     public void setForceUnlocked(boolean forceUnlocked) {
