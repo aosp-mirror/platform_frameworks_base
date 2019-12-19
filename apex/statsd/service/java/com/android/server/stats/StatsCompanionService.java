@@ -172,6 +172,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -2136,8 +2137,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullDangerousPermissionState(long elapsedNanos, final long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
+    private void pullDangerousPermissionState(int atomId, long elapsedNanos,
+            final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
         Set<Integer> reportedUids = new HashSet<>();
         try {
@@ -2166,6 +2167,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     }
                     reportedUids.add(pkg.applicationInfo.uid);
 
+                    if (atomId == StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED
+                            && ThreadLocalRandom.current().nextFloat() > 0.2f) {
+                        continue;
+                    }
+
                     int numPerms = pkg.requestedPermissions.length;
                     for (int permNum  = 0; permNum < numPerms; permNum++) {
                         String permName = pkg.requestedPermissions[permNum];
@@ -2175,7 +2181,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         try {
                             permissionInfo = pm.getPermissionInfo(permName, 0);
                             permissionFlags =
-                                pm.getPermissionFlags(permName, pkg.packageName, user);
+                                    pm.getPermissionFlags(permName, pkg.packageName, user);
 
                         } catch (PackageManager.NameNotFoundException ignored) {
                             continue;
@@ -2186,11 +2192,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         }
 
                         StatsLogEventWrapper e = new StatsLogEventWrapper(
-                                StatsLog.DANGEROUS_PERMISSION_STATE, elapsedNanos, wallClockNanos);
+                                atomId, elapsedNanos, wallClockNanos);
 
                         e.writeString(permName);
                         e.writeInt(pkg.applicationInfo.uid);
-                        e.writeString(null);
+                        if (atomId == StatsLog.DANGEROUS_PERMISSION_STATE) {
+                            e.writeString(null);
+                        }
                         e.writeBoolean((pkg.requestedPermissionsFlags[permNum]
                                 & REQUESTED_PERMISSION_GRANTED) != 0);
                         e.writeInt(permissionFlags);
@@ -2640,7 +2648,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 break;
             }
             case StatsLog.DANGEROUS_PERMISSION_STATE: {
-                pullDangerousPermissionState(elapsedNanos, wallClockNanos, ret);
+                pullDangerousPermissionState(StatsLog.DANGEROUS_PERMISSION_STATE, elapsedNanos,
+                        wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED: {
+                pullDangerousPermissionState(StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED,
+                        elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.TIME_ZONE_DATA_INFO: {
