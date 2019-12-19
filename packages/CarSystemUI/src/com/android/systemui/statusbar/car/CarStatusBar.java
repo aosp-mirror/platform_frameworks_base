@@ -63,6 +63,8 @@ import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.car.CarDeviceProvisionedController;
+import com.android.systemui.car.CarDeviceProvisionedListener;
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -179,8 +181,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private final Lazy<PowerManagerHelper> mPowerManagerHelperLazy;
     private final ShadeController mShadeController;
     private final CarServiceProvider mCarServiceProvider;
+    private final CarDeviceProvisionedController mCarDeviceProvisionedController;
 
-    private DeviceProvisionedController mDeviceProvisionedController;
+    private boolean mDeviceIsSetUpForUser = true;
+    private boolean mIsUserSetupInProgress = false;
     private PowerManagerHelper mPowerManagerHelper;
     private FlingAnimationUtils mFlingAnimationUtils;
     private NotificationDataManager mNotificationDataManager;
@@ -397,7 +401,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 dismissCallbackRegistry);
         mScrimController = scrimController;
         mLockscreenLockIconController = lockscreenLockIconController;
-        mDeviceProvisionedController = deviceProvisionedController;
+        mCarDeviceProvisionedController =
+                (CarDeviceProvisionedController) deviceProvisionedController;
         mShadeController = shadeController;
         mCarServiceProvider = carServiceProvider;
         mPowerManagerHelperLazy = powerManagerHelperLazy;
@@ -408,6 +413,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     @Override
     public void start() {
+        mDeviceIsSetUpForUser = mCarDeviceProvisionedController.isCurrentUserSetup();
+        mIsUserSetupInProgress = mCarDeviceProvisionedController.isCurrentUserSetupInProgress();
+
         // Need to initialize screen lifecycle before calling super.start - before switcher is
         // created.
         mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
@@ -450,6 +458,33 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mPowerManagerHelper = mPowerManagerHelperLazy.get();
         mPowerManagerHelper.setCarPowerStateListener(mCarPowerStateListener);
         mPowerManagerHelper.connectToCarService();
+
+        mCarDeviceProvisionedController.addCallback(
+                new CarDeviceProvisionedListener() {
+                    @Override
+                    public void onUserSetupInProgressChanged() {
+                        mDeviceIsSetUpForUser = mCarDeviceProvisionedController
+                                .isCurrentUserSetup();
+                        mIsUserSetupInProgress = mCarDeviceProvisionedController
+                                .isCurrentUserSetupInProgress();
+                    }
+
+                    @Override
+                    public void onUserSetupChanged() {
+                        mDeviceIsSetUpForUser = mCarDeviceProvisionedController
+                                .isCurrentUserSetup();
+                        mIsUserSetupInProgress = mCarDeviceProvisionedController
+                                .isCurrentUserSetupInProgress();
+                    }
+
+                    @Override
+                    public void onUserSwitched() {
+                        mDeviceIsSetUpForUser = mCarDeviceProvisionedController
+                                .isCurrentUserSetup();
+                        mIsUserSetupInProgress = mCarDeviceProvisionedController
+                                .isCurrentUserSetupInProgress();
+                    }
+                });
     }
 
     /**
@@ -465,16 +500,18 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     @Override
     public boolean hideKeyguard() {
         boolean result = super.hideKeyguard();
-        mCarNavigationBarController.hideAllKeyguardButtons(
-                mDeviceProvisionedController.isCurrentUserSetup());
+        mCarNavigationBarController.hideAllKeyguardButtons(isDeviceSetupForUser());
         return result;
     }
 
     @Override
     public void showKeyguard() {
         super.showKeyguard();
-        mCarNavigationBarController.showAllKeyguardButtons(
-                mDeviceProvisionedController.isCurrentUserSetup());
+        mCarNavigationBarController.showAllKeyguardButtons(isDeviceSetupForUser());
+    }
+
+    private boolean isDeviceSetupForUser() {
+        return mDeviceIsSetUpForUser && !mIsUserSetupInProgress;
     }
 
     @Override
@@ -536,7 +573,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 new HandleBarCloseNotificationGestureListener());
 
         mTopNavBarNotificationTouchListener = (v, event) -> {
-            if (!mDeviceProvisionedController.isCurrentUserSetup()) {
+            if (!isDeviceSetupForUser()) {
                 return true;
             }
             boolean consumed = openGestureDetector.onTouchEvent(event);
@@ -700,8 +737,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
      */
     protected void onUseenCountUpdate(int unseenNotificationCount) {
         boolean hasUnseen = unseenNotificationCount > 0;
-        mCarNavigationBarController.toggleAllNotificationsUnseenIndicator(
-                mDeviceProvisionedController.isCurrentUserSetup(), hasUnseen);
+        mCarNavigationBarController.toggleAllNotificationsUnseenIndicator(isDeviceSetupForUser(),
+                hasUnseen);
     }
 
     /**
@@ -1267,8 +1304,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
         @Override
         protected void setHeadsUpVisible() {
-            // if the Notifications panel is showing don't show the Heads up
-            if (!mEnableHeadsUpNotificationWhenNotificationShadeOpen && mPanelExpanded) {
+            // if the Notifications panel is showing or SUW for user is in progress then don't show
+            // heads up notifications
+            if ((!mEnableHeadsUpNotificationWhenNotificationShadeOpen && mPanelExpanded)
+                    || !isDeviceSetupForUser()) {
                 return;
             }
 

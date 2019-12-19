@@ -40,6 +40,8 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.ShadeControllerImpl;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.Optional;
@@ -114,4 +116,8 @@ abstract class SystemUIDefaultModule {
             CommandQueue commandQueue) {
         return new Recents(context, recentsImplementation, commandQueue);
     }
+
+    @Binds
+    abstract DeviceProvisionedController bindDeviceProvisionedController(
+            DeviceProvisionedControllerImpl deviceProvisionedController);
 }
