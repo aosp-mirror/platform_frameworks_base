@@ -574,6 +574,27 @@ public class ActivityStackTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testShouldBeVisible_FullscreenBehindTranslucentInHomeStack() {
+        final ActivityStack homeStack = createStackForShouldBeVisibleTest(mDefaultDisplay,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
+
+        final ActivityRecord firstActivity = new ActivityBuilder(mService)
+                    .setStack(homeStack)
+                    .setCreateTask(true)
+                    .build();
+        final Task task = firstActivity.getTask();
+        final ActivityRecord secondActivity = new ActivityBuilder(mService)
+                .setTask(task)
+                .build();
+
+        doReturn(false).when(secondActivity).occludesParent();
+        homeStack.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                false /* preserveWindows */);
+
+        assertTrue(firstActivity.shouldBeVisible());
+    }
+
+    @Test
     public void testMoveHomeStackBehindBottomMostVisibleStack_NoMoveHomeBehindFullscreen() {
         mDefaultDisplay.removeStack(mStack);
 

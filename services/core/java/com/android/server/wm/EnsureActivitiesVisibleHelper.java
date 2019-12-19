@@ -156,7 +156,8 @@ class EnsureActivitiesVisibleHelper {
             // determined individually unlike other stacks where the visibility or fullscreen
             // status of an activity in a previous task affects other.
             mBehindFullscreenActivity = !mContainerShouldBeVisible;
-        } else if (mContiner.isActivityTypeHome()) {
+        } else if (!mBehindFullscreenActivity && mContiner.isActivityTypeHome()
+                && r.isRootOfTask()) {
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Home task: at " + mContiner
                     + " stackShouldBeVisible=" + mContainerShouldBeVisible
                     + " behindFullscreenActivity=" + mBehindFullscreenActivity);
