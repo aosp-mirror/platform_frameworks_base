@@ -24,7 +24,6 @@ import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
 import android.content.Intent;
 import android.telephony.TelephonyManager;
-import android.util.ArrayMap;
 import android.util.LocalLog;
 import android.util.Slog;
 import android.util.TimestampedValue;
@@ -32,12 +31,11 @@ import android.util.TimestampedValue;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.timezonedetector.ArrayMapWithHistory;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.LinkedList;
-import java.util.Map;
 
 /**
  * An implementation of TimeDetectorStrategy that passes phone and manual suggestions to
@@ -99,14 +97,12 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     private TimestampedValue<Long> mLastAutoSystemClockTimeSet;
 
     /**
-     * A mapping from phoneId to a linked list of time suggestions (the "first" being the latest).
-     * We typically expect one or two entries in this Map: devices will have a small number
-     * of telephony devices and phoneIds are assumed to be stable. The LinkedList associated with
-     * the ID will not exceed {@link #KEEP_SUGGESTION_HISTORY_SIZE} in size.
+     * A mapping from phoneId to a time suggestion. We typically expect one or two mappings: devices
+     * will have a small number of telephony devices and phoneIds are assumed to be stable.
      */
     @GuardedBy("this")
-    private ArrayMap<Integer, LinkedList<PhoneTimeSuggestion>> mSuggestionByPhoneId =
-            new ArrayMap<>();
+    private ArrayMapWithHistory<Integer, PhoneTimeSuggestion> mSuggestionByPhoneId =
+            new ArrayMapWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
     @Override
     public void initialize(@NonNull Callback callback) {
@@ -179,16 +175,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
         ipw.println("Phone suggestion history:");
         ipw.increaseIndent(); // level 2
-        for (Map.Entry<Integer, LinkedList<PhoneTimeSuggestion>> entry
-                : mSuggestionByPhoneId.entrySet()) {
-            ipw.println("Phone " + entry.getKey());
-
-            ipw.increaseIndent(); // level 3
-            for (PhoneTimeSuggestion suggestion : entry.getValue()) {
-                ipw.println(suggestion);
-            }
-            ipw.decreaseIndent(); // level 3
-        }
+        mSuggestionByPhoneId.dump(ipw);
         ipw.decreaseIndent(); // level 2
 
         ipw.decreaseIndent(); // level 1
@@ -205,20 +192,10 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
 
         int phoneId = suggestion.getPhoneId();
-        LinkedList<PhoneTimeSuggestion> phoneSuggestions = mSuggestionByPhoneId.get(phoneId);
-        if (phoneSuggestions == null) {
-            // The first time we've seen this phoneId.
-            phoneSuggestions = new LinkedList<>();
-            mSuggestionByPhoneId.put(phoneId, phoneSuggestions);
-        } else if (phoneSuggestions.isEmpty()) {
-            Slog.w(LOG_TAG, "Suggestions unexpectedly empty when adding suggestion=" + suggestion);
-        }
-
-        if (!phoneSuggestions.isEmpty()) {
+        PhoneTimeSuggestion previousSuggestion = mSuggestionByPhoneId.get(phoneId);
+        if (previousSuggestion != null) {
             // We can log / discard suggestions with obvious issues with the reference time clock.
-            PhoneTimeSuggestion previousSuggestion = phoneSuggestions.getFirst();
-            if (previousSuggestion == null
-                    || previousSuggestion.getUtcTime() == null
+            if (previousSuggestion.getUtcTime() == null
                     || previousSuggestion.getUtcTime().getValue() == null) {
                 // This should be impossible given we only store validated suggestions.
                 Slog.w(LOG_TAG, "Previous suggestion is null or has a null time."
@@ -240,10 +217,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
 
         // Store the latest suggestion.
-        phoneSuggestions.addFirst(suggestion);
-        if (phoneSuggestions.size() > KEEP_SUGGESTION_HISTORY_SIZE) {
-            phoneSuggestions.removeLast();
-        }
+        mSuggestionByPhoneId.put(phoneId, suggestion);
         return true;
     }
 
@@ -331,15 +305,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         int bestScore = PHONE_INVALID_SCORE;
         for (int i = 0; i < mSuggestionByPhoneId.size(); i++) {
             Integer phoneId = mSuggestionByPhoneId.keyAt(i);
-            LinkedList<PhoneTimeSuggestion> phoneSuggestions = mSuggestionByPhoneId.valueAt(i);
-            if (phoneSuggestions == null) {
-                // Unexpected - map is missing a value.
-                Slog.w(LOG_TAG, "Suggestions unexpectedly missing for phoneId."
-                        + " phoneId=" + phoneId);
-                continue;
-            }
-
-            PhoneTimeSuggestion candidateSuggestion = phoneSuggestions.getFirst();
+            PhoneTimeSuggestion candidateSuggestion = mSuggestionByPhoneId.valueAt(i);
             if (candidateSuggestion == null) {
                 // Unexpected - null suggestions should never be stored.
                 Slog.w(LOG_TAG, "Latest suggestion unexpectedly null for phoneId."
@@ -540,10 +506,6 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     @VisibleForTesting
     @Nullable
     public synchronized PhoneTimeSuggestion getLatestPhoneSuggestion(int phoneId) {
-        LinkedList<PhoneTimeSuggestion> suggestions = mSuggestionByPhoneId.get(phoneId);
-        if (suggestions == null) {
-            return null;
-        }
-        return suggestions.getFirst();
+        return mSuggestionByPhoneId.get(phoneId);
     }
 }
