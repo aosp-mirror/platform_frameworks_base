@@ -236,6 +236,14 @@ object PhysicsAnimatorTestUtils {
         vararg additionalUpdateMatchers: UpdateMatcher
     ) {
         val updateFrames: UpdateFramesPerProperty<T> = getAnimationUpdateFrames(animator)
+
+        if (!updateFrames.containsKey(property)) {
+            error("No frames for given target object and property.")
+        }
+
+        // Copy the frames to avoid a ConcurrentModificationException if the animation update
+        // listeners attempt to add a new frame while we're verifying these.
+        val framesForProperty = ArrayList(updateFrames[property]!!)
         val matchers = ArrayDeque<UpdateMatcher>(
                 additionalUpdateMatchers.toList())
         val frameTraceMessage = StringBuilder()
@@ -243,8 +251,7 @@ object PhysicsAnimatorTestUtils {
         var curMatcher = firstUpdateMatcher
 
         // Loop through the updates from the testable animator.
-        for (update in updateFrames[property]
-                ?: error("No frames for given target object and property.")) {
+        for (update in framesForProperty) {
 
             // Check whether this frame satisfies the current matcher.
             if (curMatcher(update)) {
