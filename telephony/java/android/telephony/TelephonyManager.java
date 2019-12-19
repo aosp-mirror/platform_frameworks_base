@@ -1475,13 +1475,67 @@ public class TelephonyManager {
      * <p class="note">
      * Requires the READ_PHONE_STATE permission.
      *
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
+     * <p class="note">This is a protected intent that can only be sent by the system.
      *
      * @hide
      */
     @SystemApi
     public static final String ACTION_NETWORK_SET_TIME = "android.telephony.action.NETWORK_SET_TIME";
+
+    /**
+     * <p>Broadcast Action: The emergency callback mode is changed.
+     * <ul>
+     *   <li><em>phoneinECMState</em> - A boolean value,true=phone in ECM, false=ECM off</li>
+     * </ul>
+     * <p class="note">
+     * You can <em>not</em> receive this through components declared
+     * in manifests, only by explicitly registering for it with
+     * {@link android.content.Context#registerReceiver(android.content.BroadcastReceiver,
+     * android.content.IntentFilter) Context.registerReceiver()}.
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("ActionValue")
+    public static final String ACTION_EMERGENCY_CALLBACK_MODE_CHANGED
+            = "android.intent.action.EMERGENCY_CALLBACK_MODE_CHANGED";
+
+    /**
+     * <p>Broadcast Action: The emergency call state is changed.
+     * <ul>
+     *   <li><em>phoneInEmergencyCall</em> - A boolean value, true if phone in emergency call,
+     *   false otherwise</li>
+     * </ul>
+     * <p class="note">
+     * You can <em>not</em> receive this through components declared
+     * in manifests, only by explicitly registering for it with
+     * {@link android.content.Context#registerReceiver(android.content.BroadcastReceiver,
+     * android.content.IntentFilter) Context.registerReceiver()}.
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("ActionValue")
+    public static final String ACTION_EMERGENCY_CALL_STATE_CHANGED
+            = "android.intent.action.EMERGENCY_CALL_STATE_CHANGED";
+
+    /**
+     * <p>Broadcast Action: It indicates the Emergency callback mode blocks datacall/sms
+     * <p class="note">.
+     * This is to pop up a notice to show user that the phone is in emergency callback mode
+     * and data calls and outgoing sms are blocked.
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS
+            = "android.telephony.action.SHOW_NOTICE_ECM_BLOCK_OTHERS";
 
     //
     //

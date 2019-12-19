@@ -62,7 +62,6 @@ import com.android.internal.globalactions.SinglePressAction;
 import com.android.internal.globalactions.ToggleAction;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs;
@@ -133,7 +132,7 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
+        filter.addAction(TelephonyManager.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         ConnectivityManager cm = (ConnectivityManager)
@@ -231,7 +230,7 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
                     mIsWaitingForEcmExit = true;
                     // Launch ECM exit dialog
                     Intent ecmDialogIntent =
-                            new Intent(TelephonyIntents.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS, null);
+                            new Intent(TelephonyManager.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS, null);
                     ecmDialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(ecmDialogIntent);
                 } else {
@@ -741,7 +740,7 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
                 if (!PhoneWindowManager.SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS.equals(reason)) {
                     mHandler.sendEmptyMessage(MESSAGE_DISMISS);
                 }
-            } else if (TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED.equals(action)) {
+            } else if (TelephonyManager.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED.equals(action)) {
                 // Airplane mode can be changed after ECM exits if airplane toggle button
                 // is pressed during ECM mode
                 if (!(intent.getBooleanExtra("PHONE_IN_ECM_STATE", false)) &&

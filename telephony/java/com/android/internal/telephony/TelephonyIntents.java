@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.content.Intent;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 
 /**
  * The intents that the telephony services broadcast.
@@ -99,7 +100,7 @@ public class TelephonyIntents {
      * by the system.
      */
     public static final String ACTION_EMERGENCY_CALLBACK_MODE_CHANGED
-            = "android.intent.action.EMERGENCY_CALLBACK_MODE_CHANGED";
+            = TelephonyManager.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED;
 
     /**
      * <p>Broadcast Action: The emergency call state is changed.
@@ -120,7 +121,7 @@ public class TelephonyIntents {
      * by the system.
      */
     public static final String ACTION_EMERGENCY_CALL_STATE_CHANGED
-            = "android.intent.action.EMERGENCY_CALL_STATE_CHANGED";
+            = TelephonyManager.ACTION_EMERGENCY_CALL_STATE_CHANGED;
 
     /**
      * Broadcast Action: The phone's signal strength has changed. The intent will have the
@@ -234,7 +235,7 @@ public class TelephonyIntents {
      * by the system.
      */
     public static final String ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS
-            = "com.android.internal.intent.action.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS";
+            = TelephonyManager.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS;
 
     /**
      * <p>Broadcast Action: Indicates that the action is forbidden by network.
