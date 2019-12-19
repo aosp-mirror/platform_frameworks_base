@@ -208,13 +208,6 @@ public class UserRestrictionsUtils {
     );
 
     /**
-     * User restrictions that default to {@code true} for device owners.
-     */
-    private static final Set<String> DEFAULT_ENABLED_FOR_DEVICE_OWNERS = Sets.newArraySet(
-            UserManager.DISALLOW_ADD_MANAGED_PROFILE
-    );
-
-    /**
      * User restrictions that default to {@code true} for managed profile owners.
      *
      * NB: {@link UserManager#DISALLOW_INSTALL_UNKNOWN_SOURCES} is also set by default but it is
@@ -415,14 +408,6 @@ public class UserRestrictionsUtils {
      */
     public static boolean canProfileOwnerOfOrganizationOwnedDeviceChange(String restriction) {
         return PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS.contains(restriction);
-    }
-
-    /**
-     * Returns the user restrictions that default to {@code true} for device owners.
-     * These user restrictions are local, though. ie only for the device owner's user id.
-     */
-    public static @NonNull Set<String> getDefaultEnabledForDeviceOwner() {
-        return DEFAULT_ENABLED_FOR_DEVICE_OWNERS;
     }
 
     /**
