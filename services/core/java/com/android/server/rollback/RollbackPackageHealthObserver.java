@@ -41,6 +41,7 @@ import android.util.StatsLog;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.PackageWatchdog;
+import com.android.server.PackageWatchdog.FailureReasons;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
 
@@ -106,7 +107,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Override
-    public boolean execute(VersionedPackage failedPackage) {
+    public boolean execute(VersionedPackage failedPackage, @FailureReasons int rollbackReason) {
         RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
         VersionedPackage moduleMetadataPackage = getModuleMetadataPackage();
         RollbackInfo rollback = getAvailableRollback(rollbackManager, failedPackage);
@@ -371,7 +372,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         mNumberOfNativeCrashPollsRemaining--;
         // Check if native watchdog reported a crash
         if ("1".equals(SystemProperties.get("sys.init.updatable_crashing"))) {
-            execute(getModuleMetadataPackage());
+            execute(getModuleMetadataPackage(), PackageWatchdog.FAILURE_REASON_NATIVE_CRASH);
             // we stop polling after an attempt to execute rollback, regardless of whether the
             // attempt succeeds or not
         } else {
