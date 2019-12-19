@@ -1728,6 +1728,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     .setPosition(mSurfaceControl, spec.offsetX, spec.offsetY);
             mLastMagnificationSpec = spec;
         } else {
+            clearMagnificationSpec(t);
             for (int i = 0; i < mChildren.size(); i++) {
                 mChildren.get(i).applyMagnificationSpec(t, spec);
             }
