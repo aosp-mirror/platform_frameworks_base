@@ -2088,6 +2088,7 @@ package android.content.pm {
     field public static final int FLAG_PERMISSION_APPLY_RESTRICTION = 16384; // 0x4000
     field public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT = 32; // 0x20
     field public static final int FLAG_PERMISSION_GRANTED_BY_ROLE = 32768; // 0x8000
+    field public static final int FLAG_PERMISSION_ONE_TIME = 65536; // 0x10000
     field public static final int FLAG_PERMISSION_POLICY_FIXED = 4; // 0x4
     field public static final int FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT = 2048; // 0x800
     field public static final int FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT = 4096; // 0x1000
@@ -2162,7 +2163,7 @@ package android.content.pm {
     method public void onPermissionsChanged(int);
   }
 
-  @IntDef(prefix={"FLAG_PERMISSION_"}, value={android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE, android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
+  @IntDef(prefix={"FLAG_PERMISSION_"}, value={android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE, android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT, android.content.pm.PackageManager.FLAG_PERMISSION_ONE_TIME}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
   }
 
   public class PermissionGroupInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
@@ -7016,6 +7017,7 @@ package android.permission {
     method @BinderThread public abstract void onGetPermissionUsages(boolean, long, @NonNull java.util.function.Consumer<java.util.List<android.permission.RuntimePermissionUsageInfo>>);
     method @BinderThread public abstract void onGetRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.OutputStream, @NonNull Runnable);
     method @BinderThread public abstract void onGrantOrUpgradeDefaultRuntimePermissions(@NonNull Runnable);
+    method @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String);
     method @Deprecated @BinderThread public void onRestoreDelayedRuntimePermissionsBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @Deprecated @BinderThread public void onRestoreRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
     method @BinderThread public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String, @NonNull Runnable);
@@ -7032,6 +7034,8 @@ package android.permission {
     method @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS) public void grantDefaultPermissionsToLuiApp(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS) public void revokeDefaultPermissionsFromLuiApps(@NonNull String[], @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public void setRuntimePermissionsVersion(@IntRange(from=0) int);
+    method @RequiresPermission(allOf={android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void startOneTimePermissionSession(@NonNull String, long, int, int);
+    method @RequiresPermission(allOf={android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void stopOneTimePermissionSession(@NonNull String);
   }
 
   public static final class PermissionManager.SplitPermissionInfo {
