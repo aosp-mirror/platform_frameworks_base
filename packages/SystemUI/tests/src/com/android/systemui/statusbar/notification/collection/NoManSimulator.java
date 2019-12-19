@@ -23,7 +23,7 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 
-import com.android.systemui.statusbar.NotificationListener.NotifServiceListener;
+import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,13 +36,13 @@ import java.util.Map;
  * keep its RankingMap up to date and call appropriate event listeners.
  */
 public class NoManSimulator {
-    private final List<NotifServiceListener> mListeners = new ArrayList<>();
+    private final List<NotificationHandler> mListeners = new ArrayList<>();
     private final Map<String, Ranking> mRankings = new ArrayMap<>();
 
     public NoManSimulator() {
     }
 
-    public void addListener(NotifServiceListener listener) {
+    public void addListener(NotificationHandler listener) {
         mListeners.add(listener);
     }
 
@@ -50,7 +50,7 @@ public class NoManSimulator {
         final NotificationEntry entry = builder.build();
         mRankings.put(entry.getKey(), entry.getRanking());
         final RankingMap rankingMap = buildRankingMap();
-        for (NotifServiceListener listener : mListeners) {
+        for (NotificationHandler listener : mListeners) {
             listener.onNotificationPosted(entry.getSbn(), rankingMap);
         }
         return new NotifEvent(entry.getSbn(), entry.getRanking(), rankingMap);
@@ -59,7 +59,7 @@ public class NoManSimulator {
     public NotifEvent retractNotif(StatusBarNotification sbn, int reason) {
         assertNotNull(mRankings.remove(sbn.getKey()));
         final RankingMap rankingMap = buildRankingMap();
-        for (NotifServiceListener listener : mListeners) {
+        for (NotificationHandler listener : mListeners) {
             listener.onNotificationRemoved(sbn, rankingMap, reason);
         }
         return new NotifEvent(sbn, null, rankingMap);
@@ -67,7 +67,7 @@ public class NoManSimulator {
 
     public void issueRankingUpdate() {
         final RankingMap rankingMap = buildRankingMap();
-        for (NotifServiceListener listener : mListeners) {
+        for (NotificationHandler listener : mListeners) {
             listener.onNotificationRankingUpdate(rankingMap);
         }
     }

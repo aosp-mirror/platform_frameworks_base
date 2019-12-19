@@ -48,7 +48,7 @@ import android.util.Log;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.statusbar.NotificationListener;
-import com.android.systemui.statusbar.NotificationListener.NotifServiceListener;
+import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.util.Assert;
 
 import java.lang.annotation.Retention;
@@ -115,7 +115,7 @@ public class NotifCollection {
         }
         mAttached = true;
 
-        listenerService.addNotificationListener(mNotifServiceListener);
+        listenerService.addNotificationHandler(mNotificationHandler);
     }
 
     /**
@@ -372,7 +372,7 @@ public class NotifCollection {
         mAmDispatchingToOtherCode = false;
     }
 
-    private final NotifServiceListener mNotifServiceListener = new NotifServiceListener() {
+    private final NotificationHandler mNotificationHandler = new NotificationHandler() {
         @Override
         public void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
             NotifCollection.this.onNotificationPosted(sbn, rankingMap);

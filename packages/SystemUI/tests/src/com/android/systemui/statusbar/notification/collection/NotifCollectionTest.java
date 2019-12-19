@@ -31,6 +31,8 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.Nullable;
 import android.os.RemoteException;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -45,7 +47,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationListener;
-import com.android.systemui.statusbar.NotificationListener.NotifServiceListener;
+import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator.NotifEvent;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
@@ -62,7 +64,6 @@ import org.mockito.Spy;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -77,11 +78,11 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Spy private RecordingLifetimeExtender mExtender2 = new RecordingLifetimeExtender("Extender2");
     @Spy private RecordingLifetimeExtender mExtender3 = new RecordingLifetimeExtender("Extender3");
 
-    @Captor private ArgumentCaptor<NotifServiceListener> mListenerCaptor;
+    @Captor private ArgumentCaptor<NotificationHandler> mListenerCaptor;
     @Captor private ArgumentCaptor<NotificationEntry> mEntryCaptor;
 
     private NotifCollection mCollection;
-    private NotifServiceListener mServiceListener;
+    private NotificationHandler mNotificationHandler;
 
     private NoManSimulator mNoMan;
 
@@ -96,11 +97,11 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         // Capture the listener object that the collection registers with the listener service so
         // we can simulate listener service events in tests below
-        verify(mListenerService).addNotificationListener(mListenerCaptor.capture());
-        mServiceListener = Objects.requireNonNull(mListenerCaptor.getValue());
+        verify(mListenerService).addNotificationHandler(mListenerCaptor.capture());
+        mNotificationHandler = requireNonNull(mListenerCaptor.getValue());
 
         mNoMan = new NoManSimulator();
-        mNoMan.addListener(mServiceListener);
+        mNoMan.addListener(mNotificationHandler);
     }
 
     @Test
