@@ -27,7 +27,6 @@ import android.annotation.Nullable;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.PhoneTimeZoneSuggestion;
 import android.content.Context;
-import android.util.ArrayMap;
 import android.util.LocalLog;
 import android.util.Slog;
 
@@ -38,8 +37,6 @@ import com.android.internal.util.IndentingPrintWriter;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.LinkedList;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -175,14 +172,13 @@ public class TimeZoneDetectorStrategy {
     private final LocalLog mTimeZoneChangesLog = new LocalLog(30, false /* useLocalTimestamps */);
 
     /**
-     * A mapping from phoneId to a linked list of phone time zone suggestions (the head being the
-     * latest). We typically expect one or two entries in this Map: devices will have a small number
-     * of telephony devices and phoneIds are assumed to be stable. The LinkedList associated with
-     * the ID will not exceed {@link #KEEP_PHONE_SUGGESTION_HISTORY_SIZE} in size.
+     * A mapping from phoneId to a phone time zone suggestion. We typically expect one or two
+     * mappings: devices will have a small number of telephony devices and phoneIds are assumed to
+     * be stable.
      */
     @GuardedBy("this")
-    private ArrayMap<Integer, LinkedList<QualifiedPhoneTimeZoneSuggestion>> mSuggestionByPhoneId =
-            new ArrayMap<>();
+    private ArrayMapWithHistory<Integer, QualifiedPhoneTimeZoneSuggestion> mSuggestionByPhoneId =
+            new ArrayMapWithHistory<>(KEEP_PHONE_SUGGESTION_HISTORY_SIZE);
 
     /**
      * Creates a new instance of {@link TimeZoneDetectorStrategy}.
@@ -226,16 +222,7 @@ public class TimeZoneDetectorStrategy {
                 new QualifiedPhoneTimeZoneSuggestion(suggestion, score);
 
         // Store the suggestion against the correct phoneId.
-        LinkedList<QualifiedPhoneTimeZoneSuggestion> suggestions =
-                mSuggestionByPhoneId.get(suggestion.getPhoneId());
-        if (suggestions == null) {
-            suggestions = new LinkedList<>();
-            mSuggestionByPhoneId.put(suggestion.getPhoneId(), suggestions);
-        }
-        suggestions.addFirst(scoredSuggestion);
-        if (suggestions.size() > KEEP_PHONE_SUGGESTION_HISTORY_SIZE) {
-            suggestions.removeLast();
-        }
+        mSuggestionByPhoneId.put(suggestion.getPhoneId(), scoredSuggestion);
 
         // Now perform auto time zone detection. The new suggestion may be used to modify the time
         // zone setting.
@@ -385,7 +372,7 @@ public class TimeZoneDetectorStrategy {
     }
 
     private static boolean isOriginAutomatic(@Origin int origin) {
-        return origin == ORIGIN_PHONE;
+        return origin != ORIGIN_MANUAL;
     }
 
     @GuardedBy("this")
@@ -398,13 +385,7 @@ public class TimeZoneDetectorStrategy {
         // rate-limit so age is not a strong indicator of confidence. Instead, the callers are
         // expected to withdraw suggestions they no longer have confidence in.
         for (int i = 0; i < mSuggestionByPhoneId.size(); i++) {
-            LinkedList<QualifiedPhoneTimeZoneSuggestion> phoneSuggestions =
-                    mSuggestionByPhoneId.valueAt(i);
-            if (phoneSuggestions == null) {
-                // Unexpected
-                continue;
-            }
-            QualifiedPhoneTimeZoneSuggestion candidateSuggestion = phoneSuggestions.getFirst();
+            QualifiedPhoneTimeZoneSuggestion candidateSuggestion = mSuggestionByPhoneId.valueAt(i);
             if (candidateSuggestion == null) {
                 // Unexpected
                 continue;
@@ -456,15 +437,17 @@ public class TimeZoneDetectorStrategy {
      * Dumps internal state such as field values.
      */
     public synchronized void dumpState(PrintWriter pw, String[] args) {
-        pw.println("TimeZoneDetectorStrategy:");
-        pw.println("mCallback.isTimeZoneDetectionEnabled()="
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, " ");
+        ipw.println("TimeZoneDetectorStrategy:");
+
+        ipw.increaseIndent(); // level 1
+        ipw.println("mCallback.isTimeZoneDetectionEnabled()="
                 + mCallback.isAutoTimeZoneDetectionEnabled());
-        pw.println("mCallback.isDeviceTimeZoneInitialized()="
+        ipw.println("mCallback.isDeviceTimeZoneInitialized()="
                 + mCallback.isDeviceTimeZoneInitialized());
-        pw.println("mCallback.getDeviceTimeZone()="
+        ipw.println("mCallback.getDeviceTimeZone()="
                 + mCallback.getDeviceTimeZone());
 
-        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, " ");
         ipw.println("Time zone change log:");
         ipw.increaseIndent(); // level 2
         mTimeZoneChangesLog.dump(ipw);
@@ -472,21 +455,10 @@ public class TimeZoneDetectorStrategy {
 
         ipw.println("Phone suggestion history:");
         ipw.increaseIndent(); // level 2
-        for (Map.Entry<Integer, LinkedList<QualifiedPhoneTimeZoneSuggestion>> entry
-                : mSuggestionByPhoneId.entrySet()) {
-            ipw.println("Phone " + entry.getKey());
-
-            ipw.increaseIndent(); // level 3
-            for (QualifiedPhoneTimeZoneSuggestion suggestion : entry.getValue()) {
-                ipw.println(suggestion);
-            }
-            ipw.decreaseIndent(); // level 3
-        }
+        mSuggestionByPhoneId.dump(ipw);
         ipw.decreaseIndent(); // level 2
         ipw.decreaseIndent(); // level 1
         ipw.flush();
-
-        pw.flush();
     }
 
     /**
@@ -494,12 +466,7 @@ public class TimeZoneDetectorStrategy {
      */
     @VisibleForTesting
     public synchronized QualifiedPhoneTimeZoneSuggestion getLatestPhoneSuggestion(int phoneId) {
-        LinkedList<QualifiedPhoneTimeZoneSuggestion> suggestions =
-                mSuggestionByPhoneId.get(phoneId);
-        if (suggestions == null) {
-            return null;
-        }
-        return suggestions.getFirst();
+        return mSuggestionByPhoneId.get(phoneId);
     }
 
     /**

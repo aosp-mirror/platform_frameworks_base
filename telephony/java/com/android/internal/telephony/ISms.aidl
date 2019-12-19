@@ -593,4 +593,12 @@ interface ISms {
      * @return true for success, false otherwise.
      */
     boolean setSmscAddressOnIccEfForSubscriber(String smsc, int subId, String callingPackage);
+
+    /**
+     * Get the capacity count of sms on Icc card.
+     *
+     * @param subId for subId which getSmsCapacityOnIcc is queried.
+     * @return capacity of ICC
+     */
+    int getSmsCapacityOnIccForSubscriber(int subId);
 }

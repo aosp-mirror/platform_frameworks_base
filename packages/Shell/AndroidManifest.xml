@@ -213,6 +213,9 @@
       <!-- Permission required for CTS test - CarModeInCallServiceTest -->
     <uses-permission android:name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
 
+    <!-- Permission required for CTS test - TetheringManagerTest -->
+    <uses-permission android:name="android.permission.TETHER_PRIVILEGED"/>
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
@@ -246,6 +249,7 @@
 
         <activity
             android:name=".BugreportWarningActivity"
+            android:theme="@*android:style/Theme.DeviceDefault.Dialog.Alert.DayNight"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
             android:exported="false" />

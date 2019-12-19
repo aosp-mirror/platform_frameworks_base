@@ -96,28 +96,9 @@ static jobjectArray android_os_VintfObject_report(JNIEnv* env, jclass)
     return toJavaStringArray(env, cStrings);
 }
 
-static jint android_os_VintfObject_verify(JNIEnv* env, jclass, jobjectArray packageInfo) {
-    std::vector<std::string> cPackageInfo;
-    if (packageInfo) {
-        size_t count = env->GetArrayLength(packageInfo);
-        cPackageInfo.resize(count);
-        for (size_t i = 0; i < count; ++i) {
-            jstring element = (jstring)env->GetObjectArrayElement(packageInfo, i);
-            const char *cString = env->GetStringUTFChars(element, NULL /* isCopy */);
-            cPackageInfo[i] = cString;
-            env->ReleaseStringUTFChars(element, cString);
-        }
-    }
-    std::string error;
-    int32_t status = VintfObject::CheckCompatibility(cPackageInfo, &error);
-    if (status)
-        LOG(WARNING) << "VintfObject.verify() returns " << status << ": " << error;
-    return status;
-}
-
 static jint android_os_VintfObject_verifyWithoutAvb(JNIEnv* env, jclass) {
     std::string error;
-    int32_t status = VintfObject::CheckCompatibility({}, &error,
+    int32_t status = VintfObject::GetInstance()->checkCompatibility(&error,
             ::android::vintf::CheckFlags::DISABLE_AVB_CHECK);
     if (status)
         LOG(WARNING) << "VintfObject.verifyWithoutAvb() returns " << status << ": " << error;
@@ -170,7 +151,6 @@ static jobject android_os_VintfObject_getTargetFrameworkCompatibilityMatrixVersi
 
 static const JNINativeMethod gVintfObjectMethods[] = {
     {"report", "()[Ljava/lang/String;", (void*)android_os_VintfObject_report},
-    {"verify", "([Ljava/lang/String;)I", (void*)android_os_VintfObject_verify},
     {"verifyWithoutAvb", "()I", (void*)android_os_VintfObject_verifyWithoutAvb},
     {"getHalNamesAndVersions", "()[Ljava/lang/String;", (void*)android_os_VintfObject_getHalNamesAndVersions},
     {"getSepolicyVersion", "()Ljava/lang/String;", (void*)android_os_VintfObject_getSepolicyVersion},

@@ -442,6 +442,7 @@ java_library {
     ],
     // For backwards compatibility.
     stem: "framework",
+    apex_available: ["//apex_available:platform"],
 }
 
 // This "framework" module is NOT installed to the device. It's
@@ -459,10 +460,12 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
+        "updatable_media_stubs",
         "framework-sdkext-stubs-systemapi",
         // TODO(jiyong): add more stubs for APEXes here
     ],
     sdk_version: "core_platform",
+    apex_available: ["//apex_available:platform"],
 }
 
 java_library {
@@ -470,6 +473,7 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-all-sources"],
     installable: false,
+    apex_available: ["//apex_available:platform"],
 }
 
 java_library {
@@ -1629,6 +1633,8 @@ filegroup {
         "core/java/android/util/LocalLog.java",
         "core/java/android/util/TimeUtils.java",
         "core/java/com/android/internal/os/SomeArgs.java",
+        "core/java/com/android/internal/util/AsyncChannel.java",
+        "core/java/com/android/internal/util/BitwiseInputStream.java",
         "core/java/com/android/internal/util/FastXmlSerializer.java",
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IState.java",

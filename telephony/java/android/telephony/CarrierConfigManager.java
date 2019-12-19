@@ -419,10 +419,31 @@ public class CarrierConfigManager {
             KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY = "gsm_nonroaming_networks_string_array";
 
     /**
-     * Override the device's configuration for the ImsService to use for this SIM card.
+     * The package name containing the ImsService that will be bound to the telephony framework to
+     * support both IMS MMTEL and RCS feature functionality instead of the device default
+     * ImsService for this subscription.
+     * @deprecated Use {@link #KEY_CONFIG_IMS_MMTEL_PACKAGE_OVERRIDE_STRING} and
+     * {@link #KEY_CONFIG_IMS_RCS_PACKAGE_OVERRIDE_STRING} instead to configure these values
+     * separately. If any of those values are not empty, they will override this value.
      */
     public static final String KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING =
             "config_ims_package_override_string";
+
+    /**
+     * The package name containing the ImsService that will be bound to the telephony framework to
+     * support IMS MMTEL feature functionality instead of the device default ImsService for this
+     * subscription.
+     */
+    public static final String KEY_CONFIG_IMS_MMTEL_PACKAGE_OVERRIDE_STRING =
+            "config_ims_mmtel_package_override_string";
+
+    /**
+     * The package name containing the ImsService that will be bound to the telephony framework to
+     * support IMS RCS feature functionality instead of the device default ImsService for this
+     * subscription.
+     */
+    public static final String KEY_CONFIG_IMS_RCS_PACKAGE_OVERRIDE_STRING =
+            "config_ims_rcs_package_override_string";
 
     /**
      * Override the package that will manage {@link SubscriptionPlan}
@@ -831,13 +852,6 @@ public class CarrierConfigManager {
      */
     public static final String KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL =
             "always_show_emergency_alert_onoff_bool";
-
-    /**
-     * The flag to disable cell broadcast severe alert when extreme alert is disabled.
-     * @hide
-     */
-    public static final String KEY_DISABLE_SEVERE_WHEN_EXTREME_DISABLED_BOOL =
-            "disable_severe_when_extreme_disabled_bool";
 
     /**
      * The data call retry configuration for different types of APN.
@@ -1956,6 +1970,12 @@ public class CarrierConfigManager {
             "allow_add_call_during_video_call";
 
     /**
+     * When false, indicates that holding a video call is disabled
+     */
+    public static final String KEY_ALLOW_HOLDING_VIDEO_CALL_BOOL =
+            "allow_holding_video_call";
+
+    /**
      * When true, indicates that the HD audio icon in the in-call screen should not be shown for
      * VoWifi calls.
      * @hide
@@ -2192,7 +2212,7 @@ public class CarrierConfigManager {
      * the start of the next month.
      * <p>
      * This setting may be still overridden by explicit user choice. By default,
-     * the platform value will be used.
+     * {@link #DATA_CYCLE_USE_PLATFORM_DEFAULT} will be used.
      */
     public static final String KEY_MONTHLY_DATA_CYCLE_DAY_INT =
             "monthly_data_cycle_day_int";
@@ -2201,10 +2221,7 @@ public class CarrierConfigManager {
      * When {@link #KEY_MONTHLY_DATA_CYCLE_DAY_INT}, {@link #KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG},
      * or {@link #KEY_DATA_WARNING_THRESHOLD_BYTES_LONG} are set to this value, the platform default
      * value will be used for that key.
-     *
-     * @hide
      */
-    @Deprecated
     public static final int DATA_CYCLE_USE_PLATFORM_DEFAULT = -1;
 
     /**
@@ -2228,8 +2245,8 @@ public class CarrierConfigManager {
      * If the value is set to {@link #DATA_CYCLE_THRESHOLD_DISABLED}, the data usage warning will
      * be disabled.
      * <p>
-     * This setting may be overridden by explicit user choice. By default, the platform value
-     * will be used.
+     * This setting may be overridden by explicit user choice. By default,
+     * {@link #DATA_CYCLE_USE_PLATFORM_DEFAULT} will be used.
      */
     public static final String KEY_DATA_WARNING_THRESHOLD_BYTES_LONG =
             "data_warning_threshold_bytes_long";
@@ -2237,8 +2254,7 @@ public class CarrierConfigManager {
     /**
      * Controls if the device should automatically notify the user as they reach
      * their cellular data warning. When set to {@code false} the carrier is
-     * expected to have implemented their own notification mechanism.
-     * @hide
+     * expected to have implemented their own notification mechanism. {@code true} by default.
      */
     public static final String KEY_DATA_WARNING_NOTIFICATION_BOOL =
             "data_warning_notification_bool";
@@ -2260,8 +2276,8 @@ public class CarrierConfigManager {
      * phone. If the value is set to {@link #DATA_CYCLE_THRESHOLD_DISABLED}, the data limit will be
      * disabled.
      * <p>
-     * This setting may be overridden by explicit user choice. By default, the platform value
-     * will be used.
+     * This setting may be overridden by explicit user choice. By default,
+     * {@link #DATA_CYCLE_USE_PLATFORM_DEFAULT} will be used.
      */
     public static final String KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG =
             "data_limit_threshold_bytes_long";
@@ -2269,8 +2285,7 @@ public class CarrierConfigManager {
     /**
      * Controls if the device should automatically notify the user as they reach
      * their cellular data limit. When set to {@code false} the carrier is
-     * expected to have implemented their own notification mechanism.
-     * @hide
+     * expected to have implemented their own notification mechanism. {@code true} by default.
      */
     public static final String KEY_DATA_LIMIT_NOTIFICATION_BOOL =
             "data_limit_notification_bool";
@@ -2278,8 +2293,7 @@ public class CarrierConfigManager {
     /**
      * Controls if the device should automatically notify the user when rapid
      * cellular data usage is observed. When set to {@code false} the carrier is
-     * expected to have implemented their own notification mechanism.
-     * @hide
+     * expected to have implemented their own notification mechanism.  {@code true} by default.
      */
     public static final String KEY_DATA_RAPID_NOTIFICATION_BOOL =
             "data_rapid_notification_bool";
@@ -3471,7 +3485,6 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_APN_SETTINGS_DEFAULT_APN_TYPES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
-        sDefaults.putBoolean(KEY_DISABLE_SEVERE_WHEN_EXTREME_DISABLED_BOOL, true);
         sDefaults.putStringArray(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS, new String[]{
                 "default:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
                         + "320000:5000,640000:5000,1280000:5000,1800000:5000",
@@ -3503,6 +3516,8 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putString(KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING, null);
+        sDefaults.putString(KEY_CONFIG_IMS_MMTEL_PACKAGE_OVERRIDE_STRING, null);
+        sDefaults.putString(KEY_CONFIG_IMS_RCS_PACKAGE_OVERRIDE_STRING, null);
         sDefaults.putStringArray(KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_DIAL_STRING_REPLACE_STRING_ARRAY, null);
@@ -3646,6 +3661,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_MERGE_WIFI_CALLS_WHEN_VOWIFI_OFF_BOOL, true);
         sDefaults.putBoolean(KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_ALLOW_HOLDING_VIDEO_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_WIFI_CALLS_CAN_BE_HD_AUDIO, true);
         sDefaults.putBoolean(KEY_VIDEO_CALLS_CAN_BE_HD_AUDIO, true);
         sDefaults.putBoolean(KEY_GSM_CDMA_CALLS_CAN_BE_HD_AUDIO, false);

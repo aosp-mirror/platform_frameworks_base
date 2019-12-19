@@ -169,14 +169,6 @@ public class PhoneStateListener {
     public static final int LISTEN_SIGNAL_STRENGTHS                         = 0x00000100;
 
     /**
-     * Listen for changes to OTASP mode.
-     *
-     * @see #onOtaspChanged
-     * @hide
-     */
-    public static final int LISTEN_OTASP_CHANGED                            = 0x00000200;
-
-    /**
      * Listen for changes to observed cell info.
      *
      * @see #onCellInfoChanged
@@ -624,29 +616,6 @@ public class PhoneStateListener {
         // default implementation empty
     }
 
-
-    /**
-     * The Over The Air Service Provisioning (OTASP) has changed on the registered subscription.
-     * Note, the registration subId comes from {@link TelephonyManager} object which registers
-     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
-     * If this TelephonyManager object was created with
-     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
-     * subId. Otherwise, this callback applies to
-     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
-     *
-     * Requires the READ_PHONE_STATE permission.
-     * @param otaspMode is integer <code>OTASP_UNKNOWN=1<code>
-     *   means the value is currently unknown and the system should wait until
-     *   <code>OTASP_NEEDED=2<code> or <code>OTASP_NOT_NEEDED=3<code> is received before
-     *   making the decision to perform OTASP or not.
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public void onOtaspChanged(int otaspMode) {
-        // default implementation empty
-    }
-
     /**
      * Callback invoked when a observed cell info has changed or new cells have been added
      * or removed on the registered subscription.
@@ -1063,14 +1032,6 @@ public class PhoneStateListener {
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> psl.onSignalStrengthsChanged(signalStrength)));
-        }
-
-        public void onOtaspChanged(int otaspMode) {
-            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
-            if (psl == null) return;
-
-            Binder.withCleanCallingIdentity(
-                    () -> mExecutor.execute(() -> psl.onOtaspChanged(otaspMode)));
         }
 
         public void onCellInfoChanged(List<CellInfo> cellInfo) {
