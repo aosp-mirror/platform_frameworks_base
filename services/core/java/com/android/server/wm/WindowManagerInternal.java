@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ClipData;
+import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
@@ -492,6 +493,11 @@ public abstract class WindowManagerInternal {
      * @return The top focused display ID.
      */
     public abstract int getTopFocusedDisplayId();
+
+    /**
+     * @return The UI context of top focused display.
+     */
+    public abstract Context getTopFocusedDisplayUiContext();
 
     /**
      * Checks if this display is configured and allowed to show system decorations.

@@ -22,10 +22,8 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
@@ -54,6 +52,8 @@ import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PEN
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.power.V1_0.PowerHint;
 import android.os.Binder;
@@ -74,11 +74,14 @@ import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
+import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Consumer;
 
 /** Root {@link WindowContainer} for the device. */
@@ -286,14 +289,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
-     * Returns true if the callingUid has any non-toast window currently visible to the user.
-     * Also ignores TYPE_APPLICATION_STARTING, since those windows don't belong to apps.
+     * Returns {@code true} if the callingUid has any non-toast window currently visible to the
+     * user. Also ignores {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_STARTING},
+     * since those windows don't belong to apps.
+     * @see WindowState#isNonToastOrStarting()
      */
     boolean isAnyNonToastWindowVisibleForUid(int callingUid) {
-        return forAllWindows(w ->
-                        w.getOwningUid() == callingUid && w.mAttrs.type != TYPE_TOAST
-                        && w.mAttrs.type != TYPE_APPLICATION_STARTING && w.isVisibleNow(),
-                true /* traverseTopToBottom */);
+        final PooledPredicate p = PooledLambda.obtainPredicate(
+                WindowState::isNonToastWindowVisibleForUid,
+                PooledLambda.__(WindowState.class), callingUid);
+
+        final WindowState w = getWindow(p);
+        p.recycle();
+        return w != null;
     }
 
     /**
@@ -1084,5 +1092,22 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
         return null;
+    }
+
+    void getDisplayContextsWithNonToastVisibleWindows(int pid, List<Context> outContexts) {
+        if (outContexts == null) {
+            return;
+        }
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            DisplayContent dc = mChildren.get(i);
+            if (dc.isAnyNonToastWindowVisibleForPid(pid)) {
+                outContexts.add(dc.getDisplayUiContext());
+            }
+        }
+    }
+
+    @Nullable Context getDisplayUiContext(int displayId) {
+        return getDisplayContent(displayId) != null
+                ? getDisplayContent(displayId).getDisplayUiContext() : null;
     }
 }

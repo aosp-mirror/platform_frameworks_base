@@ -5486,4 +5486,21 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         getContentInsets(outInsets);
         getStableInsets(outStableInsets);
     }
+
+    /**
+     * Returns {@code true} if this window is not {@link WindowManager.LayoutParams#TYPE_TOAST}
+     * or {@link WindowManager.LayoutParams#TYPE_APPLICATION_STARTING},
+     * since this window doesn't belong to apps.
+     */
+    boolean isNonToastOrStarting() {
+        return mAttrs.type != TYPE_TOAST && mAttrs.type != TYPE_APPLICATION_STARTING;
+    }
+
+    boolean isNonToastWindowVisibleForUid(int callingUid) {
+        return getOwningUid() == callingUid && isNonToastOrStarting() && isVisibleNow();
+    }
+
+    boolean isNonToastWindowVisibleForPid(int pid) {
+        return mSession.mPid == pid && isNonToastOrStarting() && isVisibleNow();
+    }
 }

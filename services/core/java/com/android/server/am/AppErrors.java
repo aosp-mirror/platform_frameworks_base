@@ -29,7 +29,6 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_N
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ApplicationErrorReport;
-import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -313,13 +312,8 @@ class AppErrors {
         }
     }
 
-    void killAppAtUserRequestLocked(ProcessRecord app, Dialog fromDialog) {
-        if (app.anrDialog == fromDialog) {
-            app.anrDialog = null;
-        }
-        if (app.waitDialog == fromDialog) {
-            app.waitDialog = null;
-        }
+    void killAppAtUserRequestLocked(ProcessRecord app) {
+        app.getDialogController().clearAllErrorDialogs();
         killAppImmediateLocked(app, "user-terminated", "user request after error");
     }
 
@@ -795,7 +789,6 @@ class AppErrors {
         boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
 
-        AppErrorDialog dialogToShow = null;
         final String packageName;
         final int userId;
         synchronized (mService) {
@@ -807,7 +800,7 @@ class AppErrors {
             }
             packageName = proc.info.packageName;
             userId = proc.userId;
-            if (proc.crashDialog != null) {
+            if (proc.getDialogController().hasCrashDialogs()) {
                 Slog.e(TAG, "App already has crash dialog: " + proc);
                 if (res != null) {
                     res.set(AppErrorDialog.ALREADY_SHOWING);
@@ -840,7 +833,7 @@ class AppErrors {
             if ((mService.mAtmInternal.canShowErrorDialogs() || showBackground)
                     && !crashSilenced
                     && (showFirstCrash || showFirstCrashDevOption || data.repeating)) {
-                proc.crashDialog = dialogToShow = new AppErrorDialog(mContext, mService, data);
+                proc.getDialogController().showCrashDialogs(data);
             } else {
                 // The device is asleep, so just pretend that the user
                 // saw a crash dialog and hit "force quit".
@@ -848,11 +841,6 @@ class AppErrors {
                     res.set(AppErrorDialog.CANT_SHOW);
                 }
             }
-        }
-        // If we've created a crash dialog, show it without the lock held
-        if (dialogToShow != null) {
-            Slog.i(TAG, "Showing crash dialog for package " + packageName + " u" + userId);
-            dialogToShow.show();
         }
     }
 
@@ -864,7 +852,6 @@ class AppErrors {
     }
 
     void handleShowAnrUi(Message msg) {
-        Dialog dialogToShow = null;
         List<VersionedPackage> packageList = null;
         synchronized (mService) {
             AppNotRespondingDialog.Data data = (AppNotRespondingDialog.Data) msg.obj;
@@ -876,7 +863,7 @@ class AppErrors {
             if (!proc.isPersistent()) {
                 packageList = proc.getPackageListWithVersionCode();
             }
-            if (proc.anrDialog != null) {
+            if (proc.getDialogController().hasAnrDialogs()) {
                 Slog.e(TAG, "App already has anr dialog: " + proc);
                 MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_APP_ANR,
                         AppNotRespondingDialog.ALREADY_SHOWING);
@@ -886,18 +873,13 @@ class AppErrors {
             boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
             if (mService.mAtmInternal.canShowErrorDialogs() || showBackground) {
-                dialogToShow = new AppNotRespondingDialog(mService, mContext, data);
-                proc.anrDialog = dialogToShow;
+                proc.getDialogController().showAnrDialogs(data);
             } else {
                 MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_APP_ANR,
                         AppNotRespondingDialog.CANT_SHOW);
                 // Just kill the app if there is no dialog to be shown.
-                mService.killAppAtUsersRequest(proc, null);
+                mService.killAppAtUsersRequest(proc);
             }
-        }
-        // If we've created a crash dialog, show it without the lock held
-        if (dialogToShow != null) {
-            dialogToShow.show();
         }
         // Notify PackageWatchdog without the lock held
         if (packageList != null) {

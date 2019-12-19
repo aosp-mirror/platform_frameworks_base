@@ -167,8 +167,10 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
 
     private void setResult(int result) {
         synchronized (mService) {
-            if (mProc != null && mProc.crashDialog == AppErrorDialog.this) {
-                mProc.crashDialog = null;
+            if (mProc != null) {
+                // Don't dismiss again since it leads to recursive call between dismiss and this
+                // method.
+                mProc.getDialogController().clearCrashDialogs(false /* needDismiss */);
             }
         }
         mResult.set(result);

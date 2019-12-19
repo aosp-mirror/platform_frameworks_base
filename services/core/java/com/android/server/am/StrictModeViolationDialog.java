@@ -85,8 +85,8 @@ final class StrictModeViolationDialog extends BaseErrorDialog {
     private final Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             synchronized (mService) {
-                if (mProc != null && mProc.crashDialog == StrictModeViolationDialog.this) {
-                    mProc.crashDialog = null;
+                if (mProc != null) {
+                    mProc.getDialogController().clearViolationDialogs();
                 }
             }
             mResult.set(msg.what);

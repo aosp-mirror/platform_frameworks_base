@@ -166,6 +166,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.CompatibilityInfo;
@@ -6639,5 +6640,23 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 pw.print(",");
             }
         }
+    }
+
+    /**
+     * Similar to {@link RootWindowContainer#isAnyNonToastWindowVisibleForUid(int)}, but
+     * used for pid.
+     */
+    boolean isAnyNonToastWindowVisibleForPid(int pid) {
+        final PooledPredicate p = PooledLambda.obtainPredicate(
+                WindowState::isNonToastWindowVisibleForPid,
+                PooledLambda.__(WindowState.class), pid);
+
+        final WindowState w = getWindow(p);
+        p.recycle();
+        return w != null;
+    }
+
+    Context getDisplayUiContext() {
+        return mDisplayPolicy.getSystemUiContext();
     }
 }
