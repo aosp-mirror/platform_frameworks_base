@@ -272,6 +272,7 @@ public final class ActiveServices {
 
         static final int MSG_BG_START_TIMEOUT = 1;
         static final int MSG_UPDATE_FOREGROUND_APPS = 2;
+        static final int MSG_ENSURE_NOT_START_BG = 3;
 
         ServiceMap(Looper looper, int userId) {
             super(looper);
@@ -289,6 +290,11 @@ public final class ActiveServices {
                 case MSG_UPDATE_FOREGROUND_APPS: {
                     updateForegroundApps(this);
                 } break;
+                case MSG_ENSURE_NOT_START_BG: {
+                    synchronized (mAm) {
+                        rescheduleDelayedStartsLocked();
+                    }
+                } break;
             }
         }
 
@@ -296,7 +302,9 @@ public final class ActiveServices {
             if (mStartingBackground.remove(r)) {
                 if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE,
                         "No longer background starting: " + r);
-                rescheduleDelayedStartsLocked();
+                removeMessages(MSG_ENSURE_NOT_START_BG);
+                Message msg = obtainMessage(MSG_ENSURE_NOT_START_BG);
+                sendMessage(msg);
             }
             if (mDelayedStartList.remove(r)) {
                 if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "No longer delaying start: " + r);
