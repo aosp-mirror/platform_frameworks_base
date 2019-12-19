@@ -609,7 +609,7 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected void loadDimens() {
         super.loadDimens();
-        mFlingAnimationUtils = new FlingAnimationUtils(getContext(), 0.4f);
+        mFlingAnimationUtils = new FlingAnimationUtils(getResources().getDisplayMetrics(), 0.4f);
         mStatusBarMinHeight = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
         mQsPeekHeight = getResources().getDimensionPixelSize(R.dimen.qs_peek_height);

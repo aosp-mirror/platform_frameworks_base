@@ -101,7 +101,8 @@ public class KeyguardAffordanceHelper {
                 R.dimen.keyguard_affordance_touch_target_size);
         mHintGrowAmount =
                 mContext.getResources().getDimensionPixelSize(R.dimen.hint_grow_amount_sideways);
-        mFlingAnimationUtils = new FlingAnimationUtils(mContext, 0.4f);
+        mFlingAnimationUtils = new FlingAnimationUtils(mContext.getResources().getDisplayMetrics(),
+                0.4f);
     }
 
     private void initIcons() {

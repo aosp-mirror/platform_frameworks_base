@@ -175,6 +175,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     private final Object mQueueLock = new Object();
     private final CarNavigationBarController mCarNavigationBarController;
+    private final FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
     private final Lazy<PowerManagerHelper> mPowerManagerHelperLazy;
     private final ShadeController mShadeController;
     private final CarServiceProvider mCarServiceProvider;
@@ -318,7 +319,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             CarServiceProvider carServiceProvider,
             Lazy<PowerManagerHelper> powerManagerHelperLazy,
             Lazy<FullscreenUserSwitcher> fullscreenUserSwitcherLazy,
-            CarNavigationBarController carNavigationBarController) {
+            CarNavigationBarController carNavigationBarController,
+            FlingAnimationUtils.Builder flingAnimationUtilsBuilder) {
         super(
                 context,
                 featureFlags,
@@ -401,6 +403,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mPowerManagerHelperLazy = powerManagerHelperLazy;
         mFullscreenUserSwitcherLazy = fullscreenUserSwitcherLazy;
         mCarNavigationBarController = carNavigationBarController;
+        mFlingAnimationUtilsBuilder = flingAnimationUtilsBuilder;
     }
 
     @Override
@@ -436,8 +439,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 R.integer.notification_settle_open_percentage);
         mSettleClosePercentage = mContext.getResources().getInteger(
                 R.integer.notification_settle_close_percentage);
-        mFlingAnimationUtils = new FlingAnimationUtils(mContext,
-                FLING_ANIMATION_MAX_TIME, FLING_SPEED_UP_FACTOR);
+        mFlingAnimationUtils = mFlingAnimationUtilsBuilder
+                .setMaxLengthSeconds(FLING_ANIMATION_MAX_TIME)
+                .setSpeedUpFactor(FLING_SPEED_UP_FACTOR)
+                .build();
 
         createBatteryController();
         mCarBatteryController.startListening();

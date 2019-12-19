@@ -93,13 +93,11 @@ public class SwipeHelper implements Gefingerpoken {
     private boolean mTouchAboveFalsingThreshold;
     private boolean mDisableHwLayers;
     private final boolean mFadeDependingOnAmountSwiped;
-    private final Context mContext;
 
     private final ArrayMap<View, Animator> mDismissPendingMap = new ArrayMap<>();
 
     public SwipeHelper(
             int swipeDirection, Callback callback, Context context, FalsingManager falsingManager) {
-        mContext = context;
         mCallback = callback;
         mHandler = new Handler();
         mSwipeDirection = swipeDirection;
@@ -114,7 +112,8 @@ public class SwipeHelper implements Gefingerpoken {
         mFalsingThreshold = res.getDimensionPixelSize(R.dimen.swipe_helper_falsing_threshold);
         mFadeDependingOnAmountSwiped = res.getBoolean(R.bool.config_fadeDependingOnAmountSwiped);
         mFalsingManager = falsingManager;
-        mFlingAnimationUtils = new FlingAnimationUtils(context, getMaxEscapeAnimDuration() / 1000f);
+        mFlingAnimationUtils = new FlingAnimationUtils(res.getDisplayMetrics(),
+                getMaxEscapeAnimDuration() / 1000f);
     }
 
     public void setDensityScale(float densityScale) {
