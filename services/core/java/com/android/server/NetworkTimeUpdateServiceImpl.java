@@ -35,11 +35,11 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.TimeUtils;
 
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.DumpUtils;
 
 import java.io.FileDescriptor;
@@ -137,7 +137,7 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
 
     private void registerForTelephonyIntents() {
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(TelephonyIntents.ACTION_NETWORK_SET_TIME);
+        intentFilter.addAction(TelephonyManager.ACTION_NETWORK_SET_TIME);
         mContext.registerReceiver(mNitzReceiver, intentFilter);
     }
 
@@ -247,7 +247,7 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (DBG) Log.d(TAG, "Received " + action);
-            if (TelephonyIntents.ACTION_NETWORK_SET_TIME.equals(action)) {
+            if (TelephonyManager.ACTION_NETWORK_SET_TIME.equals(action)) {
                 mNitzTimeSetTime = SystemClock.elapsedRealtime();
             }
         }
