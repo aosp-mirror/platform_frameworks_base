@@ -60,6 +60,7 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.DebugUtils;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.StatsLog;
@@ -161,6 +162,8 @@ public class VibratorService extends IVibratorService.Stub
     private int mHapticFeedbackIntensity;
     private int mNotificationIntensity;
     private int mRingIntensity;
+    private SparseArray<Pair<VibrationEffect, AudioAttributes>> mAlwaysOnEffects =
+            new SparseArray<>();
 
     static native boolean vibratorExists();
     static native void vibratorInit();
@@ -172,6 +175,8 @@ public class VibratorService extends IVibratorService.Stub
     static native boolean vibratorSupportsExternalControl();
     static native void vibratorSetExternalControl(boolean enabled);
     static native long vibratorGetCapabilities();
+    static native void vibratorAlwaysOnEnable(long id, long effect, long strength);
+    static native void vibratorAlwaysOnDisable(long id);
 
     private final IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
@@ -516,6 +521,41 @@ public class VibratorService extends IVibratorService.Stub
             // the system vibrator when connected.
             return mSupportsAmplitudeControl && mInputDeviceVibrators.isEmpty();
         }
+    }
+
+    @Override // Binder call
+    public boolean setAlwaysOnEffect(int id, VibrationEffect effect, AudioAttributes attrs) {
+        if (!hasPermission(android.Manifest.permission.VIBRATE_ALWAYS_ON)) {
+            throw new SecurityException("Requires VIBRATE_ALWAYS_ON permission");
+        }
+        if ((mCapabilities & IVibrator.CAP_ALWAYS_ON_CONTROL) == 0) {
+            Slog.e(TAG, "Always-on effects not supported.");
+            return false;
+        }
+        if (effect == null) {
+            synchronized (mLock) {
+                mAlwaysOnEffects.delete(id);
+                vibratorAlwaysOnDisable(id);
+            }
+        } else {
+            if (!verifyVibrationEffect(effect)) {
+                return false;
+            }
+            if (!(effect instanceof VibrationEffect.Prebaked)) {
+                Slog.e(TAG, "Only prebaked effects supported for always-on.");
+                return false;
+            }
+            if (attrs == null) {
+                attrs = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_UNKNOWN)
+                        .build();
+            }
+            synchronized (mLock) {
+                mAlwaysOnEffects.put(id, Pair.create(effect, attrs));
+                updateAlwaysOnLocked(id, effect, attrs);
+            }
+        }
+        return true;
     }
 
     private void verifyIncomingUid(int uid) {
@@ -988,6 +1028,8 @@ public class VibratorService extends IVibratorService.Stub
                 // If the state changes out from under us then just reset.
                 doCancelVibrateLocked();
             }
+
+            updateAlwaysOnLocked();
         }
     }
 
@@ -1052,6 +1094,27 @@ public class VibratorService extends IVibratorService.Stub
         mRingIntensity = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.RING_VIBRATION_INTENSITY,
                 mVibrator.getDefaultRingVibrationIntensity(), UserHandle.USER_CURRENT);
+    }
+
+    private void updateAlwaysOnLocked(int id, VibrationEffect effect, AudioAttributes attrs) {
+        // TODO: Check DND and LowPower settings
+        final Vibration vib = new Vibration(null, effect, attrs, 0, null, null);
+        final int intensity = getCurrentIntensityLocked(vib);
+        if (intensity == Vibrator.VIBRATION_INTENSITY_OFF) {
+            vibratorAlwaysOnDisable(id);
+        } else {
+            final VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) effect;
+            final int strength = intensityToEffectStrength(intensity);
+            vibratorAlwaysOnEnable(id, prebaked.getId(), strength);
+        }
+    }
+
+    private void updateAlwaysOnLocked() {
+        for (int i = 0; i < mAlwaysOnEffects.size(); i++) {
+            int id = mAlwaysOnEffects.keyAt(i);
+            Pair<VibrationEffect, AudioAttributes> pair = mAlwaysOnEffects.valueAt(i);
+            updateAlwaysOnLocked(id, pair.first, pair.second);
+        }
     }
 
     @Override

@@ -17,7 +17,7 @@
  */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.tethering.inprocess"
+          package="com.android.networkstack.tethering.inprocess"
           android:sharedUserId="android.uid.system"
           android:process="system">
     <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="29" />

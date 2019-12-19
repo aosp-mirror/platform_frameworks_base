@@ -2421,7 +2421,7 @@ public abstract class BatteryStats implements Parcelable {
 
     public static final int DATA_CONNECTION_OUT_OF_SERVICE = 0;
     public static final int DATA_CONNECTION_EMERGENCY_SERVICE =
-            TelephonyManager.MAX_NETWORK_TYPE + 1;
+            TelephonyManager.getAllNetworkTypes().length + 1;
     public static final int DATA_CONNECTION_OTHER = DATA_CONNECTION_EMERGENCY_SERVICE + 1;
 
 

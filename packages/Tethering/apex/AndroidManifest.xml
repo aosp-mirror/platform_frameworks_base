@@ -15,7 +15,7 @@
  * limitations under the License.
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.android.tethering.apex">
+  package="com.android.tethering">
   <!-- APEX does not have classes.dex -->
   <application android:hasCode="false" />
   <!-- b/145383354: Current minSdk is locked to Q for development cycle, lock it to next version

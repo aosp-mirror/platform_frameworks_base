@@ -1573,6 +1573,7 @@ package android.content {
     field public static final String ACTION_CALL_EMERGENCY = "android.intent.action.CALL_EMERGENCY";
     field public static final String ACTION_CALL_PRIVILEGED = "android.intent.action.CALL_PRIVILEGED";
     field public static final String ACTION_DEVICE_CUSTOMIZATION_READY = "android.intent.action.DEVICE_CUSTOMIZATION_READY";
+    field public static final String ACTION_DIAL_EMERGENCY = "android.intent.action.DIAL_EMERGENCY";
     field public static final String ACTION_FACTORY_RESET = "android.intent.action.FACTORY_RESET";
     field public static final String ACTION_GLOBAL_BUTTON = "android.intent.action.GLOBAL_BUTTON";
     field public static final String ACTION_INCIDENT_REPORT_READY = "android.intent.action.INCIDENT_REPORT_READY";
@@ -4319,12 +4320,20 @@ package android.net {
     ctor public LinkProperties(@Nullable android.net.LinkProperties);
     method public boolean addDnsServer(@NonNull java.net.InetAddress);
     method public boolean addLinkAddress(@NonNull android.net.LinkAddress);
+    method public boolean addPcscfServer(@NonNull java.net.InetAddress);
+    method @NonNull public java.util.List<java.net.InetAddress> getAddresses();
+    method @NonNull public java.util.List<java.lang.String> getAllInterfaceNames();
+    method @NonNull public java.util.List<android.net.LinkAddress> getAllLinkAddresses();
+    method @NonNull public java.util.List<android.net.RouteInfo> getAllRoutes();
     method @NonNull public java.util.List<java.net.InetAddress> getPcscfServers();
     method @Nullable public String getTcpBufferSizes();
     method @NonNull public java.util.List<java.net.InetAddress> getValidatedPrivateDnsServers();
     method public boolean hasGlobalIpv6Address();
     method public boolean hasIpv4Address();
+    method public boolean hasIpv4DefaultRoute();
+    method public boolean hasIpv4DnsServer();
     method public boolean hasIpv6DefaultRoute();
+    method public boolean hasIpv6DnsServer();
     method public boolean isIpv4Provisioned();
     method public boolean isIpv6Provisioned();
     method public boolean isProvisioned();
@@ -7831,6 +7840,7 @@ package android.telecom {
     method public void addNewUnknownCall(android.telecom.PhoneAccountHandle, android.os.Bundle);
     method @Deprecated public void clearAccounts();
     method public void clearPhoneAccounts();
+    method @NonNull public android.content.Intent createLaunchEmergencyDialerIntent(@Nullable String);
     method @RequiresPermission(android.Manifest.permission.DUMP) public android.telecom.TelecomAnalytics dumpAnalytics();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void enablePhoneAccount(android.telecom.PhoneAccountHandle, boolean);
     method public java.util.List<android.telecom.PhoneAccountHandle> getAllPhoneAccountHandles();
@@ -7937,6 +7947,13 @@ package android.telephony {
   public class CbGeoUtils {
   }
 
+  public static class CbGeoUtils.Circle implements android.telephony.CbGeoUtils.Geometry {
+    ctor public CbGeoUtils.Circle(@NonNull android.telephony.CbGeoUtils.LatLng, double);
+    method public boolean contains(@NonNull android.telephony.CbGeoUtils.LatLng);
+    method @NonNull public android.telephony.CbGeoUtils.LatLng getCenter();
+    method public double getRadius();
+  }
+
   public static interface CbGeoUtils.Geometry {
     method public boolean contains(@NonNull android.telephony.CbGeoUtils.LatLng);
   }
@@ -7947,6 +7964,12 @@ package android.telephony {
     method @NonNull public android.telephony.CbGeoUtils.LatLng subtract(@NonNull android.telephony.CbGeoUtils.LatLng);
     field public final double lat;
     field public final double lng;
+  }
+
+  public static class CbGeoUtils.Polygon implements android.telephony.CbGeoUtils.Geometry {
+    ctor public CbGeoUtils.Polygon(@NonNull java.util.List<android.telephony.CbGeoUtils.LatLng>);
+    method public boolean contains(@NonNull android.telephony.CbGeoUtils.LatLng);
+    method @NonNull public java.util.List<android.telephony.CbGeoUtils.LatLng> getVertices();
   }
 
   public class CellBroadcastIntents {
@@ -8424,6 +8447,24 @@ package android.telephony {
     field public static final String MBMS_STREAMING_SERVICE_ACTION = "android.telephony.action.EmbmsStreaming";
   }
 
+  public final class ModemActivityInfo implements android.os.Parcelable {
+    ctor public ModemActivityInfo(long, int, int, @NonNull int[], int);
+    method public int describeContents();
+    method public int getIdleTimeMillis();
+    method public int getReceiveTimeMillis();
+    method public int getSleepTimeMillis();
+    method public long getTimestamp();
+    method @NonNull public java.util.List<android.telephony.ModemActivityInfo.TransmitPower> getTransmitPowerInfo();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ModemActivityInfo> CREATOR;
+    field public static final int TX_POWER_LEVELS = 5; // 0x5
+  }
+
+  public class ModemActivityInfo.TransmitPower {
+    method @NonNull public android.util.Range<java.lang.Integer> getPowerRangeInDbm();
+    method public int getTimeInMillis();
+  }
+
   public final class NetworkRegistrationInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getAccessNetworkTechnology();
@@ -8808,11 +8849,13 @@ package android.telephony {
   public final class SmsManager {
     method public boolean disableCellBroadcastRange(int, int, int);
     method public boolean enableCellBroadcastRange(int, int, int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getSmsCapacityOnIcc();
     method public void sendMultipartTextMessage(@NonNull String, @NonNull String, @NonNull java.util.List<java.lang.String>, @Nullable java.util.List<android.app.PendingIntent>, @Nullable java.util.List<android.app.PendingIntent>, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void sendMultipartTextMessageWithoutPersisting(String, String, java.util.List<java.lang.String>, java.util.List<android.app.PendingIntent>, java.util.List<android.app.PendingIntent>);
   }
 
   public class SubscriptionInfo implements android.os.Parcelable {
+    method public boolean areUiccApplicationsEnabled();
     method @Nullable public java.util.List<android.telephony.UiccAccessRule> getAccessRules();
     method public int getProfileClass();
     method public boolean isGroupDisabled();
@@ -8924,6 +8967,7 @@ package android.telephony {
     method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.IccOpenLogicalChannelResponse iccOpenLogicalChannelBySlot(int, @Nullable String, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String iccTransmitApduBasicChannelBySlot(int, int, int, int, int, int, @Nullable String);
     method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String iccTransmitApduLogicalChannelBySlot(int, int, int, int, int, int, int, @Nullable String);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAnyRadioPoweredOn();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApplicationOnUicc(int);
     method public boolean isDataConnectivityPossible();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
@@ -8965,6 +9009,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSimPowerStateForSlot(int, int);
     method @Deprecated public void setVisualVoicemailEnabled(android.telecom.PhoneAccountHandle, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVoiceActivationState(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void shutdownAllRadios();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean supplyPin(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPinReportResult(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean supplyPuk(String, String);
@@ -8975,6 +9020,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void updateTestOtaEmergencyNumberDbFilePath(@NonNull String);
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final String ACTION_ANOMALY_REPORTED = "android.telephony.action.ANOMALY_REPORTED";
     field public static final String ACTION_EMERGENCY_ASSISTANCE = "android.telephony.action.EMERGENCY_ASSISTANCE";
+    field public static final String ACTION_NETWORK_SET_TIME = "android.telephony.action.NETWORK_SET_TIME";
     field public static final String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
     field public static final String ACTION_SIM_CARD_STATE_CHANGED = "android.telephony.action.SIM_CARD_STATE_CHANGED";
     field public static final String ACTION_SIM_SLOT_STATUS_CHANGED = "android.telephony.action.SIM_SLOT_STATUS_CHANGED";

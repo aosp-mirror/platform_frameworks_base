@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
@@ -150,6 +151,24 @@ public abstract class Vibrator {
      * @return True if the hardware can control the amplitude of the vibrations, otherwise false.
      */
     public abstract boolean hasAmplitudeControl();
+
+    /**
+     * Configure an always-on haptics effect.
+     *
+     * @param id The board-specific always-on ID to configure.
+     * @param effect Vibration effect to assign to always-on id. Passing null will disable it.
+     * @param attributes {@link AudioAttributes} corresponding to the vibration. For example,
+     *        specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
+     *        {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
+     *        vibrations associated with incoming calls. May only be null when effect is null.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.VIBRATE_ALWAYS_ON)
+    public boolean setAlwaysOnEffect(int id, @Nullable VibrationEffect effect,
+                                  @Nullable AudioAttributes attributes) {
+        Log.w(TAG, "Always-on effects aren't supported");
+        return false;
+    }
 
     /**
      * Vibrate constantly for the specified period of time.

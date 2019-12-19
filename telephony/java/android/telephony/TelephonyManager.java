@@ -38,6 +38,9 @@ import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -140,6 +143,14 @@ import java.util.regex.Pattern;
 @SystemService(Context.TELEPHONY_SERVICE)
 public class TelephonyManager {
     private static final String TAG = "TelephonyManager";
+
+    /**
+     * To expand the error codes for {@link TelephonyManager#updateAvailableNetworks} and
+     * {@link TelephonyManager#setPreferredOpportunisticDataSubscription}.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    private static final long CALLBACK_ON_MORE_ERROR_CODE_CHANGE = 130595455L;
 
     /**
      * The key to use when placing the result of {@link #requestModemActivityInfo(ResultReceiver)}
@@ -733,8 +744,10 @@ public class TelephonyManager {
      * Retrieve with
      * {@link android.content.Intent#getIntExtra(String name, int defaultValue)}.
      *
+     * @deprecated Should use the {@link TelecomManager#EXTRA_DISCONNECT_CAUSE} instead.
      * @hide
      */
+    @Deprecated
     public static final String EXTRA_DISCONNECT_CAUSE = "disconnect_cause";
 
     /**
@@ -1449,6 +1462,26 @@ public class TelephonyManager {
      */
     public static final String EXTRA_SIM_COMBINATION_NAMES =
             "android.telephony.extra.SIM_COMBINATION_NAMES";
+
+    /**
+     * Broadcast Action: The time was set by the carrier (typically by the NITZ string).
+     * This is a sticky broadcast.
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li><em>time</em> - The time as a long in UTC milliseconds.</li>
+     * </ul>
+     *
+     * <p class="note">
+     * Requires the READ_PHONE_STATE permission.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_NETWORK_SET_TIME = "android.telephony.action.NETWORK_SET_TIME";
+
     //
     //
     // Device Info
@@ -2425,7 +2458,7 @@ public class TelephonyManager {
 
     /*
      * When adding a network type to the list below, make sure to add the correct icon to
-     * MobileSignalController.mapIconSets().
+     * MobileSignalController.mapIconSets() as well as NETWORK_TYPES
      * Do not add negative types.
      */
     /** Network type is unknown */
@@ -2473,8 +2506,36 @@ public class TelephonyManager {
     /** Current network is NR(New Radio) 5G. */
     public static final int NETWORK_TYPE_NR = TelephonyProtoEnums.NETWORK_TYPE_NR; // 20.
 
-    /** Max network type number. Update as new types are added. Don't add negative types. {@hide} */
-    public static final int MAX_NETWORK_TYPE = NETWORK_TYPE_NR;
+    private static final @NetworkType int[] NETWORK_TYPES = {
+            NETWORK_TYPE_GPRS,
+            NETWORK_TYPE_EDGE,
+            NETWORK_TYPE_UMTS,
+            NETWORK_TYPE_CDMA,
+            NETWORK_TYPE_EVDO_0,
+            NETWORK_TYPE_EVDO_A,
+            NETWORK_TYPE_1xRTT,
+            NETWORK_TYPE_HSDPA,
+            NETWORK_TYPE_HSUPA,
+            NETWORK_TYPE_HSPA,
+            NETWORK_TYPE_IDEN,
+            NETWORK_TYPE_EVDO_B,
+            NETWORK_TYPE_LTE,
+            NETWORK_TYPE_EHRPD,
+            NETWORK_TYPE_HSPAP,
+            NETWORK_TYPE_GSM,
+            NETWORK_TYPE_TD_SCDMA,
+            NETWORK_TYPE_IWLAN,
+            NETWORK_TYPE_LTE_CA,
+            NETWORK_TYPE_NR
+    };
+
+    /**
+     * Return a collection of all network types
+     * @return network types
+     */
+    public static @NonNull @NetworkType int[] getAllNetworkTypes() {
+        return NETWORK_TYPES;
+    }
 
     /**
      * Return the current data network type.
@@ -2767,6 +2828,24 @@ public class TelephonyManager {
     //
     //
 
+    /** @hide */
+    @IntDef(prefix = {"SIM_STATE_"},
+            value = {
+                    SIM_STATE_UNKNOWN,
+                    SIM_STATE_ABSENT,
+                    SIM_STATE_PIN_REQUIRED,
+                    SIM_STATE_PUK_REQUIRED,
+                    SIM_STATE_NETWORK_LOCKED,
+                    SIM_STATE_READY,
+                    SIM_STATE_NOT_READY,
+                    SIM_STATE_PERM_DISABLED,
+                    SIM_STATE_CARD_IO_ERROR,
+                    SIM_STATE_CARD_RESTRICTED,
+                    SIM_STATE_LOADED,
+                    SIM_STATE_PRESENT,
+            })
+    public @interface SimState {}
+
     /**
      * SIM card state: Unknown. Signifies that the SIM is in transition
      * between states. For example, when the user inputs the SIM pin
@@ -2972,7 +3051,7 @@ public class TelephonyManager {
      * @see #SIM_STATE_CARD_IO_ERROR
      * @see #SIM_STATE_CARD_RESTRICTED
      */
-    public int getSimState() {
+    public @SimState int getSimState() {
         int simState = getSimStateIncludingLoaded();
         if (simState == SIM_STATE_LOADED) {
             simState = SIM_STATE_READY;
@@ -2980,7 +3059,7 @@ public class TelephonyManager {
         return simState;
     }
 
-    private int getSimStateIncludingLoaded() {
+    private @SimState int getSimStateIncludingLoaded() {
         int slotIndex = getSlotIndex();
         // slotIndex may be invalid due to sim being absent. In that case query all slots to get
         // sim state
@@ -3014,7 +3093,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    public int getSimCardState() {
+    public @SimState int getSimCardState() {
         int simState = getSimState();
         return getSimCardStateFromSimState(simState);
     }
@@ -3034,7 +3113,7 @@ public class TelephonyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public int getSimCardState(int physicalSlotIndex) {
+    public @SimState int getSimCardState(int physicalSlotIndex) {
         int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex));
         return getSimCardStateFromSimState(simState);
     }
@@ -3044,7 +3123,7 @@ public class TelephonyManager {
      * @param simState
      * @return SIM card state
      */
-    private int getSimCardStateFromSimState(int simState) {
+    private @SimState int getSimCardStateFromSimState(int simState) {
         switch (simState) {
             case SIM_STATE_UNKNOWN:
             case SIM_STATE_ABSENT:
@@ -3084,7 +3163,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    public int getSimApplicationState() {
+    public @SimState int getSimApplicationState() {
         int simState = getSimStateIncludingLoaded();
         return getSimApplicationStateFromSimState(simState);
     }
@@ -3107,7 +3186,7 @@ public class TelephonyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public int getSimApplicationState(int physicalSlotIndex) {
+    public @SimState int getSimApplicationState(int physicalSlotIndex) {
         int simState =
                 SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex));
         return getSimApplicationStateFromSimState(simState);
@@ -3118,7 +3197,7 @@ public class TelephonyManager {
      * @param simState
      * @return SIM application state
      */
-    private int getSimApplicationStateFromSimState(int simState) {
+    private @SimState int getSimApplicationStateFromSimState(int simState) {
         switch (simState) {
             case SIM_STATE_UNKNOWN:
             case SIM_STATE_ABSENT:
@@ -3175,7 +3254,7 @@ public class TelephonyManager {
      * @see #SIM_STATE_CARD_IO_ERROR
      * @see #SIM_STATE_CARD_RESTRICTED
      */
-    public int getSimState(int slotIndex) {
+    public @SimState int getSimState(int slotIndex) {
         int simState = SubscriptionManager.getSimStateForSlotIndex(slotIndex);
         if (simState == SIM_STATE_LOADED) {
             simState = SIM_STATE_READY;
@@ -8248,6 +8327,44 @@ public class TelephonyManager {
     }
 
     /**
+     * Shut down all the live radios over all the slot index.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void shutdownAllRadios() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.shutdownMobileRadios();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#shutdownMobileRadios", e);
+        }
+    }
+
+    /**
+     * Check if any radio is on over all the slot indexes.
+     *
+     * @return {@code true} if any radio is on over any slot index.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isAnyRadioPoweredOn() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.needMobileRadioShutdown();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#needMobileRadioShutdown", e);
+        }
+        return false;
+    }
+
+    /**
      * Radio explicitly powered off (e.g, airplane mode).
      * @hide
      */
@@ -11077,7 +11194,9 @@ public class TelephonyManager {
     @IntDef(prefix = {"SET_OPPORTUNISTIC_SUB"}, value = {
             SET_OPPORTUNISTIC_SUB_SUCCESS,
             SET_OPPORTUNISTIC_SUB_VALIDATION_FAILED,
-            SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION})
+            SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION,
+            SET_OPPORTUNISTIC_SUB_NO_OPPORTUNISTIC_SUB_AVAILABLE,
+            SET_OPPORTUNISTIC_SUB_REMOTE_SERVICE_EXCEPTION})
     public @interface SetOpportunisticSubscriptionResult {}
 
     /**
@@ -11095,6 +11214,16 @@ public class TelephonyManager {
      */
     public static final int SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION = 2;
 
+    /**
+     * The subscription is not valid. It must be an opportunistic subscription.
+     */
+    public static final int SET_OPPORTUNISTIC_SUB_NO_OPPORTUNISTIC_SUB_AVAILABLE = 3;
+
+    /**
+     * Subscription service happened remote exception.
+     */
+    public static final int SET_OPPORTUNISTIC_SUB_REMOTE_SERVICE_EXCEPTION = 4;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"UPDATE_AVAILABLE_NETWORKS"}, value = {
@@ -11102,7 +11231,13 @@ public class TelephonyManager {
             UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE,
             UPDATE_AVAILABLE_NETWORKS_ABORTED,
             UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS,
-            UPDATE_AVAILABLE_NETWORKS_NO_CARRIER_PRIVILEGE})
+            UPDATE_AVAILABLE_NETWORKS_NO_CARRIER_PRIVILEGE,
+            UPDATE_AVAILABLE_NETWORKS_DISABLE_MODEM_FAIL,
+            UPDATE_AVAILABLE_NETWORKS_ENABLE_MODEM_FAIL,
+            UPDATE_AVAILABLE_NETWORKS_MULTIPLE_NETWORKS_NOT_SUPPORTED,
+            UPDATE_AVAILABLE_NETWORKS_NO_OPPORTUNISTIC_SUB_AVAILABLE,
+            UPDATE_AVAILABLE_NETWORKS_REMOTE_SERVICE_EXCEPTION,
+            UPDATE_AVAILABLE_NETWORKS_SERVICE_IS_DISABLED})
     public @interface UpdateAvailableNetworksResult {}
 
     /**
@@ -11129,6 +11264,36 @@ public class TelephonyManager {
      * No carrier privilege.
      */
     public static final int UPDATE_AVAILABLE_NETWORKS_NO_CARRIER_PRIVILEGE = 4;
+
+    /**
+     * Disable modem fail.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_DISABLE_MODEM_FAIL = 5;
+
+    /**
+     * Enable modem fail.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_ENABLE_MODEM_FAIL = 6;
+
+    /**
+     * Carrier app does not support multiple available networks.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_MULTIPLE_NETWORKS_NOT_SUPPORTED = 7;
+
+    /**
+     * The subscription is not valid. It must be an opportunistic subscription.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_NO_OPPORTUNISTIC_SUB_AVAILABLE = 8;
+
+    /**
+     * There is no OpportunisticNetworkService.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_REMOTE_SERVICE_EXCEPTION = 9;
+
+    /**
+     * OpportunisticNetworkService is disabled.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_SERVICE_IS_DISABLED = 10;
 
     /**
      * Set preferred opportunistic data subscription id.
@@ -11162,7 +11327,11 @@ public class TelephonyManager {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     executor.execute(() -> {
-                        callback.accept(SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION);
+                        if (Compatibility.isChangeEnabled(CALLBACK_ON_MORE_ERROR_CODE_CHANGE)) {
+                            callback.accept(SET_OPPORTUNISTIC_SUB_REMOTE_SERVICE_EXCEPTION);
+                        } else {
+                            callback.accept(SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION);
+                        }
                     });
                 } finally {
                     Binder.restoreCallingIdentity(identity);
@@ -11256,9 +11425,12 @@ public class TelephonyManager {
                 if (iOpportunisticNetworkService == null) {
                     final long identity = Binder.clearCallingIdentity();
                     try {
-                        /* Todo<b/130595455> passing unknown due to lack of good error codes */
                         executor.execute(() -> {
-                            callback.accept(UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE);
+                            if (Compatibility.isChangeEnabled(CALLBACK_ON_MORE_ERROR_CODE_CHANGE)) {
+                                callback.accept(UPDATE_AVAILABLE_NETWORKS_REMOTE_SERVICE_EXCEPTION);
+                            } else {
+                                callback.accept(UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE);
+                            }
                         });
                     } finally {
                         Binder.restoreCallingIdentity(identity);

@@ -43,6 +43,7 @@
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include "jni.h"
+#include <dmabufinfo/dmabufinfo.h>
 #include <meminfo/procmeminfo.h>
 #include <meminfo/sysmeminfo.h>
 #include <memtrack/memtrack.h>
@@ -560,6 +561,7 @@ enum {
     MEMINFO_VMALLOC_USED,
     MEMINFO_PAGE_TABLES,
     MEMINFO_KERNEL_STACK,
+    MEMINFO_KERNEL_RECLAIMABLE,
     MEMINFO_COUNT
 };
 
@@ -778,6 +780,59 @@ static jlong android_os_Debug_getFreeZramKb(JNIEnv* env, jobject clazz) {
     return zramFreeKb;
 }
 
+static jlong android_os_Debug_getIonHeapsSizeKb(JNIEnv* env, jobject clazz) {
+    jlong heapsSizeKb = 0;
+    uint64_t size;
+
+    if (meminfo::ReadIonHeapsSizeKb(&size)) {
+        heapsSizeKb = size;
+    }
+
+    return heapsSizeKb;
+}
+
+static jlong android_os_Debug_getIonPoolsSizeKb(JNIEnv* env, jobject clazz) {
+    jlong poolsSizeKb = 0;
+    uint64_t size;
+
+    if (meminfo::ReadIonPoolsSizeKb(&size)) {
+        poolsSizeKb = size;
+    }
+
+    return poolsSizeKb;
+}
+
+static jlong android_os_Debug_getIonMappedSizeKb(JNIEnv* env, jobject clazz) {
+    jlong ionPss = 0;
+    std::vector<dmabufinfo::DmaBuffer> dmabufs;
+
+    std::unique_ptr<DIR, int (*)(DIR*)> dir(opendir("/proc"), closedir);
+    if (!dir) {
+        LOG(ERROR) << "Failed to open /proc directory";
+        return false;
+    }
+
+    struct dirent* dent;
+    while ((dent = readdir(dir.get()))) {
+        if (dent->d_type != DT_DIR) continue;
+
+        int pid = atoi(dent->d_name);
+        if (pid == 0) {
+            continue;
+        }
+
+        if (!AppendDmaBufInfo(pid, &dmabufs, false)) {
+            LOG(ERROR) << "Failed to read maps for pid " << pid;
+        }
+    }
+
+    for (dmabufinfo::DmaBuffer buf : dmabufs) {
+        ionPss += buf.size() / 1024;
+    }
+
+    return ionPss;
+}
+
 /*
  * JNI registration.
  */
@@ -821,6 +876,12 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_os_Debug_getUnreachableMemory },
     { "getZramFreeKb", "()J",
             (void*)android_os_Debug_getFreeZramKb },
+    { "getIonHeapsSizeKb", "()J",
+            (void*)android_os_Debug_getIonHeapsSizeKb },
+    { "getIonPoolsSizeKb", "()J",
+            (void*)android_os_Debug_getIonPoolsSizeKb },
+    { "getIonMappedSizeKb", "()J",
+            (void*)android_os_Debug_getIonMappedSizeKb },
 };
 
 int register_android_os_Debug(JNIEnv *env)

@@ -410,6 +410,21 @@ static jlong vibratorGetCapabilities(JNIEnv*, jclass) {
     return 0;
 }
 
+static void vibratorAlwaysOnEnable(JNIEnv* env, jclass, jlong id, jlong effect, jlong strength) {
+    auto status = halCall(&aidl::IVibrator::alwaysOnEnable, id,
+            static_cast<aidl::Effect>(effect), static_cast<aidl::EffectStrength>(strength));
+    if (!status.isOk()) {
+        ALOGE("vibratortAlwaysOnEnable command failed (%s).", status.toString8().string());
+    }
+}
+
+static void vibratorAlwaysOnDisable(JNIEnv* env, jclass, jlong id) {
+    auto status = halCall(&aidl::IVibrator::alwaysOnDisable, id);
+    if (!status.isOk()) {
+        ALOGE("vibratorAlwaysOnDisable command failed (%s).", status.toString8().string());
+    }
+}
+
 static const JNINativeMethod method_table[] = {
     { "vibratorExists", "()Z", (void*)vibratorExists },
     { "vibratorInit", "()V", (void*)vibratorInit },
@@ -422,6 +437,8 @@ static const JNINativeMethod method_table[] = {
     { "vibratorSupportsExternalControl", "()Z", (void*)vibratorSupportsExternalControl},
     { "vibratorSetExternalControl", "(Z)V", (void*)vibratorSetExternalControl},
     { "vibratorGetCapabilities", "()J", (void*)vibratorGetCapabilities},
+    { "vibratorAlwaysOnEnable", "(JJJ)V", (void*)vibratorAlwaysOnEnable},
+    { "vibratorAlwaysOnDisable", "(J)V", (void*)vibratorAlwaysOnDisable},
 };
 
 int register_android_server_VibratorService(JNIEnv *env)

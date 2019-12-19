@@ -19,7 +19,7 @@
 
 #include <media/stagefright/foundation/ABase.h>
 #include <media/stagefright/foundation/AudioPresentationInfo.h>
-#include <media/MediaSource.h>
+#include <media/stagefright/MediaSource.h>
 #include <media/DataSource.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
