@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
+import android.media.RouteSessionInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 
@@ -159,10 +160,55 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         publishRoutes();
     }
 
+    @Override
+    public void onCreateSession(String packageName, String routeId, String controlCategory,
+            int sessionId) {
+        RouteSessionInfo sessionInfo = new RouteSessionInfo.Builder(
+                sessionId, packageName, controlCategory)
+                .addSelectedRoute(routeId)
+                .build();
+        notifySessionCreated(sessionId, sessionInfo, null);
+    }
+
+    @Override
+    public void onDestroySession(int sessionId, RouteSessionInfo lastSessionInfo) {}
+
+    @Override
+    public void onAddRoute(int sessionId, String routeId) {
+        RouteSessionInfo sessionInfo = getSessionInfo(sessionId);
+        //TODO: we may want to remove route if it belongs to another session
+        RouteSessionInfo newSessionInfo = new RouteSessionInfo.Builder(sessionInfo)
+                .addSelectedRoute(routeId)
+                .build();
+        setSessionInfo(sessionId, newSessionInfo);
+        publishRoutes();
+    }
+
+    @Override
+    public void onRemoveRoute(int sessionId, String routeId) {
+        RouteSessionInfo sessionInfo = getSessionInfo(sessionId);
+        RouteSessionInfo newSessionInfo = new RouteSessionInfo.Builder(sessionInfo)
+                .removeSelectedRoute(routeId)
+                .build();
+        setSessionInfo(sessionId, newSessionInfo);
+        publishRoutes();
+    }
+
+    @Override
+    public void onTransferRoute(int sessionId, String routeId) {
+        RouteSessionInfo sessionInfo = getSessionInfo(sessionId);
+        RouteSessionInfo newSessionInfo = new RouteSessionInfo.Builder(sessionInfo)
+                .clearSelectedRoutes()
+                .addSelectedRoute(routeId)
+                .build();
+        setSessionInfo(sessionId, newSessionInfo);
+        publishRoutes();
+    }
+
     void publishRoutes() {
         MediaRoute2ProviderInfo info = new MediaRoute2ProviderInfo.Builder()
                 .addRoutes(mRoutes.values())
                 .build();
-        setProviderInfo(info);
+        updateProviderInfo(info);
     }
 }
