@@ -1573,6 +1573,7 @@ package android.content {
     field public static final String ACTION_CALL_EMERGENCY = "android.intent.action.CALL_EMERGENCY";
     field public static final String ACTION_CALL_PRIVILEGED = "android.intent.action.CALL_PRIVILEGED";
     field public static final String ACTION_DEVICE_CUSTOMIZATION_READY = "android.intent.action.DEVICE_CUSTOMIZATION_READY";
+    field public static final String ACTION_DIAL_EMERGENCY = "android.intent.action.DIAL_EMERGENCY";
     field public static final String ACTION_FACTORY_RESET = "android.intent.action.FACTORY_RESET";
     field public static final String ACTION_GLOBAL_BUTTON = "android.intent.action.GLOBAL_BUTTON";
     field public static final String ACTION_INCIDENT_REPORT_READY = "android.intent.action.INCIDENT_REPORT_READY";
@@ -7839,6 +7840,7 @@ package android.telecom {
     method public void addNewUnknownCall(android.telecom.PhoneAccountHandle, android.os.Bundle);
     method @Deprecated public void clearAccounts();
     method public void clearPhoneAccounts();
+    method @NonNull public android.content.Intent createLaunchEmergencyDialerIntent(@Nullable String);
     method @RequiresPermission(android.Manifest.permission.DUMP) public android.telecom.TelecomAnalytics dumpAnalytics();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void enablePhoneAccount(android.telecom.PhoneAccountHandle, boolean);
     method public java.util.List<android.telecom.PhoneAccountHandle> getAllPhoneAccountHandles();
