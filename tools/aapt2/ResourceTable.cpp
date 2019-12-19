@@ -398,7 +398,7 @@ bool ResourceTable::AddResourceImpl(const ResourceNameRef& name, const ResourceI
 
   // Check for package names appearing twice with two different package ids
   ResourceTablePackage* package = FindOrCreatePackage(name.package);
-  if (res_id.is_valid_dynamic() && package->id && package->id.value() != res_id.package_id()) {
+  if (res_id.is_valid() && package->id && package->id.value() != res_id.package_id()) {
     diag->Error(DiagMessage(source)
                     << "trying to add resource '" << name << "' with ID " << res_id
                     << " but package '" << package->name << "' already has ID "
@@ -407,9 +407,9 @@ bool ResourceTable::AddResourceImpl(const ResourceNameRef& name, const ResourceI
   }
 
   // Whether or not to error on duplicate resources
-  bool check_id = validate_resources_ && res_id.is_valid_dynamic();
+  bool check_id = validate_resources_ && res_id.is_valid();
   // Whether or not to create a duplicate resource if the id does not match
-  bool use_id = !validate_resources_ && res_id.is_valid_dynamic();
+  bool use_id = !validate_resources_ && res_id.is_valid();
 
   ResourceTableType* type = package->FindOrCreateType(name.type, use_id ? res_id.type_id()
                                                                         : Maybe<uint8_t>());
@@ -463,7 +463,7 @@ bool ResourceTable::AddResourceImpl(const ResourceNameRef& name, const ResourceI
     }
   }
 
-  if (res_id.is_valid_dynamic()) {
+  if (res_id.is_valid()) {
     package->id = res_id.package_id();
     type->id = res_id.type_id();
     entry->id = res_id.entry_id();
@@ -504,7 +504,7 @@ bool ResourceTable::SetVisibilityImpl(const ResourceNameRef& name, const Visibil
 
   // Check for package names appearing twice with two different package ids
   ResourceTablePackage* package = FindOrCreatePackage(name.package);
-  if (res_id.is_valid_dynamic() && package->id && package->id.value() != res_id.package_id()) {
+  if (res_id.is_valid() && package->id && package->id.value() != res_id.package_id()) {
     diag->Error(DiagMessage(source)
                     << "trying to add resource '" << name << "' with ID " << res_id
                     << " but package '" << package->name << "' already has ID "
@@ -513,9 +513,9 @@ bool ResourceTable::SetVisibilityImpl(const ResourceNameRef& name, const Visibil
   }
 
   // Whether or not to error on duplicate resources
-  bool check_id = validate_resources_ && res_id.is_valid_dynamic();
+  bool check_id = validate_resources_ && res_id.is_valid();
   // Whether or not to create a duplicate resource if the id does not match
-  bool use_id = !validate_resources_ && res_id.is_valid_dynamic();
+  bool use_id = !validate_resources_ && res_id.is_valid();
 
   ResourceTableType* type = package->FindOrCreateType(name.type, use_id ? res_id.type_id()
                                                                         : Maybe<uint8_t>());
@@ -541,7 +541,7 @@ bool ResourceTable::SetVisibilityImpl(const ResourceNameRef& name, const Visibil
     return false;
   }
 
-  if (res_id.is_valid_dynamic()) {
+  if (res_id.is_valid()) {
     package->id = res_id.package_id();
     type->id = res_id.type_id();
     entry->id = res_id.entry_id();
