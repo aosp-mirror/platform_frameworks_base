@@ -17,7 +17,7 @@
 
 package com.google.android.mms.pdu;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.util.HashMap;
 import java.util.Map;

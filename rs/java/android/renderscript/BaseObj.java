@@ -16,10 +16,8 @@
 
 package android.renderscript;
 
-import android.compat.annotation.UnsupportedAppUsage;
-
+import android.annotation.UnsupportedAppUsage;
 import dalvik.system.CloseGuard;
-
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
