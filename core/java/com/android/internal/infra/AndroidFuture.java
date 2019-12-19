@@ -75,6 +75,7 @@ public class AndroidFuture<T> extends CompletableFuture<T> implements Parcelable
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = AndroidFuture.class.getSimpleName();
+    private static final StackTraceElement[] EMPTY_STACK_TRACE = new StackTraceElement[0];
 
     private final @NonNull Object mLock = new Object();
     @GuardedBy("mLock")
@@ -95,15 +96,7 @@ public class AndroidFuture<T> extends CompletableFuture<T> implements Parcelable
             // Done
             if (in.readBoolean()) {
                 // Failed
-                try {
-                    in.readException();
-                } catch (Throwable e) {
-                    completeExceptionally(e);
-                }
-                if (!isCompletedExceptionally()) {
-                    throw new IllegalStateException(
-                            "Error unparceling AndroidFuture: exception expected");
-                }
+                completeExceptionally(unparcelException(in));
             } else {
                 // Success
                 complete((T) in.readValue(null));
@@ -512,14 +505,9 @@ public class AndroidFuture<T> extends CompletableFuture<T> implements Parcelable
             T result;
             try {
                 result = get();
-            } catch (Exception t) {
-                // Exceptions coming out of get() are wrapped in ExecutionException, which is not
-                // handled by Parcel.
-                if (t instanceof ExecutionException && t.getCause() instanceof Exception) {
-                    t = (Exception) t.getCause();
-                }
+            } catch (Throwable t) {
                 dest.writeBoolean(true);
-                dest.writeException(t);
+                parcelException(dest, unwrapExecutionException(t));
                 return;
             }
             dest.writeBoolean(false);
@@ -528,20 +516,74 @@ public class AndroidFuture<T> extends CompletableFuture<T> implements Parcelable
             dest.writeStrongBinder(new IAndroidFuture.Stub() {
                 @Override
                 public void complete(AndroidFuture resultContainer) {
+                    boolean changed;
                     try {
-                        AndroidFuture.this.complete((T) resultContainer.get());
+                        changed = AndroidFuture.this.complete((T) resultContainer.get());
                     } catch (Throwable t) {
-                        // If resultContainer was completed exceptionally, get() wraps the
-                        // underlying exception in an ExecutionException. Unwrap it now to avoid
-                        // double-layering ExecutionExceptions.
-                        if (t instanceof ExecutionException && t.getCause() != null) {
-                            t = t.getCause();
-                        }
-                        completeExceptionally(t);
+                        changed = completeExceptionally(unwrapExecutionException(t));
+                    }
+                    if (!changed) {
+                        Log.w(LOG_TAG, "Remote result " + resultContainer
+                                + " ignored, as local future is already completed: "
+                                + AndroidFuture.this);
                     }
                 }
             }.asBinder());
         }
+    }
+
+    /**
+     * Exceptions coming out of {@link #get} are wrapped in {@link ExecutionException}
+     */
+    Throwable unwrapExecutionException(Throwable t) {
+        return t instanceof ExecutionException
+                ? t.getCause()
+                : t;
+    }
+
+    /**
+     * Alternative to {@link Parcel#writeException} that stores the stack trace, in a
+     * way consistent with the binder IPC exception propagation behavior.
+     */
+    private static void parcelException(Parcel p, @Nullable Throwable t) {
+        p.writeBoolean(t == null);
+        if (t == null) {
+            return;
+        }
+
+        p.writeInt(Parcel.getExceptionCode(t));
+        p.writeString(t.getClass().getName());
+        p.writeString(t.getMessage());
+        p.writeStackTrace(t);
+        parcelException(p, t.getCause());
+    }
+
+    /**
+     * @see #parcelException
+     */
+    private static @Nullable Throwable unparcelException(Parcel p) {
+        if (p.readBoolean()) {
+            return null;
+        }
+
+        int exCode = p.readInt();
+        String cls = p.readString();
+        String msg = p.readString();
+        String stackTrace = p.readInt() > 0 ? p.readString() : "\t<stack trace unavailable>";
+        msg += "\n" + stackTrace;
+
+        Exception ex = p.createExceptionOrNull(exCode, msg);
+        if (ex == null) {
+            ex = new RuntimeException(cls + ": " + msg);
+        }
+        ex.setStackTrace(EMPTY_STACK_TRACE);
+
+        Throwable cause = unparcelException(p);
+        if (cause != null) {
+            ex.initCause(ex);
+        }
+
+        return ex;
     }
 
     @Override

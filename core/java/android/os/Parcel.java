@@ -1886,6 +1886,43 @@ public final class Parcel {
     public final void writeException(@NonNull Exception e) {
         AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
 
+        int code = getExceptionCode(e);
+        writeInt(code);
+        StrictMode.clearGatheredViolations();
+        if (code == 0) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new RuntimeException(e);
+        }
+        writeString(e.getMessage());
+        final long timeNow = sParcelExceptionStackTrace ? SystemClock.elapsedRealtime() : 0;
+        if (sParcelExceptionStackTrace && (timeNow - sLastWriteExceptionStackTrace
+                > WRITE_EXCEPTION_STACK_TRACE_THRESHOLD_MS)) {
+            sLastWriteExceptionStackTrace = timeNow;
+            writeStackTrace(e);
+        } else {
+            writeInt(0);
+        }
+        switch (code) {
+            case EX_SERVICE_SPECIFIC:
+                writeInt(((ServiceSpecificException) e).errorCode);
+                break;
+            case EX_PARCELABLE:
+                // Write parceled exception prefixed by length
+                final int sizePosition = dataPosition();
+                writeInt(0);
+                writeParcelable((Parcelable) e, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+                final int payloadPosition = dataPosition();
+                setDataPosition(sizePosition);
+                writeInt(payloadPosition - sizePosition);
+                setDataPosition(payloadPosition);
+                break;
+        }
+    }
+
+    /** @hide */
+    public static int getExceptionCode(@NonNull Throwable e) {
         int code = 0;
         if (e instanceof Parcelable
                 && (e.getClass().getClassLoader() == Parcelable.class.getClassLoader())) {
@@ -1909,51 +1946,25 @@ public final class Parcel {
         } else if (e instanceof ServiceSpecificException) {
             code = EX_SERVICE_SPECIFIC;
         }
-        writeInt(code);
-        StrictMode.clearGatheredViolations();
-        if (code == 0) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
-            throw new RuntimeException(e);
+        return code;
+    }
+
+    /** @hide */
+    public void writeStackTrace(@NonNull Throwable e) {
+        final int sizePosition = dataPosition();
+        writeInt(0); // Header size will be filled in later
+        StackTraceElement[] stackTrace = e.getStackTrace();
+        final int truncatedSize = Math.min(stackTrace.length, 5);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < truncatedSize; i++) {
+            sb.append("\tat ").append(stackTrace[i]).append('\n');
         }
-        writeString(e.getMessage());
-        final long timeNow = sParcelExceptionStackTrace ? SystemClock.elapsedRealtime() : 0;
-        if (sParcelExceptionStackTrace && (timeNow - sLastWriteExceptionStackTrace
-                > WRITE_EXCEPTION_STACK_TRACE_THRESHOLD_MS)) {
-            sLastWriteExceptionStackTrace = timeNow;
-            final int sizePosition = dataPosition();
-            writeInt(0); // Header size will be filled in later
-            StackTraceElement[] stackTrace = e.getStackTrace();
-            final int truncatedSize = Math.min(stackTrace.length, 5);
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < truncatedSize; i++) {
-                sb.append("\tat ").append(stackTrace[i]).append('\n');
-            }
-            writeString(sb.toString());
-            final int payloadPosition = dataPosition();
-            setDataPosition(sizePosition);
-            // Write stack trace header size. Used in native side to skip the header
-            writeInt(payloadPosition - sizePosition);
-            setDataPosition(payloadPosition);
-        } else {
-            writeInt(0);
-        }
-        switch (code) {
-            case EX_SERVICE_SPECIFIC:
-                writeInt(((ServiceSpecificException) e).errorCode);
-                break;
-            case EX_PARCELABLE:
-                // Write parceled exception prefixed by length
-                final int sizePosition = dataPosition();
-                writeInt(0);
-                writeParcelable((Parcelable) e, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-                final int payloadPosition = dataPosition();
-                setDataPosition(sizePosition);
-                writeInt(payloadPosition - sizePosition);
-                setDataPosition(payloadPosition);
-                break;
-        }
+        writeString(sb.toString());
+        final int payloadPosition = dataPosition();
+        setDataPosition(sizePosition);
+        // Write stack trace header size. Used in native side to skip the header
+        writeInt(payloadPosition - sizePosition);
+        setDataPosition(payloadPosition);
     }
 
     /**
@@ -2069,14 +2080,7 @@ public final class Parcel {
         if (remoteStackTrace != null) {
             RemoteException cause = new RemoteException(
                     "Remote stack trace:\n" + remoteStackTrace, null, false, false);
-            try {
-                Throwable rootCause = ExceptionUtils.getRootCause(e);
-                if (rootCause != null) {
-                    rootCause.initCause(cause);
-                }
-            } catch (RuntimeException ex) {
-                Log.e(TAG, "Cannot set cause " + cause + " for " + e, ex);
-            }
+            ExceptionUtils.appendCause(e, cause);
         }
         SneakyThrow.sneakyThrow(e);
     }
@@ -2088,6 +2092,14 @@ public final class Parcel {
      * @param msg The exception message.
      */
     private Exception createException(int code, String msg) {
+        Exception exception = createExceptionOrNull(code, msg);
+        return exception != null
+                ? exception
+                : new RuntimeException("Unknown exception code: " + code + " msg " + msg);
+    }
+
+    /** @hide */
+    public Exception createExceptionOrNull(int code, String msg) {
         switch (code) {
             case EX_PARCELABLE:
                 if (readInt() > 0) {
@@ -2111,9 +2123,9 @@ public final class Parcel {
                 return new UnsupportedOperationException(msg);
             case EX_SERVICE_SPECIFIC:
                 return new ServiceSpecificException(readInt(), msg);
+            default:
+                return null;
         }
-        return new RuntimeException("Unknown exception code: " + code
-                + " msg " + msg);
     }
 
     /**
