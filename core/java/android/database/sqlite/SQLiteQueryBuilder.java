@@ -782,59 +782,42 @@ public class SQLiteQueryBuilder {
     private void enforceStrictGrammar(@Nullable String selection, @Nullable String groupBy,
             @Nullable String having, @Nullable String sortOrder, @Nullable String limit) {
         SQLiteTokenizer.tokenize(selection, SQLiteTokenizer.OPTION_NONE,
-                this::enforceStrictGrammarWhereHaving);
+                this::enforceStrictToken);
         SQLiteTokenizer.tokenize(groupBy, SQLiteTokenizer.OPTION_NONE,
-                this::enforceStrictGrammarGroupBy);
+                this::enforceStrictToken);
         SQLiteTokenizer.tokenize(having, SQLiteTokenizer.OPTION_NONE,
-                this::enforceStrictGrammarWhereHaving);
+                this::enforceStrictToken);
         SQLiteTokenizer.tokenize(sortOrder, SQLiteTokenizer.OPTION_NONE,
-                this::enforceStrictGrammarOrderBy);
+                this::enforceStrictToken);
         SQLiteTokenizer.tokenize(limit, SQLiteTokenizer.OPTION_NONE,
-                this::enforceStrictGrammarLimit);
+                this::enforceStrictToken);
     }
 
-    private void enforceStrictGrammarWhereHaving(@NonNull String token) {
+    private void enforceStrictToken(@NonNull String token) {
         if (isTableOrColumn(token)) return;
         if (SQLiteTokenizer.isFunction(token)) return;
         if (SQLiteTokenizer.isType(token)) return;
 
-        // NOTE: we explicitly don't allow SELECT subqueries, since they could
-        // leak data that should have been filtered by the trusted where clause
+        // Carefully block any tokens that are attempting to jump across query
+        // clauses or create subqueries, since they could leak data that should
+        // have been filtered by the trusted where clause
+        boolean isAllowedKeyword = SQLiteTokenizer.isKeyword(token);
         switch (token.toUpperCase(Locale.US)) {
-            case "AND": case "AS": case "BETWEEN": case "BINARY":
-            case "CASE": case "CAST": case "COLLATE": case "DISTINCT":
-            case "ELSE": case "END": case "ESCAPE": case "EXISTS":
-            case "GLOB": case "IN": case "IS": case "ISNULL":
-            case "LIKE": case "MATCH": case "NOCASE": case "NOT":
-            case "NOTNULL": case "NULL": case "OR": case "REGEXP":
-            case "RTRIM": case "THEN": case "WHEN":
-                return;
+            case "SELECT":
+            case "FROM":
+            case "WHERE":
+            case "GROUP":
+            case "HAVING":
+            case "WINDOW":
+            case "VALUES":
+            case "ORDER":
+            case "LIMIT":
+                isAllowedKeyword = false;
+                break;
         }
-        throw new IllegalArgumentException("Invalid token " + token);
-    }
-
-    private void enforceStrictGrammarGroupBy(@NonNull String token) {
-        if (isTableOrColumn(token)) return;
-        throw new IllegalArgumentException("Invalid token " + token);
-    }
-
-    private void enforceStrictGrammarOrderBy(@NonNull String token) {
-        if (isTableOrColumn(token)) return;
-        switch (token.toUpperCase(Locale.US)) {
-            case "COLLATE": case "ASC": case "DESC":
-            case "BINARY": case "RTRIM": case "NOCASE":
-            case "LOCALIZED": case "UNICODE":
-                return;
+        if (!isAllowedKeyword) {
+            throw new IllegalArgumentException("Invalid token " + token);
         }
-        throw new IllegalArgumentException("Invalid token " + token);
-    }
-
-    private void enforceStrictGrammarLimit(@NonNull String token) {
-        switch (token.toUpperCase(Locale.US)) {
-            case "OFFSET":
-                return;
-        }
-        throw new IllegalArgumentException("Invalid token " + token);
     }
 
     /**
