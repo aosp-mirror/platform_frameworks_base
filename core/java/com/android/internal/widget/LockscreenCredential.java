@@ -33,6 +33,7 @@ import com.android.internal.util.Preconditions;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A class representing a lockscreen credential. It can be either an empty password, a pattern
@@ -67,7 +68,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
      * minimize the number of extra copies introduced.
      */
     private LockscreenCredential(int type, byte[] credential) {
-        Preconditions.checkNotNull(credential);
+        Objects.requireNonNull(credential);
         if (type == CREDENTIAL_TYPE_NONE) {
             Preconditions.checkArgument(credential.length == 0);
         } else {

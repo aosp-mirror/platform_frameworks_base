@@ -19,6 +19,7 @@ package com.android.internal.util;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import java.util.Objects;
 
 /** @hide */
 public class ObjectUtils {
@@ -32,7 +33,7 @@ public class ObjectUtils {
      */
     @NonNull
     public static <T> T firstNotNull(@Nullable T a, @NonNull T b) {
-        return a != null ? a : Preconditions.checkNotNull(b);
+        return a != null ? a : Objects.requireNonNull(b);
     }
 
     /**
