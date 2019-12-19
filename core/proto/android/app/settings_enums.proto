@@ -2504,4 +2504,14 @@ enum PageId {
     // OS: R
     DIALOG_DALTONIZER_EDIT_SHORTCUT = 1814;
 
+    // OPEN: Settings > Accessibility > Magnification > Settings
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACCESSIBILITY_MAGNIFICATION_SETTINGS = 1815;
+
+    // OPEN: Settings > Accessibility > Magnification > Settings > Magnification area dialog
+    // CATEGORY: SETTINGS
+    // OS: R
+    DIALOG_MAGNIFICATION_CAPABILITY = 1816;
+
 }
