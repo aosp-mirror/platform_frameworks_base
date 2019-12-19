@@ -16,9 +16,9 @@
 
 package android.app;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.servertransaction.PendingTransactionActions;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Binder;

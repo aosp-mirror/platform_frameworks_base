@@ -29,7 +29,7 @@ import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_STOP;
 import static android.app.usage.UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE;
 
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;

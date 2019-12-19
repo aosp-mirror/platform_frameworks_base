@@ -19,8 +19,8 @@ package android.app.servertransaction;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_RESUME;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.ClientTransactionHandler;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;

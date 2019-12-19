@@ -19,7 +19,7 @@ package android.app.trust;
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;

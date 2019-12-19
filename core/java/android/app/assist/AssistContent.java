@@ -1,6 +1,6 @@
 package android.app.assist;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
