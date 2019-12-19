@@ -3538,6 +3538,9 @@
     <!-- emergency call number for the emergency affordance -->
     <string name="config_emergency_call_number" translatable="false">112</string>
 
+    <!-- Package name that provides Emergency Dialer -->
+    <string name="config_emergency_dialer_package">com.android.phone</string>
+
     <!-- Do not translate. Mcc codes whose existence trigger the presence of emergency
          affordances-->
     <integer-array name="config_emergency_mcc_codes" translatable="false">

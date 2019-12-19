@@ -2056,6 +2056,29 @@ public class TelecomManager {
         return result;
     }
 
+
+    /**
+     * Creates the {@link Intent} which can be used with {@link Context#startActivity(Intent)} to
+     * launch the activity for emergency dialer.
+     *
+     * @param number Optional number to call in emergency dialer
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public Intent createLaunchEmergencyDialerIntent(@Nullable String number) {
+        ITelecomService service = getTelecomService();
+        Intent result = null;
+        if (service != null) {
+            try {
+                result = service.createLaunchEmergencyDialerIntent(number);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error createLaunchEmergencyDialerIntent", e);
+            }
+        }
+        return result;
+    }
+
     /**
      * Determines whether Telecom would permit an incoming call to be added via the
      * {@link #addNewIncomingCall(PhoneAccountHandle, Bundle)} API for the specified
