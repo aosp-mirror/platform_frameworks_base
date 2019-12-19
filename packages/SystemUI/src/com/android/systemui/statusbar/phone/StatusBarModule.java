@@ -27,6 +27,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.InitController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
@@ -169,6 +170,7 @@ public class StatusBarModule {
             SuperStatusBarViewFactory superStatusBarViewFactory,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
+            InitController initController,
             DismissCallbackRegistry dismissCallbackRegistry) {
         return new StatusBar(
                 context,
@@ -243,6 +245,7 @@ public class StatusBarModule {
                 superStatusBarViewFactory,
                 statusBarKeyguardViewManager,
                 viewMediatorCallback,
+                initController,
                 dismissCallbackRegistry);
     }
 }

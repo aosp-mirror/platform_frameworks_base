@@ -22,6 +22,7 @@ import android.content.ContentProvider;
 
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.Dependency;
+import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.fragments.FragmentService;
@@ -76,6 +77,13 @@ public interface SystemUIRootComponent {
      */
     @Singleton
     FragmentService.FragmentCreator createFragmentCreator();
+
+
+    /**
+     * Creates a InitController.
+     */
+    @Singleton
+    InitController getInitController();
 
     /**
      * ViewCreator generates all Views that need injection.

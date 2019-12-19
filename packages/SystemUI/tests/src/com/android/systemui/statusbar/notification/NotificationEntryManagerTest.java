@@ -62,7 +62,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
-import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -233,7 +232,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                         mock(PeopleNotificationIdentifier.class)),
                 mEnvironment
         );
-        Dependency.get(InitController.class).executePostInitTasks();
         mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mHeadsUpManager);
         mEntryManager.addNotificationEntryListener(mEntryListener);
         mEntryManager.setNotificationRemoveInterceptor(mRemoveInterceptor);

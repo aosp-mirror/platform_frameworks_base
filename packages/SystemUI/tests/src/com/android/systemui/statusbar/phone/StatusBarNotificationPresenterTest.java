@@ -77,6 +77,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     private FakeMetricsLogger mMetricsLogger;
     private ShadeController mShadeController = mock(ShadeController.class);
     private StatusBar mStatusBar = mock(StatusBar.class);
+    private InitController mInitController = new InitController();
 
     @Before
     public void setup() {
@@ -100,7 +101,6 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         mDependency.injectMockDependency(VisualStabilityManager.class);
         mDependency.injectMockDependency(NotificationGutsManager.class);
         mDependency.injectMockDependency(StatusBarWindowController.class);
-        mDependency.injectMockDependency(InitController.class);
         NotificationEntryManager entryManager =
                 mDependency.injectMockDependency(NotificationEntryManager.class);
         when(entryManager.getActiveNotificationsForCurrentUser()).thenReturn(new ArrayList<>());
@@ -115,7 +115,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationAlertingManager.class),
                 mock(NotificationRowBinderImpl.class), mock(KeyguardStateController.class),
                 mock(KeyguardIndicationController.class),
-                mStatusBar, mock(ShadeControllerImpl.class), mCommandQueue);
+                mStatusBar, mock(ShadeControllerImpl.class), mCommandQueue, mInitController);
     }
 
     @Test

@@ -74,7 +74,6 @@ import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -247,6 +246,7 @@ public class StatusBarTest extends SysuiTestCase {
             mStatusBarNotificationActivityStarterBuilder;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
+    private InitController mInitController = new InitController();
 
     @Before
     public void setup() throws Exception {
@@ -395,6 +395,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mSuperStatusBarViewFactory,
                 mStatusBarKeyguardViewManager,
                 mViewMediatorCallback,
+                mInitController,
                 mDismissCallbackRegistry);
 
         when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
@@ -419,7 +420,7 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mBarService = mBarService;
         mStatusBar.mStackScroller = mStackScroller;
         mStatusBar.startKeyguard();
-        Dependency.get(InitController.class).executePostInitTasks();
+        mInitController.executePostInitTasks();
         notificationLogger.setUpWithContainer(mStackScroller);
     }
 
