@@ -3302,6 +3302,23 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         Configuration c = new Configuration(container.getRequestedOverrideConfiguration());
         c.setTo(change.getConfiguration(), configMask, windowMask);
         container.onRequestedOverrideConfigurationChanged(c);
+        // TODO(b/145675353): remove the following once we could apply new bounds to the
+        // pinned stack together with its children.
+        resizePinnedStackIfNeeded(container, configMask, windowMask, c);
+    }
+
+    private void resizePinnedStackIfNeeded(ConfigurationContainer container, int configMask,
+            int windowMask, Configuration config) {
+        if ((container instanceof ActivityStack)
+                && ((configMask & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0)
+                && ((windowMask & WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0)) {
+            final ActivityStack stack = (ActivityStack) container;
+            if (stack.inPinnedWindowingMode()) {
+                stack.resize(config.windowConfiguration.getBounds(),
+                        null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
+                        PRESERVE_WINDOWS, true /* deferResume */);
+            }
+        }
     }
 
     @Override

@@ -46,9 +46,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
 import com.android.internal.os.logging.MetricsLoggerWrapper;
-import com.android.internal.policy.PipSnapAlgorithm;
 import com.android.systemui.R;
 import com.android.systemui.pip.PipBoundsHandler;
+import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 

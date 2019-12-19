@@ -45,4 +45,17 @@ interface IPinnedStackController {
      * {@param animationDuration} suggests the animation duration transitioning to PiP window.
      */
     void startAnimation(in Rect destinationBounds, in Rect sourceRectHint, int animationDuration);
+
+    /**
+     * Notifies the controller to reset on bounds animation, if there is any.
+     * This could happen when screen rotation is happening and we need to notify the WM to reset
+     * any running bounds animation on the pinned stack.
+     * {@param bounds} here is the final destination bounds.
+     */
+    void resetBoundsAnimation(in Rect bounds);
+
+    /**
+     * Reports the current default and movement bounds to controller.
+     */
+    void reportBounds(in Rect defaultBounds, in Rect movementBounds);
 }
