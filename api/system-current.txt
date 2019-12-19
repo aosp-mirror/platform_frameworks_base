@@ -15,6 +15,7 @@ package android {
     field public static final String ACCESS_SHARED_LIBRARIES = "android.permission.ACCESS_SHARED_LIBRARIES";
     field public static final String ACCESS_SHORTCUTS = "android.permission.ACCESS_SHORTCUTS";
     field public static final String ACCESS_SURFACE_FLINGER = "android.permission.ACCESS_SURFACE_FLINGER";
+    field public static final String ACCESS_TV_TUNER = "android.permission.ACCESS_TV_TUNER";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final String ADJUST_RUNTIME_PERMISSIONS_POLICY = "android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY";
     field public static final String ALLOCATE_AGGRESSIVE = "android.permission.ALLOCATE_AGGRESSIVE";
@@ -4475,6 +4476,20 @@ package android.media.tv {
 
   public abstract static class TvView.TvInputCallback {
     method public void onEvent(String, String, android.os.Bundle);
+  }
+
+}
+
+package android.media.tv.tuner {
+
+  public abstract class FrontendSettings {
+    method public final int getFrequency();
+    method public abstract int getType();
+  }
+
+  public final class Tuner implements java.lang.AutoCloseable {
+    ctor public Tuner(@NonNull android.content.Context);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int tune(@NonNull android.media.tv.tuner.FrontendSettings);
   }
 
 }

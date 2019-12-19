@@ -4715,6 +4715,12 @@
     <permission android:name="android.permission.PEEK_DROPBOX_DATA"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows an application to access TV tuner HAL
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.ACCESS_TV_TUNER"
+        android:protectionLevel="signature|privileged" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
