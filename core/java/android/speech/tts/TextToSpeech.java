@@ -1771,7 +1771,7 @@ public class TextToSpeech {
      *
      * @param text The text that should be synthesized. No longer than
      *            {@link #getMaxSpeechInputLength()} characters.
-     * @param params Parameters for the request. Can be null.
+     * @param params Parameters for the request.
      *            Engine specific parameters may be passed in but the parameter keys
      *            must be prefixed by the name of the engine they are intended for. For example
      *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the engine
@@ -1798,7 +1798,7 @@ public class TextToSpeech {
      *
      * @param text The text that should be synthesized. No longer than
      *            {@link #getMaxSpeechInputLength()} characters.
-     * @param params Parameters for the request. Can be null.
+     * @param params Parameters for the request. Cannot be null.
      *            Engine specific parameters may be passed in but the parameter keys
      *            must be prefixed by the name of the engine they are intended for. For example
      *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
@@ -1842,7 +1842,7 @@ public class TextToSpeech {
      *
      * @param text The text that should be synthesized. No longer than
      *            {@link #getMaxSpeechInputLength()} characters.
-     * @param params Parameters for the request. Can be null.
+     * @param params Parameters for the request. Cannot be null.
      *            Supported parameter names:
      *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
      *            Engine specific parameters may be passed in but the parameter keys
