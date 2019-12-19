@@ -12799,14 +12799,31 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println(totalPss - cachedPss);
                 }
             }
-            long lostRAM = memInfo.getTotalSizeKb() - (totalPss - totalSwapPss)
+            long kernelUsed = memInfo.getKernelUsedSizeKb();
+            final long ionHeap = Debug.getIonHeapsSizeKb();
+            if (ionHeap > 0) {
+                final long ionMapped = Debug.getIonMappedSizeKb();
+                final long ionUnmapped = ionHeap - ionMapped;
+                final long ionPool = Debug.getIonPoolsSizeKb();
+                pw.print("      ION: ");
+                        pw.print(stringifyKBSize(ionHeap + ionPool));
+                        pw.print(" (");
+                        pw.print(stringifyKBSize(ionMapped));
+                        pw.print(" mapped + ");
+                        pw.print(stringifyKBSize(ionUnmapped));
+                        pw.print(" unmapped + ");
+                        pw.print(stringifyKBSize(ionPool));
+                        pw.println(" pools)");
+                kernelUsed += ionUnmapped;
+            }
+            final long lostRAM = memInfo.getTotalSizeKb() - (totalPss - totalSwapPss)
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
-                    - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb();
+                    - kernelUsed - memInfo.getZramTotalSizeKb();
             if (!opts.isCompact) {
                 pw.print(" Used RAM: "); pw.print(stringifyKBSize(totalPss - cachedPss
-                        + memInfo.getKernelUsedSizeKb())); pw.print(" (");
+                        + kernelUsed)); pw.print(" (");
                 pw.print(stringifyKBSize(totalPss - cachedPss)); pw.print(" used pss + ");
-                pw.print(stringifyKBSize(memInfo.getKernelUsedSizeKb())); pw.print(" kernel)\n");
+                pw.print(stringifyKBSize(kernelUsed)); pw.print(" kernel)\n");
                 pw.print(" Lost RAM: "); pw.println(stringifyKBSize(lostRAM));
             } else {
                 pw.print("lostram,"); pw.println(lostRAM);
@@ -13525,14 +13542,25 @@ public class ActivityManagerService extends IActivityManager.Stub
         memInfoBuilder.append(stringifyKBSize(cachedPss + memInfo.getCachedSizeKb()
                 + memInfo.getFreeSizeKb()));
         memInfoBuilder.append("\n");
+        long kernelUsed = memInfo.getKernelUsedSizeKb();
+        final long ionHeap = Debug.getIonHeapsSizeKb();
+        if (ionHeap > 0) {
+            final long ionMapped = Debug.getIonMappedSizeKb();
+            final long ionUnmapped = ionHeap - ionMapped;
+            final long ionPool = Debug.getIonPoolsSizeKb();
+            memInfoBuilder.append("       ION: ");
+            memInfoBuilder.append(stringifyKBSize(ionHeap + ionPool));
+            memInfoBuilder.append("\n");
+            kernelUsed += ionUnmapped;
+        }
         memInfoBuilder.append("  Used RAM: ");
         memInfoBuilder.append(stringifyKBSize(
-                                  totalPss - cachedPss + memInfo.getKernelUsedSizeKb()));
+                                  totalPss - cachedPss + kernelUsed));
         memInfoBuilder.append("\n");
         memInfoBuilder.append("  Lost RAM: ");
         memInfoBuilder.append(stringifyKBSize(memInfo.getTotalSizeKb()
                 - (totalPss - totalSwapPss) - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
-                - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb()));
+                - kernelUsed - memInfo.getZramTotalSizeKb()));
         memInfoBuilder.append("\n");
         Slog.i(TAG, "Low on memory:");
         Slog.i(TAG, shortNativeBuilder.toString());
