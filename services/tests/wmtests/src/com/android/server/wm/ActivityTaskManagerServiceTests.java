@@ -19,15 +19,21 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.PictureInPictureParams;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.view.IDisplayWindowListener;
 import android.view.WindowContainerTransaction;
 
@@ -36,6 +42,7 @@ import androidx.test.filters.MediumTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
 
@@ -147,6 +154,44 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
         assertEquals(0, added.size());
         assertEquals(0, changed.size());
         assertEquals(1, removed.size());
+    }
+
+    /*
+        a test to verify b/144045134 - ignore PIP mode request for destroyed activity.
+        mocks r.getParent() to return null to cause NPE inside enterPipRunnable#run() in
+        ActivityTaskMangerservice#enterPictureInPictureMode(), which rebooted the device.
+        It doesn't fully simulate the issue's reproduce steps, but this should suffice.
+     */
+    @Test
+    public void testEnterPipModeWhenRecordParentChangesToNull() {
+        MockitoSession mockSession = mockitoSession()
+                .initMocks(this)
+                .mockStatic(ActivityRecord.class)
+                .startMocking();
+
+        ActivityRecord record = mock(ActivityRecord.class);
+        IBinder token = mock(IBinder.class);
+        PictureInPictureParams params = mock(PictureInPictureParams.class);
+        record.pictureInPictureArgs = params;
+
+        //mock operations in private method ensureValidPictureInPictureActivityParamsLocked()
+        when(ActivityRecord.forTokenLocked(token)).thenReturn(record);
+        doReturn(true).when(record).supportsPictureInPicture();
+        doReturn(false).when(params).hasSetAspectRatio();
+
+        //mock other operations
+        doReturn(true).when(record)
+                .checkEnterPictureInPictureState("enterPictureInPictureMode", false);
+        doReturn(false).when(mService).isInPictureInPictureMode(any());
+        doReturn(false).when(mService).isKeyguardLocked();
+
+        //to simulate NPE
+        doReturn(null).when(record).getParent();
+
+        mService.enterPictureInPictureMode(token, params);
+        //if record's null parent is not handled gracefully, test will fail with NPE
+
+        mockSession.finishMocking();
     }
 }
 
