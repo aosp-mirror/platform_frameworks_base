@@ -2610,7 +2610,7 @@ package android.provider {
     field public static final String SERIAL_NUMBER = "serial_number";
     field public static final String SERVICE_CATEGORY = "service_category";
     field public static final String SLOT_INDEX = "slot_index";
-    field public static final String SUB_ID = "sub_id";
+    field public static final String SUBSCRIPTION_ID = "sub_id";
   }
 
   public static final class Telephony.Sms.Intents {
