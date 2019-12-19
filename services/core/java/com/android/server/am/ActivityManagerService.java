@@ -7558,6 +7558,26 @@ public class ActivityManagerService extends IActivityManager.Stub
         });
     }
 
+    @Override
+    public void appNotResponding(final String reason) {
+        final int callingPid = Binder.getCallingPid();
+
+        synchronized (mPidsSelfLocked) {
+            final ProcessRecord app = mPidsSelfLocked.get(callingPid);
+            if (app == null) {
+                throw new SecurityException("Unknown process: " + callingPid);
+            }
+
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    app.appNotResponding(
+                            null, app.info, null, null, false, "App requested: " + reason);
+                }
+            });
+        }
+    }
+
     public final void installSystemProviders() {
         List<ProviderInfo> providers;
         synchronized (this) {
