@@ -858,12 +858,13 @@ interface ITelephony {
     /**
     *  @return true if the ImsService to bind to for the slot id specified was set, false otherwise.
     */
-    boolean setImsService(int slotId, boolean isCarrierImsService, String packageName);
+    boolean setBoundImsServiceOverride(int slotIndex, boolean isCarrierService,
+            in int[] featureTypes, in String packageName);
 
     /**
     * @return the package name of the carrier/device ImsService associated with this slot.
     */
-    String getImsService(int slotId, boolean isCarrierImsService);
+    String getBoundImsServicePackage(int slotIndex, boolean isCarrierImsService, int featureType);
 
     /**
      * Get the MmTelFeature state attached to this subscription id.
