@@ -67,13 +67,14 @@ public class IncrementalManagerService extends IIncrementalManager.Stub  {
         mDataLoaderManager = mContext.getSystemService(DataLoaderManager.class);
         ServiceManager.addService(BINDER_SERVICE_NAME, this);
         // Starts and register IIncrementalManagerNative service
-        // TODO(b/136132412): add jni implementation
+        mNativeInstance = nativeStartService();
     }
+
     /**
      * Notifies native IIncrementalManager service that system is ready.
      */
     public void systemReady() {
-        // TODO(b/136132412): add jni implementation
+        nativeSystemReady(mNativeInstance);
     }
 
     /**
@@ -152,4 +153,8 @@ public class IncrementalManagerService extends IIncrementalManager.Stub  {
         (new IncrementalManagerShellCommand(mContext)).exec(
                 this, in, out, err, args, callback, resultReceiver);
     }
+
+    private static native long nativeStartService();
+
+    private static native void nativeSystemReady(long nativeInstance);
 }
