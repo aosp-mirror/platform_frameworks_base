@@ -91,7 +91,15 @@ public final class MemInfoReader {
      * that are mapped in to processes.
      */
     public long getCachedSizeKb() {
-        return mInfos[Debug.MEMINFO_BUFFERS] + mInfos[Debug.MEMINFO_SLAB_RECLAIMABLE]
+        long kReclaimable = mInfos[Debug.MEMINFO_KRECLAIMABLE];
+
+        // Note: MEMINFO_KRECLAIMABLE includes MEMINFO_SLAB_RECLAIMABLE and ION pools.
+        // Fall back to using MEMINFO_SLAB_RECLAIMABLE in case of older kernels that do
+        // not include KReclaimable meminfo field.
+        if (kReclaimable == 0) {
+            kReclaimable = mInfos[Debug.MEMINFO_SLAB_RECLAIMABLE];
+        }
+        return mInfos[Debug.MEMINFO_BUFFERS] + kReclaimable
                 + mInfos[Debug.MEMINFO_CACHED] - mInfos[Debug.MEMINFO_MAPPED];
     }
 
