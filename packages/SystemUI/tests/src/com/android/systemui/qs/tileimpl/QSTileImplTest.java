@@ -47,6 +47,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
@@ -83,6 +84,7 @@ public class QSTileImplTest extends SysuiTestCase {
         String spec = "spec";
         mTestableLooper = TestableLooper.get(this);
         mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
+        mDependency.injectMockDependency(ActivityStarter.class);
         mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
         mStatusBarStateController =
             mDependency.injectMockDependency(StatusBarStateController.class);
