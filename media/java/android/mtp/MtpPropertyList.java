@@ -16,8 +16,7 @@
 
 package android.mtp;
 
-import android.compat.annotation.UnsupportedAppUsage;
-
+import android.annotation.UnsupportedAppUsage;
 import java.util.ArrayList;
 import java.util.List;
 

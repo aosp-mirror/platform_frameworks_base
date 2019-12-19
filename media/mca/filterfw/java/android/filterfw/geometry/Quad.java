@@ -17,8 +17,10 @@
 
 package android.filterfw.geometry;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.UnsupportedAppUsage;
+import android.filterfw.geometry.Point;
 
+import java.lang.Float;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

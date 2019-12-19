@@ -17,7 +17,7 @@
 
 package com.google.android.mms;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.util.ArrayList;
 
