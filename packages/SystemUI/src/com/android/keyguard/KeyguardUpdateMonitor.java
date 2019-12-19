@@ -92,7 +92,6 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.widget.LockPatternUtils;
@@ -1060,7 +1059,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 if (DEBUG_SIM_STATES) {
                     Log.v(TAG, "action " + action
                             + " state: " + intent.getStringExtra(
-                            IccCardConstants.INTENT_KEY_ICC_STATE)
+                            Intent.EXTRA_SIM_STATE)
                             + " slotId: " + args.slotId + " subid: " + args.subId);
                 }
                 mHandler.obtainMessage(MSG_SIM_STATE_CHANGE, args.subId, args.slotId, args.simState)
@@ -1236,38 +1235,38 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             if (!TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(intent.getAction())) {
                 throw new IllegalArgumentException("only handles intent ACTION_SIM_STATE_CHANGED");
             }
-            String stateExtra = intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE);
+            String stateExtra = intent.getStringExtra(Intent.EXTRA_SIM_STATE);
             int slotId = intent.getIntExtra(PhoneConstants.PHONE_KEY, 0);
             int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
                     SubscriptionManager.INVALID_SUBSCRIPTION_ID);
-            if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
+            if (Intent.SIM_STATE_ABSENT.equals(stateExtra)) {
                 final String absentReason = intent
-                        .getStringExtra(IccCardConstants.INTENT_KEY_LOCKED_REASON);
+                        .getStringExtra(Intent.EXTRA_SIM_LOCKED_REASON);
 
-                if (IccCardConstants.INTENT_VALUE_ABSENT_ON_PERM_DISABLED.equals(
+                if (Intent.SIM_ABSENT_ON_PERM_DISABLED.equals(
                         absentReason)) {
                     state = TelephonyManager.SIM_STATE_PERM_DISABLED;
                 } else {
                     state = TelephonyManager.SIM_STATE_ABSENT;
                 }
-            } else if (IccCardConstants.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
+            } else if (Intent.SIM_STATE_READY.equals(stateExtra)) {
                 state = TelephonyManager.SIM_STATE_READY;
-            } else if (IccCardConstants.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {
+            } else if (Intent.SIM_STATE_LOCKED.equals(stateExtra)) {
                 final String lockedReason = intent
-                        .getStringExtra(IccCardConstants.INTENT_KEY_LOCKED_REASON);
-                if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
+                        .getStringExtra(Intent.EXTRA_SIM_LOCKED_REASON);
+                if (Intent.SIM_LOCKED_ON_PIN.equals(lockedReason)) {
                     state = TelephonyManager.SIM_STATE_PIN_REQUIRED;
-                } else if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
+                } else if (Intent.SIM_LOCKED_ON_PUK.equals(lockedReason)) {
                     state = TelephonyManager.SIM_STATE_PUK_REQUIRED;
                 } else {
                     state = TelephonyManager.SIM_STATE_UNKNOWN;
                 }
-            } else if (IccCardConstants.INTENT_VALUE_LOCKED_NETWORK.equals(stateExtra)) {
+            } else if (Intent.SIM_LOCKED_NETWORK.equals(stateExtra)) {
                 state = TelephonyManager.SIM_STATE_NETWORK_LOCKED;
-            } else if (IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR.equals(stateExtra)) {
+            } else if (Intent.SIM_STATE_CARD_IO_ERROR.equals(stateExtra)) {
                 state = TelephonyManager.SIM_STATE_CARD_IO_ERROR;
-            } else if (IccCardConstants.INTENT_VALUE_ICC_LOADED.equals(stateExtra)
-                    || IccCardConstants.INTENT_VALUE_ICC_IMSI.equals(stateExtra)) {
+            } else if (Intent.SIM_STATE_LOADED.equals(stateExtra)
+                    || Intent.SIM_STATE_IMSI.equals(stateExtra)) {
                 // This is required because telephony doesn't return to "READY" after
                 // these state transitions. See bug 7197471.
                 state = TelephonyManager.SIM_STATE_READY;

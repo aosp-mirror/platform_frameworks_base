@@ -37,7 +37,6 @@ import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
 import android.util.Log;
 
-import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -289,21 +288,21 @@ public class PhoneStatusBarPolicy
     }
 
     private final void updateSimState(Intent intent) {
-        String stateExtra = intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE);
-        if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
+        String stateExtra = intent.getStringExtra(Intent.EXTRA_SIM_STATE);
+        if (Intent.SIM_STATE_ABSENT.equals(stateExtra)) {
             mSimState = TelephonyManager.SIM_STATE_READY;
-        } else if (IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR.equals(stateExtra)) {
+        } else if (Intent.SIM_STATE_CARD_IO_ERROR.equals(stateExtra)) {
             mSimState = TelephonyManager.SIM_STATE_CARD_IO_ERROR;
-        } else if (IccCardConstants.INTENT_VALUE_ICC_CARD_RESTRICTED.equals(stateExtra)) {
+        } else if (Intent.SIM_STATE_CARD_RESTRICTED.equals(stateExtra)) {
             mSimState = TelephonyManager.SIM_STATE_CARD_RESTRICTED;
-        } else if (IccCardConstants.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
+        } else if (Intent.SIM_STATE_READY.equals(stateExtra)) {
             mSimState = TelephonyManager.SIM_STATE_READY;
-        } else if (IccCardConstants.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {
+        } else if (Intent.SIM_STATE_LOCKED.equals(stateExtra)) {
             final String lockedReason =
-                    intent.getStringExtra(IccCardConstants.INTENT_KEY_LOCKED_REASON);
-            if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
+                    intent.getStringExtra(Intent.EXTRA_SIM_LOCKED_REASON);
+            if (Intent.SIM_LOCKED_ON_PIN.equals(lockedReason)) {
                 mSimState = TelephonyManager.SIM_STATE_PIN_REQUIRED;
-            } else if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
+            } else if (Intent.SIM_LOCKED_ON_PUK.equals(lockedReason)) {
                 mSimState = TelephonyManager.SIM_STATE_PUK_REQUIRED;
             } else {
                 mSimState = TelephonyManager.SIM_STATE_NETWORK_LOCKED;

@@ -57,7 +57,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
 
-import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.DumpController;
@@ -183,8 +182,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testTelephonyCapable_SimState_Absent() {
         Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-        intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE,
-                IccCardConstants.INTENT_VALUE_ICC_ABSENT);
+        intent.putExtra(Intent.EXTRA_SIM_STATE,
+                Intent.SIM_STATE_ABSENT);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
                 putPhoneInfo(intent, null, false));
         mTestableLooper.processAllMessages();
@@ -194,8 +193,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testTelephonyCapable_SimState_CardIOError() {
         Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-        intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE,
-                IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR);
+        intent.putExtra(Intent.EXTRA_SIM_STATE,
+                Intent.SIM_STATE_CARD_IO_ERROR);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
                 putPhoneInfo(intent, null, false));
         mTestableLooper.processAllMessages();
@@ -221,8 +220,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // Simulate AirplaneMode case, SERVICE_STATE - POWER_OFF, check TelephonyCapable False
         // Only receive ServiceState callback IN_SERVICE -> OUT_OF_SERVICE -> POWER_OFF
         Intent intent = new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
-        intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE
-                , IccCardConstants.INTENT_VALUE_ICC_LOADED);
+        intent.putExtra(Intent.EXTRA_SIM_STATE
+                , Intent.SIM_STATE_LOADED);
         Bundle data = new Bundle();
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_POWER_OFF);
@@ -261,8 +260,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         state.setState(ServiceState.STATE_OUT_OF_SERVICE);
         state.fillInNotifierBundle(data);
         Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-        intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE
-                , IccCardConstants.INTENT_VALUE_ICC_NOT_READY);
+        intent.putExtra(Intent.EXTRA_SIM_STATE
+                , Intent.SIM_STATE_NOT_READY);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
                 , putPhoneInfo(intent, data, false));
         mTestableLooper.processAllMessages();
@@ -276,8 +275,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         state.setState(ServiceState.STATE_OUT_OF_SERVICE);
         state.fillInNotifierBundle(data);
         Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-        intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE
-                , IccCardConstants.INTENT_VALUE_ICC_READY);
+        intent.putExtra(Intent.EXTRA_SIM_STATE
+                , Intent.SIM_STATE_READY);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
                 , putPhoneInfo(intent, data, false));
         mTestableLooper.processAllMessages();
@@ -317,8 +316,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         state.setState(ServiceState.STATE_IN_SERVICE);
         state.fillInNotifierBundle(data);
         Intent intentSimState = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-        intentSimState.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE
-                , IccCardConstants.INTENT_VALUE_ICC_LOADED);
+        intentSimState.putExtra(Intent.EXTRA_SIM_STATE
+                , Intent.SIM_STATE_LOADED);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
                 , putPhoneInfo(intentSimState, data, true));
         mTestableLooper.processAllMessages();
@@ -326,8 +325,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isFalse();
 
         Intent intentServiceState =  new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
-        intentSimState.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE
-                , IccCardConstants.INTENT_VALUE_ICC_LOADED);
+        intentSimState.putExtra(Intent.EXTRA_SIM_STATE
+                , Intent.SIM_STATE_LOADED);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
                 , putPhoneInfo(intentServiceState, data, true));
         mTestableLooper.processAllMessages();
