@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import static java.util.Objects.requireNonNull;
@@ -40,17 +41,19 @@ import android.service.notification.NotificationStats;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationListener;
-import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator.NotifEvent;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CoalescedEvent;
+import com.android.systemui.statusbar.notification.collection.notifcollection.GroupCoalescer;
+import com.android.systemui.statusbar.notification.collection.notifcollection.GroupCoalescer.BatchableNotificationHandler;
 import com.android.systemui.util.Assert;
 
 import org.junit.Before;
@@ -63,6 +66,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 @SmallTest
@@ -71,18 +76,20 @@ import java.util.Map;
 public class NotifCollectionTest extends SysuiTestCase {
 
     @Mock private IStatusBarService mStatusBarService;
-    @Mock private NotificationListener mListenerService;
+    @Mock private GroupCoalescer mGroupCoalescer;
     @Spy private RecordingCollectionListener mCollectionListener;
+    @Mock private CollectionReadyForBuildListener mBuildListener;
 
     @Spy private RecordingLifetimeExtender mExtender1 = new RecordingLifetimeExtender("Extender1");
     @Spy private RecordingLifetimeExtender mExtender2 = new RecordingLifetimeExtender("Extender2");
     @Spy private RecordingLifetimeExtender mExtender3 = new RecordingLifetimeExtender("Extender3");
 
-    @Captor private ArgumentCaptor<NotificationHandler> mListenerCaptor;
+    @Captor private ArgumentCaptor<BatchableNotificationHandler> mListenerCaptor;
     @Captor private ArgumentCaptor<NotificationEntry> mEntryCaptor;
+    @Captor private ArgumentCaptor<Collection<NotificationEntry>> mBuildListCaptor;
 
     private NotifCollection mCollection;
-    private NotificationHandler mNotificationHandler;
+    private BatchableNotificationHandler mNotifHandler;
 
     private NoManSimulator mNoMan;
 
@@ -92,16 +99,17 @@ public class NotifCollectionTest extends SysuiTestCase {
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
 
         mCollection = new NotifCollection(mStatusBarService);
-        mCollection.attach(mListenerService);
+        mCollection.attach(mGroupCoalescer);
         mCollection.addCollectionListener(mCollectionListener);
+        mCollection.setBuildListener(mBuildListener);
 
         // Capture the listener object that the collection registers with the listener service so
         // we can simulate listener service events in tests below
-        verify(mListenerService).addNotificationHandler(mListenerCaptor.capture());
-        mNotificationHandler = requireNonNull(mListenerCaptor.getValue());
+        verify(mGroupCoalescer).setNotificationHandler(mListenerCaptor.capture());
+        mNotifHandler = requireNonNull(mListenerCaptor.getValue());
 
         mNoMan = new NoManSimulator();
-        mNoMan.addListener(mNotificationHandler);
+        mNoMan.addListener(mNotifHandler);
     }
 
     @Test
@@ -118,6 +126,61 @@ public class NotifCollectionTest extends SysuiTestCase {
         assertEquals(notif1.key, entry.getKey());
         assertEquals(notif1.sbn, entry.getSbn());
         assertEquals(notif1.ranking, entry.getRanking());
+    }
+
+    @Test
+    public void testEventDispatchedWhenNotifBatchPosted() {
+        // GIVEN a NotifCollection with one notif already posted
+        mNoMan.postNotif(buildNotif(TEST_PACKAGE, 2)
+                .setGroup(mContext, "group_1")
+                .setContentTitle(mContext, "Old version"));
+
+        clearInvocations(mCollectionListener);
+        clearInvocations(mBuildListener);
+
+        // WHEN three notifications from the same group are posted (one of them an update, two of
+        // them new)
+        NotificationEntry entry1 = buildNotif(TEST_PACKAGE, 1)
+                .setGroup(mContext, "group_1")
+                .build();
+        NotificationEntry entry2 = buildNotif(TEST_PACKAGE, 2)
+                .setGroup(mContext, "group_1")
+                .setContentTitle(mContext, "New version")
+                .build();
+        NotificationEntry entry3 = buildNotif(TEST_PACKAGE, 3)
+                .setGroup(mContext, "group_1")
+                .build();
+
+        mNotifHandler.onNotificationBatchPosted(Arrays.asList(
+                new CoalescedEvent(entry1.getKey(), 0, entry1.getSbn(), entry1.getRanking(), null),
+                new CoalescedEvent(entry2.getKey(), 1, entry2.getSbn(), entry2.getRanking(), null),
+                new CoalescedEvent(entry3.getKey(), 2, entry3.getSbn(), entry3.getRanking(), null)
+        ));
+
+        // THEN onEntryAdded is called on the new ones
+        verify(mCollectionListener, times(2)).onEntryAdded(mEntryCaptor.capture());
+
+        List<NotificationEntry> capturedAdds = mEntryCaptor.getAllValues();
+
+        assertEquals(entry1.getSbn(), capturedAdds.get(0).getSbn());
+        assertEquals(entry1.getRanking(), capturedAdds.get(0).getRanking());
+
+        assertEquals(entry3.getSbn(), capturedAdds.get(1).getSbn());
+        assertEquals(entry3.getRanking(), capturedAdds.get(1).getRanking());
+
+        // THEN onEntryUpdated is called on the middle one
+        verify(mCollectionListener).onEntryUpdated(mEntryCaptor.capture());
+        NotificationEntry capturedUpdate = mEntryCaptor.getValue();
+        assertEquals(entry2.getSbn(), capturedUpdate.getSbn());
+        assertEquals(entry2.getRanking(), capturedUpdate.getRanking());
+
+        // THEN onBuildList is called only once
+        verify(mBuildListener).onBuildList(mBuildListCaptor.capture());
+        assertEquals(new ArraySet<>(Arrays.asList(
+                capturedAdds.get(0),
+                capturedAdds.get(1),
+                capturedUpdate
+        )), new ArraySet<>(mBuildListCaptor.getValue()));
     }
 
     @Test
