@@ -21,6 +21,6 @@ android_test {
     static_libs: ["junit"],
     // Include all test java files.
     srcs: ["src/**/*.java"],
-    platform_apis: true,
+    defaults: ["framework-wifi-test-defaults"],
     certificate: "platform",
 }

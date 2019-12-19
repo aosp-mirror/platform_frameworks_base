@@ -47,6 +47,8 @@ filegroup {
 test_access_hidden_api_whitelist = [
     "//frameworks/base/wifi/tests",
     "//frameworks/opt/net/wifi/tests/wifitests:__subpackages__",
+
+    "//frameworks/base/core/tests/ConnectivityManagerTest",
 ]
 
 java_library {
