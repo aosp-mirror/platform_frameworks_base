@@ -187,18 +187,18 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
     @Override
     public boolean beginsSection(@NonNull View view, @Nullable View previous) {
         boolean begin = false;
-        if (view instanceof ExpandableNotificationRow) {
-            if (previous instanceof ExpandableNotificationRow) {
+        if (view instanceof ActivatableNotificationView) {
+            if (previous instanceof ActivatableNotificationView) {
                 // If we're drawing the first non-person notification, break out a section
-                ExpandableNotificationRow curr = (ExpandableNotificationRow) view;
-                ExpandableNotificationRow prev = (ExpandableNotificationRow) previous;
+                ActivatableNotificationView curr = (ActivatableNotificationView) view;
+                ActivatableNotificationView prev = (ActivatableNotificationView) previous;
 
-                begin =  curr.getEntry().getBucket() != prev.getEntry().getBucket();
+                begin = getBucket(curr) != getBucket(prev);
             }
         }
 
         if (!begin) {
-            begin = view == mGentleHeader || previous == mPeopleHubView;
+            begin = view == mGentleHeader || view == mPeopleHubView;
         }
 
         return begin;
@@ -230,29 +230,42 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
             return;
         }
 
-        int lastPersonIndex = -1;
-        int firstGentleNotifIndex = -1;
+        boolean peopleNotificationsPresent = false;
+        int firstNonHeadsUpIndex = -1;
+        int firstGentleIndex = -1;
+        int notifCount = 0;
 
         final int n = mParent.getChildCount();
         for (int i = 0; i < n; i++) {
             View child = mParent.getChildAt(i);
-            if (child instanceof ExpandableNotificationRow
-                    && child.getVisibility() != View.GONE) {
+            if (child instanceof ExpandableNotificationRow && child.getVisibility() != View.GONE) {
+                notifCount++;
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                if (firstNonHeadsUpIndex == -1 && !row.isHeadsUp()) {
+                    firstNonHeadsUpIndex = i;
+                }
                 if (row.getEntry().getBucket() == BUCKET_PEOPLE) {
-                    lastPersonIndex = i;
+                    peopleNotificationsPresent = true;
                 }
                 if (row.getEntry().getBucket() == BUCKET_SILENT) {
-                    firstGentleNotifIndex = i;
+                    firstGentleIndex = i;
                     break;
                 }
             }
         }
 
-        // make room for peopleHub
-        firstGentleNotifIndex += adjustPeopleHubVisibilityAndPosition(lastPersonIndex);
+        if (firstNonHeadsUpIndex == -1) {
+            firstNonHeadsUpIndex = firstGentleIndex != -1 ? firstGentleIndex : notifCount;
+        }
 
-        adjustGentleHeaderVisibilityAndPosition(firstGentleNotifIndex);
+        // make room for peopleHub
+        int offset = adjustPeopleHubVisibilityAndPosition(
+                firstNonHeadsUpIndex, peopleNotificationsPresent);
+        if (firstGentleIndex != -1) {
+            firstGentleIndex += offset;
+        }
+
+        adjustGentleHeaderVisibilityAndPosition(firstGentleIndex);
 
         mGentleHeader.setAreThereDismissableGentleNotifs(
                 mParent.hasActiveClearableNotifications(ROWS_GENTLE));
@@ -294,13 +307,15 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         }
     }
 
-    private int adjustPeopleHubVisibilityAndPosition(int lastPersonIndex) {
-        final boolean showPeopleHeader = mPeopleHubVisible
-                && mNumberOfSections > 2
-                && mStatusBarStateController.getState() != StatusBarState.KEYGUARD;
+    private int adjustPeopleHubVisibilityAndPosition(
+            int targetIndex, boolean peopleNotificationsPresent) {
+        final boolean showPeopleHeader = mNumberOfSections > 2
+                && mStatusBarStateController.getState() != StatusBarState.KEYGUARD
+                && (peopleNotificationsPresent || mPeopleHubVisible);
         final int currentHubIndex = mParent.indexOfChild(mPeopleHubView);
         final boolean currentlyVisible = currentHubIndex >= 0;
-        int targetIndex = lastPersonIndex + 1;
+
+        mPeopleHubView.setCanSwipe(showPeopleHeader && !peopleNotificationsPresent);
 
         if (!showPeopleHeader) {
             if (currentlyVisible) {

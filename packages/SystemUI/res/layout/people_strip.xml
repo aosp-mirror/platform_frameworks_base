@@ -18,7 +18,10 @@
 <com.android.systemui.statusbar.notification.stack.PeopleHubView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="105dp">
+    android:layout_height="@dimen/notification_section_header_height"
+    android:focusable="true"
+    android:clickable="true"
+>
 
     <com.android.systemui.statusbar.notification.row.NotificationBackgroundView
         android:id="@+id/backgroundNormal"
@@ -34,199 +37,56 @@
         android:id="@+id/people_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
         android:gravity="center"
         android:orientation="horizontal">
 
-        <View
-            android:layout_width="8dp"
-            android:layout_height="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginStart="@dimen/notification_section_header_padding_left"
+            android:gravity="start"
+            android:textAlignment="gravity"
+            android:text="@string/notification_section_header_conversations"
+            android:textSize="12sp"
+            android:textColor="@color/notification_section_header_label_color"
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
         />
 
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="match_parent"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:visibility="invisible">
-
-            <ImageView
-                android:id="@+id/person_icon"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:scaleType="fitCenter"
-            />
-
-            <TextView
-                android:id="@+id/person_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="8dp"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:textAlignment="center"
-            />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="8dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
         />
 
-        <View
-            android:layout_width="8dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
         />
 
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="match_parent"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:visibility="invisible">
-
-            <ImageView
-                android:id="@+id/person_icon"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:scaleType="fitCenter"
-            />
-
-            <TextView
-                android:id="@+id/person_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="8dp"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:textAlignment="center"
-            />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="8dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
         />
 
-        <View
-            android:layout_width="8dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
         />
 
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="match_parent"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:visibility="invisible">
-
-            <ImageView
-                android:id="@+id/person_icon"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:scaleType="fitCenter"
-            />
-
-            <TextView
-                android:id="@+id/person_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="8dp"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:textAlignment="center"
-            />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="8dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-        />
-
-        <View
-            android:layout_width="8dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-        />
-
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="match_parent"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:visibility="invisible">
-
-            <ImageView
-                android:id="@+id/person_icon"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:scaleType="fitCenter"
-            />
-
-            <TextView
-                android:id="@+id/person_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="8dp"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:textAlignment="center"
-            />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="8dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-        />
-
-        <View
-            android:layout_width="8dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-        />
-
-        <LinearLayout
-            android:layout_width="70dp"
-            android:layout_height="match_parent"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:visibility="invisible">
-
-            <ImageView
-                android:id="@+id/person_icon"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:scaleType="fitCenter"
-            />
-
-            <TextView
-                android:id="@+id/person_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="8dp"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:textAlignment="center"
-            />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="8dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
         />
 
     </LinearLayout>

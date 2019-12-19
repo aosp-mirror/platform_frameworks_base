@@ -17,24 +17,16 @@
 package com.android.systemui.statusbar.notification.people
 
 import android.app.Notification
-import android.content.Context
 import android.content.pm.UserInfo
-import android.graphics.Canvas
-import android.graphics.ColorFilter
-import android.graphics.PixelFormat
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.os.UserHandle
 import android.os.UserManager
 import android.service.notification.StatusBarNotification
 import android.util.SparseArray
-import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import com.android.internal.statusbar.NotificationVisibility
 import com.android.internal.widget.MessagingGroup
-import com.android.launcher3.icons.BaseIconFactory
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -59,8 +51,7 @@ interface NotificationPersonExtractor {
 
 @Singleton
 class NotificationPersonExtractorPluginBoundary @Inject constructor(
-    extensionController: ExtensionController,
-    private val context: Context
+    extensionController: ExtensionController
 ) : NotificationPersonExtractor {
 
     private var plugin: NotificationPersonExtractorPlugin? = null
@@ -77,9 +68,8 @@ class NotificationPersonExtractorPluginBoundary @Inject constructor(
     }
 
     override fun extractPerson(sbn: StatusBarNotification) =
-            plugin?.extractPerson(sbn)?.let { data ->
-                val badged = addBadgeToDrawable(data.avatar, context, sbn.packageName, sbn.user)
-                PersonModel(data.key, data.name, badged, data.clickIntent, sbn.user.identifier)
+            plugin?.extractPerson(sbn)?.run {
+                PersonModel(key, name, avatar, clickIntent, sbn.user.identifier)
             }
 
     override fun extractPersonKey(sbn: StatusBarNotification) = plugin?.extractPersonKey(sbn)
@@ -214,7 +204,7 @@ class PeopleHubManager {
             if (inactivePeople.size >= MAX_STORED_INACTIVE_PEOPLE) {
                 inactivePeople.removeLast()
             }
-            inactivePeople.push(data)
+            inactivePeople.add(data)
             return true
         }
         return false
@@ -247,63 +237,7 @@ private fun NotificationEntry.extractPerson(): PersonModel? {
             ?: extras.getString(Notification.EXTRA_TITLE)
             ?: return null
     val drawable = extractAvatarFromRow(this) ?: return null
-    val badgedAvatar = addBadgeToDrawable(drawable, row.context, sbn.packageName, sbn.user)
-    return PersonModel(key, name, badgedAvatar, clickIntent, sbn.user.identifier)
-}
-
-private fun addBadgeToDrawable(
-    drawable: Drawable,
-    context: Context,
-    packageName: String,
-    user: UserHandle
-): Drawable {
-    val pm = context.packageManager
-    val appInfo = pm.getApplicationInfoAsUser(packageName, 0, user)
-    return object : Drawable() {
-        override fun draw(canvas: Canvas) {
-            val iconBounds = getBounds()
-            val factory = object : BaseIconFactory(
-                    context,
-                    0 /* unused */,
-                    iconBounds.width(),
-                    true) {}
-            val badge = factory.createBadgedIconBitmap(
-                    appInfo.loadIcon(pm),
-                    user,
-                    true,
-                    appInfo.isInstantApp,
-                    null)
-            val badgeDrawable = BitmapDrawable(context.resources, badge.icon)
-                    .apply {
-                        alpha = drawable.alpha
-                        colorFilter = drawable.colorFilter
-                        val badgeWidth = TypedValue.applyDimension(
-                                TypedValue.COMPLEX_UNIT_DIP,
-                                15f,
-                                context.resources.displayMetrics
-                        ).toInt()
-                        setBounds(
-                                iconBounds.left + (iconBounds.width() - badgeWidth),
-                                iconBounds.top + (iconBounds.height() - badgeWidth),
-                                iconBounds.right,
-                                iconBounds.bottom)
-                    }
-            drawable.bounds = iconBounds
-            drawable.draw(canvas)
-            badgeDrawable.draw(canvas)
-        }
-
-        override fun setAlpha(alpha: Int) {
-            drawable.alpha = alpha
-        }
-
-        override fun setColorFilter(colorFilter: ColorFilter?) {
-            drawable.colorFilter = colorFilter
-        }
-
-        @PixelFormat.Opacity
-        override fun getOpacity(): Int = PixelFormat.OPAQUE
-    }
+    return PersonModel(key, name, drawable, clickIntent, sbn.user.identifier)
 }
 
 fun extractAvatarFromRow(entry: NotificationEntry): Drawable? =
