@@ -41,6 +41,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -124,6 +125,8 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         verify(mDb, times(1)).init();
     }
 
+    @Test
+    @Ignore("b/147012298")
     public void testOnUserUnlocked_historyDisabled() {
         Settings.Secure.putIntForUser(getContext().getContentResolver(),
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, USER_SYSTEM);

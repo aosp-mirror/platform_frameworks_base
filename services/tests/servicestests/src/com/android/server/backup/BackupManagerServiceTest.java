@@ -61,6 +61,7 @@ import com.android.server.backup.utils.RandomAccessFileUtils;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -543,6 +544,8 @@ public class BackupManagerServiceTest {
         verifyNoMoreInteractions(mUserBackupManagerService);
     }
 
+    @Test
+    @Ignore("b/147012496")
     public void testGetUserForAncestralSerialNumber() {
         BackupManagerServiceTestable.sBackupDisabled = false;
         BackupManagerService backupManagerService =
@@ -554,6 +557,7 @@ public class BackupManagerServiceTest {
         assertThat(user).isEqualTo(UserHandle.of(1));
     }
 
+    @Test
     public void testGetUserForAncestralSerialNumber_whenDisabled() {
         BackupManagerServiceTestable.sBackupDisabled = true;
         BackupManagerService backupManagerService =
