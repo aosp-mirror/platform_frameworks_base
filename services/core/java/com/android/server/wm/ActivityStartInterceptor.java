@@ -301,7 +301,8 @@ class ActivityStartInterceptor {
                 FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT | FLAG_IMMUTABLE);
         final KeyguardManager km = (KeyguardManager) mServiceContext
                 .getSystemService(KEYGUARD_SERVICE);
-        final Intent newIntent = km.createConfirmDeviceCredentialIntent(null, null, userId);
+        final Intent newIntent = km.createConfirmDeviceCredentialIntent(null, null, userId,
+                true /* disallowBiometricsIfPolicyExists */);
         if (newIntent == null) {
             return null;
         }
