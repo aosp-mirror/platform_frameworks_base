@@ -5061,12 +5061,17 @@ public class DevicePolicyManager {
      *         owner. If Device ID attestation is requested (using {@link #ID_TYPE_SERIAL},
      *         {@link #ID_TYPE_IMEI} or {@link #ID_TYPE_MEID}), the caller must be the Device Owner
      *         or the Certificate Installer delegate.
-     * @throws IllegalArgumentException if the alias in {@code keySpec} is empty, if the
-     *         algorithm specification in {@code keySpec} is not {@code RSAKeyGenParameterSpec}
-     *         or {@code ECGenParameterSpec}, or if Device ID attestation was requested but the
-     *         {@code keySpec} does not contain an attestation challenge.
-     * @throws UnsupportedOperationException if Device ID attestation was requested but the
-     *         underlying hardware does not support it.
+     * @throws IllegalArgumentException in the following cases:
+     *         <p>
+     *         <ul>
+     *         <li>The alias in {@code keySpec} is empty.</li>
+     *         <li>The algorithm specification in {@code keySpec} is not
+     *         {@code RSAKeyGenParameterSpec} or {@code ECGenParameterSpec}.</li>
+     *         <li>Device ID attestation was requested but the {@code keySpec} does not contain an
+     *         attestation challenge.</li>
+     *         </ul>
+     * @throws UnsupportedOperationException if Device ID attestation or individual attestation
+     *         was requested but the underlying hardware does not support it.
      * @throws StrongBoxUnavailableException if the use of StrongBox for key generation was
      *         specified in {@code keySpec} but the device does not have one.
      * @see KeyGenParameterSpec.Builder#setAttestationChallenge(byte[])
