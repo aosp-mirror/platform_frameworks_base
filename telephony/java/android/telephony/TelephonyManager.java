@@ -1462,6 +1462,26 @@ public class TelephonyManager {
      */
     public static final String EXTRA_SIM_COMBINATION_NAMES =
             "android.telephony.extra.SIM_COMBINATION_NAMES";
+
+    /**
+     * Broadcast Action: The time was set by the carrier (typically by the NITZ string).
+     * This is a sticky broadcast.
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li><em>time</em> - The time as a long in UTC milliseconds.</li>
+     * </ul>
+     *
+     * <p class="note">
+     * Requires the READ_PHONE_STATE permission.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_NETWORK_SET_TIME = "android.telephony.action.NETWORK_SET_TIME";
+
     //
     //
     // Device Info
