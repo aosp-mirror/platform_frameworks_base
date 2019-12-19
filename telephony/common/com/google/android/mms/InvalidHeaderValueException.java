@@ -17,7 +17,7 @@
 
 package com.google.android.mms;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import dalvik.annotation.compat.UnsupportedAppUsage;
 
 /**
  * Thrown when an invalid header value was set.

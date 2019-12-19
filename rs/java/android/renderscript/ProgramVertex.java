@@ -38,7 +38,7 @@
  **/
 package android.renderscript;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.UnsupportedAppUsage;
 
 
 /**

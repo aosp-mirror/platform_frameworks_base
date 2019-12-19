@@ -15,7 +15,7 @@
  */
 package com.android.internal.telephony;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.UnsupportedAppUsage;
 
 /**
  * SMS Constants and must be the same as the corresponding
