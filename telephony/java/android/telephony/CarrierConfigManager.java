@@ -419,10 +419,31 @@ public class CarrierConfigManager {
             KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY = "gsm_nonroaming_networks_string_array";
 
     /**
-     * Override the device's configuration for the ImsService to use for this SIM card.
+     * The package name containing the ImsService that will be bound to the telephony framework to
+     * support both IMS MMTEL and RCS feature functionality instead of the device default
+     * ImsService for this subscription.
+     * @deprecated Use {@link #KEY_CONFIG_IMS_MMTEL_PACKAGE_OVERRIDE_STRING} and
+     * {@link #KEY_CONFIG_IMS_RCS_PACKAGE_OVERRIDE_STRING} instead to configure these values
+     * separately. If any of those values are not empty, they will override this value.
      */
     public static final String KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING =
             "config_ims_package_override_string";
+
+    /**
+     * The package name containing the ImsService that will be bound to the telephony framework to
+     * support IMS MMTEL feature functionality instead of the device default ImsService for this
+     * subscription.
+     */
+    public static final String KEY_CONFIG_IMS_MMTEL_PACKAGE_OVERRIDE_STRING =
+            "config_ims_mmtel_package_override_string";
+
+    /**
+     * The package name containing the ImsService that will be bound to the telephony framework to
+     * support IMS RCS feature functionality instead of the device default ImsService for this
+     * subscription.
+     */
+    public static final String KEY_CONFIG_IMS_RCS_PACKAGE_OVERRIDE_STRING =
+            "config_ims_rcs_package_override_string";
 
     /**
      * Override the package that will manage {@link SubscriptionPlan}
@@ -3503,6 +3524,8 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putString(KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING, null);
+        sDefaults.putString(KEY_CONFIG_IMS_MMTEL_PACKAGE_OVERRIDE_STRING, null);
+        sDefaults.putString(KEY_CONFIG_IMS_RCS_PACKAGE_OVERRIDE_STRING, null);
         sDefaults.putStringArray(KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_DIAL_STRING_REPLACE_STRING_ARRAY, null);
