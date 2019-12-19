@@ -17,8 +17,8 @@
 package android.os;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
 import android.app.IAlarmManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.location.ILocationManager;
 import android.location.LocationTime;

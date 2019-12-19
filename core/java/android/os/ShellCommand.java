@@ -16,7 +16,7 @@
 
 package android.os;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.util.Slog;
 
 import com.android.internal.util.FastPrintWriter;

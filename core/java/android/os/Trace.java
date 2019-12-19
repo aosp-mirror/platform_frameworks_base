@@ -17,9 +17,7 @@
 package android.os;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
-
-import com.android.internal.os.Zygote;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;

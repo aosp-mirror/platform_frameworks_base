@@ -16,7 +16,7 @@
 
 package android.nfc;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.nfc.tech.IsoDep;
 import android.nfc.tech.MifareClassic;

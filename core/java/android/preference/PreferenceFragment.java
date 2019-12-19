@@ -17,10 +17,10 @@
 package android.preference;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.XmlRes;
 import android.app.Activity;
 import android.app.Fragment;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
