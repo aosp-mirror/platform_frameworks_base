@@ -1092,10 +1092,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         HdmiDeviceInfo avr = getAvrDeviceInfo();
         if (avr != null
                 && (avrAddress == avr.getLogicalAddress())
-                && isConnectedToArcPort(avr.getPhysicalAddress())
-                && isDirectConnectAddress(avr.getPhysicalAddress())) {
+                && isConnectedToArcPort(avr.getPhysicalAddress())) {
             if (enabled) {
-                return isConnected(avr.getPortId()) && isArcFeatureEnabled(avr.getPortId());
+                return isConnected(avr.getPortId())
+                    && isArcFeatureEnabled(avr.getPortId())
+                    && isDirectConnectAddress(avr.getPhysicalAddress());
             } else {
                 return true;
             }
