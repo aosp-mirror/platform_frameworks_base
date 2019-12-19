@@ -467,6 +467,7 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
+        "updatable_media_stubs",
         "framework-appsearch", // TODO(b/146218515): should be framework-appsearch-stubs
         "framework-sdkext-stubs-systemapi",
         // TODO(b/146167933): Use framework-statsd-stubs instead.
