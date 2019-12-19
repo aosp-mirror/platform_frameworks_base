@@ -191,7 +191,10 @@ public final class ViewRootImpl implements ViewParent,
      */
     private static final boolean MT_RENDERER_AVAILABLE = true;
 
-    private static final boolean USE_BLAST_BUFFERQUEUE = false;
+    /**
+     * @hide
+     */
+    public static final boolean USE_BLAST_BUFFERQUEUE = false;
 
     /**
      * If set to 2, the view system will switch from using rectangles retrieved from window to
@@ -631,6 +634,12 @@ public final class ViewRootImpl implements ViewParent,
         int localValue;
         int localChanges;
     }
+
+    private boolean mNextDrawUseBLASTSyncTransaction;
+    // Be very careful with the threading here. This is used from the render thread while
+    // the UI thread is paused and then applied and cleared from the UI thread right after
+    // draw returns.
+    private SurfaceControl.Transaction mRtBLASTSyncTransaction = new SurfaceControl.Transaction();
 
     private String mTag = TAG;
     public ViewRootImpl(Context context, Display display) {
@@ -3604,6 +3613,7 @@ public final class ViewRootImpl implements ViewParent,
                 final Handler handler = mAttachInfo.mHandler;
                 mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) ->
                         handler.postAtFrontOfQueue(() -> {
+                            finishBLASTSync();
                             // TODO: Use the frame number
                             pendingDrawFinished();
                             if (commitCallbacks != null) {
@@ -3616,6 +3626,7 @@ public final class ViewRootImpl implements ViewParent,
                 final Handler handler = mAttachInfo.mHandler;
                 mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) ->
                         handler.postAtFrontOfQueue(() -> {
+                            finishBLASTSync();
                             for (int i = 0; i < commitCallbacks.size(); i++) {
                                 commitCallbacks.get(i).run();
                             }
@@ -3624,10 +3635,14 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         try {
+            if (mNextDrawUseBLASTSyncTransaction) {
+                mBlastBufferQueue.setNextTransaction(mRtBLASTSyncTransaction);
+            }
             boolean canUseAsync = draw(fullRedrawNeeded);
             if (usingAsyncReport && !canUseAsync) {
                 mAttachInfo.mThreadedRenderer.setFrameCompleteCallback(null);
                 usingAsyncReport = false;
+                finishBLASTSync();
             }
         } finally {
             mIsDrawing = false;
@@ -9420,5 +9435,20 @@ public final class ViewRootImpl implements ViewParent,
             }
             return false;
         }
+    }
+
+    void setUseBLASTSyncTransaction() {
+        mNextDrawUseBLASTSyncTransaction = true;
+    }
+
+    private void finishBLASTSync() {
+        if (mNextDrawUseBLASTSyncTransaction) {
+            mNextDrawUseBLASTSyncTransaction = false;
+            mRtBLASTSyncTransaction.apply();
+        }
+    }
+
+    SurfaceControl.Transaction getBLASTSyncTransaction() {
+        return mRtBLASTSyncTransaction;
     }
 }
