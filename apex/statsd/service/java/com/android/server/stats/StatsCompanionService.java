@@ -112,7 +112,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.StatsLog;
 import android.util.proto.ProtoOutputStream;
-import android.util.proto.ProtoStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.IProcessStats;
@@ -586,23 +585,24 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                                 installer = "";
                             }
                             long applicationInfoToken =
-                                    output.start(ProtoStream.FIELD_TYPE_MESSAGE
-                                            | ProtoStream.FIELD_COUNT_REPEATED
+                                    output.start(ProtoOutputStream.FIELD_TYPE_MESSAGE
+                                            | ProtoOutputStream.FIELD_COUNT_REPEATED
                                                     | APPLICATION_INFO_FIELD_ID);
-                            output.write(ProtoStream.FIELD_TYPE_INT32
-                                    | ProtoStream.FIELD_COUNT_SINGLE | UID_FIELD_ID,
+                            output.write(ProtoOutputStream.FIELD_TYPE_INT32
+                                    | ProtoOutputStream.FIELD_COUNT_SINGLE | UID_FIELD_ID,
                                             pi.get(j).applicationInfo.uid);
-                            output.write(ProtoStream.FIELD_TYPE_INT64
-                                    | ProtoStream.FIELD_COUNT_SINGLE
+                            output.write(ProtoOutputStream.FIELD_TYPE_INT64
+                                    | ProtoOutputStream.FIELD_COUNT_SINGLE
                                             | VERSION_FIELD_ID, pi.get(j).getLongVersionCode());
-                            output.write(ProtoStream.FIELD_TYPE_STRING
-                                    | ProtoStream.FIELD_COUNT_SINGLE | VERSION_STRING_FIELD_ID,
+                            output.write(ProtoOutputStream.FIELD_TYPE_STRING
+                                    | ProtoOutputStream.FIELD_COUNT_SINGLE
+                                    | VERSION_STRING_FIELD_ID,
                                             pi.get(j).versionName);
-                            output.write(ProtoStream.FIELD_TYPE_STRING
-                                    | ProtoStream.FIELD_COUNT_SINGLE
+                            output.write(ProtoOutputStream.FIELD_TYPE_STRING
+                                    | ProtoOutputStream.FIELD_COUNT_SINGLE
                                             | PACKAGE_NAME_FIELD_ID, pi.get(j).packageName);
-                            output.write(ProtoStream.FIELD_TYPE_STRING
-                                    | ProtoStream.FIELD_COUNT_SINGLE
+                            output.write(ProtoOutputStream.FIELD_TYPE_STRING
+                                    | ProtoOutputStream.FIELD_COUNT_SINGLE
                                             | INSTALLER_FIELD_ID,
                                                     installer == null ? "" : installer);
                             numRecords++;

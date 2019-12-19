@@ -24,12 +24,12 @@ import java.io.IOException;
 /**
  * This class contains a list of helper functions to write common proto in
  * //frameworks/base/core/proto/android/base directory
+ * @hide
  */
 public class ProtoUtils {
 
     /**
      * Dump AggStats to ProtoOutputStream
-     * @hide
      */
     public static void toAggStatsProto(ProtoOutputStream proto, long fieldId,
             long min, long average, long max) {
@@ -42,7 +42,6 @@ public class ProtoUtils {
 
     /**
      * Dump Duration to ProtoOutputStream
-     * @hide
      */
     public static void toDuration(ProtoOutputStream proto, long fieldId, long startMs, long endMs) {
         final long token = proto.start(fieldId);
@@ -53,7 +52,6 @@ public class ProtoUtils {
 
     /**
      * Helper function to write bit-wise flags to proto as repeated enums
-     * @hide
      */
     public static void writeBitWiseFlagsToProtoEnum(ProtoOutputStream proto, long fieldId,
             int flags, int[] origEnums, int[] protoEnums) {
