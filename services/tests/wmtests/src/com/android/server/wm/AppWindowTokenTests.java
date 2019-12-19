@@ -135,17 +135,19 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     @Presubmit
-    public void testGetTopFullscreenWindow() {
-        assertNull(mActivity.getTopFullscreenWindow());
+    public void testGetTopFullscreenOpaqueWindow() {
+        assertNull(mActivity.getTopFullscreenOpaqueWindow());
 
         final WindowState window1 = createWindow(null, TYPE_BASE_APPLICATION, mActivity, "window1");
         final WindowState window11 = createWindow(null, TYPE_APPLICATION, mActivity, "window11");
         final WindowState window12 = createWindow(null, TYPE_APPLICATION, mActivity, "window12");
-        assertEquals(window12, mActivity.getTopFullscreenWindow());
+        assertEquals(window12, mActivity.getTopFullscreenOpaqueWindow());
         window12.mAttrs.width = 500;
-        assertEquals(window11, mActivity.getTopFullscreenWindow());
+        assertEquals(window11, mActivity.getTopFullscreenOpaqueWindow());
         window11.mAttrs.width = 500;
-        assertEquals(window1, mActivity.getTopFullscreenWindow());
+        assertEquals(window1, mActivity.getTopFullscreenOpaqueWindow());
+        window1.mAttrs.alpha = 0f;
+        assertNull(mActivity.getTopFullscreenOpaqueWindow());
         mActivity.removeImmediately();
     }
 

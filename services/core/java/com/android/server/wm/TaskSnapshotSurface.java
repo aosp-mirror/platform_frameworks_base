@@ -155,7 +155,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final MergedConfiguration tmpMergedConfiguration = new MergedConfiguration();
         final TaskDescription taskDescription = new TaskDescription();
         taskDescription.setBackgroundColor(WHITE);
-        final WindowState topFullscreenWindow;
+        final WindowState topFullscreenOpaqueWindow;
         final int sysUiVis;
         final int windowFlags;
         final int windowPrivateFlags;
@@ -175,15 +175,15 @@ class TaskSnapshotSurface implements StartingSurface {
                         + task);
                 return null;
             }
-            topFullscreenWindow = topFullscreenActivity.getTopFullscreenWindow();
-            if (mainWindow == null || topFullscreenWindow == null) {
+            topFullscreenOpaqueWindow = topFullscreenActivity.getTopFullscreenOpaqueWindow();
+            if (mainWindow == null || topFullscreenOpaqueWindow == null) {
                 Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find main window for activity="
                         + activity);
                 return null;
             }
-            sysUiVis = topFullscreenWindow.getSystemUiVisibility();
-            windowFlags = topFullscreenWindow.getAttrs().flags;
-            windowPrivateFlags = topFullscreenWindow.getAttrs().privateFlags;
+            sysUiVis = topFullscreenOpaqueWindow.getSystemUiVisibility();
+            windowFlags = topFullscreenOpaqueWindow.getAttrs().flags;
+            windowPrivateFlags = topFullscreenOpaqueWindow.getAttrs().privateFlags;
 
             layoutParams.packageName = mainWindow.getAttrs().packageName;
             layoutParams.windowAnimations = mainWindow.getAttrs().windowAnimations;
@@ -206,7 +206,7 @@ class TaskSnapshotSurface implements StartingSurface {
             }
             taskBounds = new Rect();
             task.getBounds(taskBounds);
-            currentOrientation = topFullscreenWindow.getConfiguration().orientation;
+            currentOrientation = topFullscreenOpaqueWindow.getConfiguration().orientation;
         }
         try {
             final int res = session.addToDisplay(window, window.mSeq, layoutParams,
@@ -222,7 +222,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final TaskSnapshotSurface snapshotSurface = new TaskSnapshotSurface(service, window,
                 surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, sysUiVis,
                 windowFlags, windowPrivateFlags, taskBounds,
-                currentOrientation, topFullscreenWindow.getClientInsetsState());
+                currentOrientation, topFullscreenOpaqueWindow.getClientInsetsState());
         window.setOuter(snapshotSurface);
         try {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,

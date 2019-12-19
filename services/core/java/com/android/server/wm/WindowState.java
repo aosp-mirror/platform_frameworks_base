@@ -1642,11 +1642,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && (parentAndClientVisible || isAnimating(TRANSITION | PARENTS));
     }
 
-    // TODO: Another visibility method that was added late in the release to minimize risk.
-    @Override
-    public boolean canAffectSystemUiFlags() {
-        final boolean translucent = mAttrs.alpha == 0.0f;
-        if (translucent) {
+    boolean isFullyTransparent() {
+        return mAttrs.alpha == 0f;
+    }
+
+    /**
+     * @return Whether the window can affect SystemUI flags, meaning that SystemUI (system bars,
+     *         for example) will be  affected by the flags specified in this window. This is the
+     *         case when the surface is on screen but not exiting.
+     */
+    boolean canAffectSystemUiFlags() {
+        if (isFullyTransparent()) {
             return false;
         }
         if (mActivityRecord == null) {
