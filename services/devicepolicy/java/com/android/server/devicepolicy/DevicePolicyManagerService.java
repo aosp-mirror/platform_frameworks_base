@@ -8701,9 +8701,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // Allow access to the profile owner for the specified user, or delegate cert installer
         // But only if this is an organization-owned device.
         ComponentName profileOwner = getProfileOwnerAsUser(userId);
-        if (profileOwner != null && canProfileOwnerAccessDeviceIds(userId)
+        final boolean isCallerProfileOwnerOrDelegate = profileOwner != null
                 && (profileOwner.getPackageName().equals(packageName)
-                || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
+                        || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL));
+        if (isCallerProfileOwnerOrDelegate && canProfileOwnerAccessDeviceIds(userId)) {
+            return true;
+        }
+        //TODO(b/130844684): Temporarily allow profile owner on non-organization-owned devices
+        //to read device identifiers.
+        if (isCallerProfileOwnerOrDelegate) {
             return true;
         }
 
