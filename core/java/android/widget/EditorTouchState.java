@@ -55,6 +55,8 @@ public class EditorTouchState {
     private int mMultiTapStatus = MultiTapStatus.NONE;
     private boolean mMultiTapInSameArea;
 
+    private boolean mMovedEnoughForDrag;
+
     public float getLastDownX() {
         return mLastDownX;
     }
@@ -88,10 +90,14 @@ public class EditorTouchState {
         return isMultiTap() && mMultiTapInSameArea;
     }
 
+    public boolean isMovedEnoughForDrag() {
+        return mMovedEnoughForDrag;
+    }
+
     /**
      * Updates the state based on the new event.
      */
-    public void update(MotionEvent event, ViewConfiguration viewConfiguration) {
+    public void update(MotionEvent event, ViewConfiguration config) {
         final int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
             final boolean isMouse = event.isFromSource(InputDevice.SOURCE_MOUSE);
@@ -105,11 +111,8 @@ public class EditorTouchState {
                 } else {
                     mMultiTapStatus = MultiTapStatus.TRIPLE_CLICK;
                 }
-                final float deltaX = event.getX() - mLastDownX;
-                final float deltaY = event.getY() - mLastDownY;
-                final int distanceSquared = (int) ((deltaX * deltaX) + (deltaY * deltaY));
-                int doubleTapSlop = viewConfiguration.getScaledDoubleTapSlop();
-                mMultiTapInSameArea = distanceSquared < doubleTapSlop * doubleTapSlop;
+                mMultiTapInSameArea = isDistanceWithin(mLastDownX, mLastDownY,
+                        event.getX(), event.getY(), config.getScaledDoubleTapSlop());
                 if (TextView.DEBUG_CURSOR) {
                     String status = isDoubleTap() ? "double" : "triple";
                     String inSameArea = mMultiTapInSameArea ? "in same area" : "not in same area";
@@ -125,6 +128,7 @@ public class EditorTouchState {
             }
             mLastDownX = event.getX();
             mLastDownY = event.getY();
+            mMovedEnoughForDrag = false;
         } else if (action == MotionEvent.ACTION_UP) {
             if (TextView.DEBUG_CURSOR) {
                 logCursor("EditorTouchState", "ACTION_UP");
@@ -132,6 +136,23 @@ public class EditorTouchState {
             mLastUpX = event.getX();
             mLastUpY = event.getY();
             mLastUpMillis = event.getEventTime();
+            mMovedEnoughForDrag = false;
+        } else if (action == MotionEvent.ACTION_MOVE) {
+            mMovedEnoughForDrag = !isDistanceWithin(mLastDownX, mLastDownY,
+                    event.getX(), event.getY(), config.getScaledTouchSlop());
         }
+    }
+
+    /**
+     * Returns true if the distance between the given coordinates is <= to the specified max.
+     * This is useful to be able to determine e.g. when the user's touch has moved enough in
+     * order to be considered a drag (no longer within touch slop).
+     */
+    public static boolean isDistanceWithin(float x1, float y1, float x2, float y2,
+            int maxDistance) {
+        float deltaX = x2 - x1;
+        float deltaY = y2 - y1;
+        float distanceSquared = (deltaX * deltaX) + (deltaY * deltaY);
+        return distanceSquared <= maxDistance * maxDistance;
     }
 }

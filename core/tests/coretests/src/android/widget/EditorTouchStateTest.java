@@ -16,6 +16,9 @@
 
 package android.widget;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -50,19 +53,19 @@ public class EditorTouchStateTest {
         long event1Time = 1000;
         MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
         mTouchState.update(event1, mConfig);
-        assertSingleTap(mTouchState, 20f, 30f, 0, 0);
+        assertSingleTap(mTouchState, 20f, 30f, 0, 0, false);
 
         // Simulate an ACTION_UP event.
         long event2Time = 1001;
         MotionEvent event2 = upEvent(event1Time, event2Time, 20f, 30f);
         mTouchState.update(event2, mConfig);
-        assertSingleTap(mTouchState, 20f, 30f, 20f, 30f);
+        assertSingleTap(mTouchState, 20f, 30f, 20f, 30f, false);
 
         // Generate an ACTION_DOWN event whose time is after the double-tap timeout.
         long event3Time = event2Time + ViewConfiguration.getDoubleTapTimeout() + 1;
         MotionEvent event3 = downEvent(event3Time, event3Time, 22f, 33f);
         mTouchState.update(event3, mConfig);
-        assertSingleTap(mTouchState, 22f, 33f, 20f, 30f);
+        assertSingleTap(mTouchState, 22f, 33f, 20f, 30f, false);
     }
 
     @Test
@@ -71,19 +74,19 @@ public class EditorTouchStateTest {
         long event1Time = 1000;
         MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
         mTouchState.update(event1, mConfig);
-        assertSingleTap(mTouchState, 20f, 30f, 0, 0);
+        assertSingleTap(mTouchState, 20f, 30f, 0, 0, false);
 
         // Simulate an ACTION_UP event.
         long event2Time = 1001;
         MotionEvent event2 = upEvent(event1Time, event2Time, 20f, 30f);
         mTouchState.update(event2, mConfig);
-        assertSingleTap(mTouchState, 20f, 30f, 20f, 30f);
+        assertSingleTap(mTouchState, 20f, 30f, 20f, 30f, false);
 
         // Generate an ACTION_DOWN event whose time is within the double-tap timeout.
         long event3Time = 1002;
         MotionEvent event3 = downEvent(event3Time, event3Time, 22f, 33f);
         mTouchState.update(event3, mConfig);
-        assertTap(mTouchState, 22f, 33f, 20f, 30f,
+        assertMultiTap(mTouchState, 22f, 33f, 20f, 30f,
                 MultiTapStatus.DOUBLE_TAP, true);
     }
 
@@ -93,26 +96,26 @@ public class EditorTouchStateTest {
         long event1Time = 1000;
         MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
         mTouchState.update(event1, mConfig);
-        assertSingleTap(mTouchState, 20f, 30f, 0, 0);
+        assertSingleTap(mTouchState, 20f, 30f, 0, 0, false);
 
         // Simulate an ACTION_UP event.
         long event2Time = 1001;
         MotionEvent event2 = upEvent(event1Time, event2Time, 20f, 30f);
         mTouchState.update(event2, mConfig);
-        assertSingleTap(mTouchState, 20f, 30f, 20f, 30f);
+        assertSingleTap(mTouchState, 20f, 30f, 20f, 30f, false);
 
         // Generate an ACTION_DOWN event whose time is within the double-tap timeout.
         long event3Time = 1002;
         MotionEvent event3 = downEvent(event3Time, event3Time, 200f, 300f);
         mTouchState.update(event3, mConfig);
-        assertTap(mTouchState, 200f, 300f, 20f, 30f,
+        assertMultiTap(mTouchState, 200f, 300f, 20f, 30f,
                 MultiTapStatus.DOUBLE_TAP, false);
 
         // Simulate an ACTION_UP event.
         long event4Time = 1003;
         MotionEvent event4 = upEvent(event3Time, event4Time, 200f, 300f);
         mTouchState.update(event4, mConfig);
-        assertTap(mTouchState, 200f, 300f, 200f, 300f,
+        assertMultiTap(mTouchState, 200f, 300f, 200f, 300f,
                 MultiTapStatus.DOUBLE_TAP, false);
     }
 
@@ -123,21 +126,21 @@ public class EditorTouchStateTest {
         MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
         event1.setSource(InputDevice.SOURCE_MOUSE);
         mTouchState.update(event1, mConfig);
-        assertSingleTap(mTouchState, 20f, 30f, 0, 0);
+        assertSingleTap(mTouchState, 20f, 30f, 0, 0, false);
 
         // Simulate an ACTION_UP event.
         long event2Time = 1001;
         MotionEvent event2 = upEvent(event1Time, event2Time, 20f, 30f);
         event2.setSource(InputDevice.SOURCE_MOUSE);
         mTouchState.update(event2, mConfig);
-        assertSingleTap(mTouchState, 20f, 30f, 20f, 30f);
+        assertSingleTap(mTouchState, 20f, 30f, 20f, 30f, false);
 
         // Generate a second ACTION_DOWN event whose time is within the double-tap timeout.
         long event3Time = 1002;
         MotionEvent event3 = downEvent(event3Time, event3Time, 21f, 31f);
         event3.setSource(InputDevice.SOURCE_MOUSE);
         mTouchState.update(event3, mConfig);
-        assertTap(mTouchState, 21f, 31f, 20f, 30f,
+        assertMultiTap(mTouchState, 21f, 31f, 20f, 30f,
                 MultiTapStatus.DOUBLE_TAP, true);
 
         // Simulate an ACTION_UP event.
@@ -145,7 +148,7 @@ public class EditorTouchStateTest {
         MotionEvent event4 = upEvent(event3Time, event4Time, 21f, 31f);
         event4.setSource(InputDevice.SOURCE_MOUSE);
         mTouchState.update(event4, mConfig);
-        assertTap(mTouchState, 21f, 31f, 21f, 31f,
+        assertMultiTap(mTouchState, 21f, 31f, 21f, 31f,
                 MultiTapStatus.DOUBLE_TAP, true);
 
         // Generate a third ACTION_DOWN event whose time is within the double-tap timeout.
@@ -153,7 +156,7 @@ public class EditorTouchStateTest {
         MotionEvent event5 = downEvent(event5Time, event5Time, 22f, 32f);
         event5.setSource(InputDevice.SOURCE_MOUSE);
         mTouchState.update(event5, mConfig);
-        assertTap(mTouchState, 22f, 32f, 21f, 31f,
+        assertMultiTap(mTouchState, 22f, 32f, 21f, 31f,
                 MultiTapStatus.TRIPLE_CLICK, true);
     }
 
@@ -163,34 +166,71 @@ public class EditorTouchStateTest {
         long event1Time = 1000;
         MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
         mTouchState.update(event1, mConfig);
-        assertSingleTap(mTouchState, 20f, 30f, 0, 0);
+        assertSingleTap(mTouchState, 20f, 30f, 0, 0, false);
 
         // Simulate an ACTION_UP event.
         long event2Time = 1001;
         MotionEvent event2 = upEvent(event1Time, event2Time, 20f, 30f);
         mTouchState.update(event2, mConfig);
-        assertSingleTap(mTouchState, 20f, 30f, 20f, 30f);
+        assertSingleTap(mTouchState, 20f, 30f, 20f, 30f, false);
 
         // Generate a second ACTION_DOWN event whose time is within the double-tap timeout.
         long event3Time = 1002;
         MotionEvent event3 = downEvent(event3Time, event3Time, 21f, 31f);
         mTouchState.update(event3, mConfig);
-        assertTap(mTouchState, 21f, 31f, 20f, 30f,
+        assertMultiTap(mTouchState, 21f, 31f, 20f, 30f,
                 MultiTapStatus.DOUBLE_TAP, true);
 
         // Simulate an ACTION_UP event.
         long event4Time = 1003;
         MotionEvent event4 = upEvent(event3Time, event4Time, 21f, 31f);
         mTouchState.update(event4, mConfig);
-        assertTap(mTouchState, 21f, 31f, 21f, 31f,
+        assertMultiTap(mTouchState, 21f, 31f, 21f, 31f,
                 MultiTapStatus.DOUBLE_TAP, true);
 
         // Generate a third ACTION_DOWN event whose time is within the double-tap timeout.
         long event5Time = 1004;
         MotionEvent event5 = downEvent(event5Time, event5Time, 22f, 32f);
         mTouchState.update(event5, mConfig);
-        assertTap(mTouchState, 22f, 32f, 21f, 31f,
-                MultiTapStatus.FIRST_TAP, false);
+        assertSingleTap(mTouchState, 22f, 32f, 21f, 31f, false);
+    }
+
+    @Test
+    public void testUpdate_drag() throws Exception {
+        // Simulate an ACTION_DOWN event.
+        long event1Time = 1000;
+        MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
+        mTouchState.update(event1, mConfig);
+        assertSingleTap(mTouchState, 20f, 30f, 0, 0, false);
+
+        // Simulate an ACTION_MOVE event whose location is not far enough to start a drag.
+        long event2Time = 1001;
+        MotionEvent event2 = moveEvent(event1Time, event2Time, 21f, 30f);
+        mTouchState.update(event2, mConfig);
+        assertSingleTap(mTouchState, 20f, 30f, 0, 0, false);
+
+        // Simulate another ACTION_MOVE event whose location is far enough to start a drag.
+        int touchSlop = mConfig.getScaledTouchSlop();
+        float newX = event1.getX() + touchSlop + 1;
+        float newY = event1.getY();
+        long event3Time = 1002;
+        MotionEvent event3 = moveEvent(event3Time, event3Time, newX, newY);
+        mTouchState.update(event3, mConfig);
+        assertSingleTap(mTouchState, 20f, 30f, 0, 0, true);
+
+        // Simulate an ACTION_UP event.
+        long event4Time = 1003;
+        MotionEvent event4 = upEvent(event3Time, event4Time, 200f, 300f);
+        mTouchState.update(event4, mConfig);
+        assertSingleTap(mTouchState, 20f, 30f, 200f, 300f, false);
+    }
+
+    @Test
+    public void testIsDistanceWithin() throws Exception {
+        assertTrue(EditorTouchState.isDistanceWithin(0, 0, 0, 0, 8));
+        assertTrue(EditorTouchState.isDistanceWithin(3, 9, 5, 11, 8));
+        assertTrue(EditorTouchState.isDistanceWithin(5, 11, 3, 9, 8));
+        assertFalse(EditorTouchState.isDistanceWithin(5, 10, 5, 20, 8));
     }
 
     private static MotionEvent downEvent(long downTime, long eventTime, float x, float y) {
@@ -201,8 +241,12 @@ public class EditorTouchStateTest {
         return MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_UP, x, y, 0);
     }
 
+    private static MotionEvent moveEvent(long downTime, long eventTime, float x, float y) {
+        return MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_MOVE, x, y, 0);
+    }
+
     private static void assertSingleTap(EditorTouchState touchState, float lastDownX,
-            float lastDownY, float lastUpX, float lastUpY) {
+            float lastDownY, float lastUpX, float lastUpY, boolean isMovedEnoughForDrag) {
         assertThat(touchState.getLastDownX(), is(lastDownX));
         assertThat(touchState.getLastDownY(), is(lastDownY));
         assertThat(touchState.getLastUpX(), is(lastUpX));
@@ -211,9 +255,10 @@ public class EditorTouchStateTest {
         assertThat(touchState.isTripleClick(), is(false));
         assertThat(touchState.isMultiTap(), is(false));
         assertThat(touchState.isMultiTapInSameArea(), is(false));
+        assertThat(touchState.isMovedEnoughForDrag(), is(isMovedEnoughForDrag));
     }
 
-    private static void assertTap(EditorTouchState touchState,
+    private static void assertMultiTap(EditorTouchState touchState,
             float lastDownX, float lastDownY, float lastUpX, float lastUpY,
             @MultiTapStatus int multiTapStatus, boolean isMultiTapInSameArea) {
         assertThat(touchState.getLastDownX(), is(lastDownX));
@@ -225,5 +270,6 @@ public class EditorTouchStateTest {
         assertThat(touchState.isMultiTap(), is(multiTapStatus == MultiTapStatus.DOUBLE_TAP
                 || multiTapStatus == MultiTapStatus.TRIPLE_CLICK));
         assertThat(touchState.isMultiTapInSameArea(), is(isMultiTapInSameArea));
+        assertThat(touchState.isMovedEnoughForDrag(), is(false));
     }
 }
