@@ -109,7 +109,7 @@ import com.android.internal.util.MessageUtils;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
-import com.android.tethering.R;
+import com.android.networkstack.tethering.R;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
