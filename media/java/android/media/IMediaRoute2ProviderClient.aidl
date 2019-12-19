@@ -18,6 +18,7 @@ package android.media;
 
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2Info;
+import android.media.RouteSessionInfo;
 import android.os.Bundle;
 
 /**
@@ -25,5 +26,8 @@ import android.os.Bundle;
  */
 oneway interface IMediaRoute2ProviderClient {
     void updateProviderInfo(in MediaRoute2ProviderInfo info);
-    void notifyRouteSelected(String packageName, String routeId, in Bundle controlHints, int seq);
+    void notifyRouteSelected(String packageName, String routeId, in @nullable Bundle controlHints,
+            int seq);
+    void notifySessionCreated(in @nullable RouteSessionInfo sessionInfo,
+            in @nullable Bundle controlHints, int requestId);
 }
