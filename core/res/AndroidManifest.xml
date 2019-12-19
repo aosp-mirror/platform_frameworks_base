@@ -2944,6 +2944,14 @@
     <permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE"
         android:protectionLevel="signature" />
 
+    <!-- Allows SystemUI to request third party controls.
+         <p>Should only be requested by the System and required by
+         ControlsService declarations.
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_CONTROLS"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to force a BACK operation on whatever is the
          top activity.
          <p>Not for use by third-party applications.

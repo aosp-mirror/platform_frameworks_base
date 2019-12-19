@@ -213,6 +213,8 @@ public final class ControlState implements Parcelable {
         if (mAppIntent != null) {
             dest.writeByte((byte) 1);
             mAppIntent.writeToParcel(dest, flags);
+        } else {
+            dest.writeByte((byte) 0);
         }
         if (mIcon != null) {
             dest.writeByte((byte) 1);
