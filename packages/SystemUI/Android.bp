@@ -42,6 +42,7 @@ android_library {
         "res",
     ],
     static_libs: [
+        "WindowManager-Shell",
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SettingsLib",
