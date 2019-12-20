@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
@@ -196,6 +197,7 @@ public final class CellIdentityWcdma extends CellIdentity {
     }
 
     /** @hide */
+    @NonNull
     @Override
     public GsmCellLocation asCellLocation() {
         GsmCellLocation cl = new GsmCellLocation();
