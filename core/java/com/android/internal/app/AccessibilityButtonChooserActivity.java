@@ -15,28 +15,26 @@
  */
 package com.android.internal.app;
 
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
-
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.internal.widget.ResolverDrawerLayout;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,66 +52,43 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
     private List<AccessibilityButtonTarget> mTargets = null;
 
+    private AlertDialog mAlertDialog;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.accessibility_button_chooser);
 
-        final ResolverDrawerLayout rdl = findViewById(R.id.contentPanel);
-        if (rdl != null) {
-            rdl.setOnDismissedListener(this::finish);
+        final TypedArray theme = getTheme().obtainStyledAttributes(android.R.styleable.Theme);
+        if (!theme.getBoolean(android.R.styleable.Theme_windowNoTitle, /* defValue= */false)) {
+            requestWindowFeature(Window.FEATURE_NO_TITLE);
         }
 
-        String component = Settings.Secure.getString(getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT);
-
-        if (isGestureNavigateEnabled()) {
-            TextView promptPrologue = findViewById(R.id.accessibility_button_prompt_prologue);
-            promptPrologue.setText(isTouchExploreOn()
-                    ? R.string.accessibility_gesture_3finger_prompt_text
-                    : R.string.accessibility_gesture_prompt_text);
-        }
-
-        if (TextUtils.isEmpty(component)) {
-            TextView prompt = findViewById(R.id.accessibility_button_prompt);
-            if (isGestureNavigateEnabled()) {
-                prompt.setText(isTouchExploreOn()
-                        ? R.string.accessibility_gesture_3finger_instructional_text
-                        : R.string.accessibility_gesture_instructional_text);
-            }
-            prompt.setVisibility(View.VISIBLE);
-        }
-
+        // TODO(b/146815874): Will replace it with white list services
         mMagnificationTarget = new AccessibilityButtonTarget(this, MAGNIFICATION_COMPONENT_ID,
                 R.string.accessibility_magnification_chooser_text,
                 R.drawable.ic_accessibility_magnification);
 
+        // TODO(b/146815544): Will use shortcut type or button type to get the corresponding
+        //  services
         mTargets = getServiceAccessibilityButtonTargets(this);
         if (Settings.Secure.getInt(getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED, 0) == 1) {
             mTargets.add(mMagnificationTarget);
         }
 
-        if (mTargets.size() < 2) {
-            // Why are we here?
-            finish();
-        }
-
-        GridView gridview = findViewById(R.id.accessibility_button_chooser_grid);
-        gridview.setAdapter(new TargetAdapter());
-        gridview.setOnItemClickListener((parent, view, position, id) -> {
-            onTargetSelected(mTargets.get(position));
-        });
+        // TODO(b/146815548): Will add title to separate which one type
+        mAlertDialog = new AlertDialog.Builder(this)
+                .setAdapter(new TargetAdapter(),
+                        (dialog, position) -> onTargetSelected(mTargets.get(position)))
+                .setOnDismissListener(dialog -> finish())
+                .create();
+        mAlertDialog.show();
     }
 
-    private boolean isGestureNavigateEnabled() {
-        return NAV_BAR_MODE_GESTURAL == getResources().getInteger(
-                com.android.internal.R.integer.config_navBarInteractionMode);
-    }
-
-    private boolean isTouchExploreOn() {
-        return ((AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE))
-                .isTouchExplorationEnabled();
+    @Override
+    protected void onDestroy() {
+        mAlertDialog.dismiss();
+        super.onDestroy();
     }
 
     private static List<AccessibilityButtonTarget> getServiceAccessibilityButtonTargets(
@@ -167,6 +142,8 @@ public class AccessibilityButtonChooserActivity extends Activity {
             TextView labelView = root.findViewById(R.id.accessibility_button_target_label);
             iconView.setImageDrawable(target.getDrawable());
             labelView.setText(target.getLabel());
+
+            // TODO(b/146815874): Need to get every service status to update UI
             return root;
         }
     }
@@ -175,7 +152,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
         public String mId;
         public CharSequence mLabel;
         public Drawable mDrawable;
-
+        // TODO(b/146815874): Will add fragment type and related functions
         public AccessibilityButtonTarget(@NonNull Context context,
                 @NonNull AccessibilityServiceInfo serviceInfo) {
             this.mId = serviceInfo.getComponentName().flattenToString();
