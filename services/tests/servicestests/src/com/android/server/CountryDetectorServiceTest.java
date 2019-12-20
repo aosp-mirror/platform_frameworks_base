@@ -19,8 +19,11 @@ package com.android.server;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.location.Country;
 import android.location.CountryListener;
 import android.location.ICountryListener;
@@ -31,6 +34,10 @@ import android.os.RemoteException;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.internal.R;
+import com.android.server.location.ComprehensiveCountryDetector;
+import com.android.server.location.CustomCountryDetectorTestClass;
+
 import com.google.common.truth.Expect;
 
 import org.junit.Before;
@@ -38,11 +45,17 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CountryDetectorServiceTest {
+
+    private static final String VALID_CUSTOM_TEST_CLASS =
+            "com.android.server.location.CustomCountryDetectorTestClass";
+    private static final String INVALID_CUSTOM_TEST_CLASS =
+            "com.android.server.location.MissingCountryDetectorTestClass";
 
     private static class CountryListenerTester extends ICountryListener.Stub {
         private Country mCountry;
@@ -83,12 +96,11 @@ public class CountryDetectorServiceTest {
         }
     }
 
-    @Rule
-    public final Expect expect = Expect.create();
-    @Spy
-    private Context mContext = ApplicationProvider.getApplicationContext();
-    @Spy
-    private Handler mHandler = new Handler(Looper.myLooper());
+    @Rule public final Expect expect = Expect.create();
+    @Spy private Context mContext = ApplicationProvider.getApplicationContext();
+    @Spy private Handler mHandler = new Handler(Looper.myLooper());
+    @Mock private Resources mResources;
+
     private CountryDetectorServiceTester mCountryDetectorService;
 
     @BeforeClass
@@ -108,10 +120,12 @@ public class CountryDetectorServiceTest {
             message.getCallback().run();
             return true;
         }).when(mHandler).sendMessageAtTime(any(Message.class), anyLong());
+
+        doReturn(mResources).when(mContext).getResources();
     }
 
     @Test
-    public void countryListener_add_successful() throws RemoteException {
+    public void addCountryListener_validListener_listenerAdded() throws RemoteException {
         CountryListenerTester countryListener = new CountryListenerTester();
 
         mCountryDetectorService.systemRunning();
@@ -122,7 +136,7 @@ public class CountryDetectorServiceTest {
     }
 
     @Test
-    public void countryListener_remove_successful() throws RemoteException {
+    public void removeCountryListener_validListener_listenerRemoved() throws RemoteException {
         CountryListenerTester countryListener = new CountryListenerTester();
 
         mCountryDetectorService.systemRunning();
@@ -133,8 +147,31 @@ public class CountryDetectorServiceTest {
         expect.that(mCountryDetectorService.isListenerSet()).isFalse();
     }
 
+    @Test(expected = RemoteException.class)
+    public void addCountryListener_serviceNotReady_throwsException() throws RemoteException {
+        CountryListenerTester countryListener = new CountryListenerTester();
+
+        expect.that(mCountryDetectorService.isSystemReady()).isFalse();
+        mCountryDetectorService.addCountryListener(countryListener);
+    }
+
+    @Test(expected = RemoteException.class)
+    public void removeCountryListener_serviceNotReady_throwsException() throws RemoteException {
+        CountryListenerTester countryListener = new CountryListenerTester();
+
+        expect.that(mCountryDetectorService.isSystemReady()).isFalse();
+        mCountryDetectorService.removeCountryListener(countryListener);
+    }
+
     @Test
-    public void countryListener_notify_successful() throws RemoteException {
+    public void detectCountry_serviceNotReady_returnNull() {
+        expect.that(mCountryDetectorService.isSystemReady()).isFalse();
+
+        expect.that(mCountryDetectorService.detectCountry()).isNull();
+    }
+
+    @Test
+    public void notifyReceivers_twoListenersRegistered_bothNotified() throws RemoteException {
         CountryListenerTester countryListenerA = new CountryListenerTester();
         CountryListenerTester countryListenerB = new CountryListenerTester();
         Country country = new Country("US", Country.COUNTRY_SOURCE_NETWORK);
@@ -150,5 +187,27 @@ public class CountryDetectorServiceTest {
         expect.that(countryListenerB.isNotified()).isTrue();
         expect.that(countryListenerA.getCountry().equalsIgnoreSource(country)).isTrue();
         expect.that(countryListenerB.getCountry().equalsIgnoreSource(country)).isTrue();
+    }
+
+    @Test
+    public void initialize_deviceWithCustomDetector_useCustomDetectorClass() {
+        when(mResources.getString(R.string.config_customCountryDetector))
+                .thenReturn(VALID_CUSTOM_TEST_CLASS);
+
+        mCountryDetectorService.initialize();
+
+        expect.that(mCountryDetectorService.getCountryDetector())
+                .isInstanceOf(CustomCountryDetectorTestClass.class);
+    }
+
+    @Test
+    public void initialize_deviceWithInvalidCustomDetector_useDefaultDetector() {
+        when(mResources.getString(R.string.config_customCountryDetector))
+                .thenReturn(INVALID_CUSTOM_TEST_CLASS);
+
+        mCountryDetectorService.initialize();
+
+        expect.that(mCountryDetectorService.getCountryDetector())
+                .isInstanceOf(ComprehensiveCountryDetector.class);
     }
 }
