@@ -826,7 +826,7 @@ static jlong android_os_Debug_getIonMappedSizeKb(JNIEnv* env, jobject clazz) {
         }
     }
 
-    for (dmabufinfo::DmaBuffer buf : dmabufs) {
+    for (const dmabufinfo::DmaBuffer& buf : dmabufs) {
         ionPss += buf.size() / 1024;
     }
 
