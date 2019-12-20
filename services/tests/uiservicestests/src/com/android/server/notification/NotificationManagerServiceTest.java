@@ -4397,7 +4397,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_FOREGROUND);
 
         // enqueue toast -> toast should still enqueue
-        ((INotificationManager)mService.mService).enqueueToast(testPackage,
+        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
                 new TestableToastCallback(), 2000, 0);
         assertEquals(1, mService.mToastQueue.size());
     }
@@ -4417,7 +4417,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPreferencesHelper.getImportance(testPackage, mUid)).thenReturn(IMPORTANCE_LOW);
 
         // enqueue toast -> no toasts enqueued
-        ((INotificationManager)mService.mService).enqueueToast(testPackage,
+        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
                 new TestableToastCallback(), 2000, 0);
         assertEquals(0, mService.mToastQueue.size());
     }
@@ -4440,7 +4440,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_GONE);
 
         // enqueue toast -> no toasts enqueued
-        ((INotificationManager)mService.mService).enqueueToast(testPackage,
+        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
                 new TestableToastCallback(), 2000, 0);
         assertEquals(0, mService.mToastQueue.size());
     }
@@ -4463,7 +4463,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_GONE);
 
         // enqueue toast -> system toast can still be enqueued
-        ((INotificationManager)mService.mService).enqueueToast(testPackage,
+        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
                 new TestableToastCallback(), 2000, 0);
         assertEquals(1, mService.mToastQueue.size());
     }
