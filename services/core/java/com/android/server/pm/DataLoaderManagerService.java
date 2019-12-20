@@ -76,13 +76,12 @@ public class DataLoaderManagerService extends SystemService {
                     return false;
                 }
             }
-            CharSequence packageNameSeq = params.getCharSequence("packageName");
-            if (packageNameSeq == null) {
-                Slog.e(TAG, "Must specify package name.");
+            ComponentName componentName = params.getParcelable("componentName");
+            if (componentName == null) {
+                Slog.e(TAG, "Must specify component name.");
                 return false;
             }
-            String packageName = packageNameSeq.toString();
-            ComponentName dataLoaderComponent = getDataLoaderServiceName(packageName);
+            ComponentName dataLoaderComponent = resolveDataLoaderComponentName(componentName);
             if (dataLoaderComponent == null) {
                 return false;
             }
@@ -103,22 +102,23 @@ public class DataLoaderManagerService extends SystemService {
         /**
          * Find the ComponentName of the data loader service provider, given its package name.
          *
-         * @param packageName the package name of the provider.
+         * @param componentName the name of the provider.
          * @return ComponentName of the data loader service provider. Null if provider not found.
          */
-        private @Nullable ComponentName getDataLoaderServiceName(String packageName) {
+        private @Nullable ComponentName resolveDataLoaderComponentName(
+                ComponentName componentName) {
             final PackageManager pm = mContext.getPackageManager();
             if (pm == null) {
                 Slog.e(TAG, "PackageManager is not available.");
                 return null;
             }
             Intent intent = new Intent(Intent.ACTION_LOAD_DATA);
-            intent.setPackage(packageName);
+            intent.setComponent(componentName);
             List<ResolveInfo> services =
                     pm.queryIntentServicesAsUser(intent, 0, UserHandle.getCallingUserId());
             if (services == null || services.isEmpty()) {
                 Slog.e(TAG,
-                        "Failed to find data loader service provider in package " + packageName);
+                        "Failed to find data loader service provider in " + componentName);
                 return null;
             }
 
@@ -128,23 +128,21 @@ public class DataLoaderManagerService extends SystemService {
             int numServices = services.size();
             for (int i = 0; i < numServices; i++) {
                 ResolveInfo ri = services.get(i);
-                ComponentName componentName = new ComponentName(
+                ComponentName resolved = new ComponentName(
                         ri.serviceInfo.packageName, ri.serviceInfo.name);
                 // There should only be one matching provider inside the given package.
                 // If there's more than one, return the first one found.
                 try {
-                    ApplicationInfo ai = pm.getApplicationInfo(componentName.getPackageName(), 0);
+                    ApplicationInfo ai = pm.getApplicationInfo(resolved.getPackageName(), 0);
                     if (checkLoader && !ai.isPrivilegedApp()) {
                         Slog.w(TAG,
-                                "Data loader: " + componentName.getPackageName()
-                                        + " is not a privileged app, skipping.");
+                                "Data loader: " + resolved + " is not a privileged app, skipping.");
                         continue;
                     }
-                    return componentName;
+                    return resolved;
                 } catch (PackageManager.NameNotFoundException ex) {
                     Slog.w(TAG,
-                            "Privileged data loader: " + componentName.getPackageName()
-                                    + " not found, skipping.");
+                            "Privileged data loader: " + resolved + " not found, skipping.");
                 }
 
             }

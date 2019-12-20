@@ -17,6 +17,7 @@
 package com.android.server.incremental;
 
 import android.annotation.NonNull;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.DataLoaderManager;
 import android.content.pm.DataLoaderParamsParcel;
@@ -85,7 +86,8 @@ public class IncrementalManagerService extends IIncrementalManager.Stub  {
             DataLoaderParamsParcel params,
             IDataLoaderStatusListener listener) {
         Bundle dataLoaderParams = new Bundle();
-        dataLoaderParams.putCharSequence("packageName", params.packageName);
+        dataLoaderParams.putParcelable("componentName",
+                new ComponentName(params.packageName, params.className));
         dataLoaderParams.putParcelable("control", control);
         dataLoaderParams.putParcelable("params", params);
         DataLoaderManager dataLoaderManager = mContext.getSystemService(DataLoaderManager.class);
@@ -109,8 +111,7 @@ public class IncrementalManagerService extends IIncrementalManager.Stub  {
             return false;
         }
         try {
-            // TODO: fix file list
-            dataLoader.start(null);
+            dataLoader.start();
             return true;
         } catch (RemoteException ex) {
             return false;

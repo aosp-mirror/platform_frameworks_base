@@ -19,6 +19,7 @@ package com.android.server.incremental;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -111,14 +112,14 @@ public final class IncrementalManagerShellCommand extends ShellCommand {
             pw.println("File names and sizes don't match.");
             return ERROR_DATA_LOADER_INIT;
         }
-        final DataLoaderParams params = new DataLoaderParams(
-                "", LOADER_PACKAGE_NAME, dataLoaderDynamicArgs);
+        final DataLoaderParams params = DataLoaderParams.forIncremental(
+                new ComponentName(LOADER_PACKAGE_NAME, ""), "", dataLoaderDynamicArgs);
         PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);
         sessionParams.installFlags |= PackageManager.INSTALL_ALL_USERS;
         // Replace existing if same package is already installed
         sessionParams.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
-        sessionParams.setIncrementalParams(params);
+        sessionParams.setDataLoaderParams(params);
 
         try {
             int sessionId = packageInstaller.createSession(sessionParams);

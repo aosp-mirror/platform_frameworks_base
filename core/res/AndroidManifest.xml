@@ -4113,7 +4113,7 @@
     <permission android:name="android.permission.INTENT_FILTER_VERIFICATION_AGENT"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Must be required by intent filter verifier receiver, to ensure that only the
+    <!-- Must be required by intent filter verifier rintent-filtereceiver, to ensure that only the
          system can interact with it.
          @hide
     -->
@@ -5143,6 +5143,12 @@
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
-</application>
+        <service android:name="com.android.server.pm.PackageManagerShellCommandDataLoader">
+            <intent-filter>
+                <action android:name="android.intent.action.LOAD_DATA" />
+            </intent-filter>
+        </service>
+
+    </application>
 
 </manifest>

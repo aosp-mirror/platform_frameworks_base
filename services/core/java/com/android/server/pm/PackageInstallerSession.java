@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.DataLoaderType.INCREMENTAL;
+import static android.content.pm.DataLoaderType.STREAMING;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ABORTED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_SIGNATURE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
@@ -49,12 +51,18 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.DataLoaderManager;
+import android.content.pm.DataLoaderParams;
+import android.content.pm.FileSystemControlParcel;
+import android.content.pm.IDataLoader;
+import android.content.pm.IDataLoaderStatusListener;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.IPackageInstallerSessionFileSystemConnector;
@@ -84,6 +92,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.RevocableFileDescriptor;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -127,12 +136,12 @@ import java.io.FileDescriptor;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String TAG = "PackageInstallerSession";
@@ -189,7 +198,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_VOLUME_UUID = "volumeUuid";
     private static final String ATTR_NAME = "name";
     private static final String ATTR_INSTALL_REASON = "installRason";
-    private static final String ATTR_DATA_LOADER_PACKAGE_NAME = "dataLoaderPackageName";
+    private static final String ATTR_IS_DATALOADER = "isDataLoader";
+    private static final String ATTR_DATALOADER_TYPE = "dataLoaderType";
+    private static final String ATTR_DATALOADER_PACKAGE_NAME = "dataLoaderPackageName";
+    private static final String ATTR_DATALOADER_CLASS_NAME = "dataLoaderClassName";
+    private static final String ATTR_DATALOADER_ARGUMENTS = "dataLoaderArguments";
     private static final String ATTR_LENGTH_BYTES = "lengthBytes";
     private static final String ATTR_METADATA = "metadata";
 
@@ -414,7 +427,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     };
 
     private boolean isDataLoaderInstallation() {
-        return !TextUtils.isEmpty(params.dataLoaderPackageName);
+        return params.dataLoaderParams != null;
+    }
+
+    private boolean isStreamingInstallation() {
+        return isDataLoaderInstallation() && params.dataLoaderParams.getType() == STREAMING;
+    }
+
+    private boolean isIncrementalInstallation() {
+        return isDataLoaderInstallation() && params.dataLoaderParams.getType() == INCREMENTAL;
     }
 
     /**
@@ -525,14 +546,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 stagedSessionErrorMessage != null ? stagedSessionErrorMessage : "";
 
         // TODO(b/136132412): sanity check if session should not be incremental
-        if (!params.isStaged && params.incrementalParams != null
-                && !params.incrementalParams.getPackageName().isEmpty()) {
+        if (!params.isStaged && isIncrementalInstallation()) {
             IncrementalManager incrementalManager = (IncrementalManager) mContext.getSystemService(
                     Context.INCREMENTAL_SERVICE);
             if (incrementalManager != null) {
                 mIncrementalFileStorages =
                         new IncrementalFileStorages(mPackageName, stageDir, incrementalManager,
-                                params.incrementalParams);
+                                params.dataLoaderParams);
             }
         }
     }
@@ -714,7 +734,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public void removeSplit(String splitName) {
         if (isDataLoaderInstallation()) {
             throw new IllegalStateException(
-                    "Cannot remove splits in a callback installation session.");
+                    "Cannot remove splits in a data loader installation session.");
         }
         if (TextUtils.isEmpty(params.appPackageName)) {
             throw new IllegalStateException("Must specify package name to remove a split");
@@ -753,7 +773,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private void assertCanWrite(boolean reverseMode) {
         if (isDataLoaderInstallation()) {
             throw new IllegalStateException(
-                    "Cannot write regular files in a callback installation session.");
+                    "Cannot write regular files in a data loader installation session.");
         }
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
@@ -894,7 +914,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public ParcelFileDescriptor openRead(String name) {
         if (isDataLoaderInstallation()) {
             throw new IllegalStateException(
-                    "Cannot read regular files in a callback installation session.");
+                    "Cannot read regular files in a data loader installation session.");
         }
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
@@ -1663,7 +1683,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 computeProgressLocked(true);
 
                 // Unpack native libraries for non-incremental installation
-                if (params.incrementalParams == null) {
+                if (isIncrementalInstallation()) {
                     extractNativeLibraries(stageDir, params.abiOverride, mayInheritNativeLibs());
                 }
             }
@@ -2382,7 +2402,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
         if (!isDataLoaderInstallation()) {
             throw new IllegalStateException(
-                    "Cannot add files to non-callback installation session.");
+                    "Cannot add files to non-data loader installation session.");
         }
         // Use installer provided name for now; we always rename later
         if (!FileUtils.isValidExtFilename(name)) {
@@ -2401,7 +2421,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public void removeFile(String name) {
         if (!isDataLoaderInstallation()) {
             throw new IllegalStateException(
-                    "Cannot add files to non-callback installation session.");
+                    "Cannot add files to non-data loader installation session.");
         }
         if (TextUtils.isEmpty(params.appPackageName)) {
             throw new IllegalStateException("Must specify package name to remove a split");
@@ -2415,76 +2435,121 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    static class Notificator {
+        private int mValue = 0;
+
+        void setValue(int value) {
+            synchronized (this) {
+                mValue = value;
+                this.notify();
+            }
+        }
+        int waitForValue() {
+            synchronized (this) {
+                while (mValue == 0) {
+                    try {
+                        this.wait();
+                    } catch (InterruptedException e) {
+                        // Happens if someone interrupts your thread.
+                    }
+                }
+                return mValue;
+            }
+        }
+    }
+
     /**
      * Makes sure files are present in staging location.
      */
     private void prepareDataLoader()
             throws PackageManagerException, StreamingException {
-        if (!isDataLoaderInstallation()) {
+        if (!isStreamingInstallation()) {
             return;
         }
 
         FileSystemConnector connector = new FileSystemConnector();
 
-        FileInfo[] addedFiles = mFiles.stream().filter(
-                file -> sAddedFilter.accept(new File(file.name))).toArray(FileInfo[]::new);
-        String[] removedFiles = mFiles.stream().filter(
+        List<InstallationFile> addedFiles = mFiles.stream().filter(
+                file -> sAddedFilter.accept(new File(file.name))).map(
+                    file -> new InstallationFile(
+                            file.name, file.lengthBytes, file.metadata)).collect(
+                Collectors.toList());
+        List<String> removedFiles = mFiles.stream().filter(
                 file -> sRemovedFilter.accept(new File(file.name))).map(
-                    file -> file.name.substring(0,
-                        file.name.length() - REMOVE_MARKER_EXTENSION.length())).toArray(
-                String[]::new);
+                    file -> file.name.substring(
+                            0, file.name.length() - REMOVE_MARKER_EXTENSION.length())).collect(
+                Collectors.toList());
 
-        DataLoader dataLoader = new DataLoader();
-        try {
-            dataLoader.onCreate(connector);
-
-            if (!dataLoader.onPrepareImage(addedFiles, removedFiles)) {
-                throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
-                        "Failed to prepare image.");
-            }
-        } catch (IOException e) {
-            throw new StreamingException(e);
-        } finally {
-            dataLoader.onDestroy();
-        }
-    }
-
-    static class DataLoader {
-        private ParcelFileDescriptor mInFd = null;
-        private FileSystemConnector mConnector = null;
-
-        void onCreate(FileSystemConnector connector) throws IOException {
-            mConnector = connector;
+        DataLoaderManager dataLoaderManager = mContext.getSystemService(DataLoaderManager.class);
+        if (dataLoaderManager == null) {
+            throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                    "Failed to find data loader manager service");
         }
 
-        void onDestroy() {
-            IoUtils.closeQuietly(mInFd);
-        }
+        // TODO(b/146080380): make this code async.
+        final Notificator created = new Notificator();
+        final Notificator started = new Notificator();
+        final Notificator imageReady = new Notificator();
 
-        private static final String STDIN_PATH = "-";
-        boolean onPrepareImage(FileInfo[] addedFiles, String[] removedFiles) throws IOException {
-            for (FileInfo fileInfo : addedFiles) {
-                String filePath = new String(fileInfo.metadata, StandardCharsets.UTF_8);
-                if (STDIN_PATH.equals(filePath) || TextUtils.isEmpty(filePath)) {
-                    if (mInFd == null) {
-                        Slog.e(TAG, "Invalid stdin file descriptor.");
-                        return false;
+        IDataLoaderStatusListener listener = new IDataLoaderStatusListener.Stub() {
+            @Override
+            public void onStatusChanged(int dataLoaderId, int status) {
+                switch (status) {
+                    case IDataLoaderStatusListener.DATA_LOADER_CREATED: {
+                        created.setValue(1);
+                        break;
                     }
-                    ParcelFileDescriptor inFd = ParcelFileDescriptor.dup(mInFd.getFileDescriptor());
-                    mConnector.writeData(fileInfo.name, 0, fileInfo.lengthBytes, inFd);
-                } else {
-                    File localFile = new File(filePath);
-                    ParcelFileDescriptor incomingFd = null;
-                    try {
-                        incomingFd = ParcelFileDescriptor.open(localFile,
-                                ParcelFileDescriptor.MODE_READ_ONLY);
-                        mConnector.writeData(fileInfo.name, 0, localFile.length(), incomingFd);
-                    } finally {
-                        IoUtils.closeQuietly(incomingFd);
+                    case IDataLoaderStatusListener.DATA_LOADER_STARTED: {
+                        started.setValue(1);
+                        break;
+                    }
+                    case IDataLoaderStatusListener.DATA_LOADER_IMAGE_READY: {
+                        imageReady.setValue(1);
+                        break;
+                    }
+                    case IDataLoaderStatusListener.DATA_LOADER_IMAGE_NOT_READY: {
+                        imageReady.setValue(2);
+                        break;
                     }
                 }
             }
-            return true;
+        };
+
+        final DataLoaderParams params = this.params.dataLoaderParams;
+
+        final FileSystemControlParcel control = new FileSystemControlParcel();
+        control.callback = connector;
+
+        Bundle dataLoaderParams = new Bundle();
+        dataLoaderParams.putParcelable("componentName", params.getComponentName());
+        dataLoaderParams.putParcelable("control", control);
+        dataLoaderParams.putParcelable("params", params.getData());
+
+        if (!dataLoaderManager.initializeDataLoader(sessionId, dataLoaderParams, listener)) {
+            throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                    "Failed to initialize data loader");
+        }
+        created.waitForValue();
+
+        IDataLoader dataLoader = dataLoaderManager.getDataLoader(sessionId);
+        if (dataLoader == null) {
+            throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                    "Failure to obtain data loader");
+        }
+
+        try {
+            dataLoader.start();
+            started.waitForValue();
+
+            dataLoader.prepareImage(addedFiles, removedFiles);
+            if (imageReady.waitForValue() == 2) {
+                throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                        "Failed to prepare image.");
+            }
+
+            dataLoader.destroy();
+        } catch (RemoteException e) {
+            throw new StreamingException(e);
         }
     }
 
@@ -2846,7 +2911,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeStringAttribute(out, ATTR_VOLUME_UUID, params.volumeUuid);
             writeIntAttribute(out, ATTR_INSTALL_REASON, params.installReason);
 
-            writeStringAttribute(out, ATTR_DATA_LOADER_PACKAGE_NAME, params.dataLoaderPackageName);
+            final boolean isDataLoader = params.dataLoaderParams != null;
+            writeBooleanAttribute(out, ATTR_IS_DATALOADER, isDataLoader);
+            if (isDataLoader) {
+                writeIntAttribute(out, ATTR_DATALOADER_TYPE, params.dataLoaderParams.getType());
+                writeStringAttribute(out, ATTR_DATALOADER_PACKAGE_NAME,
+                        params.dataLoaderParams.getComponentName().getPackageName());
+                writeStringAttribute(out, ATTR_DATALOADER_CLASS_NAME,
+                        params.dataLoaderParams.getComponentName().getClassName());
+                writeStringAttribute(out, ATTR_DATALOADER_ARGUMENTS,
+                        params.dataLoaderParams.getArguments());
+            }
 
             writeGrantedRuntimePermissionsLocked(out, params.grantedRuntimePermissions);
             writeWhitelistedRestrictedPermissionsLocked(out,
@@ -2957,7 +3032,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         params.volumeUuid = readStringAttribute(in, ATTR_VOLUME_UUID);
         params.installReason = readIntAttribute(in, ATTR_INSTALL_REASON);
 
-        params.dataLoaderPackageName = readStringAttribute(in, ATTR_DATA_LOADER_PACKAGE_NAME);
+        if (readBooleanAttribute(in, ATTR_IS_DATALOADER)) {
+            params.dataLoaderParams = new DataLoaderParams(
+                    readIntAttribute(in, ATTR_DATALOADER_TYPE),
+                    new ComponentName(
+                            readStringAttribute(in, ATTR_DATALOADER_PACKAGE_NAME),
+                            readStringAttribute(in, ATTR_DATALOADER_CLASS_NAME)),
+                    readStringAttribute(in, ATTR_DATALOADER_ARGUMENTS),
+                    null);
+        }
 
         final File appIconFile = buildAppIconFile(sessionId, sessionsDir);
         if (appIconFile.exists()) {

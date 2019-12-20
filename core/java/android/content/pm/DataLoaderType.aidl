@@ -17,25 +17,21 @@
 package android.content.pm;
 
 /**
- * Callbacks from a data loader binder service to report data loader status.
+ * Types of Data Loader for an installation session.
  * @hide
  */
-oneway interface IDataLoaderStatusListener {
-    /** Data loader status */
-    const int DATA_LOADER_CREATED = 0;
-    const int DATA_LOADER_DESTROYED = 1;
-
-    const int DATA_LOADER_STARTED = 2;
-    const int DATA_LOADER_STOPPED = 3;
-
-    const int DATA_LOADER_IMAGE_READY = 4;
-    const int DATA_LOADER_IMAGE_NOT_READY = 5;
-
-    const int DATA_LOADER_SLOW_CONNECTION = 6;
-    const int DATA_LOADER_NO_CONNECTION = 7;
-    const int DATA_LOADER_CONNECTION_OK = 8;
-
-    /** Data loader status callback */
-    void onStatusChanged(in int dataLoaderId, in int status);
+@Backing(type="int")
+enum DataLoaderType {
+    /**
+    * Default value, legacy installation.
+    */
+    NONE = 0,
+    /**
+     * Streaming installation using data loader.
+     */
+    STREAMING = 1,
+    /**
+     * Streaming installation using Incremental FileSystem.
+     */
+    INCREMENTAL = 2,
 }
-

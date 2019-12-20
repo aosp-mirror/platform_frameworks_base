@@ -1934,10 +1934,12 @@ package android.content.pm {
   }
 
   public class DataLoaderParams {
-    ctor public DataLoaderParams(@NonNull String, @NonNull String, @Nullable java.util.Map<java.lang.String,android.os.ParcelFileDescriptor>);
+    method @NonNull public static final android.content.pm.DataLoaderParams forIncremental(@NonNull android.content.ComponentName, @NonNull String, @Nullable java.util.Map<java.lang.String,android.os.ParcelFileDescriptor>);
+    method @NonNull public static final android.content.pm.DataLoaderParams forStreaming(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public final String getArguments();
+    method @NonNull public final android.content.ComponentName getComponentName();
     method @NonNull public final java.util.Map<java.lang.String,android.os.ParcelFileDescriptor> getDynamicArgs();
-    method @NonNull public final String getPackageName();
-    method @NonNull public final String getStaticArgs();
+    method @NonNull public final int getType();
   }
 
   public final class InstantAppInfo implements android.os.Parcelable {
@@ -2050,11 +2052,11 @@ package android.content.pm {
   public static class PackageInstaller.SessionParams implements android.os.Parcelable {
     method @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE) public void setAllocateAggressive(boolean);
     method @Deprecated public void setAllowDowngrade(boolean);
+    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setDataLoaderParams(@NonNull android.content.pm.DataLoaderParams);
     method public void setDontKillApp(boolean);
     method public void setEnableRollback(boolean);
     method public void setEnableRollback(boolean, int);
     method @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS) public void setGrantedRuntimePermissions(String[]);
-    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setIncrementalParams(@NonNull android.content.pm.DataLoaderParams);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setInstallAsApex();
     method public void setInstallAsInstantApp(boolean);
     method public void setInstallAsVirtualPreload();
