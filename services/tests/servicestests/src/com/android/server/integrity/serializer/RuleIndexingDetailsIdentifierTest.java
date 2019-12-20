@@ -129,7 +129,7 @@ public class RuleIndexingDetailsIdentifierTest {
 
         assertExpectException(
                 IllegalArgumentException.class,
-                /* expectedExceptionMessageRegex= */ "Invalid formula tag type.",
+                /* expectedExceptionMessageRegex= */ "Malformed rule identified.",
                 () -> splitRulesIntoIndexBuckets(ruleList));
     }
 
