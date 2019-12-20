@@ -266,6 +266,7 @@ filegroup {
     name: "framework-updatable-sources",
     srcs: [
         ":framework-sdkext-sources",
+        ":framework-tethering-srcs",
         ":updatable-media-srcs",
     ]
 }
@@ -370,6 +371,7 @@ java_defaults {
         "ext",
         "unsupportedappusage",
         "updatable_media_stubs",
+        "framework-tethering",
     ],
 
     jarjar_rules: ":framework-jarjar-rules",
@@ -605,10 +607,26 @@ filegroup {
     ],
 }
 
+// keep these files in sync with the package/Tethering/jarjar-rules.txt for the tethering module.
 filegroup {
     name: "framework-tethering-shared-srcs",
     srcs: [
         "core/java/android/util/LocalLog.java",
+        "core/java/com/android/internal/util/BitUtils.java",
+        "core/java/com/android/internal/util/IndentingPrintWriter.java",
+        "core/java/com/android/internal/util/IState.java",
+        "core/java/com/android/internal/util/MessageUtils.java",
+        "core/java/com/android/internal/util/Preconditions.java",
+        "core/java/com/android/internal/util/State.java",
+        "core/java/com/android/internal/util/StateMachine.java",
+    ],
+}
+
+filegroup {
+    name: "framework-tethering-annotations",
+    srcs: [
+        "core/java/android/annotation/NonNull.java",
+        "core/java/android/annotation/SystemApi.java",
     ],
 }
 // Build ext.jar

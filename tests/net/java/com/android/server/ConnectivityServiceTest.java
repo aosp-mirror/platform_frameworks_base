@@ -164,7 +164,6 @@ import android.net.ProxyInfo;
 import android.net.ResolverParamsParcel;
 import android.net.RouteInfo;
 import android.net.SocketKeepalive;
-import android.net.TetheringManager;
 import android.net.UidRange;
 import android.net.metrics.IpConnectivityLog;
 import android.net.shared.NetworkMonitorUtils;
@@ -1133,7 +1132,6 @@ public class ConnectivityServiceTest {
         doReturn(new TestNetIdManager()).when(deps).makeNetIdManager();
         doReturn(mNetworkStack).when(deps).getNetworkStack();
         doReturn(systemProperties).when(deps).getSystemProperties();
-        doReturn(mock(TetheringManager.class)).when(deps).getTetheringManager();
         doReturn(mock(ProxyTracker.class)).when(deps).makeProxyTracker(any(), any());
         doReturn(mMetricsService).when(deps).getMetricsLogger();
         doReturn(true).when(deps).queryUserAccess(anyInt(), anyInt());
