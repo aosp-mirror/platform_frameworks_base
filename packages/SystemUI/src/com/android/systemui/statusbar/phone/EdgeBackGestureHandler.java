@@ -97,6 +97,8 @@ public class EdgeBackGestureHandler implements DisplayListener,
 
     // The edge width where touch down is allowed
     private int mEdgeWidth;
+    // The bottom gesture area height
+    private int mBottomGestureHeight;
     // The slop to distinguish between horizontal and vertical motion
     private final float mTouchSlop;
     // Duration after which we consider the event as longpress.
@@ -174,6 +176,8 @@ public class EdgeBackGestureHandler implements DisplayListener,
     public void updateCurrentUserResources(Resources res) {
         mEdgeWidth = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_backGestureInset);
+        mBottomGestureHeight = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.navigation_bar_gesture_height);
     }
 
     /**
@@ -313,6 +317,11 @@ public class EdgeBackGestureHandler implements DisplayListener,
     private boolean isWithinTouchRegion(int x, int y) {
         // Disallow if too far from the edge
         if (x > mEdgeWidth + mLeftInset && x < (mDisplaySize.x - mEdgeWidth - mRightInset)) {
+            return false;
+        }
+
+        // Disallow if we are in the bottom gesture area
+        if (y >= (mDisplaySize.y - mBottomGestureHeight)) {
             return false;
         }
 
