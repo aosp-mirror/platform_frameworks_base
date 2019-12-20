@@ -396,13 +396,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Aplikaciji dovoljuje pošiljanje fiksnih oddaj, ki ostanejo po koncu oddajanja. Zaradi prekomerne uporabe je delovanje televizorja lahko počasno ali nestabilno, ker porabi preveč pomnilnika."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Aplikaciji omogoča hitro pošiljanje fiksnih oddaj, ki ostanejo po koncu oddajanja. Zaradi prekomerne uporabe je delovanje telefona lahko počasno ali nestabilno, ker porabi preveč pomnilnika."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"branje stikov"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Aplikaciji omogoča branje podatkov o stikih v tabličnem računalniku, vključno s pogostostjo klicev, pošiljanja e-poštnih sporočil in druge komunikacije s posamezniki. S tem dovoljenjem lahko aplikacije shranjujejo podatke o stikih in zlonamerne aplikacije lahko te podatke razkrijejo brez vaše vednosti."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Aplikaciji dovoljuje branje podatkov o stikih, shranjenih v televizorju, vključno s pogostostjo klicev, pošiljanja e-poštnih sporočil in druge komunikacije s posamezniki. S tem dovoljenjem lahko aplikacije shranjujejo podatke o stikih in zlonamerne aplikacije lahko te podatke razkrijejo brez vaše vednosti."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Aplikaciji omogoča branje podatkov o stikih v telefonu, vključno s pogostostjo klicev, pošiljanja e-poštnih sporočil in druge komunikacije s posamezniki. S tem dovoljenjem lahko aplikacije shranjujejo podatke o stikih in zlonamerne aplikacije lahko te podatke razkrijejo brez vaše vednosti."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"spreminjanje stikov"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Aplikaciji omogoča spreminjanje podatkov o stikih v tabličnem računalniku, vključno s pogostostjo klicev, pošiljanja e-poštnih sporočil in druge komunikacije z določenimi stiki. S tem dovoljenjem lahko aplikacije brišejo podatke o stikih."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Aplikaciji dovoljuje spreminjanje podatkov o stikih v televizorju, vključno s pogostostjo klicev, pošiljanja e-poštnih sporočil in druge komunikacije z določenimi stiki. S tem dovoljenjem lahko aplikacije brišejo podatke o stikih."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Aplikaciji omogoča spreminjanje podatkov o stikih v telefonu, vključno s pogostostjo klicev, pošiljanja e-poštnih sporočil in druge komunikacije z določenimi stiki. S tem dovoljenjem lahko aplikacije brišejo podatke o stikih."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Aplikaciji dovoljuje spreminjanje podatkov o stikih, shranjenih v tabličnem računalniku. S tem dovoljenjem lahko aplikacije brišejo podatke o stikih."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Aplikaciji dovoljuje spreminjanje podatkov o stikih, shranjenih v telefonu. S tem dovoljenjem lahko aplikacije brišejo podatke o stikih."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"branje dnevnika klicev"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Ta aplikacija lahko prebere zgodovino klicev."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"pisanje v dnevnik klicev"</string>
@@ -426,6 +430,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"dostop do približne lokacije (na podlagi omrežja) samo med delovanjem v ospredju"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Ta aplikacija lahko pridobi vašo lokacijo na podlagi omrežnih virov, kot so bazne postaje in omrežja Wi-Fi, vendar samo, ko deluje v ospredju. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v tabličnem računalniku."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Ta aplikacija lahko pridobi vašo lokacijo na podlagi omrežnih virov, kot so bazne postaje in omrežja Wi-Fi, vendar samo, ko deluje v ospredju. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v televizorju."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Ta aplikacija lahko pridobi vašo približno lokacijo samo, ko deluje v ospredju. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v avtomobilu."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Ta aplikacija lahko pridobi vašo lokacijo na podlagi omrežnih virov, kot so bazne postaje in omrežja Wi-Fi, vendar samo, ko deluje v ospredju. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v telefonu."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"dostop do lokacije med izvajanjem v ozadju"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Če to dovolite poleg dostopa do približne ali natančne lokacije, lahko aplikacija dostopa do lokacije, medtem ko se izvaja v ozadju."</string>
@@ -1279,6 +1284,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Zvoki alarma"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Zvoki obvestil"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Neznano"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Povezava z omrežjem <xliff:g id="SSID">%1$s</xliff:g> ni mogoča"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Dotaknite se za spremembo nastavitev zasebnosti in poskusite znova"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Želite spremeniti nastavitev zasebnosti?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Omrežje <xliff:g id="SSID_0">%1$s</xliff:g> bo za vzpostavitev povezave morda želelo uporabiti naslov MAC naprave, ki je enolični identifikator. To lahko napravam v bližini omogoči spremljanje lokacije vaše naprave. \n\nČe nadaljujete, bo omrežje <xliff:g id="SSID_1">%1$s</xliff:g> spremenilo nastavitev zasebnosti in se poskusilo znova povezati."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Spremeni nastavitev"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Nastavitev je posodobljena. Poskusite znova vzpostaviti povezavo."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Nastavitve zasebnosti ni mogoče spremeniti"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Omrežja ni mogoče najti"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="one">Na voljo so omrežja Wi-Fi</item>
       <item quantity="two">Na voljo so omrežja Wi-Fi</item>

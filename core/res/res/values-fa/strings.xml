@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"به برنامه اجازه می‌دهد تا پخش برنامه‌های دلچسبی را ارسال کند که پس از اتمام پخش باقی می‌ماند. استفاده بیش از حد شاید باعث شود تلویزیون با استفاده بیش از اندازه از حافظه کند یا بی‌ثبات عمل کند."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"‏به برنامه اجازه می‎دهد تا پخش‌های ماندگار را که پس از اتمام پخش باقی می‎مانند ارسال کند. استفاده بیش از حد این ویژگی ممکن است باعث مصرف بیش از حد حافظه و در نتیجه کندی یا ناپایداری تلفن شود."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"خواندن مخاطبین شما"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره شده در رایانهٔ لوحی شما را بخواند از جمله، تعداد دفعات تماس‌هایی که برقرار کرده‌اید، ایمیل‌هایی که ارسال کرده‌اید یا به روش‌های دیگری به افراد خاصی ارتباط برقرار کرده‌اید. این با برنامه‌ها امکان می‌دهد داده‌های مخاطب شما را ذخیره کنند و برنامه‌های مخرب ممکن است داده‌های مخاطب را بدون اطلاع شما به اشتراک بگذارند."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره شده در تلویزیون شما را از جمله تعداد تماس‌‌هایی که برقرار کرده‌اید، ایمیل‌هایی که ارسال کرده‌اید یا ارتباطاتی را که به هر شکل با مخاطبین خاصی برقرار کردید تغییر دهد. این مجوز به برنامه اجازه می‌دهد تا داده‌های مخاطب را ذخیره کند و شاید برنامه‌های مخرب داده‌های مخاطب را بدون اطلاع شما به اشتراک بگذارند."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره شده در تلفن شما را بخواند از جمله، تعداد دفعات تماس‌هایی که برقرار کرده‌اید، ایمیل‌هایی که ارسال کرده‌اید یا به روش‌های دیگری با افراد خاصی ارتباط برقرار کرده‌اید. این به برنامه‌ها امکان می‌دهد داده‌های مخاطب شما را ذخیره کنند و برنامه‌های مخرب ممکن است داده‌های مخاطب را بدون اطلاع شما به اشتراک بگذارند."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"تغییر مخاطبین"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره شده در رایانهٔ لوحی شما را از جمله تعداد تماس‌‌هایی که برقرار کرده‌اید، ایمیل‌هایی که ارسال کرده‌اید یا ارتباطاتی را که به هر شکل با مخاطبین خاصی برقرار کردید تغییر دهد. این مجوز به برنامه اجازه می‌دهد داده‌های مخاطب را حذف نماید."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره شده در تلویزیون شما را از جمله تعداد تماس‌‌هایی که برقرار کرده‌اید، ایمیل‌هایی که ارسال کرده‌اید یا ارتباطاتی را که به هر شکل با مخاطبین خاصی برقرار کردید تغییر دهد. این مجوز به برنامه اجازه می‌دهد داده‌های مخاطب را حذف نماید."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره شده در تلفن شما را از جمله تعداد تماس‌‌هایی که برقرار کرده‌اید، ایمیل‌هایی که ارسال کرده‌اید یا ارتباطاتی را که به هر شکل با مخاطبین خاصی برقرار کردید تغییر دهد. این مجوز به برنامه اجازه می‌دهد داده‌های مخاطب را حذف نماید."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره‌شده در رایانه لوحی شما را تغییر دهد. این مجوز به برنامه‌ها اجازه می‌دهد داده‌های مخاطب را حذف کنند."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره‌شده در تلفنتان را تغییر دهد. این مجوز به برنامه‌ها اجازه می‌دهد داده‌های مخاطب را حذف کنند."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"خواندن گزارش تماس"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"این برنامه می‌تواند سابقه تماس شما را بخواند."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"نوشتن گزارش تماس"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"دسترسی به مکان تقریبی (مبتنی بر شبکه) فقط در پیش‌زمینه"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"‏این برنامه می‌تواند براساس منابع شبکه مانند دکل‌های مخابراتی و شبکه‌های Wi-Fi، مکانتان را تشخیص دهد، اما فقط درصورتی‌که برنامه در پیش‌زمینه باشد. این خدمات مکان باید روشن و در رایانه لوحی شما دردسترس باشند تا برنامه بتواند از آن‌ها استفاده کند."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"‏این برنامه می‌تواند براساس منابع شبکه مانند دکل‌های مخابراتی و شبکه‌های Wi-Fi، مکانتان را تشخیص دهد، اما فقط درصورتی‌که برنامه در پیش‌زمینه باشد. این خدمات مکان باید روشن و در تلویزیون شما دردسترس باشند تا برنامه بتواند از آن‌ها استفاده کند."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"این برنامه فقط هنگامی‌که در پیش‌زمینه است می‌تواند مکان تقریبی شما را دریافت کند. برای اینکه برنامه بتواند از این خدمات مکان استفاده کند، این خدمات باید روشن و در خودروی شما در دسترس باشند."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"‏این برنامه می‌تواند براساس منابع شبکه مانند دکل‌های مخابراتی و شبکه‌های Wi-Fi، مکانتان را تشخیص دهد، اما فقط درصورتی‌که برنامه در پیش‌زمینه است. این خدمات مکان باید روشن و در تلفن شما دردسترس باشند تا برنامه بتواند از آن‌ها استفاده کند."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"دسترسی به مکان در پس‌زمینه"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"اگر این مجوز نیز برای دسترسی دقیق یا تقریبی به مکان داده شود، برنامه می‌تواند درحین اجرا در پس‌زمینه به مکان دسترسی پیدا کند."</string>
@@ -1182,7 +1187,7 @@
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"مقیاس"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"همیشه نشان داده شود"</string>
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"‏در تنظیمات سیستم &gt;برنامه‎ها &gt; مورد بارگیری شده آن را دوباره فعال کنید."</string>
-    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> از تنظیم فعلی اندازه نمایشگر پشتیبانی نمی‌کند و ممکن است رفتار غیرمنتظره‌ای داشته باشد."</string>
+    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> از تنظیم فعلی اندازه نمایش پشتیبانی نمی‌کند و ممکن است رفتار غیرمنتظره‌ای داشته باشد."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"همیشه نشان داده شود"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"‏<xliff:g id="APP_NAME">%1$s</xliff:g> برای نسخه ناسازگار سیستم‌عامل Android ساخته شده است و ممکن است رفتاری برخلاف انتظار داشته باشد. ممکن است نسخه به‌روزی از برنامه در دسترس باشد."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"همیشه نشان داده شود"</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"صداهای زنگ"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"صداهای اعلان"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"نامشخص"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"برقراری اتصال به <xliff:g id="SSID">%1$s</xliff:g> ممکن نیست"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"برای تغییر تنظیم حریم‌خصوصی ضربه بزنید و دوباره امتحان کنید"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"تنظیم حریم‌خصوصی تغییر کند؟"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"‏<xliff:g id="SSID_0">%1$s</xliff:g> ممکن است بخواهد بااستفاده از نشانی MAC دستگاه شما که شناسه منحصربه‌فردی است متصل شود. این کار ممکن است به دستگاه‌های اطراف امکان دهد مکان دستگاهتان را ردیابی کنند. \n\nاگر ادامه دهید، <xliff:g id="SSID_1">%1$s</xliff:g> تنظیم حریم‌خصوصی شما را تغییر می‌دهد و دوباره سعی می‌کند متصل شود."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"تغییر تنظیم"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"تنظیم به‌روزرسانی شد. دوباره وصل شوید."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"تنظیم حریم‌خصوصی را نمی‌توان تغییر داد"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"شبکه‌ای پیدا نشد"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="one">‏شبکه Wi-Fi در دسترس</item>
       <item quantity="other">‏شبکه‌ Wi-Fi در دسترس</item>

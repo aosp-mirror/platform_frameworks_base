@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Ermöglicht der App, dauerhafte Broadcasts zu senden, die auch nach Ende des Broadcasts bestehen bleiben. Ein zu intensiver Einsatz kann das Gerät langsam oder instabil machen, weil zu viel Arbeitsspeicher belegt wird."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Ermöglicht der App, dauerhafte Broadcasts zu senden, die auch nach Ende des Broadcasts bestehen bleiben. Ein zu intensiver Einsatz kann das Telefon langsam oder instabil machen, weil zu viel Arbeitsspeicher belegt wird."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"Kontakte lesen"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Ermöglicht der App, Daten zu den auf deinem Tablet gespeicherten Kontakten zu lesen, einschließlich der Häufigkeit, mit der du bestimmte Personen angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert hast. Die Berechtigung erlaubt Apps, deine Kontaktdaten zu speichern, und schädliche Apps können Kontaktdaten ohne dein Wissen weiterleiten."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Ermöglicht der App, Daten zu den auf deinem Fernseher gespeicherten Kontakten zu lesen, einschließlich der Häufigkeit, mit der du bestimmte Kontakte angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert hast. Diese Berechtigung ermöglicht der App, deine Kontaktdaten zu speichern. Schädliche Apps können so Kontaktdaten ohne dein Wissen weitergeben."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Ermöglicht der App, Daten zu den auf deinem Telefon gespeicherten Kontakten zu lesen, einschließlich der Häufigkeit, mit der du bestimmte Personen angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert hast. Die Berechtigung erlaubt Apps, deine Kontaktdaten zu speichern, und schädliche Apps können Kontaktdaten ohne dein Wissen weiterleiten."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"Kontakte ändern"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Ermöglicht der App, Daten zu Kontakten, die auf deinem Tablet gespeichert sind, zu ändern, einschließlich der Häufigkeit, mit der du bestimmte Kontakte angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert hast. Die Berechtigung erlaubt Apps, Kontaktdaten zu löschen."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Ermöglicht der App, Daten zu den auf deinem Fernseher gespeicherten Kontakten zu ändern, einschließlich der Häufigkeit, mit der du bestimmte Kontakte angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert hast. Die Berechtigung erlaubt Apps, Kontaktdaten zu löschen."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Ermöglicht der App, Daten zu Kontakten, die auf deinem Telefon gespeichert sind, zu ändern, einschließlich der Häufigkeit, mit der du bestimmte Kontakte angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert hast. Die Berechtigung erlaubt Apps, Kontaktdaten zu löschen."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Ermöglicht der App, Daten zu den auf deinem Tablet gespeicherten Kontakten zu ändern. Diese Berechtigung erlaubt Apps, Kontaktdaten zu löschen."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Ermöglicht der App, Daten zu den auf deinem Smartphone gespeicherten Kontakten zu ändern. Diese Berechtigung erlaubt Apps, Kontaktdaten zu löschen."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"Anrufliste lesen"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Diese App kann deine Anrufliste lesen."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"Anrufliste bearbeiten"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"Nur bei Ausführung im Vordergrund auf den ungefähren Standort (netzwerkbasiert) zugreifen"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Diese App kann deinen Standort anhand von Netzwerkquellen wie Mobilfunkmasten und WLANs ermitteln, allerdings nur, wenn sie im Vordergrund ausgeführt wird. Diese Standortdienste müssen auf deinem Tablet aktiviert und verfügbar sein, damit die App sie nutzen kann."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Diese App kann deinen Standort anhand von Netzwerkquellen wie Mobilfunkmasten und WLANs ermitteln, allerdings nur, wenn sie im Vordergrund ausgeführt wird. Diese Standortdienste müssen auf deinem Fernseher aktiviert und verfügbar sein, damit die App sie nutzen kann."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Diese App kann deinen ungefähren Standort nur dann ermitteln, wenn sie im Vordergrund ausgeführt wird. Damit die App diese Standortdienste nutzen kann, müssen sie in deinem Auto aktiviert und verfügbar sein."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Diese App kann deinen Standort anhand von Netzwerkquellen wie Mobilfunkmasten und WLANs ermitteln, allerdings nur, wenn sie im Vordergrund ausgeführt wird. Diese Standortdienste müssen auf deinem Smartphone aktiviert und verfügbar sein, damit die App sie nutzen kann."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"Im Hintergrund auf den Standort zugreifen"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Wenn zusätzlich zum Zugriff auf den ungefähren oder genauen Standort diese Erlaubnis erteilt wird, kann die App bei Ausführung im Hintergrund auf den Standort zugreifen."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Weckertöne"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Benachrichtigungstöne"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Unbekannt"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Verbindung zu <xliff:g id="SSID">%1$s</xliff:g> nicht möglich"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Tippe, um die Datenschutzeinstellung zu ändern und es noch einmal zu versuchen"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Datenschutzeinstellung ändern?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> möchte möglicherweise eine Verbindung über die MAC-Adresse deines Geräts herstellen; die MAC-Adresse ist eine Kennung, mit der das Gerät eindeutig identifiziert werden kann. Das kann dazu führen, dass andere Geräte in der Nähe den Standort deines Geräts verfolgen können. \n\nWenn du fortfährst, wird <xliff:g id="SSID_1">%1$s</xliff:g> deine Datenschutzeinstellung ändern und den Verbindungsversuch wiederholen."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Einstellung ändern"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Einstellung aktualisiert. Versuch noch einmal, eine Verbindung herzustellen."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Datenschutzeinstellung kann nicht geändert werden"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Netzwerk nicht gefunden"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">WLANs verfügbar</item>
       <item quantity="one">WLAN verfügbar</item>

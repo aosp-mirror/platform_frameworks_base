@@ -24,7 +24,6 @@ import android.app.IActivityTaskManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -51,7 +50,6 @@ class TaskPositioningController {
     private @Nullable TaskPositioner mTaskPositioner;
 
     private final Rect mTmpClipRect = new Rect();
-    private IBinder mTransferTouchFromToken;
 
     boolean isPositioningLocked() {
         return mTaskPositioner != null;
@@ -104,8 +102,6 @@ class TaskPositioningController {
 
         mTmpClipRect.set(0, 0, p.x, p.y);
         t.setWindowCrop(mInputSurface, mTmpClipRect);
-        t.transferTouchFocus(mTransferTouchFromToken, h.token);
-        mTransferTouchFromToken = null;
     }
 
     boolean startMovingTask(IWindow window, float startX, float startY) {
@@ -168,6 +164,7 @@ class TaskPositioningController {
         mPositioningDisplay = displayContent;
 
         mTaskPositioner = TaskPositioner.create(mService);
+        mTaskPositioner.register(displayContent);
 
         // We need to grab the touch focus so that the touch events during the
         // resizing/scrolling are not sent to the app. 'win' is the main window
@@ -178,8 +175,12 @@ class TaskPositioningController {
                 && displayContent.mCurrentFocus.mAppToken == win.mAppToken) {
             transferFocusFromWin = displayContent.mCurrentFocus;
         }
-        mTransferTouchFromToken = transferFocusFromWin.mInputChannel.getToken();
-        mTaskPositioner.register(displayContent);
+        if (!mInputManager.transferTouchFocus(
+                transferFocusFromWin.mInputChannel, mTaskPositioner.mServerChannel)) {
+            Slog.e(TAG_WM, "startPositioningLocked: Unable to transfer touch focus");
+            cleanUpTaskPositioner();
+            return false;
+        }
 
         mTaskPositioner.startDrag(win, resize, preserveOrientation, startX, startY);
         return true;

@@ -402,13 +402,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"يتيح للتطبيق إرسال عمليات بث طويلة تظل بعد انتهاء البث. وقد يؤدي الاستخدام المفرط إلى بطء أو عدم استقرار في التلفزيون حيث يتم استخدام قدر كبير من الذاكرة."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"للسماح للتطبيق بإرسال مجموعات بث مستمرة، والتي تظل بعد انتهاء البث. قد يؤدي الاستخدام بكثرة إلى حدوث بطء أو عدم استقرار في الهاتف من خلال التسبب في استخدام الهاتف لمساحة كبيرة للغاية من الذاكرة."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"قراءة جهات الاتصال"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"للسماح للتطبيق بقراءة بيانات حول جهات الاتصال المخزنة على الجهاز اللوحي، بما في ذلك مدى تكرار اتصالك بأفراد بعينهم أو مراسلتهم عبر البريد الإلكتروني أو التواصل معهم بطرق أخرى خلافًا لذلك. ويتيح هذا الإذن للتطبيقات حفظ بيانات جهات الاتصال، وقد تشارك التطبيقات الضارة بيانات جهات الاتصال بدون معرفتك."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"يتيح للتطبيق قراءة بيانات حول جهات الاتصال المخزنة على التلفزيون، بما في ذلك مدى تكرار الاتصال وإرسال الرسائل الإلكترونية والتواصل بالطرق الأخرى مع أفراد بعينهم. ويتيح هذا الإذن للتطبيقات حفظ بيانات جهة الاتصال، وقد تشارك التطبيقات الضارة بيانات جهة الاتصال بدون علمك."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"للسماح للتطبيق بقراءة بيانات حول جهات الاتصال المخزنة على الهاتف، بما في ذلك مدى تكرار اتصالك بأفراد بعينهم أو مراسلتهم عبر البريد الإلكتروني أو التواصل معهم بطرق أخرى خلافًا لذلك. ويتيح هذا الإذن للتطبيقات حفظ بيانات جهات الاتصال، وقد تشارك التطبيقات الضارة بيانات جهات الاتصال بدون معرفتك."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"تعديل جهات الاتصال"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"للسماح للتطبيق بتعديل البيانات حول جهات الاتصال المخزنة على جهازك اللوحي، بما في ذلك مدى تكرار اتصالك بجهات اتصال بعينها أو مراسلتها عبر البريد الإلكتروني أو التواصل معها بأية طريقة أخرى خلافًا لذلك. وقد يتيح هذا الإذن للتطبيقات حذف بيانات جهات الاتصال."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"يتيح للتطبيق تعديل البيانات حول جهات الاتصال المخزنة على التلفزيون، بما في ذلك مدى تكرار اتصالك بجهات اتصال بعينها أو مراسلتها عبر البريد الإلكتروني أو التواصل معها بأية طريقة أخرى خلافًا لذلك. ويتيح هذا الإذن للتطبيقات حذف بيانات جهات الاتصال."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"للسماح للتطبيق بتعديل البيانات حول جهات الاتصال المخزنة على هاتفك، بما في ذلك مدى تكرار اتصالك بجهات اتصال بعينها أو مراسلتها عبر البريد الإلكتروني أو التواصل معها بأية طريقة أخرى خلافًا لذلك. وقد يتيح هذا الإذن للتطبيقات حذف بيانات جهات الاتصال."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"يسمح هذا الإذن للتطبيق بتعديل البيانات حول جهات الاتصال المخزّنة على جهازك اللوحي. ويسمح هذا الإذن للتطبيقات بحذف بيانات جهات الاتصال."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"يسمح هذا الإذن للتطبيق بتعديل البيانات حول جهات الاتصال المخزّنة على هاتفك. ويسمح هذا الإذن للتطبيقات بحذف بيانات جهات الاتصال."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"قراءة سجل المكالمات"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"يمكن لهذا التطبيق قراءة سجل المكالمات."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"كتابة سجل المكالمات"</string>
@@ -432,6 +436,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"الوصول إلى الموقع الجغرافي التقريبي (بالاعتماد على الشبكة) في الخلفية فقط"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"‏يمكن لهذا التطبيق معرفة موقعك مستعينًا بمصادر الشبكات مثل الأبراج الخلوية وشبكات Wi-Fi ولكن يجب أن يعمل في الخلفية. ويجب تفعيل خدمات المواقع هذه وتوفّرها على جهازك اللوحي كي يتمكن التطبيق من استخدامها."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"‏يمكن لهذا التطبيق معرفة موقعك مستعينًا بمصادر الشبكات مثل الأبراج الخلوية وشبكات Wi-Fi ولكن يجب أن يعمل في الخلفية. ويجب تفعيل خدمات المواقع هذه وتوفّرها على جهاز التلفزيون كي يتمكن التطبيق من استخدامها."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"لا يمكن لهذا التطبيق معرفة موقعك الجغرافي التقريبي إلا إذا كان يعمل في الخلفية. ويجب تفعيل خدمات الموقع الجغرافي هذه وأن تكون متاحة في سيارتك حتى يتمكن التطبيق من استخدامها."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"‏يمكن لهذا التطبيق معرفة موقعك مستعينًا بمصادر الشبكات مثل الأبراج الخلوية وشبكات Wi-Fi ولكن يجب أن يعمل في الخلفية. ويجب تفعيل خدمات المواقع هذه وتوفّرها على هاتفك كي يتمكن التطبيق من استخدامها."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"الوصول إلى الموقع الجغرافي في الخلفية"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"إذا تمّ منح إذن التطبيق هذا بالإضافة إلى الموقع الجغرافي التقريبي أو الدقيق، يمكن للتطبيق الوصول إلى الموقع الجغرافي أثناء تشغيله في الخلفية."</string>
@@ -1319,6 +1324,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"أصوات التنبيه"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"أصوات الإشعار"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"غير معروف"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"لا يمكن الاتصال بـ <xliff:g id="SSID">%1$s</xliff:g>."</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"انقر لتغيير إعدادات الخصوصية وإعادة المحاولة."</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"هل تريد تغيير إعداد الخصوصية؟"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"‏قد يحتاج <xliff:g id="SSID_0">%1$s</xliff:g> إلى الاتصال باستخدام عنوان MAC الخاص بجهازك ومعرّف فريد. وقد يسمح هذا الإجراء للأجهزة القريبة بتتبع الموقع الجغرافي لجهازك. \n\nفي حال مواصلة تنفيذ هذا الإجراء، سيغيّر <xliff:g id="SSID_1">%1$s</xliff:g> إعداد الخصوصية ويحاول إعادة الاتصال."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"تغيير الإعداد"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"تم تعديل الإعداد. حاوِل إعادة الاتصال."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"لا يمكن تغيير إعداد الخصوصية."</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"لم يتم العثور على الشبكة."</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="zero">‏لا تتوفر أي شبكات Wi-Fi</item>
       <item quantity="two">‏تتوفر شبكتا Wi-Fi</item>

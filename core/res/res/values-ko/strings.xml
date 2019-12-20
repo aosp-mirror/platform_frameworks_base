@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"앱이 브로드캐스트가 끝난 후에도 흥미로운 브로드캐스트를 보낼 수 있도록 허용합니다. 이 기능을 과도하게 사용하면 메모리 사용량이 많아져 TV 속도가 저하되거나 성능이 불안정해질 수 있습니다."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"앱이 브로드캐스트가 끝난 후에 남은 브로드캐스트를 보낼 수 있도록 허용합니다. 앱을 지나치게 사용하면 휴대전화에서 메모리를 너무 많이 사용하도록 하여 속도를 저하시키거나 불안정하게 만들 수 있습니다."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"연락처 읽기"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 사용자 태블릿에 저장된 연락처에 대한 데이터를 앱이 읽도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 저장할 수 있으며, 악성 앱이 사용자 모르게 연락처 데이터를 공유할 수도 있습니다."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"앱이 특정 연락처와 통화를 하거나 이메일을 주고받거나 다른 방법으로 연락한 횟수를 포함하여 TV에 저장된 연락처 관련 데이터를 읽을 수 있도록 허용합니다. 이 경우 앱이 연락처 데이터를 저장할 수 있으며 악성 앱이 사용자 몰래 연락처 데이터에 공유할 수도 있습니다."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 사용자 휴대전화에 저장된 연락처에 대한 데이터를 앱이 읽도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 저장할 수 있으며, 악성 앱이 사용자 모르게 연락처 데이터를 공유할 수도 있습니다."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"연락처 수정"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 사용자 태블릿에 저장된 연락처에 대한 데이터를 앱이 수정할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 삭제할 수 있습니다."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"앱이 특정 연락처와 통화를 하거나 이메일을 주고받거나 다른 수단으로 연락한 횟수를 포함하여 TV에 저장된 연락처 관련 데이터를 수정할 수 있도록 허용합니다. 이 경우 앱이 연락처 데이터를 삭제할 수 있습니다."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 사용자 휴대전화에 저장된 연락처에 대한 데이터를 앱이 수정할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 삭제할 수 있습니다."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"태블릿에 저장된 연락처에 관한 데이터를 앱이 수정하도록 허용합니다. 이 권한을 사용하면 앱에서 연락처 데이터를 삭제할 수 있습니다."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"휴대전화에 저장된 연락처에 관한 데이터를 앱이 수정하도록 허용합니다. 이 권한을 사용하면 앱에서 연락처 데이터를 삭제할 수 있습니다."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"통화 기록 읽기"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"이 앱은 통화 기록을 읽을 수 있습니다."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"통화 기록 쓰기"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"포그라운드에서만 대략적인 위치(네트워크 기반)에 액세스"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"앱이 포그라운드에 있을 때만 휴대전화 기지국과 Wi-Fi 네트워크 등의 네트워크 소스를 바탕으로 사용자의 위치를 파악할 수 있습니다. 앱에서 위치 서비스를 사용하려면 태블릿에서 위치 서비스가 켜져 있으며 사용 가능해야 합니다."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"앱이 포그라운드에 있을 때만 휴대전화 기지국과 Wi-Fi 네트워크 등의 네트워크 소스를 바탕으로 사용자의 위치를 파악할 수 있습니다. 앱에서 위치 서비스를 사용하려면 TV에서 위치 서비스가 켜져 있으며 사용 가능해야 합니다."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"이 앱은 포그라운드에 있을 때만 나의 대략적인 위치를 확인할 수 있습니다. 앱에서 위치 서비스를 사용하려면 차량에서 위치 서비스가 지원되며 사용 설정되어 있어야 합니다."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"앱이 포그라운드에 있을 때만 휴대전화 기지국과 Wi-Fi 네트워크 등의 네트워크 소스를 바탕으로 사용자의 위치를 파악할 수 있습니다. 앱에서 위치 서비스를 사용하려면 휴대전화에서 위치 서비스가 켜져 있으며 사용 가능해야 합니다."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"백그라운드에서 위치 정보 액세스"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"이 권한이 대략적인 위치 정보 또는 정확한 위치 정보 액세스 권한에 추가적으로 부여되면 앱이 백그라운드에서 실행되는 동안 위치에 액세스할 수 있습니다."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"알람 소리"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"알림 사운드"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"알 수 없음"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"\'<xliff:g id="SSID">%1$s</xliff:g>\'에 연결할 수 없음"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"탭하여 개인정보 보호 설정을 변경하고 다시 시도하세요."</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"개인정보 보호 설정을 변경하시겠습니까?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g>에서 기기의 고유한 식별자인 MAC 주소를 사용하여 연결을 시도할 수도 있습니다. 이 경우 근처 기기가 내 기기의 위치를 추적할 수도 있습니다. \n\n계속하면 <xliff:g id="SSID_1">%1$s</xliff:g>에서 개인정보 보호 설정을 변경한 다음 연결을 다시 시도합니다."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"설정 변경"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"설정이 업데이트되었습니다. 다시 연결해 보세요."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"개인정보 보호 설정을 변경할 수 없습니다."</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"네트워크를 찾을 수 없습니다."</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">Wi-Fi 네트워크 사용 가능</item>
       <item quantity="one">Wi-Fi 네트워크 사용 가능</item>
