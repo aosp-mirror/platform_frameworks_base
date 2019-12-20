@@ -16,6 +16,8 @@
 
 package com.android.server.content;
 
+import static android.content.PermissionChecker.PERMISSION_GRANTED;
+
 import android.Manifest;
 import android.accounts.Account;
 import android.annotation.Nullable;
@@ -1212,7 +1214,7 @@ public final class ContentService extends IContentService.Stub {
     @RequiresPermission(android.Manifest.permission.CACHE_CONTENT)
     public void putCache(String packageName, Uri key, Bundle value, int userId) {
         Bundle.setDefusable(value, true);
-        enforceCrossUserPermission(userId, TAG);
+        enforceNonFullCrossUserPermission(userId, TAG);
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CACHE_CONTENT, TAG);
         mContext.getSystemService(AppOpsManager.class).checkPackage(Binder.getCallingUid(),
                 packageName);
@@ -1234,7 +1236,7 @@ public final class ContentService extends IContentService.Stub {
     @Override
     @RequiresPermission(android.Manifest.permission.CACHE_CONTENT)
     public Bundle getCache(String packageName, Uri key, int userId) {
-        enforceCrossUserPermission(userId, TAG);
+        enforceNonFullCrossUserPermission(userId, TAG);
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CACHE_CONTENT, TAG);
         mContext.getSystemService(AppOpsManager.class).checkPackage(Binder.getCallingUid(),
                 packageName);
@@ -1300,6 +1302,30 @@ public final class ContentService extends IContentService.Stub {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
         }
+    }
+
+    /**
+     * Checks if the request is from the system or an app that has {@code INTERACT_ACROSS_USERS} or
+     * {@code INTERACT_ACROSS_USERS_FULL} permission, if the {@code userHandle} is not for the
+     * caller.
+     *
+     * @param userHandle the user handle of the user we want to act on behalf of.
+     * @param message the message to log on security exception.
+     */
+    private void enforceNonFullCrossUserPermission(int userHandle, String message) {
+        final int callingUser = UserHandle.getCallingUserId();
+        if (callingUser == userHandle) {
+            return;
+        }
+
+        int interactAcrossUsersState = mContext.checkCallingOrSelfPermission(
+                Manifest.permission.INTERACT_ACROSS_USERS);
+        if (interactAcrossUsersState == PERMISSION_GRANTED) {
+            return;
+        }
+
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
     }
 
     private static int normalizeSyncable(int syncable) {
