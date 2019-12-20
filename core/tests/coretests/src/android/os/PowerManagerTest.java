@@ -239,4 +239,17 @@ public class PowerManagerTest extends AndroidTestCase {
         verify(mListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).onThermalStatusChanged(status);
     }
+
+    @Test
+    public void testUserspaceRebootNotSupported_throwsUnsupportedOperationException() {
+        // Can't use assumption framework with AndroidTestCase :(
+        if (mPm.isRebootingUserspaceSupported()) {
+            return;
+        }
+        try {
+            mPm.reboot(PowerManager.REBOOT_USERSPACE);
+            fail("UnsupportedOperationException not thrown");
+        } catch (UnsupportedOperationException expected) {
+        }
+    }
 }
