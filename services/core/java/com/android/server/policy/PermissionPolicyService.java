@@ -353,15 +353,14 @@ public final class PermissionPolicyService extends SystemService {
         final PermissionToOpSynchroniser synchroniser = new PermissionToOpSynchroniser(
                 getUserContext(getContext(), UserHandle.of(userId)));
         synchroniser.addPackage(pkg.packageName);
-        final String[] sharedPkgNames = packageManagerInternal.getPackagesForSharedUserId(
-                pkg.sharedUserId, userId);
-        if (sharedPkgNames != null) {
-            for (String sharedPkgName : sharedPkgNames) {
-                final AndroidPackage sharedPkg = packageManagerInternal
-                        .getPackage(sharedPkgName);
-                if (sharedPkg != null) {
-                    synchroniser.addPackage(sharedPkg.getPackageName());
-                }
+        final String[] sharedPkgNames = packageManagerInternal.getSharedUserPackagesForPackage(
+                pkg.packageName, userId);
+
+        for (String sharedPkgName : sharedPkgNames) {
+            final AndroidPackage sharedPkg = packageManagerInternal
+                    .getPackage(sharedPkgName);
+            if (sharedPkg != null) {
+                synchroniser.addPackage(sharedPkg.getPackageName());
             }
         }
         synchroniser.syncPackages();
