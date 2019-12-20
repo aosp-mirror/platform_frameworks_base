@@ -16,6 +16,10 @@
 
 package android.os;
 
+import com.android.internal.os.BinderCallsStats;
+
+import java.util.Collection;
+
 /**
  * Battery stats local system service interface. This is used to pass internal data out of
  * BatteryStatsImpl, as well as make unchecked calls into BatteryStatsImpl.
@@ -41,4 +45,10 @@ public abstract class BatteryStatsInternal {
      * @param sinceLast how long in millis has it been since a job was run
      */
     public abstract void noteJobsDeferred(int uid, int numDeferred, long sinceLast);
+
+    /**
+     * Informs battery stats of binder stats for the given work source UID.
+     */
+    public abstract void noteBinderCallStats(int workSourceUid,
+            Collection<BinderCallsStats.CallStat> callStats);
 }

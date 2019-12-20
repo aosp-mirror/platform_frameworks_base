@@ -55,6 +55,7 @@ import android.util.Slog;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.RailStats;
 import com.android.internal.os.RpmStats;
@@ -73,6 +74,7 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -221,6 +223,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         public void noteJobsDeferred(int uid, int numDeferred, long sinceLast) {
             if (DBG) Slog.d(TAG, "Jobs deferred " + uid + ": " + numDeferred + " " + sinceLast);
             BatteryStatsService.this.noteJobsDeferred(uid, numDeferred, sinceLast);
+        }
+
+        @Override
+        public void noteBinderCallStats(int workSourceUid,
+                Collection<BinderCallsStats.CallStat> callStats) {
+            mStats.noteBinderCallStats(workSourceUid, callStats);
         }
     }
 
@@ -1676,5 +1684,4 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             Binder.restoreCallingIdentity(ident);
         }
     }
-
 }
