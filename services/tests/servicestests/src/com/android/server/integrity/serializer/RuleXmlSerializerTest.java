@@ -44,48 +44,66 @@ import java.util.Optional;
 @RunWith(JUnit4.class)
 public class RuleXmlSerializerTest {
 
+    private static final String SAMPLE_INSTALLER_NAME = "com.test.installer";
+    private static final String SAMPLE_INSTALLER_CERT = "installer_cert";
+
     @Test
-    public void testXmlString_serializeEmptyRule() throws Exception {
-        Rule rule = null;
+    public void testXmlString_serializeEmptyRuleList() throws Exception {
         RuleSerializer xmlSerializer = new RuleXmlSerializer();
         String expectedRules = "<RL />";
 
         byte[] actualRules =
                 xmlSerializer.serialize(
-                        Collections.singletonList(rule), /* formatVersion= */ Optional.empty());
+                        Collections.emptyList(), /* formatVersion= */ Optional.empty());
 
         assertEquals(expectedRules, new String(actualRules, StandardCharsets.UTF_8));
     }
 
     @Test
-    public void testXmlString_serializeMultipleRules_oneEmpty() throws Exception {
-        Rule rule1 = null;
-        Rule rule2 =
+    public void testXmlString_serializeMultipleRules_indexingOrderPreserved() throws Exception {
+        String packageNameA = "aaa";
+        String packageNameB = "bbb";
+        String packageNameC = "ccc";
+        String appCert1 = "cert1";
+        String appCert2 = "cert2";
+        String appCert3 = "cert3";
+        Rule installerRule =
                 new Rule(
-                        new AtomicFormula.StringAtomicFormula(
-                                AtomicFormula.PACKAGE_NAME,
-                                "com.app.test",
-                                /* isHashedValue= */ false),
+                        new CompoundFormula(
+                                CompoundFormula.AND,
+                                Arrays.asList(
+                                        new AtomicFormula.StringAtomicFormula(
+                                                AtomicFormula.INSTALLER_NAME,
+                                                SAMPLE_INSTALLER_NAME,
+                                                /* isHashedValue= */ false),
+                                        new AtomicFormula.StringAtomicFormula(
+                                                AtomicFormula.INSTALLER_CERTIFICATE,
+                                                SAMPLE_INSTALLER_CERT,
+                                                /* isHashedValue= */ false))),
                         Rule.DENY);
-        RuleSerializer xmlSerializer = new RuleXmlSerializer();
-        Map<String, String> packageNameAttrs = new LinkedHashMap<>();
-        packageNameAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
-        packageNameAttrs.put("V", "com.app.test");
-        packageNameAttrs.put("H", "false");
-        String expectedRules =
-                "<RL>"
-                        + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
-                        + generateTagWithAttribute(
-                                /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
-                        + "</R>"
-                        + "</RL>";
 
+        RuleSerializer xmlSerializer = new RuleXmlSerializer();
         byte[] actualRules =
                 xmlSerializer.serialize(
-                        Arrays.asList(rule1, rule2), /* formatVersion= */ Optional.empty());
+                        Arrays.asList(
+                                installerRule,
+                                getRuleWithAppCertificateAndSampleInstallerName(appCert1),
+                                getRuleWithPackageNameAndSampleInstallerName(packageNameB),
+                                getRuleWithAppCertificateAndSampleInstallerName(appCert3),
+                                getRuleWithPackageNameAndSampleInstallerName(packageNameC),
+                                getRuleWithAppCertificateAndSampleInstallerName(appCert2),
+                                getRuleWithPackageNameAndSampleInstallerName(packageNameA)),
+                        /* formatVersion= */ Optional.empty());
+
+        String expectedRules = "<RL>"
+                + getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(packageNameA)
+                + getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(packageNameB)
+                + getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(packageNameC)
+                + getSerializedCompoundRuleWithAppCertificateAndSampleInstallerName(appCert1)
+                + getSerializedCompoundRuleWithAppCertificateAndSampleInstallerName(appCert2)
+                + getSerializedCompoundRuleWithAppCertificateAndSampleInstallerName(appCert3)
+                + getSerializedCompoundRuleWithSampleInstallerNameAndCert()
+                + "</RL>";
 
         assertEquals(expectedRules, new String(actualRules, StandardCharsets.UTF_8));
     }
@@ -371,7 +389,7 @@ public class RuleXmlSerializerTest {
 
         assertExpectException(
                 RuleSerializeException.class,
-                /* expectedExceptionMessageRegex */ "Invalid formula type",
+                /* expectedExceptionMessageRegex */ "Malformed rule identified.",
                 () ->
                         xmlSerializer.serialize(
                                 Collections.singletonList(rule),
@@ -391,6 +409,124 @@ public class RuleXmlSerializerTest {
         }
         res.append(closed ? " />" : ">");
         return res.toString();
+    }
+
+    private Rule getRuleWithPackageNameAndSampleInstallerName(String packageName) {
+        return new Rule(
+                new CompoundFormula(
+                        CompoundFormula.AND,
+                        Arrays.asList(
+                                new AtomicFormula.StringAtomicFormula(
+                                        AtomicFormula.PACKAGE_NAME,
+                                        packageName,
+                                        /* isHashedValue= */ false),
+                                new AtomicFormula.StringAtomicFormula(
+                                        AtomicFormula.INSTALLER_NAME,
+                                        SAMPLE_INSTALLER_NAME,
+                                        /* isHashedValue= */ false))),
+                Rule.DENY);
+    }
+
+    private String getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(
+            String packageName) {
+
+        Map<String, String> packageNameAttrs = new LinkedHashMap<>();
+        packageNameAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
+        packageNameAttrs.put("V", packageName);
+        packageNameAttrs.put("H", "false");
+
+        Map<String, String> installerNameAttrs = new LinkedHashMap<>();
+        installerNameAttrs.put("K", String.valueOf(AtomicFormula.INSTALLER_NAME));
+        installerNameAttrs.put("V", SAMPLE_INSTALLER_NAME);
+        installerNameAttrs.put("H", "false");
+
+        return generateTagWithAttribute(
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
+                + generateTagWithAttribute(
+                        /* tag= */ "OF",
+                        Collections.singletonMap("C", String.valueOf(CompoundFormula.AND)),
+                        /* closed= */ false)
+                + generateTagWithAttribute(
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                + generateTagWithAttribute(
+                        /* tag= */ "AF", installerNameAttrs, /* closed= */ true)
+                + "</OF>"
+                + "</R>";
+    }
+
+
+    private Rule getRuleWithAppCertificateAndSampleInstallerName(String certificate) {
+        return new Rule(
+                new CompoundFormula(
+                        CompoundFormula.AND,
+                        Arrays.asList(
+                                new AtomicFormula.StringAtomicFormula(
+                                        AtomicFormula.APP_CERTIFICATE,
+                                        certificate,
+                                        /* isHashedValue= */ false),
+                                new AtomicFormula.StringAtomicFormula(
+                                        AtomicFormula.INSTALLER_NAME,
+                                        SAMPLE_INSTALLER_NAME,
+                                        /* isHashedValue= */ false))),
+                Rule.DENY);
+    }
+
+    private String getSerializedCompoundRuleWithAppCertificateAndSampleInstallerName(
+            String appCert) {
+
+        Map<String, String> packageNameAttrs = new LinkedHashMap<>();
+        packageNameAttrs.put("K", String.valueOf(AtomicFormula.APP_CERTIFICATE));
+        packageNameAttrs.put("V", appCert);
+        packageNameAttrs.put("H", "false");
+
+        Map<String, String> installerNameAttrs = new LinkedHashMap<>();
+        installerNameAttrs.put("K", String.valueOf(AtomicFormula.INSTALLER_NAME));
+        installerNameAttrs.put("V", SAMPLE_INSTALLER_NAME);
+        installerNameAttrs.put("H", "false");
+
+        return generateTagWithAttribute(
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
+                + generateTagWithAttribute(
+                        /* tag= */ "OF",
+                        Collections.singletonMap("C", String.valueOf(CompoundFormula.AND)),
+                        /* closed= */ false)
+                + generateTagWithAttribute(
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                + generateTagWithAttribute(
+                        /* tag= */ "AF", installerNameAttrs, /* closed= */ true)
+                + "</OF>"
+                + "</R>";
+    }
+
+    private String getSerializedCompoundRuleWithSampleInstallerNameAndCert() {
+        Map<String, String> installerNameAttrs = new LinkedHashMap<>();
+        installerNameAttrs.put("K", String.valueOf(AtomicFormula.INSTALLER_NAME));
+        installerNameAttrs.put("V", SAMPLE_INSTALLER_NAME);
+        installerNameAttrs.put("H", "false");
+
+        Map<String, String> installerCertAttrs = new LinkedHashMap<>();
+        installerCertAttrs.put("K", String.valueOf(AtomicFormula.INSTALLER_CERTIFICATE));
+        installerCertAttrs.put("V", SAMPLE_INSTALLER_CERT);
+        installerCertAttrs.put("H", "false");
+
+        return generateTagWithAttribute(
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
+                + generateTagWithAttribute(
+                        /* tag= */ "OF",
+                        Collections.singletonMap("C", String.valueOf(CompoundFormula.AND)),
+                        /* closed= */ false)
+                + generateTagWithAttribute(
+                        /* tag= */ "AF", installerNameAttrs, /* closed= */ true)
+                + generateTagWithAttribute(
+                        /* tag= */ "AF", installerCertAttrs, /* closed= */ true)
+                + "</OF>"
+                + "</R>";
     }
 
     private Formula getInvalidFormula() {
