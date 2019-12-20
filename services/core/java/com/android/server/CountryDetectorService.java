@@ -24,21 +24,29 @@ import android.location.ICountryListener;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.server.location.ComprehensiveCountryDetector;
+import com.android.server.location.CountryDetectorBase;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
 /**
- * This class detects the country that the user is in through {@link ComprehensiveCountryDetector}.
+ * This class detects the country that the user is in. The default country detection is made through
+ * {@link com.android.server.location.ComprehensiveCountryDetector}. It is possible to overlay the
+ * detection algorithm by overlaying the attribute R.string.config_customCountryDetector with the
+ * custom class name to use instead. The custom class must extend
+ * {@link com.android.server.location.CountryDetectorBase}
  *
  * @hide
  */
@@ -88,7 +96,7 @@ public class CountryDetectorService extends ICountryDetector.Stub {
 
     private final HashMap<IBinder, Receiver> mReceivers;
     private final Context mContext;
-    private ComprehensiveCountryDetector mCountryDetector;
+    private CountryDetectorBase mCountryDetector;
     private boolean mSystemReady;
     private Handler mHandler;
     private CountryListener mLocationBasedDetectorListener;
@@ -184,8 +192,17 @@ public class CountryDetectorService extends ICountryDetector.Stub {
                 });
     }
 
-    private void initialize() {
-        mCountryDetector = new ComprehensiveCountryDetector(mContext);
+    @VisibleForTesting
+    void initialize() {
+        final String customCountryClass = mContext.getString(R.string.config_customCountryDetector);
+        if (!TextUtils.isEmpty(customCountryClass)) {
+            mCountryDetector = loadCustomCountryDetectorIfAvailable(customCountryClass);
+        }
+
+        if (mCountryDetector == null) {
+            Slog.d(TAG, "Using default country detector");
+            mCountryDetector = new ComprehensiveCountryDetector(mContext);
+        }
         mLocationBasedDetectorListener = country -> mHandler.post(() -> notifyReceivers(country));
     }
 
@@ -194,8 +211,30 @@ public class CountryDetectorService extends ICountryDetector.Stub {
     }
 
     @VisibleForTesting
+    CountryDetectorBase getCountryDetector() {
+        return mCountryDetector;
+    }
+
+    @VisibleForTesting
     boolean isSystemReady() {
         return mSystemReady;
+    }
+
+    private CountryDetectorBase loadCustomCountryDetectorIfAvailable(
+            final String customCountryClass) {
+        CountryDetectorBase customCountryDetector = null;
+
+        Slog.d(TAG, "Using custom country detector class: " + customCountryClass);
+        try {
+            customCountryDetector = Class.forName(customCountryClass).asSubclass(
+                    CountryDetectorBase.class).getConstructor(Context.class).newInstance(
+                    mContext);
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+                | NoSuchMethodException | InvocationTargetException e) {
+            Slog.e(TAG, "Could not instantiate the custom country detector class");
+        }
+
+        return customCountryDetector;
     }
 
     @SuppressWarnings("unused")
@@ -206,9 +245,10 @@ public class CountryDetectorService extends ICountryDetector.Stub {
         try {
             final Printer p = new PrintWriterPrinter(fout);
             p.println("CountryDetectorService state:");
+            p.println("Country detector class=" + mCountryDetector.getClass().getName());
             p.println("  Number of listeners=" + mReceivers.keySet().size());
             if (mCountryDetector == null) {
-                p.println("  ComprehensiveCountryDetector not initialized");
+                p.println("  CountryDetector not initialized");
             } else {
                 p.println("  " + mCountryDetector.toString());
             }

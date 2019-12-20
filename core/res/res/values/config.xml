@@ -4284,4 +4284,12 @@
 
     <!-- Whether or not to use assistant stream volume separately from music volume -->
     <bool name="config_useAssistantVolume">false</bool>
+
+    <!-- Whether to use a custom Bugreport handling. When true, ACTION_CUSTOM_BUGREPORT_REQUESTED
+         intent is broadcasted on bugreporting chord (instead of the default full bugreport
+         generation). -->
+    <bool name="config_customBugreport">false</bool>
+
+    <!-- Class name of the custom country detector to be used. -->
+    <string name="config_customCountryDetector" translatable="false">com.android.server.location.ComprehensiveCountryDetector</string>
 </resources>

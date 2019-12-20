@@ -3605,6 +3605,8 @@
 
   <java-symbol type="bool" name="config_maskMainBuiltInDisplayCutout" />
 
+  <java-symbol type="string" name="config_customCountryDetector" />
+
   <!-- For Foldables -->
   <java-symbol type="bool" name="config_lidControlsDisplayFold" />
   <java-symbol type="string" name="config_foldedArea" />
