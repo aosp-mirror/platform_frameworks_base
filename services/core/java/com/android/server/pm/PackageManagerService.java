@@ -22673,7 +22673,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps != null) {
                     return ps.getCeDataInode(userId);
                 }
-                Slog.e(TAG, "failed to find package " + packageName);
                 return 0;
             }
         }

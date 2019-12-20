@@ -316,7 +316,9 @@ public final class Zygote {
      * @param appDataDir null-ok  The data directory of the app.
      * @param isTopApp  True if the process is for top (high priority) application.
      * @param pkgDataInfoList A list that stores related packages and its app data
-     * info: volume uuid and inode.
+     * volume uuid and CE dir inode. For example, pkgDataInfoList = [app_a_pkg_name,
+     * app_a_data_volume_uuid, app_a_ce_inode, app_b_pkg_name, app_b_data_volume_uuid,
+     * app_b_ce_inode, ...];
      */
     private static void specializeAppProcess(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName,
