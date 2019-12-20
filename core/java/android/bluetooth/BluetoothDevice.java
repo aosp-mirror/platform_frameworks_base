@@ -2172,17 +2172,6 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
-     * TODO: Remove this hidden method once all the SL4A and other tests are updated to use the new
-     * API name, createL2capChannel.
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public BluetoothSocket createL2capCocSocket(int transport, int psm) throws IOException {
-        Log.e(TAG, "createL2capCocSocket: PLEASE USE THE OFFICIAL API, createL2capChannel");
-        return createL2capChannel(psm);
-    }
-
-    /**
      * Create a Bluetooth L2CAP Connection-oriented Channel (CoC) {@link BluetoothSocket} that can
      * be used to start a secure outgoing connection to the remote device with the same dynamic
      * protocol/service multiplexer (PSM) value. The supported Bluetooth transport is LE only.
@@ -2210,17 +2199,6 @@ public final class BluetoothDevice implements Parcelable {
         }
         return new BluetoothSocket(BluetoothSocket.TYPE_L2CAP_LE, -1, false, false, this, psm,
                 null);
-    }
-
-    /**
-     * TODO: Remove this hidden method once all the SL4A and other tests are updated to use the new
-     * API name, createInsecureL2capChannel.
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public BluetoothSocket createInsecureL2capCocSocket(int transport, int psm) throws IOException {
-        Log.e(TAG, "createL2capCocSocket: PLEASE USE THE OFFICIAL API, createInsecureL2capChannel");
-        return createInsecureL2capChannel(psm);
     }
 
     /**
