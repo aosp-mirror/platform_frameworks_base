@@ -55,6 +55,8 @@ public final class IncrementalManagerShellCommand extends ShellCommand {
     private static final String TAG = "IncrementalShellCommand";
     // Assuming the adb data loader is always installed on the device
     private static final String LOADER_PACKAGE_NAME = "com.android.incremental.nativeadb";
+    private static final String LOADER_CLASS_NAME =
+            LOADER_PACKAGE_NAME + ".NativeAdbDataLoaderService";
     private final @NonNull Context mContext;
 
     private static final int ERROR_INVALID_ARGUMENTS = -1;
@@ -113,7 +115,8 @@ public final class IncrementalManagerShellCommand extends ShellCommand {
             return ERROR_DATA_LOADER_INIT;
         }
         final DataLoaderParams params = DataLoaderParams.forIncremental(
-                new ComponentName(LOADER_PACKAGE_NAME, ""), "", dataLoaderDynamicArgs);
+                new ComponentName(LOADER_PACKAGE_NAME, LOADER_CLASS_NAME), "",
+                dataLoaderDynamicArgs);
         PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);
         sessionParams.installFlags |= PackageManager.INSTALL_ALL_USERS;
