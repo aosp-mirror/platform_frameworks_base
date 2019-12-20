@@ -16,8 +16,6 @@
 
 package com.android.systemui.screenshot;
 
-import static android.content.Context.NOTIFICATION_SERVICE;
-import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
@@ -31,14 +29,10 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -55,7 +49,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.DisplayMetrics;
@@ -74,20 +67,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.dagger.qualifiers.MainResources;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.util.NotificationChannels;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -108,29 +94,20 @@ public class GlobalScreenshot {
      * POD used in the AsyncTask which saves an image in the background.
      */
     static class SaveImageInBackgroundData {
-        public Context context;
         public Bitmap image;
         public Uri imageUri;
         public Consumer<Uri> finisher;
         public GlobalScreenshot.ActionsReadyListener mActionsReadyListener;
-        public int iconSize;
-        public int previewWidth;
-        public int previewheight;
         public int errorMsgResId;
 
         void clearImage() {
             image = null;
             imageUri = null;
-            iconSize = 0;
-        }
-
-        void clearContext() {
-            context = null;
         }
     }
 
     abstract static class ActionsReadyListener {
-        abstract void onActionsReady(PendingIntent shareAction, PendingIntent editAction);
+        abstract void onActionsReady(Uri imageUri, List<Notification.Action> actions);
     }
 
     // These strings are used for communicating the action invoked to
@@ -165,13 +142,12 @@ public class GlobalScreenshot {
     private static final float SCREENSHOT_CORNER_MIN_SCALE_OFFSET = .1f;
     private static final long SCREENSHOT_CORNER_TIMEOUT_MILLIS = 8000;
     private static final int MESSAGE_CORNER_TIMEOUT = 2;
-    private final int mPreviewWidth;
-    private final int mPreviewHeight;
+
+    private final ScreenshotNotificationsController mNotificationsController;
 
     private Context mContext;
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams mWindowLayoutParams;
-    private NotificationManager mNotificationManager;
     private Display mDisplay;
     private DisplayMetrics mDisplayMetrics;
 
@@ -182,13 +158,9 @@ public class GlobalScreenshot {
     private ImageView mScreenshotView;
     private ImageView mScreenshotFlash;
     private LinearLayout mActionsView;
-    private TextView mShareAction;
-    private TextView mEditAction;
-    private TextView mScrollAction;
 
     private AnimatorSet mScreenshotAnimation;
 
-    private int mNotificationIconSize;
     private float mBgPadding;
     private float mBgPaddingScale;
 
@@ -213,30 +185,17 @@ public class GlobalScreenshot {
      * @param context everything needs a context :(
      */
     @Inject
-    public GlobalScreenshot(Context context, @MainResources Resources resources,
-            LayoutInflater layoutInflater) {
+    public GlobalScreenshot(
+            Context context, @MainResources Resources resources, LayoutInflater layoutInflater,
+            ScreenshotNotificationsController screenshotNotificationsController) {
         mContext = context;
+        mNotificationsController = screenshotNotificationsController;
 
         // Inflate the screenshot layout
         mScreenshotLayout = layoutInflater.inflate(R.layout.global_screenshot, null);
         mBackgroundView = mScreenshotLayout.findViewById(R.id.global_screenshot_background);
         mScreenshotView = mScreenshotLayout.findViewById(R.id.global_screenshot);
         mActionsView = mScreenshotLayout.findViewById(R.id.global_screenshot_actions);
-
-        mShareAction = (TextView) layoutInflater.inflate(
-                R.layout.global_screenshot_action_chip, mActionsView, false);
-        mEditAction = (TextView) layoutInflater.inflate(
-                R.layout.global_screenshot_action_chip, mActionsView, false);
-        mScrollAction = (TextView) layoutInflater.inflate(
-                R.layout.global_screenshot_action_chip, mActionsView, false);
-
-        mShareAction.setText(com.android.internal.R.string.share);
-        mEditAction.setText(com.android.internal.R.string.screenshot_edit);
-        mScrollAction.setText("Scroll"); // TODO (mkephart): Add to resources and translate
-
-        mActionsView.addView(mShareAction);
-        mActionsView.addView(mEditAction);
-        mActionsView.addView(mScrollAction);
 
         mScreenshotFlash = mScreenshotLayout.findViewById(R.id.global_screenshot_flash);
         mScreenshotSelectorView = mScreenshotLayout.findViewById(R.id.global_screenshot_selector);
@@ -260,32 +219,14 @@ public class GlobalScreenshot {
         mWindowLayoutParams.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         mWindowLayoutParams.setFitWindowInsetsTypes(0 /* types */);
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        mNotificationManager =
-                (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         mDisplay = mWindowManager.getDefaultDisplay();
         mDisplayMetrics = new DisplayMetrics();
         mDisplay.getRealMetrics(mDisplayMetrics);
-
-        // Get the various target sizes
-        mNotificationIconSize =
-                resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
 
         // Scale has to account for both sides of the bg
         mBgPadding = (float) resources.getDimensionPixelSize(R.dimen.global_screenshot_bg_padding);
         mBgPaddingScale = mBgPadding / mDisplayMetrics.widthPixels;
 
-        // determine the optimal preview size
-        int panelWidth = 0;
-        try {
-            panelWidth = resources.getDimensionPixelSize(R.dimen.notification_panel_width);
-        } catch (Resources.NotFoundException e) {
-        }
-        if (panelWidth <= 0) {
-            // includes notification_panel_width==match_parent (-1)
-            panelWidth = mDisplayMetrics.widthPixels;
-        }
-        mPreviewWidth = panelWidth;
-        mPreviewHeight = resources.getDimensionPixelSize(R.dimen.notification_max_height);
 
         // Setup the Camera shutter sound
         mCameraSound = new MediaActionSound();
@@ -298,22 +239,20 @@ public class GlobalScreenshot {
     private void saveScreenshotInWorkerThread(
             Consumer<Uri> finisher, @Nullable ActionsReadyListener actionsReadyListener) {
         SaveImageInBackgroundData data = new SaveImageInBackgroundData();
-        data.context = mContext;
         data.image = mScreenBitmap;
-        data.iconSize = mNotificationIconSize;
         data.finisher = finisher;
         data.mActionsReadyListener = actionsReadyListener;
-        data.previewWidth = mPreviewWidth;
-        data.previewheight = mPreviewHeight;
         if (mSaveInBgTask != null) {
             mSaveInBgTask.cancel(false);
         }
-        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data, mNotificationManager)
-                .execute();
-    }
 
-    private void saveScreenshotInWorkerThread(Consumer<Uri> finisher) {
-        saveScreenshotInWorkerThread(finisher, null);
+        if (!DeviceConfig.getBoolean(
+                NAMESPACE_SYSTEMUI, SCREENSHOT_CORNER_FLOW, false)) {
+            mNotificationsController.reset();
+            mNotificationsController.setImage(mScreenBitmap);
+            mNotificationsController.showSavingScreenshotNotification();
+        }
+        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data).execute();
     }
 
     /**
@@ -328,7 +267,7 @@ public class GlobalScreenshot {
         // Take the screenshot
         mScreenBitmap = SurfaceControl.screenshot(crop, width, height, rot);
         if (mScreenBitmap == null) {
-            notifyScreenshotError(mContext, mNotificationManager,
+            mNotificationsController.notifyScreenshotError(
                     R.string.screenshot_failed_to_capture_text);
             finisher.accept(null);
             return;
@@ -373,12 +312,8 @@ public class GlobalScreenshot {
                         if (rect != null) {
                             if (rect.width() != 0 && rect.height() != 0) {
                                 // Need mScreenshotLayout to handle it after the view disappears
-                                mScreenshotLayout.post(new Runnable() {
-                                    public void run() {
-                                        takeScreenshot(finisher, statusBarVisible, navBarVisible,
-                                                rect);
-                                    }
-                                });
+                                mScreenshotLayout.post(() -> takeScreenshot(
+                                        finisher, statusBarVisible, navBarVisible, rect));
                             }
                         }
 
@@ -464,15 +399,30 @@ public class GlobalScreenshot {
             public void onAnimationEnd(Animator animation) {
                 // Save the screenshot once we have a bit of time now
                 if (!useCornerFlow) {
-                    saveScreenshotInWorkerThread(finisher);
+                    saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
+                        @Override
+                        void onActionsReady(Uri uri, List<Notification.Action> actions) {
+                            if (uri == null) {
+                                mNotificationsController.notifyScreenshotError(
+                                        R.string.screenshot_failed_to_capture_text);
+                            } else {
+                                mNotificationsController
+                                        .showScreenshotActionsNotification(uri, actions);
+                            }
+                        }
+                    });
                     clearScreenshot();
                 } else {
                     saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
                         @Override
-                        void onActionsReady(PendingIntent shareAction, PendingIntent editAction) {
-                            mScreenshotHandler.post(() ->
-                                    createScreenshotActionsShadeAnimation(shareAction, editAction)
-                                            .start());
+                        void onActionsReady(Uri uri, List<Notification.Action> actions) {
+                            if (uri == null) {
+                                mNotificationsController.notifyScreenshotError(
+                                        R.string.screenshot_failed_to_capture_text);
+                            } else {
+                                mScreenshotHandler.post(() ->
+                                        createScreenshotActionsShadeAnimation(actions).start());
+                            }
                         }
                     });
                     mScreenshotHandler.sendMessageDelayed(
@@ -679,8 +629,33 @@ public class GlobalScreenshot {
         return anim;
     }
 
-    private ValueAnimator createScreenshotActionsShadeAnimation(
-            PendingIntent shareAction, PendingIntent editAction) {
+    private ValueAnimator createScreenshotActionsShadeAnimation(List<Notification.Action> actions) {
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        mActionsView.removeAllViews();
+
+        for (Notification.Action action : actions) {
+            TextView actionChip = (TextView) inflater.inflate(
+                    R.layout.global_screenshot_action_chip, mActionsView, false);
+            actionChip.setText(action.title);
+            actionChip.setOnClickListener(v -> {
+                try {
+                    action.actionIntent.send();
+                    clearScreenshot();
+                } catch (PendingIntent.CanceledException e) {
+                    Log.e(TAG,
+                            String.format("Intent cancelled (title: %s)", action.title), e);
+                }
+            });
+            mActionsView.addView(actionChip);
+        }
+        TextView scrollChip = (TextView) inflater.inflate(
+                R.layout.global_screenshot_action_chip, mActionsView, false);
+        Toast scrollNotImplemented = Toast.makeText(
+                mContext, "Not implemented", Toast.LENGTH_SHORT);
+        scrollChip.setText("Scroll"); // TODO (mkephart): add resource and translate
+        scrollChip.setOnClickListener(v -> scrollNotImplemented.show());
+        mActionsView.addView(scrollChip);
+
         ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
         mActionsView.setY(mDisplayMetrics.heightPixels);
         mActionsView.setVisibility(VISIBLE);
@@ -698,156 +673,9 @@ public class GlobalScreenshot {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 mScreenshotView.requestFocus();
-                mShareAction.setOnClickListener(v -> {
-                    try {
-                        shareAction.send();
-                        clearScreenshot();
-                    } catch (PendingIntent.CanceledException e) {
-                        Log.e(TAG, "Share intent cancelled", e);
-                    }
-                });
-                mEditAction.setOnClickListener(v -> {
-                    try {
-                        editAction.send();
-                        clearScreenshot();
-                    } catch (PendingIntent.CanceledException e) {
-                        Log.e(TAG, "Edit intent cancelled", e);
-                    }
-                });
-                Toast scrollNotImplemented = Toast.makeText(
-                        mContext, "Not implemented", Toast.LENGTH_SHORT);
-                mScrollAction.setOnClickListener(v -> scrollNotImplemented.show());
             }
         });
         return animator;
-    }
-
-    static void notifyScreenshotError(Context context, NotificationManager nManager, int msgResId) {
-        Resources r = context.getResources();
-        String errorMsg = r.getString(msgResId);
-
-        // Repurpose the existing notification to notify the user of the error
-        Notification.Builder b = new Notification.Builder(context, NotificationChannels.ALERTS)
-                .setTicker(r.getString(R.string.screenshot_failed_title))
-                .setContentTitle(r.getString(R.string.screenshot_failed_title))
-                .setContentText(errorMsg)
-                .setSmallIcon(R.drawable.stat_notify_image_error)
-                .setWhen(System.currentTimeMillis())
-                .setVisibility(Notification.VISIBILITY_PUBLIC) // ok to show outside lockscreen
-                .setCategory(Notification.CATEGORY_ERROR)
-                .setAutoCancel(true)
-                .setColor(context.getColor(
-                        com.android.internal.R.color.system_notification_accent_color));
-        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
-                Context.DEVICE_POLICY_SERVICE);
-        final Intent intent = dpm.createAdminSupportIntent(
-                DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE);
-        if (intent != null) {
-            final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
-                    context, 0, intent, 0, null, UserHandle.CURRENT);
-            b.setContentIntent(pendingIntent);
-        }
-
-        SystemUI.overrideNotificationAppName(context, b, true);
-
-        Notification n = new Notification.BigTextStyle(b)
-                .bigText(errorMsg)
-                .build();
-        nManager.notify(SystemMessage.NOTE_GLOBAL_SCREENSHOT, n);
-    }
-
-    @VisibleForTesting
-    static CompletableFuture<List<Notification.Action>> getSmartActionsFuture(String screenshotId,
-            Bitmap image, ScreenshotNotificationSmartActionsProvider smartActionsProvider,
-            boolean smartActionsEnabled, boolean isManagedProfile) {
-        if (!smartActionsEnabled) {
-            Slog.i(TAG, "Screenshot Intelligence not enabled, returning empty list.");
-            return CompletableFuture.completedFuture(Collections.emptyList());
-        }
-        if (image.getConfig() != Bitmap.Config.HARDWARE) {
-            Slog.w(TAG, String.format(
-                    "Bitmap expected: Hardware, Bitmap found: %s. Returning empty list.",
-                    image.getConfig()));
-            return CompletableFuture.completedFuture(Collections.emptyList());
-        }
-
-        Slog.d(TAG, "Screenshot from a managed profile: " + isManagedProfile);
-        CompletableFuture<List<Notification.Action>> smartActionsFuture;
-        long startTimeMs = SystemClock.uptimeMillis();
-        try {
-            ActivityManager.RunningTaskInfo runningTask =
-                    ActivityManagerWrapper.getInstance().getRunningTask();
-            ComponentName componentName =
-                    (runningTask != null && runningTask.topActivity != null)
-                            ? runningTask.topActivity
-                            : new ComponentName("", "");
-            smartActionsFuture = smartActionsProvider.getActions(screenshotId, image,
-                    componentName,
-                    isManagedProfile);
-        } catch (Throwable e) {
-            long waitTimeMs = SystemClock.uptimeMillis() - startTimeMs;
-            smartActionsFuture = CompletableFuture.completedFuture(Collections.emptyList());
-            Slog.e(TAG, "Failed to get future for screenshot notification smart actions.", e);
-            notifyScreenshotOp(screenshotId, smartActionsProvider,
-                    ScreenshotNotificationSmartActionsProvider.ScreenshotOp.REQUEST_SMART_ACTIONS,
-                    ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus.ERROR,
-                    waitTimeMs);
-        }
-        return smartActionsFuture;
-    }
-
-    @VisibleForTesting
-    static List<Notification.Action> getSmartActions(String screenshotId,
-            CompletableFuture<List<Notification.Action>> smartActionsFuture, int timeoutMs,
-            ScreenshotNotificationSmartActionsProvider smartActionsProvider) {
-        long startTimeMs = SystemClock.uptimeMillis();
-        try {
-            List<Notification.Action> actions = smartActionsFuture.get(timeoutMs,
-                    TimeUnit.MILLISECONDS);
-            long waitTimeMs = SystemClock.uptimeMillis() - startTimeMs;
-            Slog.d(TAG, String.format("Got %d smart actions. Wait time: %d ms",
-                    actions.size(), waitTimeMs));
-            notifyScreenshotOp(screenshotId, smartActionsProvider,
-                    ScreenshotNotificationSmartActionsProvider.ScreenshotOp.WAIT_FOR_SMART_ACTIONS,
-                    ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus.SUCCESS,
-                    waitTimeMs);
-            return actions;
-        } catch (Throwable e) {
-            long waitTimeMs = SystemClock.uptimeMillis() - startTimeMs;
-            Slog.e(TAG, String.format("Error getting smart actions. Wait time: %d ms", waitTimeMs),
-                    e);
-            ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus status =
-                    (e instanceof TimeoutException)
-                            ? ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus.TIMEOUT
-                            : ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus.ERROR;
-            notifyScreenshotOp(screenshotId, smartActionsProvider,
-                    ScreenshotNotificationSmartActionsProvider.ScreenshotOp.WAIT_FOR_SMART_ACTIONS,
-                    status, waitTimeMs);
-            return Collections.emptyList();
-        }
-    }
-
-    static void notifyScreenshotOp(String screenshotId,
-            ScreenshotNotificationSmartActionsProvider smartActionsProvider,
-            ScreenshotNotificationSmartActionsProvider.ScreenshotOp op,
-            ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus status, long durationMs) {
-        try {
-            smartActionsProvider.notifyOp(screenshotId, op, status, durationMs);
-        } catch (Throwable e) {
-            Slog.e(TAG, "Error in notifyScreenshotOp: ", e);
-        }
-    }
-
-    static void notifyScreenshotAction(Context context, String screenshotId, String action,
-            boolean isSmartAction) {
-        try {
-            ScreenshotNotificationSmartActionsProvider provider =
-                    SystemUIFactory.getInstance().createScreenshotNotificationSmartActionsProvider(
-                            context, THREAD_POOL_EXECUTOR, new Handler());
-            provider.notifyAction(screenshotId, action, isSmartAction);
-        } catch (Throwable e) {
-            Slog.e(TAG, "Error in notifyScreenshotAction: ", e);
-        }
     }
 
     /**
@@ -878,7 +706,7 @@ public class GlobalScreenshot {
 
                 Intent actionIntent = intent.getParcelableExtra(EXTRA_ACTION_INTENT);
                 if (intent.getBooleanExtra(EXTRA_CANCEL_NOTIFICATION, false)) {
-                    cancelScreenshotNotification(context);
+                    ScreenshotNotificationsController.cancelScreenshotNotification(context);
                 }
                 ActivityOptions opts = ActivityOptions.makeBasic();
                 opts.setDisallowEnterPictureInPictureWhileLaunching(
@@ -897,8 +725,8 @@ public class GlobalScreenshot {
             if (intent.getBooleanExtra(EXTRA_SMART_ACTIONS_ENABLED, false)) {
                 String actionType = Intent.ACTION_EDIT.equals(intent.getAction()) ? ACTION_TYPE_EDIT
                         : ACTION_TYPE_SHARE;
-                notifyScreenshotAction(context, intent.getStringExtra(EXTRA_ID),
-                        actionType, false);
+                ScreenshotSmartActions.notifyScreenshotAction(
+                        context, intent.getStringExtra(EXTRA_ID), actionType, false);
             }
         }
     }
@@ -910,7 +738,7 @@ public class GlobalScreenshot {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Clear the notification only after the user has chosen a share action
-            cancelScreenshotNotification(context);
+            ScreenshotNotificationsController.cancelScreenshotNotification(context);
         }
     }
 
@@ -925,15 +753,14 @@ public class GlobalScreenshot {
             }
 
             // Clear the notification when the image is deleted
-            cancelScreenshotNotification(context);
+            ScreenshotNotificationsController.cancelScreenshotNotification(context);
 
             // And delete the image from the media store
             final Uri uri = Uri.parse(intent.getStringExtra(SCREENSHOT_URI_ID));
             new DeleteImageInBackgroundTask(context).execute(uri);
             if (intent.getBooleanExtra(EXTRA_SMART_ACTIONS_ENABLED, false)) {
-                notifyScreenshotAction(context, intent.getStringExtra(EXTRA_ID),
-                        ACTION_TYPE_DELETE,
-                        false);
+                ScreenshotSmartActions.notifyScreenshotAction(
+                        context, intent.getStringExtra(EXTRA_ID), ACTION_TYPE_DELETE, false);
             }
         }
     }
@@ -952,15 +779,8 @@ public class GlobalScreenshot {
             context.startActivityAsUser(actionIntent, opts.toBundle(),
                     UserHandle.CURRENT);
 
-            notifyScreenshotAction(context, intent.getStringExtra(EXTRA_ID),
-                    actionType,
-                    true);
+            ScreenshotSmartActions.notifyScreenshotAction(
+                    context, intent.getStringExtra(EXTRA_ID), actionType, true);
         }
-    }
-
-    private static void cancelScreenshotNotification(Context context) {
-        final NotificationManager nm =
-                (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-        nm.cancel(SystemMessage.NOTE_GLOBAL_SCREENSHOT);
     }
 }
