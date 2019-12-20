@@ -1211,8 +1211,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         // TODO moltmann b/136595429: Set featureId from caller
-        if (mService.getAppOpsService().noteOperation(opCode, callingUid, callingPackage, /* featureId */ null)
-                != AppOpsManager.MODE_ALLOWED) {
+        if (mService.getAppOpsService().noteOperation(opCode, callingUid,
+                callingPackage, /* featureId */ null, false, "") != AppOpsManager.MODE_ALLOWED) {
             if (!ignoreTargetSecurity) {
                 return ACTIVITY_RESTRICTION_APPOP;
             }
@@ -1254,9 +1254,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return ACTIVITY_RESTRICTION_NONE;
         }
 
-        // TODO moltmann b/136595429: Set componentId from caller
-        if (mService.getAppOpsService().noteOperation(opCode, callingUid, callingPackage, /* featureId */ null)
-                != AppOpsManager.MODE_ALLOWED) {
+        // TODO moltmann b/136595429: Set featureId from caller
+        if (mService.getAppOpsService().noteOperation(opCode, callingUid,
+                callingPackage, /* featureId */ null, false, "") != AppOpsManager.MODE_ALLOWED) {
             return ACTIVITY_RESTRICTION_APPOP;
         }
 

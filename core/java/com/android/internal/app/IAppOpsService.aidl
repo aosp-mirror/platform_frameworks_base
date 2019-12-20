@@ -31,9 +31,11 @@ interface IAppOpsService {
     // be kept in sync with frameworks/native/libs/binder/include/binder/IAppOpsService.h
     // and not be reordered
     int checkOperation(int code, int uid, String packageName);
-    int noteOperation(int code, int uid, String packageName, @nullable String featureId);
+    int noteOperation(int code, int uid, String packageName, @nullable String featureId,
+            boolean shouldCollectAsyncNotedOp, String message);
     int startOperation(IBinder clientId, int code, int uid, String packageName,
-            @nullable String featureId, boolean startIfModeDefault);
+            @nullable String featureId, boolean startIfModeDefault,
+            boolean shouldCollectAsyncNotedOp, String message);
     @UnsupportedAppUsage
     void finishOperation(IBinder clientId, int code, int uid, String packageName,
             @nullable String featureId);
@@ -41,8 +43,6 @@ interface IAppOpsService {
     void stopWatchingMode(IAppOpsCallback callback);
     int permissionToOpCode(String permission);
     int checkAudioOperation(int code, int usage, int uid, String packageName);
-    void noteAsyncOp(@nullable String callingPackageName, int uid, @nullable String packageName,
-            int opCode, @nullable String featureId, String message);
     boolean shouldCollectNotes(int opCode);
     void setCameraAudioRestriction(int mode);
     // End of methods also called by native code.
@@ -50,7 +50,7 @@ interface IAppOpsService {
 
     int noteProxyOperation(int code, int proxiedUid, String proxiedPackageName,
             String proxiedFeatureId, int proxyUid, String proxyPackageName,
-            String proxyFeatureId);
+            String proxyFeatureId, boolean shouldCollectAsyncNotedOp, String message);
 
     // Remaining methods are only used in Java.
     int checkPackage(int uid, String packageName);

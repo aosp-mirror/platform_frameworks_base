@@ -433,7 +433,7 @@ public class SystemServicesTestRule implements TestRule {
             doReturn(aos).when(this).getAppOpsService();
             // Make sure permission checks aren't overridden.
             doReturn(AppOpsManager.MODE_DEFAULT).when(aos).noteOperation(anyInt(), anyInt(),
-                    anyString(), nullable(String.class));
+                    anyString(), nullable(String.class), anyBoolean(), nullable(String.class));
 
             // UserManagerService
             final UserManagerService ums = mock(UserManagerService.class);

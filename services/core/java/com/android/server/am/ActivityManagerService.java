@@ -324,6 +324,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
@@ -3120,7 +3121,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private boolean hasUsageStatsPermission(String callingPackage) {
         final int mode = mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS,
-                Binder.getCallingUid(), callingPackage, null);
+                Binder.getCallingUid(), callingPackage, null, false, "");
         if (mode == AppOpsManager.MODE_DEFAULT) {
             return checkCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS)
                     == PackageManager.PERMISSION_GRANTED;
@@ -5816,7 +5817,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int noteOp(String op, int uid, String packageName) {
             // TODO moltmann: Allow to specify featureId
             return mActivityManagerService.mAppOpsService
-                    .noteOperation(AppOpsManager.strOpToOp(op), uid, packageName, null);
+                    .noteOperation(AppOpsManager.strOpToOp(op), uid, packageName, null,
+                            false, "");
         }
 
         @Override
@@ -5968,7 +5970,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         // ...and legacy apps get an AppOp check
         int appop = mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND,
-                uid, packageName, null);
+                uid, packageName, null, false, "");
         if (DEBUG_BACKGROUND_CHECK) {
             Slog.i(TAG, "Legacy app " + uid + "/" + packageName + " bg appop " + appop);
         }
@@ -19253,18 +19255,22 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public int noteOperation(int code, int uid, @Nullable String packageName,
-                @Nullable String featureId,
-                @NonNull QuadFunction<Integer, Integer, String, String, Integer> superImpl) {
+                @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
+                @Nullable String message,
+                @NonNull HexFunction<Integer, Integer, String, String, Boolean, String, Integer>
+                        superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return mAppOpsService.noteProxyOperation(code, Process.SHELL_UID,
-                            "com.android.shell", null, uid, packageName, featureId);
+                            "com.android.shell", null, uid, packageName, featureId,
+                            shouldCollectAsyncNotedOp, message);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            return superImpl.apply(code, uid, packageName, featureId);
+            return superImpl.apply(code, uid, packageName, featureId, shouldCollectAsyncNotedOp,
+                    message);
         }
 
         @Override

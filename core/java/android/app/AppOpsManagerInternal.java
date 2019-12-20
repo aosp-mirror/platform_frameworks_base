@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.SparseIntArray;
 
+import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.QuadFunction;
 
 /**
@@ -63,12 +64,16 @@ public abstract class AppOpsManagerInternal {
          * @param uid The UID for which to note.
          * @param packageName The package for which to note. {@code null} for system package.
          * @param featureId Id of the feature in the package
+         * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
+         * @param message The message in the async noted op
          * @param superImpl The super implementation.
          * @return The app op note result.
          */
         int noteOperation(int code, int uid, @Nullable String packageName,
-                @Nullable String featureId,
-                @NonNull QuadFunction<Integer, Integer, String, String, Integer> superImpl);
+                @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
+                @Nullable String message,
+                @NonNull HexFunction<Integer, Integer, String, String, Boolean, String, Integer>
+                        superImpl);
     }
 
     /**
