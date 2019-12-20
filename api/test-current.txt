@@ -4359,6 +4359,7 @@ package android.view {
     method public void setAutofilled(boolean);
     method public final void setFocusedInCluster();
     method public void setIsRootNamespace(boolean);
+    method public final void setShowingLayoutBounds(boolean);
   }
 
   public class ViewConfiguration {
