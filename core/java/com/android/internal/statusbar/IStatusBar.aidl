@@ -16,6 +16,7 @@
 
 package com.android.internal.statusbar;
 
+import android.app.ITransientNotificationCallback;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
@@ -198,4 +199,15 @@ oneway interface IStatusBar
      * Dismiss the warning that the device is about to go to sleep due to user inactivity.
      */
     void dismissInattentiveSleepWarning(boolean animated);
+
+    /**
+     * Displays a text toast.
+     */
+    void showToast(String packageName, IBinder token, CharSequence text, IBinder windowToken,
+            int duration, @nullable ITransientNotificationCallback callback);
+
+    /**
+     * Cancels toast with token {@code token} in {@code packageName}.
+     */
+    void hideToast(String packageName, IBinder token);
 }

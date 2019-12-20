@@ -16,7 +16,10 @@
 
 package com.android.server.statusbar;
 
+import android.annotation.Nullable;
+import android.app.ITransientNotificationCallback;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsetsController.Appearance;
 
@@ -123,4 +126,15 @@ public interface StatusBarManagerInternal {
 
     /** @see com.android.internal.statusbar.IStatusBar#abortTransient */
     void abortTransient(int displayId, @InternalInsetsType int[] types);
+
+    /**
+     * @see com.android.internal.statusbar.IStatusBar#showToast(String, IBinder, CharSequence,
+     * IBinder, int, ITransientNotificationCallback)
+     */
+    void showToast(String packageName, IBinder token, CharSequence text,
+            IBinder windowToken, int duration,
+            @Nullable ITransientNotificationCallback textCallback);
+
+    /** @see com.android.internal.statusbar.IStatusBar#hideToast(String, IBinder)  */
+    void hideToast(String packageName, IBinder token);
 }
