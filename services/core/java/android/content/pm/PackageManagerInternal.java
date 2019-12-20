@@ -67,6 +67,27 @@ public abstract class PackageManagerInternal {
     public static final int PACKAGE_COMPANION = 14;
 
     @IntDef(value = {
+            INTEGRITY_VERIFICATION_ALLOW,
+            INTEGRITY_VERIFICATION_REJECT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface IntegrityVerificationResult {}
+
+    /**
+     * Used as the {@code verificationCode} argument for
+     * {@link PackageManagerInternal#setIntegrityVerificationResult(int, int)} to indicate that the
+     * integrity component allows the install to proceed.
+     */
+    public static final int INTEGRITY_VERIFICATION_ALLOW = 1;
+
+    /**
+     * Used as the {@code verificationCode} argument for
+     * {@link PackageManagerInternal#setIntegrityVerificationResult(int, int)} to indicate that the
+     * integrity component does not allow install to proceed.
+     */
+    public static final int INTEGRITY_VERIFICATION_REJECT = 0;
+
+    @IntDef(value = {
         PACKAGE_SYSTEM,
         PACKAGE_SETUP_WIZARD,
         PACKAGE_INSTALLER,
@@ -842,13 +863,13 @@ public abstract class PackageManagerInternal {
      * {@link Intent#ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION package verification
      * broadcast} to respond to the package manager. The response must include
      * the {@code verificationCode} which is one of
-     * {@link PackageManager#VERIFICATION_ALLOW} or
-     * {@link PackageManager#VERIFICATION_REJECT}.
+     * {@link #INTEGRITY_VERIFICATION_ALLOW} and {@link #INTEGRITY_VERIFICATION_REJECT}.
      *
      * @param verificationId pending package identifier as passed via the
      *            {@link PackageManager#EXTRA_VERIFICATION_ID} Intent extra.
-     * @param verificationResult either {@link PackageManager#VERIFICATION_ALLOW}
-     *            or {@link PackageManager#VERIFICATION_REJECT}.
+     * @param verificationResult either {@link #INTEGRITY_VERIFICATION_ALLOW}
+     *            or {@link #INTEGRITY_VERIFICATION_REJECT}.
      */
-    public abstract void setIntegrityVerificationResult(int verificationId, int verificationResult);
+    public abstract void setIntegrityVerificationResult(int verificationId,
+            @IntegrityVerificationResult int verificationResult);
 }

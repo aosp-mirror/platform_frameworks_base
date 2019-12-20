@@ -11050,6 +11050,7 @@ public class Intent implements Parcelable, Cloneable {
                 case ACTION_MEDIA_SCANNER_FINISHED:
                 case ACTION_MEDIA_SCANNER_SCAN_FILE:
                 case ACTION_PACKAGE_NEEDS_VERIFICATION:
+                case ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION:
                 case ACTION_PACKAGE_VERIFIED:
                 case ACTION_PACKAGE_ENABLE_ROLLBACK:
                     // Ignore legacy actions

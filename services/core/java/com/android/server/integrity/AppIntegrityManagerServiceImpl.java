@@ -23,7 +23,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -35,6 +34,8 @@ import com.android.server.LocalServices;
 /** Implementation of {@link AppIntegrityManagerService}. */
 class AppIntegrityManagerServiceImpl {
     private static final String TAG = "AppIntegrityManagerServiceImpl";
+
+    private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
 
     private final Context mContext;
     private final Handler mHandler;
@@ -51,6 +52,11 @@ class AppIntegrityManagerServiceImpl {
 
         IntentFilter integrityVerificationFilter = new IntentFilter();
         integrityVerificationFilter.addAction(ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION);
+        try {
+            integrityVerificationFilter.addDataType(PACKAGE_MIME_TYPE);
+        } catch (IntentFilter.MalformedMimeTypeException e) {
+            throw new RuntimeException("Mime type malformed: should never happen.", e);
+        }
 
         mContext.registerReceiver(
                 new BroadcastReceiver() {
@@ -74,7 +80,8 @@ class AppIntegrityManagerServiceImpl {
         int verificationId = intent.getIntExtra(EXTRA_VERIFICATION_ID, -1);
         // TODO: implement this method.
         Slog.i(TAG, "Received integrity verification intent " + intent.toString());
+        Slog.i(TAG, "Extras " + intent.getExtras());
         mPackageManagerInternal.setIntegrityVerificationResult(
-                verificationId, PackageManager.VERIFICATION_ALLOW);
+                verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
     }
 }
