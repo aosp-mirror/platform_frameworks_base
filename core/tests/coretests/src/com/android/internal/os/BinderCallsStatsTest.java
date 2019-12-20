@@ -767,7 +767,9 @@ public class BinderCallsStatsTest {
         bcs.setTrackScreenInteractive(false);
 
         final ArrayList<BinderCallsStats.CallStat> callStatsList = new ArrayList<>();
-        bcs.setCallStatsObserver((workSourceUid, callStats) -> callStatsList.addAll(callStats));
+        bcs.setCallStatsObserver(
+                (workSourceUid, incrementalCallCount, callStats) -> callStatsList.addAll(
+                        callStats));
 
         Binder binder = new Binder();
 

@@ -308,9 +308,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
 
         @Override
-        public void noteBinderCallStats(int workSourceUid,
+        public void noteBinderCallStats(int workSourceUid, long incrementatCallCount,
                 Collection<BinderCallsStats.CallStat> callStats) {
-            mStats.noteBinderCallStats(workSourceUid, callStats);
+            mStats.noteBinderCallStats(workSourceUid, incrementatCallCount, callStats);
         }
     }
 
