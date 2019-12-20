@@ -1089,19 +1089,28 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             if (LOCAL_LOGV) {
                 Slog.v(TAG, "SessionCallback.onFinished id=" + sessionId + " success=" + success);
             }
-            NewRollback newRollback;
-            synchronized (mLock) {
-                newRollback = getNewRollbackForPackageSessionLocked(sessionId);
-                if (newRollback != null) {
-                    mNewRollbacks.remove(newRollback);
-                }
-            }
 
-            if (newRollback != null) {
-                Rollback rollback = completeEnableRollback(newRollback, success);
-                if (rollback != null && !rollback.isStaged()) {
-                    makeRollbackAvailable(rollback);
+            if (success) {
+                NewRollback newRollback;
+                synchronized (mLock) {
+                    newRollback = getNewRollbackForPackageSessionLocked(sessionId);
+                    if (newRollback != null && newRollback.notifySessionWithSuccess()) {
+                        mNewRollbacks.remove(newRollback);
+                    } else {
+                        // Not all child sessions finished with success.
+                        // Don't enable the rollback yet.
+                        newRollback = null;
+                    }
                 }
+
+                if (newRollback != null) {
+                    Rollback rollback = completeEnableRollback(newRollback, success);
+                    if (rollback != null && !rollback.isStaged()) {
+                        makeRollbackAvailable(rollback);
+                    }
+                }
+            } else {
+                // TODO: delete rollbacks for this failed session
             }
 
             // Clear the queue so it will never be leaked to next tests.
@@ -1251,6 +1260,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         @GuardedBy("mNewRollbackLock")
         private boolean mIsCancelled = false;
 
+        /**
+         * The number of sessions in the install which are notified with success by
+         * {@link PackageInstaller.SessionCallback#onFinished(int, boolean)}.
+         * This NewRollback will be enabled only after all child sessions finished with success.
+         */
+        @GuardedBy("mNewRollbackLock")
+        private int mNumPackageSessionsWithSuccess;
+
         private final Object mNewRollbackLock = new Object();
 
         NewRollback(Rollback rollback, int[] packageSessionIds) {
@@ -1321,6 +1338,17 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
          */
         int getPackageSessionIdCount() {
             return mPackageSessionIds.length;
+        }
+
+        /**
+         * Called when a child session finished with success.
+         * Returns true when all child sessions are notified with success. This NewRollback will be
+         * enabled only after all child sessions finished with success.
+         */
+        boolean notifySessionWithSuccess() {
+            synchronized (mNewRollbackLock) {
+                return ++mNumPackageSessionsWithSuccess == mPackageSessionIds.length;
+            }
         }
     }
 
