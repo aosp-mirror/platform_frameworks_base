@@ -19,10 +19,13 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.TaskSnapshotController.SNAPSHOT_MODE_APP_THEME;
 import static com.android.server.wm.TaskSnapshotController.SNAPSHOT_MODE_REAL;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -174,5 +177,23 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
                 buffer.destroy();
             }
         }
+    }
+
+    @Test
+    public void testPrepareTaskSnapshot() {
+        mAppWindow.mWinAnimator.mLastAlpha = 1f;
+        spyOn(mAppWindow.mWinAnimator);
+        doReturn(true).when(mAppWindow.mWinAnimator).getShown();
+        doReturn(true).when(mAppWindow.mActivityRecord).isSurfaceShowing();
+
+        final ActivityManager.TaskSnapshot.Builder builder =
+                new ActivityManager.TaskSnapshot.Builder();
+        final float scaleFraction = 0.8f;
+        mWm.mTaskSnapshotController.prepareTaskSnapshot(mAppWindow.mActivityRecord.getTask(),
+                scaleFraction, PixelFormat.UNKNOWN, builder);
+
+        assertEquals(scaleFraction, builder.getScaleFraction(), 0 /* delta */);
+        // The pixel format should be selected automatically.
+        assertNotEquals(PixelFormat.UNKNOWN, builder.getPixelFormat());
     }
 }
