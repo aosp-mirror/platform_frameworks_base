@@ -2720,6 +2720,7 @@
   <java-symbol type="layout" name="chooser_grid_preview_file" />
   <java-symbol type="id" name="chooser_row_text_option" />
   <java-symbol type="dimen" name="chooser_row_text_option_translate" />
+  <java-symbol type="dimen" name="chooser_preview_image_max_dimen"/>
   <java-symbol type="integer" name="config_maxShortcutTargetsPerApp" />
   <java-symbol type="layout" name="resolve_grid_item" />
   <java-symbol type="id" name="day_picker_view_pager" />
