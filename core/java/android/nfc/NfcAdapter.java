@@ -164,6 +164,18 @@ public final class NfcAdapter {
             "android.nfc.action.TRANSACTION_DETECTED";
 
     /**
+     * Broadcast Action: Intent to notify if the preferred payment service changed.
+     *
+     * <p>This intent will only be sent to the application has requested permission for
+     * {@link android.Manifest.permission#NFC_PREFERRED_PAYMENT_INFO} and if the application
+     * has the necessary access to Secure Element which witnessed the particular event.
+     */
+    @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PREFERRED_PAYMENT_CHANGED =
+            "android.nfc.action.PREFERRED_PAYMENT_CHANGED";
+
+    /**
      * Broadcast to only the activity that handles ACTION_TAG_DISCOVERED
      * @hide
      */
@@ -230,6 +242,17 @@ public final class NfcAdapter {
      * eSE1...eSEn for Embedded Secure Elements, SIM1...SIMn for UICC, etc.
      */
     public static final String EXTRA_SECURE_ELEMENT_NAME = "android.nfc.extra.SECURE_ELEMENT_NAME";
+
+    /**
+     * Mandatory String extra field in {@link #ACTION_PREFERRED_PAYMENT_CHANGED}
+     * Indicates the condition when trigger this event.
+     */
+    public static final String EXTRA_PREFERRED_PAYMENT_CHANGED_REASON =
+            "android.nfc.extra.PREFERRED_PAYMENT_CHANGED_REASON";
+
+    public static final int PREFERRED_PAYMENT_LOADED = 1;
+    public static final int PREFERRED_PAYMENT_CHANGED = 2;
+    public static final int PREFERRED_PAYMENT_UPDATED = 3;
 
     public static final int STATE_OFF = 1;
     public static final int STATE_TURNING_ON = 2;
@@ -1410,7 +1433,7 @@ public final class NfcAdapter {
     /**
      * Enable foreground dispatch to the given Activity.
      *
-     * <p>This will give give priority to the foreground activity when
+     * <p>This will give priority to the foreground activity when
      * dispatching a discovered {@link Tag} to an application.
      *
      * <p>If any IntentFilters are provided to this method they are used to match dispatch Intents
