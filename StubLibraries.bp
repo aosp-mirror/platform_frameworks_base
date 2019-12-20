@@ -41,10 +41,9 @@ packages_to_document = [
 ]
 
 stubs_defaults {
-    name: "metalava-api-stubs-default",
+    name: "metalava-non-updatable-api-stubs-default",
     srcs: [
         ":framework-non-updatable-sources",
-        ":framework-updatable-sources",
         "core/java/**/*.logtags",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
@@ -64,14 +63,23 @@ stubs_defaults {
         "sdk-dir",
         "api-versions-jars-dir",
     ],
-    sdk_version: "core_platform",
     filter_packages: packages_to_document,
+}
+
+stubs_defaults {
+    name: "metalava-api-stubs-default",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    srcs: [":framework-updatable-sources"],
+    sdk_version: "core_platform",
 }
 
 /////////////////////////////////////////////////////////////////////
 // *-api-stubs-docs modules providing source files for the stub libraries
 /////////////////////////////////////////////////////////////////////
 
+// api-stubs-docs, system-api-stubs-docs, and test-api-stubs-docs have APIs
+// from the non-updatable part of the platform as well as from the updatable
+// modules
 droidstubs {
     name: "api-stubs-docs",
     defaults: ["metalava-api-stubs-default"],
@@ -112,7 +120,10 @@ droidstubs {
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
-    args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\)",
+    args: metalava_framework_docs_args +
+        " --show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS," +
+        "process=android.annotation.SystemApi.Process.ALL\\)",
     check_api: {
         current: {
             api_file: "api/system-current.txt",
@@ -155,6 +166,111 @@ droidstubs {
 }
 
 /////////////////////////////////////////////////////////////////////
+// Following droidstubs modules are for extra APIs for modules.
+// The framework currently have two more API surfaces for modules:
+// @SystemApi(client=MODULE_APPS) and @SystemApi(client=MODULE_LIBRARIES)
+/////////////////////////////////////////////////////////////////////
+
+// TODO(b/146727827) remove the *-api modules when we can teach metalava
+// about the relationship among the API surfaces. Currently, these modules are only to generate
+// the API signature files and ensure that the APIs evolve in a backwards compatible manner.
+// They however are NOT used for building the API stub.
+droidstubs {
+    name: "module-app-api",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    libs: ["framework-all"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args +
+        " --show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.MODULE_APPS," +
+        "process=android.annotation.SystemApi.Process.ALL\\)",
+    check_api: {
+        current: {
+            api_file: "api/module-app-current.txt",
+            removed_api_file: "api/module-app-removed.txt",
+        },
+        // TODO(b/147559833) enable the compatibility check against the last release API
+        // and the API lint
+        //last_released: {
+        //    api_file: ":last-released-module-app-api",
+        //    removed_api_file: "api/module-app-removed.txt",
+        //    baseline_file: ":module-app-api-incompatibilities-with-last-released"
+        //},
+        //api_lint: {
+        //    enabled: true,
+        //    new_since: ":last-released-module-app-api",
+        //    baseline_file: "api/module-app-lint-baseline.txt",
+        //},
+    },
+    //jdiff_enabled: true,
+}
+
+droidstubs {
+    name: "module-lib-api",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    libs: ["framework-all"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args +
+        " --show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES," +
+        "process=android.annotation.SystemApi.Process.ALL\\)",
+    check_api: {
+        current: {
+            api_file: "api/module-lib-current.txt",
+            removed_api_file: "api/module-lib-removed.txt",
+        },
+        // TODO(b/147559833) enable the compatibility check against the last release API
+        // and the API lint
+        //last_released: {
+        //    api_file: ":last-released-module-lib-api",
+        //    removed_api_file: "api/module-lib-removed.txt",
+        //    baseline_file: ":module-lib-api-incompatibilities-with-last-released"
+        //},
+        //api_lint: {
+        //    enabled: true,
+        //    new_since: ":last-released-module-lib-api",
+        //    baseline_file: "api/module-lib-lint-baseline.txt",
+        //},
+    },
+    //jdiff_enabled: true,
+}
+
+// The following two droidstubs modules generate source files for the API stub libraries for
+// modules. Note that they not only include their own APIs but also other APIs that have
+// narrower scope. For example, module-lib-api-stubs-docs includes all @SystemApis not just
+// the ones with 'client=MODULE_LIBRARIES'.
+droidstubs {
+    name: "module-app-api-stubs-docs",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    libs: ["framework-all"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args +
+        " --show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS," +
+        "process=android.annotation.SystemApi.Process.ALL\\)" +
+        " --show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.MODULE_APPS," +
+        "process=android.annotation.SystemApi.Process.ALL\\)",
+}
+
+droidstubs {
+    name: "module-lib-api-stubs-docs",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    libs: ["framework-all"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args +
+        " --show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS," +
+        "process=android.annotation.SystemApi.Process.ALL\\)" +
+        " --show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.MODULE_APPS," +
+        "process=android.annotation.SystemApi.Process.ALL\\)" +
+        " --show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES," +
+        "process=android.annotation.SystemApi.Process.ALL\\)",
+}
+
+/////////////////////////////////////////////////////////////////////
 // android_*_stubs_current modules are the stubs libraries compiled
 // from *-api-stubs-docs
 /////////////////////////////////////////////////////////////////////
@@ -169,7 +285,6 @@ java_defaults {
     java_resources: [
         ":notices-for-framework-stubs",
     ],
-    sdk_version: "core_current",
     system_modules: "none",
     java_version: "1.8",
     compile_dex: true,
@@ -187,6 +302,7 @@ java_library_static {
         "private-stub-annotations-jar",
     ],
     defaults: ["framework-stubs-default"],
+    sdk_version: "core_current",
 }
 
 java_library_static {
@@ -201,6 +317,7 @@ java_library_static {
         "private-stub-annotations-jar",
     ],
     defaults: ["framework-stubs-default"],
+    sdk_version: "core_current",
 }
 
 java_library_static {
@@ -210,6 +327,37 @@ java_library_static {
     ],
     libs: [
         "stub-annotations",
+    ],
+    static_libs: [
+        "private-stub-annotations-jar",
+    ],
+    defaults: ["framework-stubs-default"],
+    sdk_version: "core_current",
+}
+
+java_library_static {
+    name: "framework_module_app_stubs_current",
+    srcs: [
+        ":module-app-api-stubs-docs",
+    ],
+    libs: [
+        "stub-annotations",
+        "framework-all",
+    ],
+    static_libs: [
+        "private-stub-annotations-jar",
+    ],
+    defaults: ["framework-stubs-default"],
+}
+
+java_library_static {
+    name: "framework_module_lib_stubs_current",
+    srcs: [
+        ":module-lib-api-stubs-docs",
+    ],
+    libs: [
+        "stub-annotations",
+        "framework-all",
     ],
     static_libs: [
         "private-stub-annotations-jar",
