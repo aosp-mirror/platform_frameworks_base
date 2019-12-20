@@ -228,11 +228,10 @@ final class AccessibilityController {
         }
     }
 
-    public void onAppWindowTransitionLocked(WindowState windowState, int transition) {
-        final int displayId = windowState.getDisplayId();
+    public void onAppWindowTransitionLocked(int displayId, int transition) {
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
-            displayMagnifier.onAppWindowTransitionLocked(windowState, transition);
+            displayMagnifier.onAppWindowTransitionLocked(displayId, transition);
         }
         // Not relevant for the window observer.
     }
@@ -446,11 +445,11 @@ final class AccessibilityController {
             mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_ROTATION_CHANGED);
         }
 
-        public void onAppWindowTransitionLocked(WindowState windowState, int transition) {
+        public void onAppWindowTransitionLocked(int displayId, int transition) {
             if (DEBUG_WINDOW_TRANSITIONS) {
                 Slog.i(LOG_TAG, "Window transition: "
                         + AppTransition.appTransitionToString(transition)
-                        + " displayId: " + windowState.getDisplayId());
+                        + " displayId: " + displayId);
             }
             final boolean magnifying = mMagnifedViewport.isMagnifyingLocked();
             if (magnifying) {
