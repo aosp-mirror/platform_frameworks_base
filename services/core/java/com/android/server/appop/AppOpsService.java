@@ -2335,7 +2335,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             } else {
                 final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, true) : op;
                 final int mode = switchOp.evalMode();
-                if (switchOp.mode != AppOpsManager.MODE_ALLOWED) {
+                if (mode != AppOpsManager.MODE_ALLOWED) {
                     if (DEBUG) Slog.d(TAG, "noteOperation: reject #" + mode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + packageName);
