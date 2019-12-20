@@ -260,7 +260,6 @@ package android {
 
   public static final class R.drawable {
     field public static final int ic_info = 17301684; // 0x10800b4
-    field public static final int stat_notify_wifi_in_range = 17301685; // 0x10800b5
   }
 
   public static final class R.raw {
@@ -281,9 +280,6 @@ package android {
     field public static final int config_helpIntentNameKey = 17039390; // 0x104001e
     field public static final int config_helpPackageNameKey = 17039387; // 0x104001b
     field public static final int config_helpPackageNameValue = 17039388; // 0x104001c
-    field public static final int notification_channel_network_alerts = 17039398; // 0x1040026
-    field public static final int notification_channel_network_available = 17039399; // 0x1040027
-    field public static final int notification_channel_network_status = 17039397; // 0x1040025
   }
 
   public static final class R.style {
