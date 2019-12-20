@@ -252,7 +252,8 @@ class ActivityStartInterceptor {
         final SuspendDialogInfo dialogInfo = pmi.getSuspendedDialogInfo(suspendedPackage,
                 suspendingPackage, mUserId);
         mIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(suspendedPackage,
-                suspendingPackage, dialogInfo, mUserId);
+                suspendingPackage, dialogInfo, deferCrossProfileAppsAnimationIfNecessary(),
+                mUserId);
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
