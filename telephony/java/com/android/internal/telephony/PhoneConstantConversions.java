@@ -16,9 +16,13 @@
 
 package com.android.internal.telephony;
 
+import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.telephony.PreciseCallState;
 
 import com.android.internal.telephony.PhoneConstants;
+
+import java.util.List;
 
 public class PhoneConstantConversions {
     /**
@@ -63,8 +67,6 @@ public class PhoneConstantConversions {
                 return TelephonyManager.DATA_CONNECTED;
             case SUSPENDED:
                 return TelephonyManager.DATA_SUSPENDED;
-            case DISCONNECTING:
-                return TelephonyManager.DATA_DISCONNECTING;
             default:
                 return TelephonyManager.DATA_DISCONNECTED;
         }
@@ -82,8 +84,6 @@ public class PhoneConstantConversions {
                 return PhoneConstants.DataState.CONNECTED;
             case TelephonyManager.DATA_SUSPENDED:
                 return PhoneConstants.DataState.SUSPENDED;
-            case TelephonyManager.DATA_DISCONNECTING:
-                return PhoneConstants.DataState.DISCONNECTING;
             default:
                 return PhoneConstants.DataState.DISCONNECTED;
         }
