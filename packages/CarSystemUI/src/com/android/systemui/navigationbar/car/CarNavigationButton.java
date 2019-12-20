@@ -177,25 +177,7 @@ public class CarNavigationButton extends LinearLayout {
         try {
             if (mIntent != null) {
                 final Intent intent = Intent.parseUri(mIntent, Intent.URI_INTENT_SCHEME);
-                setOnClickListener(v -> {
-                    try {
-                        if (mBroadcastIntent) {
-                            mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
-                            mContext.sendBroadcastAsUser(
-                                    new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
-                                    UserHandle.CURRENT);
-                            return;
-                        }
-                        ActivityOptions options = ActivityOptions.makeBasic();
-                        options.setLaunchDisplayId(mContext.getDisplayId());
-                        mContext.startActivityAsUser(intent, options.toBundle(),
-                                UserHandle.CURRENT);
-                        mContext.sendBroadcastAsUser(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
-                                UserHandle.CURRENT);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Failed to launch intent", e);
-                    }
-                });
+                setOnClickListener(getButtonClickListener(intent));
                 if (packageString != null) {
                     mButtonPackages = packageString.split(BUTTON_FILTER_DELIMITER);
                     intent.putExtra(EXTRA_BUTTON_PACKAGES, mButtonPackages);
@@ -215,25 +197,51 @@ public class CarNavigationButton extends LinearLayout {
         try {
             if (mLongIntent != null && (Build.IS_ENG || Build.IS_USERDEBUG)) {
                 final Intent intent = Intent.parseUri(mLongIntent, Intent.URI_INTENT_SCHEME);
-                setOnLongClickListener(v -> {
-                    try {
-                        ActivityOptions options = ActivityOptions.makeBasic();
-                        options.setLaunchDisplayId(mContext.getDisplayId());
-                        mContext.startActivityAsUser(intent, options.toBundle(),
-                                UserHandle.CURRENT);
-                        mContext.sendBroadcastAsUser(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
-                                UserHandle.CURRENT);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Failed to launch intent", e);
-                    }
-                    // consume event either way
-                    return true;
-                });
+                setOnLongClickListener(getButtonLongClickListener(intent));
             }
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to attach long press intent", e);
         }
     }
+
+    /** Defines the behavior of a button click. */
+    protected OnClickListener getButtonClickListener(Intent toSend) {
+        return v -> {
+            mContext.sendBroadcastAsUser(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
+                    UserHandle.CURRENT);
+            try {
+                if (mBroadcastIntent) {
+                    mContext.sendBroadcastAsUser(toSend, UserHandle.CURRENT);
+                    return;
+                }
+                ActivityOptions options = ActivityOptions.makeBasic();
+                options.setLaunchDisplayId(mContext.getDisplayId());
+                mContext.startActivityAsUser(toSend, options.toBundle(),
+                        UserHandle.CURRENT);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to launch intent", e);
+            }
+        };
+    }
+
+    /** Defines the behavior of a long click. */
+    protected OnLongClickListener getButtonLongClickListener(Intent toSend) {
+        return v -> {
+            mContext.sendBroadcastAsUser(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
+                    UserHandle.CURRENT);
+            try {
+                ActivityOptions options = ActivityOptions.makeBasic();
+                options.setLaunchDisplayId(mContext.getDisplayId());
+                mContext.startActivityAsUser(toSend, options.toBundle(),
+                        UserHandle.CURRENT);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to launch intent", e);
+            }
+            // consume event either way
+            return true;
+        };
+    }
+
 
     /**
      * Initializes view-related aspects of the button.
