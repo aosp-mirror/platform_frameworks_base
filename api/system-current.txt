@@ -8587,6 +8587,7 @@ package android.telephony {
   }
 
   public final class PreciseCallState implements android.os.Parcelable {
+    ctor public PreciseCallState(int, int, int, int, int);
     method public int describeContents();
     method public int getBackgroundCallState();
     method public int getForegroundCallState();
