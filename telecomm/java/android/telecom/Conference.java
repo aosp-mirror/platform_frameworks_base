@@ -24,9 +24,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.telecom.Connection.VideoProvider;
-import android.telephony.Annotation.RilRadioTechnology;
-import android.telephony.ServiceState;
-import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 
 import java.util.ArrayList;
