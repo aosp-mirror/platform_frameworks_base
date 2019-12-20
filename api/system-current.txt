@@ -1670,6 +1670,7 @@ package android.content {
     field public static final String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final String TELEPHONY_IMS_SERVICE = "telephony_ims";
     field public static final String TELEPHONY_REGISTRY_SERVICE = "telephony_registry";
+    field public static final String TETHERING_SERVICE = "tethering";
     field public static final String VR_SERVICE = "vrmanager";
     field @Deprecated public static final String WIFI_RTT_SERVICE = "rttmanager";
     field public static final String WIFI_SCANNING_SERVICE = "wifiscanner";
@@ -7599,6 +7600,7 @@ package android.provider {
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS = "install_carrier_app_notification_sleep_millis";
     field public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
     field public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
+    field public static final String TETHER_SUPPORTED = "tether_supported";
     field public static final String THEATER_MODE_ON = "theater_mode_on";
     field public static final String WEBVIEW_MULTIPROCESS = "webview_multiprocess";
     field public static final String WIFI_BADGING_THRESHOLDS = "wifi_badging_thresholds";

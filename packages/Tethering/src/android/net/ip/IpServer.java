@@ -30,7 +30,6 @@ import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.NetworkStackClient;
 import android.net.RouteInfo;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
@@ -122,7 +121,7 @@ public class IpServer extends StateMachine {
          * @param state one of STATE_*
          * @param lastError one of ConnectivityManager.TETHER_ERROR_*
          */
-        public void updateInterfaceState(IpServer who, int state, int lastError) {}
+        public void updateInterfaceState(IpServer who, int state, int lastError) { }
 
         /**
          * Notify that |who| has new LinkProperties.
@@ -130,11 +129,11 @@ public class IpServer extends StateMachine {
          * @param who the calling instance of IpServer
          * @param newLp the new LinkProperties to report
          */
-        public void updateLinkProperties(IpServer who, LinkProperties newLp) {}
+        public void updateLinkProperties(IpServer who, LinkProperties newLp) { }
     }
 
     /** Capture IpServer dependencies, for injection. */
-    public static class Dependencies {
+    public abstract static class Dependencies {
         /** Create a RouterAdvertisementDaemon instance to be used by IpServer.*/
         public RouterAdvertisementDaemon getRouterAdvertisementDaemon(InterfaceParams ifParams) {
             return new RouterAdvertisementDaemon(ifParams);
@@ -149,13 +148,9 @@ public class IpServer extends StateMachine {
             return NetdService.getInstance();
         }
 
-        /**
-         * Create a DhcpServer instance to be used by IpServer.
-         */
-        public void makeDhcpServer(String ifName, DhcpServingParamsParcel params,
-                DhcpServerCallbacks cb) {
-            NetworkStackClient.getInstance().makeDhcpServer(ifName, params, cb);
-        }
+        /** Create a DhcpServer instance to be used by IpServer. */
+        public abstract void makeDhcpServer(String ifName, DhcpServingParamsParcel params,
+                DhcpServerCallbacks cb);
     }
 
     private static final int BASE_IFACE              = Protocol.BASE_TETHERING + 100;
