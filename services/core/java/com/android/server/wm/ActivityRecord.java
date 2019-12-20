@@ -6308,6 +6308,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             resolveSizeCompatModeConfiguration(newParentConfiguration);
         } else {
             super.resolveOverrideConfiguration(newParentConfiguration);
+            // We ignore activities' requested orientation in multi-window modes. Task level may
+            // take them into consideration when calculating bounds.
+            if (getParent() != null && getParent().inMultiWindowMode()) {
+                resolvedConfig.orientation = Configuration.ORIENTATION_UNDEFINED;
+            }
             applyAspectRatio(resolvedConfig.windowConfiguration.getBounds(),
                     newParentConfiguration.windowConfiguration.getAppBounds(),
                     newParentConfiguration.windowConfiguration.getBounds());

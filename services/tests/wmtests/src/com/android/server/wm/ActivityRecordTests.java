@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.os.Process.NOBODY_UID;
@@ -62,6 +63,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 
 import android.app.ActivityOptions;
+import android.app.WindowConfiguration;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.PauseActivityItem;
@@ -70,6 +72,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.platform.test.annotations.Presubmit;
@@ -373,6 +376,64 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 ActivityConfigurationChangeItem.obtain(newConfig);
         verify(mService.getLifecycleManager()).scheduleTransaction(eq(mActivity.app.getThread()),
                 eq(mActivity.appToken), eq(expected));
+    }
+
+    @Test
+    public void ignoreRequestedOrientationInFreeformWindows() {
+        mStack.setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
+        final Rect stableRect = new Rect();
+        mStack.getDisplay().mDisplayContent.getStableRect(stableRect);
+        final boolean isScreenPortrait = stableRect.width() <= stableRect.height();
+        final Rect bounds = new Rect(stableRect);
+        if (isScreenPortrait) {
+            // Landscape bounds
+            final int newHeight = stableRect.width() - 10;
+            bounds.top = stableRect.top + (stableRect.height() - newHeight) / 2;
+            bounds.bottom = bounds.top + newHeight;
+        } else {
+            // Portrait bounds
+            final int newWidth = stableRect.height() - 10;
+            bounds.left = stableRect.left + (stableRect.width() - newWidth) / 2;
+            bounds.right = bounds.left + newWidth;
+        }
+        mTask.setBounds(bounds);
+
+        // Requests orientation that's different from its bounds.
+        mActivity.setRequestedOrientation(
+                isScreenPortrait ? SCREEN_ORIENTATION_PORTRAIT : SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Asserts it has orientation derived from bounds.
+        assertEquals(isScreenPortrait ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT,
+                mActivity.getConfiguration().orientation);
+    }
+
+    @Test
+    public void ignoreRequestedOrientationInSplitWindows() {
+        mStack.setWindowingMode(WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        final Rect stableRect = new Rect();
+        mStack.getDisplay().mDisplayContent.getStableRect(stableRect);
+        final boolean isScreenPortrait = stableRect.width() <= stableRect.height();
+        final Rect bounds = new Rect(stableRect);
+        if (isScreenPortrait) {
+            // Landscape bounds
+            final int newHeight = stableRect.width() - 10;
+            bounds.top = stableRect.top + (stableRect.height() - newHeight) / 2;
+            bounds.bottom = bounds.top + newHeight;
+        } else {
+            // Portrait bounds
+            final int newWidth = stableRect.height() - 10;
+            bounds.left = stableRect.left + (stableRect.width() - newWidth) / 2;
+            bounds.right = bounds.left + newWidth;
+        }
+        mTask.setBounds(bounds);
+
+        // Requests orientation that's different from its bounds.
+        mActivity.setRequestedOrientation(
+                isScreenPortrait ? SCREEN_ORIENTATION_PORTRAIT : SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Asserts it has orientation derived from bounds.
+        assertEquals(isScreenPortrait ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT,
+                mActivity.getConfiguration().orientation);
     }
 
     @Test
