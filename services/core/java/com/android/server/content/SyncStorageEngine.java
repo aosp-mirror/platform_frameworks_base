@@ -472,8 +472,7 @@ public class SyncStorageEngine {
 
     private int mSyncRandomOffset;
 
-    // STOPSHIP: b/143656271 this should be true on launch
-    private static final boolean DELETE_LEGACY_PARCEL_FILES = false;
+    private static final boolean DELETE_LEGACY_PARCEL_FILES = true;
     private static final String LEGACY_STATUS_FILE_NAME = "status.bin";
     private static final String LEGACY_STATISTICS_FILE_NAME = "stats.bin";
 
@@ -2076,7 +2075,7 @@ public class SyncStorageEngine {
         }
 
         // if upgrade to proto was successful, delete parcel file
-        if (DELETE_LEGACY_PARCEL_FILES && mStatusFile.exists()) {
+        if (DELETE_LEGACY_PARCEL_FILES && parcelStatus.exists() && mStatusFile.exists()) {
             parcelStatus.delete();
         }
     }
@@ -2475,7 +2474,7 @@ public class SyncStorageEngine {
         }
 
         // if upgrade to proto was successful, delete parcel file
-        if (DELETE_LEGACY_PARCEL_FILES && mStatisticsFile.exists()) {
+        if (DELETE_LEGACY_PARCEL_FILES && parcelStats.exists() && mStatisticsFile.exists()) {
             parcelStats.delete();
         }
     }
