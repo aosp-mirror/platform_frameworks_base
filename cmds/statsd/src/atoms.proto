@@ -343,6 +343,10 @@ message Atom {
         NotificationChannelModified notification_panel_modified = 246;
         IntegrityCheckResultReported integrity_check_result_reported = 247;
         IntegrityRulesPushed integrity_rules_pushed = 248;
+        CellBroadcastMessageReported cb_message_reported =
+            249 [(module) = "cellbroadcast"];
+        CellBroadcastMessageError cb_message_error =
+            250 [(module) = "cellbroadcast"];
     }
 
     // Pulled events will start at field 10000.
@@ -8111,4 +8115,56 @@ message IntegrityRulesPushed {
     // Version string of arbitrary format provided by the rule provider to
     // identify the rules.
     optional string rule_version = 3;
+}
+
+/**
+ * Logs when a cell broadcast message is received on the device.
+ *
+ * Logged from CellBroadcastService module:
+ *   packages/modules/CellBroadcastService/src/com/android/cellbroadcastservice/
+ */
+message CellBroadcastMessageReported {
+    // The type of Cell Broadcast message
+    enum CbType {
+        UNKNOWN_TYPE = 0;
+        GSM = 1;
+        CDMA = 2;
+        CDMA_SPC = 3;
+    }
+
+    // GSM, CDMA, CDMA-SCP
+    optional CbType type = 1;
+}
+
+/**
+ * Logs when an error occurs while handling a cell broadcast message;
+ *
+ * Logged from CellBroadcastService module:
+ *   packages/modules/CellBroadcastService/src/com/android/cellbroadcastservice/
+ */
+message CellBroadcastMessageError {
+    // The type of error raised when trying to handle a cell broadcast message
+    enum ErrorType {
+        UNKNOWN_TYPE = 0;
+        CDMA_DECODING_ERROR = 1;
+        CDMA_SCP_EMPTY = 2;
+        CDMA_SCP_HANDLING_ERROR = 3;
+        GSM_INVALID_HEADER_LENGTH = 4;
+        GSM_UNSUPPORTED_HEADER_MESSAGE_TYPE = 5;
+        GSM_UNSUPPORTED_HEADER_DATA_CODING_SCHEME = 6;
+        GSM_INVALID_PDU = 7;
+        GSM_INVALID_GEO_FENCING_DATA = 8;
+        GSM_UMTS_INVALID_WAC = 9;
+        FAILED_TO_INSERT_TO_DB = 10;
+        UNEXPECTED_GEOMETRY_FROM_FWK = 11;
+        UNEXPECTED_GSM_MESSAGE_TYPE_FROM_FWK = 12;
+        UNEXPECTED_CDMA_MESSAGE_TYPE_FROM_FWK = 13;
+        UNEXPECTED_CDMA_SCP_MESSAGE_TYPE_FROM_FWK = 14;
+    }
+
+    // What kind of error occurred
+    optional ErrorType type = 1;
+
+    // Exception message (or log message) associated with the error (max 1000 chars)
+    optional string exception_message = 2;
 }
