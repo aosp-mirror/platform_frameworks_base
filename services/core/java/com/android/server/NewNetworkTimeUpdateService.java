@@ -165,12 +165,14 @@ public class NewNetworkTimeUpdateService extends Binder implements NetworkTimeUp
 
     private void onPollNetworkTimeUnderWakeLock(int event) {
         // Force an NTP fix when outdated
-        if (mTime.getCacheAge() >= mPollingIntervalMs) {
+        NtpTrustedTime.TimeResult cachedNtpResult = mTime.getCachedTimeResult();
+        if (cachedNtpResult == null || cachedNtpResult.getAgeMillis() >= mPollingIntervalMs) {
             if (DBG) Log.d(TAG, "Stale NTP fix; forcing refresh");
             mTime.forceRefresh();
+            cachedNtpResult = mTime.getCachedTimeResult();
         }
 
-        if (mTime.getCacheAge() < mPollingIntervalMs) {
+        if (cachedNtpResult != null && cachedNtpResult.getAgeMillis() < mPollingIntervalMs) {
             // Obtained fresh fix; schedule next normal update
             resetAlarm(mPollingIntervalMs);
             if (isAutomaticTimeRequested()) {
@@ -322,8 +324,11 @@ public class NewNetworkTimeUpdateService extends Binder implements NetworkTimeUp
         pw.print("TimeErrorThresholdMs: ");
         TimeUtils.formatDuration(mTimeErrorThresholdMs, pw);
         pw.println("\nTryAgainCounter: " + mTryAgainCounter);
-        pw.println("NTP cache age: " + mTime.getCacheAge());
-        pw.println("NTP cache certainty: " + mTime.getCacheCertainty());
+        NtpTrustedTime.TimeResult ntpResult = mTime.getCachedTimeResult();
+        pw.println("NTP cache result: " + ntpResult);
+        if (ntpResult != null) {
+            pw.println("NTP result age: " + ntpResult.getAgeMillis());
+        }
         pw.println();
     }
 }
