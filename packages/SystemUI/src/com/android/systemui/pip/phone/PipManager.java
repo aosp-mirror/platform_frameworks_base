@@ -51,13 +51,15 @@ import com.android.systemui.wm.DisplayController;
 
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Manages the picture-in-picture (PIP) UI and states for Phones.
  */
+@Singleton
 public class PipManager implements BasePipManager {
     private static final String TAG = "PipManager";
-
-    private static PipManager sPipController;
 
     private Context mContext;
     private IActivityManager mActivityManager;
@@ -225,12 +227,8 @@ public class PipManager implements BasePipManager {
         }
     }
 
-    private PipManager() {}
-
-    /**
-     * Initializes {@link PipManager}.
-     */
-    public void initialize(Context context, BroadcastDispatcher broadcastDispatcher,
+    @Inject
+    public PipManager(Context context, BroadcastDispatcher broadcastDispatcher,
             DisplayController displayController) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
@@ -327,16 +325,6 @@ public class PipManager implements BasePipManager {
         mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
                 animatingBounds, fromImeAdjustment, fromShelfAdjustment,
                 mTmpDisplayInfo.rotation);
-    }
-
-    /**
-     * Gets an instance of {@link PipManager}.
-     */
-    public static PipManager getInstance() {
-        if (sPipController == null) {
-            sPipController = new PipManager();
-        }
-        return sPipController;
     }
 
     public void dump(PrintWriter pw) {

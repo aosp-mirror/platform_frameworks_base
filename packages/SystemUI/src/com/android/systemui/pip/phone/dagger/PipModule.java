@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.pip;
+package com.android.systemui.pip.phone.dagger;
 
-import android.content.res.Configuration;
+import com.android.systemui.pip.BasePipManager;
+import com.android.systemui.pip.phone.PipManager;
 
-import java.io.PrintWriter;
+import dagger.Binds;
+import dagger.Module;
 
-public interface BasePipManager {
-    void showPictureInPictureMenu();
-    default void expandPip() {}
-    default void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {}
-    void onConfigurationChanged(Configuration newConfig);
-    default void setShelfHeight(boolean visible, int height) {}
-    default void dump(PrintWriter pw) {}
+/**
+ * Dagger Module for Phone PIP.
+ */
+@Module
+public abstract class PipModule {
+
+    /** Binds PipManager as the default BasePipManager. */
+    @Binds
+    public abstract BasePipManager providePipManager(PipManager pipManager);
 }
