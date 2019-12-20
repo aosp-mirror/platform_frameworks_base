@@ -14,18 +14,27 @@
  * limitations under the License.
  */
 
-package android.net.wifi;
+package android.net.wifi.wificond;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.app.AlarmManager;
 import android.content.Context;
-import android.net.wifi.wificond.ChannelSettings;
-import android.net.wifi.wificond.HiddenNetwork;
-import android.net.wifi.wificond.NativeScanResult;
-import android.net.wifi.wificond.NativeWifiClient;
-import android.net.wifi.wificond.PnoSettings;
-import android.net.wifi.wificond.SingleScanSettings;
+import android.net.wifi.IApInterface;
+import android.net.wifi.IApInterfaceEventCallback;
+import android.net.wifi.IClientInterface;
+import android.net.wifi.IPnoScanEvent;
+import android.net.wifi.IScanEvent;
+import android.net.wifi.ISendMgmtFrameEvent;
+import android.net.wifi.IWifiScannerImpl;
+import android.net.wifi.IWificond;
+import android.net.wifi.SoftApInfo;
+import android.net.wifi.WifiAnnotations;
+import android.net.wifi.WifiScanner;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -44,37 +53,48 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * This class provides methods for WifiNative to send control commands to wificond.
- * NOTE: This class should only be used from WifiNative.
+ * This class encapsulates the interface the wificond daemon presents to the Wi-Fi framework. The
+ * interface is only for use by the Wi-Fi framework and access is protected by SELinux permissions.
+ *
  * @hide
  */
-public class WifiCondManager implements IBinder.DeathRecipient {
+@SystemApi
+@SystemService(Context.WIFI_COND_SERVICE)
+public class WifiCondManager {
     private static final String TAG = "WifiCondManager";
     private boolean mVerboseLoggingEnabled = false;
 
     /**
-     * The {@link #sendMgmtFrame(String, byte[], SendMgmtFrameCallback, int) sendMgmtFrame()}
+     * The {@link #sendMgmtFrame(String, byte[], int, Executor, SendMgmtFrameCallback)}
      * timeout, in milliseconds, after which
      * {@link SendMgmtFrameCallback#onFailure(int)} will be called with reason
      * {@link #SEND_MGMT_FRAME_ERROR_TIMEOUT}.
      */
-    public static final int SEND_MGMT_FRAME_TIMEOUT_MS = 1000;
+    private static final int SEND_MGMT_FRAME_TIMEOUT_MS = 1000;
 
     private static final String TIMEOUT_ALARM_TAG = TAG + " Send Management Frame Timeout";
 
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"SCAN_TYPE_"},
             value = {SCAN_TYPE_SINGLE_SCAN,
                     SCAN_TYPE_PNO_SCAN})
     public @interface ScanResultType {}
 
-    /** Get scan results for a single scan */
+    /**
+     * Specifies a scan type: single scan initiated by the framework. Can be used in
+     * {@link #getScanResults(String, int)} to specify the type of scan result to fetch.
+     */
     public static final int SCAN_TYPE_SINGLE_SCAN = 0;
 
-    /** Get scan results for Pno Scan */
+    /**
+     * Specifies a scan type: PNO scan. Can be used in {@link #getScanResults(String, int)} to
+     * specify the type of scan result to fetch.
+     */
     public static final int SCAN_TYPE_PNO_SCAN = 1;
 
     private AlarmManager mAlarmManager;
@@ -95,11 +115,12 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     private AtomicBoolean mSendMgmtFrameInProgress = new AtomicBoolean(false);
 
     /**
-     * Interface for a callback to be used to handle scan results.
+     * Interface used when waiting for scans to be completed (with results).
      */
     public interface ScanEventCallback {
         /**
-         * Called when scan results are available.
+         * Called when scan results are available. Scans results should then be obtained from
+         * {@link #getScanResults(String, int)}.
          */
         void onScanResultReady();
 
@@ -110,11 +131,14 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-     * Interface for a callback to provide information about PNO scan request.
+     * Interface for a callback to provide information about PNO scan request requested with
+     * {@link #startPnoScan(String, PnoSettings, Executor, PnoScanRequestCallback)}. Note that the
+     * callback are for the status of the request - not the scan itself. The results of the scan
+     * are returned with {@link ScanEventCallback}.
      */
     public interface PnoScanRequestCallback {
         /**
-         * Called when the PNO scan is requested.
+         * Called when a PNO scan request has been successfully submitted.
          */
         void onPnoRequestSucceeded();
 
@@ -125,73 +149,116 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     private class ScanEventHandler extends IScanEvent.Stub {
+        private Executor mExecutor;
         private ScanEventCallback mCallback;
 
-        ScanEventHandler(@NonNull ScanEventCallback callback) {
+        ScanEventHandler(@NonNull Executor executor, @NonNull ScanEventCallback callback) {
+            mExecutor = executor;
             mCallback = callback;
         }
 
         @Override
         public void OnScanResultReady() {
             Log.d(TAG, "Scan result ready event");
-            mCallback.onScanResultReady();
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mCallback.onScanResultReady());
         }
 
         @Override
         public void OnScanFailed() {
             Log.d(TAG, "Scan failed event");
-            mCallback.onScanFailed();
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mCallback.onScanFailed());
         }
     }
 
     /**
-     * Result of a signal poll.
+     * Result of a signal poll requested using {@link #signalPoll(String)}.
      */
     public static class SignalPollResult {
-        // RSSI value in dBM.
-        public int currentRssi;
-        //Transmission bit rate in Mbps.
-        public int txBitrate;
-        // Association frequency in MHz.
-        public int associationFrequency;
-        //Last received packet bit rate in Mbps.
-        public int rxBitrate;
+        /** @hide */
+        public SignalPollResult(int currentRssiDbm, int txBitrateMbps, int rxBitrateMbps,
+                int associationFrequencyMHz) {
+            this.currentRssiDbm = currentRssiDbm;
+            this.txBitrateMbps = txBitrateMbps;
+            this.rxBitrateMbps = rxBitrateMbps;
+            this.associationFrequencyMHz = associationFrequencyMHz;
+        }
+
+        /**
+         * RSSI value in dBM.
+         */
+        public final int currentRssiDbm;
+
+        /**
+         * Transmission bit rate in Mbps.
+         */
+        public final int txBitrateMbps;
+
+        /**
+         * Last received packet bit rate in Mbps.
+         */
+        public final int rxBitrateMbps;
+
+        /**
+         * Association frequency in MHz.
+         */
+        public final int associationFrequencyMHz;
     }
 
     /**
-     * WiFi interface transimission counters.
+     * Transmission counters obtained using {@link #getTxPacketCounters(String)}.
      */
     public static class TxPacketCounters {
-        // Number of successfully transmitted packets.
-        public int txSucceeded;
-        // Number of tramsmission failures.
-        public int txFailed;
+        /** @hide */
+        public TxPacketCounters(int txPacketSucceeded, int txPacketFailed) {
+            this.txPacketSucceeded = txPacketSucceeded;
+            this.txPacketFailed = txPacketFailed;
+        }
+
+        /**
+         * Number of successfully transmitted packets.
+         */
+        public final int txPacketSucceeded;
+
+        /**
+         * Number of packet transmission failures.
+         */
+        public final int txPacketFailed;
     }
 
     /**
-     * Callbacks for SoftAp interface.
+     * Callbacks for SoftAp interface registered using
+     * {@link #registerApCallback(String, Executor, SoftApCallback)}.
      */
-    public interface SoftApListener {
+    public interface SoftApCallback {
         /**
-         * Invoked when there is some fatal failure in the lower layers.
+         * Invoked when there is a fatal failure and the SoftAp is shutdown.
          */
         void onFailure();
 
         /**
-         * Invoked when the associated stations changes.
+         * Invoked when there is a change in the associated station (STA).
+         * @param client Information about the client whose status has changed.
+         * @param isConnected Indication as to whether the client is connected (true), or
+         *                    disconnected (false).
          */
-        void onConnectedClientsChanged(NativeWifiClient client, boolean isConnected);
+        void onConnectedClientsChanged(@NonNull NativeWifiClient client, boolean isConnected);
 
         /**
-         * Invoked when the channel switch event happens.
+         * Invoked when a channel switch event happens - i.e. the SoftAp is moved to a different
+         * channel. Also called on initial registration.
+         * @param frequencyMhz The new frequency of the SoftAp. A value of 0 is invalid and is an
+         *                     indication that the SoftAp is not enabled.
+         * @param bandwidth The new bandwidth of the SoftAp.
          */
-        void onSoftApChannelSwitched(int frequency, int bandwidth);
+        void onSoftApChannelSwitched(int frequencyMhz, @WifiAnnotations.Bandwidth int bandwidth);
     }
 
     /**
      * Callback to notify the results of a
-     * {@link #sendMgmtFrame(String, byte[], SendMgmtFrameCallback, int) sendMgmtFrame()} call.
-     * Note: no callbacks will be triggered if the iface dies while sending a frame.
+     * {@link #sendMgmtFrame(String, byte[], int, Executor, SendMgmtFrameCallback)} call.
+     * Note: no callbacks will be triggered if the interface dies while sending a frame.
      */
     public interface SendMgmtFrameCallback {
         /**
@@ -211,6 +278,7 @@ public class WifiCondManager implements IBinder.DeathRecipient {
         void onFailure(@SendMgmtFrameError int reason);
     }
 
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"SEND_MGMT_FRAME_ERROR_"},
             value = {SEND_MGMT_FRAME_ERROR_UNKNOWN,
@@ -224,43 +292,44 @@ public class WifiCondManager implements IBinder.DeathRecipient {
 
     /**
      * Unknown error occurred during call to
-     * {@link #sendMgmtFrame(String, byte[], SendMgmtFrameCallback, int) sendMgmtFrame()}.
+     * {@link #sendMgmtFrame(String, byte[], int, Executor, SendMgmtFrameCallback)}.
      */
     public static final int SEND_MGMT_FRAME_ERROR_UNKNOWN = 1;
 
     /**
      * Specifying the MCS rate in
-     * {@link #sendMgmtFrame(String, byte[], SendMgmtFrameCallback, int) sendMgmtFrame()} is not
+     * {@link #sendMgmtFrame(String, byte[], int, Executor, SendMgmtFrameCallback)} is not
      * supported by this device.
      */
     public static final int SEND_MGMT_FRAME_ERROR_MCS_UNSUPPORTED = 2;
 
     /**
      * Driver reported that no ACK was received for the frame transmitted using
-     * {@link #sendMgmtFrame(String, byte[], SendMgmtFrameCallback, int) sendMgmtFrame()}.
+     * {@link #sendMgmtFrame(String, byte[], int, Executor, SendMgmtFrameCallback)}.
      */
     public static final int SEND_MGMT_FRAME_ERROR_NO_ACK = 3;
 
     /**
      * Error code for when the driver fails to report on the status of the frame sent by
-     * {@link #sendMgmtFrame(String, byte[], SendMgmtFrameCallback, int) sendMgmtFrame()}
+     * {@link #sendMgmtFrame(String, byte[], int, Executor, SendMgmtFrameCallback)}
      * after {@link #SEND_MGMT_FRAME_TIMEOUT_MS} milliseconds.
      */
     public static final int SEND_MGMT_FRAME_ERROR_TIMEOUT = 4;
 
     /**
      * An existing call to
-     * {@link #sendMgmtFrame(String, byte[], SendMgmtFrameCallback, int) sendMgmtFrame()}
+     * {@link #sendMgmtFrame(String, byte[], int, Executor, SendMgmtFrameCallback)}
      * is in progress. Another frame cannot be sent until the first call completes.
      */
     public static final int SEND_MGMT_FRAME_ERROR_ALREADY_STARTED = 5;
 
-
+    /** @hide */
     public WifiCondManager(Context context) {
-        mAlarmManager = (AlarmManager) context.getSystemService(AlarmManager.class);
+        mAlarmManager = context.getSystemService(AlarmManager.class);
         mEventHandler = new Handler(context.getMainLooper());
     }
 
+    /** @hide */
     @VisibleForTesting
     public WifiCondManager(Context context, IWificond wificond) {
         this(context);
@@ -268,22 +337,26 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     private class PnoScanEventHandler extends IPnoScanEvent.Stub {
+        private Executor mExecutor;
         private ScanEventCallback mCallback;
 
-        PnoScanEventHandler(@NonNull ScanEventCallback callback) {
+        PnoScanEventHandler(@NonNull Executor executor, @NonNull ScanEventCallback callback) {
+            mExecutor = executor;
             mCallback = callback;
         }
 
         @Override
         public void OnPnoNetworkFound() {
             Log.d(TAG, "Pno scan result event");
-            mCallback.onScanResultReady();
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mCallback.onScanResultReady());
         }
 
         @Override
         public void OnPnoScanFailed() {
             Log.d(TAG, "Pno Scan failed event");
-            mCallback.onScanFailed();
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mCallback.onScanFailed());
         }
     }
 
@@ -291,9 +364,11 @@ public class WifiCondManager implements IBinder.DeathRecipient {
      * Listener for AP Interface events.
      */
     private class ApInterfaceEventCallback extends IApInterfaceEventCallback.Stub {
-        private SoftApListener mSoftApListener;
+        private Executor mExecutor;
+        private SoftApCallback mSoftApListener;
 
-        ApInterfaceEventCallback(SoftApListener listener) {
+        ApInterfaceEventCallback(Executor executor, SoftApCallback listener) {
+            mExecutor = executor;
             mSoftApListener = listener;
         }
 
@@ -304,12 +379,36 @@ public class WifiCondManager implements IBinder.DeathRecipient {
                         + client.macAddress + " isConnected: " + isConnected);
             }
 
-            mSoftApListener.onConnectedClientsChanged(client, isConnected);
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mSoftApListener.onConnectedClientsChanged(client, isConnected));
         }
 
         @Override
         public void onSoftApChannelSwitched(int frequency, int bandwidth) {
-            mSoftApListener.onSoftApChannelSwitched(frequency, bandwidth);
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mSoftApListener.onSoftApChannelSwitched(frequency,
+                    toFrameworkBandwidth(bandwidth)));
+        }
+
+        private @WifiAnnotations.Bandwidth int toFrameworkBandwidth(int bandwidth) {
+            switch(bandwidth) {
+                case IApInterfaceEventCallback.BANDWIDTH_INVALID:
+                    return SoftApInfo.CHANNEL_WIDTH_INVALID;
+                case IApInterfaceEventCallback.BANDWIDTH_20_NOHT:
+                    return SoftApInfo.CHANNEL_WIDTH_20MHZ_NOHT;
+                case IApInterfaceEventCallback.BANDWIDTH_20:
+                    return SoftApInfo.CHANNEL_WIDTH_20MHZ;
+                case IApInterfaceEventCallback.BANDWIDTH_40:
+                    return SoftApInfo.CHANNEL_WIDTH_40MHZ;
+                case IApInterfaceEventCallback.BANDWIDTH_80:
+                    return SoftApInfo.CHANNEL_WIDTH_80MHZ;
+                case IApInterfaceEventCallback.BANDWIDTH_80P80:
+                    return SoftApInfo.CHANNEL_WIDTH_80MHZ_PLUS_MHZ;
+                case IApInterfaceEventCallback.BANDWIDTH_160:
+                    return SoftApInfo.CHANNEL_WIDTH_160MHZ;
+                default:
+                    return SoftApInfo.CHANNEL_WIDTH_INVALID;
+            }
         }
     }
 
@@ -317,6 +416,7 @@ public class WifiCondManager implements IBinder.DeathRecipient {
      * Callback triggered by wificond.
      */
     private class SendMgmtFrameEvent extends ISendMgmtFrameEvent.Stub {
+        private Executor mExecutor;
         private SendMgmtFrameCallback mCallback;
         private AlarmManager.OnAlarmListener mTimeoutCallback;
         /**
@@ -332,14 +432,16 @@ public class WifiCondManager implements IBinder.DeathRecipient {
             r.run();
         }
 
-        SendMgmtFrameEvent(@NonNull SendMgmtFrameCallback callback) {
+        SendMgmtFrameEvent(@NonNull Executor executor, @NonNull SendMgmtFrameCallback callback) {
+            mExecutor = executor;
             mCallback = callback;
             // called in main thread
             mTimeoutCallback = () -> runIfFirstCall(() -> {
                 if (mVerboseLoggingEnabled) {
                     Log.e(TAG, "Timed out waiting for ACK");
                 }
-                mCallback.onFailure(SEND_MGMT_FRAME_ERROR_TIMEOUT);
+                Binder.clearCallingIdentity();
+                mExecutor.execute(() -> mCallback.onFailure(SEND_MGMT_FRAME_ERROR_TIMEOUT));
             });
             mWasCalled = false;
 
@@ -354,7 +456,8 @@ public class WifiCondManager implements IBinder.DeathRecipient {
             // post to main thread
             mEventHandler.post(() -> runIfFirstCall(() -> {
                 mAlarmManager.cancel(mTimeoutCallback);
-                mCallback.onAck(elapsedTimeMs);
+                Binder.clearCallingIdentity();
+                mExecutor.execute(() -> mCallback.onAck(elapsedTimeMs));
             }));
         }
 
@@ -364,7 +467,8 @@ public class WifiCondManager implements IBinder.DeathRecipient {
             // post to main thread
             mEventHandler.post(() -> runIfFirstCall(() -> {
                 mAlarmManager.cancel(mTimeoutCallback);
-                mCallback.onFailure(reason);
+                Binder.clearCallingIdentity();
+                mExecutor.execute(() -> mCallback.onFailure(reason));
             }));
         }
     }
@@ -372,8 +476,9 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     /**
      * Called by the binder subsystem upon remote object death.
      * Invoke all the register death handlers and clear state.
+     * @hide
      */
-    @Override
+    @VisibleForTesting
     public void binderDied() {
         mEventHandler.post(() -> {
             Log.e(TAG, "Wificond died!");
@@ -387,17 +492,22 @@ public class WifiCondManager implements IBinder.DeathRecipient {
         });
     }
 
-    /** Enable or disable verbose logging of WificondControl.
-     *  @param enable True to enable verbose logging. False to disable verbose logging.
+    /**
+     * Enable or disable verbose logging of the WifiCondManager module.
+     * @param enable True to enable verbose logging. False to disable verbose logging.
      */
     public void enableVerboseLogging(boolean enable) {
         mVerboseLoggingEnabled = enable;
     }
 
     /**
-     * Initializes wificond & registers a death notification for wificond.
-     * This method clears any existing state in wificond daemon.
+     * Initializes WifiCondManager & registers a death notification for the WifiCondManager which
+     * acts as a proxy for the wificond daemon (i.e. the death listener will be called when and if
+     * the wificond daemon dies).
      *
+     * Note: This method clears any existing state in wificond daemon.
+     *
+     * @param deathEventHandler A {@link Runnable} to be called whenever the wificond daemon dies.
      * @return Returns true on success.
      */
     public boolean initialize(@NonNull Runnable deathEventHandler) {
@@ -428,7 +538,7 @@ public class WifiCondManager implements IBinder.DeathRecipient {
             return false;
         }
         try {
-            mWificond.asBinder().linkToDeath(this, 0);
+            mWificond.asBinder().linkToDeath(() -> binderDied(), 0);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register death notification for wificond");
             // The remote has already died.
@@ -438,13 +548,24 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-    * Setup interface for client mode via wificond.
-    * @return true on success.
-    */
+     * Set up an interface for client (STA) mode.
+     *
+     * @param ifaceName Name of the interface to configure.
+     * @param executor The Executor on which to execute the callbacks.
+     * @param scanCallback A callback for framework initiated scans.
+     * @param pnoScanCallback A callback for PNO (offloaded) scans.
+     * @return true on success.
+     */
     public boolean setupInterfaceForClientMode(@NonNull String ifaceName,
+            @NonNull @CallbackExecutor Executor executor,
             @NonNull ScanEventCallback scanCallback, @NonNull ScanEventCallback pnoScanCallback) {
         Log.d(TAG, "Setting up interface for client mode");
         if (!retrieveWificondAndRegisterForDeath()) {
+            return false;
+        }
+
+        if (scanCallback == null || pnoScanCallback == null || executor == null) {
+            Log.e(TAG, "setupInterfaceForClientMode invoked with null callbacks");
             return false;
         }
 
@@ -472,10 +593,11 @@ public class WifiCondManager implements IBinder.DeathRecipient {
             }
             mWificondScanners.put(ifaceName, wificondScanner);
             Binder.allowBlocking(wificondScanner.asBinder());
-            ScanEventHandler scanEventHandler = new ScanEventHandler(scanCallback);
+            ScanEventHandler scanEventHandler = new ScanEventHandler(executor, scanCallback);
             mScanEventHandlers.put(ifaceName,  scanEventHandler);
             wificondScanner.subscribeScanEvents(scanEventHandler);
-            PnoScanEventHandler pnoScanEventHandler = new PnoScanEventHandler(pnoScanCallback);
+            PnoScanEventHandler pnoScanEventHandler = new PnoScanEventHandler(executor,
+                    pnoScanCallback);
             mPnoScanEventHandlers.put(ifaceName,  pnoScanEventHandler);
             wificondScanner.subscribePnoScanEvents(pnoScanEventHandler);
         } catch (RemoteException e) {
@@ -486,8 +608,10 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-     * Teardown a specific STA interface configured in wificond.
+     * Tear down a specific client (STA) interface, initially configured using
+     * {@link #setupInterfaceForClientMode(String, Executor, ScanEventCallback, ScanEventCallback)}.
      *
+     * @param ifaceName Name of the interface to tear down.
      * @return Returns true on success.
      */
     public boolean tearDownClientInterface(@NonNull String ifaceName) {
@@ -531,9 +655,11 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-    * Setup interface for softAp mode via wificond.
-    * @return true on success.
-    */
+     * Set up interface as a Soft AP.
+     *
+     * @param ifaceName Name of the interface to configure.
+     * @return true on success.
+     */
     public boolean setupInterfaceForSoftApMode(@NonNull String ifaceName) {
         Log.d(TAG, "Setting up interface for soft ap mode");
         if (!retrieveWificondAndRegisterForDeath()) {
@@ -560,8 +686,10 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-     * Teardown a specific AP interface configured in wificond.
+     * Tear down a Soft AP interface initially configured using
+     * {@link #setupInterfaceForSoftApMode(String)}.
      *
+     * @param ifaceName Name of the interface to tear down.
      * @return Returns true on success.
      */
     public boolean tearDownSoftApInterface(@NonNull String ifaceName) {
@@ -592,7 +720,8 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-    * Teardown all interfaces configured in wificond.
+    * Tear down all interfaces, whether clients (STA) or Soft AP.
+     *
     * @return Returns true on success.
     */
     public boolean tearDownInterfaces() {
@@ -624,12 +753,13 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-     * Request signal polling to wificond.
-     * @param ifaceName Name of the interface.
-     * Returns an SignalPollResult object.
-     * Returns null on failure.
+     * Request signal polling.
+     *
+     * @param ifaceName Name of the interface on which to poll.
+     * @return A {@link SignalPollResult} object containing interface statistics, or a null on
+     * error.
      */
-    public SignalPollResult signalPoll(@NonNull String ifaceName) {
+    @Nullable public SignalPollResult signalPoll(@NonNull String ifaceName) {
         IClientInterface iface = getClientInterface(ifaceName);
         if (iface == null) {
             Log.e(TAG, "No valid wificond client interface handler");
@@ -647,21 +777,16 @@ public class WifiCondManager implements IBinder.DeathRecipient {
             Log.e(TAG, "Failed to do signal polling due to remote exception");
             return null;
         }
-        SignalPollResult pollResult = new SignalPollResult();
-        pollResult.currentRssi = resultArray[0];
-        pollResult.txBitrate = resultArray[1];
-        pollResult.associationFrequency = resultArray[2];
-        pollResult.rxBitrate = resultArray[3];
-        return pollResult;
+        return new SignalPollResult(resultArray[0], resultArray[1], resultArray[3], resultArray[2]);
     }
 
     /**
-     * Fetch TX packet counters on current connection from wificond.
+     * Get current transmit (Tx) packet counters of the specified interface.
+     *
      * @param ifaceName Name of the interface.
-     * Returns an TxPacketCounters object.
-     * Returns null on failure.
+     * @return {@link TxPacketCounters} of the current interface or null on error.
      */
-    public TxPacketCounters getTxPacketCounters(@NonNull String ifaceName) {
+    @Nullable public TxPacketCounters getTxPacketCounters(@NonNull String ifaceName) {
         IClientInterface iface = getClientInterface(ifaceName);
         if (iface == null) {
             Log.e(TAG, "No valid wificond client interface handler");
@@ -679,10 +804,7 @@ public class WifiCondManager implements IBinder.DeathRecipient {
             Log.e(TAG, "Failed to do signal polling due to remote exception");
             return null;
         }
-        TxPacketCounters counters = new TxPacketCounters();
-        counters.txSucceeded = resultArray[0];
-        counters.txFailed = resultArray[1];
-        return counters;
+        return new TxPacketCounters(resultArray[0], resultArray[1]);
     }
 
     /** Helper function to look up the scanner impl handle using name */
@@ -691,10 +813,16 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-    * Fetch the latest scan result from kernel via wificond.
-    * @param ifaceName Name of the interface.
-    * @return Returns an array of native scan results or an empty array on failure.
-    */
+     * Fetch the latest scan results of the indicated type for the specified interface. Note that
+     * this method fetches the latest results - it does not initiate a scan. Initiating a scan can
+     * be done using {@link #startScan(String, int, Set, List)} or
+     * {@link #startPnoScan(String, PnoSettings, Executor, PnoScanRequestCallback)}.
+     *
+     * @param ifaceName Name of the interface.
+     * @param scanType The type of scan result to be returned, can be
+     * {@link #SCAN_TYPE_SINGLE_SCAN} or {@link #SCAN_TYPE_PNO_SCAN}.
+     * @return Returns an array of {@link NativeScanResult} or an empty array on failure.
+     */
     @NonNull public List<NativeScanResult> getScanResults(@NonNull String ifaceName,
             @ScanResultType int scanType) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
@@ -739,15 +867,23 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-     * Start a scan using wificond for the given parameters.
-     * @param ifaceName Name of the interface.
-     * @param scanType Type of scan to perform.
+     * Start a scan using the specified parameters. A scan is an asynchronous operation. The
+     * result of the operation is returned in the {@link ScanEventCallback} registered when
+     * setting up an interface using
+     * {@link #setupInterfaceForClientMode(String, Executor, ScanEventCallback, ScanEventCallback)}.
+     * The latest scans can be obtained using {@link #getScanResults(String, int)} and using a
+     * {@link #SCAN_TYPE_SINGLE_SCAN} for the {@code scanType}.
+     *
+     * @param ifaceName Name of the interface on which to initiate the scan.
+     * @param scanType Type of scan to perform, can be any of
+     * {@link WifiScanner#SCAN_TYPE_HIGH_ACCURACY}, {@link WifiScanner#SCAN_TYPE_LOW_POWER}, or
+     * {@link WifiScanner#SCAN_TYPE_LOW_LATENCY}.
      * @param freqs list of frequencies to scan for, if null scan all supported channels.
      * @param hiddenNetworkSSIDs List of hidden networks to be scanned for.
      * @return Returns true on success.
      */
-    public boolean scan(@NonNull String ifaceName, @WifiAnnotations.ScanType int scanType,
-            Set<Integer> freqs, List<byte[]> hiddenNetworkSSIDs) {
+    public boolean startScan(@NonNull String ifaceName, @WifiAnnotations.ScanType int scanType,
+            @Nullable Set<Integer> freqs, @Nullable List<byte[]> hiddenNetworkSSIDs) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
             Log.e(TAG, "No valid wificond scanner interface handler");
@@ -792,25 +928,40 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-     * Start PNO scan.
-     * @param ifaceName Name of the interface.
-     * @param pnoSettings Pno scan configuration.
+     * Request a PNO (Preferred Network Offload). The offload request and the scans are asynchronous
+     * operations. The result of the request are returned in the {@code callback} parameter which
+     * is an {@link PnoScanRequestCallback}. The scan results are are return in the
+     * {@link ScanEventCallback} which is registered when setting up an interface using
+     * {@link #setupInterfaceForClientMode(String, Executor, ScanEventCallback, ScanEventCallback)}.
+     * The latest PNO scans can be obtained using {@link #getScanResults(String, int)} with the
+     * {@code scanType} set to {@link #SCAN_TYPE_PNO_SCAN}.
+     *
+     * @param ifaceName Name of the interface on which to request a PNO.
+     * @param pnoSettings PNO scan configuration.
+     * @param executor The Executor on which to execute the callback.
+     * @param callback Callback for the results of the offload request.
      * @return true on success.
      */
-    public boolean startPnoScan(@NonNull String ifaceName, PnoSettings pnoSettings,
-            PnoScanRequestCallback callback) {
+    public boolean startPnoScan(@NonNull String ifaceName, @NonNull PnoSettings pnoSettings,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull PnoScanRequestCallback callback) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
             Log.e(TAG, "No valid wificond scanner interface handler");
             return false;
         }
 
+        if (callback == null || executor == null) {
+            Log.e(TAG, "startPnoScan called with a null callback");
+            return false;
+        }
+
         try {
             boolean success = scannerImpl.startPnoScan(pnoSettings);
             if (success) {
-                callback.onPnoRequestSucceeded();
+                executor.execute(callback::onPnoRequestSucceeded);
             } else {
-                callback.onPnoRequestFailed();
+                executor.execute(callback::onPnoRequestFailed);
             }
             return success;
         } catch (RemoteException e1) {
@@ -820,8 +971,10 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-     * Stop PNO scan.
-     * @param ifaceName Name of the interface.
+     * Stop PNO scan configured with
+     * {@link #startPnoScan(String, PnoSettings, Executor, PnoScanRequestCallback)}.
+     *
+     * @param ifaceName Name of the interface on which the PNO scan was configured.
      * @return true on success.
      */
     public boolean stopPnoScan(@NonNull String ifaceName) {
@@ -839,8 +992,9 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-     * Abort ongoing single scan.
-     * @param ifaceName Name of the interface.
+     * Abort ongoing single scan started with {@link #startScan(String, int, Set, List)}.
+     *
+     * @param ifaceName Name of the interface on which the scan was started.
      */
     public void abortScan(@NonNull String ifaceName) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
@@ -856,7 +1010,7 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-     * Query the list of valid frequencies for the provided band.
+     * Query the list of valid frequencies (in MHz) for the provided band.
      * The result depends on the on the country code that has been set.
      *
      * @param band as specified by one of the WifiScanner.WIFI_BAND_* constants.
@@ -865,31 +1019,39 @@ public class WifiCondManager implements IBinder.DeathRecipient {
      * WifiScanner.WIFI_BAND_5_GHZ
      * WifiScanner.WIFI_BAND_5_GHZ_DFS_ONLY
      * WifiScanner.WIFI_BAND_6_GHZ
-     * @return frequencies vector of valid frequencies (MHz), or null for error.
+     * @return frequencies vector of valid frequencies (MHz), or an empty array for error.
      * @throws IllegalArgumentException if band is not recognized.
      */
-    public int [] getChannelsForBand(@WifiAnnotations.WifiBandBasic int band) {
+    public @NonNull int[] getChannelsMhzForBand(@WifiAnnotations.WifiBandBasic int band) {
         if (mWificond == null) {
             Log.e(TAG, "No valid wificond scanner interface handler");
-            return null;
+            return new int[0];
         }
+        int[] result = null;
         try {
             switch (band) {
                 case WifiScanner.WIFI_BAND_24_GHZ:
-                    return mWificond.getAvailable2gChannels();
+                    result = mWificond.getAvailable2gChannels();
+                    break;
                 case WifiScanner.WIFI_BAND_5_GHZ:
-                    return mWificond.getAvailable5gNonDFSChannels();
+                    result = mWificond.getAvailable5gNonDFSChannels();
+                    break;
                 case WifiScanner.WIFI_BAND_5_GHZ_DFS_ONLY:
-                    return mWificond.getAvailableDFSChannels();
+                    result = mWificond.getAvailableDFSChannels();
+                    break;
                 case WifiScanner.WIFI_BAND_6_GHZ:
-                    return mWificond.getAvailable6gChannels();
+                    result = mWificond.getAvailable6gChannels();
+                    break;
                 default:
                     throw new IllegalArgumentException("unsupported band " + band);
             }
         } catch (RemoteException e1) {
             Log.e(TAG, "Failed to request getChannelsForBand due to remote exception");
         }
-        return null;
+        if (result == null) {
+            result = new int[0];
+        }
+        return result;
     }
 
     /** Helper function to look up the interface handle using name */
@@ -898,22 +1060,33 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-     * Register the provided listener for SoftAp events.
+     * Register the provided callback handler for SoftAp events. Note that the Soft AP itself is
+     * configured using {@link #setupInterfaceForSoftApMode(String)}.
      *
-     * @param ifaceName Name of the interface.
-     * @param listener Callback for AP events.
+     * @param ifaceName Name of the interface on which to register the callback.
+     * @param executor The Executor on which to execute the callbacks.
+     * @param callback Callback for AP events.
      * @return true on success, false otherwise.
      */
-    public boolean registerApListener(@NonNull String ifaceName, SoftApListener listener) {
+    public boolean registerApCallback(@NonNull String ifaceName,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SoftApCallback callback) {
         IApInterface iface = getApInterface(ifaceName);
         if (iface == null) {
             Log.e(TAG, "No valid ap interface handler");
             return false;
         }
+
+        if (callback == null || executor == null) {
+            Log.e(TAG, "registerApCallback called with a null callback");
+            return false;
+        }
+
         try {
-            IApInterfaceEventCallback  callback = new ApInterfaceEventCallback(listener);
-            mApInterfaceListeners.put(ifaceName, callback);
-            boolean success = iface.registerCallback(callback);
+            IApInterfaceEventCallback wificondCallback = new ApInterfaceEventCallback(executor,
+                    callback);
+            mApInterfaceListeners.put(ifaceName, wificondCallback);
+            boolean success = iface.registerCallback(wificondCallback);
             if (!success) {
                 Log.e(TAG, "Failed to register ap callback.");
                 return false;
@@ -926,19 +1099,28 @@ public class WifiCondManager implements IBinder.DeathRecipient {
     }
 
     /**
-     * See {@link #sendMgmtFrame(String, byte[], SendMgmtFrameCallback, int)}
+     * Send a management frame on the specified interface at the specified rate. Useful for probing
+     * the link with arbitrary frames.
+     *
+     * @param ifaceName The interface on which to send the frame.
+     * @param frame The raw byte array of the management frame to tramit.
+     * @param mcs The MCS (modulation and coding scheme), i.e. rate, at which to transmit the
+     *            frame. Specified per IEEE 802.11.
+     * @param executor The Executor on which to execute the callbacks.
+     * @param callback A {@link SendMgmtFrameCallback} callback for results of the operation.
      */
-    public void sendMgmtFrame(@NonNull String ifaceName, @NonNull byte[] frame,
-            @NonNull SendMgmtFrameCallback callback, int mcs) {
+    public void sendMgmtFrame(@NonNull String ifaceName, @NonNull byte[] frame, int mcs,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SendMgmtFrameCallback callback) {
 
-        if (callback == null) {
+        if (callback == null || executor == null) {
             Log.e(TAG, "callback cannot be null!");
             return;
         }
 
         if (frame == null) {
             Log.e(TAG, "frame cannot be null!");
-            callback.onFailure(SEND_MGMT_FRAME_ERROR_UNKNOWN);
+            executor.execute(() -> callback.onFailure(SEND_MGMT_FRAME_ERROR_UNKNOWN));
             return;
         }
 
@@ -946,17 +1128,17 @@ public class WifiCondManager implements IBinder.DeathRecipient {
         IClientInterface clientInterface = getClientInterface(ifaceName);
         if (clientInterface == null) {
             Log.e(TAG, "No valid wificond client interface handler");
-            callback.onFailure(SEND_MGMT_FRAME_ERROR_UNKNOWN);
+            executor.execute(() -> callback.onFailure(SEND_MGMT_FRAME_ERROR_UNKNOWN));
             return;
         }
 
         if (!mSendMgmtFrameInProgress.compareAndSet(false, true)) {
             Log.e(TAG, "An existing management frame transmission is in progress!");
-            callback.onFailure(SEND_MGMT_FRAME_ERROR_ALREADY_STARTED);
+            executor.execute(() -> callback.onFailure(SEND_MGMT_FRAME_ERROR_ALREADY_STARTED));
             return;
         }
 
-        SendMgmtFrameEvent sendMgmtFrameEvent = new SendMgmtFrameEvent(callback);
+        SendMgmtFrameEvent sendMgmtFrameEvent = new SendMgmtFrameEvent(executor, callback);
         try {
             clientInterface.SendMgmtFrame(frame, sendMgmtFrameEvent, mcs);
         } catch (RemoteException e) {
