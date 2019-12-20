@@ -20,7 +20,6 @@ import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
 import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -124,21 +123,7 @@ public class MediaRouterManagerTest {
         clearCallbacks();
     }
 
-    //TODO: Move to a separate file
-    @Test
-    public void testMediaRoute2Info() {
-        MediaRoute2Info routeInfo1 = new MediaRoute2Info.Builder("id", "name")
-                .build();
-        MediaRoute2Info routeInfo2 = new MediaRoute2Info.Builder(routeInfo1).build();
-
-        MediaRoute2Info routeInfo3 = new MediaRoute2Info.Builder(routeInfo1)
-                .setClientPackageName(mPackageName).build();
-
-        assertEquals(routeInfo1, routeInfo2);
-        assertNotEquals(routeInfo1, routeInfo3);
-    }
-
-    /**
+   /**
      * Tests if routes are added correctly when a new callback is registered.
      */
     @Test
@@ -177,8 +162,6 @@ public class MediaRouterManagerTest {
             }
         });
 
-        //TODO: Figure out a more proper way to test.
-        // (Control requests shouldn't be used in this way.)
         mRouter2.sendControlRequest(routes.get(ROUTE_ID2), new Intent(ACTION_REMOVE_ROUTE));
         assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
     }
