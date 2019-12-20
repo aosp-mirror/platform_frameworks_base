@@ -44,6 +44,7 @@ import com.android.server.wm.ActivityMetricsLaunchObserver.ActivityRecordProto;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 
 import java.util.Arrays;
@@ -57,6 +58,7 @@ import java.util.concurrent.TimeUnit;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     private ActivityMetricsLogger mActivityMetricsLogger;
     private ActivityMetricsLogger.LaunchingState mLaunchingState;
@@ -116,9 +118,16 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         return argThat(new ActivityRecordMatcher(record));
     }
 
-    static <T> T verifyAsync(T mock) {
+    private <T> T verifyAsync(T mock) {
+        // With WindowTestRunner, all test methods are inside WM lock, so we have to unblock any
+        // messages that are waiting for the lock.
+        waitHandlerIdle(mService.mH);
         // AMLO callbacks happen on a separate thread than AML calls, so we need to use a timeout.
         return verify(mock, timeout(TimeUnit.SECONDS.toMillis(5)));
+    }
+
+    private void verifyOnActivityLaunchFinished(ActivityRecord activity) {
+        verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(activity), anyLong());
     }
 
     private void onIntentStarted(Intent intent) {
@@ -159,7 +168,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         notifyTransitionStarting(mTopActivity);
         notifyWindowsDrawn(mTopActivity);
 
-        verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mTopActivity), anyLong());
+        verifyOnActivityLaunchFinished(mTopActivity);
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -210,7 +219,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         notifyWindowsDrawn(mTopActivity);
 
         verifyAsync(mLaunchObserver).onReportFullyDrawn(eqProto(mTopActivity), anyLong());
-        verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mTopActivity), anyLong());
+        verifyOnActivityLaunchFinished(mTopActivity);
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -267,7 +276,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
         notifyWindowsDrawn(mTopActivity);
 
-        verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mTopActivity), anyLong());
+        verifyOnActivityLaunchFinished(mTopActivity);
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -322,16 +331,40 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
         assertWithMessage("Different callers should get 2 indepedent launching states")
                 .that(previousState).isNotEqualTo(mLaunchingState);
-
-        notifyTransitionStarting(otherActivity);
-        notifyWindowsDrawn(otherActivity);
-
-        verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(otherActivity), anyLong());
+        transitToDrawnAndVerifyOnLaunchFinished(otherActivity);
 
         // The first transition should still be valid.
-        notifyTransitionStarting(mTopActivity);
-        notifyWindowsDrawn(mTopActivity);
+        transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
+    }
 
-        verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mTopActivity), anyLong());
+    @Test
+    public void testConsecutiveLaunchOnDifferentDisplay() {
+        onActivityLaunched(mTopActivity);
+
+        final ActivityStack stack = new StackBuilder(mRootActivityContainer)
+                .setDisplay(addNewDisplayContentAt(DisplayContent.POSITION_BOTTOM))
+                .setCreateActivity(false)
+                .build();
+        final ActivityRecord activityOnNewDisplay = new ActivityBuilder(mService)
+                .setStack(stack)
+                .setCreateTask(true)
+                .setProcessName("new")
+                .build();
+
+        // Before TopActivity is drawn, it launches another activity on a different display.
+        mActivityMetricsLogger.notifyActivityLaunching(activityOnNewDisplay.intent,
+                mTopActivity /* caller */);
+        notifyActivityLaunched(START_SUCCESS, activityOnNewDisplay);
+
+        // There should be 2 events instead of coalescing as one event.
+        transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
+        transitToDrawnAndVerifyOnLaunchFinished(activityOnNewDisplay);
+    }
+
+    private void transitToDrawnAndVerifyOnLaunchFinished(ActivityRecord activity) {
+        notifyTransitionStarting(activity);
+        notifyWindowsDrawn(activity);
+
+        verifyOnActivityLaunchFinished(activity);
     }
 }
