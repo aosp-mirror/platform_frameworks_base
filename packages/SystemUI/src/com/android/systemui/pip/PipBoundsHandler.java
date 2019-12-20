@@ -345,6 +345,14 @@ public class PipBoundsHandler {
     }
 
     /**
+     * Sets the current bound with the currently store aspect ratio.
+     * @param stackBounds
+     */
+    public void transformBoundsToAspectRatio(Rect stackBounds) {
+        transformBoundsToAspectRatio(stackBounds, mAspectRatio, true);
+    }
+
+    /**
      * Set the current bounds (or the default bounds if there are no current bounds) with the
      * specified aspect ratio.
      */
