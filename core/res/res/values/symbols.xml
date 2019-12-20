@@ -468,6 +468,7 @@
   <java-symbol type="string" name="config_deviceSpecificAudioService" />
   <java-symbol type="integer" name="config_num_physical_slots" />
   <java-symbol type="array" name="config_integrityRuleProviderPackages" />
+  <java-symbol type="bool" name="config_useAssistantVolume" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 

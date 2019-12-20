@@ -87,6 +87,7 @@ public class SettingsBackupTest {
                     Settings.System.VOLUME_ACCESSIBILITY, // used internally, changing value will
                                                           // not change volume
                     Settings.System.VOLUME_ALARM, // deprecated since API 2?
+                    Settings.System.VOLUME_ASSISTANT, // candidate for backup?
                     Settings.System.VOLUME_BLUETOOTH_SCO, // deprecated since API 2?
                     Settings.System.VOLUME_MASTER, // candidate for backup?
                     Settings.System.VOLUME_MUSIC, // deprecated since API 2?

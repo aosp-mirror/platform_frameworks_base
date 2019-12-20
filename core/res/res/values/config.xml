@@ -4272,4 +4272,7 @@
          value is left empty.  When this is non-empty then config_rawContactsLocalAccountName
          should also be non-empty.-->
     <string name="config_rawContactsLocalAccountType" translatable="false"></string>
+
+    <!-- Whether or not to use assistant stream volume separately from music volume -->
+    <bool name="config_useAssistantVolume">false</bool>
 </resources>
