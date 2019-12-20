@@ -241,15 +241,17 @@ public class AudioDeviceInventory {
                 } else {
                     makeA2dpDeviceUnavailableNow(address, di.mDeviceCodecFormat);
                 }
+            } else if (state == BluetoothProfile.STATE_CONNECTED) {
+                // device is not already connected
+                if (a2dpVolume != -1) {
+                    mDeviceBroker.postSetVolumeIndexOnDevice(AudioSystem.STREAM_MUSIC,
+                            // convert index to internal representation in VolumeStreamState
+                            a2dpVolume * 10,
+                            AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, "onSetA2dpSinkConnectionState");
+                }
+                makeA2dpDeviceAvailable(address, BtHelper.getName(btDevice),
+                        "onSetA2dpSinkConnectionState", a2dpCodec);
             }
-            if (a2dpVolume != -1) {
-                mDeviceBroker.postSetVolumeIndexOnDevice(AudioSystem.STREAM_MUSIC,
-                        // convert index to internal representation in VolumeStreamState
-                        a2dpVolume * 10,
-                        AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, "onSetA2dpSinkConnectionState");
-            }
-            makeA2dpDeviceAvailable(address, BtHelper.getName(btDevice),
-                    "onSetA2dpSinkConnectionState", a2dpCodec);
         }
     }
 
@@ -353,8 +355,15 @@ public class AudioDeviceInventory {
                     mConnectedDevices.replace(key, di);
                 }
             }
-            if (AudioSystem.handleDeviceConfigChange(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address,
-                    BtHelper.getName(btDevice), a2dpCodec) != AudioSystem.AUDIO_STATUS_OK) {
+            final int res = AudioSystem.handleDeviceConfigChange(
+                    AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address,
+                    BtHelper.getName(btDevice), a2dpCodec);
+
+            if (res != AudioSystem.AUDIO_STATUS_OK) {
+                AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                        "APM handleDeviceConfigChange failed for A2DP device addr="
+                        + address + " codec=" + a2dpCodec).printLog(TAG));
+
                 int musicDevice = mDeviceBroker.getDeviceForStream(AudioSystem.STREAM_MUSIC);
                 // force A2DP device disconnection in case of error so that AudioService state is
                 // consistent with audio policy manager state
@@ -362,6 +371,10 @@ public class AudioDeviceInventory {
                         btDevice, BluetoothA2dp.STATE_DISCONNECTED, BluetoothProfile.A2DP,
                         false /* suppressNoisyIntent */, musicDevice,
                         -1 /* a2dpVolume */);
+            } else {
+                AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                        "APM handleDeviceConfigChange success for A2DP device addr="
+                                + address + " codec=" + a2dpCodec).printLog(TAG));
             }
         }
     }
@@ -700,8 +713,20 @@ public class AudioDeviceInventory {
         mDeviceBroker.setBluetoothA2dpOnInt(true, eventSource);
         // at this point there could be another A2DP device already connected in APM, but it
         // doesn't matter as this new one will overwrite the previous one
-        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+        final int res = AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_AVAILABLE, address, name, a2dpCodec);
+
+        if (res != AudioSystem.AUDIO_STATUS_OK) {
+            AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                    "APM failed to make available A2DP device addr=" + address
+                            + " error=" + res).printLog(TAG));
+            // TODO: connection failed, stop here
+            // TODO: return;
+        } else {
+            AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                    "A2DP device addr=" + address + " now available").printLog(TAG));
+        }
+
         // Reset A2DP suspend state each time a new sink is connected
         AudioSystem.setParameters("A2dpSuspended=false");
 
@@ -736,8 +761,19 @@ public class AudioDeviceInventory {
 
         // device to remove was visible by APM, update APM
         mDeviceBroker.setAvrcpAbsoluteVolumeSupported(false);
-        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+        final int res = AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE, address, "", a2dpCodec);
+
+        if (res != AudioSystem.AUDIO_STATUS_OK) {
+            AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                    "APM failed to make unavailable A2DP device addr=" + address
+                            + " error=" + res).printLog(TAG));
+            // TODO:  failed to disconnect, stop here
+            // TODO: return;
+        } else {
+            AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
+                    "A2DP device addr=" + address + " made unavailable")).printLog(TAG));
+        }
         mApmConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
         // Remove A2DP routes as well
         setCurrentAudioRouteNameIfPossible(null);
