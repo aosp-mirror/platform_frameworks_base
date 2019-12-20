@@ -4050,13 +4050,28 @@ public class CarrierConfigManager {
         }
     }
 
-    /** {@hide} */
+    /**
+     * Gets the package name for a default carrier service.
+     * @return the package name for a default carrier service; empty string if not available.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getDefaultCarrierServicePackageName() {
         try {
-            return getICarrierConfigLoader().getDefaultCarrierServicePackageName();
-        } catch (Throwable t) {
-            return null;
+            ICarrierConfigLoader loader = getICarrierConfigLoader();
+            if (loader == null) {
+                Rlog.w(TAG, "getDefaultCarrierServicePackageName ICarrierConfigLoader is null");
+                return "";
+            }
+            return loader.getDefaultCarrierServicePackageName();
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getDefaultCarrierServicePackageName ICarrierConfigLoader is null"
+                    + ex.toString());
         }
+        return "";
     }
 
     /**

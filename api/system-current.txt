@@ -8897,6 +8897,7 @@ package android.telephony {
   }
 
   public class CarrierConfigManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDefaultCarrierServicePackageName();
     method @NonNull public static android.os.PersistableBundle getDefaultConfig();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void overrideConfig(int, @Nullable android.os.PersistableBundle);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void updateConfigForPhoneId(int, String);
