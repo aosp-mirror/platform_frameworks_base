@@ -338,9 +338,6 @@ public class NotifCollection {
 
     private void dispatchOnEntryAdded(NotificationEntry entry) {
         mAmDispatchingToOtherCode = true;
-        if (mBuildListener != null) {
-            mBuildListener.onBeginDispatchToListeners();
-        }
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onEntryAdded(entry);
         }
@@ -349,9 +346,6 @@ public class NotifCollection {
 
     private void dispatchOnEntryUpdated(NotificationEntry entry) {
         mAmDispatchingToOtherCode = true;
-        if (mBuildListener != null) {
-            mBuildListener.onBeginDispatchToListeners();
-        }
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onEntryUpdated(entry);
         }
@@ -363,9 +357,6 @@ public class NotifCollection {
             @CancellationReason int reason,
             boolean removedByUser) {
         mAmDispatchingToOtherCode = true;
-        if (mBuildListener != null) {
-            mBuildListener.onBeginDispatchToListeners();
-        }
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onEntryRemoved(entry, reason, removedByUser);
         }

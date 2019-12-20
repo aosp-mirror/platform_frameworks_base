@@ -1021,7 +1021,6 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
             mPendingSet.clear();
         }
 
-        mReadyForBuildListener.onBeginDispatchToListeners();
         mReadyForBuildListener.onBuildList(mEntrySet);
     }
 
