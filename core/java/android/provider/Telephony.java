@@ -1389,7 +1389,6 @@ public final class Telephony {
                 for (int i = 0; i < pduCount; i++) {
                     byte[] pdu = (byte[]) messages[i];
                     msgs[i] = SmsMessage.createFromPdu(pdu, format);
-                    if (msgs[i] != null) msgs[i].setSubId(subId);
                 }
                 return msgs;
             }
