@@ -778,10 +778,12 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Gets the Carrier-to-noise density in dB-Hz.
      *
-     * <p>Typical range: 10-50 db-Hz.
+     * <p>Typical range: 10-50 dB-Hz. The range of possible C/N0 values is 0-63 dB-Hz to handle
+     * some edge cases.
      *
      * <p>The value contains the measured C/N0 for the signal at the antenna input.
      */
+    @FloatRange(from = 0, to = 63)
     public double getCn0DbHz() {
         return mCn0DbHz;
     }
@@ -805,13 +807,14 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Gets the baseband carrier-to-noise density in dB-Hz.
      *
-     * <p>Typical range: 0-50 dB-Hz.
+     * <p>Typical range: 10-50 dB-Hz. The range of possible baseband C/N0 values is 0-63 dB-Hz to
+     * handle some edge cases.
      *
      * <p>The value contains the measured C/N0 for the signal at the baseband. This is typically
      * a few dB weaker than the value estimated for C/N0 at the antenna port, which is reported
      * in {@link #getCn0DbHz()}.
      */
-    @FloatRange(from = 0, to = 50)
+    @FloatRange(from = 0, to = 63)
     public double getBasebandCn0DbHz() {
         return mBasebandCn0DbHz;
     }
