@@ -108,12 +108,13 @@ public class ImageWallpaper extends WallpaperService {
             if (mController != null) {
                 mController.addCallback(this /* StateListener */);
             }
-            mEglHelper = new EglHelper();
-            mRenderer = new ImageWallpaperRenderer(context, this /* SurfaceProxy */);
         }
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
+            mEglHelper = new EglHelper();
+            // Deferred init renderer because we need to get wallpaper by display context.
+            mRenderer = new ImageWallpaperRenderer(getDisplayContext(), this /* SurfaceProxy */);
             setFixedSizeAllowed(true);
             setOffsetNotificationsEnabled(true);
             updateSurfaceSize();
@@ -177,14 +178,13 @@ public class ImageWallpaper extends WallpaperService {
                 mRenderer = null;
                 mEglHelper.finish();
                 mEglHelper = null;
-                getSurfaceHolder().getSurface().hwuiDestroy();
             });
         }
 
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             mWorker.getThreadHandler().post(() -> {
-                mEglHelper.init(holder);
+                mEglHelper.init(holder, needSupportWideColorGamut());
                 mRenderer.onSurfaceCreated();
             });
         }
@@ -257,7 +257,7 @@ public class ImageWallpaper extends WallpaperService {
 
             // Check if we need to recreate egl surface.
             if (mEglHelper.hasEglContext() && !mEglHelper.hasEglSurface()) {
-                if (!mEglHelper.createEglSurface(getSurfaceHolder())) {
+                if (!mEglHelper.createEglSurface(getSurfaceHolder(), needSupportWideColorGamut())) {
                     Log.w(TAG, "recreate egl surface failed!");
                 }
             }
@@ -338,6 +338,10 @@ public class ImageWallpaper extends WallpaperService {
         private boolean needPreserveEglContext() {
             return mNeedTransition && mController != null
                     && mController.getState() == StatusBarState.KEYGUARD;
+        }
+
+        private boolean needSupportWideColorGamut() {
+            return mRenderer.isWcgContent();
         }
 
         @Override

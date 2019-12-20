@@ -62,6 +62,7 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
     private boolean mScissorMode;
     private float mXOffset;
     private float mYOffset;
+    private boolean mWcgContent;
 
     public ImageWallpaperRenderer(Context context, SurfaceProxy proxy) {
         mWallpaperManager = context.getSystemService(WallpaperManager.class);
@@ -94,6 +95,11 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
     }
 
     @Override
+    public boolean isWcgContent() {
+        return mWcgContent;
+    }
+
+    @Override
     public void onSurfaceCreated() {
         glClearColor(0f, 0f, 0f, 1.0f);
         mProgram.useGLProgram(
@@ -112,7 +118,8 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
             Log.d(TAG, "loadBitmap: mBitmap=" + mBitmap);
         }
         if (mWallpaperManager != null && mBitmap == null) {
-            mBitmap = mWallpaperManager.getBitmap();
+            mBitmap = mWallpaperManager.getBitmap(false /* hardware */);
+            mWcgContent = mWallpaperManager.wallpaperSupportsWcg(WallpaperManager.FLAG_SYSTEM);
             mWallpaperManager.forgetLoadedWallpaper();
             if (mBitmap != null) {
                 float scale = (float) mScissor.height() / mBitmap.getHeight();
@@ -231,6 +238,7 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
         out.print(prefix); out.print("mYOffset="); out.print(mYOffset);
         out.print(prefix); out.print("threshold="); out.print(mImageProcessHelper.getThreshold());
         out.print(prefix); out.print("mReveal="); out.print(mImageRevealHelper.getReveal());
+        out.print(prefix); out.print("mWcgContent="); out.print(mWcgContent);
         mWallpaper.dump(prefix, fd, out, args);
     }
 }

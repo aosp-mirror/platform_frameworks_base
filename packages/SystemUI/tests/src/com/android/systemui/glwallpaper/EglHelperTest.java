@@ -52,7 +52,7 @@ public class EglHelperTest extends SysuiTestCase {
 
     @Test
     public void testInit_finish() {
-        mEglHelper.init(mSurfaceHolder);
+        mEglHelper.init(mSurfaceHolder, false /* wideColorGamut */);
         mEglHelper.finish();
     }
 
