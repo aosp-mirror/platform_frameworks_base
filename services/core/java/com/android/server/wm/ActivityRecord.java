@@ -2664,7 +2664,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // DisplayContent#topRunningActivity().
         final ActivityRecord next = display.topRunningActivity();
         final boolean isLastStackOverEmptyHome =
-                next == null && stack.isFocusedStackOnDisplay() && display.getRootHomeTask() != null;
+                next == null && stack.isFocusedStackOnDisplay()
+                        && display.getOrCreateRootHomeTask() != null;
         if (isLastStackOverEmptyHome) {
             // Don't destroy activity immediately if this is the last activity on the display and
             // the display contains home stack. Although there is no next activity at the moment,

@@ -1946,6 +1946,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mTaskContainers.getRootHomeTask();
     }
 
+    /**
+     * Returns the existing home stack or creates and returns a new one if it should exist for the
+     * display.
+     */
+    @Nullable
+    ActivityStack getOrCreateRootHomeTask() {
+        ActivityStack homeTask = getRootHomeTask();
+        if (homeTask == null && supportsSystemDecorations() && !isUntrustedVirtualDisplay()) {
+            homeTask = createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME,
+                    false /* onTop */);
+        }
+        return homeTask;
+    }
+
     /** @return The primary split-screen task, and {@code null} otherwise. */
     ActivityStack getRootSplitScreenPrimaryTask() {
         return mTaskContainers.getRootSplitScreenPrimaryTask();
@@ -4284,9 +4298,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         ActivityStack getRootHomeTask() {
-            if (mRootHomeTask == null && mDisplayId == DEFAULT_DISPLAY) {
-                Slog.e(TAG_WM, "getHomeStack: Returning null from this=" + this);
-            }
             return mRootHomeTask;
         }
 
@@ -6099,7 +6110,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         } finally {
             final ActivityStack topFullscreenStack =
                     getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);
-            final ActivityStack homeStack = getRootHomeTask();
+            final ActivityStack homeStack = getOrCreateRootHomeTask();
             if (topFullscreenStack != null && homeStack != null && !isTopStack(homeStack)) {
                 // Whenever split-screen is dismissed we want the home stack directly behind the
                 // current top fullscreen stack so it shows up when the top stack is finished.
@@ -6661,7 +6672,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void moveHomeStackToFront(String reason) {
-        final ActivityStack homeStack = getRootHomeTask();
+        final ActivityStack homeStack = getOrCreateRootHomeTask();
         if (homeStack != null) {
             homeStack.moveToFront(reason);
         }

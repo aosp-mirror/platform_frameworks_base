@@ -1992,8 +1992,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
 
         mUserStackInFront.put(mCurrentUser, focusStackId);
-        final int restoreStackId =
-                mUserStackInFront.get(userId, getDefaultDisplay().getRootHomeTask().getRootTaskId());
         mCurrentUser = userId;
 
         mStackSupervisor.mStartingUsers.add(uss);
@@ -2009,9 +2007,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
+        final int restoreStackId = mUserStackInFront.get(userId);
         ActivityStack stack = getStack(restoreStackId);
         if (stack == null) {
-            stack = getDefaultDisplay().getRootHomeTask();
+            stack = getDefaultDisplay().getOrCreateRootHomeTask();
         }
         final boolean homeInFront = stack.isActivityTypeHome();
         if (stack.isOnHomeDisplay()) {
@@ -2033,8 +2032,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      */
     void updateUserStack(int userId, ActivityStack stack) {
         if (userId != mCurrentUser) {
-            mUserStackInFront.put(userId, stack != null ? stack.getRootTaskId()
-                    : getDefaultDisplay().getRootHomeTask().getRootTaskId());
+            if (stack == null) {
+                stack = getDefaultDisplay().getOrCreateRootHomeTask();
+            }
+
+            mUserStackInFront.put(userId, stack.getRootTaskId());
         }
     }
 
