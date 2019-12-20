@@ -502,50 +502,115 @@ public abstract class Connection extends Conferenceable {
     //**********************************************************************************************
 
     /**
-     * Define IMS Audio Codec
+     * Indicates that the audio codec is currently not specified or is unknown.
      */
-    // Current audio codec is NONE
     public static final int AUDIO_CODEC_NONE = ImsStreamMediaProfile.AUDIO_QUALITY_NONE; // 0
-    // Current audio codec is AMR
+    /**
+     * Adaptive Multi-rate audio codec.
+     */
     public static final int AUDIO_CODEC_AMR = ImsStreamMediaProfile.AUDIO_QUALITY_AMR; // 1
-    // Current audio codec is AMR_WB
+    /**
+     * Adaptive Multi-rate wideband audio codec.
+     */
     public static final int AUDIO_CODEC_AMR_WB = ImsStreamMediaProfile.AUDIO_QUALITY_AMR_WB; // 2
-    // Current audio codec is QCELP13K
+    /**
+     * Qualcomm code-excited linear prediction 13 kilobit audio codec.
+     */
     public static final int AUDIO_CODEC_QCELP13K = ImsStreamMediaProfile.AUDIO_QUALITY_QCELP13K; //3
-    // Current audio codec is EVRC
+    /**
+     * Enhanced Variable Rate Codec.  See 3GPP2 C.S0014-A.
+     */
     public static final int AUDIO_CODEC_EVRC = ImsStreamMediaProfile.AUDIO_QUALITY_EVRC; // 4
-    // Current audio codec is EVRC_B
+    /**
+     * Enhanced Variable Rate Codec B.  Commonly used on CDMA networks.
+     */
     public static final int AUDIO_CODEC_EVRC_B = ImsStreamMediaProfile.AUDIO_QUALITY_EVRC_B; // 5
-    // Current audio codec is EVRC_WB
+    /**
+     * Enhanced Variable Rate Wideband Codec.  See RFC5188.
+     */
     public static final int AUDIO_CODEC_EVRC_WB = ImsStreamMediaProfile.AUDIO_QUALITY_EVRC_WB; // 6
-    // Current audio codec is EVRC_NW
+    /**
+     * Enhanced Variable Rate Narrowband-Wideband Codec.
+     */
     public static final int AUDIO_CODEC_EVRC_NW = ImsStreamMediaProfile.AUDIO_QUALITY_EVRC_NW; // 7
-    // Current audio codec is GSM_EFR
+    /**
+     * GSM Enhanced Full-Rate audio codec, also known as GSM-EFR, GSM 06.60, or simply EFR.
+     */
     public static final int AUDIO_CODEC_GSM_EFR = ImsStreamMediaProfile.AUDIO_QUALITY_GSM_EFR; // 8
-    // Current audio codec is GSM_FR
+    /**
+     * GSM Full-Rate audio codec, also known as GSM-FR, GSM 06.10, GSM, or simply FR.
+     */
     public static final int AUDIO_CODEC_GSM_FR = ImsStreamMediaProfile.AUDIO_QUALITY_GSM_FR; // 9
-    // Current audio codec is GSM_HR
+    /**
+     * GSM Half Rate audio codec.
+     */
     public static final int AUDIO_CODEC_GSM_HR = ImsStreamMediaProfile.AUDIO_QUALITY_GSM_HR; // 10
-    // Current audio codec is G711U
+    /**
+     * ITU-T G711U audio codec.
+     */
     public static final int AUDIO_CODEC_G711U = ImsStreamMediaProfile.AUDIO_QUALITY_G711U; // 11
-    // Current audio codec is G723
+    /**
+     * ITU-T G723 audio codec.
+     */
     public static final int AUDIO_CODEC_G723 = ImsStreamMediaProfile.AUDIO_QUALITY_G723; // 12
-    // Current audio codec is G711A
+    /**
+     * ITU-T G711A audio codec.
+     */
     public static final int AUDIO_CODEC_G711A = ImsStreamMediaProfile.AUDIO_QUALITY_G711A; // 13
-    // Current audio codec is G722
+    /**
+     * ITU-T G722 audio codec.
+     */
     public static final int AUDIO_CODEC_G722 = ImsStreamMediaProfile.AUDIO_QUALITY_G722; // 14
-    // Current audio codec is G711AB
+    /**
+     * ITU-T G711AB audio codec.
+     */
     public static final int AUDIO_CODEC_G711AB = ImsStreamMediaProfile.AUDIO_QUALITY_G711AB; // 15
-    // Current audio codec is G729
+    /**
+     * ITU-T G729 audio codec.
+     */
     public static final int AUDIO_CODEC_G729 = ImsStreamMediaProfile.AUDIO_QUALITY_G729; // 16
-    // Current audio codec is EVS_NB
+    /**
+     * Enhanced Voice Services Narrowband audio codec.  See 3GPP TS 26.441.
+     */
     public static final int AUDIO_CODEC_EVS_NB = ImsStreamMediaProfile.AUDIO_QUALITY_EVS_NB; // 17
-    // Current audio codec is EVS_WB
+    /**
+     * Enhanced Voice Services Wideband audio codec.  See 3GPP TS 26.441.
+     */
     public static final int AUDIO_CODEC_EVS_WB = ImsStreamMediaProfile.AUDIO_QUALITY_EVS_WB; // 18
-    // Current audio codec is EVS_SWB
+    /**
+     * Enhanced Voice Services Super-Wideband audio codec.  See 3GPP TS 26.441.
+     */
     public static final int AUDIO_CODEC_EVS_SWB = ImsStreamMediaProfile.AUDIO_QUALITY_EVS_SWB; // 19
-    // Current audio codec is EVS_FB
+    /**
+     * Enhanced Voice Services Fullband audio codec.  See 3GPP TS 26.441.
+     */
     public static final int AUDIO_CODEC_EVS_FB = ImsStreamMediaProfile.AUDIO_QUALITY_EVS_FB; // 20
+
+    /**@hide*/
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "AUDIO_CODEC_", value = {
+            AUDIO_CODEC_NONE,
+            AUDIO_CODEC_AMR,
+            AUDIO_CODEC_AMR_WB,
+            AUDIO_CODEC_QCELP13K,
+            AUDIO_CODEC_EVRC,
+            AUDIO_CODEC_EVRC_B,
+            AUDIO_CODEC_EVRC_WB,
+            AUDIO_CODEC_EVRC_NW,
+            AUDIO_CODEC_GSM_EFR,
+            AUDIO_CODEC_GSM_FR,
+            AUDIO_CODEC_GSM_HR,
+            AUDIO_CODEC_G711U,
+            AUDIO_CODEC_G723,
+            AUDIO_CODEC_G711A,
+            AUDIO_CODEC_G722,
+            AUDIO_CODEC_G711AB,
+            AUDIO_CODEC_G729,
+            AUDIO_CODEC_EVS_NB,
+            AUDIO_CODEC_EVS_SWB,
+            AUDIO_CODEC_EVS_FB
+    })
+    public @interface AudioCodec {}
 
     /**
      * Connection extra key used to store the last forwarded number associated with the current
@@ -640,10 +705,10 @@ public abstract class Connection extends Conferenceable {
             "android.telecom.extra.IS_RTT_AUDIO_PRESENT";
 
     /**
-     * The audio codec in use for the current {@link Connection}, if known. Valid values include
-     * {@link #AUDIO_CODEC_AMR_WB} and {@link #AUDIO_CODEC_EVS_WB}.
+     * The audio codec in use for the current {@link Connection}, if known.  Examples of valid
+     * values include {@link #AUDIO_CODEC_AMR_WB} and {@link #AUDIO_CODEC_EVS_WB}.
      */
-    public static final String EXTRA_AUDIO_CODEC =
+    public static final @AudioCodec String EXTRA_AUDIO_CODEC =
             "android.telecom.extra.AUDIO_CODEC";
 
     /**
