@@ -34,6 +34,10 @@ void PrettyPrintVisitor::visit(const Idmap& idmap ATTRIBUTE_UNUSED) {
 void PrettyPrintVisitor::visit(const IdmapHeader& header) {
   stream_ << "target apk path  : " << header.GetTargetPath() << std::endl
           << "overlay apk path : " << header.GetOverlayPath() << std::endl;
+  const std::string& debug = header.GetDebugInfo();
+  if (!debug.empty()) {
+    stream_ << debug;  // assume newline terminated
+  }
 
   target_apk_ = ApkAssets::Load(header.GetTargetPath().to_string());
   if (target_apk_) {

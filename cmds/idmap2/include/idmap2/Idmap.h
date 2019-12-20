@@ -18,19 +18,21 @@
  * # idmap file format (current version)
  *
  * idmap             := header data*
- * header            := magic version target_crc overlay_crc target_path overlay_path
+ * header            := magic version target_crc overlay_crc target_path overlay_path debug_info
  * data              := data_header data_block*
  * data_header       := target_package_id types_count
  * data_block        := target_type overlay_type entry_count entry_offset entry*
- * overlay_path      := string
- * target_path       := string
+ * overlay_path      := string256
+ * target_path       := string256
+ * debug_info        := string
+ * string            := <uint32_t> <uint8_t>+ '\0'+
  * entry             := <uint32_t>
  * entry_count       := <uint16_t>
  * entry_offset      := <uint16_t>
  * magic             := <uint32_t>
  * overlay_crc       := <uint32_t>
  * overlay_type      := <uint16_t>
- * string            := <uint8_t>[256]
+ * string256         := <uint8_t>[256]
  * target_crc        := <uint32_t>
  * target_package_id := <uint16_t>
  * target_type       := <uint16_t>
@@ -41,6 +43,7 @@
  * # idmap file format changelog
  * ## v1
  * - Identical to idmap v1.
+ *
  * ## v2
  * - Entries are no longer separated by type into type specific data blocks.
  * - Added overlay-indexed target resource id lookup capabilities.
@@ -53,6 +56,9 @@
  * - Idmap can now encode a type and value to override a resource without needing a table entry.
  * - A string pool block is included to retrieve the value of strings that do not have a resource
  *   table entry.
+ *
+ * ## v3
+ * - Add 'debug' block to IdmapHeader.
  */
 
 #ifndef IDMAP2_INCLUDE_IDMAP2_IDMAP_H_
@@ -116,6 +122,10 @@ class IdmapHeader {
     return StringPiece(overlay_path_);
   }
 
+  inline const std::string& GetDebugInfo() const {
+    return debug_info_;
+  }
+
   // Invariant: anytime the idmap data encoding is changed, the idmap version
   // field *must* be incremented. Because of this, we know that if the idmap
   // header is up-to-date the entire file is up-to-date.
@@ -133,6 +143,7 @@ class IdmapHeader {
   uint32_t overlay_crc_;
   char target_path_[kIdmapStringLength];
   char overlay_path_[kIdmapStringLength];
+  std::string debug_info_;
 
   friend Idmap;
   DISALLOW_COPY_AND_ASSIGN(IdmapHeader);

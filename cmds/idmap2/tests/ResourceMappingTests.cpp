@@ -25,6 +25,7 @@
 #include "TestHelpers.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "idmap2/LogInfo.h"
 #include "idmap2/ResourceMapping.h"
 
 using android::Res_value;
@@ -55,8 +56,9 @@ Result<ResourceMapping> TestGetResourceMapping(const android::StringPiece& local
     return Error(R"(Failed to load overlay apk "%s")", overlay_apk_path.data());
   }
 
+  LogInfo log_info;
   return ResourceMapping::FromApkAssets(*target_apk, *overlay_apk, overlay_info, fulfilled_policies,
-                                        enforce_overlayable);
+                                        enforce_overlayable, log_info);
 }
 
 Result<ResourceMapping> TestGetResourceMapping(const android::StringPiece& local_target_apk_path,

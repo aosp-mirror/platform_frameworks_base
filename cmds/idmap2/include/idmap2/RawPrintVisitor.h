@@ -44,7 +44,7 @@ class RawPrintVisitor : public Visitor {
   void print(uint8_t value, const char* fmt, ...);
   void print(uint16_t value, const char* fmt, ...);
   void print(uint32_t value, const char* fmt, ...);
-  void print(const std::string& value, const char* fmt, ...);
+  void print(const std::string& value, size_t encoded_size, const char* fmt, ...);
   void print_raw(uint32_t length, const char* fmt, ...);
 
   std::ostream& stream_;

@@ -30,6 +30,7 @@
 #include "idmap2/BinaryStreamVisitor.h"
 #include "idmap2/CommandLineOptions.h"
 #include "idmap2/Idmap.h"
+#include "idmap2/LogInfo.h"
 
 using android::Res_value;
 using ::testing::IsNull;
@@ -57,11 +58,12 @@ TEST(IdmapTests, CreateIdmapHeaderFromBinaryStream) {
   std::unique_ptr<const IdmapHeader> header = IdmapHeader::FromBinaryStream(stream);
   ASSERT_THAT(header, NotNull());
   ASSERT_EQ(header->GetMagic(), 0x504d4449U);
-  ASSERT_EQ(header->GetVersion(), 0x02U);
+  ASSERT_EQ(header->GetVersion(), 0x03U);
   ASSERT_EQ(header->GetTargetCrc(), 0x1234U);
   ASSERT_EQ(header->GetOverlayCrc(), 0x5678U);
   ASSERT_EQ(header->GetTargetPath().to_string(), "targetX.apk");
   ASSERT_EQ(header->GetOverlayPath().to_string(), "overlayX.apk");
+  ASSERT_EQ(header->GetDebugInfo(), "debug");
 }
 
 TEST(IdmapTests, FailToCreateIdmapHeaderFromBinaryStreamIfPathTooLong) {
@@ -76,7 +78,7 @@ TEST(IdmapTests, FailToCreateIdmapHeaderFromBinaryStreamIfPathTooLong) {
 }
 
 TEST(IdmapTests, CreateIdmapDataHeaderFromBinaryStream) {
-  const size_t offset = 0x210;
+  const size_t offset = 0x21c;
   std::string raw(reinterpret_cast<const char*>(idmap_raw_data + offset),
                   idmap_raw_data_len - offset);
   std::istringstream stream(raw);
@@ -88,7 +90,7 @@ TEST(IdmapTests, CreateIdmapDataHeaderFromBinaryStream) {
 }
 
 TEST(IdmapTests, CreateIdmapDataFromBinaryStream) {
-  const size_t offset = 0x210;
+  const size_t offset = 0x21c;
   std::string raw(reinterpret_cast<const char*>(idmap_raw_data + offset),
                   idmap_raw_data_len - offset);
   std::istringstream stream(raw);
@@ -122,7 +124,7 @@ TEST(IdmapTests, CreateIdmapFromBinaryStream) {
 
   ASSERT_THAT(idmap->GetHeader(), NotNull());
   ASSERT_EQ(idmap->GetHeader()->GetMagic(), 0x504d4449U);
-  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x02U);
+  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x03U);
   ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), 0x1234U);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), 0x5678U);
   ASSERT_EQ(idmap->GetHeader()->GetTargetPath().to_string(), "targetX.apk");
@@ -174,7 +176,7 @@ TEST(IdmapTests, CreateIdmapHeaderFromApkAssets) {
 
   ASSERT_THAT(idmap->GetHeader(), NotNull());
   ASSERT_EQ(idmap->GetHeader()->GetMagic(), 0x504d4449U);
-  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x02U);
+  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x03U);
   ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), 0x76a20829);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), 0xc054fb26);
   ASSERT_EQ(idmap->GetHeader()->GetTargetPath().to_string(), target_apk_path);
@@ -197,8 +199,9 @@ Result<std::unique_ptr<const IdmapData>> TestIdmapDataFromApkAssets(
     return Error(R"(Failed to load overlay apk "%s")", overlay_apk_path.data());
   }
 
+  LogInfo log_info;
   auto mapping = ResourceMapping::FromApkAssets(*target_apk, *overlay_apk, overlay_info,
-                                                fulfilled_policies, enforce_overlayable);
+                                                fulfilled_policies, enforce_overlayable, log_info);
 
   if (!mapping) {
     return mapping.GetError();

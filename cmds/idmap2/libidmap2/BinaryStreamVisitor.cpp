@@ -42,11 +42,19 @@ void BinaryStreamVisitor::Write32(uint32_t value) {
   stream_.write(reinterpret_cast<char*>(&x), sizeof(uint32_t));
 }
 
-void BinaryStreamVisitor::WriteString(const StringPiece& value) {
+void BinaryStreamVisitor::WriteString256(const StringPiece& value) {
   char buf[kIdmapStringLength];
   memset(buf, 0, sizeof(buf));
   memcpy(buf, value.data(), std::min(value.size(), sizeof(buf)));
   stream_.write(buf, sizeof(buf));
+}
+
+void BinaryStreamVisitor::WriteString(const std::string& value) {
+  // pad with null to nearest word boundary; include at least one terminating null
+  size_t padding_size = 4 - (value.size() % 4);
+  Write32(value.size() + padding_size);
+  stream_.write(value.c_str(), value.size());
+  stream_.write("\0\0\0\0", padding_size);
 }
 
 void BinaryStreamVisitor::visit(const Idmap& idmap ATTRIBUTE_UNUSED) {
@@ -58,8 +66,9 @@ void BinaryStreamVisitor::visit(const IdmapHeader& header) {
   Write32(header.GetVersion());
   Write32(header.GetTargetCrc());
   Write32(header.GetOverlayCrc());
-  WriteString(header.GetTargetPath());
-  WriteString(header.GetOverlayPath());
+  WriteString256(header.GetTargetPath());
+  WriteString256(header.GetOverlayPath());
+  WriteString(header.GetDebugInfo());
 }
 
 void BinaryStreamVisitor::visit(const IdmapData& data) {
