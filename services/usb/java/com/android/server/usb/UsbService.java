@@ -66,6 +66,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -345,7 +346,7 @@ public class UsbService extends IUsbManager.Stub {
 
     @Override
     public void setDevicePackage(UsbDevice device, String packageName, int userId) {
-        device = Preconditions.checkNotNull(device);
+        Objects.requireNonNull(device);
 
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
@@ -361,7 +362,7 @@ public class UsbService extends IUsbManager.Stub {
 
     @Override
     public void setAccessoryPackage(UsbAccessory accessory, String packageName, int userId) {
-        accessory = Preconditions.checkNotNull(accessory);
+        Objects.requireNonNull(accessory);
 
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
@@ -379,9 +380,9 @@ public class UsbService extends IUsbManager.Stub {
     @Override
     public void addDevicePackagesToPreferenceDenied(UsbDevice device, String[] packageNames,
             UserHandle user) {
-        device = Preconditions.checkNotNull(device);
+        Objects.requireNonNull(device);
         packageNames = Preconditions.checkArrayElementsNotNull(packageNames, "packageNames");
-        user = Preconditions.checkNotNull(user);
+        Objects.requireNonNull(user);
 
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
@@ -397,9 +398,9 @@ public class UsbService extends IUsbManager.Stub {
     @Override
     public void addAccessoryPackagesToPreferenceDenied(UsbAccessory accessory,
             String[] packageNames, UserHandle user) {
-        accessory = Preconditions.checkNotNull(accessory);
+        Objects.requireNonNull(accessory);
         packageNames = Preconditions.checkArrayElementsNotNull(packageNames, "packageNames");
-        user = Preconditions.checkNotNull(user);
+        Objects.requireNonNull(user);
 
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
@@ -415,9 +416,9 @@ public class UsbService extends IUsbManager.Stub {
     @Override
     public void removeDevicePackagesFromPreferenceDenied(UsbDevice device, String[] packageNames,
             UserHandle user) {
-        device = Preconditions.checkNotNull(device);
+        Objects.requireNonNull(device);
         packageNames = Preconditions.checkArrayElementsNotNull(packageNames, "packageNames");
-        user = Preconditions.checkNotNull(user);
+        Objects.requireNonNull(user);
 
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
@@ -433,9 +434,9 @@ public class UsbService extends IUsbManager.Stub {
     @Override
     public void removeAccessoryPackagesFromPreferenceDenied(UsbAccessory accessory,
             String[] packageNames, UserHandle user) {
-        accessory = Preconditions.checkNotNull(accessory);
+        Objects.requireNonNull(accessory);
         packageNames = Preconditions.checkArrayElementsNotNull(packageNames, "packageNames");
-        user = Preconditions.checkNotNull(user);
+        Objects.requireNonNull(user);
 
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
@@ -451,8 +452,8 @@ public class UsbService extends IUsbManager.Stub {
     @Override
     public void setDevicePersistentPermission(UsbDevice device, int uid, UserHandle user,
             boolean shouldBeGranted) {
-        device = Preconditions.checkNotNull(device);
-        user = Preconditions.checkNotNull(user);
+        Objects.requireNonNull(device);
+        Objects.requireNonNull(user);
 
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
@@ -468,8 +469,8 @@ public class UsbService extends IUsbManager.Stub {
     @Override
     public void setAccessoryPersistentPermission(UsbAccessory accessory, int uid,
             UserHandle user, boolean shouldBeGranted) {
-        accessory = Preconditions.checkNotNull(accessory);
-        user = Preconditions.checkNotNull(user);
+        Objects.requireNonNull(accessory);
+        Objects.requireNonNull(user);
 
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
@@ -663,7 +664,7 @@ public class UsbService extends IUsbManager.Stub {
 
     @Override
     public UsbPortStatus getPortStatus(String portId) {
-        Preconditions.checkNotNull(portId, "portId must not be null");
+        Objects.requireNonNull(portId, "portId must not be null");
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
         final long ident = Binder.clearCallingIdentity();
@@ -676,7 +677,7 @@ public class UsbService extends IUsbManager.Stub {
 
     @Override
     public void setPortRoles(String portId, int powerRole, int dataRole) {
-        Preconditions.checkNotNull(portId, "portId must not be null");
+        Objects.requireNonNull(portId, "portId must not be null");
         UsbPort.checkRoles(powerRole, dataRole);
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
@@ -692,7 +693,7 @@ public class UsbService extends IUsbManager.Stub {
 
     @Override
     public void enableContaminantDetection(String portId, boolean enable) {
-        Preconditions.checkNotNull(portId, "portId must not be null");
+        Objects.requireNonNull(portId, "portId must not be null");
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
         final long ident = Binder.clearCallingIdentity();
