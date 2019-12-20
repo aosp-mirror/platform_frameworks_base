@@ -163,7 +163,7 @@ public class MediaRouter2Manager {
         List<MediaRoute2Info> routes = new ArrayList<>();
         synchronized (mRoutesLock) {
             for (MediaRoute2Info route : mRoutes.values()) {
-                if (route.supportsControlCategory(controlCategories)) {
+                if (route.supportsControlCategories(controlCategories)) {
                     routes.add(route);
                 }
             }

@@ -249,20 +249,34 @@ public final class MediaRoute2Info implements Parcelable {
         return mExtras;
     }
 
+    /**
+     * Returns if the route supports the specified control category
+     *
+     * @param controlCategory control category to consider
+     * @return true if the route supports at the category
+     */
+    public boolean supportsControlCategory(@NonNull String controlCategory) {
+        Objects.requireNonNull(controlCategory, "control category must not be null");
+        for (String supportedCategory : getSupportedCategories()) {
+            if (TextUtils.equals(controlCategory, supportedCategory)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     //TODO: Move this if we re-define control category / selector things.
     /**
-     * Returns true if the route supports at least one of the specified control categories
+     * Returns if the route supports at least one of the specified control categories
      *
      * @param controlCategories the list of control categories to consider
      * @return true if the route supports at least one category
      */
-    public boolean supportsControlCategory(@NonNull Collection<String> controlCategories) {
+    public boolean supportsControlCategories(@NonNull Collection<String> controlCategories) {
         Objects.requireNonNull(controlCategories, "control categories must not be null");
         for (String controlCategory : controlCategories) {
-            for (String supportedCategory : getSupportedCategories()) {
-                if (TextUtils.equals(controlCategory, supportedCategory)) {
-                    return true;
-                }
+            if (supportsControlCategory(controlCategory)) {
+                return true;
             }
         }
         return false;
