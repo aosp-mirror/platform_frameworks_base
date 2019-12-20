@@ -10465,35 +10465,37 @@ public final class Settings {
          */
         public static final String SMS_SHORT_CODE_RULE = "sms_short_code_rule";
 
-       /**
-        * Used to select TCP's default initial receiver window size in segments - defaults to a build config value
-        * @hide
-        */
-       public static final String TCP_DEFAULT_INIT_RWND = "tcp_default_init_rwnd";
+        /**
+         * Used to select TCP's default initial receiver window size in segments - defaults to a
+         * build config value.
+         * @hide
+         */
+        public static final String TCP_DEFAULT_INIT_RWND = "tcp_default_init_rwnd";
 
-       /**
-        * Used to disable Tethering on a device - defaults to true
-        * @hide
-        */
-       public static final String TETHER_SUPPORTED = "tether_supported";
+        /**
+         * Used to disable Tethering on a device - defaults to true.
+         * @hide
+         */
+        @SystemApi
+        public static final String TETHER_SUPPORTED = "tether_supported";
 
-       /**
-        * Used to require DUN APN on the device or not - defaults to a build config value
-        * which defaults to false
-        * @hide
-        */
-       public static final String TETHER_DUN_REQUIRED = "tether_dun_required";
+        /**
+         * Used to require DUN APN on the device or not - defaults to a build config value
+         * which defaults to false.
+         * @hide
+         */
+        public static final String TETHER_DUN_REQUIRED = "tether_dun_required";
 
-       /**
-        * Used to hold a gservices-provisioned apn value for DUN.  If set, or the
-        * corresponding build config values are set it will override the APN DB
-        * values.
-        * Consists of a comma seperated list of strings:
-        * "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
-        * note that empty fields can be omitted: "name,apn,,,,,,,,,310,260,,DUN"
-        * @hide
-        */
-       public static final String TETHER_DUN_APN = "tether_dun_apn";
+        /**
+         * Used to hold a gservices-provisioned apn value for DUN.  If set, or the
+         * corresponding build config values are set it will override the APN DB
+         * values.
+         * Consists of a comma separated list of strings:
+         * "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
+         * note that empty fields can be omitted: "name,apn,,,,,,,,,310,260,,DUN"
+         * @hide
+         */
+        public static final String TETHER_DUN_APN = "tether_dun_apn";
 
         /**
          * Used to disable trying to talk to any available tethering offload HAL.

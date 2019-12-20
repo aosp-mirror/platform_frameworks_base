@@ -19,7 +19,6 @@ package android.net;
 import android.app.PendingIntent;
 import android.net.ConnectionInfo;
 import android.net.LinkProperties;
-import android.net.ITetheringEventCallback;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
@@ -78,40 +77,30 @@ interface IConnectivityManager
 
     boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress);
 
-    int tether(String iface, String callerPkg);
-
-    int untether(String iface, String callerPkg);
-
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 29,
+            publicAlternatives = "Use {@code TetheringManager#getLastTetherError} as alternative")
     int getLastTetherError(String iface);
 
-    boolean isTetheringSupported(String callerPkg);
-
-    void startTethering(int type, in ResultReceiver receiver, boolean showProvisioningUi,
-            String callerPkg);
-
-    void stopTethering(int type, String callerPkg);
-
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 29,
+            publicAlternatives = "Use {@code TetheringManager#getTetherableIfaces} as alternative")
     String[] getTetherableIfaces();
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 29,
+            publicAlternatives = "Use {@code TetheringManager#getTetheredIfaces} as alternative")
     String[] getTetheredIfaces();
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 29,
+            publicAlternatives = "Use {@code TetheringManager#getTetheringErroredIfaces} "
+            + "as Alternative")
     String[] getTetheringErroredIfaces();
 
-    String[] getTetheredDhcpRanges();
-
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 29,
+            publicAlternatives = "Use {@code TetheringManager#getTetherableUsbRegexs} as alternative")
     String[] getTetherableUsbRegexs();
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 29,
+            publicAlternatives = "Use {@code TetheringManager#getTetherableWifiRegexs} as alternative")
     String[] getTetherableWifiRegexs();
-
-    String[] getTetherableBluetoothRegexs();
-
-    int setUsbTethering(boolean enable, String callerPkg);
 
     @UnsupportedAppUsage(maxTargetSdk = 28)
     void reportInetCondition(int networkType, int percentage);
@@ -216,12 +205,6 @@ interface IConnectivityManager
     int getConnectionOwnerUid(in ConnectionInfo connectionInfo);
     boolean isCallerCurrentAlwaysOnVpnApp();
     boolean isCallerCurrentAlwaysOnVpnLockdownApp();
-
-    void getLatestTetheringEntitlementResult(int type, in ResultReceiver receiver,
-            boolean showEntitlementUi, String callerPkg);
-
-    void registerTetheringEventCallback(ITetheringEventCallback callback, String callerPkg);
-    void unregisterTetheringEventCallback(ITetheringEventCallback callback, String callerPkg);
 
     IBinder startOrGetTestNetworkService();
 }
