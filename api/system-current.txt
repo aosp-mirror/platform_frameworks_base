@@ -1917,6 +1917,13 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_PROFILES) public void startActivity(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
   }
 
+  public class DataLoaderParams {
+    ctor public DataLoaderParams(@NonNull String, @NonNull String, @Nullable java.util.Map<java.lang.String,android.os.ParcelFileDescriptor>);
+    method @NonNull public final java.util.Map<java.lang.String,android.os.ParcelFileDescriptor> getDynamicArgs();
+    method @NonNull public final String getPackageName();
+    method @NonNull public final String getStaticArgs();
+  }
+
   public final class InstantAppInfo implements android.os.Parcelable {
     ctor public InstantAppInfo(android.content.pm.ApplicationInfo, String[], String[]);
     ctor public InstantAppInfo(String, CharSequence, String[], String[]);
@@ -2006,6 +2013,7 @@ package android.content.pm {
   }
 
   public static class PackageInstaller.Session implements java.io.Closeable {
+    method public void addFile(@NonNull String, long, @NonNull byte[]);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void commitTransferred(@NonNull android.content.IntentSender);
   }
 
@@ -2028,6 +2036,7 @@ package android.content.pm {
     method public void setDontKillApp(boolean);
     method public void setEnableRollback(boolean);
     method @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS) public void setGrantedRuntimePermissions(String[]);
+    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setIncrementalParams(@NonNull android.content.pm.DataLoaderParams);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setInstallAsApex();
     method public void setInstallAsInstantApp(boolean);
     method public void setInstallAsVirtualPreload();
@@ -7928,6 +7937,14 @@ package android.service.contentsuggestions {
     method public abstract void onProcessContextImage(int, @Nullable android.graphics.Bitmap, @NonNull android.os.Bundle);
     method public abstract void onSuggestContentSelections(@NonNull android.app.contentsuggestions.SelectionsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.SelectionsCallback);
     field public static final String SERVICE_INTERFACE = "android.service.contentsuggestions.ContentSuggestionsService";
+  }
+
+}
+
+package android.service.dataloader {
+
+  public abstract class DataLoaderService extends android.app.Service {
+    ctor public DataLoaderService();
   }
 
 }

@@ -19,6 +19,7 @@ package android.service.dataloader;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.DataLoaderParams;
@@ -45,30 +46,41 @@ import java.util.List;
  * The base class for implementing data loader service to control data loaders. Expecting
  * Incremental Service to bind to a children class of this.
  *
- * @hide
+ * WARNING: This is a system API to aid internal development.
+ * Use at your own risk. It will change or be removed without warning.
  *
- * Hide for now, should be @SystemApi
  * TODO(b/136132412): update with latest API design
+ *
+ * @hide
  */
+@SystemApi
 public abstract class DataLoaderService extends Service {
     private static final String TAG = "IncrementalDataLoaderService";
     private final DataLoaderBinderService mBinder = new DataLoaderBinderService();
 
+    /** @hide */
     public static final int DATA_LOADER_READY =
             IDataLoaderStatusListener.DATA_LOADER_READY;
+    /** @hide */
     public static final int DATA_LOADER_NOT_READY =
             IDataLoaderStatusListener.DATA_LOADER_NOT_READY;
+    /** @hide */
     public static final int DATA_LOADER_RUNNING =
             IDataLoaderStatusListener.DATA_LOADER_RUNNING;
+    /** @hide */
     public static final int DATA_LOADER_STOPPED =
             IDataLoaderStatusListener.DATA_LOADER_STOPPED;
+    /** @hide */
     public static final int DATA_LOADER_SLOW_CONNECTION =
             IDataLoaderStatusListener.DATA_LOADER_SLOW_CONNECTION;
+    /** @hide */
     public static final int DATA_LOADER_NO_CONNECTION =
             IDataLoaderStatusListener.DATA_LOADER_NO_CONNECTION;
+    /** @hide */
     public static final int DATA_LOADER_CONNECTION_OK =
             IDataLoaderStatusListener.DATA_LOADER_CONNECTION_OK;
 
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"DATA_LOADER_"}, value = {
             DATA_LOADER_READY,
@@ -85,6 +97,7 @@ public abstract class DataLoaderService extends Service {
     /**
      * Managed DataLoader interface. Each instance corresponds to a single Incremental File System
      * instance.
+     * @hide
      */
     public abstract static class DataLoader {
         /**
@@ -130,6 +143,7 @@ public abstract class DataLoaderService extends Service {
      * DataLoader factory method.
      *
      * @return An instance of a DataLoader.
+     * @hide
      */
     public abstract @Nullable DataLoader onCreateDataLoader();
 
@@ -220,8 +234,6 @@ public abstract class DataLoaderService extends Service {
      * Used by the DataLoaderService implementations.
      *
      * @hide
-     *
-     * TODO(b/136132412) Should be @SystemApi
      */
     public static final class FileSystemConnector {
         /**
@@ -264,7 +276,6 @@ public abstract class DataLoaderService extends Service {
     /**
      * Wrapper for native reporting DataLoader statuses.
      * @hide
-     * TODO(b/136132412) Should be @SystemApi
      */
     public static final class StatusListener {
         /**
