@@ -323,13 +323,37 @@ class Rollback {
                 new VersionedPackage(packageName, newVersion),
                 new VersionedPackage(packageName, installedVersion),
                 new IntArray() /* pendingBackups */, new ArrayList<>() /* pendingRestores */,
-                isApex, new IntArray(), new SparseLongArray() /* ceSnapshotInodes */,
-                rollbackDataPolicy);
+                isApex, false /* isApkInApex */, new IntArray(),
+                new SparseLongArray() /* ceSnapshotInodes */, rollbackDataPolicy);
 
         synchronized (mLock) {
             info.getPackages().add(packageRollbackInfo);
         }
 
+        return true;
+    }
+
+    /**
+     * Enables this rollback for the provided apk-in-apex.
+     *
+     * @return boolean True if the rollback was enabled successfully for the specified package.
+     */
+    boolean enableForPackageInApex(String packageName, long installedVersion,
+            int rollbackDataPolicy) {
+        // TODO(b/142712057): Extract the new version number of apk-in-apex
+        // The new version for the apk-in-apex is set to 0 for now. If the package is then further
+        // updated via non-staged install flow, then RollbackManagerServiceImpl#onPackageReplaced()
+        // will be called and this rollback will be deleted. Other ways of package update have not
+        // been handled yet.
+        PackageRollbackInfo packageRollbackInfo = new PackageRollbackInfo(
+                new VersionedPackage(packageName, 0 /* newVersion */),
+                new VersionedPackage(packageName, installedVersion),
+                new IntArray() /* pendingBackups */, new ArrayList<>() /* pendingRestores */,
+                false /* isApex */, true /* isApkInApex */, new IntArray(),
+                new SparseLongArray() /* ceSnapshotInodes */, rollbackDataPolicy);
+        synchronized (mLock) {
+            info.getPackages().add(packageRollbackInfo);
+        }
         return true;
     }
 
@@ -428,6 +452,11 @@ class Rollback {
                         parentSessionId);
 
                 for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
+                    if (pkgRollbackInfo.isApkInApex()) {
+                        // No need to issue a downgrade install request for apk-in-apex. It will
+                        // be rolled back when its parent apex is downgraded.
+                        continue;
+                    }
                     PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                             PackageInstaller.SessionParams.MODE_FULL_INSTALL);
                     String installerPackageName = mInstallerPackageName;
@@ -453,7 +482,8 @@ class Rollback {
                             this, pkgRollbackInfo.getPackageName());
                     if (packageCodePaths == null) {
                         sendFailure(context, statusReceiver, RollbackManager.STATUS_FAILURE,
-                                "Backup copy of package inaccessible");
+                                "Backup copy of package: "
+                                        + pkgRollbackInfo.getPackageName() + " is inaccessible");
                         return;
                     }
 

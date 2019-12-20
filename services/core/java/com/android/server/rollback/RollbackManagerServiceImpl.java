@@ -891,9 +891,36 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         ApplicationInfo appInfo = pkgInfo.applicationInfo;
-        return rollback.enableForPackage(packageName, newPackage.versionCode,
+        boolean success = rollback.enableForPackage(packageName, newPackage.versionCode,
                 pkgInfo.getLongVersionCode(), isApex, appInfo.sourceDir,
                 appInfo.splitSourceDirs, session.rollbackDataPolicy);
+        if (!success) {
+            return success;
+        }
+
+        if (isApex) {
+            // Check if this apex contains apks inside it. If true, then they should be added as
+            // a RollbackPackageInfo into this rollback
+            final PackageManagerInternal pmi = LocalServices.getService(
+                    PackageManagerInternal.class);
+            List<String> apksInApex = pmi.getApksInApex(packageName);
+            for (String apkInApex : apksInApex) {
+                // Get information about the currently installed package.
+                final PackageInfo apkPkgInfo;
+                try {
+                    apkPkgInfo = getPackageInfo(apkInApex);
+                } catch (PackageManager.NameNotFoundException e) {
+                    // TODO: Support rolling back fresh package installs rather than
+                    // fail here. Test this case.
+                    Slog.e(TAG, apkInApex + " is not installed");
+                    return false;
+                }
+                success = rollback.enableForPackageInApex(
+                        apkInApex, apkPkgInfo.getLongVersionCode(), session.rollbackDataPolicy);
+                if (!success) return success;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -907,9 +934,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         getHandler().post(() -> {
             snapshotUserDataInternal(packageName, userIds);
             restoreUserDataInternal(packageName, userIds, appId, seInfo);
-            final PackageManagerInternal pmi = LocalServices.getService(
-                    PackageManagerInternal.class);
-            pmi.finishPackageInstall(token, false);
+            // When this method is called as part of the install flow, a positive token number is
+            // passed to it. Need to notify the PackageManager when we are done.
+            if (token > 0) {
+                final PackageManagerInternal pmi = LocalServices.getService(
+                        PackageManagerInternal.class);
+                pmi.finishPackageInstall(token, false);
+            }
         });
     }
 
@@ -1195,11 +1226,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             return null;
         }
 
-        if (rollback.getPackageCount() != newRollback.getPackageSessionIdCount()) {
-            Slog.e(TAG, "Failed to enable rollback for all packages in session.");
-            rollback.delete(mAppDataRollbackHelper);
-            return null;
-        }
+        // TODO(b/142712057): Re-enable this check. For that we need count of apks-in-apex
+//        if (rollback.getPackageCount() != newRollback.getPackageSessionIdCount()) {
+//            Slog.e(TAG, "Failed to enable rollback for all packages in session.");
+//            rollback.delete(mAppDataRollbackHelper);
+//            return null;
+//        }
 
         rollback.saveRollback();
         synchronized (mLock) {

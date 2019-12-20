@@ -492,6 +492,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int SCAN_AS_PRODUCT = 1 << 20;
     static final int SCAN_AS_SYSTEM_EXT = 1 << 21;
     static final int SCAN_AS_ODM = 1 << 22;
+    static final int SCAN_AS_APK_IN_APEX = 1 << 23;
 
     @IntDef(flag = true, prefix = { "SCAN_" }, value = {
             SCAN_NO_DEX,
@@ -2589,6 +2590,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     & (SCAN_AS_VENDOR | SCAN_AS_ODM | SCAN_AS_PRODUCT | SCAN_AS_SYSTEM_EXT)) != 0) {
                 return true;
             }
+            if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
+                return true;
+            }
             return false;
         }
 
@@ -3332,7 +3336,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            mInstallerService = new PackageInstallerService(mContext, this, mApexManager);
+            mInstallerService = new PackageInstallerService(mContext, this);
             final Pair<ComponentName, String> instantAppResolverComponent =
                     getInstantAppResolverLPr();
             if (instantAppResolverComponent != null) {
@@ -11710,6 +11714,9 @@ public class PackageManagerService extends IPackageManager.Stub
             mSettings.insertPackageSettingLPw(pkgSetting, pkg);
             // Add the new setting to mPackages
             mPackages.put(pkg.getAppInfoPackageName(), pkg);
+            if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
+                mApexManager.registerApkInApex(pkg);
+            }
 
             // Add the package's KeySets to the global KeySetManagerService
             KeySetManagerService ksms = mSettings.mKeySetManagerService;
@@ -17757,10 +17764,10 @@ public class PackageManagerService extends IPackageManager.Stub
             ApexManager.ActiveApexInfo apexInfo) {
         for (int i = 0, size = SYSTEM_PARTITIONS.size(); i < size; i++) {
             SystemPartition sp = SYSTEM_PARTITIONS.get(i);
-            if (apexInfo.preinstalledApexPath.getAbsolutePath().startsWith(
+            if (apexInfo.preInstalledApexPath.getAbsolutePath().startsWith(
                     sp.folder.getAbsolutePath())) {
-                return new SystemPartition(apexInfo.apexDirectory, sp.scanFlag,
-                        false /* hasOverlays */);
+                return new SystemPartition(apexInfo.apexDirectory,
+                        sp.scanFlag | SCAN_AS_APK_IN_APEX, false /* hasOverlays */);
             }
         }
         return null;
@@ -23449,6 +23456,11 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public boolean isApexPackage(String packageName) {
             return PackageManagerService.this.mApexManager.isApexPackage(packageName);
+        }
+
+        @Override
+        public List<String> getApksInApex(String apexPackageName) {
+            return PackageManagerService.this.mApexManager.getApksInApex(apexPackageName);
         }
 
         @Override

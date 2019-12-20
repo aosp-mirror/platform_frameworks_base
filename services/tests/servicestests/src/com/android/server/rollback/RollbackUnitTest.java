@@ -295,7 +295,8 @@ public class RollbackUnitTest {
             String packageName, long fromVersion, long toVersion, boolean isApex) {
         return new PackageRollbackInfo(new VersionedPackage(packageName, fromVersion),
                 new VersionedPackage(packageName, toVersion),
-                new IntArray(), new ArrayList<>(), isApex, new IntArray(), new SparseLongArray());
+                new IntArray(), new ArrayList<>(), isApex, false, new IntArray(),
+                new SparseLongArray());
     }
 
     private static class PackageRollbackInfoForPackage implements

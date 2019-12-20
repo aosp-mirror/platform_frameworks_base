@@ -19,6 +19,7 @@ package com.android.tests.rollback.host;
 import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertThrows;
 
+import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
@@ -27,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -48,14 +50,32 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
                     phase));
     }
 
+    private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
+
     @Before
     public void setUp() throws Exception {
+        if (!getDevice().isAdbRoot()) {
+            getDevice().enableAdbRoot();
+        }
+        getDevice().remountSystemWritable();
+        getDevice().executeShellCommand(
+                "rm -f /system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex "
+                        + "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex");
         getDevice().reboot();
     }
 
     @After
     public void tearDown() throws Exception {
         runPhase("testCleanUp");
+
+        if (!getDevice().isAdbRoot()) {
+            getDevice().enableAdbRoot();
+        }
+        getDevice().remountSystemWritable();
+        getDevice().executeShellCommand(
+                "rm -f /system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex "
+                        + "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex");
+        getDevice().reboot();
     }
 
     /**
@@ -182,6 +202,28 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runPhase("testRollbackDataPolicy_Phase2");
         getDevice().reboot();
         runPhase("testRollbackDataPolicy_Phase3");
+    }
+
+    /**
+     * Tests that userdata of apk-in-apex is restored when apex is rolled back.
+     */
+    @Test
+    public void testRollbackApexWithApk() throws Exception {
+        getDevice().uninstallPackage("com.android.cts.install.lib.testapp.A");
+        CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
+        final String fileName = APK_IN_APEX_TESTAPEX_NAME + "_v1.apex";
+        final File apex = buildHelper.getTestFile(fileName);
+        if (!getDevice().isAdbRoot()) {
+            getDevice().enableAdbRoot();
+        }
+        getDevice().remountSystemWritable();
+        assertTrue(getDevice().pushFile(apex, "/system/apex/" + fileName));
+        getDevice().reboot();
+        runPhase("testRollbackApexWithApk_Phase1");
+        getDevice().reboot();
+        runPhase("testRollbackApexWithApk_Phase2");
+        getDevice().reboot();
+        runPhase("testRollbackApexWithApk_Phase3");
     }
 
     private void crashProcess(String processName, int numberOfCrashes) throws Exception {

@@ -33,11 +33,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.parsing.AndroidPackage;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
@@ -50,6 +52,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.util.IntArray;
@@ -61,6 +65,7 @@ import android.util.apk.ApkSignatureVerifier;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.os.BackgroundThread;
+import com.android.server.LocalServices;
 
 import java.io.File;
 import java.io.IOException;
@@ -93,10 +98,11 @@ public class StagingManager {
     @GuardedBy("mStagedSessions")
     private final SparseIntArray mSessionRollbackIds = new SparseIntArray();
 
-    StagingManager(PackageInstallerService pi, ApexManager am, Context context) {
+    StagingManager(PackageInstallerService pi, Context context) {
         mPi = pi;
-        mApexManager = am;
         mContext = context;
+
+        mApexManager = ApexManager.getInstance();
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mPreRebootVerificationHandler = new PreRebootVerificationHandler(
                 BackgroundThread.get().getLooper());
@@ -334,6 +340,88 @@ public class StagingManager {
         return PackageHelper.getStorageManager().needsCheckpoint();
     }
 
+    /**
+     * Apks inside apex are not installed using apk-install flow. They are scanned from the system
+     * directory directly by PackageManager, as such, RollbackManager need to handle their data
+     * separately here.
+     */
+    private void snapshotAndRestoreApkInApexUserData(PackageInstallerSession session) {
+        // We want to process apks inside apex. So current session needs to contain apex.
+        if (!sessionContainsApex(session)) {
+            return;
+        }
+
+        boolean doSnapshotOrRestore =
+                (session.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0
+                || session.params.installReason == PackageManager.INSTALL_REASON_ROLLBACK;
+        if (!doSnapshotOrRestore) {
+            return;
+        }
+
+        // Find all the apex sessions that needs processing
+        List<PackageInstallerSession> apexSessions = new ArrayList<>();
+        if (session.isMultiPackage()) {
+            List<PackageInstallerSession> childrenSessions = new ArrayList<>();
+            synchronized (mStagedSessions) {
+                for (int childSessionId : session.getChildSessionIds()) {
+                    PackageInstallerSession childSession = mStagedSessions.get(childSessionId);
+                    if (childSession != null) {
+                        childrenSessions.add(childSession);
+                    }
+                }
+            }
+            for (PackageInstallerSession childSession : childrenSessions) {
+                if (sessionContainsApex(childSession)) {
+                    apexSessions.add(childSession);
+                }
+            }
+        } else {
+            apexSessions.add(session);
+        }
+
+        // For each apex, process the apks inside it
+        for (PackageInstallerSession apexSession : apexSessions) {
+            List<String> apksInApex = mApexManager.getApksInApex(apexSession.getPackageName());
+            for (String apk: apksInApex) {
+                snapshotAndRestoreApkInApexUserData(apk);
+            }
+        }
+    }
+
+    private void snapshotAndRestoreApkInApexUserData(String packageName) {
+        IRollbackManager rm = IRollbackManager.Stub.asInterface(
+                    ServiceManager.getService(Context.ROLLBACK_SERVICE));
+
+        PackageManagerInternal mPmi = LocalServices.getService(PackageManagerInternal.class);
+        AndroidPackage pkg = mPmi.getPackage(packageName);
+        if (pkg == null) {
+            Slog.e(TAG, "Could not find package: " + packageName
+                    + "for snapshotting/restoring user data.");
+            return;
+        }
+        final String seInfo = pkg.getSeInfo();
+        final UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
+        final int[] allUsers = um.getUserIds();
+
+        int appId = -1;
+        long ceDataInode = -1;
+        final PackageSetting ps = (PackageSetting) mPmi.getPackageSetting(packageName);
+        if (ps != null && rm != null) {
+            appId = ps.appId;
+            ceDataInode = ps.getCeDataInode(UserHandle.USER_SYSTEM);
+            // NOTE: We ignore the user specified in the InstallParam because we know this is
+            // an update, and hence need to restore data for all installed users.
+            final int[] installedUsers = ps.queryInstalledUsers(allUsers, true);
+
+            try {
+                rm.snapshotAndRestoreUserData(packageName, installedUsers, appId, ceDataInode,
+                        seInfo, 0 /*token*/);
+            } catch (RemoteException re) {
+                Slog.e(TAG, "Error snapshotting/restoring user data: " + re);
+            }
+        }
+    }
+
     private void resumeSession(@NonNull PackageInstallerSession session) {
         Slog.d(TAG, "Resuming session " + session.sessionId);
 
@@ -407,6 +495,7 @@ public class StagingManager {
                 abortCheckpoint();
                 return;
             }
+            snapshotAndRestoreApkInApexUserData(session);
             Slog.i(TAG, "APEX packages in session " + session.sessionId
                     + " were successfully activated. Proceeding with APK packages, if any");
         }
@@ -529,7 +618,7 @@ public class StagingManager {
                         Arrays.stream(session.getChildSessionIds())
                                 // Retrieve cached sessions matching ids.
                                 .mapToObj(i -> mStagedSessions.get(i))
-                                // Filter only the ones containing APKs.s
+                                // Filter only the ones containing APKs.
                                 .filter(childSession -> !isApexSession(childSession))
                                 .collect(Collectors.toList());
             }
