@@ -520,7 +520,7 @@ public:
 
     ssize_t indexOfString(const char16_t* str, size_t strLen) const;
 
-    size_t size() const;
+    virtual size_t size() const;
     size_t styleCount() const;
     size_t bytes() const;
     const void* data() const;

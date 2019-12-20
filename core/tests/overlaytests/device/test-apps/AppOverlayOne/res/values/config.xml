@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="str">single</string>
-    <string name="str2">single</string>
     <integer name="matrix_101000">300</integer>
     <integer name="matrix_101001">300</integer>
     <integer name="matrix_101010">300</integer>
@@ -18,7 +17,6 @@
     <integer name="matrix_111101">300</integer>
     <integer name="matrix_111110">300</integer>
     <integer name="matrix_111111">300</integer>
-    <bool name="usually_false">true</bool>
     <integer-array name="fibonacci">
         <item>21</item>
         <item>13</item>
@@ -29,7 +27,10 @@
         <item>1</item>
         <item>1</item>
     </integer-array>
+
     <!-- The following integer does not exist in the original package. Idmap
          generation should therefore ignore it. -->
     <integer name="integer_not_in_original_package">0</integer>
+
+    <attr name="customAttribute" />
 </resources>
