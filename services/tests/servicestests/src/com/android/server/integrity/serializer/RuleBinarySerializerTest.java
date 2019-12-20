@@ -47,12 +47,17 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @RunWith(JUnit4.class)
 public class RuleBinarySerializerTest {
+
+    private static final String SAMPLE_INSTALLER_NAME = "com.test.installer";
+    private static final String SAMPLE_INSTALLER_CERT = "installer_cert";
 
     private static final String COMPOUND_FORMULA_START_BITS =
             getBits(COMPOUND_FORMULA_START, SEPARATOR_BITS);
@@ -67,6 +72,9 @@ public class RuleBinarySerializerTest {
 
     private static final String PACKAGE_NAME = getBits(AtomicFormula.PACKAGE_NAME, KEY_BITS);
     private static final String APP_CERTIFICATE = getBits(AtomicFormula.APP_CERTIFICATE, KEY_BITS);
+    private static final String INSTALLER_NAME = getBits(AtomicFormula.INSTALLER_NAME, KEY_BITS);
+    private static final String INSTALLER_CERTIFICATE =
+            getBits(AtomicFormula.INSTALLER_CERTIFICATE, KEY_BITS);
     private static final String VERSION_CODE = getBits(AtomicFormula.VERSION_CODE, KEY_BITS);
     private static final String PRE_INSTALLED = getBits(AtomicFormula.PRE_INSTALLED, KEY_BITS);
 
@@ -83,17 +91,28 @@ public class RuleBinarySerializerTest {
             getBytes(getBits(DEFAULT_FORMAT_VERSION, FORMAT_VERSION_BITS));
 
     @Test
-    public void testBinaryString_serializeEmptyRule() throws Exception {
-        Rule rule = null;
+    public void testBinaryString_serializeNullRules() {
         RuleSerializer binarySerializer = new RuleBinarySerializer();
 
         assertExpectException(
                 RuleSerializeException.class,
-                /* expectedExceptionMessageRegex= */ "Null rule can not be serialized",
+                /* expectedExceptionMessageRegex= */
+                "Index buckets cannot be created for null rule list.",
                 () ->
-                        binarySerializer.serialize(
-                                Collections.singletonList(rule),
-                                /* formatVersion= */ Optional.empty()));
+                        binarySerializer.serialize(null, /* formatVersion= */ Optional.empty()));
+    }
+
+    @Test
+    public void testBinaryString_emptyRules() throws Exception {
+        ByteArrayOutputStream expectedArrayOutputStream = new ByteArrayOutputStream();
+        expectedArrayOutputStream.write(DEFAULT_FORMAT_VERSION_BYTES);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        RuleSerializer binarySerializer = new RuleBinarySerializer();
+        binarySerializer.serialize(
+                Collections.emptyList(), /* formatVersion= */ Optional.empty(), outputStream);
+
+        assertThat(outputStream.toByteArray()).isEqualTo(expectedArrayOutputStream.toByteArray());
     }
 
     @Test
@@ -381,7 +400,7 @@ public class RuleBinarySerializerTest {
 
         assertExpectException(
                 RuleSerializeException.class,
-                /* expectedExceptionMessageRegex= */ "Invalid formula type",
+                /* expectedExceptionMessageRegex= */ "Malformed rule identified.",
                 () ->
                         binarySerializer.serialize(
                                 Collections.singletonList(rule),
@@ -400,6 +419,165 @@ public class RuleBinarySerializerTest {
                         Collections.emptyList(), /* formatVersion= */ Optional.of(formatVersion));
 
         assertThat(actualRules).isEqualTo(expectedRules);
+    }
+
+    @Test
+    public void testBinaryString_serializeComplexCompoundFormula_indexingOrderValid()
+            throws Exception {
+        String packageNameA = "aaa";
+        String packageNameB = "bbb";
+        String packageNameC = "ccc";
+        String appCert1 = "cert1";
+        String appCert2 = "cert2";
+        String appCert3 = "cert3";
+        Rule installerRule =
+                new Rule(
+                        new CompoundFormula(
+                                CompoundFormula.AND,
+                                Arrays.asList(
+                                        new AtomicFormula.StringAtomicFormula(
+                                                AtomicFormula.INSTALLER_NAME,
+                                                SAMPLE_INSTALLER_NAME,
+                                                /* isHashedValue= */ false),
+                                        new AtomicFormula.StringAtomicFormula(
+                                                AtomicFormula.INSTALLER_CERTIFICATE,
+                                                SAMPLE_INSTALLER_CERT,
+                                                /* isHashedValue= */ false))),
+                        Rule.DENY);
+
+        RuleSerializer binarySerializer = new RuleBinarySerializer();
+        List<Rule> ruleList = new ArrayList();
+        ruleList.add(getRuleWithAppCertificateAndSampleInstallerName(appCert3));
+        ruleList.add(getRuleWithAppCertificateAndSampleInstallerName(appCert2));
+        ruleList.add(getRuleWithAppCertificateAndSampleInstallerName(appCert1));
+        ruleList.add(getRuleWithPackageNameAndSampleInstallerName(packageNameB));
+        ruleList.add(getRuleWithPackageNameAndSampleInstallerName(packageNameC));
+        ruleList.add(getRuleWithPackageNameAndSampleInstallerName(packageNameA));
+        ruleList.add(installerRule);
+        byte[] actualRules =
+                binarySerializer.serialize(ruleList, /* formatVersion= */ Optional.empty());
+
+
+        // Note that ordering is important here and the test verifies that the rules are written
+        // in this sorted order.
+        ByteArrayOutputStream expectedArrayOutputStream = new ByteArrayOutputStream();
+        expectedArrayOutputStream.write(DEFAULT_FORMAT_VERSION_BYTES);
+        expectedArrayOutputStream.write(
+                getBytes(getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(
+                        packageNameA)));
+        expectedArrayOutputStream.write(
+                getBytes(getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(
+                        packageNameB)));
+        expectedArrayOutputStream.write(
+                getBytes(getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(
+                        packageNameC)));
+        expectedArrayOutputStream.write(
+                getBytes(getSerializedCompoundRuleWithCertificateNameAndSampleInstallerName(
+                        appCert1)));
+        expectedArrayOutputStream.write(
+                getBytes(getSerializedCompoundRuleWithCertificateNameAndSampleInstallerName(
+                        appCert2)));
+        expectedArrayOutputStream.write(
+                getBytes(getSerializedCompoundRuleWithCertificateNameAndSampleInstallerName(
+                        appCert3)));
+        String expectedBitsForInstallerRule =
+                START_BIT
+                        + COMPOUND_FORMULA_START_BITS
+                        + AND
+                        + ATOMIC_FORMULA_START_BITS
+                        + INSTALLER_NAME
+                        + EQ
+                        + IS_NOT_HASHED
+                        + getBits(SAMPLE_INSTALLER_NAME.length(), VALUE_SIZE_BITS)
+                        + getValueBits(SAMPLE_INSTALLER_NAME)
+                        + ATOMIC_FORMULA_START_BITS
+                        + INSTALLER_CERTIFICATE
+                        + EQ
+                        + IS_NOT_HASHED
+                        + getBits(SAMPLE_INSTALLER_CERT.length(), VALUE_SIZE_BITS)
+                        + getValueBits(SAMPLE_INSTALLER_CERT)
+                        + COMPOUND_FORMULA_END_BITS
+                        + DENY
+                        + END_BIT;
+        expectedArrayOutputStream.write(getBytes(expectedBitsForInstallerRule));
+
+        assertThat(actualRules).isEqualTo(expectedArrayOutputStream.toByteArray());
+    }
+
+    private Rule getRuleWithPackageNameAndSampleInstallerName(String packageName) {
+        return new Rule(
+                new CompoundFormula(
+                        CompoundFormula.AND,
+                        Arrays.asList(
+                                new AtomicFormula.StringAtomicFormula(
+                                        AtomicFormula.PACKAGE_NAME,
+                                        packageName,
+                                        /* isHashedValue= */ false),
+                                new AtomicFormula.StringAtomicFormula(
+                                        AtomicFormula.INSTALLER_NAME,
+                                        SAMPLE_INSTALLER_NAME,
+                                        /* isHashedValue= */ false))),
+                Rule.DENY);
+    }
+
+    private String getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(
+            String packageName) {
+        return START_BIT
+                + COMPOUND_FORMULA_START_BITS
+                + AND
+                + ATOMIC_FORMULA_START_BITS
+                + PACKAGE_NAME
+                + EQ
+                + IS_NOT_HASHED
+                + getBits(packageName.length(), VALUE_SIZE_BITS)
+                + getValueBits(packageName)
+                + ATOMIC_FORMULA_START_BITS
+                + INSTALLER_NAME
+                + EQ
+                + IS_NOT_HASHED
+                + getBits(SAMPLE_INSTALLER_NAME.length(), VALUE_SIZE_BITS)
+                + getValueBits(SAMPLE_INSTALLER_NAME)
+                + COMPOUND_FORMULA_END_BITS
+                + DENY
+                + END_BIT;
+    }
+
+    private Rule getRuleWithAppCertificateAndSampleInstallerName(String certificate) {
+        return new Rule(
+                new CompoundFormula(
+                        CompoundFormula.AND,
+                        Arrays.asList(
+                                new AtomicFormula.StringAtomicFormula(
+                                        AtomicFormula.APP_CERTIFICATE,
+                                        certificate,
+                                        /* isHashedValue= */ false),
+                                new AtomicFormula.StringAtomicFormula(
+                                        AtomicFormula.INSTALLER_NAME,
+                                        SAMPLE_INSTALLER_NAME,
+                                        /* isHashedValue= */ false))),
+                Rule.DENY);
+    }
+
+    private String getSerializedCompoundRuleWithCertificateNameAndSampleInstallerName(
+            String appCertificate) {
+        return START_BIT
+                + COMPOUND_FORMULA_START_BITS
+                + AND
+                + ATOMIC_FORMULA_START_BITS
+                + APP_CERTIFICATE
+                + EQ
+                + IS_NOT_HASHED
+                + getBits(appCertificate.length(), VALUE_SIZE_BITS)
+                + getValueBits(appCertificate)
+                + ATOMIC_FORMULA_START_BITS
+                + INSTALLER_NAME
+                + EQ
+                + IS_NOT_HASHED
+                + getBits(SAMPLE_INSTALLER_NAME.length(), VALUE_SIZE_BITS)
+                + getValueBits(SAMPLE_INSTALLER_NAME)
+                + COMPOUND_FORMULA_END_BITS
+                + DENY
+                + END_BIT;
     }
 
     private static Formula getInvalidFormula() {
