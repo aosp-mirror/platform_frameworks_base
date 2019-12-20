@@ -2691,18 +2691,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         return mActivityRecord.getTask().getTaskStack().shouldIgnoreInput()
                 || !mActivityRecord.mVisibleRequested
-                || isAnimatingToRecents();
+                || isRecentsAnimationConsumingAppInput();
     }
 
     /**
-     * Returns {@code true} if the window is animating to home as part of the recents animation.
+     * Returns {@code true} if the window is animating to home as part of the recents animation and
+     * it is consuming input from the app.
      */
-    private boolean isAnimatingToRecents() {
+    private boolean isRecentsAnimationConsumingAppInput() {
         final RecentsAnimationController recentsAnimationController =
                 mWmService.getRecentsAnimationController();
         return recentsAnimationController != null
-                && recentsAnimationController.isAnimatingTask(getTask())
-                && !recentsAnimationController.isTargetApp(mActivityRecord);
+                && recentsAnimationController.shouldApplyInputConsumer(mActivityRecord);
     }
 
     @Override

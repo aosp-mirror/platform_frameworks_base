@@ -596,7 +596,7 @@ public class WindowStateTests extends WindowTestsBase {
 
         // Mock active recents animation
         RecentsAnimationController recentsController = mock(RecentsAnimationController.class);
-        when(recentsController.isAnimatingTask(win0.mActivityRecord.getTask())).thenReturn(true);
+        when(recentsController.shouldApplyInputConsumer(win0.mActivityRecord)).thenReturn(true);
         mWm.setRecentsAnimationController(recentsController);
         assertTrue(win0.cantReceiveTouchInput());
     }

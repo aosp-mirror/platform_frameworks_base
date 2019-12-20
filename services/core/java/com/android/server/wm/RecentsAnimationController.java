@@ -754,8 +754,7 @@ public class RecentsAnimationController implements DeathRecipient {
         // Only apply the input consumer if it is enabled, it is not the target (home/recents)
         // being revealed with the transition, and we are actively animating the app as a part of
         // the animation
-        return mInputConsumerEnabled && mTargetActivityRecord != activity
-                && isAnimatingApp(activity);
+        return mInputConsumerEnabled && !isTargetApp(activity) && isAnimatingApp(activity);
     }
 
     boolean updateInputConsumerForApp(InputWindowHandle inputWindowHandle,
@@ -810,7 +809,9 @@ public class RecentsAnimationController implements DeathRecipient {
                     PooledLambda.__(ActivityRecord.class));
             boolean isAnimatingApp = task.forAllActivities(f);
             f.recycle();
-            return isAnimatingApp;
+            if (isAnimatingApp) {
+                return true;
+            }
         }
         return false;
     }
