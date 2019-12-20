@@ -137,8 +137,7 @@ public class UsageStatsService extends SystemService implements
     private static final File USAGE_STATS_LEGACY_DIR = new File(
             Environment.getDataSystemDirectory(), "usagestats");
     // For migration purposes, indicates whether to keep the legacy usage stats directory or not
-    // STOPSHIP: b/138323140 this should be false on launch
-    private static final boolean KEEP_LEGACY_DIR = true;
+    private static final boolean KEEP_LEGACY_DIR = false;
 
     private static final char TOKEN_DELIMITER = '/';
 
@@ -648,7 +647,7 @@ public class UsageStatsService extends SystemService implements
 
     private void deleteLegacyDir(int userId) {
         final File legacyUserDir = new File(USAGE_STATS_LEGACY_DIR, Integer.toString(userId));
-        if (!KEEP_LEGACY_DIR) {
+        if (!KEEP_LEGACY_DIR && legacyUserDir.exists()) {
             deleteRecursively(legacyUserDir);
             if (legacyUserDir.exists()) {
                 Slog.w(TAG, "Error occurred while attempting to delete legacy usage stats "
