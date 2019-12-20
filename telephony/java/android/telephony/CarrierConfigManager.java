@@ -3003,16 +3003,18 @@ public class CarrierConfigManager {
             "data_switch_validation_timeout_long";
 
     /**
-     * GPS configs. See android.hardware.gnss@1.0 IGnssConfiguration.
-     * @hide
+     * GPS configs. See the GNSS HAL documentation for more details.
      */
     public static final class Gps {
+        private Gps() {}
+
         /** Prefix of all Gps.KEY_* constants. */
         public static final String KEY_PREFIX = "gps.";
 
         /**
          * Location information during (and after) an emergency call is only provided over control
          * plane signaling from the network.
+         * @hide
          */
         public static final int SUPL_EMERGENCY_MODE_TYPE_CP_ONLY = 0;
 
@@ -3020,6 +3022,7 @@ public class CarrierConfigManager {
          * Location information during (and after) an emergency call is provided over the data
          * plane and serviced by the framework GNSS service, but if it fails, the carrier also
          * supports control plane backup signaling.
+         * @hide
          */
         public static final int SUPL_EMERGENCY_MODE_TYPE_CP_FALLBACK = 1;
 
@@ -3027,6 +3030,7 @@ public class CarrierConfigManager {
          * Location information during (and after) an emergency call is provided over the data plane
          * and serviced by the framework GNSS service only. There is no backup signalling over the
          * control plane if it fails.
+         * @hide
          */
         public static final int SUPL_EMERGENCY_MODE_TYPE_DP_ONLY = 2;
 
@@ -3043,10 +3047,14 @@ public class CarrierConfigManager {
         /**
          * SUPL server host for SET Initiated & non-ES Network-Initiated SUPL requests.
          * Default to supl.google.com
+         * @hide
          */
         public static final String KEY_SUPL_HOST_STRING = KEY_PREFIX + "supl_host";
 
-        /** SUPL server port. Default to 7275. */
+        /**
+         * SUPL server port. Default to 7275.
+         * @hide
+         */
         public static final String KEY_SUPL_PORT_STRING = KEY_PREFIX + "supl_port";
 
         /**
@@ -3054,6 +3062,7 @@ public class CarrierConfigManager {
          * with bits 0:7 representing a service indicator field, bits 8:15
          * representing the minor version and bits 16:23 representing the
          * major version. Default to 0x20000.
+         * @hide
          */
         public static final String KEY_SUPL_VER_STRING = KEY_PREFIX + "supl_ver";
 
@@ -3061,6 +3070,7 @@ public class CarrierConfigManager {
          * SUPL_MODE configuration bit mask
          * 1 - Mobile Station Based. This is default.
          * 2 - Mobile Station Assisted.
+         * @hide
          */
         public static final String KEY_SUPL_MODE_STRING = KEY_PREFIX + "supl_mode";
 
@@ -3069,6 +3079,7 @@ public class CarrierConfigManager {
          * (e.g. E911), and SUPL non-ES requests to only outside of non user emergency sessions.
          * 0 - no.
          * 1 - yes. This is default.
+         * @hide
          */
         // TODO(b/119567985): name this key properly
         public static final String KEY_SUPL_ES_STRING = KEY_PREFIX + "supl_es";
@@ -3078,6 +3089,7 @@ public class CarrierConfigManager {
          * 0 - Radio Resource Location Protocol in user plane and control plane. This is default.
          * 1 - Enable LTE Positioning Protocol in user plane.
          * 2 - Enable LTE Positioning Protocol in control plane.
+         * @hide
          */
         public static final String KEY_LPP_PROFILE_STRING = KEY_PREFIX + "lpp_profile";
 
@@ -3085,6 +3097,7 @@ public class CarrierConfigManager {
          * Determine whether to use emergency PDN for emergency SUPL.
          * 0 - no.
          * 1 - yes. This is default.
+         * @hide
          */
         public static final String KEY_USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL_STRING =
                 KEY_PREFIX + "use_emergency_pdn_for_emergency_supl";
@@ -3095,6 +3108,7 @@ public class CarrierConfigManager {
          * 1 - Use A-GLONASS in Radio Resource Control(RRC) control-plane.
          * 2 - Use A-GLONASS in Radio Resource Location user-plane.
          * 4 - Use A-GLONASS in LTE Positioning Protocol User plane.
+         * @hide
          */
         public static final String KEY_A_GLONASS_POS_PROTOCOL_SELECT_STRING =
                 KEY_PREFIX + "a_glonass_pos_protocol_select";
@@ -3106,11 +3120,13 @@ public class CarrierConfigManager {
          * "1" - Lock Mobile Originated GPS functionalities.
          * "2" - Lock Network initiated GPS functionalities.
          * "3" - Lock both. This is default.
+         * @hide
          */
         public static final String KEY_GPS_LOCK_STRING = KEY_PREFIX + "gps_lock";
 
         /**
          * Control Plane / SUPL NI emergency extension time in seconds. Default to "0".
+         * @hide
          */
         public static final String KEY_ES_EXTENSION_SEC_STRING = KEY_PREFIX + "es_extension_sec";
 
@@ -3119,6 +3135,7 @@ public class CarrierConfigManager {
          * the non-framework entities requesting location directly from GNSS without involving
          * the framework, as managed by IGnssVisibilityControl.hal. For example,
          * "com.example.mdt com.example.ims".
+         * @hide
          */
         public static final String KEY_NFW_PROXY_APPS_STRING = KEY_PREFIX + "nfw_proxy_apps";
 
@@ -3134,6 +3151,7 @@ public class CarrierConfigManager {
          * {@link #SUPL_EMERGENCY_MODE_TYPE_CP_ONLY}.
          * <p>
          * The default value for this configuration is {@link #SUPL_EMERGENCY_MODE_TYPE_CP_ONLY}.
+         * @hide
          */
         public static final String KEY_ES_SUPL_CONTROL_PLANE_SUPPORT_INT = KEY_PREFIX
                 + "es_supl_control_plane_support_int";
@@ -3145,6 +3163,7 @@ public class CarrierConfigManager {
          * <p>
          * A string array of PLMNs that do not support a control-plane mechanism for getting a
          * user's location for SUPL ES.
+         * @hide
          */
         public static final String KEY_ES_SUPL_DATA_PLANE_ONLY_ROAMING_PLMN_STRING_ARRAY =
                 KEY_PREFIX + "es_supl_data_plane_only_roaming_plmn_string_array";
