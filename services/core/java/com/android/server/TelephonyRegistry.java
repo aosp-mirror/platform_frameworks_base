@@ -441,10 +441,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
             mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
             mCallQuality[i] = createCallQuality();
-            mCallAttributes[i] = new CallAttributes(new PreciseCallState(),
+            mCallAttributes[i] = new CallAttributes(createPreciseCallState(),
                     TelephonyManager.NETWORK_TYPE_UNKNOWN, createCallQuality());
             mCallNetworkType[i] = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-            mPreciseCallState[i] = new PreciseCallState();
+            mPreciseCallState[i] = createPreciseCallState();
             mRingingCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
             mForegroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
             mBackgroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
@@ -534,10 +534,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
             mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
             mCallQuality[i] = createCallQuality();
-            mCallAttributes[i] = new CallAttributes(new PreciseCallState(),
+            mCallAttributes[i] = new CallAttributes(createPreciseCallState(),
                     TelephonyManager.NETWORK_TYPE_UNKNOWN, createCallQuality());
             mCallNetworkType[i] = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-            mPreciseCallState[i] = new PreciseCallState();
+            mPreciseCallState[i] = createPreciseCallState();
             mRingingCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
             mForegroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
             mBackgroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
@@ -2643,6 +2643,15 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             default:
                 return "UNKNOWN";
         }
+    }
+
+    /** Returns a new PreciseCallState object with default values. */
+    private static PreciseCallState createPreciseCallState() {
+        return new PreciseCallState(PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
+            PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
+            PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
+            DisconnectCause.NOT_VALID,
+            PreciseDisconnectCause.NOT_VALID);
     }
 
     /** Returns a new CallQuality object with default values. */
