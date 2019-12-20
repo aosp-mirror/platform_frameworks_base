@@ -281,7 +281,8 @@ class TaskSnapshotController {
      *
      * @return true if the state of the task is ok to proceed
      */
-    private boolean prepareTaskSnapshot(Task task, float scaleFraction, int pixelFormat,
+    @VisibleForTesting
+    boolean prepareTaskSnapshot(Task task, float scaleFraction, int pixelFormat,
             TaskSnapshot.Builder builder) {
         if (!mService.mPolicy.isScreenOn()) {
             if (DEBUG_SCREENSHOT) {
@@ -339,6 +340,7 @@ class TaskSnapshotController {
                 && (!activity.fillsParent() || isWindowTranslucent);
 
         builder.setTopActivityComponent(activity.mActivityComponent);
+        builder.setPixelFormat(pixelFormat);
         builder.setIsTranslucent(isTranslucent);
         builder.setOrientation(activity.getTask().getConfiguration().orientation);
         builder.setWindowingMode(task.getWindowingMode());
