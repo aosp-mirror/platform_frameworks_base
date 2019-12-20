@@ -5737,7 +5737,8 @@ public class Editor {
                     } else if (FLAG_ENABLE_CURSOR_DRAG
                                 && mTextView.getLayout() != null
                                 && mTextView.isFocused()
-                                && mTouchState.isMovedEnoughForDrag()) {
+                                && mTouchState.isMovedEnoughForDrag()
+                                && !mTouchState.isDragCloseToVertical()) {
                         startCursorDrag(event);
                     }
                     break;
