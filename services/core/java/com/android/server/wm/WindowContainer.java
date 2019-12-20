@@ -2092,6 +2092,21 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * @return The {@link WindowContainer} which is running an animation.
+     *
+     * It traverses from the current container to its parents recursively. If nothing is animating,
+     * it will return {@code null}.
+     */
+    @Nullable
+    WindowContainer getAnimatingContainer() {
+        if (isAnimating()) {
+            return this;
+        }
+        final WindowContainer parent = getParent();
+        return (parent != null) ? parent.getAnimatingContainer() : null;
+    }
+
+    /**
      * @see SurfaceAnimator#startDelayingAnimationStart
      */
     void startDelayingAnimationStart() {

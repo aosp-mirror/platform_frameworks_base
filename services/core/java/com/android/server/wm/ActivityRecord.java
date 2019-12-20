@@ -3089,7 +3089,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "Removing app %s delayed=%b animation=%s animating=%b", this, delayed,
-                getAnimation(), isAnimating(PARENTS | TRANSITION));
+                getAnimation(), isAnimating(TRANSITION | PARENTS));
 
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "removeAppToken: %s"
                 + " delayed=%b Callers=%s", this, delayed, Debug.getCallers(4));
@@ -3101,7 +3101,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If this window was animating, then we need to ensure that the app transition notifies
         // that animations have completed in DisplayContent.handleAnimatingStoppedAndTransition(),
         // so add to that list now
-        if (isAnimating(PARENTS | TRANSITION)) {
+        if (isAnimating(TRANSITION | PARENTS)) {
             getDisplayContent().mNoAnimationNotifyOnTransitionFinished.add(token);
         }
 
@@ -5345,13 +5345,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!allDrawn && w.mightAffectAllDrawn()) {
             if (DEBUG_VISIBILITY || WM_DEBUG_ORIENTATION.isLogToLogcat()) {
                 Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()
-                        + ", isAnimationSet=" + isAnimating(PARENTS | TRANSITION));
+                        + ", isAnimationSet=" + isAnimating(TRANSITION | PARENTS));
                 if (!w.isDrawnLw()) {
                     Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceController
                             + " pv=" + w.isVisibleByPolicy()
                             + " mDrawState=" + winAnimator.drawStateToString()
                             + " ph=" + w.isParentWindowHidden() + " th=" + mVisibleRequested
-                            + " a=" + isAnimating(PARENTS | TRANSITION));
+                            + " a=" + isAnimating(TRANSITION | PARENTS));
                 }
             }
 
