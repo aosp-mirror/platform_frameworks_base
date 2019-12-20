@@ -25,7 +25,6 @@ import java.util.List;
 public class MultiDisplayResolveInfo extends DisplayResolveInfo {
 
     List<DisplayResolveInfo> mTargetInfos = new ArrayList<>();
-    String mPackageName;
     // We'll use this DRI for basic presentation info - eg icon, name.
     final DisplayResolveInfo mBaseInfo;
 
@@ -36,6 +35,12 @@ public class MultiDisplayResolveInfo extends DisplayResolveInfo {
         super(firstInfo);
         mBaseInfo = firstInfo;
         mTargetInfos.add(firstInfo);
+    }
+
+    @Override
+    public CharSequence getExtendedInfo() {
+        // Never show subtitle for stacked apps
+        return null;
     }
 
     /**
