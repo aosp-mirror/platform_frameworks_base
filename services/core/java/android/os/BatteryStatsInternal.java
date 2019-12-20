@@ -49,6 +49,6 @@ public abstract class BatteryStatsInternal {
     /**
      * Informs battery stats of binder stats for the given work source UID.
      */
-    public abstract void noteBinderCallStats(int workSourceUid,
+    public abstract void noteBinderCallStats(int workSourceUid, long incrementalBinderCallCount,
             Collection<BinderCallsStats.CallStat> callStats);
 }
