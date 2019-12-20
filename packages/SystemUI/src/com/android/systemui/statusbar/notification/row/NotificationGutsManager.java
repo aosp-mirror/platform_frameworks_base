@@ -42,7 +42,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
@@ -108,7 +108,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
 
     @Inject
     public NotificationGutsManager(Context context, VisualStabilityManager visualStabilityManager,
-            Lazy<StatusBar> statusBarLazy, @MainHandler Handler mainHandler,
+            Lazy<StatusBar> statusBarLazy, @Main Handler mainHandler,
             AccessibilityManager accessibilityManager) {
         mContext = context;
         mVisualStabilityManager = visualStabilityManager;

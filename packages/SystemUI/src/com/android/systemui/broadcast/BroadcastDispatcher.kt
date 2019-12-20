@@ -28,8 +28,8 @@ import android.util.Log
 import android.util.SparseArray
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
-import com.android.systemui.dagger.qualifiers.BgLooper
-import com.android.systemui.dagger.qualifiers.MainHandler
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -62,8 +62,8 @@ private const val DEBUG = true
 @Singleton
 open class BroadcastDispatcher @Inject constructor (
     private val context: Context,
-    @MainHandler private val mainHandler: Handler,
-    @BgLooper private val bgLooper: Looper
+    @Main private val mainHandler: Handler,
+    @Background private val bgLooper: Looper
 ) : Dumpable {
 
     // Only modify in BG thread

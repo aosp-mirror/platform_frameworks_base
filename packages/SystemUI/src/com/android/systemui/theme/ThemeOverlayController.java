@@ -36,7 +36,7 @@ import android.util.Log;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.BgHandler;
+import com.android.systemui.dagger.qualifiers.Background;
 
 import com.google.android.collect.Sets;
 
@@ -70,7 +70,7 @@ public class ThemeOverlayController extends SystemUI {
 
     @Inject
     public ThemeOverlayController(Context context, BroadcastDispatcher broadcastDispatcher,
-            @BgHandler Handler bgHandler) {
+            @Background Handler bgHandler) {
         super(context);
         mBroadcastDispatcher = broadcastDispatcher;
         mBgHandler = bgHandler;

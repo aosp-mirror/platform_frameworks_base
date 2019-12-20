@@ -38,7 +38,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 import com.android.systemui.car.CarServiceProvider;
-import com.android.systemui.dagger.qualifiers.MainResources;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.car.CarTrustAgentUnlockDialogHelper.OnHideListener;
 import com.android.systemui.statusbar.car.UserGridRecyclerView.UserRecord;
 
@@ -78,7 +78,7 @@ public class FullscreenUserSwitcher {
     @Inject
     public FullscreenUserSwitcher(
             Context context,
-            @MainResources Resources resources,
+            @Main Resources resources,
             UserManager userManager,
             CarServiceProvider carServiceProvider,
             CarTrustAgentUnlockDialogHelper carTrustAgentUnlockDialogHelper) {

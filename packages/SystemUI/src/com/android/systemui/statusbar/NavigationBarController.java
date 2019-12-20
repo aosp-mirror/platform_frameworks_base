@@ -35,7 +35,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.systemui.Dependency;
 import com.android.systemui.assist.AssistHandleViewController;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
@@ -65,7 +65,7 @@ public class NavigationBarController implements Callbacks {
     SparseArray<NavigationBarFragment> mNavigationBars = new SparseArray<>();
 
     @Inject
-    public NavigationBarController(Context context, @MainHandler Handler handler,
+    public NavigationBarController(Context context, @Main Handler handler,
             CommandQueue commandQueue) {
         mContext = context;
         mHandler = handler;

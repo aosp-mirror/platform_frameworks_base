@@ -47,7 +47,7 @@ import android.util.LongSparseArray;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
-import com.android.systemui.dagger.qualifiers.BgLooper;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSHost;
@@ -109,7 +109,7 @@ public class GarbageMonitor implements Dumpable {
     @Inject
     public GarbageMonitor(
             Context context,
-            @BgLooper Looper bgLooper,
+            @Background Looper bgLooper,
             LeakDetector leakDetector,
             LeakReporter leakReporter) {
         mContext = context.getApplicationContext();

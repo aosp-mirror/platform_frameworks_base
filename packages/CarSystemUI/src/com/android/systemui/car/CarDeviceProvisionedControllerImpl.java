@@ -27,7 +27,7 @@ import android.provider.Settings;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 
 import javax.inject.Inject;
@@ -54,7 +54,7 @@ public class CarDeviceProvisionedControllerImpl extends DeviceProvisionedControl
     private final ContentResolver mContentResolver;
 
     @Inject
-    public CarDeviceProvisionedControllerImpl(Context context, @MainHandler Handler mainHandler,
+    public CarDeviceProvisionedControllerImpl(Context context, @Main Handler mainHandler,
             BroadcastDispatcher broadcastDispatcher) {
         super(context, mainHandler, broadcastDispatcher);
         mContentResolver = context.getContentResolver();

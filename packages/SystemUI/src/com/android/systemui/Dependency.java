@@ -39,10 +39,8 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.dagger.qualifiers.BgHandler;
-import com.android.systemui.dagger.qualifiers.BgLooper;
-import com.android.systemui.dagger.qualifiers.MainHandler;
-import com.android.systemui.dagger.qualifiers.MainLooper;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -297,10 +295,10 @@ public class Dependency {
     @Inject Lazy<SensorPrivacyManager> mSensorPrivacyManager;
     @Inject Lazy<AutoHideController> mAutoHideController;
     @Inject Lazy<ForegroundServiceNotificationListener> mForegroundServiceNotificationListener;
-    @Inject @BgLooper Lazy<Looper> mBgLooper;
-    @Inject @BgHandler Lazy<Handler> mBgHandler;
-    @Inject @MainLooper Lazy<Looper> mMainLooper;
-    @Inject @MainHandler Lazy<Handler> mMainHandler;
+    @Inject @Background Lazy<Looper> mBgLooper;
+    @Inject @Background Lazy<Handler> mBgHandler;
+    @Inject @Main Lazy<Looper> mMainLooper;
+    @Inject @Main Lazy<Handler> mMainHandler;
     @Inject @Named(TIME_TICK_HANDLER_NAME) Lazy<Handler> mTimeTickHandler;
     @Nullable
     @Inject @Named(LEAK_REPORT_EMAIL_NAME) Lazy<String> mLeakReportEmail;

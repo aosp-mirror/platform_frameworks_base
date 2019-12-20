@@ -44,8 +44,8 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
-import com.android.systemui.dagger.qualifiers.BgHandler;
-import com.android.systemui.dagger.qualifiers.MainResources;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.PackageManagerWrapper;
 
 import javax.inject.Singleton;
@@ -126,7 +126,7 @@ public class SystemServicesModule {
     @Provides
     @Nullable
     static LocalBluetoothManager provideLocalBluetoothController(Context context,
-            @BgHandler Handler bgHandler) {
+            @Background Handler bgHandler) {
         return LocalBluetoothManager.create(context, bgHandler, UserHandle.ALL);
     }
 
@@ -150,7 +150,7 @@ public class SystemServicesModule {
     }
 
     @Provides
-    @MainResources
+    @Main
     static Resources provideResources(Context context) {
         return context.getResources();
     }

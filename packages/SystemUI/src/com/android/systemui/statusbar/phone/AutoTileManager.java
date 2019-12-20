@@ -21,7 +21,7 @@ import android.os.Handler;
 import android.provider.Settings.Secure;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.dagger.qualifiers.BgHandler;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.SecureSetting;
@@ -57,7 +57,7 @@ public class AutoTileManager {
 
     @Inject
     public AutoTileManager(Context context, AutoAddTracker autoAddTracker, QSTileHost host,
-            @BgHandler Handler handler,
+            @Background Handler handler,
             HotspotController hotspotController,
             DataSaverController dataSaverController,
             ManagedProfileController managedProfileController,

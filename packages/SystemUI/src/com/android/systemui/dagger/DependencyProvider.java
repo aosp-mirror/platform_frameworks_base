@@ -25,8 +25,6 @@ import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Process;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
 import android.view.IWindowManager;
@@ -35,10 +33,8 @@ import android.view.LayoutInflater;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.dagger.qualifiers.BgHandler;
-import com.android.systemui.dagger.qualifiers.BgLooper;
-import com.android.systemui.dagger.qualifiers.MainHandler;
-import com.android.systemui.dagger.qualifiers.MainLooper;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.PluginInitializerImpl;
@@ -80,35 +76,6 @@ public class DependencyProvider {
         HandlerThread thread = new HandlerThread("TimeTick");
         thread.start();
         return new Handler(thread.getLooper());
-    }
-
-    @Singleton
-    @Provides
-    @BgLooper
-    public Looper provideBgLooper() {
-        HandlerThread thread = new HandlerThread("SysUiBg",
-                Process.THREAD_PRIORITY_BACKGROUND);
-        thread.start();
-        return thread.getLooper();
-    }
-
-    /** Main Looper */
-    @Provides
-    @MainLooper
-    public Looper provideMainLooper() {
-        return Looper.getMainLooper();
-    }
-
-    @Provides
-    @BgHandler
-    public Handler provideBgHandler(@BgLooper Looper bgLooper) {
-        return new Handler(bgLooper);
-    }
-
-    @Provides
-    @MainHandler
-    public Handler provideMainHandler(@MainLooper Looper mainLooper) {
-        return new Handler(mainLooper);
     }
 
     /** */
@@ -175,7 +142,7 @@ public class DependencyProvider {
     @Singleton
     @Provides
     public NightDisplayListener provideNightDisplayListener(Context context,
-            @BgHandler Handler bgHandler) {
+            @Background Handler bgHandler) {
         return new NightDisplayListener(context, bgHandler);
     }
 
@@ -188,7 +155,7 @@ public class DependencyProvider {
     @Singleton
     @Provides
     public NavigationBarController provideNavigationBarController(Context context,
-            @MainHandler Handler mainHandler, CommandQueue commandQueue) {
+            @Main Handler mainHandler, CommandQueue commandQueue) {
         return new NavigationBarController(context, mainHandler, commandQueue);
     }
 
@@ -201,7 +168,7 @@ public class DependencyProvider {
     @Singleton
     @Provides
     public AutoHideController provideAutoHideController(Context context,
-            @MainHandler Handler mainHandler,
+            @Main Handler mainHandler,
             NotificationRemoteInputManager notificationRemoteInputManager,
             IWindowManager iWindowManager) {
         return new AutoHideController(context, mainHandler, notificationRemoteInputManager,

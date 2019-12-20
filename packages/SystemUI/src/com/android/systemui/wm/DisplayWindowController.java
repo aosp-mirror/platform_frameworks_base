@@ -31,7 +31,7 @@ import android.view.IDisplayWindowRotationController;
 import android.view.IWindowManager;
 import android.view.WindowContainerTransaction;
 
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import java.util.ArrayList;
 
@@ -160,7 +160,7 @@ public class DisplayWindowController {
             };
 
     @Inject
-    public DisplayWindowController(Context context, @MainHandler Handler mainHandler,
+    public DisplayWindowController(Context context, @Main Handler mainHandler,
             IWindowManager wmService) {
         mHandler = mainHandler;
         mContext = context;

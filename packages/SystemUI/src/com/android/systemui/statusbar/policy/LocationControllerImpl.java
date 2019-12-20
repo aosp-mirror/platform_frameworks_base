@@ -37,7 +37,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.BgLooper;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.util.Utils;
 
 import java.util.ArrayList;
@@ -69,7 +69,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     private final H mHandler = new H();
 
     @Inject
-    public LocationControllerImpl(Context context, @BgLooper Looper bgLooper,
+    public LocationControllerImpl(Context context, @Background Looper bgLooper,
             BroadcastDispatcher broadcastDispatcher, BootCompleteCache bootCompleteCache) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;

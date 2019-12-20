@@ -37,7 +37,7 @@ import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
-import com.android.systemui.dagger.qualifiers.MainResources;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -68,7 +68,7 @@ class CarTrustAgentUnlockDialogHelper extends BroadcastReceiver{
     private OnHideListener mOnHideListener;
 
     @Inject
-    CarTrustAgentUnlockDialogHelper(Context context, @MainResources Resources resources,
+    CarTrustAgentUnlockDialogHelper(Context context, @Main Resources resources,
             UserManager userManager, WindowManager windowManager) {
         mContext = context;
         mResources = resources;

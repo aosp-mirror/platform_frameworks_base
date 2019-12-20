@@ -24,7 +24,7 @@ import android.util.SparseArray;
 
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.systemui.appops.AppOpsController;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.util.Assert;
@@ -50,7 +50,7 @@ public class ForegroundServiceController {
 
     @Inject
     public ForegroundServiceController(NotificationEntryManager entryManager,
-            AppOpsController appOpsController, @MainHandler Handler mainHandler) {
+            AppOpsController appOpsController, @Main Handler mainHandler) {
         mEntryManager = entryManager;
         mMainHandler = mainHandler;
         appOpsController.addCallback(APP_OPS, (code, uid, packageName, active) -> {

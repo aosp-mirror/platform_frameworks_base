@@ -25,7 +25,7 @@ import android.provider.Settings.Secure;
 import android.util.Log;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.CurrentUserTracker;
 
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
     /**
      */
     @Inject
-    public DeviceProvisionedControllerImpl(Context context, @MainHandler Handler mainHandler,
+    public DeviceProvisionedControllerImpl(Context context, @Main Handler mainHandler,
             BroadcastDispatcher broadcastDispatcher) {
         super(broadcastDispatcher);
         mContext = context;

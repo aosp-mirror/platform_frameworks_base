@@ -52,8 +52,8 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
-import com.android.systemui.dagger.qualifiers.BgHandler;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -549,8 +549,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 NotificationInterruptionStateProvider notificationInterruptionStateProvider,
                 MetricsLogger metricsLogger,
                 LockPatternUtils lockPatternUtils,
-                @MainHandler Handler mainThreadHandler,
-                @BgHandler Handler backgroundHandler,
+                @Main Handler mainThreadHandler,
+                @Background Handler backgroundHandler,
                 ActivityIntentHelper activityIntentHelper,
                 BubbleController bubbleController,
                 ShadeController shadeController,

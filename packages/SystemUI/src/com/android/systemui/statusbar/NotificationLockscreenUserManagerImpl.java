@@ -48,7 +48,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.recents.OverviewProxyService;
@@ -190,7 +190,7 @@ public class NotificationLockscreenUserManagerImpl implements
             IStatusBarService iStatusBarService,
             KeyguardManager keyguardManager,
             StatusBarStateController statusBarStateController,
-            @MainHandler Handler mainHandler,
+            @Main Handler mainHandler,
             DeviceProvisionedController deviceProvisionedController,
             KeyguardStateController keyguardStateController) {
         mContext = context;

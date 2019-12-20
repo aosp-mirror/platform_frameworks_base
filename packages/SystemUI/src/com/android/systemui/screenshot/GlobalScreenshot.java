@@ -68,7 +68,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.systemui.R;
-import com.android.systemui.dagger.qualifiers.MainResources;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
 
@@ -186,7 +186,7 @@ public class GlobalScreenshot {
      */
     @Inject
     public GlobalScreenshot(
-            Context context, @MainResources Resources resources, LayoutInflater layoutInflater,
+            Context context, @Main Resources resources, LayoutInflater layoutInflater,
             ScreenshotNotificationsController screenshotNotificationsController) {
         mContext = context;
         mNotificationsController = screenshotNotificationsController;

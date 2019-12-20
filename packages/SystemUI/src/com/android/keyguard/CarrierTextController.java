@@ -43,7 +43,7 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.dagger.qualifiers.MainResources;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 
 import java.util.List;
@@ -608,7 +608,7 @@ public class CarrierTextController {
         private boolean mShowMissingSim;
 
         @Inject
-        public Builder(Context context, @MainResources Resources resources) {
+        public Builder(Context context, @Main Resources resources) {
             mContext = context;
             mSeparator = resources.getString(
                     com.android.internal.R.string.kg_text_message_separator);

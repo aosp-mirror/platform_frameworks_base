@@ -26,7 +26,7 @@ import android.os.HandlerExecutor;
 import android.os.UserManager;
 import android.util.Log;
 
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -59,7 +59,7 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
      * Controller used to retrieve information related to a hotspot.
      */
     @Inject
-    public HotspotControllerImpl(Context context, @MainHandler Handler mainHandler) {
+    public HotspotControllerImpl(Context context, @Main Handler mainHandler) {
         mContext = context;
         mConnectivityManager =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
