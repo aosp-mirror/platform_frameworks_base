@@ -179,6 +179,8 @@ public final class StatsLog extends StatsLogInternal {
      * @param rollbackType          state of the rollback.
      * @param packageName           package name being rolled back.
      * @param packageVersionCode    version of the package being rolled back.
+     * @param rollbackReason        reason the package is being rolled back.
+     * @param failingPackageName    the package name causing the failure.
      *
      * @return True if the log request was sent to statsd.
      *
@@ -186,7 +188,7 @@ public final class StatsLog extends StatsLogInternal {
      */
     @RequiresPermission(allOf = {DUMP, PACKAGE_USAGE_STATS})
     public static boolean logWatchdogRollbackOccurred(int rollbackType, String packageName,
-            long packageVersionCode) {
+            long packageVersionCode, int rollbackReason, String failingPackageName) {
         synchronized (sLogLock) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
@@ -198,7 +200,7 @@ public final class StatsLog extends StatsLogInternal {
                 }
 
                 service.sendWatchdogRollbackOccurredAtom(rollbackType, packageName,
-                        packageVersionCode);
+                        packageVersionCode, rollbackReason, failingPackageName);
                 return true;
             } catch (RemoteException e) {
                 sService = null;
