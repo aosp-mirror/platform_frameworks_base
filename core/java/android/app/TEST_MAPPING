@@ -48,6 +48,10 @@
                 }
             ],
             "file_patterns": ["INotificationManager\\.aidl"]
+        },
+        {
+            "name": "FrameworksInstantAppResolverTests",
+            "file_patterns": ["(/|^)InstantAppResolve[^/]*"]
         }
     ],
     "postsubmit": [
