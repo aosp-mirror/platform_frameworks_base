@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Process;
 import android.os.SystemProperties;
@@ -173,10 +174,10 @@ public class BinderCallsStatsService extends Binder {
             }
 
             try {
-                    mParser.setString(Settings.Global.getString(mContext.getContentResolver(),
-                            Settings.Global.BINDER_CALLS_STATS));
+                mParser.setString(Settings.Global.getString(mContext.getContentResolver(),
+                        Settings.Global.BINDER_CALLS_STATS));
             } catch (IllegalArgumentException e) {
-                    Slog.e(TAG, "Bad binder call stats settings", e);
+                Slog.e(TAG, "Bad binder call stats settings", e);
             }
             mBinderCallsStats.setDetailedTracking(mParser.getBoolean(
                     SETTINGS_DETAILED_TRACKING_KEY, BinderCallsStats.DETAILED_TRACKING_DEFAULT));
@@ -298,6 +299,11 @@ public class BinderCallsStatsService extends Binder {
                 CachedDeviceState.Readonly deviceState = getLocalService(
                         CachedDeviceState.Readonly.class);
                 mBinderCallsStats.setDeviceState(deviceState);
+
+                BatteryStatsInternal batteryStatsInternal = getLocalService(
+                        BatteryStatsInternal.class);
+                mBinderCallsStats.setCallStatsObserver(batteryStatsInternal::noteBinderCallStats);
+
                 // It needs to be called before mService.systemReady to make sure the observer is
                 // initialized before installing it.
                 mWorkSourceProvider.systemReady(getContext());
