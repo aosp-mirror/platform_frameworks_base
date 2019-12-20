@@ -2517,4 +2517,14 @@ enum PageId {
     // OS: R
     DIALOG_MAGNIFICATION_CAPABILITY = 1816;
 
+    // OPEN: Settings > Accessibility > Color inversion
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACCESSIBILITY_COLOR_INVERSION_SETTINGS = 1817;
+
+    // OPEN: Settings > Accessibility > Color inversion > Edit shortcut dialog
+    // CATEGORY: SETTINGS
+    // OS: R
+    DIALOG_COLOR_INVERSION_EDIT_SHORTCUT = 1818;
+
 }
