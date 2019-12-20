@@ -16,6 +16,8 @@
 
 package com.android.systemui.accessibility;
 
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
@@ -196,6 +198,7 @@ public class WindowMagnificationController implements View.OnClickListener,
         params.token = mOverlayView.getWindowToken();
         params.x = mMagnificationFrame.left;
         params.y = mMagnificationFrame.top;
+        params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         params.setTitle(mContext.getString(R.string.magnification_window_title));
 
         mMirrorView = LayoutInflater.from(mContext).inflate(R.layout.window_magnifier_view, null);
