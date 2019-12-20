@@ -437,6 +437,11 @@ interface IActivityTaskManager {
     void registerRemoteAnimations(in IBinder token, in RemoteAnimationDefinition definition);
 
     /**
+     * Unregisters all remote animations for a specific activity.
+     */
+    void unregisterRemoteAnimations(in IBinder token);
+
+    /**
      * Registers a remote animation to be run for all activity starts from a certain package during
      * a short predefined amount of time.
      */

@@ -37,6 +37,13 @@ public class ActivityCompat {
     }
 
     /**
+     * @see Activity#unregisterRemoteAnimations
+     */
+    public void unregisterRemoteAnimations() {
+        mWrapped.unregisterRemoteAnimations();
+    }
+
+    /**
      * @see android.view.ViewDebug#dumpv2(View, ByteArrayOutputStream)
      */
     public boolean encodeViewHierarchy(ByteArrayOutputStream out) {
