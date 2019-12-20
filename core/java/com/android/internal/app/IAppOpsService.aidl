@@ -32,14 +32,13 @@ interface IAppOpsService {
     // and not be reordered
     int checkOperation(int code, int uid, String packageName);
     int noteOperation(int code, int uid, String packageName, @nullable String featureId);
-    int startOperation(IBinder token, int code, int uid, String packageName,
+    int startOperation(IBinder clientId, int code, int uid, String packageName,
             @nullable String featureId, boolean startIfModeDefault);
     @UnsupportedAppUsage
-    void finishOperation(IBinder token, int code, int uid, String packageName,
+    void finishOperation(IBinder clientId, int code, int uid, String packageName,
             @nullable String featureId);
     void startWatchingMode(int op, String packageName, IAppOpsCallback callback);
     void stopWatchingMode(IAppOpsCallback callback);
-    IBinder getToken(IBinder clientToken);
     int permissionToOpCode(String permission);
     int checkAudioOperation(int code, int usage, int uid, String packageName);
     void noteAsyncOp(@nullable String callingPackageName, int uid, @nullable String packageName,

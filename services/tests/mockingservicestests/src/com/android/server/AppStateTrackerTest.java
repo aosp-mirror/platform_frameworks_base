@@ -44,7 +44,6 @@ import android.app.AppOpsManager.PackageOps;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManager;
-import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -82,6 +81,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -690,11 +690,11 @@ public class AppStateTrackerTest {
         entries.add(new OpEntry(
                 AppOpsManager.OP_ACCESS_NOTIFICATIONS,
                 AppOpsManager.MODE_IGNORED,
-                new Pair[0]));
+                Collections.emptyMap()));
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
                 AppOpsManager.MODE_IGNORED,
-                new Pair[0]));
+                Collections.emptyMap()));
 
         ops.add(new PackageOps(PACKAGE_1, UID_1, entries));
 
@@ -703,7 +703,7 @@ public class AppStateTrackerTest {
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
                 AppOpsManager.MODE_IGNORED,
-                new Pair[0]));
+                Collections.emptyMap()));
 
         ops.add(new PackageOps(PACKAGE_2, UID_2, entries));
 
@@ -712,7 +712,7 @@ public class AppStateTrackerTest {
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
                 AppOpsManager.MODE_ALLOWED,
-                new Pair[0]));
+                Collections.emptyMap()));
 
         ops.add(new PackageOps(PACKAGE_1, UID_10_1, entries));
 
@@ -721,11 +721,11 @@ public class AppStateTrackerTest {
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
                 AppOpsManager.MODE_IGNORED,
-                new Pair[0]));
+                Collections.emptyMap()));
         entries.add(new OpEntry(
                 AppOpsManager.OP_ACCESS_NOTIFICATIONS,
                 AppOpsManager.MODE_IGNORED,
-                new Pair[0]));
+                Collections.emptyMap()));
 
         ops.add(new PackageOps(PACKAGE_3, UID_10_3, entries));
 
