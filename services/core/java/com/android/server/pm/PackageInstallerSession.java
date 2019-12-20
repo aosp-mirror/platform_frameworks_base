@@ -119,7 +119,6 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
@@ -141,6 +140,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -209,6 +209,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private static final String PROPERTY_NAME_INHERIT_NATIVE = "pi.inherit_native_on_dont_kill";
     private static final int[] EMPTY_CHILD_SESSION_ARRAY = {};
+
+    private static final String SYSTEM_DATA_LOADER_PACKAGE = "android";
 
     // TODO: enforce INSTALL_ALLOW_TEST
     // TODO: enforce INSTALL_ALLOW_DOWNGRADE
@@ -556,6 +558,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                                 params.dataLoaderParams);
             }
         }
+
+        if (isStreamingInstallation()
+                && this.params.dataLoaderParams.getComponentName().getPackageName()
+                == SYSTEM_DATA_LOADER_PACKAGE) {
+            assertShellOrSystemCalling("System data loaders");
+        }
     }
 
     public SessionInfo generateInfo() {
@@ -771,6 +779,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private void assertShellOrSystemCalling(String operation) {
+        switch (Binder.getCallingUid()) {
+            case android.os.Process.SHELL_UID:
+            case android.os.Process.ROOT_UID:
+            case android.os.Process.SYSTEM_UID:
+                break;
+            default:
+                throw new SecurityException(operation + " only supported from shell or system");
+        }
+    }
+
     private void assertCanWrite(boolean reverseMode) {
         if (isDataLoaderInstallation()) {
             throw new IllegalStateException(
@@ -781,15 +800,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertPreparedAndNotSealedLocked("assertCanWrite");
         }
         if (reverseMode) {
-            switch (Binder.getCallingUid()) {
-                case android.os.Process.SHELL_UID:
-                case android.os.Process.ROOT_UID:
-                case android.os.Process.SYSTEM_UID:
-                    break;
-                default:
-                    throw new SecurityException(
-                            "Reverse mode only supported from shell or system");
-            }
+            assertShellOrSystemCalling("Reverse mode");
         }
     }
 
@@ -1026,12 +1037,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mHandler.obtainMessage(MSG_COMMIT).sendToTarget();
     }
 
-    private class FileSystemConnector extends IPackageInstallerSessionFileSystemConnector.Stub {
+    private final class FileSystemConnector extends
+            IPackageInstallerSessionFileSystemConnector.Stub {
+        final Set<String> mAddedFiles;
+
+        FileSystemConnector(List<InstallationFile> addedFiles) {
+            mAddedFiles = addedFiles.stream().map(file -> file.getName()).collect(
+                    Collectors.toSet());
+        }
+
         @Override
         public void writeData(String name, long offsetBytes, long lengthBytes,
                 ParcelFileDescriptor incomingFd) {
             if (incomingFd == null) {
                 throw new IllegalArgumentException("incomingFd can't be null");
+            }
+            if (!mAddedFiles.contains(name)) {
+                throw new SecurityException("File name is not in the list of added files.");
             }
             try {
                 doWriteInternal(name, offsetBytes, lengthBytes, incomingFd);
@@ -2468,8 +2490,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
-        FileSystemConnector connector = new FileSystemConnector();
-
         List<InstallationFile> addedFiles = mFiles.stream().filter(
                 file -> sAddedFilter.accept(new File(file.name))).map(
                     file -> new InstallationFile(
@@ -2480,6 +2500,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     file -> file.name.substring(
                             0, file.name.length() - REMOVE_MARKER_EXTENSION.length())).collect(
                 Collectors.toList());
+
+        final FileSystemConnector connector = new FileSystemConnector(addedFiles);
 
         DataLoaderManager dataLoaderManager = mContext.getSystemService(DataLoaderManager.class);
         if (dataLoaderManager == null) {
@@ -2516,10 +2538,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         };
 
-        final DataLoaderParams params = this.params.dataLoaderParams;
-
         final FileSystemControlParcel control = new FileSystemControlParcel();
         control.callback = connector;
+
+        final DataLoaderParams params = this.params.dataLoaderParams;
 
         Bundle dataLoaderParams = new Bundle();
         dataLoaderParams.putParcelable("componentName", params.getComponentName());

@@ -34,7 +34,6 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.DataLoaderParams;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstaller;
@@ -137,10 +136,6 @@ class PackageManagerShellCommand extends ShellCommand {
     private final static String ART_PROFILE_SNAPSHOT_DEBUG_LOCATION = "/data/misc/profman/";
     private static final int DEFAULT_WAIT_MS = 60 * 1000;
 
-    private static final String DATA_LOADER_PACKAGE = "android";
-    private static final String DATA_LOADER_CLASS =
-            "com.android.server.pm.PackageManagerShellCommandDataLoader";
-
     final IPackageManager mInterface;
     final IPermissionManager mPermissionManager;
     final private WeakHashMap<String, Resources> mResourceCache =
@@ -164,7 +159,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
         final PrintWriter pw = getOutPrintWriter();
         try {
-            switch(cmd) {
+            switch (cmd) {
                 case "path":
                     return runPath();
                 case "dump":
@@ -1163,9 +1158,8 @@ class PackageManagerShellCommand extends ShellCommand {
     private int runStreamingInstall() throws RemoteException {
         final InstallParams params = makeInstallParams();
         if (params.sessionParams.dataLoaderParams == null) {
-            final DataLoaderParams dataLoaderParams = DataLoaderParams.forStreaming(
-                    new ComponentName(DATA_LOADER_PACKAGE, DATA_LOADER_CLASS), "");
-            params.sessionParams.setDataLoaderParams(dataLoaderParams);
+            params.sessionParams.setDataLoaderParams(
+                    PackageManagerShellCommandDataLoader.getDataLoaderParams(this));
         }
         return doRunInstall(params);
     }
