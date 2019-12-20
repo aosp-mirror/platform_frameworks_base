@@ -396,6 +396,10 @@ bool isUidField(const Field& field, const Value& value);
 
 bool equalDimensions(const std::vector<Matcher>& dimension_a,
                      const std::vector<Matcher>& dimension_b);
+
+// Returns true if dimension_a is a subset of dimension_b.
+bool subsetDimensions(const std::vector<Matcher>& dimension_a,
+                      const std::vector<Matcher>& dimension_b);
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
