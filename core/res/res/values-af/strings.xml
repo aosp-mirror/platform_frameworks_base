@@ -188,8 +188,7 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Die werkprofiel se administrasieprogram ontbreek of is korrup. Gevolglik is jou werkprofiel en verwante data uitgevee. Kontak jou administrateur vir bystand."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Jou werkprofiel is nie meer op hierdie toestel beskikbaar nie"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Te veel wagwoordpogings"</string>
-    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
-    <skip />
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrateur het toestel vir persoonlike gebruik afgestaan"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Toestel word bestuur"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Jou organisasie bestuur hierdie toestel en kan netwerkverkeer monitor. Tik vir besonderhede."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Jou toestel sal uitgevee word"</string>
@@ -381,13 +380,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"Laat die program toe om vaste uitsendings wat agterbly nadat die uitsending eindig, te stuur. Oormatige gebruik kan jou Android TV-toestel stadig of onstabiel maak omdat dit veroorsaak dat jou toestel te veel geheue gebruik."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Laat die program toe om taai uitsendings te stuur, wat agterbly nadat die uitsending klaar is. Oormatige gebruik kan die foon stadig of onstabiel maak deurdat dit te veel geheue gebruik."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"lees jou kontakte"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Laat die program toe om inligting oor jou kontakte wat op jou tablet gestoor is, te lees, insluitend die gereeldheid van oproepe wat jy gemaak het, e-posse wat jy gestuur het, of ander maniere waarop jy met spesifieke individue gekommunikeer het. Hierdie toestemming laat programme toe om jou kontakdata te stoor, en kwaadwillige programme kan moontlik kontakdata sonder jou kennis deel."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="2387823103274997441">"Laat die program toe om data te lees oor jou kontakte wat op jou Android TV-toestel geberg is, insluitend hoe gereeld jy spesifieke individue gebel, ge-e-pos of op ander maniere met hulle gekommunikeer het. Hierdie toestemming laat programme toe om jou kontakdata te stoor, én kwaadwillige programme kan kontakdata deel sonder dat jy dit weet."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Laat die program toe om inligting oor jou kontakte wat op jou foon gestoor is, te lees, insluitend die gereeldheid van oproepe wat jy gemaak het, e-posse wat jy gestuur het, of ander maniere waarop jy met spesifieke individue gekommunikeer het. Hierdie toestemming laat programme toe om jou kontakdata te stoor, en kwaadwillige programme kan moontlik kontakdata sonder jou kennis deel."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Laat die program toe om data te lees oor jou kontakte wat op jou tablet geberg is. Programme sal ook toegang hê tot die rekeninge op jou tablet wat kontakte geskep het. Dit kan rekeninge insluit wat geskep is deur programme wat jy geïnstalleer het. Hierdie toestemming laat programme toe om jou kontakdata te stoor, en kwaadwillige programme kan kontakdata deel sonder dat jy dit weet."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Laat die program toe om data te lees oor jou kontakte wat op jou Android TV-toestel geberg is. Programme sal ook toegang hê tot die rekeninge op jou Android TV-toestel wat kontakte geskep het. Dit kan rekeninge insluit wat geskep is deur programme wat jy geïnstalleer het. Hierdie toestemming laat programme toe om jou kontakdata te stoor, en kwaadwillige programme kan kontakdata deel sonder dat jy dit weet."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Laat die program toe om data te lees oor jou kontakte wat op jou foon geberg is. Programme sal ook toegang hê tot die rekeninge op jou foon wat kontakte geskep het. Dit kan rekeninge insluit wat geskep is deur programme wat jy geïnstalleer het. Hierdie toestemming laat programme toe om jou kontakdata te stoor, en kwaadwillige programme kan kontakdata deel sonder dat jy dit weet."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"verander jou kontakte"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Laat die program toe om data oor jou kontakte wat op jou tablet gestoor is te verander, insluitend die gereeldheid van oproepe wat jy gemaak het, e-posse wat jy gestuur het, of ander maniere waarop jy met spesifieke individue gekommunikeer het. Hierdie toestemming laat programme toe om kontakdata uit te vee."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="3870937407268625273">"Laat die program toe om die data oor jou kontakte wat op jou Android TV-toestel gestoor is, te verander – dit sluit in hoe gereeld jy spesifieke kontakte gebel, ge-e-pos of op ander maniere met hulle gekommunikeer het. Hierdie toestemming laat programme toe om kontakdata uit te vee."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Laat die program toe om data oor jou kontakte wat op jou foon gestoor is te verander, insluitend die gereeldheid waarop jy oproepe gemaak het, gee-pos het, of op ander maniere met spesifieke kontakte gekommunikeer het. Hierdie toestemming laat programme toe om kontakdata te skrap."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Laat die program toe om die data te wysig oor jou kontakte wat op jou tablet geberg is. Hierdie toestemming laat programme toe om kontakdata uit te vee."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Laat die program toe om die data te wysig oor jou kontakte wat op jou Android TV-toestel geberg is. Hierdie toestemming laat programme toe om kontakdata uit te vee."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Laat die program toe om die data te wysig oor jou kontakte wat op jou foon geberg is. Hierdie toestemming laat programme toe om kontakdata uit te vee."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"lees oproeprekord"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Hierdie program kan jou oproepgeskiedenis lees."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"skryf oproeprekord"</string>
@@ -407,13 +406,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"Kry toegang tot ekstra liggingverskaffer-bevele"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Gee die program toegang tot ekstra liggingverskaffer-bevele. Dit kan die program dalk toelaat om in te meng met die werking van die GPS of ander liggingbronne."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"kry net op die voorgrond toegang tot presiese ligging"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"Hierdie program kan jou presiese ligging kry net wanneer dit op die voorgrond is. Hierdie liggingdienste moet aangeskakel wees en op jou foon beskikbaar wees sodat die program hulle kan gebruik. Dit kan veroorsaak dat meer batterykrag gebruik word."</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"kry benaderde ligging (netwerkgegrond) net op die voorgrond"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Hierdie program kan jou ligging kry op grond van netwerkhulpbronne soos selfoontorings en Wi-Fi-netwerke, maar net wanneer die program op die voorgrond is. Die program kan hierdie liggingdienste net gebruik as hulle aangeskakel is en op jou tablet beskikbaar is."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="6994518594789550469">"Hierdie program kan jou ligging kry op grond van netwerkhulpbronne soos selfoontorings en Wi-Fi-netwerke, maar net wanneer die program op die voorgrond is. Die program kan hierdie liggingdienste net gebruik as hulle aangeskakel is en op jou Android TV-toestel beskikbaar is."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Hierdie program kan jou ligging kry op grond van netwerkhulpbronne soos selfoontorings en Wi-Fi-netwerke, maar net wanneer die program op die voorgrond is. Die program kan hierdie liggingdienste net gebruik as hulle aangeskakel is en op jou foon beskikbaar is."</string>
+    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Hierdie program kan jou presiese ligging kry net wanneer dit op die voorgrond is. Liggingdienste moet aangeskakel wees en op jou toestel beskikbaar wees sodat die program hulle kan gebruik. Dit kan veroorsaak dat meer batterykrag gebruik word."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"kry benaderde ligging net op die voorgrond"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Hierdie program kan jou benaderde ligging net kry wanneer dit op die voorgrond is. Liggingdienste moet aangeskakel wees en op jou toestel beskikbaar wees sodat die program hulle kan gebruik."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"kry ligging op die agtergrond"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"As dit bo en behalwe toegang tot die benaderde of presiese ligging verleen word, kan die program die ligging kry terwyl dit op die agtergrond werk."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Hierdie program het toegang tot ligging terwyl dit op die agtergrond werk, asook voorgrondtoegang tot ligging."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"verander jou klankinstellings"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Laat die program toe om globale klankinstellings soos volume en watter luidspreker vir uitvoer gebruik word, te verander."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"neem klank op"</string>
@@ -494,6 +491,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Laat die program toe om die opstelling van Bluetooth op die tablet te sien, en om verbindings met saamgebinde toestelle te maak en te aanvaar."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Laat die program toe om die opstelling van Bluetooth op jou Android TV-toestel te bekyk, en om verbindings met saamgebinde toestelle te maak en te aanvaar."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Laat die program toe om die opstelling van die Bluetooth op die foon te sien, en om verbindings met saamgebinde toestelle te maak en te aanvaar."</string>
+    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
+    <skip />
+    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
+    <skip />
     <string name="permlab_nfc" msgid="1904455246837674977">"beheer kortveldkommunikasie"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Laat die program toe om met kortveldkommunikasie- (NFC) merkers, kaarte en lesers te kommunikeer."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"deaktiveer jou skermslot"</string>
@@ -1862,7 +1863,11 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Gekoppel aan <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Tik om lêers te bekyk"</string>
     <string name="pin_target" msgid="8036028973110156895">"Speld vas"</string>
+    <!-- no translation found for pin_specific_target (7824671240625957415) -->
+    <skip />
     <string name="unpin_target" msgid="3963318576590204447">"Ontspeld"</string>
+    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
+    <skip />
     <string name="app_info" msgid="6113278084877079851">"Programinligting"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Begin tans demonstrasie …"</string>
@@ -1905,6 +1910,8 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Dateer hierdie items op in "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> en <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Stoor"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Nee, dankie"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"Nie nou nie"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"Nooit"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Dateer op"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"Gaan voort"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"wagwoord"</string>
@@ -2000,5 +2007,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Wissel verdeelde skerm"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Sluitskerm"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skermkiekie"</string>
-    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"<xliff:g id="APP_NAME">%1$s</xliff:g>-program in opspringervenster."</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> se onderskrifbalk."</string>
 </resources>

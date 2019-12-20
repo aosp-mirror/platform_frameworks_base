@@ -188,8 +188,7 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Ishchi profilning administrator ilovasi yo‘q yoki buzilgan. Shuning uchun, ishchi profilingiz va unga aloqador ma’lumotlar o‘chirib tashlandi. Yordam olish uchun administratoringizga murojaat qiling."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Bu qurilmada endi ishchi profilingiz mavjud emas"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Parol ko‘p marta xato kiritildi"</string>
-    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
-    <skip />
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrator shaxsiy foydalanishga qoldirilgan qurilmani rad etdi"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Bu – boshqariladigan qurilma"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Tashkilotingiz bu qurilmani boshqaradi va tarmoq trafigini nazorat qilishi mumkin. Tafsilotlar uchun bosing."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Qurilmangizdagi ma’lumotlar o‘chirib tashlanadi"</string>
@@ -381,13 +380,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"Ilova yuborilganidan keyin oʻchib ketmaydigan muddatsiz tarqatma xabarlarni yuborishi mumkin. Ulardan notoʻgʻri maqsadda foydalanish qurilmaning ishlashini sekinlatishi yoki xotiraga haddan ziyod yuklanish tushishi oqibatida qurilma ishdan chiqishi mumkin."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Ilova yuborilganidan keyin o‘chib ketmaydigan muddatsiz tarqatma xabarlarni yuborishi mumkin. Ulardan noto‘g‘ri maqsadda foydalanish qurilmaning ishlashini sekinlatishi yoki xotiraga haddan ziyod yuklanish tushishi oqibatida qurilma ishdan chiqishi mumkin."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"kontaktlaringizni ko‘rish"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Ilovaga planshetingizda saqlangan kontaktlar ma’lumotlarini, shuningdek, ba‘zi shaxslarga qilgan qo‘ng‘iroqlar muntazamligi, ularga yozgan e-pochta xabarlari yoki boshqa xabar almashish yo‘llari orqali xabarlashganingiz haqidagi ma’lumotlarni o‘qishga ruxsat beradi. Ushbu ruxsat ilovalarga aloqa ma’lumotlaringizni saqlash uchun ruxsat beradi va zararli ilovalar sizga bildirmasdan kontaktlar ma’lumotlaringizni boshqalarga ulashishi mumkin."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="2387823103274997441">"Ilovaga Android TV qurilmangizdagi kontaktlar haqidagi axborotni, jumladan, muayyan shaxslar bilan chaqiruv, email orqali xabarlashish yoki muloqot qilish takroriyligi haqidagi axborotni oʻqish huquqini beradi. Bu ruxsat ilovalarga kontaktlaringizga oid axborotni saqlash huquqini berib, zararli ilovalar uning yordamida kontakt maʼlumotlarini sizdan beruxsat boshqalarga ulashishi mumkin."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Ilovaga telefoningizda saqlangan kontaktlar ma’lumotlarini, shuningdek, ba‘zi shaxslarga qilgan qo‘ng‘iroqlar muntazamligi, ularga yozgan e-pochta xabarlari yoki boshqa xabar almashish yo‘llari orqali xabarlashganingiz haqidagi ma’lumotlarni o‘qishga ruxsat beradi. Ushbu ruxsat ilovalarga kontaktlar ma’lumotlaringizni saqlash uchun ruxsat beradi va zararli ilovalar sizga bildirmasdan aloqa ma’lumotlaringizni boshqalarga ulashishi mumkin."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Bu planshetga telefoningizdagi kontaktlarga oid axborotni oʻqish huquqini beradi. Ilovalar ham planshetdagi kontaktlarni yaratgan hisoblaringizga ruxsat oladi Jumladan, oʻrnatilgan ilovalar ochgan hisoblarga ham ruxsat beriladi. Bu ruxsat ilovalarga kontaktlaringizga oid axborotni saqlash huquqini berib, zararli ilovalar uning yordamida kontakt maʼlumotlarini sizdan beruxsat boshqalarga ulashishi mumkin."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Bu ilovaga Android TV qurilmangizdagi kontaktlarga oid axborotni oʻqish huquqini beradi. Ilovalar ham Android TV qurilmasidagi kontaktlarni yaratgan hisoblaringizga ruxsat oladi Jumladan, oʻrnatilgan ilovalar ochgan hisoblarga ham ruxsat beriladi. Bu ruxsat ilovalarga kontaktlaringizga oid axborotni saqlash huquqini berib, zararli ilovalar uning yordamida kontakt maʼlumotlarini sizdan beruxsat boshqalarga ulashishi mumkin."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Bu ilovaga telefoningizdagi kontaktlarga oid axborotni oʻqish huquqini beradi. Ilovalar ham telefondagi kontaktlarni yaratgan hisoblaringizga ruxsat oladi Jumladan, oʻrnatilgan ilovalar ochgan hisoblarga ham ruxsat beriladi. Bu ruxsat ilovalarga kontaktlaringizga oid axborotni saqlash huquqini berib, zararli ilovalar uning yordamida kontakt maʼlumotlarini sizdan beruxsat boshqalarga ulashishi mumkin."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"kontaktlaringizni tahrirlash"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Ilovaga planshetingizda saqlangan kontaktlar ma’lumotlarini, shuningdek, ba‘zi shaxslarga qilgan qo‘ng‘iroqlar muntazamligi, ularga yozgan e-pochta xabarlari yoki boshqa xabar almashish yo‘llari orqali xabarlashganingiz haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Ushbu ruxsat ilovalarga kontaktlar ma’lumotlarini o‘chirishga ruxsat beradi."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="3870937407268625273">"Ilovaga Android TV qurilmangizda saqlangan kontaktlar haqidagi axborotni, jumladan, muayyan kontakt bilan chaqiruv, email yoki boshqa usullar orqali muloqot qilish takroriyligini tahrirlash huquqini beradi. Bu ruxsat orqali ilovalar kontaktlar haqidagi axborotni oʻchirib tashlashi mumkin."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Ilovaga telefoningizda saqlangan kontaktlar ma’lumotlarini, shuningdek, ba‘zi shaxslarga qilgan qo‘ng‘iroqlar muntazamligi, ularga yozgan e-pochta xabarlari yoki boshqa xabar almashish yo‘llari orqali xabarlashganingiz haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Ushbu ruxsat ilovalarga kontaktlar ma’lumotlarini o‘chirishga ruxsat beradi."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Bu ilovaga planshetingizdagi kontaktlarga oid axborotni oʻzgartirish huquqini beradi. Bu ruxsat ilovalarga kontaktlarga oid axborotni oʻchirish imkonini ham beradi."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Bu ilovaga Android TV qurilmangizdagi kontaktlarga oid axborotni oʻzgartirish huquqini beradi. Bu ruxsat ilovalarga kontaktlarga oid axborotni oʻchirish imkonini ham beradi."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Bu ilovaga telefoningizdagi kontaktlarga oid axborotni oʻzgartirish huquqini beradi. Bu ruxsat ilovalarga kontaktlarga oid axborotni oʻchirish imkonini ham beradi."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"qo‘ng‘iroq jurnallarini o‘qish"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Bu ilova chaqiruvlar tarixini o‘qiy oladi."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"qo‘ng‘iroq jurnaliga yozish"</string>
@@ -407,13 +406,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"qo‘shimcha manzillarga kirish buyruqlari"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Ilovaga qo‘shimcha joylashuv xizmati buyruqlaridan foydalanishga ruxsat beradi. Uning yordamida ilova GPS yoki boshqa joylashuv ma’lumoti manbalarining ishlashiga xalaqit qilishi mumkin."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"aniq joylashuv axborotini olishga faqat old fonda ruxsat"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"Bu ilova faqat fon rejimida aniq joylashuv axborotingizdan foydalanishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular telefoningizda yoniq turishi va ishlashi kerak. Bunda batareya sarfi oshishi mumkin."</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"faqat faol rejimda taxminiy joylashuv axborotiga (tarmoq asosida) ruxsat"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Bu ilova faqat faol rejimda ekanida Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular planshetingizda yoniq bo‘lishi va ishlashi kerak."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="6994518594789550469">"Bu ilova faqat faol rejimda ekanida Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular Android TV qurilmangizda yoniq boʻlishi va ishlashi kerak."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Bu ilova faqat faol rejimda ekanida Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular telefoningizda yoniq bo‘lishi va ishlashi kerak."</string>
+    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Bu ilova faqat fon rejimida aniq joylashuv axborotingizdan foydalanishi mumkin. Ilova joylashuv xizmatlaridan foydalana olishi uchun ular qurilmangizda yoniq turishi va ishlashi kerak. Bunda batareya sarfi oshishi mumkin."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"taxminiy joylashuv axborotini olishga faqat old fonda ruxsat"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Bu ilova faqat fon rejimida taxminiy joylashuv axborotingizdan foydalanishi mumkin. Ilova joylashuv xizmatlaridan foydalana olishi uchun ular avtomobilingizda yoniq boʻlishi va ishlashi kerak."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"fonda joylashuv axborotidan foydalanish"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Agar taxminiy yoki aniq joylashuv axborotiga qo‘shimcha tarzda ruxsat berilgan bo‘lsa, ilova ishlayotganda joylashuv axborotidan fonda foydalana oladi."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Bu ilova joylashuv axborotidan orqa fonda ham, old fonda ham foydalanishi mumkin."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"audio sozlamalaringizni o‘zgartirish"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Ilovalarga tovush va ovoz chiqarish uchun foydalaniladigan karnay kabi global audio sozlamalarini o‘zgartirish uchun ruxsat beradi."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ovoz yozib olish"</string>
@@ -494,6 +491,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Ilovaga planshetdagi Bluetooth‘ning sozlamasini ko‘rishga va bog‘langan qurilmalarga ulanish va ulardan ulanish so‘rovlarini qabul qulishga imkon beradi."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Ilovaga Android TV qurilmangizdagi Bluetooth sozlamasini koʻrishga va bogʻlangan qurilmalarga ulanish va ulardan ulanish talablarni qabul qilishga imkon beradi."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Ilovaga telefondagi Bluetooth‘ning sozlamasini ko‘rishga va bog‘langan qurilmalarga ulanish va ulardan ulanish so‘rovlarini qabul qulishga imkon beradi."</string>
+    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
+    <skip />
+    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
+    <skip />
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC modulini boshqarish"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Ilova qisqa masofali aloqa (NFC) texnologiyasi yordamida NFC yorliqlari, kartalar va o‘qish moslamalari bilan ma’lumot almashishi mumkin."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ekran qulfini o‘chirib qo‘yish"</string>
@@ -1862,7 +1863,11 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> qurilmasiga ulandi"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Fayllarni ko‘rish uchun bosing"</string>
     <string name="pin_target" msgid="8036028973110156895">"Qadash"</string>
+    <!-- no translation found for pin_specific_target (7824671240625957415) -->
+    <skip />
     <string name="unpin_target" msgid="3963318576590204447">"Olib tashlash"</string>
+    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
+    <skip />
     <string name="app_info" msgid="6113278084877079851">"Ilova haqida"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo boshlanmoqda…"</string>
@@ -1905,6 +1910,8 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" xizmatidagi <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> va <xliff:g id="TYPE_2">%3$s</xliff:g> yangilansinmi?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Saqlash"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Kerak emas"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"Keyinroq"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"Hech qachon"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Yangilash"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"Davom etish"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"parol"</string>
@@ -2000,5 +2007,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Ekranni ikkiga ajratish tugmasi"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Ekran qulfi"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skrinshot"</string>
-    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasi qalqib chiquvchi oynada."</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> taglavhalar paneli."</string>
 </resources>

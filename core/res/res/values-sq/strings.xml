@@ -188,8 +188,7 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Aplikacioni i administratorit të profilit të punës mungon ose është dëmtuar. Si rezultat i kësaj, profili yt i punës dhe të dhënat përkatëse janë fshirë. Kontakto me administratorin për ndihmë."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Profili yt i punës nuk është më i disponueshëm në këtë pajisje"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Shumë përpjekje për fjalëkalimin"</string>
-    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
-    <skip />
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administratori e refuzoi pajisjen për përdorim personal"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Pajisja është e menaxhuar"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organizata jote e menaxhon këtë pajisje dhe mund të monitorojë trafikun e rrjetit. Trokit për detaje."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Pajisja do të spastrohet"</string>
@@ -381,13 +380,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"Lejon aplikacionin të dërgojë transmetime ngjitëse të cilat mbeten pas përfundimit të transmetimit. Përdorimi i tepërt mund ta bëjë pajisjen tënde Android TV të ngadaltë ose të paqëndrueshme, duke e detyruar atë të përdorë më shumë memorie."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Lejon aplikacionin të dërgojë transmetime ngjitëse që qëndrojnë derisa të përfundojë transmetimi. Përdorimi i tepruar mund ta bëjë telefonin të ngadaltë ose të paqëndrueshëm duke e detyruar atë të përdorë shumë kujtesë."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"lexo kontaktet e tua"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Lejon aplikacionin të lexojë të dhëna rreth kontakteve të ruajtura në tabletin tënd, përfshirë shpeshtësinë me të cilën ke telefonuar, ke dërguar mail-a ose komunikuar në mënyra të tjera me individë të caktuar. Kjo leje u mundëson aplikacioneve të ruajnë të dhënat e tua të kontakteve, ndaj aplikacionet keqdashëse mund të ndajnë të dhëna të kontakteve pa dijeninë tënde."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="2387823103274997441">"Lejon aplikacionin të lexojë të dhënat rreth kontakteve të tua të ruajtura në pajisjen tënde Android TV, përfshi shpeshtësinë me të cilën ke telefonuar, ke dërguar email-e apo komunikuar në rrugë të tjera me kontakte të veçanta. Ky autorizim i lejon aplikacionet të ruajnë të dhënat e tua të kontakteve, dhe aplikacionet keqdashëse mund të ndajnë të dhëna të kontakteve pa dijeninë tënde."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Lejon aplikacionin të lexojë të dhëna rreth kontakteve të ruajtura në telefonin tënd, përfshirë shpeshtësinë me të cilën ke telefonuar, ke dërguar mail-a ose komunikuar në mënyra të tjera me individë të caktuar. Kjo leje u mundëson aplikacioneve të ruajnë të dhënat e tua të kontakteve, ndaj aplikacionet keqdashëse mund të ndajnë të dhëna të kontakteve pa dijeninë tënde."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Lejon aplikacionin të lexojë të dhëna për kontaktet e ruajtura në tabletin tënd. Aplikacionet do të kenë po ashtu qasje te llogaritë në tabletin tënd, të cilat i kanë krijuar kontaktet. Kjo mund të përfshijë llogaritë e krijuara nga aplikacionet që ke instaluar. Kjo leje lejon që aplikacionet të ruajnë të dhënat e tua të kontakteve dhe aplikacionet keqdashëse mund të ndajnë të dhëna të kontakteve pa dijeninë tënde."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Lejon aplikacionin të lexojë të dhëna për kontaktet e ruajtura në pajisjen tënde Android TV. Aplikacionet do të kenë po ashtu qasje te llogaritë në pajisjen tënde të Android TV, të cilat i kanë krijuar kontaktet. Kjo mund të përfshijë llogaritë e krijuara nga aplikacionet që ke instaluar. Kjo leje lejon që aplikacionet të ruajnë të dhënat e tua të kontakteve dhe aplikacionet keqdashëse mund të ndajnë të dhëna të kontakteve pa dijeninë tënde."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Lejon aplikacionin të lexojë të dhëna për kontaktet e ruajtura në telefonin tënd. Aplikacionet do të kenë po ashtu qasje te llogaritë në telefonin tënd, të cilat i kanë krijuar kontaktet. Kjo mund të përfshijë llogaritë e krijuara nga aplikacionet që ke instaluar. Kjo leje lejon që aplikacionet të ruajnë të dhënat e tua të kontakteve dhe aplikacionet keqdashëse mund të ndajnë të dhëna të kontakteve pa dijeninë tënde."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"modifiko kontaktet"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Lejon aplikacionin të modifikojë të dhënat rreth kontakteve të tua të ruajtura në tabletin tënd, përfshi shpeshtësinë me të cilën ke telefonuar, ke dërguar mail-a apo ke komunikuar në rrugë të tjera me kontakte të veçanta. Kjo leje u mundëson aplikacioneve të fshijnë të dhënat e kontaktit."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="3870937407268625273">"Lejon aplikacionin të modifikojë të dhënat rreth kontakteve të tua të ruajtura në pajisjen tënde Android TV, përfshi shpeshtësinë me të cilën ke telefonuar, ke dërguar email-e apo komunikuar në rrugë të tjera me kontakte specifike. Ky autorizim i lejon aplikacionet të fshijnë të dhënat e kontaktit."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Lejon aplikacionin të modifikojë të dhënat e kontakteve të tua të ruajtura në telefon, përfshirë shpeshtësinë me të cilën ke telefonuar, ke dërguar mail-a apo ke komunikuar në rrugë të tjera me kontakte të veçanta. Kjo leje iu mundëson aplikacioneve të fshijnë të dhënat e kontakteve."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Lejon aplikacionin të modifikojë të dhënat rreth kontakteve të tua të ruajtura në tabletin tënd. Kjo leje lejon që aplikacionet të fshijnë të dhënat e kontakteve."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Lejon aplikacionin të modifikojë të dhënat rreth kontakteve të tua të ruajtura në pajisjen tënde Android TV. Kjo leje lejon që aplikacionet të fshijnë të dhënat e kontakteve."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Lejon aplikacionin të modifikojë të dhënat rreth kontakteve të tua të ruajtura në telefonin tënd. Kjo leje lejon që aplikacionet të fshijnë të dhënat e kontakteve."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"lexo ditarin e telefonatave"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Ky aplikacion mund të lexojë të gjithë historikun e telefonatave."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"shkruaj ditarin e telefonatave"</string>
@@ -407,13 +406,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"qasje në komandat shtesë të ofruesit të vendndodhjes"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Lejon aplikacionin të ketë qasje në komandat shtesë të ofruesit për vendndodhjen. Kjo mund ta lejojë aplikacionin të ndërhyjë në operacionin e GPS-së apo të burimeve të tjera për vendndodhjen."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"qasu në vendndodhjen e saktë vetëm në plan të parë"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"Ky aplikacion mund të marrë vendndodhjen tënde të saktë në çdo kohë kur është në plan të parë. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në telefonin tënd që aplikacioni të mund t\'i përdorë. Kjo gjë mund të rritë konsumin e baterisë."</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"qasu te vendndodhja e përafërt (bazuar te rrjeti) vetëm në plan të parë"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi, por vetëm kur aplikacioni është në plan të parë. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe të ofrohen në tabletin tënd që aplikacioni të mund t\'i përdorë."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="6994518594789550469">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi, por vetëm kur aplikacioni është në plan të parë. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe të ofrohen në pajisjen tënde Android TV që aplikacioni të mund t\'i përdorë."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi, por vetëm kur aplikacioni është në plan të parë. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe të ofrohen në telefonin tënd që aplikacioni të mund t\'i përdorë."</string>
+    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Ky aplikacion mund të marrë vendndodhjen tënde të saktë vetëm kur është në plan të parë. Shërbimet e vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në pajisjen tënde që aplikacioni të mund t\'i përdorë. Kjo gjë mund të rrisë konsumin e baterisë."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"qasu në vendndodhjen e përafërt vetëm në plan të parë"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Ky aplikacion mund të marrë vendndodhjen tënde të përafërt vetëm kur është në plan të parë. Shërbimet e vendndodhjes duhet të jenë të aktivizuara dhe të ofrohen në pajisjen tënde që aplikacioni të mund t\'i përdorë."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"qasje te vendndodhja në sfond"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Nëse kjo jepet përveç qasjes te vendndodhja e përafërt ose të saktë, aplikacioni mund të qaset te vendndodhja ndërkohë që ekzekutohet në sfond."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Ky aplikacion mund të ketë qasje te vendndodhja ndërkohë që funksionon në sfond, përveç qasjes në plan të parë te vendndodhja."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ndrysho cilësimet e audios"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Lejon aplikacionin të modifikojë cilësimet globale të audios siç është volumi dhe se cili altoparlant përdoret për daljen."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"regjistro audio"</string>
@@ -494,6 +491,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Lejon aplikacionin të shikojë konfigurimin e \"bluetooth-it\" në tablet, të kryejë dhe të pranojë lidhje me pajisjet e çiftuara."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Lejon aplikacionin të shikojë konfigurimin e Bluetooth-it në pajisjen tënde Android TV dhe të kryejë dhe të pranojë lidhje me pajisjet e çiftuara."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Lejon aplikacionin të shohë konfigurimin e \"bluetooth-it\" në telefon dhe të kryejë e pranojë lidhje me pajisjet e çiftuara."</string>
+    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
+    <skip />
+    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
+    <skip />
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollo \"Komunikimin e fushës në afërsi\" NFC"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Lejon aplikacionin të komunikojë me etiketimet e \"Komunikimit të fushës së afërt (NFC)\", kartat dhe lexuesit."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"çaktivizo kyçjen e ekranit"</string>
@@ -1862,7 +1863,11 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"U lidh me <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Trokit për të parë skedarët"</string>
     <string name="pin_target" msgid="8036028973110156895">"Gozhdo"</string>
+    <!-- no translation found for pin_specific_target (7824671240625957415) -->
+    <skip />
     <string name="unpin_target" msgid="3963318576590204447">"Zhgozhdo"</string>
+    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
+    <skip />
     <string name="app_info" msgid="6113278084877079851">"Informacioni mbi aplikacionin"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Po nis demonstrimin..."</string>
@@ -1905,6 +1910,8 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Të përditësohen këta artikuj në "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> dhe <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Ruaj"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Jo, faleminderit"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"Jo tani"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"Asnjëherë"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Përditëso"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"Vazhdo"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"fjalëkalimi"</string>
@@ -2000,5 +2007,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Kalo tek ekrani i ndarë"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Ekrani i kyçjes"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Pamja e ekranit"</string>
-    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"Aplikacioni <xliff:g id="APP_NAME">%1$s</xliff:g> në dritaren kërcyese."</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Shiriti i nëntitullit të <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
 </resources>

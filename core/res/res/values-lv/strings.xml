@@ -190,8 +190,7 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Trūkst darba profila administratora lietotnes, vai šī lietotne ir bojāta. Šī iemesla dēļ jūsu darba profils un saistītie dati tika dzēsti. Lai saņemtu palīdzību, sazinieties ar administratoru."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Jūsu darba profils šai ierīcē vairs nav pieejams."</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Veikts pārāk daudz paroles ievadīšanas mēģinājumu."</string>
-    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
-    <skip />
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrators atteicās no tādas ierīces pārvaldības, ko var izmantot personiskām vajadzībām"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Ierīce tiek pārvaldīta"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Jūsu organizācija pārvalda šo ierīci un var uzraudzīt tīkla datplūsmu. Pieskarieties, lai saņemtu detalizētu informāciju."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Jūsu ierīces dati tiks dzēsti"</string>
@@ -384,13 +383,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"Ļauj lietotnei sūtīt piesaistošas apraides, kas tiek saglabātas pēc apraides pabeigšanas. Pārmērīga izmantošana var palēnināt Android TV ierīces darbību vai padarīt tās darbību nestabilu, liekot izmantot pārāk daudz atmiņas."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Ļauj lietotnei sūtīt piesaistošas apraides, kas tiek saglabātas pēc apraides pabeigšanas. Pārmērīga izmantošana var palēnināt tālruņa darbību vai padarīt tā darbību nestabilu, liekot izmantot pārāk daudz atmiņas."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"lasīt kontaktpersonu informāciju"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Ļauj lietotnei lasīt datus par jūsu planšetdatorā saglabātajām kontaktpersonām, tostarp to, cik bieži esat zvanījis, sazinājies pa e-pastu vai citādi sazinājies ar konkrētām personām. Ar šo atļauju lietotnes var saglabāt jūsu kontaktpersonu datus, un ļaunprātīgas lietotnes var kopīgot kontaktpersonu datus bez jūsu atļaujas."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="2387823103274997441">"Ļauj lietotnei lasīt datus par Android TV ierīcē glabātajām kontaktpersonām, tostarp par zvanu un e-pasta ziņojumu apjomu vai saziņu citos veidos, kas veikta ar konkrētām kontaktpersonām. Ar šo atļauju lietotnes var saglabāt jūsu kontaktpersonu datus, un ļaunprātīgas lietotnes var kopīgot kontaktpersonu datus, jums nezinot."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Ļauj lietotnei lasīt datus par jūsu tālrunī saglabātajām kontaktpersonām, tostarp to, cik bieži esat zvanījis, sazinājies pa e-pastu vai citādi sazinājies ar konkrētām personām. Ar šo atļauju lietotnes var saglabāt jūsu kontaktpersonu datus, un ļaunprātīgas lietotnes var kopīgot kontaktpersonu datus bez jūsu atļaujas."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Ļauj lietotnei lasīt datus par planšetdatorā glabātajām kontaktpersonām. Lietotnēm būs arī piekļuve kontiem jūsu planšetdatorā, kuros ir izveidotas kontaktpersonas. Tas var ietvert kontus, ko izveidojušas jūsu instalētās lietotnes. Ar šo atļauju lietotnes var saglabāt jūsu kontaktpersonu datus, savukārt ļaunprātīgas lietotnes var kopīgot kontaktpersonu datus, jums nezinot."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Ļauj lietotnei lasīt datus par Android TV ierīcē glabātajām kontaktpersonām. Lietotnēm būs arī piekļuve kontiem jūsu Android TV ierīcē, kuros ir izveidotas kontaktpersonas. Tas var ietvert kontus, ko izveidojušas jūsu instalētās lietotnes. Ar šo atļauju lietotnes var saglabāt jūsu kontaktpersonu datus, savukārt ļaunprātīgas lietotnes var kopīgot kontaktpersonu datus, jums nezinot."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Ļauj lietotnei lasīt datus par tālrunī glabātajām kontaktpersonām. Lietotnēm būs arī piekļuve kontiem jūsu tālrunī, kuros ir izveidotas kontaktpersonas. Tas var ietvert kontus, ko izveidojušas jūsu instalētās lietotnes. Ar šo atļauju lietotnes var saglabāt jūsu kontaktpersonu datus, savukārt ļaunprātīgas lietotnes var kopīgot kontaktpersonu datus, jums nezinot."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"mainīt kontaktpersonu informāciju"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Ļauj lietotnei mainīt datus par planšetdatorā saglabātajām kontaktpersonām, tostarp par zvanu un e-pasta ziņojumu apjomu vai saziņu citos veidos, kas veikta ar konkrētām kontaktpersonām. Ar šo atļauju lietotne var dzēst kontaktpersonu datus."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="3870937407268625273">"Ļauj lietotnei mainīt datus par Android TV ierīcē saglabātajām kontaktpersonām, tostarp par zvanu un e-pasta ziņojumu apjomu vai saziņu citos veidos, kas veikta ar konkrētām kontaktpersonām. Ar šo atļauju lietotnes var dzēst kontaktpersonu datus."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Ļauj lietotnei mainīt datus par tālrunī saglabātajām kontaktpersonām, tostarp par zvanu un e-pasta ziņojumu apjomu vai saziņu citos veidos, kas veikta ar konkrētām kontaktpersonām. Ar šo atļauju lietotne var dzēst kontaktpersonu datus."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Ļauj lietotnei mainīt datus par planšetdatorā glabātajām kontaktpersonām. Ar šo atļauju lietotnes var dzēst kontaktpersonu datus."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Ļauj lietotnei mainīt datus par Android TV ierīcē glabātajām kontaktpersonām. Ar šo atļauju lietotnes var dzēst kontaktpersonu datus."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Ļauj lietotnei mainīt datus par tālrunī glabātajām kontaktpersonām. Ar šo atļauju lietotnes var dzēst kontaktpersonu datus."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"nolasīt zvanu žurnālu"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Šī lietotne var lasīt jūsu zvanu vēsturi."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"rakstīt zvanu žurnālā"</string>
@@ -410,13 +409,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"piekļūt atrašanās vietas nodrošinātāja papildu komandām"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Ļauj lietotnei piekļūt papildu atrašanās vietas noteikšanas nodrošinātāju komandām. Tas var ļaut lietotnei traucēt GPS vai citu atrašanās vietas noteikšanas avotu darbību."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"piekļuve precīzai atrašanās vietai, tikai darbojoties priekšplānā"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"Šī lietotne var iegūt precīzu jūsu atrašanās vietu, tikai darbojoties priekšplānā. Šiem atrašanās vietu pakalpojumiem ir jābūt ieslēgtiem un pieejamiem jūsu tālrunī, lai lietotne varētu tos izmantot. Tādējādi var palielināties akumulatora jaudas patēriņš."</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"piekļuve aptuvenai atrašanās vietai (pēc tīkla datiem), tikai darbojoties priekšplānā"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Kad šī lietotne darbojas priekšplānā, tā var noteikt jūsu atrašanās vietu, izmantojot tīkla resursus, piemēram, mobilo sakaru torņus un Wi-Fi tīklus. Šiem atrašanās vietu pakalpojumiem ir jābūt ieslēgtiem un pieejamiem jūsu planšetdatorā, lai lietotne varētu tos izmantot."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="6994518594789550469">"Kad šī lietotne darbojas priekšplānā, tā var noteikt jūsu atrašanās vietu, izmantojot tīkla resursus, piemēram, mobilo sakaru torņus un Wi-Fi tīklus. Šiem atrašanās vietu pakalpojumiem ir jābūt ieslēgtiem un pieejamiem jūsu Android TV ierīcē, lai lietotne varētu tos izmantot."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Kad šī lietotne darbojas priekšplānā, tā var noteikt jūsu atrašanās vietu, izmantojot tīkla resursus, piemēram, mobilo sakaru torņus un Wi-Fi tīklus. Šiem atrašanās vietu pakalpojumiem ir jābūt ieslēgtiem un pieejamiem jūsu tālrunī, lai lietotne varētu tos izmantot."</string>
+    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Šī lietotne var iegūt precīzu jūsu atrašanās vietu, tikai darbojoties priekšplānā. Jūsu ierīcē ir jābūt ieslēgtiem un pieejamiem atrašanās vietu pakalpojumiem, lai lietotne varētu tos izmantot. Tādējādi var palielināties akumulatora jaudas patēriņš."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"piekļuve aptuvenai atrašanās vietai, tikai darbojoties priekšplānā"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Šī lietotne var iegūt aptuvenu jūsu atrašanās vietu, tikai darbojoties priekšplānā. Jūsu ierīcē ir jābūt ieslēgtiem un pieejamiem atrašanās vietu pakalpojumiem, lai lietotne varētu tos izmantot."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"piekļūt atrašanās vietai fonā"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Ja šī atļauja tiek piešķirta līdz ar piekļuvi aptuvenai vai precīzai atrašanās vietai, lietotne var piekļūt atrašanās vietai, darbojoties fonā."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Šī lietotne var piekļūt atrašanās vietas datiem, darbojoties ne tikai priekšplānā, bet arī fonā."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"mainīt audio iestatījumus"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Ļauj lietotnei mainīt globālos audio iestatījumus, piemēram, skaļumu un izejai izmantoto skaļruni."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ierakstīt audio"</string>
@@ -497,6 +494,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Ļauj lietotnei skatīt Bluetooth konfigurāciju planšetdatorā, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Ļauj lietotnei skatīt Bluetooth konfigurāciju Android TV ierīcē, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Ļauj lietotnei skatīt Bluetooth konfigurāciju tālrunī, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>
+    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
+    <skip />
+    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
+    <skip />
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolē tuvlauka saziņu"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Ļauj lietotnei sazināties ar tuva darbības lauka sakaru (Near Field Communication — NFC) atzīmēm, kartēm un lasītājiem."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"atspējot ekrāna bloķēšanu"</string>
@@ -1894,7 +1895,11 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Izveidots savienojums ar: <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Pieskarieties, lai skatītu failus."</string>
     <string name="pin_target" msgid="8036028973110156895">"Piespraust"</string>
+    <!-- no translation found for pin_specific_target (7824671240625957415) -->
+    <skip />
     <string name="unpin_target" msgid="3963318576590204447">"Atspraust"</string>
+    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
+    <skip />
     <string name="app_info" msgid="6113278084877079851">"Lietotnes informācija"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Notiek demonstrācijas palaišana..."</string>
@@ -1938,6 +1943,8 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Vai atjaunināt šos vienumus pakalpojumā "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> un <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Saglabāt"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Nē, paldies"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"Vēlāk"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"Nekad"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Atjaunināt"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"Turpināt"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"paroli"</string>
@@ -2034,5 +2041,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Pārslēgt ekrāna sadalīšanu"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Bloķēt ekrānu"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Ekrānuzņēmums"</string>
-    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> uznirstošajā logā."</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g> subtitru josla."</string>
 </resources>
