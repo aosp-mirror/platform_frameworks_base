@@ -3330,6 +3330,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // Special permissions for the system telephony apps.
                 allowed = true;
             }
+            if (!allowed && bp.isCompanion()
+                    && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
+                        PackageManagerInternal.PACKAGE_COMPANION, UserHandle.USER_SYSTEM),
+                    pkg.getPackageName())) {
+                // Special permissions for the system companion device manager.
+                allowed = true;
+            }
         }
         return allowed;
     }

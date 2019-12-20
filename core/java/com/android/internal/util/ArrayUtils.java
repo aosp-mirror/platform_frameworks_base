@@ -136,6 +136,13 @@ public class ArrayUtils {
     }
 
     /**
+     * Returns the same array or an empty one if it's null.
+     */
+    public static @NonNull <T> T[] emptyIfNull(@Nullable T[] items, Class<T> kind) {
+        return items != null ? items : emptyArray(kind);
+    }
+
+    /**
      * Checks if given array is null or has zero elements.
      */
     public static boolean isEmpty(@Nullable Collection<?> array) {
@@ -746,6 +753,42 @@ public class ArrayUtils {
         for (int i = 0; i < size; i++) {
             if (val[i] != null) {
                 result[outIdx++] = val[i];
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns an array containing elements from the given one that match the given predicate.
+     */
+    public static @Nullable <T> T[] filter(@Nullable T[] items,
+            @NonNull IntFunction<T[]> arrayConstructor,
+            @NonNull java.util.function.Predicate<T> predicate) {
+        if (isEmpty(items)) {
+            return items;
+        }
+
+        int matchesCount = 0;
+        int size = size(items);
+        for (int i = 0; i < size; i++) {
+            if (predicate.test(items[i])) {
+                matchesCount++;
+            }
+        }
+        if (matchesCount == 0) {
+            return items;
+        }
+        if (matchesCount == items.length) {
+            return items;
+        }
+        if (matchesCount == 0) {
+            return null;
+        }
+        T[] result = arrayConstructor.apply(matchesCount);
+        int outIdx = 0;
+        for (int i = 0; i < size; i++) {
+            if (predicate.test(items[i])) {
+                result[outIdx++] = items[i];
             }
         }
         return result;
