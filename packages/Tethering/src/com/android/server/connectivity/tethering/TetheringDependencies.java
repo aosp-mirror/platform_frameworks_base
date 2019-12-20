@@ -39,7 +39,7 @@ import java.util.ArrayList;
  *
  * @hide
  */
-public class TetheringDependencies {
+public abstract class TetheringDependencies {
     /**
      * Get a reference to the offload hardware interface to be used by tethering.
      */
@@ -66,9 +66,7 @@ public class TetheringDependencies {
     /**
      * Get dependencies to be used by IpServer.
      */
-    public IpServer.Dependencies getIpServerDependencies() {
-        return new IpServer.Dependencies();
-    }
+    public abstract IpServer.Dependencies getIpServerDependencies();
 
     /**
      * Indicates whether tethering is supported on the device.
@@ -80,9 +78,7 @@ public class TetheringDependencies {
     /**
      * Get the NetworkRequest that should be fulfilled by the default network.
      */
-    public NetworkRequest getDefaultNetworkRequest() {
-        return null;
-    }
+    public abstract NetworkRequest getDefaultNetworkRequest();
 
     /**
      * Get a reference to the EntitlementManager to be used by tethering.
@@ -138,14 +134,10 @@ public class TetheringDependencies {
     /**
      * Get tethering thread looper.
      */
-    public Looper getTetheringLooper() {
-        return null;
-    }
+    public abstract Looper getTetheringLooper();
 
     /**
      *  Get Context of TetheringSerice.
      */
-    public Context getContext() {
-        return null;
-    }
+    public abstract Context getContext();
 }

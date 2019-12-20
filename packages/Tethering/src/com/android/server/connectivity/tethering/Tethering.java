@@ -16,6 +16,7 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
 import static android.hardware.usb.UsbManager.USB_FUNCTION_RNDIS;
@@ -63,7 +64,7 @@ import android.hardware.usb.UsbManager;
 import android.net.INetd;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
-import android.net.ITetherInternalCallback;
+import android.net.ITetheringEventCallback;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -89,6 +90,7 @@ import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
@@ -103,7 +105,6 @@ import android.util.SparseArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.Protocol;
@@ -162,6 +163,8 @@ public class Tethering {
     }
 
     private final SharedLog mLog = new SharedLog(TAG);
+    private final RemoteCallbackList<ITetheringEventCallback> mTetheringEventCallbacks =
+            new RemoteCallbackList<>();
 
     // used to synchronize public access to members
     private final Object mPublicSync;
@@ -188,8 +191,8 @@ public class Tethering {
     private final NetdCallback mNetdCallback;
     private final UserRestrictionActionListener mTetheringRestriction;
     private int mActiveDataSubId = INVALID_SUBSCRIPTION_ID;
-    // All the usage of mTetherInternalCallback should run in the same thread.
-    private ITetherInternalCallback mTetherInternalCallback = null;
+    // All the usage of mTetheringEventCallback should run in the same thread.
+    private ITetheringEventCallback mTetheringEventCallback = null;
 
     private volatile TetheringConfiguration mConfig;
     private InterfaceSet mCurrentUpstreamIfaceSet;
@@ -573,6 +576,11 @@ public class Tethering {
         }
     }
 
+    boolean isTetherProvisioningRequired() {
+        final TetheringConfiguration cfg = mConfig;
+        return mEntitlementMgr.isTetherProvisioningRequired(cfg);
+    }
+
     // TODO: Figure out how to update for local hotspot mode interfaces.
     private void sendTetherStateChangedBroadcast() {
         if (!mDeps.isTetheringSupported()) return;
@@ -588,7 +596,7 @@ public class Tethering {
         boolean bluetoothTethered = false;
 
         final TetheringConfiguration cfg = mConfig;
-        final TetherStatesParcel mTetherStatesParcel = new TetherStatesParcel();
+        mTetherStatesParcel = new TetherStatesParcel();
 
         synchronized (mPublicSync) {
             for (int i = 0; i < mTetherStates.size(); i++) {
@@ -1796,47 +1804,67 @@ public class Tethering {
     }
 
     /** Register tethering event callback */
-    void registerTetherInternalCallback(ITetherInternalCallback callback) {
+    void registerTetheringEventCallback(ITetheringEventCallback callback) {
         mHandler.post(() -> {
-            mTetherInternalCallback = callback;
+            mTetheringEventCallbacks.register(callback);
             try {
-                mTetherInternalCallback.onCallbackCreated(mTetherUpstream,
-                        mConfig.toStableParcelable(), mTetherStatesParcel);
+                callback.onCallbackStarted(mTetherUpstream, mConfig.toStableParcelable(),
+                        mTetherStatesParcel);
             } catch (RemoteException e) {
                 // Not really very much to do here.
             }
         });
     }
 
-    private void reportUpstreamChanged(Network network) {
-        // Don't need to synchronized mTetherInternalCallback because all the usage of this variable
-        // should run at the same thread.
-        if (mTetherInternalCallback == null) return;
+    /** Unregister tethering event callback */
+    void unregisterTetheringEventCallback(ITetheringEventCallback callback) {
+        mHandler.post(() -> {
+            mTetheringEventCallbacks.unregister(callback);
+        });
+    }
 
+    private void reportUpstreamChanged(Network network) {
+        final int length = mTetheringEventCallbacks.beginBroadcast();
         try {
-            mTetherInternalCallback.onUpstreamChanged(network);
-        } catch (RemoteException e) {
-            // Not really very much to do here.
+            for (int i = 0; i < length; i++) {
+                try {
+                    mTetheringEventCallbacks.getBroadcastItem(i).onUpstreamChanged(network);
+                } catch (RemoteException e) {
+                    // Not really very much to do here.
+                }
+            }
+        } finally {
+            mTetheringEventCallbacks.finishBroadcast();
         }
     }
 
     private void reportConfigurationChanged(TetheringConfigurationParcel config) {
-        if (mTetherInternalCallback == null) return;
-
+        final int length = mTetheringEventCallbacks.beginBroadcast();
         try {
-            mTetherInternalCallback.onConfigurationChanged(config);
-        } catch (RemoteException e) {
-            // Not really very much to do here.
+            for (int i = 0; i < length; i++) {
+                try {
+                    mTetheringEventCallbacks.getBroadcastItem(i).onConfigurationChanged(config);
+                } catch (RemoteException e) {
+                    // Not really very much to do here.
+                }
+            }
+        } finally {
+            mTetheringEventCallbacks.finishBroadcast();
         }
     }
 
     private void reportTetherStateChanged(TetherStatesParcel states) {
-        if (mTetherInternalCallback == null) return;
-
+        final int length = mTetheringEventCallbacks.beginBroadcast();
         try {
-            mTetherInternalCallback.onTetherStatesChanged(states);
-        } catch (RemoteException e) {
-            // Not really very much to do here.
+            for (int i = 0; i < length; i++) {
+                try {
+                    mTetheringEventCallbacks.getBroadcastItem(i).onTetherStatesChanged(states);
+                } catch (RemoteException e) {
+                    // Not really very much to do here.
+                }
+            }
+        } finally {
+            mTetheringEventCallbacks.finishBroadcast();
         }
     }
 
@@ -1844,7 +1872,11 @@ public class Tethering {
         // Binder.java closes the resource for us.
         @SuppressWarnings("resource")
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump.");
+            return;
+        }
 
         pw.println("Tethering:");
         pw.increaseIndent();

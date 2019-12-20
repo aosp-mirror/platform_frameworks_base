@@ -1,0 +1,1 @@
+rule android.annotation.** com.android.networkstack.tethering.annotation.@1

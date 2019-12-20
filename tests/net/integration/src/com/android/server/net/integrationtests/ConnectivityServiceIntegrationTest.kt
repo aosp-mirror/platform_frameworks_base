@@ -32,7 +32,6 @@ import android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET
 import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
 import android.net.NetworkRequest
 import android.net.TestNetworkStackClient
-import android.net.TetheringManager
 import android.net.metrics.IpConnectivityLog
 import android.os.ConditionVariable
 import android.os.IBinder
@@ -169,7 +168,6 @@ class ConnectivityServiceIntegrationTest {
         val deps = spy(ConnectivityService.Dependencies())
         doReturn(networkStackClient).`when`(deps).networkStack
         doReturn(metricsLogger).`when`(deps).metricsLogger
-        doReturn(mock(TetheringManager::class.java)).`when`(deps).getTetheringManager()
         doReturn(mock(ProxyTracker::class.java)).`when`(deps).makeProxyTracker(any(), any())
         doReturn(mock(MockableSystemProperties::class.java)).`when`(deps).systemProperties
         doReturn(TestNetIdManager()).`when`(deps).makeNetIdManager()
