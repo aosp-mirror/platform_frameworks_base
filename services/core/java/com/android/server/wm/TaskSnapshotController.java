@@ -565,16 +565,16 @@ class TaskSnapshotController {
     }
 
     /**
-     * @return The SystemUI visibility flags for the top fullscreen window in the given
+     * @return The SystemUI visibility flags for the top fullscreen opaque window in the given
      *         {@param task}.
      */
     private int getSystemUiVisibility(Task task) {
         final ActivityRecord topFullscreenActivity = task.getTopFullscreenActivity();
-        final WindowState topFullscreenWindow = topFullscreenActivity != null
-                ? topFullscreenActivity.getTopFullscreenWindow()
+        final WindowState topFullscreenOpaqueWindow = topFullscreenActivity != null
+                ? topFullscreenActivity.getTopFullscreenOpaqueWindow()
                 : null;
-        if (topFullscreenWindow != null) {
-            return topFullscreenWindow.getSystemUiVisibility();
+        if (topFullscreenOpaqueWindow != null) {
+            return topFullscreenOpaqueWindow.getSystemUiVisibility();
         }
         return 0;
     }

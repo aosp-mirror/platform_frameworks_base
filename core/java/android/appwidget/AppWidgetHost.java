@@ -18,8 +18,8 @@ package android.appwidget;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.IntentSender;

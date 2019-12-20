@@ -265,6 +265,7 @@ filegroup {
         ":framework-sdkext-sources",
         ":framework-statsd-sources",
         ":updatable-media-srcs",
+        ":framework-mediaprovider-sources",
         ":framework-wifi-updatable-sources",
     ]
 }
@@ -380,6 +381,7 @@ java_defaults {
         "ext",
         "unsupportedappusage",
         "updatable_media_stubs",
+        "framework_mediaprovider_stubs",
     ],
 
     jarjar_rules: ":framework-jarjar-rules",
@@ -467,6 +469,8 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
+        "updatable_media_stubs",
+        "framework_mediaprovider_stubs",
         "framework-appsearch", // TODO(b/146218515): should be framework-appsearch-stubs
         "framework-sdkext-stubs-systemapi",
         // TODO(b/146167933): Use framework-statsd-stubs instead.
@@ -582,11 +586,14 @@ gensrcs {
 filegroup {
     name: "framework-annotations",
     srcs: [
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
+        "core/java/android/annotation/NonNull.java",
+        "core/java/android/annotation/Nullable.java",
+        "core/java/android/annotation/RequiresPermission.java",
+        "core/java/android/annotation/SdkConstant.java",
         "core/java/android/annotation/SystemApi.java",
+        "core/java/android/annotation/TestApi.java",
         "core/java/android/annotation/UnsupportedAppUsage.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
         "core/java/com/android/internal/annotations/VisibleForTesting.java",
@@ -966,6 +973,7 @@ java_library {
         "core/java/android/os/RemoteException.java",
         "core/java/android/util/AndroidException.java",
     ],
+    libs: [ "unsupportedappusage" ],
 
     dxflags: ["--core-library"],
     installable: false,
@@ -1646,20 +1654,23 @@ filegroup {
 filegroup {
     name: "framework-media-annotation-srcs",
     srcs: [
+        ":framework-annotations",
         "core/java/android/annotation/CallbackExecutor.java",
         "core/java/android/annotation/CallSuper.java",
         "core/java/android/annotation/DrawableRes.java",
-        "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/LongDef.java",
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/Nullable.java",
-        "core/java/android/annotation/RequiresPermission.java",
-        "core/java/android/annotation/SdkConstant.java",
         "core/java/android/annotation/StringDef.java",
-        "core/java/android/annotation/SystemApi.java",
-        "core/java/android/annotation/TestApi.java",
-        "core/java/android/annotation/UnsupportedAppUsage.java",
-        "core/java/com/android/internal/annotations/GuardedBy.java",
+    ],
+}
+
+filegroup {
+    name: "framework-mediaprovider-annotation-sources",
+    srcs: [
+        ":framework-annotations",
+        "core/java/android/annotation/BytesLong.java",
+        "core/java/android/annotation/CurrentTimeMillisLong.java",
+        "core/java/android/annotation/CurrentTimeSecondsLong.java",
+        "core/java/android/annotation/DurationMillisLong.java",
     ],
 }
 

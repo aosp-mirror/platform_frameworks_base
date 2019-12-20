@@ -240,7 +240,7 @@ applications that come with the platform
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.tethering">
+    <privapp-permissions package="com.android.networkstack.tethering">
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
@@ -266,6 +266,8 @@ applications that come with the platform
     </privapp-permissions>
 
     <privapp-permissions package="com.android.shell">
+        <!-- Needed for test only -->
+        <permission name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
         <permission name="android.permission.ACCESS_LOWPAN_STATE"/>
         <permission name="android.permission.BACKUP"/>
         <permission name="android.permission.BATTERY_STATS"/>

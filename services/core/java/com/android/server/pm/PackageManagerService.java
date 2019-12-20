@@ -96,6 +96,8 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
+import static com.android.internal.util.ArrayUtils.emptyIfNull;
+import static com.android.internal.util.ArrayUtils.filter;
 import static com.android.server.pm.ComponentResolver.RESOLVE_PRIORITY_SORTER;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
@@ -249,7 +251,6 @@ import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 import android.permission.IPermissionManager;
 import android.provider.DeviceConfig;
-import android.provider.MediaStore;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.security.KeyStore;
@@ -385,6 +386,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -16629,37 +16631,48 @@ public class PackageManagerService extends IPackageManager.Stub
                 + " Activities needs verification ...");
 
         int count = 0;
-
+        boolean handlesWebUris = false;
+        final boolean alreadyVerified;
         synchronized (mLock) {
             // If this is a new install and we see that we've already run verification for this
             // package, we have nothing to do: it means the state was restored from backup.
-            if (!replacing) {
-                IntentFilterVerificationInfo ivi =
-                        mSettings.getIntentFilterVerificationLPr(packageName);
-                if (ivi != null) {
-                    if (DEBUG_DOMAIN_VERIFICATION) {
-                        Slog.i(TAG, "Package " + packageName+ " already verified: status="
-                                + ivi.getStatusString());
-                    }
-                    return;
+            final IntentFilterVerificationInfo ivi =
+                    mSettings.getIntentFilterVerificationLPr(packageName);
+            alreadyVerified = (ivi != null);
+            if (!replacing && alreadyVerified) {
+                if (DEBUG_DOMAIN_VERIFICATION) {
+                    Slog.i(TAG, "Package " + packageName + " already verified: status="
+                            + ivi.getStatusString());
                 }
+                return;
             }
 
-            // If any filters need to be verified, then all need to be.
+            // If any filters need to be verified, then all need to be.  In addition, we need to
+            // know whether an updating app has any web navigation intent filters, to re-
+            // examine handling policy even if not re-verifying.
             boolean needToVerify = false;
             for (ParsedActivity a : activities) {
                 for (ParsedActivityIntentInfo filter : a.intents) {
+                    if (filter.handlesWebUris(true)) {
+                        handlesWebUris = true;
+                    }
                     if (filter.needsVerification() && needsNetworkVerificationLPr(filter)) {
                         if (DEBUG_DOMAIN_VERIFICATION) {
                             Slog.d(TAG,
                                     "Intent filter needs verification, so processing all filters");
                         }
                         needToVerify = true;
+                        // It's safe to break out here because filter.needsVerification()
+                        // can only be true if filter.handlesWebUris(true) returns true, so
+                        // we've already noted that.
                         break;
                     }
                 }
             }
 
+            // Note whether this app publishes any web navigation handling support at all,
+            // and whether there are any web-nav filters that fit the profile for running
+            // a verification pass now.
             if (needToVerify) {
                 final int verificationId = mIntentFilterVerificationToken++;
                 for (ParsedActivity a : activities) {
@@ -16677,13 +16690,23 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         if (count > 0) {
+            // count > 0 means that we're running a full verification pass
             if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "Starting " + count
                     + " IntentFilter verification" + (count > 1 ? "s" : "")
                     +  " for userId:" + userId);
             mIntentFilterVerifier.startVerifications(userId);
+        } else if (alreadyVerified && handlesWebUris) {
+            // App used autoVerify in the past, no longer does, but still handles web
+            // navigation starts.
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.d(TAG, "App changed web filters but no longer verifying - resetting policy");
+            }
+            synchronized (mLock) {
+                clearIntentFilterVerificationsLPw(packageName, userId);
+            }
         } else {
             if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.d(TAG, "No filters or not all autoVerify for " + packageName);
+                Slog.d(TAG, "No web filters or no prior verify policy for " + packageName);
             }
         }
     }
@@ -19260,6 +19283,18 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         return ensureSystemPackageName(appPredictionServiceComponentName.getPackageName());
     }
+
+    private @NonNull String[] dropNonSystemPackages(@NonNull String[] pkgNames) {
+        return emptyIfNull(filter(pkgNames, String[]::new, mIsSystemPackage), String.class);
+    }
+
+    private Predicate<String> mIsSystemPackage = (pkgName) -> {
+        if ("android".equals(pkgName)) {
+            return true;
+        }
+        AndroidPackage pkg = mPackages.get(pkgName);
+        return pkg != null && pkg.isSystem();
+    };
 
     @Override
     public String getSystemCaptionsServicePackageName() {
@@ -22539,7 +22574,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public @NonNull String[] getKnownPackageNames(int knownPackage, int userId) {
-            switch (knownPackage) {
+            return dropNonSystemPackages(getKnownPackageNamesInternal(knownPackage, userId));
+        }
+
+        private String[] getKnownPackageNamesInternal(int knownPackage, int userId) {
+            switch(knownPackage) {
                 case PackageManagerInternal.PACKAGE_BROWSER:
                     return new String[]{mPermissionManager.getDefaultBrowser(userId)};
                 case PackageManagerInternal.PACKAGE_INSTALLER:
@@ -22566,6 +22605,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     return filterOnlySystemPackages(mAppPredictionServicePackage);
                 case PackageManagerInternal.PACKAGE_TELEPHONY:
                     return filterOnlySystemPackages(mTelephonyPackages);
+                case PackageManagerInternal.PACKAGE_COMPANION:
+                    return filterOnlySystemPackages("com.android.companiondevicemanager");
                 default:
                     return ArrayUtils.emptyArray(String.class);
             }

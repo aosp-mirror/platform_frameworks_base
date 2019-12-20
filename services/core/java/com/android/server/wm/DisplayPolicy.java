@@ -232,6 +232,7 @@ public class DisplayPolicy {
 
     private final WindowManagerService mService;
     private final Context mContext;
+    private final Context mUiContext;
     private final DisplayContent mDisplayContent;
     private final Object mLock;
     private final Handler mHandler;
@@ -449,6 +450,9 @@ public class DisplayPolicy {
         mService = service;
         mContext = displayContent.isDefaultDisplay ? service.mContext
                 : service.mContext.createDisplayContext(displayContent.getDisplay());
+        mUiContext = displayContent.isDefaultDisplay ? service.mAtmService.mUiContext
+                : service.mAtmService.mSystemThread
+                        .createSystemUiContext(displayContent.getDisplayId());
         mDisplayContent = displayContent;
         mLock = service.getWindowManagerLock();
 
@@ -2765,10 +2769,8 @@ public class DisplayPolicy {
         return mContext;
     }
 
-    private Context getSystemUiContext() {
-        final Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
-        return mDisplayContent.isDefaultDisplay
-                ? uiContext : uiContext.createDisplayContext(mDisplayContent.getDisplay());
+    Context getSystemUiContext() {
+        return mUiContext;
     }
 
     private int getNavigationBarWidth(int rotation, int uiMode) {

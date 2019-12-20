@@ -18,7 +18,7 @@ package android.content;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Parcel;

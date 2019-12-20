@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -208,11 +209,12 @@ public abstract class PanelView extends FrameLayout {
         super(context, attrs);
         mKeyguardStateController = keyguardStateController;
         mStatusBarStateController = statusBarStateController;
-        mFlingAnimationUtils = new FlingAnimationUtils(context, 0.6f /* maxLengthSeconds */,
-                0.6f /* speedUpFactor */);
-        mFlingAnimationUtilsClosing = new FlingAnimationUtils(context, 0.5f /* maxLengthSeconds */,
-                0.6f /* speedUpFactor */);
-        mFlingAnimationUtilsDismissing = new FlingAnimationUtils(context,
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        mFlingAnimationUtils = new FlingAnimationUtils(displayMetrics,
+                0.6f /* maxLengthSeconds */, 0.6f /* speedUpFactor */);
+        mFlingAnimationUtilsClosing = new FlingAnimationUtils(displayMetrics,
+                0.5f /* maxLengthSeconds */, 0.6f /* speedUpFactor */);
+        mFlingAnimationUtilsDismissing = new FlingAnimationUtils(displayMetrics,
                 0.5f /* maxLengthSeconds */, 0.2f /* speedUpFactor */, 0.6f /* x2 */,
                 0.84f /* y2 */);
         mBounceInterpolator = new BounceInterpolator();

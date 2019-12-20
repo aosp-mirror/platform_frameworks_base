@@ -241,17 +241,15 @@ public class AudioDeviceInventory {
                 } else {
                     makeA2dpDeviceUnavailableNow(address, di.mDeviceCodecFormat);
                 }
-            } else if (state == BluetoothProfile.STATE_CONNECTED) {
-                // device is not already connected
-                if (a2dpVolume != -1) {
-                    mDeviceBroker.postSetVolumeIndexOnDevice(AudioSystem.STREAM_MUSIC,
-                            // convert index to internal representation in VolumeStreamState
-                            a2dpVolume * 10,
-                            AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, "onSetA2dpSinkConnectionState");
-                }
-                makeA2dpDeviceAvailable(address, BtHelper.getName(btDevice),
-                        "onSetA2dpSinkConnectionState", a2dpCodec);
             }
+            if (a2dpVolume != -1) {
+                mDeviceBroker.postSetVolumeIndexOnDevice(AudioSystem.STREAM_MUSIC,
+                        // convert index to internal representation in VolumeStreamState
+                        a2dpVolume * 10,
+                        AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, "onSetA2dpSinkConnectionState");
+            }
+            makeA2dpDeviceAvailable(address, BtHelper.getName(btDevice),
+                    "onSetA2dpSinkConnectionState", a2dpCodec);
         }
     }
 

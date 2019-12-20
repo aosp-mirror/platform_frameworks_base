@@ -52,8 +52,13 @@ const int FIELD_ID_IS_ACTIVE = 14;
 // for GaugeMetricDataWrapper
 const int FIELD_ID_DATA = 1;
 const int FIELD_ID_SKIPPED = 2;
+// for SkippedBuckets
 const int FIELD_ID_SKIPPED_START_MILLIS = 3;
 const int FIELD_ID_SKIPPED_END_MILLIS = 4;
+const int FIELD_ID_SKIPPED_DROP_EVENT = 5;
+// for DumpEvent Proto
+const int FIELD_ID_BUCKET_DROP_REASON = 1;
+const int FIELD_ID_DROP_TIME = 2;
 // for GaugeMetricData
 const int FIELD_ID_DIMENSION_IN_WHAT = 1;
 const int FIELD_ID_BUCKET_INFO = 3;
@@ -193,7 +198,7 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     protoOutput->write(FIELD_TYPE_BOOL | FIELD_ID_IS_ACTIVE, isActiveLocked());
 
-    if (mPastBuckets.empty()) {
+    if (mPastBuckets.empty() && mSkippedBuckets.empty()) {
         return;
     }
 
@@ -212,13 +217,21 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
 
     uint64_t protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_GAUGE_METRICS);
 
-    for (const auto& pair : mSkippedBuckets) {
+    for (const auto& skippedBucket : mSkippedBuckets) {
         uint64_t wrapperToken =
                 protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_SKIPPED);
         protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_SKIPPED_START_MILLIS,
-                           (long long)(NanoToMillis(pair.first)));
+                           (long long)(NanoToMillis(skippedBucket.bucketStartTimeNs)));
         protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_SKIPPED_END_MILLIS,
-                           (long long)(NanoToMillis(pair.second)));
+                           (long long)(NanoToMillis(skippedBucket.bucketEndTimeNs)));
+
+        for (const auto& dropEvent : skippedBucket.dropEvents) {
+            uint64_t dropEventToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                                         FIELD_ID_SKIPPED_DROP_EVENT);
+            protoOutput->write(FIELD_TYPE_INT32 | FIELD_ID_BUCKET_DROP_REASON, dropEvent.reason);
+            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_DROP_TIME, (long long) (NanoToMillis(dropEvent.dropTimeNs)));
+            protoOutput->end(dropEventToken);
+        }
         protoOutput->end(wrapperToken);
     }
 
@@ -545,7 +558,10 @@ void GaugeMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
         info.mBucketEndNs = fullBucketEndTimeNs;
     }
 
-    if (info.mBucketEndNs - mCurrentBucketStartTimeNs >= mMinBucketSizeNs) {
+    // Add bucket to mPastBuckets if bucket is large enough.
+    // Otherwise, drop the bucket data and add bucket metadata to mSkippedBuckets.
+    bool isBucketLargeEnough = info.mBucketEndNs - mCurrentBucketStartTimeNs >= mMinBucketSizeNs;
+    if (isBucketLargeEnough) {
         for (const auto& slice : *mCurrentSlicedBucket) {
             info.mGaugeAtoms = slice.second;
             auto& bucketList = mPastBuckets[slice.first];
@@ -554,7 +570,13 @@ void GaugeMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
                  slice.first.toString().c_str());
         }
     } else {
-        mSkippedBuckets.emplace_back(info.mBucketStartNs, info.mBucketEndNs);
+        mCurrentSkippedBucket.bucketStartTimeNs = mCurrentBucketStartTimeNs;
+        mCurrentSkippedBucket.bucketEndTimeNs = eventTimeNs;
+        if (!maxDropEventsReached()) {
+            mCurrentSkippedBucket.dropEvents.emplace_back(
+                    buildDropEvent(eventTimeNs, BucketDropReason::BUCKET_TOO_SMALL));
+        }
+        mSkippedBuckets.emplace_back(mCurrentSkippedBucket);
     }
 
     // If we have anomaly trackers, we need to update the partial bucket values.
@@ -573,6 +595,7 @@ void GaugeMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
     StatsdStats::getInstance().noteBucketCount(mMetricId);
     mCurrentSlicedBucket = std::make_shared<DimToGaugeAtomsMap>();
     mCurrentBucketStartTimeNs = nextBucketStartTimeNs;
+    mCurrentSkippedBucket.reset();
 }
 
 size_t GaugeMetricProducer::byteSizeLocked() const {

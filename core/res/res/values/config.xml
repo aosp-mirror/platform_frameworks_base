@@ -3572,6 +3572,13 @@
         <item>android.ext.services</item>
     </string-array>
 
+    <!-- The package name for the system companion device manager service.
+         This service must be trusted, as it can be activated without explicit consent of the user.
+         Example: "com.android.companiondevicemanager"
+         See android.companion.CompanionDeviceManager.
+    -->
+    <string name="config_companionDeviceManagerPackage" translatable="false"></string>
+
     <!-- The package name for the default wellbeing app.
          This package must be trusted, as it has the permissions to control other applications
          on the device.
@@ -4272,4 +4279,7 @@
          value is left empty.  When this is non-empty then config_rawContactsLocalAccountName
          should also be non-empty.-->
     <string name="config_rawContactsLocalAccountType" translatable="false"></string>
+
+    <!-- Whether or not to use assistant stream volume separately from music volume -->
+    <bool name="config_useAssistantVolume">false</bool>
 </resources>

@@ -23,10 +23,9 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
-
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Helper class for keeping track of whitelisted packages/activities.
@@ -107,7 +106,7 @@ public final class WhitelistHelper {
      * Returns {@code true} if the entire package is whitelisted.
      */
     public boolean isWhitelisted(@NonNull String packageName) {
-        Preconditions.checkNotNull(packageName);
+        Objects.requireNonNull(packageName);
 
         if (mWhitelistedPackages == null) return false;
 
@@ -119,7 +118,7 @@ public final class WhitelistHelper {
      * Returns {@code true} if the specified activity is whitelisted.
      */
     public boolean isWhitelisted(@NonNull ComponentName componentName) {
-        Preconditions.checkNotNull(componentName);
+        Objects.requireNonNull(componentName);
 
         final String packageName = componentName.getPackageName();
         final ArraySet<ComponentName> whitelistedComponents = getWhitelistedComponents(packageName);
@@ -136,7 +135,7 @@ public final class WhitelistHelper {
      */
     @Nullable
     public ArraySet<ComponentName> getWhitelistedComponents(@NonNull String packageName) {
-        Preconditions.checkNotNull(packageName);
+        Objects.requireNonNull(packageName);
 
         return mWhitelistedPackages == null ? null : mWhitelistedPackages.get(packageName);
     }

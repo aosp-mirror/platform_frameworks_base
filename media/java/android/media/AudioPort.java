@@ -16,7 +16,7 @@
 
 package android.media;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * An audio port is a node of the audio framework or hardware that can be connected to or

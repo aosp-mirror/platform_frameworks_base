@@ -1325,6 +1325,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     private void unlockUser(int userId, byte[] token, byte[] secret,
             @ChallengeType int challengeType, long challenge,
             @Nullable ArrayList<PendingResetLockout> resetLockouts) {
+        Slog.i(TAG, "Unlocking user " + userId + " with secret only, length "
+                + (secret != null ? secret.length : 0));
         // TODO: make this method fully async so we can update UI with progress strings
         final boolean alreadyUnlocked = mUserManager.isUserUnlockingOrUnlocked(userId);
         final CountDownLatch latch = new CountDownLatch(1);
@@ -2651,11 +2653,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 }
             }
         }
-
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-            setUserPasswordMetrics(userCredential, userId);
-            unlockKeystore(authResult.authToken.deriveKeyStorePassword(), userId);
-
             // Do resetLockout / revokeChallenge when all profiles are unlocked
             if (hasEnrolledBiometrics) {
                 if (resetLockouts == null) {
@@ -2664,18 +2662,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                 resetLockouts.add(new PendingResetLockout(userId, response.getPayload()));
             }
 
-            final byte[] secret = authResult.authToken.deriveDiskEncryptionKey();
-            Slog.i(TAG, "Unlocking user " + userId + " with secret only, length " + secret.length);
-            unlockUser(userId, null, secret, challengeType, challenge, resetLockouts);
-
-            activateEscrowTokens(authResult.authToken, userId);
-
-            if (isManagedProfileWithSeparatedLock(userId)) {
-                setDeviceUnlockedForUser(userId);
-            }
-            mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
-
-            onAuthTokenKnownForUser(userId, authResult.authToken);
+            // TODO: Move setUserPasswordMetrics() inside onCredentialVerified(): this will require
+            // LSS to store an encrypted version of the latest password metric for every user,
+            // because user credential is not known when onCredentialVerified() is called during
+            // a token-based unlock.
+            setUserPasswordMetrics(userCredential, userId);
+            onCredentialVerified(authResult.authToken, challengeType, challenge, resetLockouts,
+                    userId);
         } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
             if (response.getTimeout() > 0) {
                 requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT, userId);
@@ -2683,6 +2676,27 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         return response;
+    }
+
+    private void onCredentialVerified(AuthenticationToken authToken,
+            @ChallengeType int challengeType, long challenge,
+            @Nullable ArrayList<PendingResetLockout> resetLockouts, int userId) {
+
+        unlockKeystore(authToken.deriveKeyStorePassword(), userId);
+
+        {
+            final byte[] secret = authToken.deriveDiskEncryptionKey();
+            unlockUser(userId, null, secret, challengeType, challenge, resetLockouts);
+            Arrays.fill(secret, (byte) 0);
+        }
+        activateEscrowTokens(authToken, userId);
+
+        if (isManagedProfileWithSeparatedLock(userId)) {
+            setDeviceUnlockedForUser(userId);
+        }
+        mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
+
+        onAuthTokenKnownForUser(userId, authToken);
     }
 
     private void setDeviceUnlockedForUser(int userId) {
@@ -3057,8 +3071,10 @@ public class LockSettingsService extends ILockSettings.Stub {
                 return false;
             }
         }
-        unlockUser(userId, null, authResult.authToken.deriveDiskEncryptionKey());
-        onAuthTokenKnownForUser(userId, authResult.authToken);
+        // TODO: Reset biometrics lockout here. Ideally that should be self-contained inside
+        // onCredentialVerified(), which will require some refactoring on the current lockout
+        // reset logic.
+        onCredentialVerified(authResult.authToken, CHALLENGE_NONE, 0, null, userId);
         return true;
     }
 

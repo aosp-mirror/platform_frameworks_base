@@ -141,6 +141,7 @@ cc_library_shared {
                 "android_os_UEventObserver.cpp",
                 "android_os_VintfObject.cpp",
                 "android_os_VintfRuntimeInfo.cpp",
+                "android_os_incremental_IncrementalManager.cpp",
                 "android_net_LocalSocketImpl.cpp",
                 "android_net_NetUtils.cpp",
                 "android_service_DataLoaderService.cpp",
@@ -207,6 +208,7 @@ cc_library_shared {
 
             static_libs: [
                 "libasync_safe",
+                "libdmabufinfo",
                 "libgif",
                 "libseccomp_policy",
                 "libgrallocusage",

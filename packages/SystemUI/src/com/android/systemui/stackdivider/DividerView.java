@@ -295,7 +295,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 R.integer.long_press_dock_anim_duration);
         mGrowRecents = getResources().getBoolean(R.bool.recents_grow_in_multiwindow);
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
-        mFlingAnimationUtils = new FlingAnimationUtils(getContext(), 0.3f);
+        mFlingAnimationUtils = new FlingAnimationUtils(getResources().getDisplayMetrics(), 0.3f);
         updateDisplayInfo();
         boolean landscape = getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE;

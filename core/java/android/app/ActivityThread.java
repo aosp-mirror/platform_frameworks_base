@@ -32,7 +32,6 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PACK
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
@@ -46,6 +45,7 @@ import android.app.servertransaction.PendingTransactionActions;
 import android.app.servertransaction.PendingTransactionActions.StopInfo;
 import android.app.servertransaction.TransactionExecutor;
 import android.app.servertransaction.TransactionExecutorHelper;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;

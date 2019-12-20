@@ -15,21 +15,21 @@
 //
 
 apex {
-    name: "com.android.tethering.apex",
+    name: "com.android.tethering",
     apps: ["Tethering"],
     manifest: "manifest.json",
-    key: "com.android.tethering.apex.key",
+    key: "com.android.tethering.key",
 
     androidManifest: "AndroidManifest.xml",
 }
 
 apex_key {
-    name: "com.android.tethering.apex.key",
-    public_key: "com.android.tethering.apex.avbpubkey",
-    private_key: "com.android.tethering.apex.pem",
+    name: "com.android.tethering.key",
+    public_key: "com.android.tethering.avbpubkey",
+    private_key: "com.android.tethering.pem",
 }
 
 android_app_certificate {
-    name: "com.android.tethering.apex.certificate",
-    certificate: "com.android.tethering.apex",
+    name: "com.android.tethering.certificate",
+    certificate: "com.android.tethering",
 }

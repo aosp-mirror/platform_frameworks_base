@@ -485,8 +485,8 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
     // Received data: ['inputPort1', '1', 'inputPort2', '2']
     // So we unpack accordingly here.
     outConfig->portAssociations.clear();
-    jobjectArray portAssociations = jobjectArray(env->CallStaticObjectMethod(
-            gServiceClassInfo.clazz, gServiceClassInfo.getInputPortAssociations));
+    jobjectArray portAssociations = jobjectArray(env->CallObjectMethod(mServiceObj,
+            gServiceClassInfo.getInputPortAssociations));
     if (!checkAndClearExceptionFromCallback(env, "getInputPortAssociations") && portAssociations) {
         jsize length = env->GetArrayLength(portAssociations);
         for (jsize i = 0; i < length / 2; i++) {
@@ -1920,7 +1920,7 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_STATIC_METHOD_ID(gServiceClassInfo.getExcludedDeviceNames, clazz,
             "getExcludedDeviceNames", "()[Ljava/lang/String;");
 
-    GET_STATIC_METHOD_ID(gServiceClassInfo.getInputPortAssociations, clazz,
+    GET_METHOD_ID(gServiceClassInfo.getInputPortAssociations, clazz,
             "getInputPortAssociations", "()[Ljava/lang/String;");
 
     GET_METHOD_ID(gServiceClassInfo.getKeyRepeatTimeout, clazz,

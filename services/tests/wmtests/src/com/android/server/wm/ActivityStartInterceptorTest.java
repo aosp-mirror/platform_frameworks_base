@@ -24,6 +24,7 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 
@@ -137,8 +138,8 @@ public class ActivityStartInterceptorTest {
         // Mock KeyguardManager
         when(mContext.getSystemService(Context.KEYGUARD_SERVICE)).thenReturn(mKeyguardManager);
         when(mKeyguardManager.createConfirmDeviceCredentialIntent(
-                nullable(CharSequence.class), nullable(CharSequence.class), eq(TEST_USER_ID)))
-                .thenReturn(CONFIRM_CREDENTIALS_INTENT);
+                nullable(CharSequence.class), nullable(CharSequence.class), eq(TEST_USER_ID),
+                eq(true))).thenReturn(CONFIRM_CREDENTIALS_INTENT);
 
         // Mock PackageManager
         when(mService.getPackageManager()).thenReturn(mPackageManager);

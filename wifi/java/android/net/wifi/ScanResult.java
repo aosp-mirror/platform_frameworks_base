@@ -103,6 +103,12 @@ public class ScanResult implements Parcelable {
 
     /**
      * @hide
+     * Security protocol type: WAPI.
+     */
+    public static final int PROTOCOL_WAPI = 4;
+
+    /**
+     * @hide
      * No security key management scheme.
      */
     public static final int KEY_MGMT_NONE = 0;
@@ -169,6 +175,18 @@ public class ScanResult implements Parcelable {
     public static final int KEY_MGMT_OWE_TRANSITION = 12;
     /**
      * @hide
+     * Security key management scheme: WAPI_PSK.
+     */
+    @SystemApi
+    public static final int KEY_MGMT_WAPI_PSK = 13;
+    /**
+     * @hide
+     * Security key management scheme: WAPI_CERT.
+     */
+    @SystemApi
+    public static final int KEY_MGMT_WAPI_CERT = 14;
+    /**
+     * @hide
      * No cipher suite.
      */
     public static final int CIPHER_NONE = 0;
@@ -192,6 +210,11 @@ public class ScanResult implements Parcelable {
      * Cipher suite: GCMP
      */
     public static final int CIPHER_GCMP_256 = 4;
+    /**
+     * @hide
+     * Cipher suite: SMS4
+     */
+    public static final int CIPHER_SMS4 = 5;
 
     /**
      * The detected signal level in dBm, also known as the RSSI.

@@ -16,17 +16,14 @@
 
 package android.app;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.annotation.StringRes;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ProviderInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ProviderInfo;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Parcel;
@@ -37,6 +34,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
 import android.view.inputmethod.EditorInfo;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.HashMap;

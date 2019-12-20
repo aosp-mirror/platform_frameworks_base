@@ -16,7 +16,7 @@
 
 package android.animation;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * This evaluator can be used to perform type interpolation between integer

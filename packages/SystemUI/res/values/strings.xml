@@ -1140,13 +1140,16 @@
     <string name="battery_saver_notification_action_text">Turn off Battery Saver</string>
 
     <!-- Media projection permission dialog warning text. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_text">While recording or casting, <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> can capture any sensitive information that is displayed on your screen or played from your device, including sensitive information such as audio, passwords, payment info, photos and messages.</string>
+    <string name="media_projection_dialog_text"><xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
 
     <!-- Media projection permission dialog warning text for system services. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_service_text">While recording or casting, the service providing this function can capture any sensitive information that is displayed on your screen or played from your device, including sensitive information such as audio, passwords, payment info, photos and messages.</string>
+    <string name="media_projection_dialog_service_text">The service providing this function will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
+
+    <!-- Media projection permission dialog warning title for system services. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_dialog_service_title">Start recording or casting ?</string>
 
     <!-- Media projection permission dialog warning title. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_title">Exposing sensitive info during casting/recording </string>
+    <string name="media_projection_dialog_title">Start recording or casting with <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g>?</string>
 
     <!-- Media projection permission dialog permanent grant check box. [CHAR LIMIT=NONE] -->
     <string name="media_projection_remember_text">Don\'t show again</string>

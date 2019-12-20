@@ -32,9 +32,6 @@ import androidx.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-
 /**
  * Unit tests for {@link android.net.wifi.WifiConfiguration}.
  */
@@ -196,33 +193,6 @@ public class WifiConfigurationTest {
     }
 
     /**
-     * Verifies that the serialization/de-serialization for softap config works.
-     */
-    @Test
-    public void testSoftApConfigBackupAndRestore() throws Exception {
-        WifiConfiguration config = new WifiConfiguration();
-        config.SSID = "TestAP";
-        config.apBand = WifiConfiguration.AP_BAND_5GHZ;
-        config.apChannel = 40;
-        config.allowedKeyManagement.set(KeyMgmt.WPA2_PSK);
-        config.preSharedKey = "TestPsk";
-        config.hiddenSSID = true;
-
-        byte[] data = config.getBytesForBackup();
-        ByteArrayInputStream bais = new ByteArrayInputStream(data);
-        DataInputStream in = new DataInputStream(bais);
-        WifiConfiguration restoredConfig = WifiConfiguration.getWifiConfigFromBackup(in);
-
-        assertEquals(config.SSID, restoredConfig.SSID);
-        assertEquals(config.preSharedKey, restoredConfig.preSharedKey);
-        assertEquals(config.getAuthType(), restoredConfig.getAuthType());
-        assertEquals(config.apBand, restoredConfig.apBand);
-        assertEquals(config.apChannel, restoredConfig.apChannel);
-        assertEquals(config.hiddenSSID, restoredConfig.hiddenSSID);
-    }
-
-
-    /**
      * Verifies that getKeyIdForCredentials returns the expected string for Enterprise networks
      * @throws Exception
      */
@@ -317,6 +287,16 @@ public class WifiConfigurationTest {
         config.allowedKeyManagement.clear();
         config.allowedKeyManagement.set(KeyMgmt.NONE);
         assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.NONE], config.getSsidAndSecurityTypeString());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.WAPI_PSK);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.WAPI_PSK],
+                config.getSsidAndSecurityTypeString());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.WAPI_CERT);
+        assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.WAPI_CERT],
+                config.getSsidAndSecurityTypeString());
     }
 
     /**

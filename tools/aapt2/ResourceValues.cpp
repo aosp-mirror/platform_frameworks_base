@@ -117,7 +117,7 @@ bool Reference::Equals(const Value* value) const {
 
 bool Reference::Flatten(android::Res_value* out_value) const {
   const ResourceId resid = id.value_or_default(ResourceId(0));
-  const bool dynamic = resid.is_valid_dynamic() && is_dynamic;
+  const bool dynamic = resid.is_valid() && is_dynamic;
 
   if (reference_type == Reference::Type::kResource) {
     if (dynamic) {
@@ -159,7 +159,7 @@ void Reference::Print(std::ostream* out) const {
     *out << name.value();
   }
 
-  if (id && id.value().is_valid_dynamic()) {
+  if (id && id.value().is_valid()) {
     if (name) {
       *out << " ";
     }
@@ -196,7 +196,7 @@ static void PrettyPrintReferenceImpl(const Reference& ref, bool print_package, P
       printer->Print("/");
       printer->Print(name.entry);
     }
-  } else if (ref.id && ref.id.value().is_valid_dynamic()) {
+  } else if (ref.id && ref.id.value().is_valid()) {
     printer->Print(ref.id.value().to_string());
   }
 }

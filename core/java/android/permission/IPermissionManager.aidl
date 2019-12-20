@@ -20,6 +20,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
+import android.os.UserHandle;
 import android.permission.IOnPermissionsChangeListener;
 
 /**
@@ -100,4 +101,9 @@ interface IPermissionManager {
     boolean isPermissionRevokedByPolicy(String permName, String packageName, int userId);
 
     List<SplitPermissionInfoParcelable> getSplitPermissions();
+
+    void startOneTimePermissionSession(String packageName, int userId, long timeout,
+            int importanceToResetTimer, int importanceToKeepSessionAlive);
+
+    void stopOneTimePermissionSession(String packageName, int userId);
 }

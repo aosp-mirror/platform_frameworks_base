@@ -328,7 +328,9 @@ public final class IncrementalManager {
      * Checks if path is mounted on Incremental File System.
      */
     public static boolean isIncrementalPath(@NonNull String path) {
-        // TODO(b/136132412): add jni implementation
-        return false;
+        return nativeIsIncrementalPath(path);
     }
+
+    /* Native methods */
+    private static native boolean nativeIsIncrementalPath(@NonNull String path);
 }

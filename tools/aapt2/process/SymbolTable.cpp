@@ -340,7 +340,7 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
     }
 
     res_id = asset_manager_.GetResourceId(real_name.to_string());
-    if (res_id.is_valid() && asset_manager_.GetResourceFlags(res_id.id, &type_spec_flags)) {
+    if (res_id.is_valid_static() && asset_manager_.GetResourceFlags(res_id.id, &type_spec_flags)) {
       found = true;
       return false;
     }
@@ -379,7 +379,7 @@ static Maybe<ResourceName> GetResourceName(android::AssetManager2& am,
 
 std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
     ResourceId id) {
-  if (!id.is_valid()) {
+  if (!id.is_valid_static()) {
     // Exit early and avoid the error logs from AssetManager.
     return {};
   }

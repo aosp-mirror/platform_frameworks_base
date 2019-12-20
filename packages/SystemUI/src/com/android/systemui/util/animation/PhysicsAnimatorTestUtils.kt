@@ -142,6 +142,7 @@ object PhysicsAnimatorTestUtils {
      */
     @JvmStatic
     @Throws(InterruptedException::class)
+    @Suppress("UNCHECKED_CAST")
     fun <T : Any> blockUntilAnimationsEnd(
         properties: FloatPropertyCompat<in T>
     ) {
@@ -236,6 +237,14 @@ object PhysicsAnimatorTestUtils {
         vararg additionalUpdateMatchers: UpdateMatcher
     ) {
         val updateFrames: UpdateFramesPerProperty<T> = getAnimationUpdateFrames(animator)
+
+        if (!updateFrames.containsKey(property)) {
+            error("No frames for given target object and property.")
+        }
+
+        // Copy the frames to avoid a ConcurrentModificationException if the animation update
+        // listeners attempt to add a new frame while we're verifying these.
+        val framesForProperty = ArrayList(updateFrames[property]!!)
         val matchers = ArrayDeque<UpdateMatcher>(
                 additionalUpdateMatchers.toList())
         val frameTraceMessage = StringBuilder()
@@ -243,8 +252,7 @@ object PhysicsAnimatorTestUtils {
         var curMatcher = firstUpdateMatcher
 
         // Loop through the updates from the testable animator.
-        for (update in updateFrames[property]
-                ?: error("No frames for given target object and property.")) {
+        for (update in framesForProperty) {
 
             // Check whether this frame satisfies the current matcher.
             if (curMatcher(update)) {
@@ -320,6 +328,7 @@ object PhysicsAnimatorTestUtils {
     /**
      * Returns all of the values that have ever been reported to update listeners, per property.
      */
+    @Suppress("UNCHECKED_CAST")
     fun <T : Any> getAnimationUpdateFrames(animator: PhysicsAnimator<T>):
             UpdateFramesPerProperty<T> {
         return animatorTestHelpers[animator]?.getUpdates() as UpdateFramesPerProperty<T>
@@ -333,6 +342,7 @@ object PhysicsAnimatorTestUtils {
         animatorTestHelpers[animator]?.clearUpdates()
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun <T> getAnimationTestHelper(animator: PhysicsAnimator<T>): AnimatorTestHelper<T> {
         return animatorTestHelpers[animator] as AnimatorTestHelper<T>
     }

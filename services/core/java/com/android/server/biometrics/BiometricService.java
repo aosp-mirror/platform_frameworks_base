@@ -28,6 +28,7 @@ import static android.hardware.biometrics.BiometricManager.Authenticators;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.UserSwitchObserver;
+import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -210,6 +211,7 @@ public class BiometricService extends SystemService {
     }
 
     private final Injector mInjector;
+    private final DevicePolicyManager mDevicePolicyManager;
     @VisibleForTesting
     final IBiometricService.Stub mImpl;
     @VisibleForTesting
@@ -648,6 +650,10 @@ public class BiometricService extends SystemService {
                 throw new SecurityException("Invalid authenticator configuration");
             }
 
+            if (bundle.getBoolean(BiometricPrompt.EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS)) {
+                checkInternalPermission();
+            }
+
             Utils.combineAuthenticatorBundles(bundle);
 
             // Check the usage of this in system server. Need to remove this check if it becomes a
@@ -712,8 +718,8 @@ public class BiometricService extends SystemService {
             int biometricConstantsResult = BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
             final long ident = Binder.clearCallingIdentity();
             try {
-                biometricConstantsResult =
-                        checkAndGetAuthenticators(userId, bundle, opPackageName).second;
+                biometricConstantsResult = checkAndGetAuthenticators(userId, bundle, opPackageName,
+                        false /* checkDevicePolicyManager */).second;
                 if (biometricConstantsResult != BiometricConstants.BIOMETRIC_SUCCESS
                         && Utils.isDeviceCredentialAllowed(bundle)) {
                     // If there's an issue with biometrics, but device credential is allowed and
@@ -947,6 +953,8 @@ public class BiometricService extends SystemService {
         super(context);
 
         mInjector = injector;
+        mDevicePolicyManager = (DevicePolicyManager) context
+                .getSystemService(context.DEVICE_POLICY_SERVICE);
         mImpl = new BiometricServiceWrapper();
         mEnabledOnKeyguardCallbacks = new ArrayList<>();
         mSettingObserver = mInjector.getSettingObserver(context, mHandler,
@@ -978,6 +986,42 @@ public class BiometricService extends SystemService {
     }
 
     /**
+     * @param modality one of {@link BiometricAuthenticator#TYPE_FINGERPRINT},
+     * {@link BiometricAuthenticator#TYPE_IRIS} or {@link BiometricAuthenticator#TYPE_FACE}
+     * @return
+     */
+    private int mapModalityToDevicePolicyType(int modality) {
+        switch (modality) {
+            case TYPE_FINGERPRINT:
+                return DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT;
+            case TYPE_IRIS:
+                return DevicePolicyManager.KEYGUARD_DISABLE_IRIS;
+            case TYPE_FACE:
+                return DevicePolicyManager.KEYGUARD_DISABLE_FACE;
+            default:
+                Slog.e(TAG, "Error modality=" + modality);
+                return DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE;
+        }
+    }
+
+    // TODO(joshmccloskey): Update this to throw an error if a new modality is added and this
+    // logic is not updated.
+    private boolean isBiometricDisabledByDevicePolicy(int modality, int effectiveUserId) {
+        final int biometricToCheck = mapModalityToDevicePolicyType(modality);
+        if (biometricToCheck == DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE) {
+            Slog.e(TAG, "Allowing unknown modality " + modality + " to pass Device Policy check");
+            return false;
+        }
+        final int devicePolicyDisabledFeatures =
+                mDevicePolicyManager.getKeyguardDisabledFeatures(null, effectiveUserId);
+        final boolean isBiometricDisabled =
+                (biometricToCheck & devicePolicyDisabledFeatures) != 0;
+        Slog.w(TAG, "isBiometricDisabledByDevicePolicy(" + modality + "," + effectiveUserId
+                + ")=" + isBiometricDisabled);
+        return isBiometricDisabled;
+    }
+
+    /**
      * Checks if there are any available biometrics, and returns the modality. This method also
      * returns errors through the callback (no biometric feature, hardware not detected, no
      * templates enrolled, etc). This service must not start authentication if errors are sent.
@@ -996,7 +1040,7 @@ public class BiometricService extends SystemService {
      * TODO(kchyn): Update this to handle DEVICE_CREDENTIAL better, reduce duplicate code in callers
      */
     private Pair<Integer, Integer> checkAndGetAuthenticators(int userId, Bundle bundle,
-            String opPackageName) throws RemoteException {
+            String opPackageName, boolean checkDevicePolicyManager) throws RemoteException {
         if (!Utils.isBiometricAllowed(bundle)
                 && Utils.isDeviceCredentialAllowed(bundle)
                 && !mTrustManager.isDeviceSecure(userId)) {
@@ -1033,6 +1077,11 @@ public class BiometricService extends SystemService {
                     }
                     if (authenticator.impl.hasEnrolledTemplates(userId, opPackageName)) {
                         hasTemplatesEnrolled = true;
+                        // If the device policy manager disables a specific biometric, skip it.
+                        if (checkDevicePolicyManager &&
+                                isBiometricDisabledByDevicePolicy(modality, userId)) {
+                            continue;
+                        }
                         if (isEnabledForApp(modality, userId)) {
                             enabledForApps = true;
                             break;
@@ -1043,6 +1092,7 @@ public class BiometricService extends SystemService {
         }
 
         Slog.d(TAG, "checkAndGetAuthenticators: user=" + userId
+                + " checkDevicePolicyManager=" + checkDevicePolicyManager
                 + " isHardwareDetected=" + isHardwareDetected
                 + " hasTemplatesEnrolled=" + hasTemplatesEnrolled
                 + " enabledForApps=" + enabledForApps);
@@ -1502,8 +1552,10 @@ public class BiometricService extends SystemService {
             int result;
 
             try {
+                final boolean checkDevicePolicyManager = bundle.getBoolean(
+                        BiometricPrompt.EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS, false);
                 final Pair<Integer, Integer> pair = checkAndGetAuthenticators(userId, bundle,
-                        opPackageName);
+                        opPackageName, checkDevicePolicyManager);
                 modality = pair.first;
                 result = pair.second;
             } catch (RemoteException e) {

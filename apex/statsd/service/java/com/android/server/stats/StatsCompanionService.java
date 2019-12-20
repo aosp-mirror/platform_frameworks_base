@@ -112,7 +112,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.StatsLog;
 import android.util.proto.ProtoOutputStream;
-import android.util.proto.ProtoStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.IProcessStats;
@@ -172,6 +171,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -542,9 +542,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void informAllUidsLocked(Context context) throws RemoteException {
         UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
         PackageManager pm = context.getPackageManager();
-        final List<UserInfo> users = um.getUsers(true);
+        final List<UserHandle> users = um.getUserHandles(true);
         if (DEBUG) {
-            Slog.d(TAG, "Iterating over " + users.size() + " profiles.");
+            Slog.d(TAG, "Iterating over " + users.size() + " userHandles.");
         }
 
         ParcelFileDescriptor[] fds;
@@ -571,11 +571,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 ProtoOutputStream output = new ProtoOutputStream(fout);
                 int numRecords = 0;
                 // Add in all the apps for every user/profile.
-                for (UserInfo profile : users) {
+                for (UserHandle userHandle : users) {
                     List<PackageInfo> pi =
                             pm.getInstalledPackagesAsUser(PackageManager.MATCH_UNINSTALLED_PACKAGES
                                             | PackageManager.MATCH_ANY_USER,
-                                    profile.id);
+                                    userHandle.getIdentifier());
                     for (int j = 0; j < pi.size(); j++) {
                         if (pi.get(j).applicationInfo != null) {
                             String installer;
@@ -585,23 +585,24 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                                 installer = "";
                             }
                             long applicationInfoToken =
-                                    output.start(ProtoStream.FIELD_TYPE_MESSAGE
-                                            | ProtoStream.FIELD_COUNT_REPEATED
+                                    output.start(ProtoOutputStream.FIELD_TYPE_MESSAGE
+                                            | ProtoOutputStream.FIELD_COUNT_REPEATED
                                                     | APPLICATION_INFO_FIELD_ID);
-                            output.write(ProtoStream.FIELD_TYPE_INT32
-                                    | ProtoStream.FIELD_COUNT_SINGLE | UID_FIELD_ID,
+                            output.write(ProtoOutputStream.FIELD_TYPE_INT32
+                                    | ProtoOutputStream.FIELD_COUNT_SINGLE | UID_FIELD_ID,
                                             pi.get(j).applicationInfo.uid);
-                            output.write(ProtoStream.FIELD_TYPE_INT64
-                                    | ProtoStream.FIELD_COUNT_SINGLE
+                            output.write(ProtoOutputStream.FIELD_TYPE_INT64
+                                    | ProtoOutputStream.FIELD_COUNT_SINGLE
                                             | VERSION_FIELD_ID, pi.get(j).getLongVersionCode());
-                            output.write(ProtoStream.FIELD_TYPE_STRING
-                                    | ProtoStream.FIELD_COUNT_SINGLE | VERSION_STRING_FIELD_ID,
+                            output.write(ProtoOutputStream.FIELD_TYPE_STRING
+                                    | ProtoOutputStream.FIELD_COUNT_SINGLE
+                                    | VERSION_STRING_FIELD_ID,
                                             pi.get(j).versionName);
-                            output.write(ProtoStream.FIELD_TYPE_STRING
-                                    | ProtoStream.FIELD_COUNT_SINGLE
+                            output.write(ProtoOutputStream.FIELD_TYPE_STRING
+                                    | ProtoOutputStream.FIELD_COUNT_SINGLE
                                             | PACKAGE_NAME_FIELD_ID, pi.get(j).packageName);
-                            output.write(ProtoStream.FIELD_TYPE_STRING
-                                    | ProtoStream.FIELD_COUNT_SINGLE
+                            output.write(ProtoOutputStream.FIELD_TYPE_STRING
+                                    | ProtoOutputStream.FIELD_COUNT_SINGLE
                                             | INSTALLER_FIELD_ID,
                                                     installer == null ? "" : installer);
                             numRecords++;
@@ -2136,8 +2137,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullDangerousPermissionState(long elapsedNanos, final long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
+    private void pullDangerousPermissionState(int atomId, long elapsedNanos,
+            final long wallClockNanos, List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
         Set<Integer> reportedUids = new HashSet<>();
         try {
@@ -2166,6 +2167,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     }
                     reportedUids.add(pkg.applicationInfo.uid);
 
+                    if (atomId == StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED
+                            && ThreadLocalRandom.current().nextFloat() > 0.2f) {
+                        continue;
+                    }
+
                     int numPerms = pkg.requestedPermissions.length;
                     for (int permNum  = 0; permNum < numPerms; permNum++) {
                         String permName = pkg.requestedPermissions[permNum];
@@ -2175,7 +2181,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         try {
                             permissionInfo = pm.getPermissionInfo(permName, 0);
                             permissionFlags =
-                                pm.getPermissionFlags(permName, pkg.packageName, user);
+                                    pm.getPermissionFlags(permName, pkg.packageName, user);
 
                         } catch (PackageManager.NameNotFoundException ignored) {
                             continue;
@@ -2186,11 +2192,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         }
 
                         StatsLogEventWrapper e = new StatsLogEventWrapper(
-                                StatsLog.DANGEROUS_PERMISSION_STATE, elapsedNanos, wallClockNanos);
+                                atomId, elapsedNanos, wallClockNanos);
 
                         e.writeString(permName);
                         e.writeInt(pkg.applicationInfo.uid);
-                        e.writeString(null);
+                        if (atomId == StatsLog.DANGEROUS_PERMISSION_STATE) {
+                            e.writeString(null);
+                        }
                         e.writeBoolean((pkg.requestedPermissionsFlags[permNum]
                                 & REQUESTED_PERMISSION_GRANTED) != 0);
                         e.writeInt(permissionFlags);
@@ -2640,7 +2648,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 break;
             }
             case StatsLog.DANGEROUS_PERMISSION_STATE: {
-                pullDangerousPermissionState(elapsedNanos, wallClockNanos, ret);
+                pullDangerousPermissionState(StatsLog.DANGEROUS_PERMISSION_STATE, elapsedNanos,
+                        wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED: {
+                pullDangerousPermissionState(StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED,
+                        elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.TIME_ZONE_DATA_INFO: {

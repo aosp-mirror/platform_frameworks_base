@@ -16,8 +16,14 @@
 
 package com.android.systemui.pip;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
+import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_180;
 
+import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
@@ -32,9 +38,8 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IPinnedStackController;
 import android.view.IWindowManager;
+import android.view.WindowContainerTransaction;
 import android.view.WindowManagerGlobal;
-
-import com.android.internal.policy.PipSnapAlgorithm;
 
 import java.io.PrintWriter;
 
@@ -154,6 +159,7 @@ public class PipBoundsHandler {
      */
     public void onMinimizedStateChanged(boolean minimized) {
         mIsMinimized = minimized;
+        mSnapAlgorithm.setMinimized(minimized);
     }
 
     /**
@@ -199,6 +205,7 @@ public class PipBoundsHandler {
         mReentrySnapFraction = INVALID_SNAP_FRACTION;
         mReentrySize = null;
         mLastPipComponentName = null;
+        mLastDestinationBounds.setEmpty();
     }
 
     public Rect getLastDestinationBounds() {
@@ -235,8 +242,9 @@ public class PipBoundsHandler {
      */
     public void onPrepareAnimation(Rect sourceRectHint, float aspectRatio, Rect bounds) {
         final Rect destinationBounds;
+        final Rect defaultBounds = getDefaultBounds(mReentrySnapFraction, mReentrySize);
         if (bounds == null) {
-            destinationBounds = getDefaultBounds(mReentrySnapFraction, mReentrySize);
+            destinationBounds = new Rect(defaultBounds);
         } else {
             destinationBounds = new Rect(bounds);
         }
@@ -253,8 +261,81 @@ public class PipBoundsHandler {
             mPinnedStackController.startAnimation(destinationBounds, sourceRectHint,
                     -1 /* animationDuration */);
             mLastDestinationBounds.set(destinationBounds);
+            mPinnedStackController.reportBounds(defaultBounds,
+                    getMovementBounds(defaultBounds));
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to start PiP animation from SysUI", e);
+        }
+    }
+
+    /**
+     * Updates the display info, calculating and returning the new stack and movement bounds in the
+     * new orientation of the device if necessary.
+     *
+     * @return {@code true} if internal {@link DisplayInfo} is rotated, {@code false} otherwise.
+     */
+    public boolean onDisplayRotationChanged(Rect outBounds, int displayId, int fromRotation,
+            int toRotation, WindowContainerTransaction t) {
+        // Bail early if the event is not sent to current {@link #mDisplayInfo}
+        if ((displayId != mDisplayInfo.displayId) || (fromRotation == toRotation)) {
+            return false;
+        }
+
+        // Bail early if the pinned stack is staled.
+        final ActivityManager.StackInfo pinnedStackInfo;
+        try {
+            pinnedStackInfo = ActivityTaskManager.getService()
+                    .getStackInfo(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
+            if (pinnedStackInfo == null) return false;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get StackInfo for pinned stack", e);
+            return false;
+        }
+
+        // Calculate the snap fraction of the current stack along the old movement bounds
+        final Rect postChangeStackBounds = new Rect(mLastDestinationBounds);
+        final float snapFraction = getSnapFraction(postChangeStackBounds);
+
+        // Populate the new {@link #mDisplayInfo}.
+        // The {@link DisplayInfo} queried from DisplayManager would be the one before rotation,
+        // therefore, the width/height may require a swap first.
+        // Moving forward, we should get the new dimensions after rotation from DisplayLayout.
+        mDisplayInfo.rotation = toRotation;
+        updateDisplayInfoIfNeeded();
+
+        // Calculate the stack bounds in the new orientation based on same fraction along the
+        // rotated movement bounds.
+        final Rect postChangeMovementBounds = getMovementBounds(postChangeStackBounds,
+                false /* adjustForIme */);
+        mSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
+                snapFraction);
+        if (mIsMinimized) {
+            applyMinimizedOffset(postChangeStackBounds, postChangeMovementBounds);
+        }
+
+        try {
+            outBounds.set(postChangeStackBounds);
+            mLastDestinationBounds.set(outBounds);
+            mPinnedStackController.resetBoundsAnimation(outBounds);
+            mPinnedStackController.reportBounds(outBounds, getMovementBounds(outBounds));
+            t.setBounds(pinnedStackInfo.stackToken, outBounds);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to resize PiP on display rotation", e);
+        }
+        return true;
+    }
+
+    private void updateDisplayInfoIfNeeded() {
+        final boolean updateNeeded;
+        if ((mDisplayInfo.rotation == ROTATION_0) || (mDisplayInfo.rotation == ROTATION_180)) {
+            updateNeeded = (mDisplayInfo.logicalWidth > mDisplayInfo.logicalHeight);
+        } else {
+            updateNeeded = (mDisplayInfo.logicalWidth < mDisplayInfo.logicalHeight);
+        }
+        if (updateNeeded) {
+            final int newLogicalHeight = mDisplayInfo.logicalWidth;
+            mDisplayInfo.logicalWidth = mDisplayInfo.logicalHeight;
+            mDisplayInfo.logicalHeight = newLogicalHeight;
         }
     }
 

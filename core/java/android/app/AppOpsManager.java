@@ -26,8 +26,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.usage.UsageStatsManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -846,10 +846,12 @@ public class AppOpsManager {
     public static final int OP_ACCESS_MEDIA_LOCATION = 90;
     /** @hide Query all apps on device, regardless of declarations in the calling app manifest */
     public static final int OP_QUERY_ALL_PACKAGES = 91;
+    /** @hide Access all external storage */
+    public static final int OP_MANAGE_EXTERNAL_STORAGE = 92;
 
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 92;
+    public static final int _NUM_OP = 93;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1135,6 +1137,10 @@ public class AppOpsManager {
     public static final String OPSTR_READ_DEVICE_IDENTIFIERS = "android:read_device_identifiers";
     /** @hide Query all packages on device */
     public static final String OPSTR_QUERY_ALL_PACKAGES = "android:query_all_packages";
+    /** @hide Access all external storage */
+    @SystemApi
+    public static final String OPSTR_MANAGE_EXTERNAL_STORAGE =
+            "android:manage_external_storage";
 
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
@@ -1317,6 +1323,7 @@ public class AppOpsManager {
             OP_READ_DEVICE_IDENTIFIERS,         // READ_DEVICE_IDENTIFIERS
             OP_ACCESS_MEDIA_LOCATION,           // ACCESS_MEDIA_LOCATION
             OP_QUERY_ALL_PACKAGES,              // QUERY_ALL_PACKAGES
+            OP_MANAGE_EXTERNAL_STORAGE,         // MANAGE_EXTERNAL_STORAGE
     };
 
     /**
@@ -1415,6 +1422,7 @@ public class AppOpsManager {
             OPSTR_READ_DEVICE_IDENTIFIERS,
             OPSTR_ACCESS_MEDIA_LOCATION,
             OPSTR_QUERY_ALL_PACKAGES,
+            OPSTR_MANAGE_EXTERNAL_STORAGE,
     };
 
     /**
@@ -1514,6 +1522,7 @@ public class AppOpsManager {
             "READ_DEVICE_IDENTIFIERS",
             "ACCESS_MEDIA_LOCATION",
             "QUERY_ALL_PACKAGES",
+            "MANAGE_EXTERNAL_STORAGE"
     };
 
     /**
@@ -1614,6 +1623,7 @@ public class AppOpsManager {
             null, // no direct permission for OP_READ_DEVICE_IDENTIFIERS
             Manifest.permission.ACCESS_MEDIA_LOCATION,
             null, // no permission for OP_QUERY_ALL_PACKAGES
+            null, // no permission for OP_MANAGE_EXTERNAL_STORAGE
     };
 
     /**
@@ -1714,6 +1724,7 @@ public class AppOpsManager {
             null, // READ_DEVICE_IDENTIFIERS
             null, // ACCESS_MEDIA_LOCATION
             null, // QUERY_ALL_PACKAGES
+            null, // MANAGE_EXTERNAL_STORAGE
     };
 
     /**
@@ -1813,6 +1824,7 @@ public class AppOpsManager {
             false, // READ_DEVICE_IDENTIFIERS
             false, // ACCESS_MEDIA_LOCATION
             false, // QUERY_ALL_PACKAGES
+            false, // MANAGE_EXTERNAL_STORAGE
     };
 
     /**
@@ -1911,6 +1923,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ERRORED, // READ_DEVICE_IDENTIFIERS
             AppOpsManager.MODE_ALLOWED, // ALLOW_MEDIA_LOCATION
             AppOpsManager.MODE_DEFAULT, // QUERY_ALL_PACKAGES
+            AppOpsManager.MODE_DEFAULT, // MANAGE_EXTERNAL_STORAGE
     };
 
     /**
@@ -2013,6 +2026,7 @@ public class AppOpsManager {
             false, // READ_DEVICE_IDENTIFIERS
             false, // ACCESS_MEDIA_LOCATION
             false, // QUERY_ALL_PACKAGES
+            false, // MANAGE_EXTERNAL_STORAGE
     };
 
     /**

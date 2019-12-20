@@ -16,7 +16,7 @@
 
 package android.media;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * The AudioGain describes a gain controller. Gain controllers are exposed by

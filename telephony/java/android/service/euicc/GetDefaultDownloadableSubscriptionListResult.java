@@ -17,7 +17,7 @@ package android.service.euicc;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.euicc.DownloadableSubscription;

@@ -28,12 +28,12 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothCodecConfig;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -374,6 +374,10 @@ public class AudioManager {
     public static final int STREAM_TTS = AudioSystem.STREAM_TTS;
     /** Used to identify the volume of audio streams for accessibility prompts */
     public static final int STREAM_ACCESSIBILITY = AudioSystem.STREAM_ACCESSIBILITY;
+    /** @hide Used to identify the volume of audio streams for virtual assistant */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int STREAM_ASSISTANT = AudioSystem.STREAM_ASSISTANT;
 
     /** Number of audio streams */
     /**

@@ -516,7 +516,7 @@ Maybe<ResourceId> ParseResourceId(const StringPiece& str) {
   if (android::ResTable::stringToInt(str16.data(), str16.size(), &value)) {
     if (value.dataType == android::Res_value::TYPE_INT_HEX) {
       ResourceId id(value.data);
-      if (id.is_valid_dynamic()) {
+      if (id.is_valid()) {
         return id;
       }
     }

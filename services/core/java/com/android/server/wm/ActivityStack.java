@@ -821,10 +821,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         // Update bounds if applicable
         boolean hasNewOverrideBounds = false;
         // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
-        if (overrideWindowingMode == WINDOWING_MODE_PINNED) {
-            // Pinned calculation already includes rotation
-            hasNewOverrideBounds = calculatePinnedBoundsForConfigChange(newBounds);
-        } else if (!matchParentBounds()) {
+        if ((overrideWindowingMode != WINDOWING_MODE_PINNED) && !matchParentBounds()) {
             // If the parent (display) has rotated, rotate our bounds to best-fit where their
             // bounds were on the pre-rotated display.
             final int newRotation = getWindowConfiguration().getRotation();
@@ -882,9 +879,6 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                         null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
                         null /* tempOtherTaskBounds */, null /* tempOtherTaskInsetBounds */,
                         PRESERVE_WINDOWS, true /* deferResume */);
-            } else {
-                resize(new Rect(newBounds), null /* tempTaskBounds */,
-                        null /* tempTaskInsetBounds */, PRESERVE_WINDOWS, true /* deferResume */);
             }
         }
         if (prevIsAlwaysOnTop != isAlwaysOnTop()) {
@@ -3664,8 +3658,9 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         }
 
         final DisplayContent display = getDisplay();
-        final boolean topFocused = mRootActivityContainer.isTopDisplayFocusedStack(this);
-        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "removeChild: task=" + child);
+        if (DEBUG_TASK_MOVEMENT) {
+            Slog.d(TAG_WM, "removeChild: task=" + child + " reason=" + reason);
+        }
 
         super.removeChild(child);
 
@@ -3681,25 +3676,11 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             // Stack is now empty...
           removeIfPossible();
         }
-
-        moveHomeStackToFrontIfNeeded(topFocused, display, reason);
     }
 
     @Override
     void removeChild(WindowContainer child) {
         removeChild(child, "removeChild");
-    }
-
-    void moveHomeStackToFrontIfNeeded(
-            boolean wasTopFocusedStack, DisplayContent display, String reason) {
-        if (!hasChild() && wasTopFocusedStack) {
-            // We only need to adjust focused stack if this stack is in focus and we are not in the
-            // process of moving the task to the top of the stack that will be focused.
-            String myReason = reason + " leftTaskHistoryEmpty";
-            if (!inMultiWindowMode() || adjustFocusToNextFocusableStack(myReason) == null) {
-                display.moveHomeStackToFront(myReason);
-            }
-        }
     }
 
     Task createTask(int taskId, ActivityInfo info, Intent intent,
@@ -4102,45 +4083,27 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     }
 
     /**
-     * Updates the passed-in {@code inOutBounds} based on the current state of the
-     * pinned controller. This gets run *after* the override configuration is updated, so it's
-     * safe to rely on the controller's state in here (though eventually this dependence should
-     * be removed).
+     * Reset the current animation running on {@link #mBoundsAnimationTarget}.
      *
-     * This does NOT modify this TaskStack's configuration. However, it does, for the time-being,
-     * update pinned controller state.
-     *
-     * @param inOutBounds the bounds to update (both input and output).
-     * @return true if bounds were updated to some non-empty value.
+     * @param destinationBounds the final destination bounds
      */
-    boolean calculatePinnedBoundsForConfigChange(Rect inOutBounds) {
-        boolean animating = false;
-        if ((mBoundsAnimatingRequested || mBoundsAnimating) && !mBoundsAnimationTarget.isEmpty()) {
-            animating = true;
-            getFinalAnimationBounds(mTmpRect2);
-        } else {
-            mTmpRect2.set(inOutBounds);
-        }
-        boolean updated = mDisplayContent.mPinnedStackControllerLocked.onTaskStackBoundsChanged(
-                mTmpRect2, mTmpRect3);
-        if (updated) {
-            inOutBounds.set(mTmpRect3);
+    void resetCurrentBoundsAnimation(Rect destinationBounds) {
+        boolean animating = (mBoundsAnimatingRequested || mBoundsAnimating)
+                && !mBoundsAnimationTarget.isEmpty();
 
-            // The final boundary is updated while there is an existing boundary animation. Let's
-            // cancel this animation to prevent the obsolete animation overwritten updated bounds.
-            if (animating && !inOutBounds.equals(mBoundsAnimationTarget)) {
-                final DisplayContent displayContent = getDisplayContent();
-                displayContent.mBoundsAnimationController.getHandler().post(() ->
-                        displayContent.mBoundsAnimationController.cancel(this));
-            }
-            // Once we've set the bounds based on the rotation of the old bounds in the new
-            // orientation, clear the animation target bounds since they are obsolete, and
-            // cancel any currently running animations
-            mBoundsAnimationTarget.setEmpty();
-            mBoundsAnimationSourceHintBounds.setEmpty();
-            mCancelCurrentBoundsAnimation = true;
+        // The final boundary is updated while there is an existing boundary animation. Let's
+        // cancel this animation to prevent the obsolete animation overwritten updated bounds.
+        if (animating && !destinationBounds.equals(mBoundsAnimationTarget)) {
+            final BoundsAnimationController controller =
+                    getDisplayContent().mBoundsAnimationController;
+            controller.getHandler().post(() -> controller.cancel(this));
         }
-        return updated;
+        // Once we've set the bounds based on the rotation of the old bounds in the new
+        // orientation, clear the animation target bounds since they are obsolete, and
+        // cancel any currently running animations
+        mBoundsAnimationTarget.setEmpty();
+        mBoundsAnimationSourceHintBounds.setEmpty();
+        mCancelCurrentBoundsAnimation = true;
     }
 
     /**

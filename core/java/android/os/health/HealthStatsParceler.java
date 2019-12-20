@@ -17,10 +17,9 @@
 package android.os.health;
 
 import android.annotation.TestApi;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 /**
  * Class to allow sending the HealthStats through aidl generated glue.

@@ -16,9 +16,9 @@
 
 package android.appwidget;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;

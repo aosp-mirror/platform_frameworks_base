@@ -20,7 +20,6 @@ import android.Manifest.permission;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.role.RoleManager;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -47,6 +46,8 @@ import android.util.Log;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+
+import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.util.Collection;
 import java.util.HashMap;

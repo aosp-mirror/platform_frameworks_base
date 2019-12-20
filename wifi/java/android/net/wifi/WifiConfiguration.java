@@ -36,14 +36,9 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.BackupUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
@@ -123,7 +118,9 @@ public class WifiConfiguration implements Parcelable {
                 OWE,
                 SUITE_B_192,
                 WPA_PSK_SHA256,
-                WPA_EAP_SHA256})
+                WPA_EAP_SHA256,
+                WAPI_PSK,
+                WAPI_CERT})
         public @interface KeyMgmtScheme {}
 
         /** WPA is not used; plaintext or static WEP could be used. */
@@ -190,11 +187,26 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int WPA_EAP_SHA256 = 12;
 
+        /**
+         * WAPI pre-shared key (requires {@code preSharedKey} to be specified).
+         * @hide
+         */
+        @SystemApi
+        public static final int WAPI_PSK = 13;
+
+        /**
+         * WAPI certificate to be specified.
+         * @hide
+         */
+        @SystemApi
+        public static final int WAPI_CERT = 14;
+
         public static final String varName = "key_mgmt";
 
         public static final String[] strings = { "NONE", "WPA_PSK", "WPA_EAP",
                 "IEEE8021X", "WPA2_PSK", "OSEN", "FT_PSK", "FT_EAP",
-                "SAE", "OWE", "SUITE_B_192", "WPA_PSK_SHA256", "WPA_EAP_SHA256" };
+                "SAE", "OWE", "SUITE_B_192", "WPA_PSK_SHA256", "WPA_EAP_SHA256",
+                "WAPI_PSK", "WAPI_CERT" };
     }
 
     /**
@@ -215,9 +227,14 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int OSEN = 2;
 
+        /**
+         * WAPI Protocol
+         */
+        public static final int WAPI = 3;
+
         public static final String varName = "proto";
 
-        public static final String[] strings = { "WPA", "RSN", "OSEN" };
+        public static final String[] strings = { "WPA", "RSN", "OSEN", "WAPI" };
     }
 
     /**
@@ -260,10 +277,14 @@ public class WifiConfiguration implements Parcelable {
          * AES in Galois/Counter Mode
          */
         public static final int GCMP_256 = 3;
+        /**
+         * SMS4 cipher for WAPI
+         */
+        public static final int SMS4 = 4;
 
         public static final String varName = "pairwise";
 
-        public static final String[] strings = { "NONE", "TKIP", "CCMP", "GCMP_256" };
+        public static final String[] strings = { "NONE", "TKIP", "CCMP", "GCMP_256", "SMS4" };
     }
 
     /**
@@ -301,12 +322,17 @@ public class WifiConfiguration implements Parcelable {
          * AES in Galois/Counter Mode
          */
         public static final int GCMP_256 = 5;
+        /**
+         * SMS4 cipher for WAPI
+         */
+        public static final int SMS4 = 6;
 
         public static final String varName = "group";
 
         public static final String[] strings =
                 { /* deprecated */ "WEP40", /* deprecated */ "WEP104",
-                        "TKIP", "CCMP", "GTK_NOT_USED", "GCMP_256" };
+                        "TKIP", "CCMP", "GTK_NOT_USED", "GCMP_256",
+                        "SMS4" };
     }
 
     /**
@@ -388,6 +414,10 @@ public class WifiConfiguration implements Parcelable {
     public static final int SECURITY_TYPE_EAP_SUITE_B = 5;
     /** @hide */
     public static final int SECURITY_TYPE_OWE = 6;
+    /** @hide */
+    public static final int SECURITY_TYPE_WAPI_PSK = 7;
+    /** @hide */
+    public static final int SECURITY_TYPE_WAPI_CERT = 8;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -398,7 +428,9 @@ public class WifiConfiguration implements Parcelable {
             SECURITY_TYPE_EAP,
             SECURITY_TYPE_SAE,
             SECURITY_TYPE_EAP_SUITE_B,
-            SECURITY_TYPE_OWE
+            SECURITY_TYPE_OWE,
+            SECURITY_TYPE_WAPI_PSK,
+            SECURITY_TYPE_WAPI_CERT
     })
     public @interface SecurityType {}
 
@@ -449,6 +481,18 @@ public class WifiConfiguration implements Parcelable {
             case SECURITY_TYPE_OWE:
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.OWE);
                 requirePMF = true;
+                break;
+            case SECURITY_TYPE_WAPI_PSK:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WAPI_PSK);
+                allowedProtocols.set(WifiConfiguration.Protocol.WAPI);
+                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.SMS4);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.SMS4);
+                break;
+            case SECURITY_TYPE_WAPI_CERT:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WAPI_CERT);
+                allowedProtocols.set(WifiConfiguration.Protocol.WAPI);
+                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.SMS4);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.SMS4);
                 break;
             default:
                 throw new IllegalArgumentException("unknown security type " + securityType);
@@ -2350,6 +2394,10 @@ public class WifiConfiguration implements Parcelable {
             return KeyMgmt.OWE;
         } else if (allowedKeyManagement.get(KeyMgmt.SUITE_B_192)) {
             return KeyMgmt.SUITE_B_192;
+        } else if (allowedKeyManagement.get(KeyMgmt.WAPI_PSK)) {
+            return KeyMgmt.WAPI_PSK;
+        } else if (allowedKeyManagement.get(KeyMgmt.WAPI_CERT)) {
+            return KeyMgmt.WAPI_CERT;
         }
         return KeyMgmt.NONE;
     }
@@ -2388,6 +2436,10 @@ public class WifiConfiguration implements Parcelable {
             key = SSID + KeyMgmt.strings[KeyMgmt.SAE];
         } else if (allowedKeyManagement.get(KeyMgmt.SUITE_B_192)) {
             key = SSID + KeyMgmt.strings[KeyMgmt.SUITE_B_192];
+        } else if (allowedKeyManagement.get(KeyMgmt.WAPI_PSK)) {
+            key = SSID + KeyMgmt.strings[KeyMgmt.WAPI_PSK];
+        } else if (allowedKeyManagement.get(KeyMgmt.WAPI_CERT)) {
+            key = SSID + KeyMgmt.strings[KeyMgmt.WAPI_CERT];
         } else {
             key = SSID + KeyMgmt.strings[KeyMgmt.NONE];
         }
@@ -2768,54 +2820,4 @@ public class WifiConfiguration implements Parcelable {
                 return new WifiConfiguration[size];
             }
         };
-
-    /**
-     * Serialize the Soft AP configuration contained in this object for backup.
-     * @hide
-     */
-    @NonNull
-    // TODO(b/144368124): this method should be removed once we migrate to SoftApConfiguration
-    public byte[] getBytesForBackup() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream out = new DataOutputStream(baos);
-
-        out.writeInt(BACKUP_VERSION);
-        BackupUtils.writeString(out, SSID);
-        out.writeInt(apBand);
-        out.writeInt(apChannel);
-        BackupUtils.writeString(out, preSharedKey);
-        out.writeInt(getAuthType());
-        out.writeBoolean(hiddenSSID);
-        return baos.toByteArray();
-    }
-
-    /**
-     * Deserialize a byte array containing Soft AP configuration into a WifiConfiguration object.
-     * @return The deserialized WifiConfiguration containing Soft AP configuration, or null if
-     * the version contains a bad dataset e.g. Version 1
-     * @throws BackupUtils.BadVersionException if the version is unrecognized
-     * @hide
-     */
-    @Nullable
-    // TODO(b/144368124): this method should be removed once we migrate to SoftApConfiguration
-    public static WifiConfiguration getWifiConfigFromBackup(@NonNull DataInputStream in)
-            throws IOException, BackupUtils.BadVersionException {
-        WifiConfiguration config = new WifiConfiguration();
-        int version = in.readInt();
-        if (version < 1 || version > BACKUP_VERSION) {
-            throw new BackupUtils.BadVersionException("Unknown Backup Serialization Version");
-        }
-
-        if (version == 1) return null; // Version 1 is a bad dataset.
-
-        config.SSID = BackupUtils.readString(in);
-        config.apBand = in.readInt();
-        config.apChannel = in.readInt();
-        config.preSharedKey = BackupUtils.readString(in);
-        config.allowedKeyManagement.set(in.readInt());
-        if (version >= 3) {
-            config.hiddenSSID = in.readBoolean();
-        }
-        return config;
-    }
 }

@@ -28,9 +28,9 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.Preconditions;
 
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * Helper class for monitoring the state of packages: adding, removing,
@@ -93,7 +93,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
             throw new IllegalStateException("Already registered");
         }
         mRegisteredContext = context;
-        mRegisteredHandler = Preconditions.checkNotNull(handler);
+        mRegisteredHandler = Objects.requireNonNull(handler);
         if (user != null) {
             context.registerReceiverAsUser(this, user, sPackageFilt, null, mRegisteredHandler);
             context.registerReceiverAsUser(this, user, sNonDataFilt, null, mRegisteredHandler);

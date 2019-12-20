@@ -12,21 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/matchers/SimpleLogMatchingTracker.h"
 #include "src/metrics/ValueMetricProducer.h"
-#include "src/stats_log_util.h"
-#include "metrics_test_helper.h"
-#include "tests/statsd_test_util.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <math.h>
 #include <stdio.h>
+
 #include <vector>
+
+#include "metrics_test_helper.h"
+#include "src/matchers/SimpleLogMatchingTracker.h"
+#include "src/metrics/MetricProducer.h"
+#include "src/stats_log_util.h"
+#include "tests/statsd_test_util.h"
 
 using namespace testing;
 using android::sp;
-using android::util::ProtoReader;
 using std::make_shared;
 using std::set;
 using std::shared_ptr;
@@ -128,6 +130,24 @@ class ValueMetricProducerTestHelper {
         return valueProducer;
     }
 
+    static sp<ValueMetricProducer> createValueProducerWithNoInitialCondition(
+            sp<MockStatsPullerManager>& pullerManager, ValueMetric& metric) {
+        UidMap uidMap;
+        SimpleAtomMatcher atomMatcher;
+        atomMatcher.set_atom_id(tagId);
+        sp<EventMatcherWizard> eventMatcherWizard =
+                new EventMatcherWizard({new SimpleLogMatchingTracker(
+                        atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+        sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+        EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
+        EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillRepeatedly(Return());
+
+        sp<ValueMetricProducer> valueProducer = new ValueMetricProducer(
+                kConfigKey, metric, 1, wizard, logEventMatcherIndex, eventMatcherWizard, tagId,
+                bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+        return valueProducer;
+    }
+
     static ValueMetric createMetric() {
         ValueMetric metric;
         metric.set_id(metricId);
@@ -206,7 +226,7 @@ TEST(ValueMetricProducerTest, TestFirstBucket) {
  * Tests pulled atoms with no conditions
  */
 TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
-    ValueMetric metric = ValueMetricProducerTestHelper::createMetric(); 
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, Pull(tagId, _))
             .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
@@ -290,7 +310,7 @@ TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
 }
 
 TEST(ValueMetricProducerTest, TestPartialBucketCreated) {
-    ValueMetric metric = ValueMetricProducerTestHelper::createMetric(); 
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, Pull(tagId, _))
             // Initialize bucket.
@@ -347,7 +367,7 @@ TEST(ValueMetricProducerTest, TestPartialBucketCreated) {
  * Tests pulled atoms with filtering
  */
 TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering) {
-    ValueMetric metric = ValueMetricProducerTestHelper::createMetric(); 
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
     UidMap uidMap;
     SimpleAtomMatcher atomMatcher;
@@ -696,7 +716,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
 }
 
 TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
-    ValueMetric metric = ValueMetricProducerTestHelper::createMetric(); 
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
     UidMap uidMap;
     SimpleAtomMatcher atomMatcher;
@@ -1026,7 +1046,7 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
 
 // Test value metric no condition, the pull on bucket boundary come in time and too late
 TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
-    ValueMetric metric = ValueMetricProducerTestHelper::createMetric(); 
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, Pull(tagId, _)).WillOnce(Return(true));
     sp<ValueMetricProducer> valueProducer =
@@ -2104,7 +2124,10 @@ TEST(ValueMetricProducerTest, TestBaseSetOnConditionChange) {
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
 }
 
-TEST(ValueMetricProducerTest, TestInvalidBucketWhenOneConditionFailed) {
+/*
+ * Tests that a bucket is marked invalid when a condition change pull fails.
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenOneConditionFailed) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
@@ -2162,9 +2185,33 @@ TEST(ValueMetricProducerTest, TestInvalidBucketWhenOneConditionFailed) {
     EXPECT_EQ(140, curInterval.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucket2StartTimeNs + 10, false /* include partial bucket */, true,
+                                FAST /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 2), dropEvent.drop_time_millis());
 }
 
-TEST(ValueMetricProducerTest, TestInvalidBucketWhenGuardRailHit) {
+/*
+ * Tests that a bucket is marked invalid when the guardrail is hit.
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenGuardRailHit) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
     metric.mutable_dimensions_in_what()->set_field(tagId);
     metric.mutable_dimensions_in_what()->add_child()->set_field(1);
@@ -2191,9 +2238,47 @@ TEST(ValueMetricProducerTest, TestInvalidBucketWhenGuardRailHit) {
     valueProducer->onConditionChanged(true, bucketStartTimeNs + 2);
     EXPECT_EQ(true, valueProducer->mCurrentBucketIsInvalid);
     EXPECT_EQ(0UL, valueProducer->mCurrentSlicedBucket.size());
+    EXPECT_EQ(0UL, valueProducer->mSkippedBuckets.size());
+
+    // Bucket 2 start.
+    vector<shared_ptr<LogEvent>> allData;
+    allData.clear();
+    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 1);
+    event->write(1);
+    event->write(10);
+    event->init();
+    allData.push_back(event);
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
+
+    // First bucket added to mSkippedBuckets after flush.
+    EXPECT_EQ(1UL, valueProducer->mSkippedBuckets.size());
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucket2StartTimeNs + 10000, false /* include recent buckets */,
+                                true, FAST /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::DIMENSION_GUARDRAIL_REACHED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 2), dropEvent.drop_time_millis());
 }
 
-TEST(ValueMetricProducerTest, TestInvalidBucketWhenInitialPullFailed) {
+/*
+ * Tests that a bucket is marked invalid when the bucket's initial pull fails.
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenInitialPullFailed) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
@@ -2257,9 +2342,34 @@ TEST(ValueMetricProducerTest, TestInvalidBucketWhenInitialPullFailed) {
     EXPECT_EQ(140, curInterval.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucket2StartTimeNs + 10000, false /* include recent buckets */,
+                                true, FAST /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 2), dropEvent.drop_time_millis());
 }
 
-TEST(ValueMetricProducerTest, TestInvalidBucketWhenLastPullFailed) {
+/*
+ * Tests that a bucket is marked invalid when the bucket's final pull fails
+ * (i.e. failed pull on bucket boundary).
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenLastPullFailed) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
@@ -2300,8 +2410,6 @@ TEST(ValueMetricProducerTest, TestInvalidBucketWhenLastPullFailed) {
     allData.push_back(event);
     valueProducer->onDataPulled(allData, /** succeed */ true, bucketStartTimeNs);
 
-    // This will fail and should invalidate the whole bucket since we do not have all the data
-    // needed to compute the metric value when the screen was on.
     valueProducer->onConditionChanged(false, bucketStartTimeNs + 2);
     valueProducer->onConditionChanged(true, bucketStartTimeNs + 3);
 
@@ -2317,17 +2425,38 @@ TEST(ValueMetricProducerTest, TestInvalidBucketWhenLastPullFailed) {
     valueProducer->flushIfNeededLocked(bucket2StartTimeNs + 1);
 
     EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
-    // Last pull failed so based has been reset.
+    // Last pull failed so base has been reset.
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval& curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(false, curInterval.hasBase);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(false, valueProducer->mHasGlobalBase);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucket2StartTimeNs + 10000, false /* include recent buckets */,
+                                true, FAST /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs), dropEvent.drop_time_millis());
 }
 
 TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onDataPulled) {
-    ValueMetric metric = ValueMetricProducerTestHelper::createMetric(); 
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, Pull(tagId, _))
             // Start bucket.
@@ -2520,48 +2649,6 @@ TEST(ValueMetricProducerTest, TestPartialResetOnBucketBoundaries) {
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
 }
 
-TEST(ValueMetricProducerTest, TestBucketIncludingUnknownConditionIsInvalid) {
-    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
-    metric.mutable_dimensions_in_what()->set_field(tagId);
-    metric.mutable_dimensions_in_what()->add_child()->set_field(1);
-    metric.set_condition(StringToId("SCREEN_ON"));
-
-    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-    EXPECT_CALL(*pullerManager, Pull(tagId, _))
-            // Second onConditionChanged.
-            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-                data->clear();
-                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs);
-                event->write(tagId);
-                event->write(2);
-                event->write(2);
-                event->init();
-                data->push_back(event);
-                return true;
-            }));
-
-    sp<ValueMetricProducer> valueProducer =
-            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
-    valueProducer->mCondition = ConditionState::kUnknown;
-
-    valueProducer->onConditionChanged(false, bucketStartTimeNs + 10);
-    valueProducer->onConditionChanged(true, bucketStartTimeNs + 20);
-
-    // End of bucket
-    vector<shared_ptr<LogEvent>> allData;
-    allData.clear();
-    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 1);
-    event->write(4);
-    event->write(4);
-    event->init();
-    allData.push_back(event);
-    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
-
-    // Bucket is incomplete so it is mark as invalid, however the base is fine since the last pull
-    // succeeded.
-    EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
-}
-
 TEST(ValueMetricProducerTest, TestFullBucketResetWhenLastBucketInvalid) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
@@ -2750,6 +2837,7 @@ TEST(ValueMetricProducerTest, TestDataIsNotUpdatedWhenNoConditionChanged) {
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {2}, {2});
 }
 
+// TODO: b/145705635 fix or delete this test
 TEST(ValueMetricProducerTest, TestBucketInvalidIfGlobalBaseIsNotSet) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
 
@@ -2797,25 +2885,8 @@ TEST(ValueMetricProducerTest, TestBucketInvalidIfGlobalBaseIsNotSet) {
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {}, {});
 }
 
-static StatsLogReport outputStreamToProto(ProtoOutputStream* proto) {
-    vector<uint8_t> bytes;
-    bytes.resize(proto->size());
-    size_t pos = 0;
-    sp<ProtoReader> reader = proto->data();
-    while (reader->readBuffer() != NULL) {
-        size_t toRead = reader->currentToRead();
-        std::memcpy(&((bytes)[pos]), reader->readBuffer(), toRead);
-        pos += toRead;
-        reader->move(toRead);
-    }
-
-    StatsLogReport report;
-    report.ParseFromArray(bytes.data(), bytes.size());
-    return report;
-}
-
 TEST(ValueMetricProducerTest, TestPullNeededFastDump) {
-    ValueMetric metric = ValueMetricProducerTestHelper::createMetric(); 
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
     UidMap uidMap;
     SimpleAtomMatcher atomMatcher;
@@ -2857,7 +2928,7 @@ TEST(ValueMetricProducerTest, TestPullNeededFastDump) {
 }
 
 TEST(ValueMetricProducerTest, TestFastDumpWithoutCurrentBucket) {
-    ValueMetric metric = ValueMetricProducerTestHelper::createMetric(); 
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
     UidMap uidMap;
     SimpleAtomMatcher atomMatcher;
@@ -2910,7 +2981,7 @@ TEST(ValueMetricProducerTest, TestFastDumpWithoutCurrentBucket) {
 }
 
 TEST(ValueMetricProducerTest, TestPullNeededNoTimeConstraints) {
-    ValueMetric metric = ValueMetricProducerTestHelper::createMetric(); 
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
     UidMap uidMap;
     SimpleAtomMatcher atomMatcher;
@@ -3101,6 +3172,600 @@ TEST(ValueMetricProducerTest, TestPulledData_noDiff_withFailure) {
 
     // No buckets, we had a failure.
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {}, {});
+}
+
+/*
+ * Test that DUMP_REPORT_REQUESTED dump reason is logged.
+ *
+ * For the bucket to be marked invalid during a dump report requested,
+ * three things must be true:
+ * - we want to include the current partial bucket
+ * - we need a pull (metric is pulled and condition is true)
+ * - the dump latency must be FAST
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenDumpReportRequested) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // Condition change to true.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 20);
+                event->write("field1");
+                event->write(10);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+
+    // Condition change event.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 20);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucketStartTimeNs + 40, true /* include recent buckets */, true,
+                                FAST /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::DUMP_REPORT_REQUESTED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 40), dropEvent.drop_time_millis());
+}
+
+/*
+ * Test that EVENT_IN_WRONG_BUCKET dump reason is logged for a late condition
+ * change event (i.e. the condition change occurs in the wrong bucket).
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenConditionEventWrongBucket) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // Condition change to true.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 50);
+                event->write("field1");
+                event->write(10);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+
+    // Condition change event.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 50);
+
+    // Bucket boundary pull.
+    vector<shared_ptr<LogEvent>> allData;
+    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs);
+    event->write("field1");
+    event->write(15);
+    event->init();
+    allData.push_back(event);
+    valueProducer->onDataPulled(allData, /** succeeds */ true, bucket2StartTimeNs + 1);
+
+    // Late condition change event.
+    valueProducer->onConditionChanged(false, bucket2StartTimeNs - 100);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucket2StartTimeNs + 100, true /* include recent buckets */, true,
+                                NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(1, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucket3StartTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::EVENT_IN_WRONG_BUCKET, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs - 100), dropEvent.drop_time_millis());
+}
+
+/*
+ * Test that EVENT_IN_WRONG_BUCKET dump reason is logged for a late accumulate
+ * event (i.e. the accumulate events call occurs in the wrong bucket).
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenAccumulateEventWrongBucket) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // Condition change to true.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 50);
+                event->write("field1");
+                event->write(10);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Dump report requested.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 100);
+                event->write("field1");
+                event->write(15);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+
+    // Condition change event.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 50);
+
+    // Bucket boundary pull.
+    vector<shared_ptr<LogEvent>> allData;
+    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs);
+    event->write("field1");
+    event->write(15);
+    event->init();
+    allData.push_back(event);
+    valueProducer->onDataPulled(allData, /** succeeds */ true, bucket2StartTimeNs + 1);
+
+    allData.clear();
+    event = make_shared<LogEvent>(tagId, bucket2StartTimeNs - 100);
+    event->write("field1");
+    event->write(20);
+    event->init();
+    allData.push_back(event);
+
+    // Late accumulateEvents event.
+    valueProducer->accumulateEvents(allData, bucket2StartTimeNs - 100, bucket2StartTimeNs - 100);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucket2StartTimeNs + 100, true /* include recent buckets */, true,
+                                NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(1, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucket3StartTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::EVENT_IN_WRONG_BUCKET, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs - 100), dropEvent.drop_time_millis());
+}
+
+/*
+ * Test that CONDITION_UNKNOWN dump reason is logged due to an unknown condition
+ * when a metric is initialized.
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenConditionUnknown) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // Condition change to true.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 50);
+                event->write("field1");
+                event->write(10);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Dump report requested.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 100);
+                event->write("field1");
+                event->write(15);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithNoInitialCondition(pullerManager,
+                                                                                     metric);
+
+    // Condition change event.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 50);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucketStartTimeNs + 100, true /* include recent buckets */, true,
+                                NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::CONDITION_UNKNOWN, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 100), dropEvent.drop_time_millis());
+}
+
+/*
+ * Test that PULL_FAILED dump reason is logged due to a pull failure in
+ * #pullAndMatchEventsLocked.
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenPullFailed) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // Condition change to true.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 50);
+                event->write("field1");
+                event->write(10);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Dump report requested, pull fails.
+            .WillOnce(Return(false));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+
+    // Condition change event.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 50);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucketStartTimeNs + 100, true /* include recent buckets */, true,
+                                NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 100), dropEvent.drop_time_millis());
+}
+
+/*
+ * Test that MULTIPLE_BUCKETS_SKIPPED dump reason is logged when a log event
+ * skips over more than one bucket.
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenMultipleBucketsSkipped) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // Condition change to true.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
+                event->write("field1");
+                event->write(10);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Dump report requested.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event =
+                        make_shared<LogEvent>(tagId, bucket4StartTimeNs + 1000);
+                event->write("field1");
+                event->write(15);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+
+    // Condition change event.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 10);
+
+    // Condition change event that skips forward by three buckets.
+    valueProducer->onConditionChanged(false, bucket4StartTimeNs + 10);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucket4StartTimeNs + 1000, true /* include recent buckets */, true,
+                                NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::MULTIPLE_BUCKETS_SKIPPED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucket4StartTimeNs + 10), dropEvent.drop_time_millis());
+}
+
+/*
+ * Test that BUCKET_TOO_SMALL dump reason is logged when a flushed bucket size
+ * is smaller than the "min_bucket_size_nanos" specified in the metric config.
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestBucketDropWhenBucketTooSmall) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+    metric.set_min_bucket_size_nanos(10000000000);  // 10 seconds
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // Condition change to true.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
+                event->write("field1");
+                event->write(10);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Dump report requested.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event =
+                        make_shared<LogEvent>(tagId, bucketStartTimeNs + 9000000);
+                event->write("field1");
+                event->write(15);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+
+    // Condition change event.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 10);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucketStartTimeNs + 9000000, true /* include recent buckets */,
+                                true, NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 9000000),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::BUCKET_TOO_SMALL, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 9000000), dropEvent.drop_time_millis());
+}
+
+/*
+ * Test multiple bucket drop events in the same bucket.
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestMultipleBucketDropEvents) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // Condition change to true.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
+                event->write("field1");
+                event->write(10);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithNoInitialCondition(pullerManager,
+                                                                                     metric);
+
+    // Condition change event.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 10);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucketStartTimeNs + 1000, true /* include recent buckets */, true,
+                                FAST /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(2, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::CONDITION_UNKNOWN, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 10), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(1);
+    EXPECT_EQ(BucketDropReason::DUMP_REPORT_REQUESTED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 1000), dropEvent.drop_time_millis());
+}
+
+/*
+ * Test that the number of logged bucket drop events is capped at the maximum.
+ * The maximum is currently 10 and is set in MetricProducer::maxDropEventsReached().
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestMaxBucketDropEvents) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // First condition change event.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                for (int i = 0; i < 2000; i++) {
+                    shared_ptr<LogEvent> event =
+                            make_shared<LogEvent>(tagId, bucketStartTimeNs + 1);
+                    event->write(i);
+                    event->write(i);
+                    event->init();
+                    data->push_back(event);
+                }
+                return true;
+            }))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 220);
+                event->write("field1");
+                event->write(10);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithNoInitialCondition(pullerManager,
+                                                                                     metric);
+
+    // First condition change event causes guardrail to be reached.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 10);
+
+    // 2-10 condition change events result in failed pulls.
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 30);
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 50);
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 70);
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 90);
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 100);
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 150);
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 170);
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 190);
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 200);
+
+    // Condition change event 11
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 220);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    // Because we already have 10 dump events in the current bucket,
+    // this case should not be added to the list of dump events.
+    valueProducer->onDumpReport(bucketStartTimeNs + 1000, true /* include recent buckets */, true,
+                                FAST /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(10, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::CONDITION_UNKNOWN, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 10), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(1);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 30), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(2);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 50), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(3);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 70), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(4);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 90), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(5);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 100), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(6);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 150), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(7);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 170), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(8);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 190), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(9);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 200), dropEvent.drop_time_millis());
 }
 
 }  // namespace statsd

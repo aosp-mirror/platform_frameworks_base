@@ -2182,21 +2182,11 @@ class Task extends WindowContainer<WindowContainer> {
     void reparent(ActivityStack stack, int position, boolean moveParents, String reason) {
         if (DEBUG_STACK) Slog.i(TAG, "reParentTask: removing taskId=" + mTaskId
                 + " from stack=" + getTaskStack());
-        EventLogTags.writeWmTaskRemoved(mTaskId, "reParentTask");
-
-        final ActivityStack prevStack = getTaskStack();
-        final boolean wasTopFocusedStack =
-                mAtmService.mRootActivityContainer.isTopDisplayFocusedStack(prevStack);
-        final DisplayContent prevStackDisplay = prevStack.getDisplay();
+        EventLogTags.writeWmTaskRemoved(mTaskId, "reParentTask:" + reason);
 
         position = stack.findPositionForTask(this, position, showForAllUsers());
 
         reparent(stack, position);
-
-        if (!moveParents) {
-            // Only move home stack forward if we are not going to move the new parent forward.
-            prevStack.moveHomeStackToFrontIfNeeded(wasTopFocusedStack, prevStackDisplay, reason);
-        }
 
         stack.positionChildAt(position, this, moveParents);
 

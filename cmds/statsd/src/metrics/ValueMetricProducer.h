@@ -130,8 +130,9 @@ private:
     int64_t calcBucketsForwardCount(const int64_t& eventTimeNs) const;
 
     // Mark the data as invalid.
-    void invalidateCurrentBucket();
-    void invalidateCurrentBucketWithoutResetBase();
+    void invalidateCurrentBucket(const int64_t dropTimeNs, const BucketDropReason reason);
+    void invalidateCurrentBucketWithoutResetBase(const int64_t dropTimeNs,
+                                                 const BucketDropReason reason);
 
     const int mWhatMatcherIndex;
 
@@ -176,9 +177,6 @@ private:
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     std::unordered_map<MetricDimensionKey, std::vector<ValueBucket>> mPastBuckets;
-
-    // Pairs of (elapsed start, elapsed end) denoting buckets that were skipped.
-    std::list<std::pair<int64_t, int64_t>> mSkippedBuckets;
 
     const int64_t mMinBucketSizeNs;
 
@@ -248,7 +246,6 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2);
-    FRIEND_TEST(ValueMetricProducerTest, TestBucketIncludingUnknownConditionIsInvalid);
     FRIEND_TEST(ValueMetricProducerTest, TestBucketInvalidIfGlobalBaseIsNotSet);
     FRIEND_TEST(ValueMetricProducerTest, TestCalcPreviousBucketEndTime);
     FRIEND_TEST(ValueMetricProducerTest, TestDataIsNotUpdatedWhenNoConditionChanged);
@@ -258,10 +255,6 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestFirstBucket);
     FRIEND_TEST(ValueMetricProducerTest, TestFullBucketResetWhenLastBucketInvalid);
-    FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenGuardRailHit);
-    FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenInitialPullFailed);
-    FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenLastPullFailed);
-    FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenOneConditionFailed);
     FRIEND_TEST(ValueMetricProducerTest, TestLateOnDataPulledWithDiff);
     FRIEND_TEST(ValueMetricProducerTest, TestLateOnDataPulledWithoutDiff);
     FRIEND_TEST(ValueMetricProducerTest, TestPartialBucketCreated);
@@ -295,6 +288,13 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey);
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBase);
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures);
+
+    FRIEND_TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenOneConditionFailed);
+    FRIEND_TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenInitialPullFailed);
+    FRIEND_TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenLastPullFailed);
+    FRIEND_TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenGuardRailHit);
+    FRIEND_TEST(ValueMetricProducerTest_BucketDrop,
+                TestInvalidBucketWhenAccumulateEventWrongBucket);
     friend class ValueMetricProducerTestHelper;
 };
 

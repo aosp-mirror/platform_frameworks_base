@@ -23,8 +23,8 @@ import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.UnsupportedAppUsage;
 import android.app.trust.ITrustManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -118,6 +118,16 @@ public class KeyguardManager {
     public static final int RESULT_ALTERNATE = 1;
 
     /**
+     *
+     * If this is set, check device policy for allowed biometrics when the user is authenticating.
+     * This should only be used in the context of managed profiles.
+     *
+     * @hide
+     */
+    public static final String EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS = "check_dpm";
+
+
+    /**
      * Get an intent to prompt the user to confirm credentials (pin, pattern, password or biometrics
      * if enrolled) for the current user of the device. The caller is expected to launch this
      * activity using {@link android.app.Activity#startActivityForResult(Intent, int)} and check for
@@ -161,6 +171,28 @@ public class KeyguardManager {
         // explicitly set the package for security
         intent.setPackage(getSettingsPackageForIntent(intent));
 
+        return intent;
+    }
+
+    /**
+     * Get an intent to prompt the user to confirm credentials (pin, pattern or password)
+     * for the given user. The caller is expected to launch this activity using
+     * {@link android.app.Activity#startActivityForResult(Intent, int)} and check for
+     * {@link android.app.Activity#RESULT_OK} if the user successfully completes the challenge.
+     *
+     * @param disallowBiometricsIfPolicyExists If true check if the Device Policy Manager has
+     * disabled biometrics on the device. If biometrics are disabled, fall back to PIN/pattern/pass.
+     *
+     * @return the intent for launching the activity or null if no password is required.
+     *
+     * @hide
+     */
+    public Intent createConfirmDeviceCredentialIntent(
+            CharSequence title, CharSequence description, int userId,
+            boolean disallowBiometricsIfPolicyExists) {
+        Intent intent = this.createConfirmDeviceCredentialIntent(title, description, userId);
+        intent.putExtra(EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS,
+                disallowBiometricsIfPolicyExists);
         return intent;
     }
 

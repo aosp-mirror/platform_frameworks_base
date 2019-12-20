@@ -636,4 +636,18 @@ public final class PermissionControllerManager {
             return future;
         });
     }
+
+    /**
+     * Called when a package that has permissions registered as "one-time" is considered
+     * inactive.
+     *
+     * @param packageName The package which became inactive
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
+    public void notifyOneTimePermissionSessionTimeout(@NonNull String packageName) {
+        mRemoteService.run(
+                service -> service.notifyOneTimePermissionSessionTimeout(packageName));
+    }
 }

@@ -32,7 +32,6 @@ import android.text.TextUtils;
 import android.util.DebugUtils;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.PrintWriter;
@@ -40,6 +39,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -352,7 +352,7 @@ public interface ServiceConnector<I extends IInterface> {
         @Override
         public <R> CompletionAwareJob<I, R> postForResult(@NonNull Job<I, R> job) {
             CompletionAwareJob<I, R> task = new CompletionAwareJob<>();
-            task.mDelegate = Preconditions.checkNotNull(job);
+            task.mDelegate = Objects.requireNonNull(job);
             enqueue(task);
             return task;
         }
@@ -360,7 +360,7 @@ public interface ServiceConnector<I extends IInterface> {
         @Override
         public <R> AndroidFuture<R> postAsync(@NonNull Job<I, CompletableFuture<R>> job) {
             CompletionAwareJob<I, R> task = new CompletionAwareJob<>();
-            task.mDelegate = Preconditions.checkNotNull((Job) job);
+            task.mDelegate = Objects.requireNonNull((Job) job);
             task.mAsync = true;
             enqueue(task);
             return task;

@@ -21,6 +21,7 @@ import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 
 import android.content.Context;
 
+import com.android.systemui.car.CarDeviceProvisionedControllerImpl;
 import com.android.systemui.car.CarNotificationEntryManager;
 import com.android.systemui.car.CarNotificationInterruptionStateProvider;
 import com.android.systemui.dagger.SystemUIRootComponent;
@@ -46,6 +47,7 @@ import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.volume.CarVolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
@@ -143,4 +145,8 @@ abstract class CarSystemUIModule {
     @Binds
     abstract StatusBarKeyguardViewManager bindStatusBarKeyguardViewManager(
             CarStatusBarKeyguardViewManager keyguardViewManager);
+
+    @Binds
+    abstract DeviceProvisionedController bindDeviceProvisionedController(
+            CarDeviceProvisionedControllerImpl deviceProvisionedController);
 }

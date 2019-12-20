@@ -43,7 +43,7 @@ import android.annotation.Size;
 import android.annotation.StyleRes;
 import android.annotation.TestApi;
 import android.annotation.UiThread;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AutofillOptions;
 import android.content.ClipData;
 import android.content.Context;

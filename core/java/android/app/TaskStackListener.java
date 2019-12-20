@@ -16,8 +16,8 @@
 
 package android.app;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager.TaskSnapshot;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.os.Binder;
 import android.os.IBinder;

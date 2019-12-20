@@ -26,6 +26,7 @@ import static android.view.Surface.rotationToString;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Parcel;
@@ -34,8 +35,6 @@ import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.WireTypeMismatchException;
 import android.view.DisplayInfo;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.io.IOException;
 

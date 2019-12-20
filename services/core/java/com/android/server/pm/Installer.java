@@ -28,6 +28,7 @@ import android.os.IBinder.DeathRecipient;
 import android.os.IInstalld;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.storage.CrateMetadata;
 import android.text.format.DateUtils;
 import android.util.Slog;
 
@@ -288,6 +289,43 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return new long[6];
         try {
             return mInstalld.getExternalSize(uuid, userId, flags, appIds);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * To get all of the CrateMetadata of the crates for the specified user app by the installd.
+     *
+     * @param uuid the UUID
+     * @param packageNames the application package names
+     * @param userId the user id
+     * @return the array of CrateMetadata
+     */
+    @Nullable
+    public CrateMetadata[] getAppCrates(@NonNull String uuid, @NonNull String[] packageNames,
+            @UserIdInt int userId) throws InstallerException {
+        if (!checkBeforeRemote()) return null;
+        try {
+            return mInstalld.getAppCrates(uuid, packageNames, userId);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * To retrieve all of the CrateMetadata of the crate for the specified user app by the installd.
+     *
+     * @param uuid the UUID
+     * @param userId the user id
+     * @return the array of CrateMetadata
+     */
+    @Nullable
+    public CrateMetadata[] getUserCrates(String uuid, @UserIdInt int userId)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return null;
+        try {
+            return mInstalld.getUserCrates(uuid, userId);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

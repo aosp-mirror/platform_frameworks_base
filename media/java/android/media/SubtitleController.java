@@ -16,10 +16,7 @@
 
 package android.media;
 
-import java.util.Locale;
-import java.util.Vector;
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.MediaPlayer.TrackInfo;
 import android.media.SubtitleTrack.RenderingWidget;
@@ -27,6 +24,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.view.accessibility.CaptioningManager;
+
+import java.util.Locale;
+import java.util.Vector;
 
 /**
  * The subtitle controller provides the architecture to display subtitles for a

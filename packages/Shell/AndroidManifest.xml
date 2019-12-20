@@ -227,6 +227,9 @@
     <!-- Permission required for CTS test - TetheringManagerTest -->
     <uses-permission android:name="android.permission.TETHER_PRIVILEGED"/>
 
+    <!-- Permission required for CTS test - CtsOsTestCases -->
+    <uses-permission android:name="android.permission.MANAGE_CRATES"/>
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

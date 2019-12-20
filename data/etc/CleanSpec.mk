@@ -53,6 +53,8 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/product/etc/permissions/com.
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/product/etc/permissions/com.android.settings.xml)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/product/etc/permissions/com.android.launcher3.xml)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/product/etc/permissions/com.android.launcher3.xml)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/product/etc/permissions/com.android.systemui.xml)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/product/etc/permissions/com.android.systemui.xml)
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER
 # ******************************************************************

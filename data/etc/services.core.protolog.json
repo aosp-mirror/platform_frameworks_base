@@ -385,6 +385,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1263316010": {
+      "message": "Computed rotation=%s (%d) for display id=%d based on lastOrientation=%s (%d) and oldRotation=%s (%d)",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotation.java"
+    },
     "-1259022216": {
       "message": "SURFACE HIDE ( %s ): %s",
       "level": "INFO",
@@ -462,6 +468,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-1108775960": {
+      "message": "%s is requesting orientation %d (%s)",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/WindowContainer.java"
     },
     "-1103716954": {
       "message": "Not removing %s due to exit animation",
@@ -630,6 +642,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "-766059044": {
+      "message": "Display id=%d selected orientation %s (%d), got rotation %s (%d)",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
     "-760801764": {
       "message": "onAnimationCancelled",
@@ -1267,12 +1285,6 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
-    "481370485": {
-      "message": "Computed rotation=%d for display id=%d based on lastOrientation=%d and oldRotation=%d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/DisplayRotation.java"
-    },
     "490877640": {
       "message": "onStackOrderChanged(): stack=%s",
       "level": "DEBUG",
@@ -1794,12 +1806,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "1573332272": {
-      "message": "Display id=%d selected orientation %d, got rotation %d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
     "1577579529": {
       "message": "win=%s destroySurfaces: appStopped=%b win.mWindowRemovalAllowed=%b win.mRemoveOnExit=%b",

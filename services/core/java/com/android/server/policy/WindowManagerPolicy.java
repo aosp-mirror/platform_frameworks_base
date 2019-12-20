@@ -336,13 +336,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         boolean isAnimatingLw();
 
         /**
-         * @return Whether the window can affect SystemUI flags, meaning that SystemUI (system bars,
-         *         for example) will be  affected by the flags specified in this window. This is the
-         *         case when the surface is on screen but not exiting.
-         */
-        boolean canAffectSystemUiFlags();
-
-        /**
          * Is this window considered to be gone for purposes of layout?
          */
         boolean isGoneForLayoutLw();

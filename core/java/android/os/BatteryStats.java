@@ -21,9 +21,9 @@ import static android.os.BatteryStatsManager.NUM_WIFI_STATES;
 import static android.os.BatteryStatsManager.NUM_WIFI_SUPPL_STATES;
 
 import android.annotation.IntDef;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.job.JobParameters;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.BatteryStatsManager.WifiState;

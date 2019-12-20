@@ -18,8 +18,8 @@ package android.media.session;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
@@ -443,8 +443,8 @@ public final class MediaController {
      * Get the session's tag for debugging purposes.
      *
      * @return The session's tag.
-     * @hide
      */
+    @NonNull
     public String getTag() {
         if (mTag == null) {
             try {

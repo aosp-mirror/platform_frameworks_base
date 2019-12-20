@@ -19,7 +19,7 @@ package android.bluetooth;
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;

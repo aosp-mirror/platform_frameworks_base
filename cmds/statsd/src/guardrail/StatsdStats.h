@@ -181,6 +181,8 @@ public:
 
     static const int64_t kInt64Max = 0x7fffffffffffffffLL;
 
+    static const int32_t kMaxLoggedBucketDropEvents = 10;
+
     /**
      * Report a new config has been received and report the static stats about the config.
      *

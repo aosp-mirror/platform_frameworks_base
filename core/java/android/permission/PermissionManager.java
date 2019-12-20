@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.pm.IPackageManager;
@@ -282,6 +283,71 @@ public final class PermissionManager {
 
         private SplitPermissionInfo(@NonNull SplitPermissionInfoParcelable parcelable) {
             mSplitPermissionInfoParcelable = parcelable;
+        }
+    }
+
+    /**
+     * Starts a one-time permission session for a given package. A one-time permission session is
+     * ended if app becomes inactive. Inactivity is defined as the package's uid importance level
+     * staying > importanceToResetTimer for timeoutMillis milliseconds. If the package's uid
+     * importance level goes <= importanceToResetTimer then the timer is reset and doesn't start
+     * until going > importanceToResetTimer.
+     * <p>
+     * When this timeoutMillis is reached if the importance level is <= importanceToKeepSessionAlive
+     * then the session is extended until either the importance goes above
+     * importanceToKeepSessionAlive which will end the session or <= importanceToResetTimer which
+     * will continue the session and reset the timer.
+     * </p>
+     * <p>
+     * Importance levels are defined in {@link android.app.ActivityManager.RunningAppProcessInfo}.
+     * </p>
+     * <p>
+     * Once the session ends
+     * {@link PermissionControllerService#onOneTimePermissionSessionTimeout(String)} is invoked.
+     * </p>
+     * <p>
+     * Note that if there is currently an active session for a package a new one isn't created and
+     * the existing one isn't changed.
+     * </p>
+     * @param packageName The package to start a one-time permission session for
+     * @param timeoutMillis Number of milliseconds for an app to be in an inactive state
+     * @param importanceToResetTimer The least important level to uid must be to reset the timer
+     * @param importanceToKeepSessionAlive The least important level the uid must be to keep the
+     *                                    session alive
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+            Manifest.permission.PACKAGE_USAGE_STATS})
+    public void startOneTimePermissionSession(@NonNull String packageName, long timeoutMillis,
+            @ActivityManager.RunningAppProcessInfo.Importance int importanceToResetTimer,
+            @ActivityManager.RunningAppProcessInfo.Importance int importanceToKeepSessionAlive) {
+        try {
+            mPermissionManager.startOneTimePermissionSession(packageName, mContext.getUserId(),
+                    timeoutMillis, importanceToResetTimer, importanceToKeepSessionAlive);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Stops the one-time permission session for the package. The callback to the end of session is
+     * not invoked. If there is no one-time session for the package then nothing happens.
+     *
+     * @param packageName Package to stop the one-time permission session for
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+            Manifest.permission.PACKAGE_USAGE_STATS})
+    public void stopOneTimePermissionSession(@NonNull String packageName) {
+        try {
+            mPermissionManager.stopOneTimePermissionSession(packageName,
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
         }
     }
 }

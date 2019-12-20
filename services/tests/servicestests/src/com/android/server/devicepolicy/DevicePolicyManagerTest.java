@@ -100,7 +100,6 @@ import com.android.internal.widget.LockscreenCredential;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.RestrictionsListener;
-import com.android.server.pm.UserRestrictionsUtils;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -1163,7 +1162,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
                 eq(UserHandle.USER_SYSTEM),
-                eq(null),
+                MockUtils.checkUserRestrictions(),
                 eq(UserManagerInternal.OWNER_TYPE_DEVICE_OWNER));
 
         verify(getServices().usageStatsManagerInternal).setActiveAdminApps(
@@ -1719,28 +1718,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.setDeviceOwner(admin1, "owner-name",
                 UserHandle.USER_SYSTEM));
 
-        // Check that the user restrictions that are enabled by default are set. Then unset them.
-        final String[] defaultRestrictions = UserRestrictionsUtils
-                .getDefaultEnabledForDeviceOwner().toArray(new String[0]);
-        DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions(defaultRestrictions),
-                dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
-        );
-        DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions(defaultRestrictions),
-                dpm.getUserRestrictions(admin1)
-        );
-        verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
-                eq(UserHandle.USER_SYSTEM),
-                MockUtils.checkUserRestrictions(defaultRestrictions),
-                eq(UserManagerInternal.OWNER_TYPE_DEVICE_OWNER)
-        );
-        reset(getServices().userManagerInternal);
-
-        for (String restriction : defaultRestrictions) {
-            dpm.clearUserRestriction(admin1, restriction);
-        }
-
         assertNoDeviceOwnerRestrictions();
         reset(getServices().userManagerInternal);
 
@@ -2004,7 +1981,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         reset(getServices().userManagerInternal);
     }
 
-    public void testDefaultEnabledUserRestrictions() throws Exception {
+    public void testNoDefaultEnabledUserRestrictions() throws Exception {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
         mContext.callerPermissions.add(permission.MANAGE_USERS);
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
@@ -2022,29 +1999,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.setDeviceOwner(admin1, "owner-name",
                 UserHandle.USER_SYSTEM));
 
-        // Check that the user restrictions that are enabled by default are set. Then unset them.
-        String[] defaultRestrictions = UserRestrictionsUtils
-                .getDefaultEnabledForDeviceOwner().toArray(new String[0]);
-        assertTrue(defaultRestrictions.length > 0);
-        DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions(defaultRestrictions),
-                dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
-        );
-        DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions(defaultRestrictions),
-                dpm.getUserRestrictions(admin1)
-        );
-        verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
-                eq(UserHandle.USER_SYSTEM),
-                MockUtils.checkUserRestrictions(defaultRestrictions),
-                eq(UserManagerInternal.OWNER_TYPE_DEVICE_OWNER)
-        );
-        reset(getServices().userManagerInternal);
-
-        for (String restriction : defaultRestrictions) {
-            dpm.clearUserRestriction(admin1, restriction);
-        }
-
         assertNoDeviceOwnerRestrictions();
 
         // Initialize DPMS again and check that the user restriction wasn't enabled again.
@@ -2054,47 +2008,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertNotNull(dpms.getDeviceOwnerAdminLocked());
 
         assertNoDeviceOwnerRestrictions();
-
-        // Add a new restriction to the default set, initialize DPMS, and check that the restriction
-        // is set as it wasn't enabled during setDeviceOwner.
-        final String newDefaultEnabledRestriction = UserManager.DISALLOW_REMOVE_MANAGED_PROFILE;
-        assertFalse(UserRestrictionsUtils
-                .getDefaultEnabledForDeviceOwner().contains(newDefaultEnabledRestriction));
-        UserRestrictionsUtils
-                .getDefaultEnabledForDeviceOwner().add(newDefaultEnabledRestriction);
-        try {
-            reset(getServices().userManagerInternal);
-            initializeDpms();
-            assertTrue(dpm.isDeviceOwnerApp(admin1.getPackageName()));
-            assertNotNull(dpms.getDeviceOwnerAdminLocked());
-
-            DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions(newDefaultEnabledRestriction),
-                dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
-            );
-            DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions(newDefaultEnabledRestriction),
-                dpm.getUserRestrictions(admin1)
-            );
-            verify(getServices().userManagerInternal, atLeast(1)).setDevicePolicyUserRestrictions(
-                    eq(UserHandle.USER_SYSTEM),
-                    MockUtils.checkUserRestrictions(newDefaultEnabledRestriction),
-                    eq(UserManagerInternal.OWNER_TYPE_DEVICE_OWNER)
-            );
-            reset(getServices().userManagerInternal);
-
-            // Remove the restriction.
-            dpm.clearUserRestriction(admin1, newDefaultEnabledRestriction);
-
-            // Initialize DPMS again. The restriction shouldn't be enabled for a second time.
-            initializeDpms();
-            assertTrue(dpm.isDeviceOwnerApp(admin1.getPackageName()));
-            assertNotNull(dpms.getDeviceOwnerAdminLocked());
-            assertNoDeviceOwnerRestrictions();
-        } finally {
-            UserRestrictionsUtils
-                .getDefaultEnabledForDeviceOwner().remove(newDefaultEnabledRestriction);
-        }
     }
 
     private void assertNoDeviceOwnerRestrictions() {

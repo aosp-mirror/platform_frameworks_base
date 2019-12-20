@@ -17,9 +17,8 @@
 package android.webkit;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.webkit.CacheManager.CacheResult;
-import android.webkit.PluginData;
 
 import java.util.Map;
 
