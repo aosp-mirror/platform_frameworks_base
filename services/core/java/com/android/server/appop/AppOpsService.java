@@ -45,6 +45,7 @@ import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 
 import android.Manifest;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -102,6 +103,7 @@ import android.util.AtomicFile;
 import android.util.KeyValueListParser;
 import android.util.LongSparseArray;
 import android.util.Pair;
+import android.util.Pools.SimplePool;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -200,10 +202,20 @@ public class AppOpsService extends IAppOpsService.Stub {
     };
 
     private static final int MAX_UNFORWARED_OPS = 10;
+    private static final int MAX_UNUSED_POOLED_OBJECTS = 3;
 
     Context mContext;
     final AtomicFile mFile;
     final Handler mHandler;
+
+    /** Pool for {@link OpEventProxyInfoPool} to avoid to constantly reallocate new objects */
+    @GuardedBy("this")
+    private final OpEventProxyInfoPool mOpEventProxyInfoPool = new OpEventProxyInfoPool();
+
+    /** Pool for {@link InProgressStartOpEventPool} to avoid to constantly reallocate new objects */
+    @GuardedBy("this")
+    private final InProgressStartOpEventPool mInProgressStartOpEventPool =
+            new InProgressStartOpEventPool();
 
     private final AppOpsManagerInternalImpl mAppOpsManagerInternal
             = new AppOpsManagerInternalImpl();
@@ -269,6 +281,46 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @GuardedBy("this")
     private SparseArray<List<Integer>> mSwitchOpToOps;
+
+    /**
+     * An unsynchronized pool of {@link OpEventProxyInfo} objects.
+     */
+    private class OpEventProxyInfoPool extends SimplePool<OpEventProxyInfo> {
+        OpEventProxyInfoPool() {
+            super(MAX_UNUSED_POOLED_OBJECTS);
+        }
+
+        OpEventProxyInfo acquire(@IntRange(from = 0) int uid, @Nullable String packageName,
+                @Nullable String featureId) {
+            OpEventProxyInfo recycled = acquire();
+            if (recycled != null) {
+                recycled.reinit(uid, packageName, featureId);
+                return recycled;
+            }
+
+            return new OpEventProxyInfo(uid, packageName, featureId);
+        }
+    }
+
+    /**
+     * An unsynchronized pool of {@link InProgressStartOpEvent} objects.
+     */
+    private class InProgressStartOpEventPool extends SimplePool<InProgressStartOpEvent> {
+        InProgressStartOpEventPool() {
+            super(MAX_UNUSED_POOLED_OBJECTS);
+        }
+
+        InProgressStartOpEvent acquire(long startTime, long elapsedTime, @NonNull IBinder clientId,
+                @NonNull Runnable onDeath, int uidState) throws RemoteException {
+            InProgressStartOpEvent recycled = acquire();
+            if (recycled != null) {
+                recycled.reinit(startTime, elapsedTime, clientId, onDeath, uidState);
+                return recycled;
+            }
+
+            return new InProgressStartOpEvent(startTime, elapsedTime, clientId, onDeath, uidState);
+        }
+    }
 
     /**
      * All times are in milliseconds. These constants are kept synchronized with the system
@@ -486,43 +538,96 @@ public class AppOpsService extends IAppOpsService.Stub {
     /** A in progress startOp->finishOp event */
     private static final class InProgressStartOpEvent implements IBinder.DeathRecipient {
         /** Wall clock time of startOp event (not monotonic) */
-        final long startTime;
+        private long mStartTime;
 
         /** Elapsed time since boot of startOp event */
-        final long startElapsedTime;
+        private long mStartElapsedTime;
 
         /** Id of the client that started the event */
-        final @NonNull IBinder clientId;
+        private @NonNull IBinder mClientId;
 
         /** To call when client dies */
-        final @NonNull Runnable onDeath;
+        private @NonNull Runnable mOnDeath;
 
         /** uidstate used when calling startOp */
-        final @AppOpsManager.UidState int uidState;
+        private @AppOpsManager.UidState int mUidState;
 
         /** How many times the op was started but not finished yet */
         int numUnfinishedStarts;
 
+        /**
+         * Create a new {@link InProgressStartOpEvent}.
+         *
+         * @param startTime The time {@link #startOperation} was called
+         * @param startElapsedTime The elapsed time when {@link #startOperation} was called
+         * @param clientId The client id of the caller of {@link #startOperation}
+         * @param onDeath The code to execute on client death
+         * @param uidState The uidstate of the app {@link #startOperation} was called for
+         *
+         * @throws RemoteException If the client is dying
+         */
         private InProgressStartOpEvent(long startTime, long startElapsedTime,
                 @NonNull IBinder clientId, @NonNull Runnable onDeath, int uidState)
                 throws RemoteException {
-            this.startTime = startTime;
-            this.startElapsedTime = startElapsedTime;
-            this.clientId = clientId;
-            this.onDeath = onDeath;
-            this.uidState = uidState;
+            mStartTime = startTime;
+            mStartElapsedTime = startElapsedTime;
+            mClientId = clientId;
+            mOnDeath = onDeath;
+            mUidState = uidState;
 
             clientId.linkToDeath(this, 0);
         }
 
         /** Clean up event */
         public void finish() {
-            clientId.unlinkToDeath(this, 0);
+            mClientId.unlinkToDeath(this, 0);
         }
 
         @Override
         public void binderDied() {
-            onDeath.run();
+            mOnDeath.run();
+        }
+
+        /**
+         * Reinit existing object with new state.
+         *
+         * @param startTime The time {@link #startOperation} was called
+         * @param startElapsedTime The elapsed time when {@link #startOperation} was called
+         * @param clientId The client id of the caller of {@link #startOperation}
+         * @param onDeath The code to execute on client death
+         * @param uidState The uidstate of the app {@link #startOperation} was called for
+         *
+         * @throws RemoteException If the client is dying
+         */
+        public void reinit(long startTime, long startElapsedTime, @NonNull IBinder clientId,
+                @NonNull Runnable onDeath, int uidState) throws RemoteException {
+            mStartTime = startTime;
+            mStartElapsedTime = startElapsedTime;
+            mClientId = clientId;
+            mOnDeath = onDeath;
+            mUidState = uidState;
+
+            clientId.linkToDeath(this, 0);
+        }
+
+        /** @return Wall clock time of startOp event */
+        public long getStartTime() {
+            return mStartTime;
+        }
+
+        /** @return Elapsed time since boot of startOp event */
+        public long getStartElapsedTime() {
+            return mStartElapsedTime;
+        }
+
+        /** @return Id of the client that started the event */
+        public @NonNull IBinder getClientId() {
+            return mClientId;
+        }
+
+        /** @return uidstate used when calling startOp */
+        public int getUidState() {
+            return mUidState;
         }
     }
 
@@ -595,9 +700,16 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             OpEventProxyInfo proxyInfo = null;
             if (proxyUid != Process.INVALID_UID) {
-                proxyInfo = new OpEventProxyInfo(proxyUid, proxyPackageName, proxyFeatureId);
+                proxyInfo = mOpEventProxyInfoPool.acquire(proxyUid, proxyPackageName,
+                        proxyFeatureId);
             }
-            mAccessEvents.put(key, new NoteOpEvent(noteTime, duration, proxyInfo));
+
+            NoteOpEvent existingEvent = mAccessEvents.get(key);
+            if (existingEvent != null) {
+                existingEvent.reinit(noteTime, duration, proxyInfo, mOpEventProxyInfoPool);
+            } else {
+                mAccessEvents.put(key, new NoteOpEvent(noteTime, duration, proxyInfo));
+            }
         }
 
         /**
@@ -626,7 +738,12 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
 
             // We do not collect proxy information for rejections yet
-            mRejectEvents.put(key, new NoteOpEvent(noteTime, -1, null));
+            NoteOpEvent existingEvent = mRejectEvents.get(key);
+            if (existingEvent != null) {
+                existingEvent.reinit(noteTime, -1, null, mOpEventProxyInfoPool);
+            } else {
+                mRejectEvents.put(key, new NoteOpEvent(noteTime, -1, null));
+            }
         }
 
         /**
@@ -646,28 +763,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                 mInProgressEvents = new ArrayMap<>(1);
             }
 
-
             InProgressStartOpEvent event = mInProgressEvents.get(clientId);
             if (event == null) {
-                event = new InProgressStartOpEvent(System.currentTimeMillis(),
-                        SystemClock.elapsedRealtime(), clientId, () -> {
-                    // In the case the client dies without calling finish first
-                    synchronized (AppOpsService.this) {
-                        if (mInProgressEvents == null) {
-                            return;
-                        }
-
-                        InProgressStartOpEvent deadEvent = mInProgressEvents.get(clientId);
-                        if (deadEvent != null) {
-                            deadEvent.numUnfinishedStarts = 1;
-                        }
-
-                        finished(clientId);
-                    }
-                }, uidState);
+                event = mInProgressStartOpEventPool.acquire(System.currentTimeMillis(),
+                        SystemClock.elapsedRealtime(), clientId,
+                        PooledLambda.obtainRunnable(AppOpsService::onClientDeath, this, clientId),
+                        uidState);
                 mInProgressEvents.put(clientId, event);
             } else {
-                if (uidState != event.uidState) {
+                if (uidState != event.mUidState) {
                     onUidStateChanged(uidState);
                 }
             }
@@ -711,13 +815,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
 
                 // startOp events don't support proxy, hence use flags==SELF
-                NoteOpEvent finishedEvent = new NoteOpEvent(event.startTime,
-                        SystemClock.elapsedRealtime() - event.startElapsedTime, null);
-                mAccessEvents.put(makeKey(event.uidState, OP_FLAG_SELF), finishedEvent);
+                NoteOpEvent finishedEvent = new NoteOpEvent(event.getStartTime(),
+                        SystemClock.elapsedRealtime() - event.getStartElapsedTime(), null);
+                mAccessEvents.put(makeKey(event.getUidState(), OP_FLAG_SELF), finishedEvent);
 
                 mHistoricalRegistry.increaseOpAccessDuration(parent.op, parent.uid,
-                        parent.packageName, event.uidState, AppOpsManager.OP_FLAG_SELF,
-                        finishedEvent.duration);
+                        parent.packageName, event.getUidState(), AppOpsManager.OP_FLAG_SELF,
+                        finishedEvent.getDuration());
+
+                mInProgressStartOpEventPool.release(event);
 
                 if (mInProgressEvents.isEmpty()) {
                     mInProgressEvents = null;
@@ -728,6 +834,26 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 parent.packageName, false);
                     }
                 }
+            }
+        }
+
+        /**
+         * Called in the case the client dies without calling finish first
+         *
+         * @param clientId The client that died
+         */
+        void onClientDeath(@NonNull IBinder clientId) {
+            synchronized (AppOpsService.this) {
+                if (mInProgressEvents == null) {
+                    return;
+                }
+
+                InProgressStartOpEvent deadEvent = mInProgressEvents.get(clientId);
+                if (deadEvent != null) {
+                    deadEvent.numUnfinishedStarts = 1;
+                }
+
+                finished(clientId);
             }
         }
 
@@ -745,10 +871,10 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int i = 0; i < numInProgressEvents; i++) {
                 InProgressStartOpEvent event = mInProgressEvents.valueAt(i);
 
-                if (event.uidState != newState) {
+                if (event.getUidState() != newState) {
                     try {
-                        finished(event.clientId, false);
-                        started(event.clientId, newState);
+                        finished(event.getClientId(), false);
+                        started(event.getClientId(), newState);
                     } catch (RemoteException e) {
                         if (DEBUG) Slog.e(TAG, "Cannot switch to new uidState " + newState);
                     }
@@ -776,7 +902,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 NoteOpEvent bEvent = b.valueAt(i);
                 NoteOpEvent aEvent = a.get(keyOfEventToAdd);
 
-                if (aEvent == null || bEvent.noteTime > aEvent.noteTime) {
+                if (aEvent == null || bEvent.getNoteTime() > aEvent.getNoteTime()) {
                     a.put(keyOfEventToAdd, bEvent);
                 }
             }
@@ -798,7 +924,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                 int numInProgressEvents = opToAdd.mInProgressEvents.size();
                 for (int i = 0; i < numInProgressEvents; i++) {
-                    opToAdd.mInProgressEvents.valueAt(i).finish();
+                    InProgressStartOpEvent event = opToAdd.mInProgressEvents.valueAt(i);
+
+                    event.finish();
+                    mInProgressStartOpEventPool.release(event);
                 }
             }
 
@@ -815,11 +944,26 @@ public class AppOpsService extends IAppOpsService.Stub {
                     || (mRejectEvents != null && mRejectEvents.size() > 0);
         }
 
-        @NonNull OpFeatureEntry createFeatureEntryLocked() {
-            LongSparseArray<NoteOpEvent> accessEvents = null;
-            if (mAccessEvents != null) {
-                accessEvents = mAccessEvents.clone();
+        /**
+         * Clone a {@link LongSparseArray} and clone all values.
+         */
+        private @Nullable LongSparseArray<NoteOpEvent> deepClone(
+                @Nullable LongSparseArray<NoteOpEvent> original) {
+            if (original == null) {
+                return original;
             }
+
+            int size = original.size();
+            LongSparseArray<NoteOpEvent> clone = new LongSparseArray<>(size);
+            for (int i = 0; i < size; i++) {
+                clone.put(original.keyAt(i), new NoteOpEvent(original.valueAt(i)));
+            }
+
+            return clone;
+        }
+
+        @NonNull OpFeatureEntry createFeatureEntryLocked() {
+            LongSparseArray<NoteOpEvent> accessEvents = deepClone(mAccessEvents);
 
             // Add in progress events as access events
             if (mInProgressEvents != null) {
@@ -834,15 +978,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                     InProgressStartOpEvent event = mInProgressEvents.valueAt(i);
 
                     // startOp events don't support proxy
-                    accessEvents.append(makeKey(event.uidState, OP_FLAG_SELF),
-                            new NoteOpEvent(event.startTime, now - event.startElapsedTime, null));
+                    accessEvents.append(makeKey(event.getUidState(), OP_FLAG_SELF),
+                            new NoteOpEvent(event.getStartTime(), now - event.getStartElapsedTime(),
+                                    null));
                 }
             }
 
-            LongSparseArray<NoteOpEvent> rejectEvents = null;
-            if (mRejectEvents != null) {
-                rejectEvents = mRejectEvents.clone();
-            }
+            LongSparseArray<NoteOpEvent> rejectEvents = deepClone(mRejectEvents);
 
             return new OpFeatureEntry(parent.op, isRunning(), accessEvents, rejectEvents);
         }
@@ -1080,6 +1222,13 @@ public class AppOpsService extends IAppOpsService.Stub {
         public void binderDied() {
             stopWatchingNoted(mCallback);
         }
+    }
+
+    /**
+     * Call {@link FeatureOp#onClientDeath featureOp.onClientDeath(clientId)}.
+     */
+    private static void onClientDeath(@NonNull FeatureOp featureOp, @NonNull IBinder clientId) {
+        featureOp.onClientDeath(clientId);
     }
 
     public AppOpsService(File storagePath, Handler handler) {
@@ -1339,7 +1488,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         FeatureOp featureOp = op.mFeatures.valueAt(featureNum);
 
                         while (featureOp.mInProgressEvents != null) {
-                            featureOp.mInProgressEvents.valueAt(0).onDeath.run();
+                            featureOp.finished(featureOp.mInProgressEvents.keyAt(0));
                         }
                     }
                 }
@@ -2460,7 +2609,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (featureOp.isRunning()) {
                 Slog.w(TAG, "Noting op not finished: uid " + uid + " pkg " + packageName + " code "
                         + code + " startTime of in progress event="
-                        + featureOp.mInProgressEvents.valueAt(0).startTime);
+                        + featureOp.mInProgressEvents.valueAt(0).getStartTime());
             }
 
             final int switchCode = AppOpsManager.opToSwitch(code);
@@ -4374,7 +4523,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int i = 0; i < numInProgressEvents; i++) {
                 InProgressStartOpEvent event = featureOp.mInProgressEvents.valueAt(i);
 
-                earliestElapsedTime = Math.min(earliestElapsedTime, event.startElapsedTime);
+                earliestElapsedTime = Math.min(earliestElapsedTime, event.getStartElapsedTime());
                 maxNumStarts = Math.max(maxNumStarts, event.numUnfinishedStarts);
             }
 
