@@ -188,8 +188,7 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"仕事用プロファイルの管理アプリがないか、破損しています。そのため仕事用プロファイルと関連データが削除されました。管理者にサポートをご依頼ください。"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"お使いの仕事用プロファイルはこのデバイスで使用できなくなりました"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"パスワード入力回数が上限を超えました"</string>
-    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
-    <skip />
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"管理者により、デバイスの個人使用が許可されました"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"管理対象のデバイス"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"このデバイスは組織によって管理され、ネットワーク トラフィックが監視される場合があります。詳しくはタップしてください。"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"デバイスのデータが消去されます"</string>
@@ -381,13 +380,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"配信が終了してもメモリに残る sticky ブロードキャストの配信をアプリに許可します。この許可を使用しすぎると、メモリの使用量が増えて Android TV デバイスの動作が遅くなったり不安定になったりすることがあります。"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えてモバイル デバイスの動作が遅くなったり不安定になったりする恐れがあります。"</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"連絡先の読み取り"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"タブレットに保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリに連絡先データの保存を許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
-    <string name="permdesc_readContacts" product="tv" msgid="2387823103274997441">"Android TV デバイスに保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、連絡先データの保存をアプリに許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"モバイル デバイスに保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリに連絡先データの保存を許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"タブレットに保存されている連絡先に関するデータの読み取りをアプリに許可します。また、この読み取りを許可したアプリは、連絡先を作成したタブレット上のアカウントにもアクセスできます。これには、インストールしたアプリによって作成されたアカウントも含まれます。これにより、連絡先データの保存をアプリに許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Android TV デバイスに保存されている連絡先に関するデータの読み取りをアプリに許可します。また、この読み取りを許可したアプリは、連絡先を作成した Android TV デバイス上のアカウントにもアクセスできます。これには、インストールしたアプリによって作成されたアカウントも含まれます。これにより、連絡先データの保存をアプリに許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"スマートフォンに保存されている連絡先に関するデータの読み取りをアプリに許可します。また、この読み取りを許可したアプリは、連絡先を作成したスマートフォン上のアカウントにもアクセスできます。これには、インストールしたアプリによって作成されたアカウントも含まれます。これにより、連絡先データの保存をアプリに許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"連絡先の変更"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"タブレットに保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリが連絡先データを削除できるようになります。"</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="3870937407268625273">"Android TV デバイスに保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、連絡先データの削除をアプリに許可することになります。"</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"モバイルデバイスに保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリが連絡先データを削除できるようになります。"</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"タブレットに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Android TV デバイスに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"スマートフォンに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"通話履歴の読み取り"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"このアプリは通話履歴を読み取ることができます。"</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"通話履歴の書き込み"</string>
@@ -407,13 +406,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"位置情報提供者の追加コマンドアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"フォアグラウンドでのみ正確な位置情報にアクセス"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"このアプリは、フォアグラウンド状態でのみユーザーの正確な位置情報を取得できます。この位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。これにより、電池の消費量が増える可能性があります。"</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"フォアグラウンドでのみ（ネットワークに基づく）おおよその位置情報にアクセス"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、タブレットでアプリがサービスを利用できるようにする必要があります。"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="6994518594789550469">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、Android TV デバイスでアプリがサービスを利用できるようにする必要があります。"</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。"</string>
+    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"このアプリは、フォアグラウンドでのみユーザーの正確な位置情報を取得できます。位置情報サービスを ON にして、デバイスでアプリがサービスを利用できるようにする必要があります。これにより、電池の消費量が増える可能性があります。"</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"フォアグラウンドでのみおおよその位置情報にアクセス"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"このアプリは、フォアグラウンドでのみユーザーのおおよその位置情報を取得できます。位置情報サービスを ON にして、デバイスでアプリがサービスを利用できるようにする必要があります。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"バックグラウンドでの位置情報へのアクセス"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"これが、おおよその位置情報または正確な位置情報へのアクセスの追加権限の場合、アプリはバックグラウンドでの実行中も位置情報にアクセスできます。"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"このアプリは、フォアグラウンドで位置情報にアクセスできるだけでなく、バックグラウンドでの実行中も位置情報にアクセスできます。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"音声設定の変更"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"録音"</string>
@@ -494,6 +491,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"タブレットのBluetooth設定を表示すること、ペアのデバイスに接続すること/ペアのデバイスからの接続を受け入れることをアプリに許可します。"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Android TV デバイスの Bluetooth 設定の表示と、ペア設定されたデバイスへの接続の確立、またはペア設定されたデバイスからの接続の受け入れをアプリに許可します。"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"モバイルデバイスのBluetooth設定を表示すること、ペアのデバイスに接続すること/ペアのデバイスからの接続を受け入れることをアプリに許可します。"</string>
+    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
+    <skip />
+    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
+    <skip />
     <string name="permlab_nfc" msgid="1904455246837674977">"NFCの管理"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"NFCタグ、カード、リーダーとの通信をアプリに許可します。"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"画面ロックの無効化"</string>
@@ -1862,7 +1863,11 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> に接続しました"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"タップしてファイルを表示"</string>
     <string name="pin_target" msgid="8036028973110156895">"固定"</string>
+    <!-- no translation found for pin_specific_target (7824671240625957415) -->
+    <skip />
     <string name="unpin_target" msgid="3963318576590204447">"固定を解除"</string>
+    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
+    <skip />
     <string name="app_info" msgid="6113278084877079851">"アプリ情報"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"デモを開始しています…"</string>
@@ -1905,6 +1910,8 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>、<xliff:g id="TYPE_2">%3$s</xliff:g>を "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" で更新しますか？"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"はい"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"いいえ"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"後で"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"なし"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"更新"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"続行"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"パスワード"</string>
@@ -2000,5 +2007,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"分割画面の切り替え"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ロック画面"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"スクリーンショット"</string>
-    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"<xliff:g id="APP_NAME">%1$s</xliff:g> アプリがポップアップ ウィンドウで開きます。"</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> のキャプション バーです。"</string>
 </resources>
