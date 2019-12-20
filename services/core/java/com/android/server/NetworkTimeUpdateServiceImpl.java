@@ -154,17 +154,20 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
 
     private void onPollNetworkTimeUnderWakeLock(int event) {
         // Force an NTP fix when outdated
-        if (mTime.getCacheAge() >= mPollingIntervalMs) {
+        NtpTrustedTime.TimeResult cachedNtpResult = mTime.getCachedTimeResult();
+        if (cachedNtpResult == null || cachedNtpResult.getAgeMillis() >= mPollingIntervalMs) {
             if (DBG) Log.d(TAG, "Stale NTP fix; forcing refresh");
             mTime.forceRefresh();
+            cachedNtpResult = mTime.getCachedTimeResult();
         }
 
-        if (mTime.getCacheAge() < mPollingIntervalMs) {
+        if (cachedNtpResult != null && cachedNtpResult.getAgeMillis() < mPollingIntervalMs) {
             // Obtained fresh fix; schedule next normal update
             resetAlarm(mPollingIntervalMs);
 
             // Suggest the time to the time detector. It may choose use it to set the system clock.
-            TimestampedValue<Long> timeSignal = mTime.getCachedNtpTimeSignal();
+            TimestampedValue<Long> timeSignal = new TimestampedValue<>(
+                    cachedNtpResult.getElapsedRealtimeMillis(), cachedNtpResult.getTimeMillis());
             NetworkTimeSuggestion timeSuggestion = new NetworkTimeSuggestion(timeSignal);
             timeSuggestion.addDebugInfo("Origin: NetworkTimeUpdateServiceImpl. event=" + event);
             mTimeDetector.suggestNetworkTime(timeSuggestion);
@@ -275,8 +278,11 @@ public class NetworkTimeUpdateServiceImpl extends Binder implements NetworkTimeU
         TimeUtils.formatDuration(mPollingIntervalShorterMs, pw);
         pw.println("\nTryAgainTimesMax: " + mTryAgainTimesMax);
         pw.println("\nTryAgainCounter: " + mTryAgainCounter);
-        pw.println("NTP cache age: " + mTime.getCacheAge());
-        pw.println("NTP cache certainty: " + mTime.getCacheCertainty());
+        NtpTrustedTime.TimeResult ntpResult = mTime.getCachedTimeResult();
+        pw.println("NTP cache result: " + ntpResult);
+        if (ntpResult != null) {
+            pw.println("NTP result age: " + ntpResult.getAgeMillis());
+        }
         pw.println();
     }
 }
