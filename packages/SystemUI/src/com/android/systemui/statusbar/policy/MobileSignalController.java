@@ -398,7 +398,7 @@ public class MobileSignalController extends SignalController<
                     intent.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_PLMN, false),
                     intent.getStringExtra(TelephonyIntents.EXTRA_PLMN));
             notifyListenersIfNecessary();
-        } else if (action.equals(TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)) {
+        } else if (action.equals(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)) {
             updateDataSim();
             notifyListenersIfNecessary();
         }
