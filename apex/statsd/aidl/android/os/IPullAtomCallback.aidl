@@ -26,6 +26,6 @@ interface IPullAtomCallback {
     /**
      * Initiate a request for a pull for an atom.
      */
-     void onPullAtom(int atomTag, IPullAtomResultReceiver resultReceiver);
+     oneway void onPullAtom(int atomTag, IPullAtomResultReceiver resultReceiver);
 
 }

@@ -215,6 +215,11 @@ interface IStatsd {
     */
    oneway void unregisterPullerCallback(int atomTag, String packageName);
 
+  /**
+   * Unregisters any pullAtomCallback for the given uid/atom.
+   */
+   oneway void unregisterPullAtomCallback(int uid, int atomTag);
+
     /**
      * The install requires staging.
      */

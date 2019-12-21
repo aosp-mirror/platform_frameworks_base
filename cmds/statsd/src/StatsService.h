@@ -199,6 +199,11 @@ public:
     virtual Status unregisterPullerCallback(int32_t atomTag, const String16& packageName) override;
 
     /**
+     * Binder call to unregister any existing callback for the given uid and atom.
+     */
+    virtual Status unregisterPullAtomCallback(int32_t uid, int32_t atomTag) override;
+
+    /**
      * Binder call to log BinaryPushStateChanged atom.
      */
     virtual Status sendBinaryPushStateChangedAtom(

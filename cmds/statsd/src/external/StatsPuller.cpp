@@ -47,6 +47,7 @@ bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
         if (mHasGoodData) {
             (*data) = mCachedData;
             StatsdStats::getInstance().notePullFromCache(mTagId);
+
         }
         return mHasGoodData;
     }
