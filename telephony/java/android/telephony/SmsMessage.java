@@ -344,10 +344,12 @@ public class SmsMessage {
      * @param use7bitOnly if true, characters that are not part of the radio-specific 7-bit encoding
      *     are counted as single space chars. If false, and if the messageBody contains non-7-bit
      *     encodable characters, length is calculated using a 16-bit encoding.
-     * @return an int[4] with int[0] being the number of SMS's required, int[1] the number of code
+     * @return an int[6] with int[0] being the number of SMS's required, int[1] the number of code
      *     units used, and int[2] is the number of code units remaining until the next message.
      *     int[3] is an indicator of the encoding code unit size (see the ENCODING_* definitions in
-     *     SmsConstants).
+     *     SmsConstants). int[4] is the GSM national language table to use, or 0 for the default
+     *     7-bit alphabet. int[5] The GSM national language shift table to use, or 0 for the default
+     *     7-bit extension table.
      */
     public static int[] calculateLength(CharSequence msgBody, boolean use7bitOnly) {
         return calculateLength(msgBody, use7bitOnly, SmsManager.getDefaultSmsSubscriptionId());
@@ -362,10 +364,12 @@ public class SmsMessage {
      *     are counted as single space chars. If false, and if the messageBody contains non-7-bit
      *     encodable characters, length is calculated using a 16-bit encoding.
      * @param subId Subscription to take SMS format.
-     * @return an int[4] with int[0] being the number of SMS's required, int[1] the number of code
+     * @return an int[6] with int[0] being the number of SMS's required, int[1] the number of code
      *     units used, and int[2] is the number of code units remaining until the next message.
      *     int[3] is an indicator of the encoding code unit size (see the ENCODING_* definitions in
-     *     SmsConstants).
+     *     SmsConstants). int[4] is the GSM national language table to use, or 0 for the default
+     *     7-bit alphabet. int[5] The GSM national language shift table to use, or 0 for the default
+     *     7-bit extension table.
      * @hide
      */
     public static int[] calculateLength(CharSequence msgBody, boolean use7bitOnly, int subId) {
@@ -376,11 +380,13 @@ public class SmsMessage {
                                 msgBody, use7bitOnly, true)
                         : com.android.internal.telephony.gsm.SmsMessage.calculateLength(
                                 msgBody, use7bitOnly);
-        int ret[] = new int[4];
+        int[] ret = new int[6];
         ret[0] = ted.msgCount;
         ret[1] = ted.codeUnitCount;
         ret[2] = ted.codeUnitsRemaining;
         ret[3] = ted.codeUnitSize;
+        ret[4] = ted.languageTable;
+        ret[5] = ted.languageShiftTable;
         return ret;
     }
 
