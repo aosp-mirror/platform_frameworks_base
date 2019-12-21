@@ -19,6 +19,7 @@ package com.android.internal.util;
 import android.os.RemoteException;
 import android.util.ExceptionUtils;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -48,6 +49,13 @@ public class FunctionalUtils {
      * @see #uncheckExceptions(ThrowingConsumer)
      */
     public static Runnable uncheckExceptions(ThrowingRunnable action) {
+        return action;
+    }
+
+    /**
+     * @see #uncheckExceptions(ThrowingConsumer)
+     */
+    public static <A, B> BiConsumer<A, B> uncheckExceptions(ThrowingBiConsumer<A, B> action) {
         return action;
     }
 
@@ -180,6 +188,31 @@ public class FunctionalUtils {
         default R apply(T t) {
             try {
                 return applyOrThrow(t);
+            } catch (Exception ex) {
+                throw ExceptionUtils.propagate(ex);
+            }
+        }
+    }
+
+    /**
+     * A {@link BiConsumer} that allows throwing checked exceptions from its single abstract method.
+     *
+     * Can be used together with {@link #uncheckExceptions} to effectively turn a lambda expression
+     * that throws a checked exception into a regular {@link Function}
+     *
+     * @param <A> see {@link BiConsumer}
+     * @param <B> see {@link BiConsumer}
+     */
+    @FunctionalInterface
+    @SuppressWarnings("FunctionalInterfaceMethodChanged")
+    public interface ThrowingBiConsumer<A, B> extends BiConsumer<A, B> {
+        /** @see ThrowingFunction */
+        void acceptOrThrow(A a, B b) throws Exception;
+
+        @Override
+        default void accept(A a, B b) {
+            try {
+                acceptOrThrow(a, b);
             } catch (Exception ex) {
                 throw ExceptionUtils.propagate(ex);
             }
