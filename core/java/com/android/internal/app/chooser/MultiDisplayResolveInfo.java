@@ -16,6 +16,12 @@
 
 package com.android.internal.app.chooser;
 
+import android.app.Activity;
+import android.os.Bundle;
+import android.os.UserHandle;
+
+import com.android.internal.app.ResolverActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +34,8 @@ public class MultiDisplayResolveInfo extends DisplayResolveInfo {
     String mPackageName;
     // We'll use this DRI for basic presentation info - eg icon, name.
     final DisplayResolveInfo mBaseInfo;
+    // Index of selected target
+    private int mSelected = -1;
 
     /**
      * @param firstInfo A representative DRI to use for the main icon, title, etc for this Info.
@@ -50,6 +58,32 @@ public class MultiDisplayResolveInfo extends DisplayResolveInfo {
      */
     public List<DisplayResolveInfo> getTargets() {
         return mTargetInfos;
+    }
+
+    public void setSelected(int selected) {
+        mSelected = selected;
+    }
+
+    /**
+     * Whether or not the user has selected a specific target for this MultiInfo.
+     */
+    public boolean hasSelected() {
+        return mSelected >= 0;
+    }
+
+    @Override
+    public boolean start(Activity activity, Bundle options) {
+        return mTargetInfos.get(mSelected).start(activity, options);
+    }
+
+    @Override
+    public boolean startAsCaller(ResolverActivity activity, Bundle options, int userId) {
+        return mTargetInfos.get(mSelected).startAsCaller(activity, options, userId);
+    }
+
+    @Override
+    public boolean startAsUser(Activity activity, Bundle options, UserHandle user) {
+        return mTargetInfos.get(mSelected).startAsUser(activity, options, user);
     }
 
 }
