@@ -82,6 +82,7 @@ import android.net.wifi.WifiManager.ScanResultsCallback;
 import android.net.wifi.WifiManager.SoftApCallback;
 import android.net.wifi.WifiManager.SuggestionConnectionStatusListener;
 import android.net.wifi.WifiManager.TrafficStateCallback;
+import android.net.wifi.WifiManager.WifiConnectedNetworkScorer;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -138,6 +139,7 @@ public class WifiManagerTest {
     @Mock Executor mExecutor;
     @Mock Executor mAnotherExecutor;
     @Mock ActivityManager mActivityManager;
+    @Mock WifiConnectedNetworkScorer mWifiConnectedNetworkScorer;
 
     private Handler mHandler;
     private TestLooper mLooper;
@@ -2218,5 +2220,64 @@ public class WifiManagerTest {
                 .thenReturn(testResults);
         assertEquals(testResults, mWifiManager
                 .getWifiConfigForMatchedNetworkSuggestionsSharedWithUser(new ArrayList<>()));
+    }
+
+    /**
+     * Verify the call to setWifiConnectedNetworkScorer goes to WifiServiceImpl.
+     */
+    @Test
+    public void setWifiConnectedNetworkScorerGoesToWifiServiceImpl() throws Exception {
+        mExecutor = new SynchronousExecutor();
+        mWifiManager.setWifiConnectedNetworkScorer(mExecutor, mWifiConnectedNetworkScorer);
+        verify(mWifiService).setWifiConnectedNetworkScorer(any(IBinder.class),
+                any(IWifiConnectedNetworkScorer.Stub.class));
+    }
+
+    /**
+     * Verify the call to clearWifiConnectedNetworkScorer goes to WifiServiceImpl.
+     */
+    @Test
+    public void clearWifiConnectedNetworkScorerGoesToWifiServiceImpl() throws Exception {
+        mExecutor = new SynchronousExecutor();
+        mWifiManager.setWifiConnectedNetworkScorer(mExecutor, mWifiConnectedNetworkScorer);
+        verify(mWifiService).setWifiConnectedNetworkScorer(any(IBinder.class),
+                any(IWifiConnectedNetworkScorer.Stub.class));
+
+        mWifiManager.clearWifiConnectedNetworkScorer();
+        verify(mWifiService).clearWifiConnectedNetworkScorer();
+    }
+
+    /**
+     * Verify that Wi-Fi connected scorer receives score change callback after registeration.
+     */
+    @Test
+    public void verifyScorerReceiveScoreChangeCallbackAfterRegistration() throws Exception {
+        mExecutor = new SynchronousExecutor();
+        mWifiManager.setWifiConnectedNetworkScorer(mExecutor, mWifiConnectedNetworkScorer);
+        ArgumentCaptor<IWifiConnectedNetworkScorer.Stub> scorerCaptor =
+                ArgumentCaptor.forClass(IWifiConnectedNetworkScorer.Stub.class);
+        verify(mWifiService).setWifiConnectedNetworkScorer(any(IBinder.class),
+                scorerCaptor.capture());
+        scorerCaptor.getValue().setScoreChangeCallback(any());
+        mLooper.dispatchAll();
+        verify(mWifiConnectedNetworkScorer).setScoreChangeCallback(any());
+    }
+
+    /**
+     * Verify that Wi-Fi connected scorer receives session ID when start/stop methods are called.
+     */
+    @Test
+    public void verifyScorerReceiveSessionIdWhenStartStopIsCalled() throws Exception {
+        mExecutor = new SynchronousExecutor();
+        mWifiManager.setWifiConnectedNetworkScorer(mExecutor, mWifiConnectedNetworkScorer);
+        ArgumentCaptor<IWifiConnectedNetworkScorer.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(IWifiConnectedNetworkScorer.Stub.class);
+        verify(mWifiService).setWifiConnectedNetworkScorer(any(IBinder.class),
+                callbackCaptor.capture());
+        callbackCaptor.getValue().start(0);
+        callbackCaptor.getValue().stop(10);
+        mLooper.dispatchAll();
+        verify(mWifiConnectedNetworkScorer).start(0);
+        verify(mWifiConnectedNetworkScorer).stop(10);
     }
 }

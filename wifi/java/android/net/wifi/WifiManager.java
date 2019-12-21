@@ -5777,4 +5777,186 @@ public class WifiManager {
             return new SparseArray<>();
         }
     }
+
+    /**
+     * Callback interface for framework to receive network status changes and trigger of updating
+     * {@link WifiUsabilityStatsEntry}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface ScoreChangeCallback {
+        /**
+         * Called by applications to indicate network status.
+         *
+         * @param sessionId The ID to indicate current Wi-Fi network connection obtained from
+         *                  {@link WifiConnectedNetworkScorer#start(int)}.
+         * @param isUsable The bit to indicate whether current Wi-Fi network is usable or not.
+         *                 Populated by connected network scorer in applications.
+         */
+        void onStatusChange(int sessionId, boolean isUsable);
+
+        /**
+         * Called by applications to trigger an update of {@link WifiUsabilityStatsEntry}.
+         * To receive update applications need to add WifiUsabilityStatsEntry listener. See
+         * {@link addOnWifiUsabilityStatsListener(Executor, OnWifiUsabilityStatsListener)}.
+         *
+         * @param sessionId The ID to indicate current Wi-Fi network connection obtained from
+         *                  {@link WifiConnectedNetworkScorer#start(int)}.
+         */
+        void onTriggerUpdateOfWifiUsabilityStats(int sessionId);
+    }
+
+    /**
+     * Callback proxy for {@link ScoreChangeCallback} objects.
+     *
+     * @hide
+     */
+    private class ScoreChangeCallbackProxy implements ScoreChangeCallback {
+        private final IScoreChangeCallback mScoreChangeCallback;
+
+        private ScoreChangeCallbackProxy(IScoreChangeCallback callback) {
+            mScoreChangeCallback = callback;
+        }
+
+        @Override
+        public void onStatusChange(int sessionId, boolean isUsable) {
+            try {
+                mScoreChangeCallback.onStatusChange(sessionId, isUsable);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        @Override
+        public void onTriggerUpdateOfWifiUsabilityStats(int sessionId) {
+            try {
+                mScoreChangeCallback.onTriggerUpdateOfWifiUsabilityStats(sessionId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Interface for Wi-Fi connected network scorer. Should be implemented by applications and set
+     * when calling
+     * {@link WifiManager#setWifiConnectedNetworkScorer(Executor, WifiConnectedNetworkScorer)}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface WifiConnectedNetworkScorer {
+        /**
+         * Called by framework to indicate the start of a network connection.
+         * @param sessionId The ID to indicate current Wi-Fi network connection.
+         */
+        void start(int sessionId);
+
+        /**
+         * Called by framework to indicate the end of a network connection.
+         * @param sessionId The ID to indicate current Wi-Fi network connection obtained from
+         *                  {@link WifiConnectedNetworkScorer#start(int)}.
+         */
+        void stop(int sessionId);
+
+        /**
+         * Framework sets callback for score change events after application sets its scorer.
+         * @param cbImpl The instance for {@link WifiManager#ScoreChangeCallback}. Should be
+         * implemented and instantiated by framework.
+         */
+        void setScoreChangeCallback(@NonNull ScoreChangeCallback cbImpl);
+    }
+
+    /**
+     * Callback proxy for {@link WifiConnectedNetworkScorer} objects.
+     *
+     * @hide
+     */
+    private class WifiConnectedNetworkScorerProxy extends IWifiConnectedNetworkScorer.Stub {
+        private Executor mExecutor;
+        private WifiConnectedNetworkScorer mScorer;
+
+        WifiConnectedNetworkScorerProxy(Executor executor, WifiConnectedNetworkScorer scorer) {
+            mExecutor = executor;
+            mScorer = scorer;
+        }
+
+        @Override
+        public void start(int sessionId) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "WifiConnectedNetworkScorer: " + "start: sessionId=" + sessionId);
+            }
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mScorer.start(sessionId));
+        }
+
+        @Override
+        public void stop(int sessionId) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "WifiConnectedNetworkScorer: " + "stop: sessionId=" + sessionId);
+            }
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mScorer.stop(sessionId));
+        }
+
+        @Override
+        public void setScoreChangeCallback(IScoreChangeCallback cbImpl) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "WifiConnectedNetworkScorer: "
+                        + "setScoreChangeCallback: cbImpl=" + cbImpl);
+            }
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> mScorer.setScoreChangeCallback(
+                    new ScoreChangeCallbackProxy(cbImpl)));
+        }
+    }
+
+    /**
+     * Set a callback for Wi-Fi connected network scorer.  See {@link WifiConnectedNetworkScorer}.
+     * Only a single scorer can be set. Caller will be invoked periodically by framework to inform
+     * client about start and stop of Wi-Fi connection. Caller can clear a previously set scorer
+     * using {@link clearWifiConnectedNetworkScorer()}.
+     *
+     * @param executor The executor on which callback will be invoked.
+     * @param scorer Scorer for Wi-Fi network implemented by application.
+     * @return true Scorer is set successfully.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE)
+    public boolean setWifiConnectedNetworkScorer(@NonNull @CallbackExecutor Executor executor,
+            @NonNull WifiConnectedNetworkScorer scorer) {
+        if (executor == null) throw new IllegalArgumentException("executor cannot be null");
+        if (scorer == null) throw new IllegalArgumentException("scorer cannot be null");
+        if (mVerboseLoggingEnabled) {
+            Log.v(TAG, "setWifiConnectedNetworkScorer: scorer=" + scorer);
+        }
+        try {
+            return mService.setWifiConnectedNetworkScorer(new Binder(),
+                    new WifiConnectedNetworkScorerProxy(executor, scorer));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allow caller to clear a previously set scorer. After calling this method,
+     * client will no longer receive information about start and stop of Wi-Fi connection.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE)
+    public void clearWifiConnectedNetworkScorer() {
+        if (mVerboseLoggingEnabled) {
+            Log.v(TAG, "clearWifiConnectedNetworkScorer");
+        }
+        try {
+            mService.clearWifiConnectedNetworkScorer();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
