@@ -93,7 +93,6 @@ public class Svc {
     public static final Command[] COMMANDS = new Command[] {
             COMMAND_HELP,
             new PowerCommand(),
-            new DataCommand(),
             // `svc wifi` has been migrated to WifiShellCommand
             new UsbCommand(),
             new NfcCommand(),
