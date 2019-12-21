@@ -300,7 +300,7 @@
     <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att spela in ljud?"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fysiska aktivitet"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"åtkomst till data om fysisk aktivitet"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; to åtkomst till data om fysisk aktivitet?"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till data om fysisk aktivitet?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ta bilder och spela in video"</string>
     <string name="permgrouprequest_camera" msgid="2697305443703328372">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att ta bilder och spela in video?"</string>
@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Tillåter att appen skickar sticky broadcasts som finns kvar när sändningen är slut. Överdriven användning kan göra TV:n seg eller instabil eftersom den använder för mycket minne."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Tillåter att appen skickar sticky broadcast, som finns kvar när sändningen är slut. Vid intensiv användning kan mobilen bli långsam eller instabil eftersom minnet överbelastas."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"läsa dina kontakter"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Tillåter att appen läser kontaktuppgifter som sparats på surfplattan, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. Med den här behörigheten tillåts appen att spara kontaktuppgifter. Skadliga appar kan dela uppgifterna med andra utan din vetskap."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Tillåter att appen läser data om dina kontakter som sparats på TV:n, bland annat hur ofta du har ringt, skickat e-post eller kommunicerat på andra sätt med enskilda individer. Med den här behörigheten kan appar spara dina kontaktuppgifter och skadliga appar kan dela kontaktuppgifter utan att du vet om det."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Tillåter att appen läser kontaktuppgifter som sparats på mobilen, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. Med den här behörigheten tillåts appen att spara kontaktuppgifter. Skadliga appar kan dela uppgifterna med andra utan din vetskap."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"ändra kontakterna"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Tillåter att appen ändrar kontaktuppgifter som sparats på surfplattan, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. Med den här behörigheten tillåts appar att ta bort kontaktuppgifter."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Tillåter att appen ändrar uppgifterna om dina kontakter som har sparats på TV:n, bland annat hur ofta du har ringt, skickat e-post eller kommunicerat på andra sätt med särskilda kontakter. Med den här behörigheten kan appar ta bort kontaktuppgifter."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Tillåter att appen ändrar kontaktuppgifter som sparats på mobilen, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. Med den här behörigheten tillåts appar att ta bort kontaktuppgifter."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Tillåter att appen ändrar kontaktuppgifter som sparats på surfplattan. Med den här behörigheten får appar även radera kontaktuppgifter."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Tillåter att appen ändrar kontaktuppgifter som sparats på telefonen. Med den här behörigheten får appar även radera kontaktuppgifter."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"läs samtalslogg"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Appen kan läsa din samtalshistorik."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"skriv samtalslogg"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"endast åtkomst till beräknad plats (nätverksbaserad) i förgrunden"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Appen kan endast få information om din plats från källor i nätverket, som mobilmaster och Wi-Fi-nätverk, när den körs i förgrunden. Platstjänsterna måste ha aktiverats och finnas på surfplattan om appen ska kunna använda dem."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Appen kan endast få information om din plats från källor i nätverket, som mobilmaster och Wi-Fi-nätverk, när den körs i förgrunden. Platstjänsterna måste ha aktiverats och finnas på tv:n om appen ska kunna använda dem."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Den här appen kan endast få information om din ungefärliga plats när den körs i förgrunden. Platstjänsterna måste ha aktiverats och vara tillgängliga för bilen om appen ska kunna använda dem."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Appen kan endast få information om din plats från källor i nätverket, som mobilmaster och Wi-Fi-nätverk, när den körs i förgrunden. Platstjänsterna måste ha aktiverats och finnas på mobilen om appen ska kunna använda dem."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"få åtkomst till platsinformation i bakgrunden"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Om denna behörighet ges utöver ungefärlig eller exakt platsåtkomst får appen åtkomst till platsinformation när den körs i bakgrunden."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Ljud för alarm"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Aviseringsljud"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Okänt"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Det gick inte att ansluta till <xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Tryck för att ändra sekretessinställningar och försök igen"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Vill du ändra sekretessinställningar?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Det kan vara så att enhetens MAC-adress (en unik identifierare) används vid anslutningen till <xliff:g id="SSID_0">%1$s</xliff:g>. Det kan göra det möjligt för enheter i närheten att spåra enhetens plats. \n\nOm du fortsätter ändras sekretessinställningen och <xliff:g id="SSID_1">%1$s</xliff:g> testar att ansluta på nytt."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Ändra inställning"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Inställningen har uppdaterats. Försök att ansluta igen."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Det gick inte att ändra sekretessinställningen"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Nätverket hittades inte"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">Wi-Fi-nätverk är tillgängliga</item>
       <item quantity="one">Wi-Fi-nätverk är tillgängligt</item>

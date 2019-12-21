@@ -373,13 +373,13 @@
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"İş profili"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Gece Işığı"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Gün batımı açılacak"</string>
-    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Gün doğumuna kadar"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Sabaha kadar"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Şu saatte açılacak: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Şu saate kadar: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Koyu tema"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"Koyu tema\nPil tasarrufu"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Pil Tasarrufu"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Gün batımı açılacak"</string>
-    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Gün doğumuna kadar"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Sabaha kadar"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC devre dışı"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC etkin"</string>

@@ -377,7 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Desde: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Ata: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Tema escuro"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"Tema escuro\nAforro de batería"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Aforro de batería"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Activación ao solpor"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Ata o amencer"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
@@ -549,7 +549,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"A pantalla manterase visible ata que deixes de fixala. Para facelo, mantén premido Inicio."</string>
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Para deixar de fixar a pantalla, mantén premidos os botóns Volver e Visión xeral"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Para deixar de fixar a pantalla, mantén premidos os botóns Atrás e Inicio"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Para soltar esta pantalla, pasa o dedo cara arriba e mantena premida"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Para deixar de fixar esta pantalla, pasa o dedo cara arriba e mantena premida"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"De acordo"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Non, grazas"</string>
     <string name="screen_pinning_start" msgid="5695091877402422575">"Fixouse a pantalla"</string>

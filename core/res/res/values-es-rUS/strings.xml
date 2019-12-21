@@ -390,13 +390,17 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Permite que la aplicación transmita emisiones atractivas, que permanecen una vez que termina la emisión. El uso excesivo puede provocar que la TV esté lenta o poco estable debido al gran uso de memoria."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Permite que la aplicación envíe transmisiones persistentes que permanecen después de que finaliza la transmisión. Un uso excesivo podría ralentizar el dispositivo o hacer que funcione de manera inestable al forzarlo a utilizar mucha memoria."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"leer tus contactos"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Permite que la aplicación consulte información sobre los contactos almacenados en la tablet, incluida la frecuencia con la que los has llamado, les has enviado correos o te has puesto en contacto con ellos de otro modo. Las aplicaciones pueden utilizar este permiso para guardar los datos de los contactos, y las aplicaciones malintencionadas podrían compartirlos sin tu consentimiento."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Permite que la aplicación lea datos sobre los contactos almacenados en la TV, lo que incluye la frecuencia de llamadas, correos electrónicos u otro tipo de comunicaciones con personas específicas. Esta opción permite que las aplicaciones guarden tus datos de contacto y que las aplicaciones malintencionadas puedan usar esta información sin que lo sepas."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Permite que la aplicación consulte información sobre contactos almacenados en el dispositivo, incluida la frecuencia con la que los has llamado, les has enviado correos o te has puesto en contacto con ellos de otro modo. Las aplicaciones pueden utilizar este permiso para guardar los datos de los contactos, y las aplicaciones malintencionadas podrían compartirlos sin tu consentimiento."</string>
+    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
+    <skip />
+    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
+    <skip />
     <string name="permlab_writeContacts" msgid="8919430536404830430">"modificar tus contactos"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Permite que la aplicación modifique los datos de los contactos almacenados en la tablet, incluida la frecuencia con la que los has llamado, les has enviado correos o te has puesto en contacto con ellos de otro modo. Las aplicaciones pueden utilizar este permiso para eliminar datos de contactos."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Permite que la aplicación modifique datos sobre los contactos almacenados en la TV, lo que incluye la frecuencia de llamadas, correos electrónicos u otro tipo de comunicaciones con contactos específicos. Las aplicaciones pueden usar este permiso para eliminar datos de contactos."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Permite que la aplicación modifique los datos de los contactos almacenados en el dispositivo, incluida la frecuencia con la que los has llamado, les has enviado correos o te has puesto en contacto con ellos de otro modo. Las aplicaciones pueden utilizar este permiso para eliminar datos de contactos."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Permite que la app modifique datos sobre los contactos almacenados en la tablet. Las apps pueden utilizar este permiso para borrar los datos de los contactos."</string>
+    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
+    <skip />
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Permite que la app modifique datos sobre los contactos almacenados en el teléfono. Las apps pueden utilizar este permiso para borrar los datos de los contactos."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"leer el registro de llamadas"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Esta app puede leer tu historial de llamadas."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"escribir en el registro de llamadas"</string>
@@ -420,6 +424,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"acceso a la ubicación aproximada (mediante red) solo en primer plano"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Esta app puede obtener tu ubicación desde fuentes de red, como torres de telefonía celular y redes Wi-Fi, pero solo en primer plano. Los servicios de ubicación deben estar activados y disponibles en tu tablet para que la app pueda usarlos."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Esta app puede obtener tu ubicación desde fuentes de red, como torres de telefonía celular y redes Wi-Fi, pero solo en primer plano. Los servicios de ubicación deben estar activados y disponibles en tu TV para que la app pueda usarlos."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Esta app puede obtener tu ubicación aproximada únicamente cuando está en primer plano. Los servicios de ubicación deben estar activados y disponibles en el vehículo para que la app pueda usarlos."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Esta app puede obtener tu ubicación desde fuentes de red, como torres de telefonía celular y redes Wi-Fi, pero solo en primer plano. Los servicios de ubicación deben estar activados y disponibles en tu teléfono para que la app pueda usarlos."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"acceder a la ubicación en segundo plano"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Si este permiso se otorga de manera adicional para aproximar o precisar el acceso a la ubicación, la app podrá acceder a la ubicación mientras se ejecuta en segundo plano."</string>
@@ -1239,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Sonidos de la alarma"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Sonidos de notificaciones"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Desconocido"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"No se puede establecer conexión con <xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Presiona para cambiar la configuración de privacidad y volver a intentarlo"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"¿Quieres cambiar la configuración de privacidad?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Es posible que <xliff:g id="SSID_0">%1$s</xliff:g> quiera conectarse mediante la dirección MAC (un identificador único) de tu dispositivo. Eso podría permitir que dispositivos cercanos registren la ubicación de tu dispositivo. \n\nSi continúas, <xliff:g id="SSID_1">%1$s</xliff:g> cambiará la configuración de privacidad e intentará volver a establecer conexión."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Cambiar configuración"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Se actualizó la configuración. Intenta conectarte de nuevo."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"No se puede cambiar la configuración de privacidad"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"No se encontró ninguna red"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">redes de Wi-Fi disponibles</item>
       <item quantity="one">red de Wi-Fi disponible</item>
@@ -1347,7 +1360,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Cargando el dispositivo conectado mediante USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Se activó la transferencia de archivos mediante USB"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Se activó el modo PTP mediante USB"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Se activó la conexión mediante dispositivo portátil por USB"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Se activó la conexión mediante dispositivo móvil por USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Se activó el modo MIDI mediante USB"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Accesorio USB conectado"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Presiona para ver más opciones."</string>
@@ -1478,7 +1491,7 @@
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Presiona para salir de la app de conducción."</string>
     <string name="tethered_notification_title" msgid="2700523927485687353">"Anclaje a red o zona activa conectados"</string>
     <string name="tethered_notification_message" msgid="6228080755828019453">"Presiona para configurar."</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"Se inhabilitó la conexión mediante dispositivo portátil"</string>
+    <string name="disable_tether_notification_title" msgid="7158047514545848391">"Se inhabilitó la conexión mediante dispositivo móvil"</string>
     <string name="disable_tether_notification_message" msgid="98281313984014775">"Para obtener más información, comunícate con el administrador"</string>
     <string name="back_button_label" msgid="4078224038025043387">"Atrás"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Siguiente"</string>

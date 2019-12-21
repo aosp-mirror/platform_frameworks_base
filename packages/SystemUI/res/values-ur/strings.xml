@@ -232,7 +232,7 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"ہوائی جہاز وضع کو آن کر دیا گیا۔"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"مکمل خاموشی"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"صرف الارمز"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"\'ڈسٹرب نہ کریں\'۔"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ڈسٹرب نہ کریں۔"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\'ڈسٹرب نہ کریں\' کو آف کر دیا گیا۔"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"\'ڈسٹرب نہ کریں\' کو آن کر دیا گیا۔"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"بلوٹوتھ۔"</string>
@@ -299,7 +299,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"اسکرین سیور"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"ایتھرنیٹ"</string>
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"مزید اختیارات کے لیے آئیکنز کو ٹچ کریں اور دبائیں رکھیں"</string>
-    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"\'ڈسٹرب نہ کریں\'"</string>
+    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ڈسٹرب نہ کریں"</string>
     <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"صرف ترجیحی"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"صرف الارمز"</string>
     <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"مکمل خاموشی"</string>
@@ -377,7 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"آن ہوگی بوقت <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> تک"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"گہری تھیم"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"گہری تھیم\nبیٹری سیور"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"بیٹری سیور"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"شام کے وقت آن ہوگی"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"طلوع آفتاب تک"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
@@ -741,7 +741,7 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"کیلنڈر"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"والیوم کنٹرولز کے ساتھ دکھائیں"</string>
-    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"\'ڈسٹرب نہ کریں\'"</string>
+    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ڈسٹرب نہ کریں"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"والیوم بٹنز کے شارٹ کٹ"</string>
     <string name="volume_up_silent" msgid="1035180298885717790">"والیوم بڑھانے پر \'ڈسٹرب نہ کریں\' سے باہر نکلیں"</string>
     <string name="battery" msgid="769686279459897127">"بیٹری"</string>

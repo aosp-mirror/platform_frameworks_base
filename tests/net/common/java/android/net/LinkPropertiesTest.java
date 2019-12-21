@@ -31,6 +31,7 @@ import android.util.ArraySet;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ParcelableTestUtil;
 import com.android.internal.util.TestUtils;
 
 import org.junit.Test;
@@ -47,25 +48,22 @@ import java.util.Set;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class LinkPropertiesTest {
-    private static final InetAddress ADDRV4 = InetAddresses.parseNumericAddress("75.208.6.1");
-    private static final InetAddress ADDRV6 = InetAddresses.parseNumericAddress(
-            "2001:0db8:85a3:0000:0000:8a2e:0370:7334");
-    private static final InetAddress DNS1 = InetAddresses.parseNumericAddress("75.208.7.1");
-    private static final InetAddress DNS2 = InetAddresses.parseNumericAddress("69.78.7.1");
-    private static final InetAddress DNS6 = InetAddresses.parseNumericAddress(
-            "2001:4860:4860::8888");
-    private static final InetAddress PRIVDNS1 = InetAddresses.parseNumericAddress("1.1.1.1");
-    private static final InetAddress PRIVDNS2 = InetAddresses.parseNumericAddress("1.0.0.1");
-    private static final InetAddress PRIVDNS6 = InetAddresses.parseNumericAddress(
-            "2606:4700:4700::1111");
-    private static final InetAddress PCSCFV4 = InetAddresses.parseNumericAddress("10.77.25.37");
-    private static final InetAddress PCSCFV6 = InetAddresses.parseNumericAddress(
-            "2001:0db8:85a3:0000:0000:8a2e:0370:1");
-    private static final InetAddress GATEWAY1 = InetAddresses.parseNumericAddress("75.208.8.1");
-    private static final InetAddress GATEWAY2 = InetAddresses.parseNumericAddress("69.78.8.1");
-    private static final InetAddress GATEWAY61 = InetAddresses.parseNumericAddress(
-            "fe80::6:0000:613");
-    private static final InetAddress GATEWAY62 = InetAddresses.parseNumericAddress("fe80::6:2222");
+    private static final InetAddress ADDRV4 = address("75.208.6.1");
+    private static final InetAddress ADDRV6 = address("2001:0db8:85a3:0000:0000:8a2e:0370:7334");
+    private static final InetAddress DNS1 = address("75.208.7.1");
+    private static final InetAddress DNS2 = address("69.78.7.1");
+    private static final InetAddress DNS6 = address("2001:4860:4860::8888");
+    private static final InetAddress PRIVDNS1 = address("1.1.1.1");
+    private static final InetAddress PRIVDNS2 = address("1.0.0.1");
+    private static final InetAddress PRIVDNS6 = address("2606:4700:4700::1111");
+    private static final InetAddress PCSCFV4 = address("10.77.25.37");
+    private static final InetAddress PCSCFV6 = address("2001:0db8:85a3:0000:0000:8a2e:0370:1");
+    private static final InetAddress GATEWAY1 = address("75.208.8.1");
+    private static final InetAddress GATEWAY2 = address("69.78.8.1");
+    private static final InetAddress GATEWAY61 = address("fe80::6:0000:613");
+    private static final InetAddress GATEWAY62 = address("fe80::6:22%lo");
+    private static final InetAddress TESTIPV4ADDR = address("192.168.47.42");
+    private static final InetAddress TESTIPV6ADDR = address("fe80::7:33%43");
     private static final String NAME = "qmi0";
     private static final String DOMAINS = "google.com";
     private static final String PRIV_DNS_SERVER_NAME = "private.dns.com";
@@ -75,8 +73,7 @@ public class LinkPropertiesTest {
     private static final LinkAddress LINKADDRV6 = new LinkAddress(ADDRV6, 128);
     private static final LinkAddress LINKADDRV6LINKLOCAL = new LinkAddress("fe80::1/64");
 
-    // TODO: replace all calls to NetworkUtils.numericToInetAddress with calls to this method.
-    private InetAddress Address(String addrString) {
+    private static InetAddress address(String addrString) {
         return InetAddresses.parseNumericAddress(addrString);
     }
 
@@ -223,7 +220,7 @@ public class LinkPropertiesTest {
         target.clear();
         target.setInterfaceName(NAME);
         // change link addresses
-        target.addLinkAddress(new LinkAddress(Address("75.208.6.2"), 32));
+        target.addLinkAddress(new LinkAddress(address("75.208.6.2"), 32));
         target.addLinkAddress(LINKADDRV6);
         target.addDnsServer(DNS1);
         target.addDnsServer(DNS2);
@@ -238,7 +235,7 @@ public class LinkPropertiesTest {
         target.addLinkAddress(LINKADDRV4);
         target.addLinkAddress(LINKADDRV6);
         // change dnses
-        target.addDnsServer(Address("75.208.7.2"));
+        target.addDnsServer(address("75.208.7.2"));
         target.addDnsServer(DNS2);
         target.addPcscfServer(PCSCFV6);
         target.addRoute(new RouteInfo(GATEWAY1));
@@ -250,10 +247,10 @@ public class LinkPropertiesTest {
         target.setInterfaceName(NAME);
         target.addLinkAddress(LINKADDRV4);
         target.addLinkAddress(LINKADDRV6);
-        target.addDnsServer(Address("75.208.7.2"));
+        target.addDnsServer(address("75.208.7.2"));
         target.addDnsServer(DNS2);
         // change pcscf
-        target.addPcscfServer(Address("2001::1"));
+        target.addPcscfServer(address("2001::1"));
         target.addRoute(new RouteInfo(GATEWAY1));
         target.addRoute(new RouteInfo(GATEWAY2));
         target.setMtu(MTU);
@@ -266,9 +263,9 @@ public class LinkPropertiesTest {
         target.addDnsServer(DNS1);
         target.addDnsServer(DNS2);
         // change gateway
-        target.addRoute(new RouteInfo(Address("75.208.8.2")));
-        target.addRoute(new RouteInfo(GATEWAY2));
+        target.addRoute(new RouteInfo(address("75.208.8.2")));
         target.setMtu(MTU);
+        target.addRoute(new RouteInfo(GATEWAY2));
         assertFalse(source.equals(target));
 
         target.clear();
@@ -344,7 +341,7 @@ public class LinkPropertiesTest {
 
     @Test
     public void testRouteInterfaces() {
-        LinkAddress prefix = new LinkAddress(Address("2001:db8::"), 32);
+        LinkAddress prefix = new LinkAddress(address("2001:db8::"), 32);
         InetAddress address = ADDRV6;
 
         // Add a route with no interface to a LinkProperties with no interface. No errors.
@@ -734,8 +731,7 @@ public class LinkPropertiesTest {
 
         // Add an on-link route, making the on-link DNS server reachable,
         // but there is still no IPv4 address.
-        assertTrue(v4lp.addRoute(new RouteInfo(
-                new IpPrefix(NetworkUtils.numericToInetAddress("75.208.0.0"), 16))));
+        assertTrue(v4lp.addRoute(new RouteInfo(new IpPrefix(address("75.208.0.0"), 16))));
         assertFalse(v4lp.isReachable(DNS1));
         assertFalse(v4lp.isReachable(DNS2));
 
@@ -751,9 +747,9 @@ public class LinkPropertiesTest {
         assertTrue(v4lp.isReachable(DNS2));
 
         final LinkProperties v6lp = new LinkProperties();
-        final InetAddress kLinkLocalDns = Address("fe80::6:1");
-        final InetAddress kLinkLocalDnsWithScope = Address("fe80::6:2%43");
-        final InetAddress kOnLinkDns = Address("2001:db8:85a3::53");
+        final InetAddress kLinkLocalDns = address("fe80::6:1");
+        final InetAddress kLinkLocalDnsWithScope = address("fe80::6:2%43");
+        final InetAddress kOnLinkDns = address("2001:db8:85a3::53");
         assertFalse(v6lp.isReachable(kLinkLocalDns));
         assertFalse(v6lp.isReachable(kLinkLocalDnsWithScope));
         assertFalse(v6lp.isReachable(kOnLinkDns));
@@ -762,7 +758,7 @@ public class LinkPropertiesTest {
         // Add a link-local route, making the link-local DNS servers reachable. Because
         // we assume the presence of an IPv6 link-local address, link-local DNS servers
         // are considered reachable, but only those with a non-zero scope identifier.
-        assertTrue(v6lp.addRoute(new RouteInfo(new IpPrefix(Address("fe80::"), 64))));
+        assertTrue(v6lp.addRoute(new RouteInfo(new IpPrefix(address("fe80::"), 64))));
         assertFalse(v6lp.isReachable(kLinkLocalDns));
         assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
         assertFalse(v6lp.isReachable(kOnLinkDns));
@@ -778,7 +774,7 @@ public class LinkPropertiesTest {
         // Add a global route on link, but no global address yet. DNS servers reachable
         // via a route that doesn't require a gateway: give them the benefit of the
         // doubt and hope the link-local source address suffices for communication.
-        assertTrue(v6lp.addRoute(new RouteInfo(new IpPrefix(Address("2001:db8:85a3::"), 64))));
+        assertTrue(v6lp.addRoute(new RouteInfo(new IpPrefix(address("2001:db8:85a3::"), 64))));
         assertFalse(v6lp.isReachable(kLinkLocalDns));
         assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
         assertTrue(v6lp.isReachable(kOnLinkDns));
@@ -807,7 +803,7 @@ public class LinkPropertiesTest {
         stacked.setInterfaceName("v4-test0");
         v6lp.addStackedLink(stacked);
 
-        InetAddress stackedAddress = Address("192.0.0.4");
+        InetAddress stackedAddress = address("192.0.0.4");
         LinkAddress stackedLinkAddress = new LinkAddress(stackedAddress, 32);
         assertFalse(v6lp.isReachable(stackedAddress));
         stacked.addLinkAddress(stackedLinkAddress);
@@ -840,7 +836,7 @@ public class LinkPropertiesTest {
         LinkProperties rmnet1 = new LinkProperties();
         rmnet1.setInterfaceName("rmnet1");
         rmnet1.addLinkAddress(new LinkAddress("10.0.0.3/8"));
-        RouteInfo defaultRoute1 = new RouteInfo((IpPrefix) null, Address("10.0.0.1"),
+        RouteInfo defaultRoute1 = new RouteInfo((IpPrefix) null, address("10.0.0.1"),
                 rmnet1.getInterfaceName());
         RouteInfo directRoute1 = new RouteInfo(new IpPrefix("10.0.0.0/8"), null,
                 rmnet1.getInterfaceName());
@@ -859,7 +855,7 @@ public class LinkPropertiesTest {
         rmnet2.setInterfaceName("rmnet2");
         rmnet2.addLinkAddress(new LinkAddress("fe80::cafe/64"));
         rmnet2.addLinkAddress(new LinkAddress("2001:db8::2/64"));
-        RouteInfo defaultRoute2 = new RouteInfo((IpPrefix) null, Address("2001:db8::1"),
+        RouteInfo defaultRoute2 = new RouteInfo((IpPrefix) null, address("2001:db8::1"),
                 rmnet2.getInterfaceName());
         RouteInfo directRoute2 = new RouteInfo(new IpPrefix("2001:db8::/64"), null,
                 rmnet2.getInterfaceName());
@@ -925,24 +921,53 @@ public class LinkPropertiesTest {
     public void testLinkPropertiesParcelable() throws Exception {
         LinkProperties source = new LinkProperties();
         source.setInterfaceName(NAME);
-        // set 2 link addresses
+
         source.addLinkAddress(LINKADDRV4);
         source.addLinkAddress(LINKADDRV6);
-        // set 2 dnses
+
         source.addDnsServer(DNS1);
         source.addDnsServer(DNS2);
-        // set 2 gateways
+        source.addDnsServer(GATEWAY62);
+
+        source.addPcscfServer(TESTIPV4ADDR);
+        source.addPcscfServer(TESTIPV6ADDR);
+
+        source.setUsePrivateDns(true);
+        source.setPrivateDnsServerName(PRIV_DNS_SERVER_NAME);
+
+        source.setDomains(DOMAINS);
+
         source.addRoute(new RouteInfo(GATEWAY1));
         source.addRoute(new RouteInfo(GATEWAY2));
-        // set 2 validated private dnses
+
         source.addValidatedPrivateDnsServer(DNS6);
         source.addValidatedPrivateDnsServer(GATEWAY61);
+        source.addValidatedPrivateDnsServer(TESTIPV6ADDR);
+
+        source.setHttpProxy(ProxyInfo.buildDirectProxy("test", 8888));
 
         source.setMtu(MTU);
 
+        source.setTcpBufferSizes(TCP_BUFFER_SIZES);
+
         source.setNat64Prefix(new IpPrefix("2001:db8:1:2:64:64::/96"));
 
+        final LinkProperties stacked = new LinkProperties();
+        stacked.setInterfaceName("test-stacked");
+        source.addStackedLink(stacked);
+
         TestUtils.assertParcelingIsLossless(source);
+        ParcelableTestUtil.assertFieldCountEquals(14, LinkProperties.class);
+    }
+
+    @Test
+    public void testLinkLocalDnsServerParceling() throws Exception {
+        final String strAddress = "fe80::1%lo";
+        final LinkProperties lp = new LinkProperties();
+        lp.addDnsServer(address(strAddress));
+        final LinkProperties unparceled = TestUtils.parcelingRoundTrip(lp);
+        // Inet6Address#equals does not test for the scope id
+        assertEquals(strAddress, unparceled.getDnsServers().get(0).getHostAddress());
     }
 
     @Test
