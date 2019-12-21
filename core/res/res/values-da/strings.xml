@@ -188,8 +188,7 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Administrationsappen til arbejdsprofilen mangler eller er beskadiget. Derfor er din arbejdsprofil og dine relaterede data blevet slettet. Kontakt din administrator for at få hjælp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Din arbejdsprofil er ikke længere tilgængelig på denne enhed"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"For mange mislykkede adgangskodeforsøg"</string>
-    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
-    <skip />
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administratoren har gjort personlig brug af enheden utilgængelig"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Dette er en administreret enhed"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Din organisation administrerer denne enhed og kan overvåge netværkstrafik. Tryk for at se info."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Enheden slettes"</string>
@@ -381,13 +380,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"Tillader, at appen kan sende klæbende udsendelser, der forbliver, når udsendelsen er slut. Overdreven brug kan gøre din Android TV-enhed langsom eller ustabil, da det tvinger den til at bruge for meget hukommelse."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Tillader, at appen kan sende klæbende udsendelser, der forbliver tilbage, når udsendelsen er slut. Overdreven brug kan gøre din telefon langsom eller ustabil ved at tvinge den til at bruge for meget hukommelse."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"læse dine kontakter"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Tillader, at appen kan læse data om de kontakter, der er gemt på din tablet, f.eks. hvor ofte du har ringet til, sendt mail til eller på anden måde kommunikeret med bestemte personer. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="2387823103274997441">"Tillader, at appen kan læse gemte data på din Android TV-enhed om dine kontakter, bl.a. hvor ofte du har ringet til dem, sendt mail til dem eller på anden måde kommunikeret med bestemte personer. Denne tilladelse giver apps mulighed for at gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Tillader, at appen kan læse data om de kontakter, der er gemt på din telefon, f.eks. hvor ofte du har ringet til, sendt mail til eller på anden måde kommunikeret med bestemte personer. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Tillader, at appen kan læse data om de kontakter, der er gemt på din tablet. Apps får også adgang til de konti på din tablet, som har oprettet kontakter. Dette kan omfatte konti, som er oprettet af apps, du har installeret. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Tillader, at appen kan læse data om de kontakter, der er gemt på din Android TV-enhed. Apps får også adgang til de konti på din Android TV-enhed, som har oprettet kontakter. Dette kan omfatte konti, som er oprettet af apps, du har installeret. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Tillader, at appen læser data om de kontakter, der er gemt på din telefon. Apps får også adgang til de konti på din telefon, som har oprettet kontakter. Dette kan omfatte konti, som er oprettet af apps, du har installeret. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"ændre dine kontakter"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din tablet, f.eks. hvor ofte du har ringet til dem, sendt dem en mail eller på anden måde kommunikeret med bestemte kontakter. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="3870937407268625273">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din Android TV-enhed, bl.a. hvor ofte du har ringet til dem, sendt en mail til dem eller på anden måde kommunikeret med bestemte kontakter. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din telefon, f.eks. hvor ofte du har ringet til dem, sendt en mail til dem eller på anden måde kommunikeret med bestemte kontakter. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din tablet. Denne tilladelse giver apps mulighed for at slette kontaktdata."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din Android TV-enhed. Denne tilladelse giver apps mulighed for at slette kontaktdata."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din telefon. Denne tilladelse giver apps mulighed for at slette kontaktdata."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"læse opkaldsliste"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Denne app kan læse din opkaldshistorik."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"skriv opkaldsliste"</string>
@@ -407,13 +406,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"få adgang til yderligere kommandoer for placeringsudbyder"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Tillader, at appen kan få adgang til yderligere kommandoer for placeringsudbydere. Dette kan gøre det muligt for appen at forstyrre GPS-funktionen eller andre placeringskilder."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"få kun adgang til nøjagtig placering i forgrunden"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"Denne app kan kun få din nøjagtige placering, når den er i forgrunden. Disse placeringstjenester skal være aktiverede og tilgængelige på din telefon, før appen kan bruge dem. Dette kan øge batteriforbruget."</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"få kun adgang til omtrentlig placering (netværksbaseret) i forgrunden"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Denne app kan fastslå din placering ved hjælp af netværkskilder som f.eks. mobilmaster og Wi-Fi-netværk, men kun når appen er i forgrunden. Disse placeringstjenester skal være aktiverede og tilgængelige på din tablet, før appen kan bruge dem."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="6994518594789550469">"Denne app kan fastslå din placering ved hjælp af netværkskilder som f.eks. mobilmaster og Wi-Fi-netværk, men kun når appen er i forgrunden. Disse placeringstjenester skal være aktiverede og tilgængelige på din Android TV-enhed, før appen kan bruge dem."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Denne app kan fastslå din placering ved hjælp af netværkskilder som f.eks. mobilmaster og Wi-Fi-netværk, men kun når appen er i forgrunden. Disse placeringstjenester skal være aktiveret og tilgængelige på din telefon, før appen kan bruge dem."</string>
+    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Denne app kan kun finde din nøjagtige placering, når den er i forgrunden. Placeringstjenester skal være aktiverede og tilgængelige på din telefon, før appen kan anvende dem. Dette kan øge batteriforbruget."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"få kun adgang til omtrentlig placering i forgrunden"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Denne app kan kun finde din omtrentlige placering, når den er i forgrunden. Placeringstjenester skal være aktiverede og tilgængelige på din enhed, før appen kan anvende dem."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"adgang til placering i baggrunden"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Hvis appen godkendes, og der gives adgang til den omtrentlige eller nøjagtige placering, kan appen registrere placeringen, mens den kører i baggrunden."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Foruden adgang til placering ved kørsel i forgrunden har denne app også adgang til din placering, mens den kører i baggrunden."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"skifte dine lydindstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Tillader, at appen kan ændre globale lydindstillinger, som f.eks. lydstyrke og hvilken højttaler der bruges til output."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"optage lyd"</string>
@@ -494,6 +491,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Tillader, at appen kan læse konfigurationen af ​​Bluetooth på tabletten samt kan oprette og acceptere forbindelser med parrede enheder."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Tillader, at appen kan se konfigurationen af Bluetooth på din Android TV-enhed samt oprette og acceptere forbindelser med parrede enheder."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Tillader, at appen kan læse konfigurationen af ​​Bluetooth på telefonen samt kan oprette og acceptere forbindelser med parrede enheder."</string>
+    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
+    <skip />
+    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
+    <skip />
     <string name="permlab_nfc" msgid="1904455246837674977">"administrere Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Tillader, at appen kan kommunikere med NFC-tags (Near Field Communication), -kort og -læsere."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"deaktivere din skærmlås"</string>
@@ -900,7 +901,7 @@
     <string name="factorytest_no_action" msgid="339252838115675515">"Der blev ikke fundet nogen pakke, som leverer handlingen FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"Genstart"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"På siden på \"<xliff:g id="TITLE">%s</xliff:g>\" står der:"</string>
-    <string name="js_dialog_title_default" msgid="3769524569903332476">"Javascript"</string>
+    <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"Bekræft navigation"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"Forlad denne side"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"Bliv på denne side"</string>
@@ -1862,7 +1863,11 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Tilsluttet <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Tryk for at se filer"</string>
     <string name="pin_target" msgid="8036028973110156895">"Fastgør"</string>
+    <!-- no translation found for pin_specific_target (7824671240625957415) -->
+    <skip />
     <string name="unpin_target" msgid="3963318576590204447">"Frigør"</string>
+    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
+    <skip />
     <string name="app_info" msgid="6113278084877079851">"Appinfo"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Starter demoen…"</string>
@@ -1905,6 +1910,8 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Vil du opdatere disse elementer i "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> og <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Gem"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Nej tak"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"Ikke nu"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"Aldrig"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Opdater"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"Fortsæt"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"adgangskode"</string>
@@ -2000,5 +2007,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Slå Opdelt skærm til eller fra"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Låseskærm"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Screenshot"</string>
-    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"<xliff:g id="APP_NAME">%1$s</xliff:g>-appen i et pop op-vindue."</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Titellinje for <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
 </resources>

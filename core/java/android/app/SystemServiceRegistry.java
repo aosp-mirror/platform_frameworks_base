@@ -116,12 +116,13 @@ import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
 import android.net.NetworkWatchlistManager;
 import android.net.TestNetworkManager;
+import android.net.TetheringManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
 import android.net.nsd.INsdManager;
 import android.net.nsd.NsdManager;
-import android.net.wifi.WifiCondManager;
 import android.net.wifi.WifiFrameworkInitializer;
+import android.net.wifi.wificond.WifiCondManager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -338,6 +339,17 @@ public final class SystemServiceRegistry {
                 return ServiceManager.getServiceOrThrow(Context.NETD_SERVICE);
             }
         });
+
+        registerService(Context.TETHERING_SERVICE, TetheringManager.class,
+                new CachedServiceFetcher<TetheringManager>() {
+            @Override
+            public TetheringManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getService(Context.TETHERING_SERVICE);
+                if (b == null) return null;
+
+                return new TetheringManager(ctx, b);
+            }});
+
 
         registerService(Context.IPSEC_SERVICE, IpSecManager.class,
                 new CachedServiceFetcher<IpSecManager>() {
@@ -1146,14 +1158,6 @@ public final class SystemServiceRegistry {
                             throws ServiceNotFoundException {
                         return new TimeZoneDetector();
                     }});
-
-        registerService(Context.TELEPHONY_IMS_SERVICE, android.telephony.ims.ImsManager.class,
-                new CachedServiceFetcher<android.telephony.ims.ImsManager>() {
-                    @Override
-                    public android.telephony.ims.ImsManager createService(ContextImpl ctx) {
-                        return new android.telephony.ims.ImsManager(ctx.getOuterContext());
-                    }
-                });
 
         registerService(Context.PERMISSION_SERVICE, PermissionManager.class,
                 new CachedServiceFetcher<PermissionManager>() {

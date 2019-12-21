@@ -17,8 +17,7 @@
 package com.android.server.pm;
 
 import android.content.pm.PackageManager;
-import com.android.server.pm.PackageVerificationState;
-
+import android.content.pm.PackageManagerInternal;
 import android.test.AndroidTestCase;
 
 public class PackageVerificationStateTest extends AndroidTestCase {
@@ -29,7 +28,8 @@ public class PackageVerificationStateTest extends AndroidTestCase {
     private static final int SUFFICIENT_UID_2 = 8938;
 
     public void testPackageVerificationState_OnlyRequiredVerifier_AllowedInstall() {
-        PackageVerificationState state = new PackageVerificationState(REQUIRED_UID, null);
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.setRequiredVerifierUid(REQUIRED_UID);
 
         assertFalse("Verification should not be marked as complete yet",
                 state.isVerificationComplete());
@@ -44,7 +44,8 @@ public class PackageVerificationStateTest extends AndroidTestCase {
     }
 
     public void testPackageVerificationState_OnlyRequiredVerifier_DeniedInstall() {
-        PackageVerificationState state = new PackageVerificationState(REQUIRED_UID, null);
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.setRequiredVerifierUid(REQUIRED_UID);
 
         assertFalse("Verification should not be marked as complete yet",
                 state.isVerificationComplete());
@@ -59,7 +60,8 @@ public class PackageVerificationStateTest extends AndroidTestCase {
     }
 
     public void testPackageVerificationState_RequiredAndOneSufficient_RequiredDeniedInstall() {
-        PackageVerificationState state = new PackageVerificationState(REQUIRED_UID, null);
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.setRequiredVerifierUid(REQUIRED_UID);
 
         assertFalse("Verification should not be marked as complete yet",
                 state.isVerificationComplete());
@@ -84,7 +86,8 @@ public class PackageVerificationStateTest extends AndroidTestCase {
     }
 
     public void testPackageVerificationState_RequiredAndOneSufficient_SufficientDeniedInstall() {
-        PackageVerificationState state = new PackageVerificationState(REQUIRED_UID, null);
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.setRequiredVerifierUid(REQUIRED_UID);
 
         assertFalse("Verification should not be marked as complete yet",
                 state.isVerificationComplete());
@@ -109,7 +112,8 @@ public class PackageVerificationStateTest extends AndroidTestCase {
     }
 
     public void testPackageVerificationState_RequiredAndTwoSufficient_OneSufficientIsEnough() {
-        PackageVerificationState state = new PackageVerificationState(REQUIRED_UID, null);
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.setRequiredVerifierUid(REQUIRED_UID);
 
         assertFalse("Verification should not be marked as complete yet",
                 state.isVerificationComplete());
@@ -135,7 +139,8 @@ public class PackageVerificationStateTest extends AndroidTestCase {
     }
 
     public void testPackageVerificationState_RequiredAndTwoSufficient_SecondSufficientIsEnough() {
-        PackageVerificationState state = new PackageVerificationState(REQUIRED_UID, null);
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.setRequiredVerifierUid(REQUIRED_UID);
 
         assertFalse("Verification should not be marked as complete yet",
                 state.isVerificationComplete());
@@ -166,7 +171,8 @@ public class PackageVerificationStateTest extends AndroidTestCase {
     }
 
     public void testPackageVerificationState_RequiredAndTwoSufficient_RequiredOverrides() {
-        PackageVerificationState state = new PackageVerificationState(REQUIRED_UID, null);
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.setRequiredVerifierUid(REQUIRED_UID);
 
         assertFalse("Verification should not be marked as complete yet",
                 state.isVerificationComplete());
@@ -201,5 +207,56 @@ public class PackageVerificationStateTest extends AndroidTestCase {
 
         assertTrue("Installation should be marked as allowed still",
                 state.isInstallAllowed());
+    }
+
+    public void testAreAllVerificationsComplete_onlyVerificationPasses() {
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.setRequiredVerifierUid(REQUIRED_UID);
+        assertFalse(state.areAllVerificationsComplete());
+
+        state.setVerifierResponse(REQUIRED_UID, PackageManager.VERIFICATION_ALLOW);
+
+        assertFalse(state.areAllVerificationsComplete());
+    }
+
+    public void testAreAllVerificationsComplete_onlyIntegrityCheckPasses() {
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.setRequiredVerifierUid(REQUIRED_UID);
+        assertFalse(state.areAllVerificationsComplete());
+
+        state.setIntegrityVerificationResult(PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
+
+        assertFalse(state.areAllVerificationsComplete());
+    }
+
+    public void testAreAllVerificationsComplete_bothPasses() {
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.setRequiredVerifierUid(REQUIRED_UID);
+        assertFalse(state.areAllVerificationsComplete());
+
+        state.setIntegrityVerificationResult(PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
+        state.setVerifierResponse(REQUIRED_UID, PackageManager.VERIFICATION_ALLOW);
+
+        assertTrue(state.areAllVerificationsComplete());
+    }
+
+    public void testAreAllVerificationsComplete_onlyVerificationFails() {
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.setRequiredVerifierUid(REQUIRED_UID);
+        assertFalse(state.areAllVerificationsComplete());
+
+        state.setVerifierResponse(REQUIRED_UID, PackageManager.VERIFICATION_REJECT);
+
+        assertFalse(state.areAllVerificationsComplete());
+    }
+
+    public void testAreAllVerificationsComplete_onlyIntegrityCheckFails() {
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.setRequiredVerifierUid(REQUIRED_UID);
+        assertFalse(state.areAllVerificationsComplete());
+
+        state.setIntegrityVerificationResult(PackageManagerInternal.INTEGRITY_VERIFICATION_REJECT);
+
+        assertFalse(state.areAllVerificationsComplete());
     }
 }

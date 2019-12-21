@@ -43,7 +43,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.NotificationMediaManager;
 
 import libcore.io.IoUtils;
@@ -83,7 +83,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             DumpController dumpController,
             NotificationMediaManager mediaManager,
-            @MainHandler Handler mainHandler) {
+            @Main Handler mainHandler) {
         dumpController.registerDumpable(getClass().getSimpleName(), this);
         mWallpaperManager = wallpaperManager;
         mCurrentUserId = ActivityManager.getCurrentUser();

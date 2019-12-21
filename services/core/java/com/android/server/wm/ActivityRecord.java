@@ -1811,7 +1811,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else if (taskSwitch && allowTaskSnapshot) {
-            return snapshot == null ? STARTING_WINDOW_TYPE_SPLASH_SCREEN
+            return snapshot == null ? STARTING_WINDOW_TYPE_NONE
                     : snapshotOrientationSameAsTask(snapshot) || fromRecents
                             ? STARTING_WINDOW_TYPE_SNAPSHOT : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else {
@@ -4159,7 +4159,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * transition.
      *
      * <p class="note><strong>Note:</strong> If the visibility of this {@link ActivityRecord} is
-     * already set to {@link #visible}, we don't need to update the visibility. So {@code false} is
+     * already set to {@link #mVisible}, we don't need to update the visibility. So {@code false} is
      * returned.</p>
      *
      * @param visible {@code true} if this {@link ActivityRecord} should become visible,
@@ -4169,16 +4169,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     boolean shouldApplyAnimation(boolean visible) {
         // Allow for state update and animation to be applied if:
-        // * token is transitioning visibility state
-        // * or the token was marked as hidden and is exiting before we had a chance to play the
+        // * activity is transitioning visibility state
+        // * or the activity was marked as hidden and is exiting before we had a chance to play the
         // transition animation
-        // * or this is an opening app and windows are being replaced
-        // * or the token is the opening app and visible while opening task behind existing one.
-        final DisplayContent displayContent = getDisplayContent();
+        // * or this is an opening app and windows are being replaced (e.g. freeform window to
+        //   normal window).
         return isVisible() != visible || (!isVisible() && mIsExiting)
-                || (visible && forAllWindows(WindowState::waitingForReplacement, true))
-                || (visible && displayContent.mOpeningApps.contains(this)
-                && displayContent.mAppTransition.getAppTransition() == TRANSIT_TASK_OPEN_BEHIND);
+                || (visible && forAllWindows(WindowState::waitingForReplacement, true));
     }
 
     /**
@@ -6063,6 +6060,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void registerRemoteAnimations(RemoteAnimationDefinition definition) {
         mRemoteAnimationDefinition = definition;
+        if (definition != null) {
+            definition.linkToDeath(this::unregisterRemoteAnimations);
+        }
+    }
+
+    void unregisterRemoteAnimations() {
+        mRemoteAnimationDefinition = null;
     }
 
     RemoteAnimationDefinition getRemoteAnimationDefinition() {
@@ -6304,6 +6308,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             resolveSizeCompatModeConfiguration(newParentConfiguration);
         } else {
             super.resolveOverrideConfiguration(newParentConfiguration);
+            // We ignore activities' requested orientation in multi-window modes. Task level may
+            // take them into consideration when calculating bounds.
+            if (getParent() != null && getParent().inMultiWindowMode()) {
+                resolvedConfig.orientation = Configuration.ORIENTATION_UNDEFINED;
+            }
             applyAspectRatio(resolvedConfig.windowConfiguration.getBounds(),
                     newParentConfiguration.windowConfiguration.getAppBounds(),
                     newParentConfiguration.windowConfiguration.getBounds());

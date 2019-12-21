@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dagger.qualifiers;
+package android.net;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Qualifier;
-
-@Qualifier
-@Documented
-@Retention(RUNTIME)
-public @interface BgHandler {
+/**
+ * Listener interface allowing objects to listen to various module event.
+ * {@hide}
+ */
+oneway interface IIntResultListener {
+    void onResult(int resultCode);
 }

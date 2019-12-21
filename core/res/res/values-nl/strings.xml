@@ -188,8 +188,7 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"De beheer-app van het werkprofiel ontbreekt of is beschadigd. Als gevolg hiervan zijn je werkprofiel en alle gerelateerde gegevens verwijderd. Neem contact op met je beheerder voor hulp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Je werkprofiel is niet meer beschikbaar op dit apparaat"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Te veel wachtwoordpogingen"</string>
-    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
-    <skip />
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"De beheerder heeft het apparaat afgestaan voor persoonlijk gebruik"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Apparaat wordt beheerd"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Dit apparaat wordt beheerd door je organisatie. Het netwerkverkeer kan worden bijgehouden. Tik voor meer informatie."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Je apparaat wordt gewist"</string>
@@ -381,13 +380,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"Hiermee kan de app sticky broadcasts verzenden die worden behouden nadat de broadcast is beëindigd. Bij overmatig gebruik kan het Android TV-apparaat traag of instabiel worden omdat er te veel geheugenruimte wordt gebruikt."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Hiermee kan de app sticky broadcasts verzenden die behouden blijven nadat de broadcast is beëindigd. Bij overmatig gebruik kan de telefoon traag of instabiel worden omdat er te veel geheugenruimte wordt gebruikt."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"je contacten lezen"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je tablet, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke personen. Met deze toestemming kunnen apps je contactgegevens opslaan, en schadelijke apps kunnen zonder je medeweten contactgegevens delen."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="2387823103274997441">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je Android TV-apparaat, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke personen. Met dit recht kunnen apps je contactgegevens opslaan en kunnen schadelijke apps zonder je medeweten contactgegevens delen."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je telefoon, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke personen. Met deze toestemming kunnen apps je contactgegevens opslaan, en schadelijke apps kunnen zonder je medeweten contactgegevens delen."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je tablet. Apps hebben ook toegang tot de accounts op je tablet waarvoor contacten zijn gemaakt. Dit kan accounts omvatten die zijn gemaakt door apps die je hebt geïnstalleerd. Met dit recht kunnen apps je contactgegevens opslaan en kunnen schadelijke apps zonder je medeweten contactgegevens delen."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je Android TV. Apps hebben ook toegang tot de accounts op je Android TV-apparaat waarvoor contacten zijn gemaakt. Dit kan accounts omvatten die zijn gemaakt door apps die je hebt geïnstalleerd. Met dit recht kunnen apps je contactgegevens opslaan en kunnen schadelijke apps zonder je medeweten contactgegevens delen."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je telefoon. Apps hebben ook toegang tot de accounts op je telefoon waarvoor contacten zijn gemaakt. Dit kan accounts omvatten die zijn gemaakt door apps die je hebt geïnstalleerd. Met dit recht kunnen apps je contactgegevens opslaan en kunnen schadelijke apps zonder je medeweten contactgegevens delen."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"je contacten aanpassen"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tablet, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="3870937407268625273">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je Android TV-apparaat, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met dit recht kunnen apps contactgegevens verwijderen."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je telefoon, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tablet. Met dit recht kunnen apps contactgegevens verwijderen."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je Android TV. Met dit recht kunnen apps contactgegevens verwijderen."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je telefoon. Met dit recht kunnen apps contactgegevens verwijderen."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"gesprekslijst lezen"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Deze app kan je gespreksgeschiedenis lezen."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"gesprekslijst schrijven"</string>
@@ -407,13 +406,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"toegang tot extra opdrachten van locatieaanbieder"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Hiermee kan de app toegang krijgen tot extra opdrachten voor de locatieprovider. De app kan hiermee de werking van gps of andere locatiebronnen te verstoren."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"alleen toegang tot precieze locatie op de voorgrond"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"Deze app kan je exacte locatie ophalen wanneer de app op de voorgrond wordt uitgevoerd. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je telefoon. Hierdoor kan het batterijverbruik toenemen."</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"alleen toegang tot geschatte locatie (op basis van netwerk) op de voorgrond"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Deze app kan je locatie ophalen op basis van netwerkbronnen zoals zendmasten en wifi-netwerken, maar alleen wanneer de app zich op de voorgrond bevindt. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je tablet."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="6994518594789550469">"Deze app kan je locatie ophalen op basis van netwerkbronnen zoals zendmasten en wifi-netwerken, maar alleen als de app zich op de voorgrond bevindt. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je Android TV-apparaat."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Deze app kan je locatie ophalen op basis van netwerkbronnen zoals zendmasten en wifi-netwerken, maar alleen wanneer de app zich op de voorgrond bevindt. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je telefoon."</string>
+    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Deze app kan je exacte locatie ophalen als de app op de voorgrond wordt uitgevoerd. De app kan alleen gebruikmaken van de locatieservices als die zijn ingeschakeld en beschikbaar zijn op je apparaat. Hierdoor kan het batterijverbruik toenemen."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"alleen toegang tot geschatte locatie op de voorgrond"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Deze app kan je geschatte locatie alleen opvragen als de app op de voorgrond wordt gebruikt. De app kan de locatieservices alleen gebruiken als ze zijn ingeschakeld en beschikbaar zijn op je apparaat."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"toegang tot locatie op de achtergrond"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Als dit wordt verleend als aanvulling op toegang tot de geschatte of precieze locatie, kan de app toegang tot de locatie krijgen terwijl de app actief is op de achtergrond."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Deze app heeft niet alleen op de voorgrond toegang tot je locatie, maar ook als deze actief is op de achtergrond."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"je audio-instellingen wijzigen"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Hiermee kan de app algemene audio-instellingen wijzigen zoals het volume en welke luidspreker wordt gebruikt voor de uitvoer."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"audio opnemen"</string>
@@ -494,6 +491,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Hiermee kan de app de Bluetooth-configuratie van de tablet bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Hiermee kan de app de Bluetooth-configuratie van het Android TV-apparaat bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Hiermee kan de app de Bluetooth-configuratie van de telefoon bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
+    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
+    <skip />
+    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
+    <skip />
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication regelen"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Hiermee kan de app communiceren met NFC-tags (Near Field Communication), kaarten en lezers."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"je schermvergrendeling uitschakelen"</string>
@@ -1862,7 +1863,11 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Verbonden met <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Tik om bestanden te bekijken"</string>
     <string name="pin_target" msgid="8036028973110156895">"Vastzetten"</string>
+    <!-- no translation found for pin_specific_target (7824671240625957415) -->
+    <skip />
     <string name="unpin_target" msgid="3963318576590204447">"Losmaken"</string>
+    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
+    <skip />
     <string name="app_info" msgid="6113278084877079851">"App-info"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo starten…"</string>
@@ -1905,6 +1910,8 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Deze items updaten in "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> en <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Opslaan"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Nee, bedankt"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"Niet nu"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"Nooit"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Updaten"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"Doorgaan"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"Wachtwoord"</string>
@@ -2000,5 +2007,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Gesplitst scherm schakelen"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Scherm vergrendelen"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Screenshot"</string>
-    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"App <xliff:g id="APP_NAME">%1$s</xliff:g> in pop-upvenster."</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Ondertitelingsbalk van <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
 </resources>

@@ -48,4 +48,16 @@ public final class WifiAnnotations {
             WifiScanner.WIFI_BAND_5_GHZ_DFS_ONLY,
             WifiScanner.WIFI_BAND_6_GHZ})
     public @interface WifiBandBasic {}
+
+    @IntDef(prefix = { "CHANNEL_WIDTH_" }, value = {
+            SoftApInfo.CHANNEL_WIDTH_INVALID,
+            SoftApInfo.CHANNEL_WIDTH_20MHZ_NOHT,
+            SoftApInfo.CHANNEL_WIDTH_20MHZ,
+            SoftApInfo.CHANNEL_WIDTH_40MHZ,
+            SoftApInfo.CHANNEL_WIDTH_80MHZ,
+            SoftApInfo.CHANNEL_WIDTH_80MHZ_PLUS_MHZ,
+            SoftApInfo.CHANNEL_WIDTH_160MHZ,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Bandwidth {}
 }

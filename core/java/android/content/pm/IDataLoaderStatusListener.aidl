@@ -22,13 +22,18 @@ package android.content.pm;
  */
 oneway interface IDataLoaderStatusListener {
     /** Data loader status */
-    const int DATA_LOADER_READY = 0;
-    const int DATA_LOADER_NOT_READY = 1;
-    const int DATA_LOADER_RUNNING = 2;
+    const int DATA_LOADER_CREATED = 0;
+    const int DATA_LOADER_DESTROYED = 1;
+
+    const int DATA_LOADER_STARTED = 2;
     const int DATA_LOADER_STOPPED = 3;
-    const int DATA_LOADER_SLOW_CONNECTION = 4;
-    const int DATA_LOADER_NO_CONNECTION = 5;
-    const int DATA_LOADER_CONNECTION_OK = 6;
+
+    const int DATA_LOADER_IMAGE_READY = 4;
+    const int DATA_LOADER_IMAGE_NOT_READY = 5;
+
+    const int DATA_LOADER_SLOW_CONNECTION = 6;
+    const int DATA_LOADER_NO_CONNECTION = 7;
+    const int DATA_LOADER_CONNECTION_OK = 8;
 
     /** Data loader status callback */
     void onStatusChanged(in int dataLoaderId, in int status);

@@ -37,12 +37,12 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.companion.Association;
 import android.companion.AssociationRequest;
 import android.companion.BluetoothDeviceFilter;
 import android.companion.BluetoothLeDeviceFilter;
 import android.companion.DeviceFilter;
 import android.companion.ICompanionDeviceDiscoveryService;
-import android.companion.ICompanionDeviceDiscoveryServiceCallback;
 import android.companion.IFindDeviceCallback;
 import android.companion.WifiDeviceFilter;
 import android.content.BroadcastReceiver;
@@ -63,6 +63,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
@@ -97,7 +98,7 @@ public class DeviceDiscoveryService extends Service {
     DevicesAdapter mDevicesAdapter;
     IFindDeviceCallback mFindCallback;
 
-    ICompanionDeviceDiscoveryServiceCallback mServiceCallback;
+    AndroidFuture<Association> mServiceCallback;
     boolean mIsScanning = false;
     @Nullable DeviceChooserActivity mActivity = null;
 
@@ -107,7 +108,7 @@ public class DeviceDiscoveryService extends Service {
         public void startDiscovery(AssociationRequest request,
                 String callingPackage,
                 IFindDeviceCallback findCallback,
-                ICompanionDeviceDiscoveryServiceCallback serviceCallback) {
+                AndroidFuture serviceCallback) {
             if (DEBUG) {
                 Log.i(LOG_TAG,
                         "startDiscovery() called with: filter = [" + request
@@ -303,23 +304,12 @@ public class DeviceDiscoveryService extends Service {
     }
 
     void onDeviceSelected(String callingPackage, String deviceAddress) {
-        try {
-            mServiceCallback.onDeviceSelected(
-                    //TODO is this the right userId?
-                    callingPackage, getUserId(), deviceAddress);
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "Failed to record association: "
-                    + callingPackage + " <-> " + deviceAddress);
-        }
+        mServiceCallback.complete(new Association(getUserId(), deviceAddress, callingPackage));
     }
 
     void onCancel() {
         if (DEBUG) Log.i(LOG_TAG, "onCancel()");
-        try {
-            mServiceCallback.onDeviceSelectionCancel();
-        } catch (RemoteException e) {
-            throw new RuntimeException(e);
-        }
+        mServiceCallback.cancel(true);
     }
 
     class DevicesAdapter extends ArrayAdapter<DeviceFilterPair> {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi;
+package android.net.wifi.wificond;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -38,13 +38,18 @@ import static org.mockito.Mockito.when;
 import android.app.AlarmManager;
 import android.app.test.TestAlarmManager;
 import android.content.Context;
+import android.net.wifi.IApInterface;
+import android.net.wifi.IApInterfaceEventCallback;
+import android.net.wifi.IClientInterface;
+import android.net.wifi.IPnoScanEvent;
+import android.net.wifi.IScanEvent;
+import android.net.wifi.ISendMgmtFrameEvent;
+import android.net.wifi.IWifiScannerImpl;
+import android.net.wifi.IWificond;
+import android.net.wifi.SoftApInfo;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiScanner;
 import android.net.wifi.util.HexEncoding;
-import android.net.wifi.wificond.ChannelSettings;
-import android.net.wifi.wificond.HiddenNetwork;
-import android.net.wifi.wificond.NativeWifiClient;
-import android.net.wifi.wificond.PnoNetwork;
-import android.net.wifi.wificond.PnoSettings;
-import android.net.wifi.wificond.SingleScanSettings;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -67,7 +72,6 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -88,7 +92,7 @@ public class WifiCondManagerTest {
     @Mock
     private IApInterface mApInterface;
     @Mock
-    private WifiCondManager.SoftApListener mSoftApListener;
+    private WifiCondManager.SoftApCallback mSoftApListener;
     @Mock
     private WifiCondManager.SendMgmtFrameCallback mSendMgmtFrameCallback;
     @Mock
@@ -122,6 +126,7 @@ public class WifiCondManagerTest {
     private static final String TEST_QUOTED_SSID_2 = "\"testSsid2\"";
     private static final int[] TEST_FREQUENCIES_1 = {};
     private static final int[] TEST_FREQUENCIES_2 = {2500, 5124};
+    private static final byte[] TEST_RAW_MAC_BYTES = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05};
 
     private static final List<byte[]> SCAN_HIDDEN_NETWORK_SSID_LIST =
             new ArrayList<byte[]>() {{
@@ -131,22 +136,23 @@ public class WifiCondManagerTest {
                         LocalNativeUtil.decodeSsid(TEST_QUOTED_SSID_2)));
             }};
 
-    private static final PnoSettings TEST_PNO_SETTINGS =
-            new PnoSettings() {{
-                intervalMs = 6000;
-                pnoNetworks = new ArrayList<>();
-                PnoNetwork network = new PnoNetwork();
-                network.ssid = LocalNativeUtil.byteArrayFromArrayList(
-                        LocalNativeUtil.decodeSsid(TEST_QUOTED_SSID_1));
-                network.isHidden = true;
-                network.frequencies = TEST_FREQUENCIES_1;
-                pnoNetworks.add(network);
-                network.ssid = LocalNativeUtil.byteArrayFromArrayList(
-                        LocalNativeUtil.decodeSsid(TEST_QUOTED_SSID_2));
-                network.isHidden = false;
-                network.frequencies = TEST_FREQUENCIES_2;
-                pnoNetworks.add(network);
-            }};
+    private static final PnoSettings TEST_PNO_SETTINGS = new PnoSettings();
+    static {
+        TEST_PNO_SETTINGS.setIntervalMillis(6000);
+        List<PnoNetwork> initPnoNetworks = new ArrayList<>();
+        PnoNetwork network = new PnoNetwork();
+        network.setSsid(LocalNativeUtil.byteArrayFromArrayList(
+                LocalNativeUtil.decodeSsid(TEST_QUOTED_SSID_1)));
+        network.setHidden(true);
+        network.setFrequenciesMhz(TEST_FREQUENCIES_1);
+        initPnoNetworks.add(network);
+        network.setSsid(LocalNativeUtil.byteArrayFromArrayList(
+                LocalNativeUtil.decodeSsid(TEST_QUOTED_SSID_2)));
+        network.setHidden(false);
+        network.setFrequenciesMhz(TEST_FREQUENCIES_2);
+        initPnoNetworks.add(network);
+        TEST_PNO_SETTINGS.setPnoNetworks(initPnoNetworks);
+    }
 
     private static final int TEST_MCS_RATE = 5;
     private static final int TEST_SEND_MGMT_FRAME_ELAPSED_TIME_MS = 100;
@@ -180,8 +186,9 @@ public class WifiCondManagerTest {
         when(mClientInterface.getWifiScannerImpl()).thenReturn(mWifiScannerImpl);
         when(mClientInterface.getInterfaceName()).thenReturn(TEST_INTERFACE_NAME);
         mWificondControl = new WifiCondManager(mContext, mWificond);
-        assertEquals(true, mWificondControl.setupInterfaceForClientMode(TEST_INTERFACE_NAME,
-                mNormalScanCallback, mPnoScanCallback));
+        assertEquals(true,
+                mWificondControl.setupInterfaceForClientMode(TEST_INTERFACE_NAME, Runnable::run,
+                        mNormalScanCallback, mPnoScanCallback));
     }
 
     /**
@@ -264,7 +271,7 @@ public class WifiCondManagerTest {
         assertNull(mWificondControl.signalPoll(TEST_INTERFACE_NAME));
         verify(mClientInterface, never()).signalPoll();
 
-        assertFalse(mWificondControl.scan(
+        assertFalse(mWificondControl.startScan(
                 TEST_INTERFACE_NAME, WifiScanner.SCAN_TYPE_LOW_LATENCY,
                 SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST));
         verify(mWifiScannerImpl, never()).scan(any());
@@ -348,8 +355,8 @@ public class WifiCondManagerTest {
     public void testTeardownSoftApInterfaceClearsHandles() throws Exception {
         testTeardownSoftApInterface();
 
-        assertFalse(mWificondControl.registerApListener(
-                TEST_INTERFACE_NAME, mSoftApListener));
+        assertFalse(mWificondControl.registerApCallback(
+                TEST_INTERFACE_NAME, Runnable::run, mSoftApListener));
         verify(mApInterface, never()).registerCallback(any());
     }
 
@@ -417,8 +424,8 @@ public class WifiCondManagerTest {
     public void testSignalPoll() throws Exception {
         when(mWificond.createClientInterface(TEST_INTERFACE_NAME)).thenReturn(mClientInterface);
 
-        mWificondControl.setupInterfaceForClientMode(TEST_INTERFACE_NAME, mNormalScanCallback,
-                mPnoScanCallback);
+        mWificondControl.setupInterfaceForClientMode(TEST_INTERFACE_NAME, Runnable::run,
+                mNormalScanCallback, mPnoScanCallback);
         mWificondControl.signalPoll(TEST_INTERFACE_NAME);
         verify(mClientInterface).signalPoll();
     }
@@ -432,7 +439,7 @@ public class WifiCondManagerTest {
 
         // Configure client interface.
         assertEquals(true, mWificondControl.setupInterfaceForClientMode(TEST_INTERFACE_NAME,
-                mNormalScanCallback, mPnoScanCallback));
+                Runnable::run, mNormalScanCallback, mPnoScanCallback));
 
         // Tear down interfaces.
         assertTrue(mWificondControl.tearDownInterfaces());
@@ -448,8 +455,8 @@ public class WifiCondManagerTest {
     public void testGetTxPacketCounters() throws Exception {
         when(mWificond.createClientInterface(TEST_INTERFACE_NAME)).thenReturn(mClientInterface);
 
-        mWificondControl.setupInterfaceForClientMode(TEST_INTERFACE_NAME, mNormalScanCallback,
-                mPnoScanCallback);
+        mWificondControl.setupInterfaceForClientMode(TEST_INTERFACE_NAME, Runnable::run,
+                mNormalScanCallback, mPnoScanCallback);
         mWificondControl.getTxPacketCounters(TEST_INTERFACE_NAME);
         verify(mClientInterface).getPacketCounters();
     }
@@ -464,7 +471,7 @@ public class WifiCondManagerTest {
 
         // Configure client interface.
         assertEquals(true, mWificondControl.setupInterfaceForClientMode(TEST_INTERFACE_NAME,
-                mNormalScanCallback, mPnoScanCallback));
+                Runnable::run, mNormalScanCallback, mPnoScanCallback));
 
         // Tear down interfaces.
         assertTrue(mWificondControl.tearDownInterfaces());
@@ -483,7 +490,7 @@ public class WifiCondManagerTest {
 
         // Configure client interface.
         assertEquals(true, mWificondControl.setupInterfaceForClientMode(TEST_INTERFACE_NAME,
-                mNormalScanCallback, mPnoScanCallback));
+                Runnable::run, mNormalScanCallback, mPnoScanCallback));
 
         // Tear down interfaces.
         assertTrue(mWificondControl.tearDownInterfaces());
@@ -500,7 +507,7 @@ public class WifiCondManagerTest {
     @Test
     public void testScan() throws Exception {
         when(mWifiScannerImpl.scan(any(SingleScanSettings.class))).thenReturn(true);
-        assertTrue(mWificondControl.scan(
+        assertTrue(mWificondControl.startScan(
                 TEST_INTERFACE_NAME, WifiScanner.SCAN_TYPE_LOW_POWER,
                 SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST));
         verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
@@ -520,7 +527,7 @@ public class WifiCondManagerTest {
         assertEquals(hiddenSsidWithDup.get(0),
                 hiddenSsidWithDup.get(hiddenSsidWithDup.size() - 1));
         // Pass the List with duplicate elements into scan()
-        assertTrue(mWificondControl.scan(
+        assertTrue(mWificondControl.startScan(
                 TEST_INTERFACE_NAME, WifiScanner.SCAN_TYPE_LOW_POWER,
                 SCAN_FREQ_SET, hiddenSsidWithDup));
         // But the argument passed down should have the duplicate removed.
@@ -535,7 +542,7 @@ public class WifiCondManagerTest {
     @Test
     public void testScanNullParameters() throws Exception {
         when(mWifiScannerImpl.scan(any(SingleScanSettings.class))).thenReturn(true);
-        assertTrue(mWificondControl.scan(
+        assertTrue(mWificondControl.startScan(
                 TEST_INTERFACE_NAME, WifiScanner.SCAN_TYPE_HIGH_ACCURACY, null, null));
         verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
                 IWifiScannerImpl.SCAN_TYPE_HIGH_ACCURACY, null, null)));
@@ -547,7 +554,7 @@ public class WifiCondManagerTest {
     @Test
     public void testScanFailure() throws Exception {
         when(mWifiScannerImpl.scan(any(SingleScanSettings.class))).thenReturn(false);
-        assertFalse(mWificondControl.scan(
+        assertFalse(mWificondControl.startScan(
                 TEST_INTERFACE_NAME, WifiScanner.SCAN_TYPE_LOW_LATENCY,
                 SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST));
         verify(mWifiScannerImpl).scan(any(SingleScanSettings.class));
@@ -558,7 +565,7 @@ public class WifiCondManagerTest {
      */
     @Test
     public void testScanFailureDueToInvalidType() throws Exception {
-        assertFalse(mWificondControl.scan(
+        assertFalse(mWificondControl.startScan(
                 TEST_INTERFACE_NAME, 100,
                 SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST));
         verify(mWifiScannerImpl, never()).scan(any(SingleScanSettings.class));
@@ -570,9 +577,10 @@ public class WifiCondManagerTest {
     @Test
     public void testStartPnoScan() throws Exception {
         when(mWifiScannerImpl.startPnoScan(any(PnoSettings.class))).thenReturn(true);
-        assertTrue(mWificondControl.startPnoScan(TEST_INTERFACE_NAME, TEST_PNO_SETTINGS,
-                mPnoScanRequestCallback));
-        verify(mWifiScannerImpl).startPnoScan(argThat(new PnoScanMatcher(TEST_PNO_SETTINGS)));
+        assertTrue(
+                mWificondControl.startPnoScan(TEST_INTERFACE_NAME, TEST_PNO_SETTINGS, Runnable::run,
+                        mPnoScanRequestCallback));
+        verify(mWifiScannerImpl).startPnoScan(eq(TEST_PNO_SETTINGS));
         verify(mPnoScanRequestCallback).onPnoRequestSucceeded();
     }
 
@@ -665,8 +673,9 @@ public class WifiCondManagerTest {
     public void testStartPnoScanForMetrics() throws Exception {
         when(mWifiScannerImpl.startPnoScan(any(PnoSettings.class))).thenReturn(false);
 
-        assertFalse(mWificondControl.startPnoScan(TEST_INTERFACE_NAME, TEST_PNO_SETTINGS,
-                mPnoScanRequestCallback));
+        assertFalse(
+                mWificondControl.startPnoScan(TEST_INTERFACE_NAME, TEST_PNO_SETTINGS, Runnable::run,
+                        mPnoScanRequestCallback));
         verify(mPnoScanRequestCallback).onPnoRequestFailed();
     }
 
@@ -695,11 +704,11 @@ public class WifiCondManagerTest {
         final ArgumentCaptor<IApInterfaceEventCallback> apInterfaceCallbackCaptor =
                 ArgumentCaptor.forClass(IApInterfaceEventCallback.class);
 
-        assertTrue(mWificondControl.registerApListener(
-                TEST_INTERFACE_NAME, mSoftApListener));
+        assertTrue(mWificondControl.registerApCallback(
+                TEST_INTERFACE_NAME, Runnable::run, mSoftApListener));
         verify(mApInterface).registerCallback(apInterfaceCallbackCaptor.capture());
 
-        final NativeWifiClient testClient = new NativeWifiClient();
+        final NativeWifiClient testClient = new NativeWifiClient(TEST_RAW_MAC_BYTES);
         apInterfaceCallbackCaptor.getValue().onConnectedClientsChanged(testClient, true);
         verify(mSoftApListener).onConnectedClientsChanged(eq(testClient), eq(true));
 
@@ -707,7 +716,8 @@ public class WifiCondManagerTest {
         int channelBandwidth = IApInterfaceEventCallback.BANDWIDTH_20;
         apInterfaceCallbackCaptor.getValue().onSoftApChannelSwitched(channelFrequency,
                 channelBandwidth);
-        verify(mSoftApListener).onSoftApChannelSwitched(eq(channelFrequency), eq(channelBandwidth));
+        verify(mSoftApListener).onSoftApChannelSwitched(eq(channelFrequency),
+                eq(SoftApInfo.CHANNEL_WIDTH_20MHZ));
     }
 
     /**
@@ -739,7 +749,7 @@ public class WifiCondManagerTest {
         verify(deathHandler).run();
 
         // The handles should be cleared after death.
-        assertNull(mWificondControl.getChannelsForBand(WifiScanner.WIFI_BAND_5_GHZ));
+        assertEquals(0, mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_5_GHZ).length);
         verify(mWificond, never()).getAvailable5gNonDFSChannels();
     }
 
@@ -748,7 +758,8 @@ public class WifiCondManagerTest {
      */
     @Test
     public void testSendMgmtFrameNullCallback() throws Exception {
-        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, null, TEST_MCS_RATE);
+        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, TEST_MCS_RATE,
+                Runnable::run, null);
 
         verify(mClientInterface, never()).SendMgmtFrame(any(), any(), anyInt());
     }
@@ -758,8 +769,8 @@ public class WifiCondManagerTest {
      */
     @Test
     public void testSendMgmtFrameNullFrame() throws Exception {
-        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, null,
-                mSendMgmtFrameCallback, TEST_MCS_RATE);
+        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, null, TEST_MCS_RATE, Runnable::run,
+                mSendMgmtFrameCallback);
 
         verify(mClientInterface, never()).SendMgmtFrame(any(), any(), anyInt());
         verify(mSendMgmtFrameCallback).onFailure(anyInt());
@@ -770,8 +781,8 @@ public class WifiCondManagerTest {
      */
     @Test
     public void testSendMgmtFrameInvalidInterfaceName() throws Exception {
-        mWificondControl.sendMgmtFrame(TEST_INVALID_INTERFACE_NAME, TEST_PROBE_FRAME,
-                mSendMgmtFrameCallback, TEST_MCS_RATE);
+        mWificondControl.sendMgmtFrame(TEST_INVALID_INTERFACE_NAME, TEST_PROBE_FRAME, TEST_MCS_RATE,
+                Runnable::run, mSendMgmtFrameCallback);
 
         verify(mClientInterface, never()).SendMgmtFrame(any(), any(), anyInt());
         verify(mSendMgmtFrameCallback).onFailure(anyInt());
@@ -787,13 +798,15 @@ public class WifiCondManagerTest {
         WifiCondManager.SendMgmtFrameCallback cb2 = mock(
                 WifiCondManager.SendMgmtFrameCallback.class);
 
-        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, cb1, TEST_MCS_RATE);
+        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, TEST_MCS_RATE,
+                Runnable::run, cb1);
         verify(cb1, never()).onFailure(anyInt());
         verify(mClientInterface, times(1))
                 .SendMgmtFrame(AdditionalMatchers.aryEq(TEST_PROBE_FRAME),
                         any(), eq(TEST_MCS_RATE));
 
-        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, cb2, TEST_MCS_RATE);
+        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, TEST_MCS_RATE,
+                Runnable::run, cb2);
         verify(cb2).onFailure(WifiCondManager.SEND_MGMT_FRAME_ERROR_ALREADY_STARTED);
         // verify SendMgmtFrame() still was only called once i.e. not called again
         verify(mClientInterface, times(1))
@@ -820,8 +833,8 @@ public class WifiCondManagerTest {
         doNothing().when(mAlarmManager).set(anyInt(), anyLong(), any(),
                 alarmListenerCaptor.capture(), handlerCaptor.capture());
 
-        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME,
-                cb, TEST_MCS_RATE);
+        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, TEST_MCS_RATE,
+                Runnable::run, cb);
         mLooper.dispatchAll();
 
         verify(cb).onFailure(anyInt());
@@ -854,7 +867,8 @@ public class WifiCondManagerTest {
         final ArgumentCaptor<Handler> handlerCaptor = ArgumentCaptor.forClass(Handler.class);
         doNothing().when(mAlarmManager).set(anyInt(), anyLong(), any(),
                 alarmListenerCaptor.capture(), handlerCaptor.capture());
-        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, cb, TEST_MCS_RATE);
+        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, TEST_MCS_RATE,
+                Runnable::run, cb);
 
         sendMgmtFrameEventCaptor.getValue().OnAck(TEST_SEND_MGMT_FRAME_ELAPSED_TIME_MS);
         mLooper.dispatchAll();
@@ -887,7 +901,8 @@ public class WifiCondManagerTest {
         final ArgumentCaptor<Handler> handlerCaptor = ArgumentCaptor.forClass(Handler.class);
         doNothing().when(mAlarmManager).set(anyInt(), anyLong(), any(),
                 alarmListenerCaptor.capture(), handlerCaptor.capture());
-        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, cb, TEST_MCS_RATE);
+        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, TEST_MCS_RATE,
+                Runnable::run, cb);
 
         sendMgmtFrameEventCaptor.getValue().OnFailure(
                 WifiCondManager.SEND_MGMT_FRAME_ERROR_UNKNOWN);
@@ -921,7 +936,8 @@ public class WifiCondManagerTest {
         final ArgumentCaptor<Handler> handlerCaptor = ArgumentCaptor.forClass(Handler.class);
         doNothing().when(mAlarmManager).set(anyInt(), anyLong(), any(),
                 alarmListenerCaptor.capture(), handlerCaptor.capture());
-        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, cb, TEST_MCS_RATE);
+        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, TEST_MCS_RATE,
+                Runnable::run, cb);
 
         handlerCaptor.getValue().post(() -> alarmListenerCaptor.getValue().onAlarm());
         mLooper.dispatchAll();
@@ -987,8 +1003,8 @@ public class WifiCondManagerTest {
         final ArgumentCaptor<Handler> handlerCaptor = ArgumentCaptor.forClass(Handler.class);
         doNothing().when(mAlarmManager).set(anyInt(), anyLong(), any(),
                 alarmListenerCaptor.capture(), handlerCaptor.capture());
-        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME,
-                mSendMgmtFrameCallback, TEST_MCS_RATE);
+        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, TEST_MCS_RATE,
+                Runnable::run, mSendMgmtFrameCallback);
 
         // AlarmManager should post the onAlarm() callback onto the handler, but since we are
         // triggering onAlarm() ourselves during the test, manually post onto handler
@@ -1015,8 +1031,8 @@ public class WifiCondManagerTest {
         final ArgumentCaptor<Handler> handlerCaptor = ArgumentCaptor.forClass(Handler.class);
         doNothing().when(mAlarmManager).set(anyInt(), anyLong(), any(),
                 alarmListenerCaptor.capture(), handlerCaptor.capture());
-        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME,
-                mSendMgmtFrameCallback, TEST_MCS_RATE);
+        mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, TEST_MCS_RATE,
+                Runnable::run, mSendMgmtFrameCallback);
 
         // AlarmManager should post the onAlarm() callback onto the handler, but since we are
         // triggering onAlarm() ourselves during the test, manually post onto handler
@@ -1083,56 +1099,6 @@ public class WifiCondManagerTest {
         public String toString() {
             return "ScanMatcher{mExpectedFreqs=" + mExpectedFreqs
                     + ", mExpectedSsids=" + mExpectedSsids + '}';
-        }
-    }
-
-    // Create a ArgumentMatcher which captures a PnoSettings parameter and checks if it
-    // matches the WifiNative.PnoSettings;
-    private class PnoScanMatcher implements ArgumentMatcher<PnoSettings> {
-        private final PnoSettings mExpectedPnoSettings;
-
-        PnoScanMatcher(PnoSettings expectedPnoSettings) {
-            this.mExpectedPnoSettings = expectedPnoSettings;
-        }
-
-        @Override
-        public boolean matches(PnoSettings settings) {
-            if (mExpectedPnoSettings == null) {
-                return false;
-            }
-            if (settings.intervalMs != mExpectedPnoSettings.intervalMs
-                    || settings.min2gRssi != mExpectedPnoSettings.min2gRssi
-                    || settings.min5gRssi != mExpectedPnoSettings.min5gRssi
-                    || settings.min6gRssi != mExpectedPnoSettings.min6gRssi) {
-                return false;
-            }
-            if (settings.pnoNetworks == null || mExpectedPnoSettings.pnoNetworks == null) {
-                return false;
-            }
-            if (settings.pnoNetworks.size() != mExpectedPnoSettings.pnoNetworks.size()) {
-                return false;
-            }
-
-            for (int i = 0; i < settings.pnoNetworks.size(); i++) {
-                if (!Arrays.equals(settings.pnoNetworks.get(i).ssid,
-                        mExpectedPnoSettings.pnoNetworks.get(i).ssid)) {
-                    return false;
-                }
-                if (settings.pnoNetworks.get(i).isHidden != mExpectedPnoSettings.pnoNetworks.get(
-                        i).isHidden) {
-                    return false;
-                }
-                if (!Arrays.equals(settings.pnoNetworks.get(i).frequencies,
-                        mExpectedPnoSettings.pnoNetworks.get(i).frequencies)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return "PnoScanMatcher{" + "mExpectedPnoSettings=" + mExpectedPnoSettings + '}';
         }
     }
 

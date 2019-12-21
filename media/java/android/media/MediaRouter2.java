@@ -271,7 +271,7 @@ public class MediaRouter2 {
 
                 List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
                 for (MediaRoute2Info route : mRoutes.values()) {
-                    if (route.supportsControlCategory(mControlCategories)) {
+                    if (route.supportsControlCategories(mControlCategories)) {
                         filteredRoutes.add(route);
                     }
                 }
@@ -399,8 +399,8 @@ public class MediaRouter2 {
         mControlCategories = newControlCategories;
 
         for (MediaRoute2Info route : mRoutes.values()) {
-            boolean preSupported = route.supportsControlCategory(prevControlCategories);
-            boolean postSupported = route.supportsControlCategory(newControlCategories);
+            boolean preSupported = route.supportsControlCategories(prevControlCategories);
+            boolean postSupported = route.supportsControlCategories(newControlCategories);
             if (preSupported == postSupported) {
                 continue;
             }
@@ -430,7 +430,7 @@ public class MediaRouter2 {
         synchronized (sLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.put(route.getUniqueId(), route);
-                if (route.supportsControlCategory(mControlCategories)) {
+                if (route.supportsControlCategories(mControlCategories)) {
                     addedRoutes.add(route);
                 }
             }
@@ -446,7 +446,7 @@ public class MediaRouter2 {
         synchronized (sLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.remove(route.getUniqueId());
-                if (route.supportsControlCategory(mControlCategories)) {
+                if (route.supportsControlCategories(mControlCategories)) {
                     removedRoutes.add(route);
                 }
             }
@@ -462,7 +462,7 @@ public class MediaRouter2 {
         synchronized (sLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.put(route.getUniqueId(), route);
-                if (route.supportsControlCategory(mControlCategories)) {
+                if (route.supportsControlCategories(mControlCategories)) {
                     changedRoutes.add(route);
                 }
             }

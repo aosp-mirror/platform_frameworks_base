@@ -68,7 +68,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.RegionInterceptingFrameLayout.RegionInterceptableView;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
@@ -147,7 +147,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     @Inject
     public ScreenDecorations(Context context,
             Lazy<StatusBar> statusBarLazy,
-            @MainHandler Handler handler,
+            @Main Handler handler,
             BroadcastDispatcher broadcastDispatcher,
             TunerService tunerService) {
         super(context);

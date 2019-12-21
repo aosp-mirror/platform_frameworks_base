@@ -16,12 +16,6 @@
 
 package com.android.server.integrity;
 
-import static android.content.pm.PackageManager.EXTRA_VERIFICATION_ID;
-
-import static org.mockito.Mockito.verify;
-
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 
 import androidx.test.InstrumentationRegistry;
@@ -56,17 +50,7 @@ public class AppIntegrityManagerServiceImplTest {
     }
 
     @Test
-    public void integrityVerification_allow() {
-        int verificationId = 2;
-        Intent integrityVerificationIntent = new Intent();
-        integrityVerificationIntent.setAction(Intent.ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION);
-        integrityVerificationIntent.putExtra(EXTRA_VERIFICATION_ID, verificationId);
-
-        // We cannot send the broadcast using the context since it is a protected broadcast and
-        // we will get a security exception.
-        mService.handleIntegrityVerification(integrityVerificationIntent);
-
-        verify(mPackageManagerInternal)
-                .setIntegrityVerificationResult(verificationId, PackageManager.VERIFICATION_ALLOW);
+    public void noop() {
+        // We need this test just as a place holder since an empty test suite is treated as error.
     }
 }

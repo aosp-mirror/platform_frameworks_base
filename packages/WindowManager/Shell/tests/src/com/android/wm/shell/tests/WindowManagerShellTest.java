@@ -14,17 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dagger.qualifiers;
+package com.android.wm.shell.tests;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
+import com.android.wm.shell.WindowManagerShell;
 
-import javax.inject.Qualifier;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-@Qualifier
-@Documented
-@Retention(RUNTIME)
-public @interface MainHandler {
+/**
+ * Tests for the shell.
+ */
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class WindowManagerShellTest {
+
+    WindowManagerShell mShell;
+
+    @Test
+    public void testNothing() {
+        // Do nothing
+    }
 }

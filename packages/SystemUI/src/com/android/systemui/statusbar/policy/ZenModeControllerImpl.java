@@ -40,7 +40,7 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.util.Utils;
@@ -78,7 +78,7 @@ public class ZenModeControllerImpl extends CurrentUserTracker
     private NotificationManager.Policy mConsolidatedNotificationPolicy;
 
     @Inject
-    public ZenModeControllerImpl(Context context, @MainHandler Handler handler,
+    public ZenModeControllerImpl(Context context, @Main Handler handler,
             BroadcastDispatcher broadcastDispatcher) {
         super(broadcastDispatcher);
         mContext = context;

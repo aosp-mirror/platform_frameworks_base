@@ -192,8 +192,7 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Skrbniška aplikacija delovnega profila manjka ali pa je poškodovana, zaradi česar je bil delovni profil s povezanimi podatki izbrisan. Za pomoč se obrnite na skrbnika."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Vaš delovni profil ni več na voljo v tej napravi"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Preveč poskusov vnosa gesla"</string>
-    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
-    <skip />
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"Skrbnik je napravo prepustil osebni uporabi"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Naprava je upravljana"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Vaša organizacija upravlja to napravo in lahko nadzira omrežni promet. Dotaknite se za podrobnosti."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Podatki v napravi bodo izbrisani"</string>
@@ -387,13 +386,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"Aplikaciji dovoljuje pošiljanje fiksnih oddaj, ki ostanejo po koncu oddajanja. Zaradi prekomerne uporabe je delovanje naprave Android TV lahko počasno ali nestabilno, ker porabi preveč pomnilnika."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Aplikaciji omogoča hitro pošiljanje fiksnih oddaj, ki ostanejo po koncu oddajanja. Zaradi prekomerne uporabe je delovanje telefona lahko počasno ali nestabilno, ker porabi preveč pomnilnika."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"branje stikov"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Aplikaciji omogoča branje podatkov o stikih v tabličnem računalniku, vključno s pogostostjo klicev, pošiljanja e-poštnih sporočil in druge komunikacije s posamezniki. S tem dovoljenjem lahko aplikacije shranjujejo podatke o stikih in zlonamerne aplikacije lahko te podatke razkrijejo brez vaše vednosti."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="2387823103274997441">"Aplikaciji dovoljuje branje podatkov o stikih, shranjenih v napravi Android TV, vključno s pogostostjo klicev, pošiljanja e-poštnih sporočil in druge komunikacije s posamezniki. S tem dovoljenjem lahko aplikacije shranjujejo podatke o stikih in zlonamerne aplikacije lahko te podatke razkrijejo brez vaše vednosti."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Aplikaciji omogoča branje podatkov o stikih v telefonu, vključno s pogostostjo klicev, pošiljanja e-poštnih sporočil in druge komunikacije s posamezniki. S tem dovoljenjem lahko aplikacije shranjujejo podatke o stikih in zlonamerne aplikacije lahko te podatke razkrijejo brez vaše vednosti."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Aplikaciji dovoljuje branje podatkov o stikih, shranjenih v tabličnem računalniku. Aplikacije bodo imele dostop tudi do računov v tabličnem računalniku, ki so ustvarili stike. To lahko vključuje račune, ki so jih ustvarile nameščene aplikacije. S tem dovoljenjem lahko aplikacije shranjujejo podatke o stikih in zlonamerne aplikacije lahko te podatke razkrijejo brez vaše vednosti."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Aplikaciji dovoljuje branje podatkov o stikih, shranjenih v napravi Android TV. Aplikacije bodo imele dostop tudi do računov v napravi Android TV, ki so ustvarili stike. To lahko vključuje račune, ki so jih ustvarile nameščene aplikacije. S tem dovoljenjem lahko aplikacije shranjujejo podatke o stikih in zlonamerne aplikacije lahko te podatke razkrijejo brez vaše vednosti."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Aplikaciji dovoljuje branje podatkov o stikih, shranjenih v telefonu. Aplikacije bodo imele dostop tudi do računov v telefonu, ki so ustvarili stike. To lahko vključuje račune, ki so jih ustvarile nameščene aplikacije. S tem dovoljenjem lahko aplikacije shranjujejo podatke o stikih in zlonamerne aplikacije lahko te podatke razkrijejo brez vaše vednosti."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"spreminjanje stikov"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Aplikaciji omogoča spreminjanje podatkov o stikih v tabličnem računalniku, vključno s pogostostjo klicev, pošiljanja e-poštnih sporočil in druge komunikacije z določenimi stiki. S tem dovoljenjem lahko aplikacije brišejo podatke o stikih."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="3870937407268625273">"Aplikaciji dovoljuje spreminjanje podatkov o stikih, shranjenih v napravi Android TV, vključno s pogostostjo klicev, pošiljanja e-poštnih sporočil in druge komunikacije z določenimi stiki. S tem dovoljenjem lahko aplikacije brišejo podatke o stikih."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Aplikaciji omogoča spreminjanje podatkov o stikih v telefonu, vključno s pogostostjo klicev, pošiljanja e-poštnih sporočil in druge komunikacije z določenimi stiki. S tem dovoljenjem lahko aplikacije brišejo podatke o stikih."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Aplikaciji dovoljuje spreminjanje podatkov o stikih, shranjenih v tabličnem računalniku. S tem dovoljenjem lahko aplikacije brišejo podatke o stikih."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Aplikaciji dovoljuje spreminjanje podatkov o stikih, shranjenih v napravi Android TV. S tem dovoljenjem lahko aplikacije brišejo podatke o stikih."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Aplikaciji dovoljuje spreminjanje podatkov o stikih, shranjenih v telefonu. S tem dovoljenjem lahko aplikacije brišejo podatke o stikih."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"branje dnevnika klicev"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Ta aplikacija lahko prebere zgodovino klicev."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"pisanje v dnevnik klicev"</string>
@@ -413,13 +412,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"dostopanje do ukazov ponudnika dodatnih lokacij"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Aplikaciji omogoča dostop do dodatnih ukazov ponudnika lokacij. S tem lahko aplikacija moti delovanje sistema GPS ali drugih virov lokacije."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"dostop do točne lokacije samo, ko deluje v ospredju"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"Ta aplikacija lahko pridobi vašo točno lokacijo samo, ko deluje v ospredju. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v telefonu. Poraba energije akumulatorja bo morda večja."</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"dostop do približne lokacije (na podlagi omrežja) samo med delovanjem v ospredju"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Ta aplikacija lahko pridobi vašo lokacijo na podlagi omrežnih virov, kot so bazne postaje in omrežja Wi-Fi, vendar samo, ko deluje v ospredju. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v tabličnem računalniku."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="6994518594789550469">"Ta aplikacija lahko pridobi vašo lokacijo na podlagi omrežnih virov, kot so bazne postaje in omrežja Wi-Fi, vendar samo, ko deluje v ospredju. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v napravi Android TV."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Ta aplikacija lahko pridobi vašo lokacijo na podlagi omrežnih virov, kot so bazne postaje in omrežja Wi-Fi, vendar samo, ko deluje v ospredju. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v telefonu."</string>
+    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Ta aplikacija lahko pridobi vašo točno lokacijo samo, ko deluje v ospredju. Če želite aplikaciji omogočiti uporabo lokacijskih storitev, morajo biti te vklopljene in na voljo v napravi. Poraba energije baterije bo morda večja."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"dostop do približne lokacije samo, ko deluje v ospredju"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Ta aplikacija lahko pridobi vašo približno lokacijo samo, ko deluje v ospredju. Če želite aplikaciji omogočiti uporabo lokacijskih storitev, morajo biti te vklopljene in na voljo v napravi."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"dostop do lokacije med izvajanjem v ozadju"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Če to dovolite poleg dostopa do približne ali natančne lokacije, lahko aplikacija dostopa do lokacije, medtem ko se izvaja v ozadju."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Ta aplikacija lahko dostopa do lokacije, ko deluje v ospredju ali ozadju."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"spreminjanje nastavitev zvoka"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Aplikaciji omogoča spreminjanje splošnih zvočnih nastavitev, na primer glasnost in kateri zvočnik se uporablja."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"snemanje zvoka"</string>
@@ -500,6 +497,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Aplikaciji omogoča ogled konfiguracije Bluetootha tabličnega računalnika ter vzpostavljanje in sprejemanje povezave s seznanjenimi napravami."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Aplikaciji dovoljuje ogled konfiguracije vmesnika Bluetooth v napravi Android TV ter ustvarjanje in sprejemanje povezav s seznanjenimi napravami."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Aplikaciji omogoča ogled konfiguracije Bluetootha telefona ter ustvarjanje in sprejemanje povezave s seznanjenimi napravami."</string>
+    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
+    <skip />
+    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
+    <skip />
     <string name="permlab_nfc" msgid="1904455246837674977">"nadzor nad komunikacijo s tehnologijo bližnjega polja"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Podpira komunikacijo med računalnikom in oznakami, karticami in bralniki komunikacije s tehnologijo bližnjega polja."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"onemogočanje zaklepanja zaslona"</string>
@@ -1926,7 +1927,11 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Vzpostavljena povezava z napravo <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Dotaknite se, če si želite ogledati datoteke"</string>
     <string name="pin_target" msgid="8036028973110156895">"Pripenjanje"</string>
+    <!-- no translation found for pin_specific_target (7824671240625957415) -->
+    <skip />
     <string name="unpin_target" msgid="3963318576590204447">"Odpenjanje"</string>
+    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
+    <skip />
     <string name="app_info" msgid="6113278084877079851">"Podatki o aplikacijah"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Začenjanje predstavitve …"</string>
@@ -1971,6 +1976,8 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Želite posodobiti te elemente v aplikaciji "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> in <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Shrani"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Ne, hvala"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"Ne zdaj"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"Nikoli"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Posodobi"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"Naprej"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"geslo"</string>
@@ -2068,5 +2075,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Preklop razdeljenega zaslona"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zaklenjen zaslon"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Posnetek zaslona"</string>
-    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> v pojavnem oknu."</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Vrstica s podnapisi aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
 </resources>

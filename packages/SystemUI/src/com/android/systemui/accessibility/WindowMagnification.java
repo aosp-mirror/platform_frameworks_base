@@ -22,7 +22,7 @@ import android.os.Handler;
 import android.provider.Settings;
 
 import com.android.systemui.SystemUI;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -36,7 +36,7 @@ public class WindowMagnification extends SystemUI {
     private final Handler mHandler;
 
     @Inject
-    public WindowMagnification(Context context, @MainHandler Handler mainHandler) {
+    public WindowMagnification(Context context, @Main Handler mainHandler) {
         super(context);
         mHandler = mainHandler;
     }

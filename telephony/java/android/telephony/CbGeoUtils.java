@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 /**
  * This utils class is used for geo-fencing of CellBroadcast messages and is used by the cell
  * broadcast module.

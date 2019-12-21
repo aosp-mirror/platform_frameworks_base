@@ -40,8 +40,9 @@ class IdmapResMap;
 class OverlayStringPool : public ResStringPool {
  public:
   virtual ~OverlayStringPool();
-  virtual const char16_t* stringAt(size_t idx, size_t* outLen) const;
-  virtual const char* string8At(size_t idx, size_t* outLen) const;
+  const char16_t* stringAt(size_t idx, size_t* outLen) const override;
+  const char* string8At(size_t idx, size_t* outLen) const override;
+  size_t size() const override;
 
   explicit OverlayStringPool(const LoadedIdmap* loaded_idmap);
  private:
@@ -53,8 +54,8 @@ class OverlayStringPool : public ResStringPool {
 // resources to the resource id of corresponding target resources.
 class OverlayDynamicRefTable : public DynamicRefTable {
  public:
-  virtual ~OverlayDynamicRefTable() = default;
-  virtual status_t lookupResourceId(uint32_t* resId) const;
+  ~OverlayDynamicRefTable() override = default;
+  status_t lookupResourceId(uint32_t* resId) const override;
 
  private:
   explicit OverlayDynamicRefTable(const Idmap_data_header* data_header,

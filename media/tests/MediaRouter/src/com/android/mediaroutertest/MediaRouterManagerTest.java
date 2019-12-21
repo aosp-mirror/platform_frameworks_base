@@ -256,6 +256,37 @@ public class MediaRouterManagerTest {
         }
     }
 
+    @Test
+    public void testGetActiveRoutes() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch latch2 = new CountDownLatch(1);
+
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(CATEGORIES_ALL);
+        addRouterCallback(new MediaRouter2.Callback());
+        addManagerCallback(new MediaRouter2Manager.Callback() {
+            @Override
+            public void onRouteSelected(String packageName, MediaRoute2Info route) {
+                if (TextUtils.equals(mPackageName, packageName)
+                        && route != null && TextUtils.equals(route.getId(), ROUTE_ID1)) {
+                    latch.countDown();
+                }
+            }
+        });
+
+        assertEquals(0, mManager.getActiveRoutes().size());
+
+        mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1));
+        latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+
+        assertEquals(1, mManager.getActiveRoutes().size());
+
+        awaitOnRouteChangedManager(
+                () -> mManager.unselectRoute(mPackageName),
+                ROUTE_ID1,
+                route -> TextUtils.equals(route.getClientPackageName(), null));
+        assertEquals(0, mManager.getActiveRoutes().size());
+    }
+
     /**
      * Tests selecting and unselecting routes of a single provider.
      */

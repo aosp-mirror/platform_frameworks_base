@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package android.net;
-
-import android.net.Network;
-import android.net.TetheringConfigurationParcel;
-import android.net.TetherStatesParcel;
+package android.content.pm;
 
 /**
- * Callback class for receiving tethering changed events
+ * Types of Data Loader for an installation session.
  * @hide
  */
-oneway interface ITetherInternalCallback
-{
-    void onUpstreamChanged(in Network network);
-    void onConfigurationChanged(in TetheringConfigurationParcel config);
-    void onTetherStatesChanged(in TetherStatesParcel states);
-    void onCallbackCreated(in Network network, in TetheringConfigurationParcel config,
-            in TetherStatesParcel states);
+@Backing(type="int")
+enum DataLoaderType {
+    /**
+    * Default value, legacy installation.
+    */
+    NONE = 0,
+    /**
+     * Streaming installation using data loader.
+     */
+    STREAMING = 1,
+    /**
+     * Streaming installation using Incremental FileSystem.
+     */
+    INCREMENTAL = 2,
 }

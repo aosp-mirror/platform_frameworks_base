@@ -13,18 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package android.companion;
 
-package com.android.systemui.dagger.qualifiers;
-
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Qualifier;
-
-@Qualifier
-@Documented
-@Retention(RUNTIME)
-public @interface MainLooper {
-}
+parcelable Association;

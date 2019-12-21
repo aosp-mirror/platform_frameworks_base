@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dagger.qualifiers;
+package android.net;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import android.net.Network;
+import android.net.TetheringConfigurationParcel;
+import android.net.TetherStatesParcel;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Qualifier;
-
-@Qualifier
-@Documented
-@Retention(RUNTIME)
-public @interface MainResources {
-    // TODO: use attribute to get other, non-main resources?
+/**
+ * Callback class for receiving tethering changed events.
+ * @hide
+ */
+oneway interface ITetheringEventCallback
+{
+    void onCallbackStarted(in Network network, in TetheringConfigurationParcel config,
+            in TetherStatesParcel states);
+    void onCallbackStopped(int errorCode);
+    void onUpstreamChanged(in Network network);
+    void onConfigurationChanged(in TetheringConfigurationParcel config);
+    void onTetherStatesChanged(in TetherStatesParcel states);
 }

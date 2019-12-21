@@ -112,18 +112,19 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 activeColorMode = Display.COLOR_MODE_INVALID;
             }
             int[] colorModes = SurfaceControl.getDisplayColorModes(displayToken);
-            int[] allowedConfigs = SurfaceControl.getAllowedDisplayConfigs(displayToken);
+            SurfaceControl.DesiredDisplayConfigSpecs desiredDisplayConfigSpecs =
+                    SurfaceControl.getDesiredDisplayConfigSpecs(displayToken);
             LocalDisplayDevice device = mDevices.get(physicalDisplayId);
             if (device == null) {
                 // Display was added.
                 final boolean isInternal = mDevices.size() == 0;
-                device = new LocalDisplayDevice(displayToken, physicalDisplayId,
-                        configs, activeConfig, allowedConfigs, colorModes, activeColorMode,
+                device = new LocalDisplayDevice(displayToken, physicalDisplayId, configs,
+                        activeConfig, desiredDisplayConfigSpecs, colorModes, activeColorMode,
                         isInternal);
                 mDevices.put(physicalDisplayId, device);
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_ADDED);
             } else if (device.updatePhysicalDisplayInfoLocked(configs, activeConfig,
-                        allowedConfigs, colorModes, activeColorMode)) {
+                               desiredDisplayConfigSpecs, colorModes, activeColorMode)) {
                 // Display properties changed.
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_CHANGED);
             }
@@ -172,12 +173,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mDefaultModeId;
         private int mActiveModeId;
         private boolean mActiveModeInvalid;
-        private int[] mAllowedModeIds;
-        private float mMinRefreshRate;
-        private float mMaxRefreshRate;
-        private boolean mAllowedModeIdsInvalid;
+        private DisplayModeDirector.DesiredDisplayModeSpecs mDisplayModeSpecs =
+                new DisplayModeDirector.DesiredDisplayModeSpecs();
+        private boolean mDisplayModeSpecsInvalid;
         private int mActivePhysIndex;
-        private int[] mAllowedPhysIndexes;
         private int mActiveColorMode;
         private boolean mActiveColorModeInvalid;
         private Display.HdrCapabilities mHdrCapabilities;
@@ -188,13 +187,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         LocalDisplayDevice(IBinder displayToken, long physicalDisplayId,
                 SurfaceControl.PhysicalDisplayInfo[] physicalDisplayInfos, int activeDisplayInfo,
-                int[] allowedDisplayInfos, int[] colorModes, int activeColorMode,
-                boolean isInternal) {
+                SurfaceControl.DesiredDisplayConfigSpecs physicalDisplayConfigSpecs,
+                int[] colorModes, int activeColorMode, boolean isInternal) {
             super(LocalDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + physicalDisplayId);
             mPhysicalDisplayId = physicalDisplayId;
             mIsInternal = isInternal;
             updatePhysicalDisplayInfoLocked(physicalDisplayInfos, activeDisplayInfo,
-                    allowedDisplayInfos, colorModes, activeColorMode);
+                    physicalDisplayConfigSpecs, colorModes, activeColorMode);
             updateColorModesLocked(colorModes, activeColorMode);
             mSidekickInternal = LocalServices.getService(SidekickInternal.class);
             if (mIsInternal) {
@@ -213,10 +212,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         public boolean updatePhysicalDisplayInfoLocked(
                 SurfaceControl.PhysicalDisplayInfo[] physicalDisplayInfos, int activeDisplayInfo,
-                int[] allowedDisplayInfos, int[] colorModes, int activeColorMode) {
+                SurfaceControl.DesiredDisplayConfigSpecs physicalDisplayConfigSpecs,
+                int[] colorModes, int activeColorMode) {
             mDisplayInfos = Arrays.copyOf(physicalDisplayInfos, physicalDisplayInfos.length);
             mActivePhysIndex = activeDisplayInfo;
-            mAllowedPhysIndexes = Arrays.copyOf(allowedDisplayInfos, allowedDisplayInfos.length);
             // Build an updated list of all existing modes.
             ArrayList<DisplayModeRecord> records = new ArrayList<DisplayModeRecord>();
             boolean modesAdded = false;
@@ -264,6 +263,26 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 sendTraversalRequestLocked();
             }
 
+            // Check whether surface flinger spontaneously changed display config specs out from
+            // under us. If so, schedule a traversal to reapply our display config specs.
+            if (mDisplayModeSpecs.defaultModeId != 0) {
+                int activeDefaultMode =
+                        findMatchingModeIdLocked(physicalDisplayConfigSpecs.defaultConfig);
+                // If we can't map the defaultConfig index to a mode, then the physical display
+                // configs must have changed, and the code below for handling changes to the
+                // list of available modes will take care of updating display config specs.
+                if (activeDefaultMode != 0) {
+                    if (mDisplayModeSpecs.defaultModeId != activeDefaultMode
+                            || mDisplayModeSpecs.refreshRateRange.min
+                                    != physicalDisplayConfigSpecs.minRefreshRate
+                            || mDisplayModeSpecs.refreshRateRange.max
+                                    != physicalDisplayConfigSpecs.maxRefreshRate) {
+                        mDisplayModeSpecsInvalid = true;
+                        sendTraversalRequestLocked();
+                    }
+                }
+            }
+
             boolean recordsChanged = records.size() != mSupportedModes.size() || modesAdded;
             // If the records haven't changed then we're done here.
             if (!recordsChanged) {
@@ -286,6 +305,17 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mDefaultModeId = activeRecord.mMode.getModeId();
             }
 
+            // Determine whether the display mode specs' default mode is still there.
+            if (mSupportedModes.indexOfKey(mDisplayModeSpecs.defaultModeId) < 0) {
+                if (mDisplayModeSpecs.defaultModeId != 0) {
+                    Slog.w(TAG,
+                            "DisplayModeSpecs default mode no longer available, using currently"
+                                    + " active mode as default.");
+                }
+                mDisplayModeSpecs.defaultModeId = activeRecord.mMode.getModeId();
+                mDisplayModeSpecsInvalid = true;
+            }
+
             // Determine whether the active mode is still there.
             if (mSupportedModes.indexOfKey(mActiveModeId) < 0) {
                 if (mActiveModeId != 0) {
@@ -295,21 +325,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mActiveModeId = mDefaultModeId;
                 mActiveModeInvalid = true;
             }
-
-            // Determine what the currently allowed modes are
-            mAllowedModeIds = new int[] { mActiveModeId };
-            int[] allowedModeIds = new int[mAllowedPhysIndexes.length];
-            int size = 0;
-            for (int physIndex : mAllowedPhysIndexes) {
-                int modeId = findMatchingModeIdLocked(physIndex);
-                if (modeId > 0) {
-                    allowedModeIds[size++] = modeId;
-                }
-            }
-
-            // If this is different from our desired allowed modes, then mark our current set as
-            // invalid so we correct this on the next traversal.
-            mAllowedModeIdsInvalid = !Arrays.equals(allowedModeIds, mAllowedModeIds);
 
             // Schedule traversals so that we apply pending changes.
             sendTraversalRequestLocked();
@@ -624,10 +639,40 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void setDesiredDisplayConfigSpecs(int defaultModeId, float minRefreshRate,
-                float maxRefreshRate, int[] modes) {
-            updateDesiredDisplayConfigSpecs(defaultModeId, minRefreshRate, maxRefreshRate);
-            updateAllowedModesLocked(modes);
+        public void setDesiredDisplayModeSpecsLocked(
+                DisplayModeDirector.DesiredDisplayModeSpecs displayModeSpecs) {
+            if (displayModeSpecs.defaultModeId == 0) {
+                // Bail if the caller is requesting a null mode. We'll get called again shortly with
+                // a valid mode.
+                return;
+            }
+            int defaultPhysIndex = findDisplayInfoIndexLocked(displayModeSpecs.defaultModeId);
+            if (defaultPhysIndex < 0) {
+                // When a display is hotplugged, it's possible for a mode to be removed that was
+                // previously valid. Because of the way display changes are propagated through the
+                // framework, and the caching of the display mode specs in LogicalDisplay, it's
+                // possible we'll get called with a stale mode id that no longer represents a valid
+                // mode. This should only happen in extremely rare cases. A followup call will
+                // contain a valid mode id.
+                Slog.w(TAG,
+                        "Ignoring request for invalid default mode id "
+                                + displayModeSpecs.defaultModeId);
+                updateDeviceInfoLocked();
+                return;
+            }
+            if (mDisplayModeSpecsInvalid || !displayModeSpecs.equals(mDisplayModeSpecs)) {
+                mDisplayModeSpecsInvalid = false;
+                mDisplayModeSpecs.copyFrom(displayModeSpecs);
+                final IBinder token = getDisplayTokenLocked();
+                SurfaceControl.setDesiredDisplayConfigSpecs(token,
+                        new SurfaceControl.DesiredDisplayConfigSpecs(defaultPhysIndex,
+                                mDisplayModeSpecs.refreshRateRange.min,
+                                mDisplayModeSpecs.refreshRateRange.max));
+                int activePhysIndex = SurfaceControl.getActiveConfig(token);
+                if (updateActiveModeLocked(activePhysIndex)) {
+                    updateDeviceInfoLocked();
+                }
+            }
         }
 
         @Override
@@ -650,105 +695,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mActiveModeInvalid = mActiveModeId == 0;
             if (mActiveModeInvalid) {
                 Slog.w(TAG, "In unknown mode after setting allowed configs"
-                        + ": allowedPhysIndexes=" + mAllowedPhysIndexes
                         + ", activePhysIndex=" + mActivePhysIndex);
             }
             return true;
-        }
-
-        // TODO(b/142507213): Remove once refresh rates are plummed through to kernel.
-        public void updateAllowedModesLocked(int[] allowedModes) {
-            if (Arrays.equals(allowedModes, mAllowedModeIds) && !mAllowedModeIdsInvalid) {
-                return;
-            }
-            if (updateAllowedModesInternalLocked(allowedModes)) {
-                updateDeviceInfoLocked();
-            }
-        }
-
-        public void updateDesiredDisplayConfigSpecs(int defaultModeId, float minRefreshRate,
-                float maxRefreshRate) {
-            if (minRefreshRate == mMinRefreshRate
-                        && maxRefreshRate == mMaxRefreshRate
-                        && defaultModeId == mDefaultModeId) {
-                return;
-            }
-            if (updateDesiredDisplayConfigSpecsInternalLocked(defaultModeId, minRefreshRate,
-                    maxRefreshRate)) {
-                updateDeviceInfoLocked();
-            }
-        }
-
-        public boolean updateDesiredDisplayConfigSpecsInternalLocked(int defaultModeId,
-                float minRefreshRate, float maxRefreshRate) {
-            if (DEBUG) {
-                Slog.w(TAG, "updateDesiredDisplayConfigSpecsInternalLocked("
-                        + "defaultModeId="
-                        + Integer.toString(defaultModeId)
-                        + ", minRefreshRate="
-                        + Float.toString(minRefreshRate)
-                        + ", maxRefreshRate="
-                        + Float.toString(minRefreshRate));
-            }
-
-            final IBinder token = getDisplayTokenLocked();
-            SurfaceControl.setDesiredDisplayConfigSpecs(token,
-                    new SurfaceControl.DesiredDisplayConfigSpecs(
-                            defaultModeId, minRefreshRate, maxRefreshRate));
-            int activePhysIndex = SurfaceControl.getActiveConfig(token);
-            return updateActiveModeLocked(activePhysIndex);
-        }
-
-        public boolean updateAllowedModesInternalLocked(int[] allowedModes) {
-            if (DEBUG) {
-                Slog.w(TAG, "updateAllowedModesInternalLocked(allowedModes="
-                        + Arrays.toString(allowedModes) + ")");
-            }
-            int[] allowedPhysIndexes = new int[allowedModes.length];
-            int size = 0;
-            for (int modeId : allowedModes) {
-                int physIndex = findDisplayInfoIndexLocked(modeId);
-                if (physIndex < 0) {
-                    Slog.w(TAG, "Requested mode ID " + modeId + " not available,"
-                            + " dropping from allowed set.");
-                } else {
-                    allowedPhysIndexes[size++] = physIndex;
-                }
-            }
-
-            // If we couldn't find one or more of the suggested allowed modes then we need to
-            // shrink the array to its actual size.
-            if (size != allowedModes.length) {
-                allowedPhysIndexes = Arrays.copyOf(allowedPhysIndexes, size);
-            }
-
-            // If we found no suitable modes, then we try again with the default mode which we
-            // assume has a suitable physical config.
-            if (size == 0) {
-                if (DEBUG) {
-                    Slog.w(TAG, "No valid modes allowed, falling back to default mode (id="
-                            + mDefaultModeId + ")");
-                }
-                allowedModes = new int[] { mDefaultModeId };
-                allowedPhysIndexes = new int[] { findDisplayInfoIndexLocked(mDefaultModeId) };
-            }
-
-            mAllowedModeIds = allowedModes;
-            mAllowedModeIdsInvalid = false;
-
-            if (Arrays.equals(mAllowedPhysIndexes, allowedPhysIndexes)) {
-                return false;
-            }
-            mAllowedPhysIndexes = allowedPhysIndexes;
-
-            if (DEBUG) {
-                Slog.w(TAG, "Setting allowed physical configs: allowedPhysIndexes="
-                        + Arrays.toString(allowedPhysIndexes));
-            }
-
-            SurfaceControl.setAllowedDisplayConfigs(getDisplayTokenLocked(), allowedPhysIndexes);
-            int activePhysIndex = SurfaceControl.getActiveConfig(getDisplayTokenLocked());
-            return updateActiveModeLocked(activePhysIndex);
         }
 
         public boolean requestColorModeLocked(int colorMode) {
@@ -770,11 +719,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         public void dumpLocked(PrintWriter pw) {
             super.dumpLocked(pw);
             pw.println("mPhysicalDisplayId=" + mPhysicalDisplayId);
-            pw.println("mAllowedPhysIndexes=" + Arrays.toString(mAllowedPhysIndexes));
-            pw.println("mAllowedModeIds=" + Arrays.toString(mAllowedModeIds));
-            pw.println("mMinRefreshRate=" + mMinRefreshRate);
-            pw.println("mMaxRefreshRate=" + mMaxRefreshRate);
-            pw.println("mAllowedModeIdsInvalid=" + mAllowedModeIdsInvalid);
+            pw.println("mDisplayModeSpecs={" + mDisplayModeSpecs + "}");
+            pw.println("mDisplayModeSpecsInvalid=" + mDisplayModeSpecsInvalid);
             pw.println("mActivePhysIndex=" + mActivePhysIndex);
             pw.println("mActiveModeId=" + mActiveModeId);
             pw.println("mActiveColorMode=" + mActiveColorMode);

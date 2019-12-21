@@ -171,6 +171,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
     }
 
     /** @hide */
+    @NonNull
     @Override
     public GsmCellLocation asCellLocation() {
         GsmCellLocation cl = new GsmCellLocation();

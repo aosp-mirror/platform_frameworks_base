@@ -25,6 +25,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -163,10 +164,38 @@ public class MediaRouter2Manager {
         List<MediaRoute2Info> routes = new ArrayList<>();
         synchronized (mRoutesLock) {
             for (MediaRoute2Info route : mRoutes.values()) {
-                if (route.supportsControlCategory(controlCategories)) {
+                if (route.supportsControlCategories(controlCategories)) {
                     routes.add(route);
                 }
             }
+        }
+        return routes;
+    }
+
+    /**
+     * Gets the list of routes that are actively used by {@link MediaRouter2}.
+     */
+    @NonNull
+    public List<MediaRoute2Info> getActiveRoutes() {
+        List<MediaRoute2Info> routes = new ArrayList<>();
+        synchronized (mRoutesLock) {
+            for (MediaRoute2Info route : mRoutes.values()) {
+                if (!TextUtils.isEmpty(route.getClientPackageName())) {
+                    routes.add(route);
+                }
+            }
+        }
+        return routes;
+    }
+
+    /**
+     * Gets the list of discovered routes
+     */
+    @NonNull
+    public List<MediaRoute2Info> getAllRoutes() {
+        List<MediaRoute2Info> routes = new ArrayList<>();
+        synchronized (mRoutesLock) {
+            routes.addAll(mRoutes.values());
         }
         return routes;
     }

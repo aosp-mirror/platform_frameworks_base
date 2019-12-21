@@ -16,21 +16,32 @@
 
 package android.net.wifi.wificond;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Arrays;
 
 /**
- * NativeWifiClient for wificond
+ * Structure providing information about clients (STAs) associated with a SoftAp.
  *
  * @hide
  */
-public class NativeWifiClient implements Parcelable {
-    public byte[] macAddress;
+@SystemApi
+public final class NativeWifiClient implements Parcelable {
+    /**
+     * The raw bytes of the MAC address of the client (STA) represented by this object.
+     */
+    @NonNull public final byte[] macAddress;
 
-    /** public constructor */
-    public NativeWifiClient() { }
+    /**
+     * public constructor
+     * @hide
+     */
+    public NativeWifiClient(@NonNull byte[] macAddress) {
+        this.macAddress = macAddress;
+    }
 
     /** override comparator */
     @Override
@@ -60,18 +71,20 @@ public class NativeWifiClient implements Parcelable {
      * |flag| is ignored.
      */
     @Override
-    public void writeToParcel(Parcel out, int flags) {
+    public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeByteArray(macAddress);
     }
 
     /** implement Parcelable interface */
-    public static final Parcelable.Creator<NativeWifiClient> CREATOR =
+    @NonNull public static final Parcelable.Creator<NativeWifiClient> CREATOR =
             new Parcelable.Creator<NativeWifiClient>() {
                 @Override
                 public NativeWifiClient createFromParcel(Parcel in) {
-                    NativeWifiClient result = new NativeWifiClient();
-                    result.macAddress = in.createByteArray();
-                    return result;
+                    byte[] macAddress = in.createByteArray();
+                    if (macAddress == null) {
+                        macAddress = new byte[0];
+                    }
+                    return new NativeWifiClient(macAddress);
                 }
 
                 @Override

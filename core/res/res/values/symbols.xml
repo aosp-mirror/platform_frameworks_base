@@ -1342,6 +1342,7 @@
   <java-symbol type="drawable" name="picture_emergency" />
   <java-symbol type="drawable" name="platlogo" />
   <java-symbol type="drawable" name="stat_notify_sync_error" />
+  <java-symbol type="drawable" name="stat_notify_wifi_in_range" />
   <java-symbol type="drawable" name="ic_wifi_signal_0" />
   <java-symbol type="drawable" name="ic_wifi_signal_1" />
   <java-symbol type="drawable" name="ic_wifi_signal_2" />
@@ -3787,6 +3788,9 @@
   <java-symbol type="string" name="accessibility_system_action_toggle_split_screen_label" />
 
   <java-symbol type="string" name="accessibility_freeform_caption" />
+
+  <!-- For Wide Color Gamut -->
+  <java-symbol type="bool" name="config_enableWcgMode" />
 
   <!-- For contacts provider. -->
   <java-symbol type="string" name="config_rawContactsLocalAccountName" />

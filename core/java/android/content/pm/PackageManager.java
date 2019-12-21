@@ -710,6 +710,29 @@ public abstract class PackageManager {
     public static final int COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED = 4;
 
     /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            RollbackDataPolicy.RESTORE,
+            RollbackDataPolicy.WIPE,
+            RollbackDataPolicy.RETAIN
+    })
+    public @interface RollbackDataPolicy {
+        /**
+         * User data will be backed up during install and restored during rollback.
+         */
+        int RESTORE = 0;
+        /**
+         * User data won't be backed up during install but will be wiped out during rollback.
+         */
+        int WIPE = 1;
+        /**
+         * User data won't be backed up during install and won't be restored during rollback.
+         * TODO: Not implemented yet.
+         */
+        int RETAIN = 2;
+    }
+
+    /** @hide */
     @IntDef(flag = true, prefix = { "INSTALL_" }, value = {
             INSTALL_REPLACE_EXISTING,
             INSTALL_ALLOW_TEST,

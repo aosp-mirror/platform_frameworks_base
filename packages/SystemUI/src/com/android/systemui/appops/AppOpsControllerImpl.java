@@ -30,7 +30,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
-import com.android.systemui.dagger.qualifiers.BgLooper;
+import com.android.systemui.dagger.qualifiers.Background;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -81,7 +81,7 @@ public class AppOpsControllerImpl implements AppOpsController,
     };
 
     @Inject
-    public AppOpsControllerImpl(Context context, @BgLooper Looper bgLooper,
+    public AppOpsControllerImpl(Context context, @Background Looper bgLooper,
             DumpController dumpController) {
         this(context, bgLooper, new PermissionFlagsCache(context), dumpController);
     }

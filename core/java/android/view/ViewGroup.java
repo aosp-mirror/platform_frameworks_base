@@ -681,7 +681,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     private void initViewGroup() {
         // ViewGroup doesn't draw by default
-        if (!debugDraw()) {
+        if (!isShowingLayoutBounds()) {
             setFlags(WILL_NOT_DRAW, DRAW_MASK);
         }
         mGroupFlags |= FLAG_CLIP_CHILDREN;
@@ -4156,7 +4156,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
         if (usingRenderNodeProperties) canvas.insertInorderBarrier();
 
-        if (debugDraw()) {
+        if (isShowingLayoutBounds()) {
             onDebugDraw(canvas);
         }
 

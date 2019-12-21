@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dagger.qualifiers;
+package com.android.wm.shell;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Qualifier;
-
-@Qualifier
-@Documented
-@Retention(RUNTIME)
-public @interface BgLooper {
+/**
+ * Interface for the shell.
+ */
+public class WindowManagerShell {
 }

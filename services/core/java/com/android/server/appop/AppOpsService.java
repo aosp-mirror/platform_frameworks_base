@@ -17,11 +17,12 @@
 package com.android.server.appop;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
-import static android.app.AppOpsManager.MAX_PRIORITY_UID_STATE;
-import static android.app.AppOpsManager.MIN_PRIORITY_UID_STATE;
+import static android.app.AppOpsManager.NoteOpEvent;
+import static android.app.AppOpsManager.OpEventProxyInfo;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_COARSE_LOCATION;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
+import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
@@ -33,6 +34,9 @@ import static android.app.AppOpsManager.UID_STATE_MAX_LAST_NON_RESTRICTED;
 import static android.app.AppOpsManager.UID_STATE_PERSISTENT;
 import static android.app.AppOpsManager.UID_STATE_TOP;
 import static android.app.AppOpsManager._NUM_OP;
+import static android.app.AppOpsManager.extractFlagsFromKey;
+import static android.app.AppOpsManager.extractUidStateFromKey;
+import static android.app.AppOpsManager.makeKey;
 import static android.app.AppOpsManager.modeToName;
 import static android.app.AppOpsManager.opToName;
 import static android.app.AppOpsManager.resolveFirstUnrestrictedUidState;
@@ -93,7 +97,6 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.KeyValueListParser;
 import android.util.LongSparseArray;
-import android.util.LongSparseLongArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -365,8 +368,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         public long pendingStateCommitTime;
         public int capability;
         public int pendingCapability;
-        // For all features combined
-        public int startNesting;
 
         public ArrayMap<String, Ops> pkgOps;
         public SparseIntArray opModes;
@@ -474,126 +475,318 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private static final class FeatureOp {
+    /** A in progress startOp->finishOp event */
+    private static final class InProgressStartOpEvent implements IBinder.DeathRecipient {
+        /** Time of startOp event */
+        final long startTime;
+
+        /** Id of the client that started the event */
+        final @NonNull IBinder clientId;
+
+        /** To call when client dies */
+        final @NonNull Runnable onDeath;
+
+        /** uidstate used when calling startOp */
+        final @AppOpsManager.UidState int uidState;
+
+        /** How many times the op was started but not finished yet */
+        int numUnfinishedStarts;
+
+        private InProgressStartOpEvent(long startTime, @NonNull IBinder clientId,
+                @NonNull Runnable onDeath, int uidState) throws RemoteException {
+            this.startTime = startTime;
+            this.clientId = clientId;
+            this.onDeath = onDeath;
+            this.uidState = uidState;
+
+            clientId.linkToDeath(this, 0);
+        }
+
+        /** Clean up event */
+        public void finish() {
+            clientId.unlinkToDeath(this, 0);
+        }
+
+        @Override
+        public void binderDied() {
+            onDeath.run();
+        }
+    }
+
+    private final class FeatureOp {
         public final @NonNull Op parent;
 
-        public boolean running;
+        /**
+         * Last successful accesses (noteOp + finished startOp) for each uidState/opFlag combination
+         *
+         * <p>Key is {@link AppOpsManager#makeKey}
+         */
+        @GuardedBy("AppOpsService.this")
+        private @Nullable LongSparseArray<AppOpsManager.NoteOpEvent> mAccessEvents;
 
-        private @Nullable LongSparseLongArray mAccessTimes;
-        private @Nullable LongSparseLongArray mRejectTimes;
-        private @Nullable LongSparseLongArray mDurations;
-        private @Nullable LongSparseLongArray mProxyUids;
-        private @Nullable LongSparseArray<String> mProxyFeatureIds;
-        private @Nullable LongSparseArray<String> mProxyPackageNames;
+        /**
+         * Last rejected accesses for each uidState/opFlag combination
+         *
+         * <p>Key is {@link AppOpsManager#makeKey}
+         */
+        @GuardedBy("AppOpsService.this")
+        private @Nullable LongSparseArray<AppOpsManager.NoteOpEvent> mRejectEvents;
 
-        public int startNesting;
-        public long startRealtime;
+        /**
+         * Currently in progress startOp events
+         *
+         * <p>Key is clientId
+         */
+        @GuardedBy("AppOpsService.this")
+        private @Nullable ArrayMap<IBinder, InProgressStartOpEvent> mInProgressEvents;
 
         FeatureOp(@NonNull Op parent) {
             this.parent = parent;
         }
 
-        public void accessed(long time, int proxyUid, @Nullable String proxyPackageName,
+        /**
+         * Update state when noteOp was rejected or startOp->finishOp event finished
+         *
+         * @param proxyUid The uid of the proxy
+         * @param proxyPackageName The package name of the proxy
+         * @param proxyFeatureId the featureId in the proxies package
+         * @param uidState UID state of the app noteOp/startOp was called for
+         * @param flags OpFlags of the call
+         */
+        public void accessed(int proxyUid, @Nullable String proxyPackageName,
                 @Nullable String proxyFeatureId, @AppOpsManager.UidState int uidState,
                 @OpFlags int flags) {
-            final long key = AppOpsManager.makeKey(uidState, flags);
-            if (mAccessTimes == null) {
-                mAccessTimes = new LongSparseLongArray();
-            }
-            mAccessTimes.put(key, time);
-            updateProxyState(key, proxyUid, proxyPackageName, proxyFeatureId);
-            if (mDurations != null) {
-                mDurations.delete(key);
-            }
+            accessed(System.currentTimeMillis(), -1, proxyUid, proxyPackageName,
+                    proxyFeatureId, uidState, flags);
         }
 
-        public void rejected(long time, int proxyUid, @Nullable String proxyPackageName,
-                @Nullable String proxyFeatureId, @AppOpsManager.UidState int uidState,
-                @OpFlags int flags) {
-            final long key = AppOpsManager.makeKey(uidState, flags);
-            if (mRejectTimes == null) {
-                mRejectTimes = new LongSparseLongArray();
-            }
-            mRejectTimes.put(key, time);
-            updateProxyState(key, proxyUid, proxyPackageName, proxyFeatureId);
-            if (mDurations != null) {
-                mDurations.delete(key);
-            }
-        }
-
-        public void started(long time, @AppOpsManager.UidState int uidState, @OpFlags int flags) {
-            updateAccessTimeAndDuration(time, -1 /*duration*/, uidState, flags);
-            running = true;
-        }
-
-        public void finished(long time, long duration, @AppOpsManager.UidState int uidState,
-                @OpFlags int flags) {
-            updateAccessTimeAndDuration(time, duration, uidState, flags);
-            running = false;
-        }
-
-        public void running(long time, long duration, @AppOpsManager.UidState int uidState,
-                @OpFlags int flags) {
-            updateAccessTimeAndDuration(time, duration, uidState, flags);
-        }
-
-        public void continuing(long duration, @AppOpsManager.UidState int uidState,
-                @OpFlags int flags) {
-            final long key = AppOpsManager.makeKey(uidState, flags);
-            if (mDurations == null) {
-                mDurations = new LongSparseLongArray();
-            }
-            mDurations.put(key, duration);
-        }
-
-        private void updateAccessTimeAndDuration(long time, long duration,
+        /**
+         * Add an access that was previously collected.
+         *
+         * @param noteTime The time of the event
+         * @param duration The duration of the event
+         * @param proxyUid The uid of the proxy
+         * @param proxyPackageName The package name of the proxy
+         * @param proxyFeatureId the featureId in the proxies package
+         * @param uidState UID state of the app noteOp/startOp was called for
+         * @param flags OpFlags of the call
+         */
+        public void accessed(long noteTime, long duration, int proxyUid,
+                @Nullable String proxyPackageName, @Nullable String proxyFeatureId,
                 @AppOpsManager.UidState int uidState, @OpFlags int flags) {
-            final long key = AppOpsManager.makeKey(uidState, flags);
-            if (mAccessTimes == null) {
-                mAccessTimes = new LongSparseLongArray();
+            long key = makeKey(uidState, flags);
+
+            if (mAccessEvents == null) {
+                mAccessEvents = new LongSparseArray<>(1);
             }
-            mAccessTimes.put(key, time);
-            if (mDurations == null) {
-                mDurations = new LongSparseLongArray();
+
+            OpEventProxyInfo proxyInfo = null;
+            if (proxyUid != Process.INVALID_UID) {
+                proxyInfo = new OpEventProxyInfo(proxyUid, proxyPackageName, proxyFeatureId);
             }
-            mDurations.put(key, duration);
+            mAccessEvents.put(key, new NoteOpEvent(noteTime, duration, proxyInfo));
         }
 
-        private void updateProxyState(long key, int proxyUid,
-                @Nullable String proxyPackageName, @Nullable String featureId) {
-            if (proxyUid == Process.INVALID_UID) {
+        /**
+         * Update state when noteOp/startOp was rejected.
+         *
+         * @param uidState UID state of the app noteOp is called for
+         * @param flags OpFlags of the call
+         */
+        public void rejected(@AppOpsManager.UidState int uidState, @OpFlags int flags) {
+            rejected(System.currentTimeMillis(), uidState, flags);
+        }
+
+        /**
+         * Add an rejection that was previously collected
+         *
+         * @param noteTime The time of the event
+         * @param uidState UID state of the app noteOp/startOp was called for
+         * @param flags OpFlags of the call
+         */
+        public void rejected(long noteTime, @AppOpsManager.UidState int uidState,
+                @OpFlags int flags) {
+            long key = makeKey(uidState, flags);
+
+            if (mRejectEvents == null) {
+                mRejectEvents = new LongSparseArray<>(1);
+            }
+
+            // We do not collect proxy information for rejections yet
+            mRejectEvents.put(key, new NoteOpEvent(noteTime, -1, null));
+        }
+
+        /**
+         * Update state when start was called
+         *
+         * @param clientId Id of the startOp caller
+         * @param uidState UID state of the app startOp is called for
+         */
+        public void started(@NonNull IBinder clientId, @AppOpsManager.UidState int uidState)
+                throws RemoteException {
+            if (!parent.isRunning()) {
+                scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
+                        parent.packageName, true);
+            }
+
+            if (mInProgressEvents == null) {
+                mInProgressEvents = new ArrayMap<>(1);
+            }
+
+
+            InProgressStartOpEvent event = mInProgressEvents.get(clientId);
+            if (event == null) {
+                event = new InProgressStartOpEvent(System.currentTimeMillis(), clientId, () -> {
+                    // In the case the client dies without calling finish first
+                    synchronized (AppOpsService.this) {
+                        if (mInProgressEvents == null) {
+                            return;
+                        }
+
+                        InProgressStartOpEvent deadEvent = mInProgressEvents.get(clientId);
+                        if (deadEvent != null) {
+                            deadEvent.numUnfinishedStarts = 1;
+                        }
+
+                        finished(clientId);
+                    }
+                }, uidState);
+                mInProgressEvents.put(clientId, event);
+            } else {
+                if (uidState != event.uidState) {
+                    onUidStateChanged(uidState);
+                }
+            }
+
+            event.numUnfinishedStarts++;
+
+            // startOp events don't support proxy, hence use flags==SELF
+            mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid, parent.packageName,
+                    uidState, OP_FLAG_SELF);
+        }
+
+        /**
+         * Update state when finishOp was called
+         *
+         * @param clientId Id of the finishOp caller
+         */
+        public void finished(@NonNull IBinder clientId) {
+            finished(clientId, true);
+        }
+
+        private void finished(@NonNull IBinder clientId, boolean triggerCallbackIfNeeded) {
+            if (mInProgressEvents == null) {
+                Slog.wtf(TAG, "No ops running");
                 return;
             }
 
-            if (mProxyUids == null) {
-                mProxyUids = new LongSparseLongArray();
+            int indexOfToken = mInProgressEvents.indexOfKey(clientId);
+            if (indexOfToken < 0) {
+                Slog.wtf(TAG, "No op running for the client");
+                return;
             }
-            mProxyUids.put(key, proxyUid);
 
-            if (mProxyPackageNames == null) {
-                mProxyPackageNames = new LongSparseArray<>();
-            }
-            mProxyPackageNames.put(key, proxyPackageName);
+            InProgressStartOpEvent event = mInProgressEvents.valueAt(indexOfToken);
+            event.numUnfinishedStarts--;
+            if (event.numUnfinishedStarts == 0) {
+                event.finish();
+                mInProgressEvents.removeAt(indexOfToken);
 
-            if (mProxyFeatureIds == null) {
-                mProxyFeatureIds = new LongSparseArray<>();
+                if (mAccessEvents == null) {
+                    mAccessEvents = new LongSparseArray<>(1);
+                }
+
+                // startOp events don't support proxy, hence use flags==SELF
+                NoteOpEvent finishedEvent = new NoteOpEvent(event.startTime,
+                        System.currentTimeMillis() - event.startTime, null);
+                mAccessEvents.put(makeKey(event.uidState, OP_FLAG_SELF), finishedEvent);
+
+                mHistoricalRegistry.increaseOpAccessDuration(parent.op, parent.uid,
+                        parent.packageName, event.uidState, AppOpsManager.OP_FLAG_SELF,
+                        finishedEvent.duration);
+
+                if (mInProgressEvents.isEmpty()) {
+                    mInProgressEvents = null;
+
+                    // TODO moltmann: Also callback for single feature activity changes
+                    if (triggerCallbackIfNeeded && !parent.isRunning()) {
+                        scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
+                                parent.packageName, false);
+                    }
+                }
             }
-            mProxyFeatureIds.put(key, featureId);
+        }
+
+        /**
+         * Notify that the state of the uid changed
+         *
+         * @param newState The new state
+         */
+        public void onUidStateChanged(@AppOpsManager.UidState int newState) {
+            if (mInProgressEvents == null) {
+                return;
+            }
+
+            int numInProgressEvents = mInProgressEvents.size();
+            for (int i = 0; i < numInProgressEvents; i++) {
+                InProgressStartOpEvent event = mInProgressEvents.valueAt(i);
+
+                if (event.uidState != newState) {
+                    try {
+                        finished(event.clientId, false);
+                        started(event.clientId, newState);
+                    } catch (RemoteException e) {
+                        if (DEBUG) Slog.e(TAG, "Cannot switch to new uidState " + newState);
+                    }
+                }
+            }
+        }
+
+        public boolean isRunning() {
+            return mInProgressEvents != null;
         }
 
         boolean hasAnyTime() {
-            return (mAccessTimes != null && mAccessTimes.size() > 0)
-                    || (mRejectTimes != null && mRejectTimes.size() > 0);
+            return (mAccessEvents != null && mAccessEvents.size() > 0)
+                    || (mRejectEvents != null && mRejectEvents.size() > 0);
         }
 
-        @NonNull OpFeatureEntry.Builder createFeatureEntryBuilderLocked() {
-            return new OpFeatureEntry.Builder(running, mAccessTimes, mRejectTimes, mDurations,
-                    mProxyUids, mProxyPackageNames, mProxyFeatureIds);
+        @NonNull OpFeatureEntry createFeatureEntryLocked() {
+            LongSparseArray<NoteOpEvent> accessEvents = null;
+            if (mAccessEvents != null) {
+                accessEvents = mAccessEvents.clone();
+            }
+
+            // Add in progress events as access events
+            if (mInProgressEvents != null) {
+                long now = System.currentTimeMillis();
+                int numInProgressEvents = mInProgressEvents.size();
+
+                if (accessEvents == null) {
+                    accessEvents = new LongSparseArray<>(numInProgressEvents);
+                }
+
+                for (int i = 0; i < numInProgressEvents; i++) {
+                    InProgressStartOpEvent event = mInProgressEvents.valueAt(i);
+
+                    // startOp events don't support proxy
+                    accessEvents.append(makeKey(event.uidState, OP_FLAG_SELF),
+                            new NoteOpEvent(event.startTime, now - event.startTime, null));
+                }
+            }
+
+            LongSparseArray<NoteOpEvent> rejectEvents = null;
+            if (mRejectEvents != null) {
+                rejectEvents = mRejectEvents.clone();
+            }
+
+            return new OpFeatureEntry(parent.op, isRunning(), accessEvents, rejectEvents);
         }
     }
 
-    final static class Op {
+    final class Op {
         int op;
+        int uid;
         final UidState uidState;
         final @NonNull String packageName;
 
@@ -602,8 +795,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         /** featureId -> FeatureOp */
         final ArrayMap<String, FeatureOp> mFeatures = new ArrayMap<>(1);
 
-        Op(UidState uidState, String packageName, int op) {
+        Op(UidState uidState, String packageName, int op, int uid) {
             this.op = op;
+            this.uid = uid;
             this.uidState = uidState;
             this.packageName = packageName;
             this.mode = AppOpsManager.opToDefaultMode(op);
@@ -641,11 +835,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         @NonNull OpEntry createEntryLocked() {
             final int numFeatures = mFeatures.size();
 
-            final Pair<String, OpFeatureEntry.Builder>[] featureEntries =
-                    new Pair[numFeatures];
+            final ArrayMap<String, OpFeatureEntry> featureEntries = new ArrayMap<>(numFeatures);
             for (int i = 0; i < numFeatures; i++) {
-                featureEntries[i] = new Pair<>(mFeatures.keyAt(i),
-                        mFeatures.valueAt(i).createFeatureEntryBuilderLocked());
+                featureEntries.put(mFeatures.keyAt(i),
+                        mFeatures.valueAt(i).createFeatureEntryLocked());
             }
 
             return new OpEntry(op, mode, featureEntries);
@@ -654,17 +847,27 @@ public class AppOpsService extends IAppOpsService.Stub {
         @NonNull OpEntry createSingleFeatureEntryLocked(@Nullable String featureId) {
             final int numFeatures = mFeatures.size();
 
-            final Pair<String, AppOpsManager.OpFeatureEntry.Builder>[] featureEntries =
-                    new Pair[1];
+            final ArrayMap<String, OpFeatureEntry> featureEntries = new ArrayMap<>(1);
             for (int i = 0; i < numFeatures; i++) {
                 if (Objects.equals(mFeatures.keyAt(i), featureId)) {
-                    featureEntries[0] = new Pair<>(mFeatures.keyAt(i),
-                            mFeatures.valueAt(i).createFeatureEntryBuilderLocked());
+                    featureEntries.put(mFeatures.keyAt(i),
+                            mFeatures.valueAt(i).createFeatureEntryLocked());
                     break;
                 }
             }
 
             return new OpEntry(op, mode, featureEntries);
+        }
+
+        boolean isRunning() {
+            final int numFeatures = mFeatures.size();
+            for (int i = 0; i < numFeatures; i++) {
+                if (mFeatures.valueAt(i).isRunning()) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
@@ -812,53 +1015,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         @Override
         public void binderDied() {
             stopWatchingNoted(mCallback);
-        }
-    }
-
-    final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<>();
-
-    final class ClientState extends Binder implements DeathRecipient {
-        final ArrayList<Pair<Op, String>> mStartedOps = new ArrayList<>();
-        final IBinder mAppToken;
-        final int mPid;
-
-        ClientState(IBinder appToken) {
-            mAppToken = appToken;
-            mPid = Binder.getCallingPid();
-            // Watch only for remote processes dying
-            if (!(appToken instanceof Binder)) {
-                try {
-                    mAppToken.linkToDeath(this, 0);
-                } catch (RemoteException e) {
-                    /* do nothing */
-                }
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "ClientState{" +
-                    "mAppToken=" + mAppToken +
-                    ", " + "pid=" + mPid +
-                    '}';
-        }
-
-        @Override
-        public void binderDied() {
-            synchronized (AppOpsService.this) {
-                for (int i=mStartedOps.size()-1; i>=0; i--) {
-                    final Pair<Op, String> startedOp = mStartedOps.get(i);
-                    final Op op = startedOp.first;
-                    final String featureId = startedOp.second;
-
-                    finishOperationLocked(op, featureId, /*finishNested*/ true);
-                    if (op.mFeatures.get(featureId).startNesting <= 0) {
-                        scheduleOpActiveChangedIfNeededLocked(op.op, op.uidState.uid,
-                                op.packageName, false);
-                    }
-                }
-                mClients.remove(mAppToken);
-            }
         }
     }
 
@@ -1024,43 +1180,19 @@ public class AppOpsService extends IAppOpsService.Stub {
                 mUidStates.remove(uid);
             }
 
-            // Finish ops other packages started on behalf of the package.
-            final int clientCount = mClients.size();
-            for (int i = 0; i < clientCount; i++) {
-                final ClientState client = mClients.valueAt(i);
-                if (client.mStartedOps == null) {
-                    continue;
-                }
-                final int startedOpCount = client.mStartedOps.size();
-                for (int j = startedOpCount - 1; j >= 0; j--) {
-                    final Pair<Op, String> startedOp = client.mStartedOps.get(j);
-                    final Op op = startedOp.first;
-                    final String featureId = startedOp.second;
-
-                    if (uid == op.uidState.uid && packageName.equals(op.packageName)) {
-                        finishOperationLocked(op, featureId, /*finishNested*/ true);
-                        client.mStartedOps.remove(j);
-                        if (op.mFeatures.get(featureId).startNesting <= 0) {
-                            scheduleOpActiveChangedIfNeededLocked(op.op,
-                                    uid, packageName, false);
-                        }
-                    }
-                }
-            }
-
             if (ops != null) {
                 scheduleFastWriteLocked();
 
-                final int opCount = ops.size();
-                for (int opNum = 0; opNum < opCount; opNum++) {
+                final int numOps = ops.size();
+                for (int opNum = 0; opNum < numOps; opNum++) {
                     final Op op = ops.valueAt(opNum);
 
                     final int numFeatures = op.mFeatures.size();
                     for (int featureNum = 0; featureNum < numFeatures; featureNum++) {
-                        if (op.mFeatures.valueAt(featureNum).running) {
-                            scheduleOpActiveChangedIfNeededLocked(
-                                    op.op, op.uidState.uid, op.packageName, false);
-                            break;
+                        FeatureOp featureOp = op.mFeatures.valueAt(featureNum);
+
+                        while (featureOp.mInProgressEvents != null) {
+                            featureOp.mInProgressEvents.valueAt(0).onDeath.run();
                         }
                     }
                 }
@@ -1112,35 +1244,21 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                     uidState.pendingStateCommitTime = SystemClock.elapsedRealtime() + settleTime;
                 }
-                if (uidState.startNesting != 0) {
-                    // There is some actively running operation...  need to find it
-                    // and appropriately update its state.
-                    final long now = System.currentTimeMillis();
-                    final long nowElapsed = SystemClock.elapsedRealtime();
-                    for (int i = uidState.pkgOps.size() - 1; i >= 0; i--) {
-                        final Ops ops = uidState.pkgOps.valueAt(i);
-                        for (int j = ops.size() - 1; j >= 0; j--) {
-                            final Op op = ops.valueAt(j);
+
+                if (uidState.pkgOps != null) {
+                    int numPkgs = uidState.pkgOps.size();
+                    for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
+                        Ops ops = uidState.pkgOps.valueAt(pkgNum);
+
+                        int numOps = ops.size();
+                        for (int opNum = 0; opNum < numOps; opNum++) {
+                            Op op = ops.valueAt(opNum);
 
                             int numFeatures = op.mFeatures.size();
-                            for (int featureNum = 0; featureNum < numFeatures;
-                                    featureNum++) {
-                                final FeatureOp featureOp = op.mFeatures.valueAt(
-                                        featureNum);
-                                if (featureOp.startNesting > 0) {
-                                    final long duration = SystemClock.elapsedRealtime()
-                                            - featureOp.startRealtime;
-                                    // We don't support proxy long running ops (start/stop)
-                                    mHistoricalRegistry.increaseOpAccessDuration(op.op,
-                                            op.uidState.uid, op.packageName, oldPendingState,
-                                            AppOpsManager.OP_FLAG_SELF, duration);
-                                    // Finish the op in the old state
-                                    featureOp.finished(now, duration, oldPendingState,
-                                            AppOpsManager.OP_FLAG_SELF);
-                                    // Start the op in the new state
-                                    featureOp.startRealtime = nowElapsed;
-                                    featureOp.started(now, newState, AppOpsManager.OP_FLAG_SELF);
-                                }
+                            for (int featureNum = 0; featureNum < numFeatures; featureNum++) {
+                                FeatureOp featureOp = op.mFeatures.valueAt(featureNum);
+
+                                featureOp.onUidStateChanged(newState);
                             }
                         }
                     }
@@ -1202,7 +1320,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             resOps = new ArrayList<>();
             for (int i = 0; i < opModeCount; i++) {
                 int code = uidState.opModes.keyAt(i);
-                resOps.add(new OpEntry(code, uidState.opModes.get(code), new Pair[0]));
+                resOps.add(new OpEntry(code, uidState.opModes.get(code), Collections.emptyMap()));
             }
         } else {
             for (int j=0; j<ops.length; j++) {
@@ -1211,7 +1329,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (resOps == null) {
                         resOps = new ArrayList<>();
                     }
-                    resOps.add(new OpEntry(code, uidState.opModes.get(code), new Pair[0]));
+                    resOps.add(new OpEntry(code, uidState.opModes.get(code),
+                            Collections.emptyMap()));
                 }
             }
         }
@@ -1219,16 +1338,6 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private static @NonNull OpEntry getOpEntryForResult(@NonNull Op op, long elapsedNow) {
-        final int numFeatures = op.mFeatures.size();
-
-        for (int i = 0; i < numFeatures; i++) {
-            final FeatureOp featureOp = op.mFeatures.valueAt(i);
-            if (featureOp.running) {
-                featureOp.continuing(elapsedNow - featureOp.startRealtime,
-                        op.uidState.state, AppOpsManager.OP_FLAG_SELF);
-            }
-        }
-
         return op.createEntryLocked();
     }
 
@@ -1962,18 +2071,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    @Override
-    public IBinder getToken(IBinder clientToken) {
-        synchronized (this) {
-            ClientState cs = mClients.get(clientToken);
-            if (cs == null) {
-                cs = new ClientState(clientToken);
-                mClients.put(clientToken, cs);
-            }
-            return cs;
-        }
-    }
-
     public CheckOpsDelegate getAppOpsServiceDelegate() {
         synchronized (this) {
             return mCheckOpsDelegate;
@@ -2214,15 +2311,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return AppOpsManager.MODE_IGNORED;
             }
             final UidState uidState = ops.uidState;
-            if (featureOp.running) {
-                final OpFeatureEntry entry = getOpLocked(ops, code,
-                        false).createSingleFeatureEntryLocked(featureId).getFeatures().get(
-                        featureId);
-
-                Slog.w(TAG, "Noting op not finished: uid " + uid + " pkg " + packageName
-                        + " code " + code + " time=" + entry.getLastAccessTime(uidState.state,
-                        uidState.state, flags) + " duration=" + entry.getLastDuration(
-                                uidState.state, uidState.state, flags));
+            if (featureOp.isRunning()) {
+                Slog.w(TAG, "Noting op not finished: uid " + uid + " pkg " + packageName + " code "
+                        + code + " startTime of in progress event="
+                        + featureOp.mInProgressEvents.valueAt(0).startTime);
             }
 
             final int switchCode = AppOpsManager.opToSwitch(code);
@@ -2234,8 +2326,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (DEBUG) Slog.d(TAG, "noteOperation: uid reject #" + uidMode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + packageName);
-                    featureOp.rejected(System.currentTimeMillis(), proxyUid, proxyPackageName,
-                            proxyFeatureId, uidState.state, flags);
+                    featureOp.rejected(uidState.state, flags);
                     mHistoricalRegistry.incrementOpRejected(code, uid, packageName,
                             uidState.state, flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, uidMode);
@@ -2244,12 +2335,11 @@ public class AppOpsService extends IAppOpsService.Stub {
             } else {
                 final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, true) : op;
                 final int mode = switchOp.evalMode();
-                if (switchOp.mode != AppOpsManager.MODE_ALLOWED) {
+                if (mode != AppOpsManager.MODE_ALLOWED) {
                     if (DEBUG) Slog.d(TAG, "noteOperation: reject #" + mode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + packageName);
-                    featureOp.rejected(System.currentTimeMillis(), proxyUid, proxyPackageName,
-                            proxyFeatureId, uidState.state, flags);
+                    featureOp.rejected(uidState.state, flags);
                     mHistoricalRegistry.incrementOpRejected(code, uid, packageName,
                             uidState.state, flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, mode);
@@ -2258,8 +2348,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             if (DEBUG) Slog.d(TAG, "noteOperation: allowing code " + code + " uid " + uid
                     + " package " + packageName + (featureId == null ? "" : "." + featureId));
-            featureOp.accessed(System.currentTimeMillis(), proxyUid, proxyPackageName,
-                    proxyFeatureId, uidState.state, flags);
+            featureOp.accessed(proxyUid, proxyPackageName, proxyFeatureId, uidState.state, flags);
             // TODO moltmann: Add features to historical app-ops
             mHistoricalRegistry.incrementOpAccessedCount(op.op, uid, packageName,
                     uidState.state, flags);
@@ -2496,7 +2585,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
-    public int startOperation(IBinder token, int code, int uid, String packageName,
+    public int startOperation(IBinder clientId, int code, int uid, String packageName,
             String featureId, boolean startIfModeDefault) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
@@ -2504,7 +2593,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (resolvedPackageName == null) {
             return  AppOpsManager.MODE_IGNORED;
         }
-        ClientState client = (ClientState)token;
 
         boolean isPrivileged;
         try {
@@ -2539,10 +2627,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (DEBUG) Slog.d(TAG, "noteOperation: uid reject #" + uidMode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + resolvedPackageName);
-                    // We don't support proxy long running ops (start/stop)
-                    featureOp.rejected(System.currentTimeMillis(), -1 /*proxyUid*/,
-                            null /*proxyPackage*/, null, uidState.state,
-                            AppOpsManager.OP_FLAG_SELF);
+                    featureOp.rejected(uidState.state, AppOpsManager.OP_FLAG_SELF);
                     mHistoricalRegistry.incrementOpRejected(opCode, uid, packageName,
                             uidState.state, AppOpsManager.OP_FLAG_SELF);
                     return uidMode;
@@ -2555,10 +2640,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (DEBUG) Slog.d(TAG, "startOperation: reject #" + mode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + resolvedPackageName);
-                    // We don't support proxy long running ops (start/stop)
-                    featureOp.rejected(System.currentTimeMillis(), -1 /*proxyUid*/,
-                            null /*proxyPackage*/, null, uidState.state,
-                            AppOpsManager.OP_FLAG_SELF);
+                    featureOp.rejected(uidState.state, AppOpsManager.OP_FLAG_SELF);
                     mHistoricalRegistry.incrementOpRejected(opCode, uid, packageName,
                             uidState.state, AppOpsManager.OP_FLAG_SELF);
                     return mode;
@@ -2566,29 +2648,19 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             if (DEBUG) Slog.d(TAG, "startOperation: allowing code " + code + " uid " + uid
                     + " package " + resolvedPackageName);
-            if (featureOp.startNesting == 0) {
-                featureOp.startRealtime = SystemClock.elapsedRealtime();
-                // We don't support proxy long running ops (start/stop)
-                featureOp.started(System.currentTimeMillis(), uidState.state,
-                        AppOpsManager.OP_FLAG_SELF);
-                mHistoricalRegistry.incrementOpAccessedCount(opCode, uid, packageName,
-                        uidState.state, AppOpsManager.OP_FLAG_SELF);
 
-                // TODO moltmann: call back when a feature became inactive
-                if (uidState.startNesting == 0) {
-                    scheduleOpActiveChangedIfNeededLocked(code, uid, packageName, true);
-                }
+            try {
+                featureOp.started(clientId, uidState.state);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
             }
-            featureOp.startNesting++;
-            uidState.startNesting++;
-            client.mStartedOps.add(new Pair<>(op, featureId));
         }
 
         return AppOpsManager.MODE_ALLOWED;
     }
 
     @Override
-    public void finishOperation(IBinder token, int code, int uid, String packageName,
+    public void finishOperation(IBinder clientId, int code, int uid, String packageName,
             String featureId) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
@@ -2596,10 +2668,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (resolvedPackageName == null) {
             return;
         }
-        if (!(token instanceof ClientState)) {
-            return;
-        }
-        ClientState client = (ClientState) token;
 
         boolean isPrivileged;
         try {
@@ -2619,36 +2687,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return;
             }
 
-            if (client.mStartedOps.remove(new Pair<>(op, featureId))) {
-                finishOperationLocked(op, featureId, /*finishNested*/ false);
-
-                // TODO moltmann: call back when a feature became inactive
-                if (op.uidState.startNesting <= 0) {
-                    scheduleOpActiveChangedIfNeededLocked(code, uid, packageName, false);
-                }
-
-                return;
+            try {
+                featureOp.finished(clientId);
+            } catch (IllegalStateException e) {
+                Slog.e(TAG, "Operation not started: uid=" + uid + " pkg="
+                        + packageName + " op=" + AppOpsManager.opToName(code), e);
             }
         }
-
-        // We finish ops when packages get removed to guarantee no dangling
-        // started ops. However, some part of the system may asynchronously
-        // finish ops for an already gone package. Hence, finishing an op
-        // for a non existing package is fine and we don't log as a wtf.
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            if (LocalServices.getService(PackageManagerInternal.class).getPackageUid(
-                    resolvedPackageName, 0, UserHandle.getUserId(uid)) < 0) {
-                Slog.i(TAG, "Finishing op=" + AppOpsManager.opToName(code)
-                        + " for non-existing package=" + resolvedPackageName
-                        + " in uid=" + uid);
-                return;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-        Slog.wtf(TAG, "Operation not started: uid=" + uid + " pkg="
-                + packageName + " op=" + AppOpsManager.opToName(code));
     }
 
     private void scheduleOpActiveChangedIfNeededLocked(int code, int uid, String packageName,
@@ -2767,38 +2812,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         return permInfo.getProtection() == PROTECTION_DANGEROUS;
-    }
-
-    void finishOperationLocked(@NonNull Op op, @Nullable String featureId, boolean finishNested) {
-        final FeatureOp featureOp = op.mFeatures.get(featureId);
-        final int opCode = featureOp.parent.op;
-        final int uid = featureOp.parent.uidState.uid;
-        if (featureOp.startNesting <= 1 || finishNested) {
-            if (featureOp.startNesting == 1 || finishNested) {
-                // We don't support proxy long running ops (start/stop)
-                final long duration = SystemClock.elapsedRealtime() - featureOp.startRealtime;
-                featureOp.finished(System.currentTimeMillis(), duration, op.uidState.state,
-                        AppOpsManager.OP_FLAG_SELF);
-                mHistoricalRegistry.increaseOpAccessDuration(opCode, uid, op.packageName,
-                        op.uidState.state, AppOpsManager.OP_FLAG_SELF, duration);
-            } else {
-                final OpFeatureEntry entry = op.createSingleFeatureEntryLocked(
-                        featureId).getFeatures().get(featureId);
-                Slog.w(TAG, "Finishing op nesting under-run: uid " + uid + " pkg "
-                        + op.packageName + " code " + opCode + " time="
-                        + entry.getLastAccessTime(OP_FLAGS_ALL)
-                        + " duration=" + entry.getLastDuration(MAX_PRIORITY_UID_STATE,
-                        MIN_PRIORITY_UID_STATE, OP_FLAGS_ALL) + " nesting="
-                        + featureOp.startNesting);
-            }
-            if (featureOp.startNesting >= 1) {
-                op.uidState.startNesting -= featureOp.startNesting;
-            }
-            featureOp.startNesting = 0;
-        } else {
-            featureOp.startNesting--;
-            op.uidState.startNesting--;
-        }
     }
 
     private void verifyIncomingUid(int uid) {
@@ -3064,7 +3077,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (!edit) {
                 return null;
             }
-            op = new Op(ops.uidState, ops.packageName, code);
+            op = new Op(ops.uidState, ops.packageName, code, ops.uidState.uid);
             ops.put(code, op);
         }
         if (edit) {
@@ -3208,7 +3221,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     final Op op = ops.get(AppOpsManager.OP_RUN_IN_BACKGROUND);
                     if (op != null && op.mode != AppOpsManager.opToDefaultMode(op.op)) {
                         final Op copy = new Op(op.uidState, op.packageName,
-                            AppOpsManager.OP_RUN_ANY_IN_BACKGROUND);
+                                AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, uidState.uid);
                         copy.mode = op.mode;
                         ops.put(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, copy);
                         changed = true;
@@ -3336,25 +3349,22 @@ public class AppOpsService extends IAppOpsService.Stub {
         final FeatureOp featureOp = parent.getOrCreateFeature(parent, feature);
 
         final long key = XmlUtils.readLongAttribute(parser, "n");
-
-        final int flags = AppOpsManager.extractFlagsFromKey(key);
-        final int state = AppOpsManager.extractUidStateFromKey(key);
+        final int uidState = extractUidStateFromKey(key);
+        final int opFlags = extractFlagsFromKey(key);
 
         final long accessTime = XmlUtils.readLongAttribute(parser, "t", 0);
         final long rejectTime = XmlUtils.readLongAttribute(parser, "r", 0);
-        final long accessDuration = XmlUtils.readLongAttribute(parser, "d", 0);
+        final long accessDuration = XmlUtils.readLongAttribute(parser, "d", -1);
         final String proxyPkg = XmlUtils.readStringAttribute(parser, "pp");
-        final int proxyUid = XmlUtils.readIntAttribute(parser, "pu", 0);
+        final int proxyUid = XmlUtils.readIntAttribute(parser, "pu", Process.INVALID_UID);
         final String proxyFeatureId = XmlUtils.readStringAttribute(parser, "pc");
 
         if (accessTime > 0) {
-            featureOp.accessed(accessTime, proxyUid, proxyPkg, proxyFeatureId, state, flags);
+            featureOp.accessed(accessTime, accessDuration, proxyUid, proxyPkg, proxyFeatureId,
+                    uidState, opFlags);
         }
         if (rejectTime > 0) {
-            featureOp.rejected(rejectTime, proxyUid, proxyPkg, proxyFeatureId, state, flags);
-        }
-        if (accessDuration > 0) {
-            featureOp.running(accessTime, accessDuration, state, flags);
+            featureOp.rejected(rejectTime, uidState, opFlags);
         }
     }
 
@@ -3362,7 +3372,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         @NonNull String pkgName, boolean isPrivileged) throws NumberFormatException,
         XmlPullParserException, IOException {
         Op op = new Op(uidState, pkgName,
-                Integer.parseInt(parser.getAttributeValue(null, "n")));
+                Integer.parseInt(parser.getAttributeValue(null, "n")),
+                uidState.uid);
 
         final int mode = XmlUtils.readIntAttribute(parser, "m",
                 AppOpsManager.opToDefaultMode(op.op));
@@ -3496,33 +3507,37 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 final OpFeatureEntry feature = op.getFeatures().get(
                                         featureId);
 
-                                final LongSparseArray keys = feature.collectKeys();
-                                if (keys == null || keys.size() <= 0) {
-                                    continue;
-                                }
-                                final int keyCount = keys.size();
+                                final ArraySet<Long> keys = feature.collectKeys();
 
+                                final int keyCount = keys.size();
                                 for (int k = 0; k < keyCount; k++) {
-                                    final long key = keys.keyAt(k);
+                                    final long key = keys.valueAt(k);
 
                                     final int uidState = AppOpsManager.extractUidStateFromKey(key);
                                     final int flags = AppOpsManager.extractFlagsFromKey(key);
 
-                                    final long accessTime = feature.getLastAccessTime(
-                                            uidState, uidState, flags);
-                                    final long rejectTime = feature.getLastRejectTime(
-                                            uidState, uidState, flags);
-                                    final long accessDuration = feature.getLastDuration(
-                                            uidState, uidState, flags);
-                                    final String proxyPkg = feature.getProxyPackageName(uidState,
-                                            flags);
-                                    final String proxyFeatureId = feature.getProxyFeatureId(
+                                    final long accessTime = feature.getLastAccessTime(uidState,
                                             uidState, flags);
-                                    final int proxyUid = feature.getProxyUid(uidState, flags);
+                                    final long rejectTime = feature.getLastRejectTime(uidState,
+                                            uidState, flags);
+                                    final long accessDuration = feature.getLastDuration(uidState,
+                                            uidState, flags);
+                                    // Proxy information for rejections is not backed up
+                                    final OpEventProxyInfo proxy = feature.getLastProxyInfo(
+                                            uidState, uidState, flags);
 
                                     if (accessTime <= 0 && rejectTime <= 0 && accessDuration <= 0
-                                            && proxyPkg == null && proxyUid < 0) {
+                                            && proxy == null) {
                                         continue;
+                                    }
+
+                                    String proxyPkg = null;
+                                    String proxyFeatureId = null;
+                                    int proxyUid = Process.INVALID_UID;
+                                    if (proxy != null) {
+                                        proxyPkg = proxy.getPackageName();
+                                        proxyFeatureId = proxy.getFeatureId();
+                                        proxyUid = proxy.getUid();
                                     }
 
                                     out.startTag(null, "st");
@@ -3591,10 +3606,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         Shell(IAppOpsService iface, AppOpsService internal) {
             mInterface = iface;
             mInternal = internal;
-            try {
-                mToken = mInterface.getToken(sBinder);
-            } catch (RemoteException e) {
-            }
+            mToken = AppOpsManager.getClientId();
         }
 
         @Override
@@ -3889,42 +3901,48 @@ public class AppOpsService extends IAppOpsService.Stub {
                             pw.print(": ");
                             pw.print(AppOpsManager.modeToName(ent.getMode()));
                             if (shell.featureId == null) {
-                                if (ent.getTime() != 0) {
+                                if (ent.getLastAccessTime(OP_FLAGS_ALL) != -1) {
                                     pw.print("; time=");
-                                    TimeUtils.formatDuration(now - ent.getTime(), pw);
+                                    TimeUtils.formatDuration(
+                                            now - ent.getLastAccessTime(OP_FLAGS_ALL), pw);
                                     pw.print(" ago");
                                 }
-                                if (ent.getRejectTime() != 0) {
+                                if (ent.getLastRejectTime(OP_FLAGS_ALL) != -1) {
                                     pw.print("; rejectTime=");
-                                    TimeUtils.formatDuration(now - ent.getRejectTime(), pw);
+                                    TimeUtils.formatDuration(
+                                            now - ent.getLastRejectTime(OP_FLAGS_ALL), pw);
                                     pw.print(" ago");
                                 }
-                                if (ent.getDuration() == -1) {
+                                if (ent.isRunning()) {
                                     pw.print(" (running)");
-                                } else if (ent.getDuration() != 0) {
+                                } else if (ent.getLastDuration(OP_FLAGS_ALL) != -1) {
                                     pw.print("; duration=");
-                                    TimeUtils.formatDuration(ent.getDuration(), pw);
+                                    TimeUtils.formatDuration(ent.getLastDuration(OP_FLAGS_ALL), pw);
                                 }
                             } else {
                                 final OpFeatureEntry featureEnt = ent.getFeatures().get(
                                         shell.featureId);
                                 if (featureEnt != null) {
-                                    if (featureEnt.getTime() != 0) {
+                                    if (featureEnt.getLastAccessTime(OP_FLAGS_ALL) != -1) {
                                         pw.print("; time=");
-                                        TimeUtils.formatDuration(now - featureEnt.getTime(), pw);
+                                        TimeUtils.formatDuration(now - featureEnt.getLastAccessTime(
+                                                OP_FLAGS_ALL), pw);
                                         pw.print(" ago");
                                     }
-                                    if (featureEnt.getRejectTime() != 0) {
+                                    if (featureEnt.getLastRejectTime(OP_FLAGS_ALL) != -1) {
                                         pw.print("; rejectTime=");
-                                        TimeUtils.formatDuration(now - featureEnt.getRejectTime(),
+                                        TimeUtils.formatDuration(
+                                                now - featureEnt.getLastRejectTime(OP_FLAGS_ALL),
                                                 pw);
                                         pw.print(" ago");
                                     }
-                                    if (featureEnt.getDuration() == -1) {
+                                    if (featureEnt.isRunning()) {
                                         pw.print(" (running)");
-                                    } else if (featureEnt.getDuration() != 0) {
+                                    } else if (featureEnt.getLastDuration(OP_FLAGS_ALL)
+                                            != -1) {
                                         pw.print("; duration=");
-                                        TimeUtils.formatDuration(featureEnt.getDuration(), pw);
+                                        TimeUtils.formatDuration(
+                                                featureEnt.getLastDuration(OP_FLAGS_ALL), pw);
                                     }
                                 }
                             }
@@ -4095,27 +4113,28 @@ public class AppOpsService extends IAppOpsService.Stub {
         final OpFeatureEntry entry = op.createSingleFeatureEntryLocked(
                 featureId).getFeatures().get(featureId);
 
-        final LongSparseArray keys = entry.collectKeys();
-        if (keys == null || keys.size() <= 0) {
-            return;
-        }
+        final ArraySet<Long> keys = entry.collectKeys();
 
         final int keyCount = keys.size();
         for (int k = 0; k < keyCount; k++) {
-            final long key = keys.keyAt(k);
+            final long key = keys.valueAt(k);
 
             final int uidState = AppOpsManager.extractUidStateFromKey(key);
             final int flags = AppOpsManager.extractFlagsFromKey(key);
 
-            final long accessTime = entry.getLastAccessTime(
-                    uidState, uidState, flags);
-            final long rejectTime = entry.getLastRejectTime(
-                    uidState, uidState, flags);
-            final long accessDuration = entry.getLastDuration(
-                    uidState, uidState, flags);
-            final String proxyPkg = entry.getProxyPackageName(uidState, flags);
-            final String proxyFeatureId = entry.getProxyFeatureId(uidState, flags);
-            final int proxyUid = entry.getProxyUid(uidState, flags);
+            final long accessTime = entry.getLastAccessTime(uidState, uidState, flags);
+            final long rejectTime = entry.getLastRejectTime(uidState, uidState, flags);
+            final long accessDuration = entry.getLastDuration(uidState, uidState, flags);
+            final OpEventProxyInfo proxy = entry.getLastProxyInfo(uidState, uidState, flags);
+
+            String proxyPkg = null;
+            String proxyFeatureId = null;
+            int proxyUid = Process.INVALID_UID;
+            if (proxy != null) {
+                proxyPkg = proxy.getPackageName();
+                proxyFeatureId = proxy.getFeatureId();
+                proxyUid = proxy.getUid();
+            }
 
             if (accessTime > 0) {
                 pw.print(prefix);
@@ -4168,14 +4187,25 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         final FeatureOp featureOp = op.mFeatures.get(featureId);
-        if (featureOp.running) {
+        if (featureOp.isRunning()) {
+            long earliestStartTime = Long.MAX_VALUE;
+            long maxNumStarts = 0;
+            int numInProgressEvents = featureOp.mInProgressEvents.size();
+            for (int i = 0; i < numInProgressEvents; i++) {
+                InProgressStartOpEvent event = featureOp.mInProgressEvents.valueAt(i);
+
+                earliestStartTime = Math.min(earliestStartTime, event.startTime);
+                maxNumStarts = Math.max(maxNumStarts, event.numUnfinishedStarts);
+            }
+
             pw.print(prefix + "Running start at: ");
-            TimeUtils.formatDuration(nowElapsed - featureOp.startRealtime, pw);
+            TimeUtils.formatDuration(nowElapsed - earliestStartTime, pw);
             pw.println();
-        }
-        if (featureOp.startNesting != 0) {
-            pw.print(prefix + "startNesting=");
-            pw.println(featureOp.startNesting);
+
+            if (maxNumStarts > 1) {
+                pw.print(prefix + "startNesting=");
+                pw.println(maxNumStarts);
+            }
         }
     }
 
@@ -4423,44 +4453,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     pw.println(cb);
                 }
             }
-            if (mClients.size() > 0 && dumpMode < 0 && !dumpWatchers && !dumpHistory) {
-                needSep = true;
-                boolean printedHeader = false;
-                for (int i=0; i<mClients.size(); i++) {
-                    boolean printedClient = false;
-                    ClientState cs = mClients.valueAt(i);
-                    if (cs.mStartedOps.size() > 0) {
-                        boolean printedStarted = false;
-                        for (int j=0; j<cs.mStartedOps.size(); j++) {
-                            final Pair<Op, String> startedOp = cs.mStartedOps.get(j);
-                            final Op op = startedOp.first;
-                            if (dumpOp >= 0 && op.op != dumpOp) {
-                                continue;
-                            }
-                            if (dumpPackage != null && !dumpPackage.equals(op.packageName)) {
-                                continue;
-                            }
-                            if (!printedHeader) {
-                                pw.println("  Clients:");
-                                printedHeader = true;
-                            }
-                            if (!printedClient) {
-                                pw.print("    "); pw.print(mClients.keyAt(i)); pw.println(":");
-                                pw.print("      "); pw.println(cs);
-                                printedClient = true;
-                            }
-                            if (!printedStarted) {
-                                pw.println("      Started ops:");
-                                printedStarted = true;
-                            }
-                            pw.print("        "); pw.print("uid="); pw.print(op.uidState.uid);
-                            pw.print(" pkg="); pw.print(op.packageName);
-                            pw.print(" featureId="); pw.print(startedOp.second);
-                            pw.print(" op="); pw.println(AppOpsManager.opToName(op.op));
-                        }
-                    }
-                }
-            }
             if (mAudioRestrictionManager.hasActiveRestrictions() && dumpOp < 0
                     && dumpPackage != null && dumpMode < 0 && !dumpWatchers && !dumpWatchers) {
                 needSep = mAudioRestrictionManager.dump(pw) | needSep ;
@@ -4535,10 +4527,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     pw.print("    pendingStateCommitTime=");
                     TimeUtils.formatDuration(uidState.pendingStateCommitTime, nowElapsed, pw);
                     pw.println();
-                }
-                if (uidState.startNesting != 0) {
-                    pw.print("    startNesting=");
-                    pw.println(uidState.startNesting);
                 }
                 if (uidState.foregroundOps != null && (dumpMode < 0
                         || dumpMode == AppOpsManager.MODE_FOREGROUND)) {
@@ -4813,17 +4801,18 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         // TODO moltmann: Allow to check for feature op activeness
         synchronized (AppOpsService.this) {
-            for (int i = mClients.size() - 1; i >= 0; i--) {
-                final ClientState client = mClients.valueAt(i);
-                for (int j = client.mStartedOps.size() - 1; j >= 0; j--) {
-                    final Pair<Op, String> startedOp = client.mStartedOps.get(j);
-                    if (startedOp.first.op == code && startedOp.first.uidState.uid == uid) {
-                        return true;
-                    }
-                }
+            Ops pkgOps = getOpsRawLocked(uid, resolvedPackageName, false, false);
+            if (pkgOps == null) {
+                return false;
             }
+
+            Op op = pkgOps.get(code);
+            if (op == null) {
+                return false;
+            }
+
+            return op.isRunning();
         }
-        return false;
     }
 
     @Override

@@ -188,8 +188,7 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"कार्य प्रोफाइल प्रशासक अ‍ॅप गहाळ आहे किंवा करप्ट आहे. परिणामी, तुमचे कार्य प्रोफाइल आणि संबंधित डेटा हटवले गेले आहेत. सहाय्यासाठी आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"तुमचे कार्य प्रोफाइल आता या डिव्हाइसवर उपलब्‍ध नाही"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"बर्‍याचदा पासवर्ड टाकण्‍याचा प्रयत्‍न केला"</string>
-    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
-    <skip />
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"वैयक्तिक वापरासाठी ॲडमिनने नियंत्रण सोडलेले डिव्हाइस"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"डिव्हाइस व्यवस्थापित केले आहे"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"तुमची संस्था हे डिव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे निरीक्षण करू शकते. तपशीलांसाठी टॅप करा."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"तुमचे डिव्हाइस मिटविले जाईल"</string>
@@ -381,13 +380,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"चिकट प्रसारणे पाठविण्यासाठी ॲपला अनुमती देते, जे प्रसारण समाप्त झाल्यानंतर देखील तसेच राहते. अत्याधिक वापरामुळे बरीच मेमरी वापरली जाऊन तो तुमच्या Android TV डिव्हाइसला धीमा किंवा अस्थिर करू शकतो."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"रोचक प्रसारणे पाठविण्यासाठी अ‍ॅप ला अनुमती देते, जे प्रसारण समाप्त झाल्यानंतर देखील तसेच राहते. अत्याधिक वापरामुळे बरीच मेमरी वापरली जाऊन तो फोनला धीमा किंवा अस्थिर करू शकतो."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"तुमचे संपर्क वाचा"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"तुम्ही कॉल केलेल्या, ईमेल केलेल्या किंवा विशिष्ट लोकांशी अन्य मार्गांनी संवाद प्रस्थापित केलेल्या लोकांच्या फ्रिक्वेन्सीसह, आपल्या टॅब्लेटवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अ‍ॅप ला अनुमती देते. ही परवानगी तुमचा संपर्क डेटा सेव्ह करण्याची अ‍ॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अ‍ॅप्स आपल्या माहितीशिवाय संपर्क डेटा शेअर करू शकतात."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="2387823103274997441">"तुम्ही केलेले कॉल, केलेले ईमेल किंवा विशिष्‍ट संपर्कांसह अन्य मार्गांनी केलेले कम्युनिकेशन यांची वारंवारता, यासह तुमच्या Android TV डिव्‍हाइसवर स्टोअर केलेल्‍या तुमच्या संपर्कांविषयीचा डेटा वाचण्याची ॲपला अनुमती देते. ही परवानगी अ‍ॅप्सना तुमचा संपर्क डेटा सेव्ह करण्याची अनुमती देते आणि ही दुर्भावनापूर्ण अ‍ॅप्स तुम्हाला न कळवता संपर्क डेटा शेअर करू शकतात."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"तुम्ही कॉल केलेल्या, ईमेल केलेल्या किंवा विशिष्ट लोकांशी अन्य मार्गांनी संवाद प्रस्थापित केलेल्या लोकांच्या फ्रिक्वेन्सीसह, आपल्या फोनवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अ‍ॅप ला अनुमती देते. ही परवानगी तुमचा संपर्क डेटा सेव्ह करण्याची अ‍ॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अ‍ॅप्स आपल्या माहितीशिवाय संपर्क डेटा शेअर करू शकतात."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"तुमच्या टॅबलेटवर स्टोअर केलेल्‍या तुमच्या संपर्कांविषयीचा डेटा वाचण्याची ॲपला अनुमती देते. अ‍ॅप्सना संपर्क तयार केलेल्या तुमच्या टॅबलेटवरील खात्याचा अ‍ॅक्सेसदेखील असेल. यामध्ये तुम्ही इंस्टॉल केलेल्या ॲप्सने तयार केलेल्या खात्यांचा समावेश असू शकतात. ही परवानगी ॲप्सना तुमचा संपर्क डेटा सेव्ह करण्याची अनुमती देते आणि दुर्भावनापूर्ण ॲप्स तुम्हाला न कळवता संपर्क डेटा शेअर करू शकतात."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"तुमच्या Android TV डिव्हाइस स्टोअर केलेल्‍या तुमच्या संपर्कांविषयीचा डेटा वाचण्याची ॲपला अनुमती देते. अ‍ॅप्सना संपर्क तयार केलेल्या तुमच्या Android TV डिव्हाइसवरील खात्याचा अ‍ॅक्सेसदेखील असेल. यामध्ये तुम्ही इंस्टॉल केलेल्या ॲप्सने तयार केलेल्या खात्यांचा समावेश असू शकतात. ही परवानगी ॲप्सना तुमचा संपर्क डेटा सेव्ह करण्याची अनुमती देते आणि दुर्भावनापूर्ण ॲप्स तुम्हाला न कळवता संपर्क डेटा शेअर करू शकतात."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"तुमच्या फोनवर स्टोअर केलेल्‍या तुमच्या संपर्कांविषयीचा डेटा वाचण्याची ॲपला अनुमती देते. अ‍ॅप्सना संपर्क तयार केलेल्या तुमच्या फोनवरील खात्याचा अ‍ॅक्सेसदेखील असेल. यामध्ये तुम्ही इंस्टॉल केलेल्या ॲप्सने तयार केलेल्या खात्यांचा समावेश असू शकतात. ही परवानगी ॲप्सना तुमचा संपर्क डेटा सेव्ह करण्याची अनुमती देते आणि दुर्भावनापूर्ण ॲप्स तुम्हाला न कळवता संपर्क डेटा शेअर करू शकतात."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"तुमचे संपर्क सुधारित करा"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"तुम्ही विशिष्ट संपर्कांशी अन्य मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संवाद प्रस्थापित केलेल्या फ्रिक्वेन्सीसह, आपल्या टॅब्लेटवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. ही परवानगी संपर्क डेटा हटविण्यासाठी अ‍ॅप ला अनुमती देते."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="3870937407268625273">"तुम्ही विशिष्ट संपर्कांशी कॉल, ईमेल किंवा इतर मार्गांनी संवाद प्रस्थापित केल्याची वारंवारता यांच्या समावेशासह, तुमच्या Android TV वर स्टोअर केलेल्या तुमच्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी ॲपला अनुमती देते. ही परवानगी ॲपला संपर्क डेटा हटविण्यासाठी अनुमती देते."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"तुम्ही विशिष्ट संपर्कांशी अन्य मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संवाद प्रस्थापित केलेल्या फ्रिक्वेन्सीसह, आपल्या फोनवर स्टोअर केलेल्या आपल्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. ही परवानगी संपर्क डेटा हटविण्यासाठी अ‍ॅप ला अनुमती देते."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"तुमच्या टॅबलेटवर स्टोअर केलेल्या तुमच्या संपर्कांविषयीच्या डेटामध्ये बदल करण्यासाठी अ‍ॅपला अनुमती देते. ही परवानगी अ‍ॅप्सला संपर्क डेटा हटवण्याची परवानगी देते."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Android TV वर स्टोअर केलेल्या तुमच्या संपर्कांविषयीच्या डेटामध्ये बदल करण्यासाठी अ‍ॅपला अनुमती देते. ही परवानगी अ‍ॅप्सला संपर्क डेटा हटवण्याची परवानगी देते."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"तुमच्या फोनवर स्टोअर केलेल्या तुमच्या संपर्कांविषयीच्या डेटामध्ये बदल करण्यासाठी अ‍ॅपला अनुमती देते. ही परवानगी अ‍ॅप्सला संपर्क डेटा हटवण्याची परवानगी देते."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"कॉल लॉग वाचा"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"हा अ‍ॅप तुमचा कॉल इतिहास वाचू शकता."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"कॉल लॉग लिहा"</string>
@@ -407,13 +406,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"अतिरिक्त स्थान प्रदाता आदेश अ‍ॅक्सेस करा"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"अ‍ॅपला अतिरिक्त स्‍थान प्रदाता आदेशावर प्रवेश करण्‍याची अनुमती देते. हे कदाचित अ‍ॅपला GPS किंवा इतर स्‍थान स्रोत च्या ऑपरेशनमध्‍ये हस्तक्षेप करण्‍याची अनुमती देऊ शकते."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"फक्त फोरग्राउंडमध्ये अचूकपणे अ‍ॅक्सेस करा"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"हे अ‍ॅप फक्त फोरग्राउंडमध्ये असतानाच तुमचे अचूक स्थान मिळवू शकते. या स्थान सेवा सुरू करणे आणि त्या वापरण्यासाठी अ‍ॅपसाठी तुमच्या फोनवर उपलब्ध करणे आवश्यक आहे, यामुळे बॅटरी वापर वाढू शकतो."</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"फक्त फोरग्राउंडमध्ये अंदाजे स्थान (नेटवर्क आधारित) अ‍ॅक्सेस करा"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"हे अ‍ॅप फक्त फोरग्राउंडमध्ये असतानाच, सेल टॉवर आणि वाय-फाय नेटवर्क सारख्या नेटवर्क स्रोतवर आधारित तुमचे स्थान मिळवू शकते. त्या वापरण्याकरता अ‍ॅपसाठी, या स्थान सेवा सुरू करणे आणि त्या तुमच्या टॅबलेटवर उपलब्ध करणे आवश्यक आहे."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="6994518594789550469">"हे ॲप फक्त फोरग्राउंडमध्ये असतानाच, सेल टॉवर आणि वाय-फाय नेटवर्क सारख्या नेटवर्क स्रोतवर आधारित तुमचे स्थान मिळवू शकते. ॲपने वापरण्याकरिता, या स्थान सेवा सुरू करणे आणि त्या तुमच्या Android TV डिव्हाइसवर उपलब्ध करणे आवश्यक आहे."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"हे अ‍ॅप फक्त फोरग्राउंडमध्ये असतानाच, सेल टॉवर आणि वाय-फाय नेटवर्क सारख्या नेटवर्क स्रोतवर आधारित तुमचे स्थान मिळवू शकते. ते वापरण्याकरता अ‍ॅपसाठी, या स्थान सेवा सुरू करणे आणि त्या तुमच्या फोनवर उपलब्ध करणे आवश्यक आहे."</string>
+    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"हे अ‍ॅप फक्त फोरग्राउंडमध्ये असतानाच तुमचे अचूक स्थान मिळवू शकते. स्थातुमच्या डिव्हाइसवर स्थान सेवा सुरू असणे आणि उपलब्ध असणे आवश्यक आहे जेणेकरून ॲप त्यांचा वापर करू शकतील. यामुळे बॅटरी वापर वाढू शकतो."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"फक्त फोअरग्राउंडमध्ये अचूक स्थान अ‍ॅक्सेस करा"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"हे अ‍ॅप फक्त फोरग्राउंडमध्ये असताना तुमचे अचूक स्थान मिळवू शकते. तुमच्या डिव्हाइसवर स्थान सेवा सुरू असणे आणि उपलब्ध असणे आवश्यक आहे जेणेकरून ॲप त्यांचा वापर करू शकतील."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"बॅकग्राउंडमध्ये स्थान अ‍ॅक्सेस करू शकतो"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"याला अंदाजे किंवा अचूक स्थान अ‍ॅक्सेस करण्यास अतिरिक्त मंजूरी दिल्यास, बॅकग्राउंडमध्ये चालतांना अ‍ॅप स्थान अ‍ॅक्सेस करू शकतो."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"हे अ‍ॅप फोरग्राउंड स्थान ॲक्सेस व्यतिरिक्त, बॅकग्राउंडमध्ये सुरू असताना स्थान ॲक्सेस करू शकते."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"आपल्या ऑडिओ सेटिंग्ज बदला"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"व्हॉल्यूम आणि आउटपुटसाठी कोणता स्पीकर वापरला आहे यासारख्या समग्र ऑडिओ सेटिंग्ज सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ऑडिओ रेकॉर्ड"</string>
@@ -494,6 +491,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"टॅबलेटवर ब्लूटूथ चे कॉंफिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डीव्हाइससह कनेक्शन इंस्टॉल करण्यासाठी आणि स्वीकारण्यासाठी, अ‍ॅप ला अनुमती देते."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Android TV डिव्हाइसवर ब्लूटूथ चे कॉंफिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डीव्हाइससह कनेक्शन तयार करण्यासाठी आणि स्वीकारण्यासाठी, ॲपला अनुमती देते."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"फोनवर ब्लूटूथ चे कॉंफिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डीव्हाइससह कनेक्शन इंस्टॉल करण्यासाठी आणि स्वीकारण्यासाठी, अ‍ॅप ला अनुमती देते."</string>
+    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
+    <skip />
+    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
+    <skip />
     <string name="permlab_nfc" msgid="1904455246837674977">"फील्ड जवळील कम्युनिकेशन नियंत्रित करा"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"फील्ड जवळील कम्युनिकेशन (NFC) टॅग, कार्डे आणि वाचक यांच्यासह संवाद करण्यासाठी ॲपला अनुमती देते."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"तुमचे स्क्रीन लॉक अक्षम करा"</string>
@@ -900,7 +901,7 @@
     <string name="factorytest_no_action" msgid="339252838115675515">"FACTORY_TEST क्रिया प्रदान करणारे कोणतेही पॅकेज आढळले नाही."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"रीबूट करा"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पृष्ठ हे म्हणते:"</string>
-    <string name="js_dialog_title_default" msgid="3769524569903332476">"Javascript"</string>
+    <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"नेव्हिगेशनची पुष्टी करा"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"हे पृष्ठ सोडा"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"या पेजवर रहा"</string>
@@ -1862,7 +1863,11 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> शी कनेक्ट केलेले"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"फायली पाहण्यासाठी टॅप करा"</string>
     <string name="pin_target" msgid="8036028973110156895">"पिन"</string>
+    <!-- no translation found for pin_specific_target (7824671240625957415) -->
+    <skip />
     <string name="unpin_target" msgid="3963318576590204447">"अनपिन करा"</string>
+    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
+    <skip />
     <string name="app_info" msgid="6113278084877079851">"अ‍ॅप माहिती"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"डेमो प्रारंभ करत आहे..."</string>
@@ -1905,6 +1910,8 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"हे आयटम "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> आणि <xliff:g id="TYPE_2">%3$s</xliff:g> मध्ये अपडेट करायचे का?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"सेव्ह करा"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"नाही, नको"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"आता नाही"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"कधीही नाही"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"अपडेट करा"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"पुढे सुरू ठेवा"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"पासवर्ड"</string>
@@ -2000,5 +2007,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"विभाजित स्क्रीन टॉगल करा"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"स्‍क्रीन लॉक करा"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"स्क्रीनशॉट"</string>
-    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"पॉप-अप विंडोमध्ये <xliff:g id="APP_NAME">%1$s</xliff:g> ॲप."</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> चा शीर्षक बार."</string>
 </resources>

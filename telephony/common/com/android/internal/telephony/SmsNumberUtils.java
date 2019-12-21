@@ -20,8 +20,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.Binder;
-import android.os.Build;
 import android.os.PersistableBundle;
+import android.os.SystemProperties;
 import android.telephony.CarrierConfigManager;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.Rlog;
@@ -43,7 +43,7 @@ import java.util.HashMap;
  */
 public class SmsNumberUtils {
     private static final String TAG = "SmsNumberUtils";
-    private static final boolean DBG = Build.IS_DEBUGGABLE;
+    private static final boolean DBG = SystemProperties.getInt("ro.debuggable", 0) == 1;
 
     private static final String PLUS_SIGN = "+";
 

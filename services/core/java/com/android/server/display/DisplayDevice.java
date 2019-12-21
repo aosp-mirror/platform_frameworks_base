@@ -138,18 +138,13 @@ abstract class DisplayDevice {
     }
 
     /**
-     * Sets the refresh ranges, and display modes that the system is allowed to switch between.
-     * Display modes are roughly ordered by preference.
+     * Sets the display mode specs.
      *
      * Not all display devices will automatically switch between modes, so it's important that the
-     * most-desired modes are at the beginning of the allowed array.
-     *
-     * @param defaultModeId is used, if the device does not support multiple refresh
-     * rates, and to navigate other parameters.
+     * default modeId is set correctly.
      */
-    public void setDesiredDisplayConfigSpecs(int defaultModeId, float minRefreshRate,
-            float maxRefreshRate, int[] modes) {
-    }
+    public void setDesiredDisplayModeSpecsLocked(
+            DisplayModeDirector.DesiredDisplayModeSpecs displayModeSpecs) {}
 
     /**
      * Sets the requested color mode.

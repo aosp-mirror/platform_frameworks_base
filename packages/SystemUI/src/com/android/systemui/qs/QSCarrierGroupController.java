@@ -32,8 +32,8 @@ import android.widget.TextView;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.keyguard.CarrierTextController;
-import com.android.systemui.dagger.qualifiers.BgHandler;
-import com.android.systemui.dagger.qualifiers.MainLooper;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.NetworkController;
 
@@ -111,7 +111,7 @@ public class QSCarrierGroupController {
     }
 
     private QSCarrierGroupController(QSCarrierGroup view, ActivityStarter activityStarter,
-            @BgHandler Handler bgHandler, @MainLooper Looper mainLooper,
+            @Background Handler bgHandler, @Main Looper mainLooper,
             NetworkController networkController,
             CarrierTextController.Builder carrierTextControllerBuilder) {
         mActivityStarter = activityStarter;
@@ -308,8 +308,8 @@ public class QSCarrierGroupController {
         private final CarrierTextController.Builder mCarrierTextControllerBuilder;
 
         @Inject
-        public Builder(ActivityStarter activityStarter, @BgHandler Handler handler,
-                @MainLooper Looper looper, NetworkController networkController,
+        public Builder(ActivityStarter activityStarter, @Background Handler handler,
+                @Main Looper looper, NetworkController networkController,
                 CarrierTextController.Builder carrierTextControllerBuilder) {
             mActivityStarter = activityStarter;
             mHandler = handler;

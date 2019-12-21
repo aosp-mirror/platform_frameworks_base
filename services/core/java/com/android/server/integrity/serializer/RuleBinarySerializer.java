@@ -27,6 +27,9 @@ import static com.android.server.integrity.model.ComponentBitSize.KEY_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.OPERATOR_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.SEPARATOR_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.VALUE_SIZE_BITS;
+import static com.android.server.integrity.serializer.RuleIndexingDetails.APP_CERTIFICATE_INDEXED;
+import static com.android.server.integrity.serializer.RuleIndexingDetails.NOT_INDEXED;
+import static com.android.server.integrity.serializer.RuleIndexingDetails.PACKAGE_NAME_INDEXED;
 
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
@@ -36,35 +39,15 @@ import android.content.integrity.Rule;
 import com.android.server.integrity.model.BitOutputStream;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /** A helper class to serialize rules from the {@link Rule} model to Binary representation. */
 public class RuleBinarySerializer implements RuleSerializer {
-
-    // Get the byte representation for a list of rules, and write them to an output stream.
-    @Override
-    public void serialize(
-            List<Rule> rules, Optional<Integer> formatVersion, OutputStream outputStream)
-            throws RuleSerializeException {
-        try {
-            BitOutputStream bitOutputStream = new BitOutputStream();
-
-            int formatVersionValue = formatVersion.orElse(DEFAULT_FORMAT_VERSION);
-            bitOutputStream.setNext(FORMAT_VERSION_BITS, formatVersionValue);
-            outputStream.write(bitOutputStream.toByteArray());
-
-            for (Rule rule : rules) {
-                bitOutputStream.clear();
-                serializeRule(rule, bitOutputStream);
-                outputStream.write(bitOutputStream.toByteArray());
-            }
-        } catch (Exception e) {
-            throw new RuleSerializeException(e.getMessage(), e);
-        }
-    }
 
     // Get the byte representation for a list of rules.
     @Override
@@ -76,6 +59,45 @@ public class RuleBinarySerializer implements RuleSerializer {
             return byteArrayOutputStream.toByteArray();
         } catch (Exception e) {
             throw new RuleSerializeException(e.getMessage(), e);
+        }
+    }
+
+    // Get the byte representation for a list of rules, and write them to an output stream.
+    @Override
+    public void serialize(
+            List<Rule> rules, Optional<Integer> formatVersion, OutputStream outputStream)
+            throws RuleSerializeException {
+        try {
+            // Determine the indexing groups and the order of the rules within each indexed group.
+            Map<Integer, List<Rule>> indexedRules =
+                    RuleIndexingDetailsIdentifier.splitRulesIntoIndexBuckets(rules);
+
+            serializeRuleFileMetadata(formatVersion, outputStream);
+
+            serializeIndexedRules(indexedRules.get(PACKAGE_NAME_INDEXED), outputStream);
+            serializeIndexedRules(indexedRules.get(APP_CERTIFICATE_INDEXED), outputStream);
+            serializeIndexedRules(indexedRules.get(NOT_INDEXED), outputStream);
+        } catch (Exception e) {
+            throw new RuleSerializeException(e.getMessage(), e);
+        }
+    }
+
+    private void serializeRuleFileMetadata(
+            Optional<Integer> formatVersion, OutputStream outputStream) throws IOException {
+        int formatVersionValue = formatVersion.orElse(DEFAULT_FORMAT_VERSION);
+
+        BitOutputStream bitOutputStream = new BitOutputStream();
+        bitOutputStream.setNext(FORMAT_VERSION_BITS, formatVersionValue);
+        outputStream.write(bitOutputStream.toByteArray());
+    }
+
+    private void serializeIndexedRules(List<Rule> rules, OutputStream outputStream)
+            throws IOException {
+        BitOutputStream bitOutputStream = new BitOutputStream();
+        for (Rule rule : rules) {
+            bitOutputStream.clear();
+            serializeRule(rule, bitOutputStream);
+            outputStream.write(bitOutputStream.toByteArray());
         }
     }
 

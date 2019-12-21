@@ -188,8 +188,7 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"İş profili admin tətbiqi ya yoxdur, ya da korlanıb. Nəticədə iş profili və onunla bağlı data silinib. Kömək üçün admin ilə əlaqə saxlayın."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"İş profili artıq bu cihazda əlçatan deyil"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Həddindən çox parol cəhdi"</string>
-    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
-    <skip />
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"Admin şəxsi istifadə üçün cihazdan imtina etdi"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Cihaz idarə olunur"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Təşkilat bu cihazı idarə edir və şəbəkənin ötürülməsinə nəzarət edə bilər. Detallar üçün klikləyin."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Cihazınız təmizlənəcəkdir"</string>
@@ -381,13 +380,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"Tətbiqə yayım bitdikdən sonra qalan əlaqələndirici yayımları göndərmək icazəsi verir. Həddindən çox istifadə Android TV cihazının daha çox yaddaşdan istifadə etməsinə səbəb olaraq onun surətini zəiflədə və stabilliyini poza bilər."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Tətbiqə yayım bitdikdən sonra da qalan çətin yayımlar göndərməyə imkan verir. Hədsiz istifadə çox yaddaş istifadəsinə səbəb olmaqla telefonu yavaş və qeyri-stabil edə bilər."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"kontakrlatınızı oxumaq"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Tətbiqə planşetinizdə yerləşən kontaktları oxumaq icazəsi verir, tez-tez zəng elədiyiniz, emailləşdiyiniz və ya əlaqə saxladığınız xüsusi individuallar daxil olmaqla. Bu icazə tətbiqlərə kontakt məlumatlarınızı saxlamağa və zərərli tətbiqlərə kontakt məlumatlarını sizin bilginiz olmada paylaşma imkanı yaradır."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="2387823103274997441">"Tətbiqə xüsusi şəxslərə hansı müddətdən bir zəng etmək, e-poçt göndərmək və ya onlarla başqa şəkildə əlaqə saxlamaq daxil olmaqla, Android TV cihazında saxlanan kontaktlar haqqında datanı oxumaq icazəsi verir. Bu icazə proqramlara əlaqə məlumatlarınızı saxlamaq imkanı verir və zərərli proqramlar sizin xəbəriniz olmadan əlaqə məlumatlarınızı paylaşa bilər."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Tətbiqə tez-tez zəng elədiyiniz, e-məktub göndərdiyiniz və ya əlaqə saxladığınız xüsusi individuallar daxil olmaqla telefonunuzda yerləşən kontaktları oxumaq icazəsi verir. Bu icazə tətbiqlərə kontakt məlumatlarınızı saxlamağa və zərərli tətbiqlərə kontakt məlumatlarını sizin xəbəriniz olmada paylaşma imkanı yaradır."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Tətbiqə planşetinizdə saxlanılan kontaktlar haqqında datanı oxumaq icazəsi verir. Tətbiqlərin, həmçinin planşetinizdə kontaktlar yaradan hesablara da giriş imkanı olacaq. Buraya quraşdırdığınız tətbiqlər tərəfindən yaradılan hesablar daxil ola bilər. Bu icazə tətbiqlərə kontakt məlumatlarınızı yadda saxlamaq imkanı verir və zərərli tətbiqlər kontakt məlumatlarını xəbəriniz olmadan paylaşa bilər."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Tətbiqə Android TV cihazınızda saxlanan kontaktlar haqqında datanı oxumaq icazəsi verir. Tətbiqlərin, həmçinin Android TV cihazınızda kontaktlar yaradan hesablara da giriş imkanı olacaq. Buraya quraşdırdığınız tətbiqlər tərəfindən yaradılan hesablar daxil ola bilər. Bu icazə tətbiqlərə kontakt məlumatlarınızı yadda saxlamaq imkanı verir və zərərli tətbiqlər kontakt məlumatlarını xəbəriniz olmadan paylaşa bilər."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Tətbiqə telefonunuzda saxlanılan kontaktlar haqqında datanı oxumaq icazəsi verir. Tətbiqlərin, həmçinin telefonunuzda kontaktlar yaradan hesablara da giriş imkanı olacaq. Buraya quraşdırdığınız tətbiqlər tərəfindən yaradılan hesablar daxil ola bilər. Bu icazə tətbiqlərə kontakt məlumatlarınızı yadda saxlamaq imkanı verir və zərərli tətbiqlər kontakt məlumatlarını xəbəriniz olmadan paylaşa bilər."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"kontaktlarınızı dəyişdirir"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Tətbiqə planşetinizdəki zəng etmək tezliyiniz, elektron poçtlarınız, ünsiyyətləriniz haqqında məlumatları dəyişməyə imkan verir. Bu icazə kontakt məlumatlarının silinməsinə də imkan verir."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="3870937407268625273">"Tətbiqə xüsusi şəxslərə hansı müddətdən bir zəng etmək, e-poçt göndərmək və ya onlarla başqa şəkildə əlaqə saxlamaq daxil olmaqla, Android TV cihazında saxlanan kontaktlar haqqında datanı dəyişdirmək icazəsi verir. Bu icazə tətbiqlərə kontakt datasını silmək imkanı verir."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Tətbiqə Sizin zəng etmək tezliyiniz, elektron poçtlarınız, ünsiyyətləriniz haqqında məlumatları dəyişməyə imkan verir. Buna kontaktların silinməsi imkanı də daxildir."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Tətbiqə planşetinizdə saxlanan kontaktlar haqqında datanı dəyişdirmək icazəsi verir. Bu icazə tətbiqlərə kontakt datasını silmək imkanı verir."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Tətbiqə Android TV cihazında saxlanan kontaktlar haqqında datanı dəyişdirmək icazəsi verir. Bu icazə tətbiqlərə kontakt datasını silmək imkanı verir."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Tətbiqə telefonunuzda saxlanan kontaktlar haqqında datanı dəyişdirmək icazəsi verir. Bu icazə tətbiqlərə kontakt datasını silmək imkanı verir."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"zəng qeydiyyatını oxu"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Bu tətbiq zəng tarixçənizi oxuya bilər."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"zəng loqu yazır"</string>
@@ -407,13 +406,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"əlavə məkan provayderi əmrlərinə çıxış"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Tətbiqə ekstra məkan provayder əmrlərinə girişə imkan verir. Bu, tətbiqə GPS və ya digər lokal mənbələrlə əməliyyata müdaxiləyə imkan verə bilər."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"yalnız ön planda dəqiq məkana daxil olun"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"Bu tətbiq yalnız ön fonda olduqda dəqiq məkanınızı əldə edə bilər. Tətbiqin bunlardan istifadə etməsi üçün bu məkan xidmətləri aktiv edilməlidir və telefonda əlçatan olmalıdır. Bu, batareya sərfiyyatını artıra bilər."</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"yalnız ön planda təxmini məkana (şəbəkəyə əsaslanan) giriş"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Bu tətbiq baza stansiyaları və Wi-Fi şəbəkələri kimi şəbəkə mənbələrinə əsaslanaraq məkanınızı əldə edə bilər. Bu, yalnız tətbiq ön planda olduqda mümkündür. Tətbiqin istifadə edə bilməsi üçün bu məkan xidmətləri aktiv edilməli və planşetdə əlçatan olmalıdır."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="6994518594789550469">"Bu tətbiq baza stansiyaları və Wi-Fi kimi şəbəkə mənbələrinə əsaslanaraq məkanınızı əldə edə bilər. Bu, yalnız tətbiq ön planda olduqda mümkündür. Tətbiqin istifadə etməsi üçün bu məkan xidmətləri aktiv edilməli və Android TV cihazında əlçatan olmalıdır."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Bu tətbiq baza stansiyaları və Wi-Fi kimi şəbəkə mənbələrinə əsaslanaraq məkanınızı əldə edə bilər. Bu, yalnız tətbiq ön planda olduqda mümkündür. Tətbiqin istifadə edə bilməsi üçün bu məkan xidmətləri aktiv edilməli və telefonda əlçatan olmalıdır."</string>
+    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Bu tətbiq yalnız ön fonda olduqda dəqiq məkanınızı əldə edə bilər. Tətbiqin bunlardan istifadə etməsi üçün məkan xidmətləri aktiv edilməli və cihazda əlçatan olmalıdır. Bu, batareya sərfiyyatını artıra bilər."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"yalnız ön planda təqribi məkana giriş"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Bu tətbiq yalnız ön fonda olduqda təqribi məkanınızı əldə edə bilər. Tətbiqin istifadə edə bilməsi üçün məkan xidmətləri cihazda aktiv edilməli və əlçatan olmalıdır."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"arxa fonda məkan girişi"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Bu, təqribi və ya dəqiq məkan girişinə əlavə olaraq verilərsə, tətbiq arxa fonda işləyərkən məkana daxil ola bilər."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Bu tətbiq ön planda məkana girişlə yanaşı, arxa fonda işləyərkən məkana giriş edə bilər."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"audio ayarlarınızı dəyişir"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Tətbiqə səs və hansı spikerin çıxış üçün istifadə olunduğu kimi qlobal səs ayarlarını dəyişdirməyə imkan verir."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"səs yaz"</string>
@@ -494,6 +491,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Tətbiqə yerli Bluetooth planşetinin konfiqurasiyasını görməyə və cütlənmiş cihazlarla bağlantılar etməyə və qəbul etməyə imkan verir."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Tətbiqə Android TV cihazında Bluetooth konfiqurasiyasına baxmaq, həmçinin qoşulmuş cihazlar ilə bağlantılar yaratmaq və qəbul etmək icazəsi verir."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Tətbiqə Bluetooth və ya telefon konfiqurasiyalarını görməyə və qoşulmuş cihazlarla əlaqə qurmağa və qəbul etməyə icazə verir."</string>
+    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
+    <skip />
+    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
+    <skip />
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication\'ı kontrol et"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Tətbiqə Yaxın Məsafə Kommunikasiyası (NFC) teqləri, kartları və oxuyucuları ilə əlaqə qurmağa icazə verir."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"Ekran kilidini deaktiv edir"</string>
@@ -1862,7 +1863,11 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> məhsuluna bağlandı"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Faylları görmək üçün basın"</string>
     <string name="pin_target" msgid="8036028973110156895">"Pin kod"</string>
+    <!-- no translation found for pin_specific_target (7824671240625957415) -->
+    <skip />
     <string name="unpin_target" msgid="3963318576590204447">"Çıxarın"</string>
+    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
+    <skip />
     <string name="app_info" msgid="6113278084877079851">"Tətbiq məlumatı"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo başlayır…"</string>
@@ -1905,6 +1910,8 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Bu elementlər "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ünvanında yenilənsin: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> və <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Yadda saxlayın"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Xeyr, çox sağ olun"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"İndi yox"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"Heç vaxt"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Yeniləyin"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"Davam edin"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"parol"</string>
@@ -2000,5 +2007,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Bölünmüş Ekrana keçid"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Kilid Ekranı"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Ekran şəkli"</string>
-    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"Açilən pəncərədə <xliff:g id="APP_NAME">%1$s</xliff:g> tətbiqi."</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> başlıq paneli."</string>
 </resources>

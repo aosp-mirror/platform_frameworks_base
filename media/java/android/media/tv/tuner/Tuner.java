@@ -106,6 +106,9 @@ public final class Tuner implements AutoCloseable  {
      */
     private native Frontend nativeOpenFrontendById(int id);
     private native int nativeTune(int type, FrontendSettings settings);
+    private native int nativeStopTune();
+    private native int nativeSetLnb(int lnbId);
+    private native int nativeSetLna(boolean enable);
 
     private native Filter nativeOpenFilter(int type, int subType, int bufferSize);
 
@@ -256,6 +259,46 @@ public final class Tuner implements AutoCloseable  {
         return nativeTune(settings.getType(), settings);
     }
 
+    /**
+     * Stops a previous tuning.
+     *
+     * If the method completes successfully the frontend is no longer tuned and no data
+     * will be sent to attached filters.
+     *
+     * @return result status of the operation.
+     * @hide
+     */
+    public int stopTune() {
+        return nativeStopTune();
+    }
+
+    /**
+     * Sets Low-Noise Block downconverter (LNB) for satellite frontend.
+     *
+     * This assigns a hardware LNB resource to the satellite tuner. It can be
+     * called multiple times to update LNB assignment.
+     *
+     * @param lnb the LNB instance.
+     *
+     * @return result status of the operation.
+     * @hide
+     */
+    public int setLnb(@NonNull Lnb lnb) {
+        return nativeSetLnb(lnb.mId);
+    }
+
+    /**
+     * Enable or Disable Low Noise Amplifier (LNA).
+     *
+     * @param enable true to activate LNA module; false to deactivate LNA
+     *
+     * @return result status of the operation.
+     * @hide
+     */
+    public int setLna(boolean enable) {
+        return nativeSetLna(enable);
+    }
+
     private List<Integer> getFrontendIds() {
         mFrontendIds = nativeGetFrontendIds();
         return mFrontendIds;
@@ -380,7 +423,14 @@ public final class Tuner implements AutoCloseable  {
         }
     }
 
-    /** @hide */
+    /**
+     * This class is used to interact with descramblers.
+     *
+     * <p> Descrambler is a hardware component used to descramble data.
+     *
+     * <p> This class controls the TIS interaction with Tuner HAL.
+     *
+     */
     public class Descrambler {
         private long mNativeContext;
 
@@ -389,19 +439,28 @@ public final class Tuner implements AutoCloseable  {
 
         private Descrambler() {}
 
-        private boolean addPid(@DemuxPidType int pidType, int pid, Filter filter) {
+        /** @hide */
+        public boolean addPid(@DemuxPidType int pidType, int pid, Filter filter) {
             return nativeAddPid(pidType, pid, filter);
         }
 
-        private boolean removePid(@DemuxPidType int pidType, int pid, Filter filter) {
+        /** @hide */
+        public boolean removePid(@DemuxPidType int pidType, int pid, Filter filter) {
             return nativeRemovePid(pidType, pid, filter);
         }
 
     }
 
-    private Descrambler openDescrambler() {
-        Descrambler descrambler = nativeOpenDescrambler();
-        return descrambler;
+    /**
+     * Opens a Descrambler in tuner.
+     *
+     * @return  a {@link Descrambler} object.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @Nullable
+    public Descrambler openDescrambler() {
+        checkPermission();
+        return nativeOpenDescrambler();
     }
 
     // TODO: consider splitting Dvr to Playback and Recording

@@ -16,26 +16,52 @@
 
 package android.net.wifi.wificond;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Objects;
 
 /**
- * RadioChainInfo for wificond
+ * A class representing the radio chains of the Wi-Fi modems. Use to provide raw information about
+ * signals received on different radio chains.
  *
  * @hide
  */
-public class RadioChainInfo implements Parcelable {
+@SystemApi
+public final class RadioChainInfo implements Parcelable {
     private static final String TAG = "RadioChainInfo";
 
+    /** @hide */
+    @VisibleForTesting
     public int chainId;
+    /** @hide */
+    @VisibleForTesting
     public int level;
 
+    /**
+     * Return an identifier for this radio chain. This is an arbitrary ID which is consistent for
+     * the same device.
+     *
+     * @return The radio chain ID.
+     */
+    public int getChainId() {
+        return chainId;
+    }
 
-    /** public constructor */
-    public RadioChainInfo() { }
+    /**
+     * Returns the detected signal level on this radio chain in dBm (aka RSSI).
+     *
+     * @return A signal level in dBm.
+     */
+    public int getLevelDbm() {
+        return level;
+    }
 
+    /** @hide */
     public RadioChainInfo(int chainId, int level) {
         this.chainId = chainId;
         this.level = level;
@@ -73,23 +99,20 @@ public class RadioChainInfo implements Parcelable {
      * |flags| is ignored.
      */
     @Override
-    public void writeToParcel(Parcel out, int flags) {
+    public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeInt(chainId);
         out.writeInt(level);
     }
 
     /** implement Parcelable interface */
-    public static final Parcelable.Creator<RadioChainInfo> CREATOR =
+    @NonNull public static final Parcelable.Creator<RadioChainInfo> CREATOR =
             new Parcelable.Creator<RadioChainInfo>() {
         /**
          * Caller is responsible for providing a valid parcel.
          */
         @Override
         public RadioChainInfo createFromParcel(Parcel in) {
-            RadioChainInfo result = new RadioChainInfo();
-            result.chainId = in.readInt();
-            result.level = in.readInt();
-            return result;
+            return new RadioChainInfo(in.readInt(), in.readInt());
         }
 
         @Override

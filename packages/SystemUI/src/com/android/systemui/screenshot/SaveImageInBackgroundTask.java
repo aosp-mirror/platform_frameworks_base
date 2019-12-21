@@ -18,7 +18,6 @@ package com.android.systemui.screenshot;
 
 import android.app.ActivityTaskManager;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipDescription;
@@ -30,12 +29,7 @@ import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.Picture;
+import android.graphics.drawable.Icon;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -57,13 +51,8 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
-import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
-import com.android.systemui.util.NotificationChannels;
-
-import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,6 +65,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -93,22 +83,17 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private static final String SCREENSHOT_ID_TEMPLATE = "Screenshot_%s";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
 
+    private final Context mContext;
     private final GlobalScreenshot.SaveImageInBackgroundData mParams;
-    private final NotificationManager mNotificationManager;
-    private final Notification.Builder mNotificationBuilder, mPublicNotificationBuilder;
     private final String mImageFileName;
     private final long mImageTime;
-    private final Notification.BigPictureStyle mNotificationStyle;
-    private final int mImageWidth;
-    private final int mImageHeight;
     private final ScreenshotNotificationSmartActionsProvider mSmartActionsProvider;
     private final String mScreenshotId;
     private final boolean mSmartActionsEnabled;
     private final Random mRandom = new Random();
 
-    SaveImageInBackgroundTask(Context context, GlobalScreenshot.SaveImageInBackgroundData data,
-            NotificationManager nManager) {
-        Resources r = context.getResources();
+    SaveImageInBackgroundTask(Context context, GlobalScreenshot.SaveImageInBackgroundData data) {
+        mContext = context;
 
         // Prepare all the output metadata
         mParams = data;
@@ -129,143 +114,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             // If smart actions is not enabled use empty implementation.
             mSmartActionsProvider = new ScreenshotNotificationSmartActionsProvider();
         }
-
-        // Create the large notification icon
-        mImageWidth = data.image.getWidth();
-        mImageHeight = data.image.getHeight();
-        int iconSize = data.iconSize;
-        int previewWidth = data.previewWidth;
-        int previewHeight = data.previewheight;
-
-        Paint paint = new Paint();
-        ColorMatrix desat = new ColorMatrix();
-        desat.setSaturation(0.25f);
-        paint.setColorFilter(new ColorMatrixColorFilter(desat));
-        Matrix matrix = new Matrix();
-        int overlayColor = 0x40FFFFFF;
-
-        matrix.setTranslate((previewWidth - mImageWidth) / 2,
-                (previewHeight - mImageHeight) / 2);
-        Bitmap picture = generateAdjustedHwBitmap(data.image, previewWidth, previewHeight,
-                matrix, paint, overlayColor);
-
-        // Note, we can't use the preview for the small icon, since it is non-square
-        float scale = (float) iconSize / Math.min(mImageWidth, mImageHeight);
-        matrix.setScale(scale, scale);
-        matrix.postTranslate((iconSize - (scale * mImageWidth)) / 2,
-                (iconSize - (scale * mImageHeight)) / 2);
-        Bitmap icon = generateAdjustedHwBitmap(data.image, iconSize, iconSize, matrix, paint,
-                overlayColor);
-
-        mNotificationManager = nManager;
-        final long now = System.currentTimeMillis();
-
-        // Setup the notification
-        mNotificationStyle = new Notification.BigPictureStyle()
-                .bigPicture(picture.createAshmemBitmap());
-
-        // The public notification will show similar info but with the actual screenshot omitted
-        mPublicNotificationBuilder =
-                new Notification.Builder(context, NotificationChannels.SCREENSHOTS_HEADSUP)
-                        .setContentTitle(r.getString(R.string.screenshot_saving_title))
-                        .setSmallIcon(R.drawable.stat_notify_image)
-                        .setCategory(Notification.CATEGORY_PROGRESS)
-                        .setWhen(now)
-                        .setShowWhen(true)
-                        .setColor(r.getColor(
-                                com.android.internal.R.color.system_notification_accent_color));
-        SystemUI.overrideNotificationAppName(context, mPublicNotificationBuilder, true);
-
-        mNotificationBuilder = new Notification.Builder(context,
-                NotificationChannels.SCREENSHOTS_HEADSUP)
-                .setContentTitle(r.getString(R.string.screenshot_saving_title))
-                .setSmallIcon(R.drawable.stat_notify_image)
-                .setWhen(now)
-                .setShowWhen(true)
-                .setColor(r.getColor(
-                        com.android.internal.R.color.system_notification_accent_color))
-                .setStyle(mNotificationStyle)
-                .setPublicVersion(mPublicNotificationBuilder.build());
-        mNotificationBuilder.setFlag(Notification.FLAG_NO_CLEAR, true);
-        SystemUI.overrideNotificationAppName(context, mNotificationBuilder, true);
-
-        mNotificationManager.notify(SystemMessageProto.SystemMessage.NOTE_GLOBAL_SCREENSHOT,
-                mNotificationBuilder.build());
-
-        /**
-         * NOTE: The following code prepares the notification builder for updating the
-         * notification after the screenshot has been written to disk.
-         */
-
-        // On the tablet, the large icon makes the notification appear as if it is clickable
-        // (and on small devices, the large icon is not shown) so defer showing the large icon
-        // until we compose the final post-save notification below.
-        mNotificationBuilder.setLargeIcon(icon.createAshmemBitmap());
-        // But we still don't set it for the expanded view, allowing the smallIcon to show here.
-        mNotificationStyle.bigLargeIcon((Bitmap) null);
-    }
-
-    private int getUserHandleOfForegroundApplication(Context context) {
-        // This logic matches
-        // com.android.systemui.statusbar.phone.PhoneStatusBarPolicy#updateManagedProfile
-        try {
-            return ActivityTaskManager.getService().getLastResumedActivityUserId();
-        } catch (RemoteException e) {
-            Slog.w(TAG, "getUserHandleOfForegroundApplication: ", e);
-            return context.getUserId();
-        }
-    }
-
-    private boolean isManagedProfile(Context context) {
-        UserManager manager = UserManager.get(context);
-        UserInfo info = manager.getUserInfo(getUserHandleOfForegroundApplication(context));
-        return info.isManagedProfile();
-    }
-
-    private List<Notification.Action> buildSmartActions(
-            List<Notification.Action> actions, Context context) {
-        List<Notification.Action> broadcastActions = new ArrayList<>();
-        for (Notification.Action action : actions) {
-            // Proxy smart actions through {@link GlobalScreenshot.SmartActionsReceiver}
-            // for logging smart actions.
-            Bundle extras = action.getExtras();
-            String actionType = extras.getString(
-                    ScreenshotNotificationSmartActionsProvider.ACTION_TYPE,
-                    ScreenshotNotificationSmartActionsProvider.DEFAULT_ACTION_TYPE);
-            Intent intent = new Intent(context,
-                    GlobalScreenshot.SmartActionsReceiver.class).putExtra(
-                    GlobalScreenshot.EXTRA_ACTION_INTENT, action.actionIntent);
-            addIntentExtras(mScreenshotId, intent, actionType, mSmartActionsEnabled);
-            PendingIntent broadcastIntent = PendingIntent.getBroadcast(context,
-                    mRandom.nextInt(),
-                    intent,
-                    PendingIntent.FLAG_CANCEL_CURRENT);
-            broadcastActions.add(new Notification.Action.Builder(action.getIcon(), action.title,
-                    broadcastIntent).setContextual(true).addExtras(extras).build());
-        }
-        return broadcastActions;
-    }
-
-    private static void addIntentExtras(String screenshotId, Intent intent, String actionType,
-            boolean smartActionsEnabled) {
-        intent
-                .putExtra(GlobalScreenshot.EXTRA_ACTION_TYPE, actionType)
-                .putExtra(GlobalScreenshot.EXTRA_ID, screenshotId)
-                .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED, smartActionsEnabled);
-    }
-
-    /**
-     * Generates a new hardware bitmap with specified values, copying the content from the
-     * passed in bitmap.
-     */
-    private Bitmap generateAdjustedHwBitmap(Bitmap bitmap, int width, int height, Matrix matrix,
-            Paint paint, int color) {
-        Picture picture = new Picture();
-        Canvas canvas = picture.beginRecording(width, height);
-        canvas.drawColor(color);
-        canvas.drawBitmap(bitmap, matrix, paint);
-        picture.endRecording();
-        return Bitmap.createBitmap(picture);
     }
 
     @Override
@@ -278,15 +126,15 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         // so bump it back up so that we save a little quicker.
         Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
 
-        Context context = mParams.context;
-        ContentResolver resolver = context.getContentResolver();
+        ContentResolver resolver = mContext.getContentResolver();
         Bitmap image = mParams.image;
-        Resources r = context.getResources();
+        Resources r = mContext.getResources();
 
         try {
             CompletableFuture<List<Notification.Action>> smartActionsFuture =
-                    GlobalScreenshot.getSmartActionsFuture(mScreenshotId, image,
-                            mSmartActionsProvider, mSmartActionsEnabled, isManagedProfile(context));
+                    ScreenshotSmartActions.getSmartActionsFuture(
+                            mScreenshotId, image, mSmartActionsProvider,
+                            mSmartActionsEnabled, isManagedProfile(mContext));
 
             // Save the screenshot to the MediaStore
             final ContentValues values = new ContentValues();
@@ -347,8 +195,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 throw e;
             }
 
-            populateNotificationActions(context, r, uri, smartActionsFuture, mNotificationBuilder);
-
+            List<Notification.Action> actions =
+                    populateNotificationActions(mContext, r, uri, smartActionsFuture);
+            mParams.mActionsReadyListener.onActionsReady(uri, actions);
             mParams.imageUri = uri;
             mParams.image = null;
             mParams.errorMsgResId = 0;
@@ -358,6 +207,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             Slog.e(TAG, "unable to save screenshot", e);
             mParams.clearImage();
             mParams.errorMsgResId = R.string.screenshot_failed_to_save_text;
+            mParams.mActionsReadyListener.onActionsReady(null, null);
         }
 
         // Recycle the bitmap data
@@ -368,10 +218,24 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
+    @Override
+    protected void onPostExecute(Void params) {
+        mParams.finisher.accept(mParams.imageUri);
+    }
+
+    @Override
+    protected void onCancelled(Void params) {
+        // If we are cancelled while the task is running in the background, we may get null
+        // params. The finisher is expected to always be called back, so just use the baked-in
+        // params from the ctor in any case.
+        mParams.mActionsReadyListener.onActionsReady(null, null);
+        mParams.finisher.accept(null);
+        mParams.clearImage();
+    }
+
     @VisibleForTesting
-    void populateNotificationActions(Context context, Resources r, Uri uri,
-            CompletableFuture<List<Notification.Action>> smartActionsFuture,
-            Notification.Builder notificationBuilder) {
+    List<Notification.Action> populateNotificationActions(Context context, Resources r, Uri uri,
+            CompletableFuture<List<Notification.Action>> smartActionsFuture) {
         // Note: Both the share and edit actions are proxied through ActionProxyReceiver in
         // order to do some common work like dismissing the keyguard and sending
         // closeSystemWindows
@@ -399,10 +263,10 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         PendingIntent chooserAction = PendingIntent.getBroadcast(context, requestCode,
                 new Intent(context, GlobalScreenshot.TargetChosenReceiver.class),
                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
-        Intent sharingChooserIntent = Intent.createChooser(sharingIntent, null,
-                chooserAction.getIntentSender())
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        Intent sharingChooserIntent =
+                Intent.createChooser(sharingIntent, null, chooserAction.getIntentSender())
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         // Create a share action for the notification
         PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, requestCode,
@@ -414,10 +278,10 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                                 mSmartActionsEnabled)
                         .setAction(Intent.ACTION_SEND),
                 PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
+
         Notification.Action.Builder shareActionBuilder = new Notification.Action.Builder(
-                R.drawable.ic_screenshot_share,
+                Icon.createWithResource(r, R.drawable.ic_screenshot_share),
                 r.getString(com.android.internal.R.string.share), shareAction);
-        notificationBuilder.addAction(shareActionBuilder.build());
 
         // Create an edit intent, if a specific package is provided as the editor, then
         // launch that directly
@@ -443,12 +307,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                         .setAction(Intent.ACTION_EDIT),
                 PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
         Notification.Action.Builder editActionBuilder = new Notification.Action.Builder(
-                R.drawable.ic_screenshot_edit,
+                Icon.createWithResource(r, R.drawable.ic_screenshot_edit),
                 r.getString(com.android.internal.R.string.screenshot_edit), editAction);
-        notificationBuilder.addAction(editActionBuilder.build());
-        if (mParams.mActionsReadyListener != null) {
-            mParams.mActionsReadyListener.onActionsReady(shareAction, editAction);
-        }
 
         // Create a delete action for the notification
         PendingIntent deleteAction = PendingIntent.getBroadcast(context, requestCode,
@@ -459,88 +319,73 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                                 mSmartActionsEnabled),
                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
         Notification.Action.Builder deleteActionBuilder = new Notification.Action.Builder(
-                R.drawable.ic_screenshot_delete,
+                Icon.createWithResource(r, R.drawable.ic_screenshot_delete),
                 r.getString(com.android.internal.R.string.delete), deleteAction);
-        notificationBuilder.addAction(deleteActionBuilder.build());
 
+        ArrayList<Notification.Action> actions = new ArrayList<>(
+                Arrays.asList(shareActionBuilder.build(), editActionBuilder.build(),
+                        deleteActionBuilder.build()));
         if (mSmartActionsEnabled) {
-            int timeoutMs = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
-                    SystemUiDeviceConfigFlags
-                            .SCREENSHOT_NOTIFICATION_SMART_ACTIONS_TIMEOUT_MS,
+            int timeoutMs = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_SYSTEMUI,
+                    SystemUiDeviceConfigFlags.SCREENSHOT_NOTIFICATION_SMART_ACTIONS_TIMEOUT_MS,
                     1000);
-            List<Notification.Action> smartActions = GlobalScreenshot.getSmartActions(mScreenshotId,
-                    smartActionsFuture, timeoutMs, mSmartActionsProvider);
-            smartActions = buildSmartActions(smartActions, context);
-            for (Notification.Action action : smartActions) {
-                notificationBuilder.addAction(action);
-            }
+            actions.addAll(buildSmartActions(
+                    ScreenshotSmartActions.getSmartActions(
+                            mScreenshotId, smartActionsFuture, timeoutMs, mSmartActionsProvider),
+                    context));
+        }
+        return actions;
+    }
+
+    private int getUserHandleOfForegroundApplication(Context context) {
+        // This logic matches
+        // com.android.systemui.statusbar.phone.PhoneStatusBarPolicy#updateManagedProfile
+        try {
+            return ActivityTaskManager.getService().getLastResumedActivityUserId();
+        } catch (RemoteException e) {
+            Slog.w(TAG, "getUserHandleOfForegroundApplication: ", e);
+            return context.getUserId();
         }
     }
 
-    @Override
-    protected void onPostExecute(Void params) {
-        if (mParams.errorMsgResId != 0) {
-            // Show a message that we've failed to save the image to disk
-            GlobalScreenshot.notifyScreenshotError(mParams.context, mNotificationManager,
-                    mParams.errorMsgResId);
-        } else {
-            if (mParams.mActionsReadyListener != null) {
-                // Cancel the "saving screenshot" notification
-                mNotificationManager.cancel(
-                        SystemMessageProto.SystemMessage.NOTE_GLOBAL_SCREENSHOT);
-            } else {
-                // Show the final notification to indicate screenshot saved
-                Context context = mParams.context;
-                Resources r = context.getResources();
+    private boolean isManagedProfile(Context context) {
+        UserManager manager = UserManager.get(context);
+        UserInfo info = manager.getUserInfo(getUserHandleOfForegroundApplication(context));
+        return info.isManagedProfile();
+    }
 
-                // Create the intent to show the screenshot in gallery
-                Intent launchIntent = new Intent(Intent.ACTION_VIEW);
-                launchIntent.setDataAndType(mParams.imageUri, "image/png");
-                launchIntent.setFlags(
-                        Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                final long now = System.currentTimeMillis();
-
-                // Update the text and the icon for the existing notification
-                mPublicNotificationBuilder
-                        .setContentTitle(r.getString(R.string.screenshot_saved_title))
-                        .setContentText(r.getString(R.string.screenshot_saved_text))
-                        .setContentIntent(
-                                PendingIntent.getActivity(mParams.context, 0, launchIntent, 0))
-                        .setWhen(now)
-                        .setAutoCancel(true)
-                        .setColor(context.getColor(
-                                com.android.internal.R.color.system_notification_accent_color));
-                mNotificationBuilder
-                        .setContentTitle(r.getString(R.string.screenshot_saved_title))
-                        .setContentText(r.getString(R.string.screenshot_saved_text))
-                        .setContentIntent(PendingIntent.getActivity(mParams.context, 0,
-                                launchIntent, 0))
-                        .setWhen(now)
-                        .setAutoCancel(true)
-                        .setColor(context.getColor(
-                                com.android.internal.R.color.system_notification_accent_color))
-                        .setPublicVersion(mPublicNotificationBuilder.build())
-                        .setFlag(Notification.FLAG_NO_CLEAR, false);
-
-                mNotificationManager.notify(SystemMessageProto.SystemMessage.NOTE_GLOBAL_SCREENSHOT,
-                        mNotificationBuilder.build());
-            }
+    private List<Notification.Action> buildSmartActions(
+            List<Notification.Action> actions, Context context) {
+        List<Notification.Action> broadcastActions = new ArrayList<>();
+        for (Notification.Action action : actions) {
+            // Proxy smart actions through {@link GlobalScreenshot.SmartActionsReceiver}
+            // for logging smart actions.
+            Bundle extras = action.getExtras();
+            String actionType = extras.getString(
+                    ScreenshotNotificationSmartActionsProvider.ACTION_TYPE,
+                    ScreenshotNotificationSmartActionsProvider.DEFAULT_ACTION_TYPE);
+            Intent intent = new Intent(context,
+                    GlobalScreenshot.SmartActionsReceiver.class).putExtra(
+                    GlobalScreenshot.EXTRA_ACTION_INTENT, action.actionIntent);
+            addIntentExtras(mScreenshotId, intent, actionType, mSmartActionsEnabled);
+            PendingIntent broadcastIntent = PendingIntent.getBroadcast(context,
+                    mRandom.nextInt(),
+                    intent,
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            broadcastActions.add(new Notification.Action.Builder(action.getIcon(), action.title,
+                    broadcastIntent).setContextual(true).addExtras(extras).build());
         }
-        mParams.finisher.accept(mParams.imageUri);
-        mParams.clearContext();
+        return broadcastActions;
     }
 
-    @Override
-    protected void onCancelled(Void params) {
-        // If we are cancelled while the task is running in the background, we may get null
-        // params. The finisher is expected to always be called back, so just use the baked-in
-        // params from the ctor in any case.
-        mParams.finisher.accept(null);
-        mParams.clearImage();
-        mParams.clearContext();
-
-        // Cancel the posted notification
-        mNotificationManager.cancel(SystemMessageProto.SystemMessage.NOTE_GLOBAL_SCREENSHOT);
+    private static void addIntentExtras(String screenshotId, Intent intent, String actionType,
+            boolean smartActionsEnabled) {
+        intent
+                .putExtra(GlobalScreenshot.EXTRA_ACTION_TYPE, actionType)
+                .putExtra(GlobalScreenshot.EXTRA_ID, screenshotId)
+                .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED, smartActionsEnabled);
     }
+
+
 }

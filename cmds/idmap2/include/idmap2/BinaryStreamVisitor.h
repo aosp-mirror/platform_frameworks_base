@@ -40,7 +40,8 @@ class BinaryStreamVisitor : public Visitor {
   void Write8(uint8_t value);
   void Write16(uint16_t value);
   void Write32(uint32_t value);
-  void WriteString(const StringPiece& value);
+  void WriteString256(const StringPiece& value);
+  void WriteString(const std::string& value);
   std::ostream& stream_;
 };
 

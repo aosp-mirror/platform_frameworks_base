@@ -64,7 +64,7 @@ import com.android.systemui.DemoMode;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.BgLooper;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.MobileSignalController.MobileIconGroup;
@@ -177,7 +177,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
      * Construct this controller object and register for updates.
      */
     @Inject
-    public NetworkControllerImpl(Context context, @BgLooper Looper bgLooper,
+    public NetworkControllerImpl(Context context, @Background Looper bgLooper,
             DeviceProvisionedController deviceProvisionedController,
             BroadcastDispatcher broadcastDispatcher) {
         this(context, (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE),

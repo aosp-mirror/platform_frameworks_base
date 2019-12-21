@@ -22,7 +22,7 @@
     <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
         <!-- Disable package verifier prevents it holding the target APK's fd that prevents cache
              eviction. -->
-        <option name="set-global-setting" key="package_verifier_enable" value="0" />
+        <option name="set-global-setting" key="verifier_verify_adb_installs" value="0" />
         <option name="restore-settings" value="true" />
 
         <!-- Skip in order to prevent reboot that confuses the test flow. -->

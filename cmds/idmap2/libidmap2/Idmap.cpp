@@ -70,7 +70,7 @@ bool WARN_UNUSED ReadBuffer(std::istream& stream, std::unique_ptr<uint8_t[]>* ou
 }
 
 // a string is encoded as a kIdmapStringLength char array; the array is always null-terminated
-bool WARN_UNUSED ReadString(std::istream& stream, char out[kIdmapStringLength]) {
+bool WARN_UNUSED ReadString256(std::istream& stream, char out[kIdmapStringLength]) {
   char buf[kIdmapStringLength];
   memset(buf, 0, sizeof(buf));
   if (!stream.read(buf, sizeof(buf))) {
@@ -81,6 +81,23 @@ bool WARN_UNUSED ReadString(std::istream& stream, char out[kIdmapStringLength]) 
   }
   memcpy(out, buf, sizeof(buf));
   return true;
+}
+
+Result<std::string> ReadString(std::istream& stream) {
+  uint32_t size;
+  if (!Read32(stream, &size)) {
+    return Error("failed to read string size");
+  }
+  if (size == 0) {
+    return std::string("");
+  }
+  std::string buf(size, '\0');
+  if (!stream.read(buf.data(), size)) {
+    return Error("failed to read string of size %u", size);
+  }
+  // buf is guaranteed to be null terminated (with enough nulls to end on a word boundary)
+  buf.resize(strlen(buf.c_str()));
+  return buf;
 }
 
 Result<uint32_t> GetCrc(const ZipFile& zip) {
@@ -98,10 +115,16 @@ std::unique_ptr<const IdmapHeader> IdmapHeader::FromBinaryStream(std::istream& s
 
   if (!Read32(stream, &idmap_header->magic_) || !Read32(stream, &idmap_header->version_) ||
       !Read32(stream, &idmap_header->target_crc_) || !Read32(stream, &idmap_header->overlay_crc_) ||
-      !ReadString(stream, idmap_header->target_path_) ||
-      !ReadString(stream, idmap_header->overlay_path_)) {
+      !ReadString256(stream, idmap_header->target_path_) ||
+      !ReadString256(stream, idmap_header->overlay_path_)) {
     return nullptr;
   }
+
+  auto debug_str = ReadString(stream);
+  if (!debug_str) {
+    return nullptr;
+  }
+  idmap_header->debug_info_ = std::move(*debug_str);
 
   return std::move(idmap_header);
 }
@@ -307,17 +330,15 @@ Result<std::unique_ptr<const Idmap>> Idmap::FromApkAssets(const ApkAssets& targe
   memset(header->overlay_path_, 0, sizeof(header->overlay_path_));
   memcpy(header->overlay_path_, overlay_apk_path.data(), overlay_apk_path.size());
 
-  std::unique_ptr<Idmap> idmap(new Idmap());
-  idmap->header_ = std::move(header);
-
   auto overlay_info = utils::ExtractOverlayManifestInfo(overlay_apk_path);
   if (!overlay_info) {
     return overlay_info.GetError();
   }
 
+  LogInfo log_info;
   auto resource_mapping =
       ResourceMapping::FromApkAssets(target_apk_assets, overlay_apk_assets, *overlay_info,
-                                     fulfilled_policies, enforce_overlayable);
+                                     fulfilled_policies, enforce_overlayable, log_info);
   if (!resource_mapping) {
     return resource_mapping.GetError();
   }
@@ -327,7 +348,11 @@ Result<std::unique_ptr<const Idmap>> Idmap::FromApkAssets(const ApkAssets& targe
     return idmap_data.GetError();
   }
 
+  std::unique_ptr<Idmap> idmap(new Idmap());
+  header->debug_info_ = log_info.GetString();
+  idmap->header_ = std::move(header);
   idmap->data_.push_back(std::move(*idmap_data));
+
   return {std::move(idmap)};
 }
 

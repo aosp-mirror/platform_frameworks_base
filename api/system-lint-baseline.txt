@@ -24,6 +24,11 @@ ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#setWfdInfo(android.net
 ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#setWifiP2pChannels(android.net.wifi.p2p.WifiP2pManager.Channel, int, int, android.net.wifi.p2p.WifiP2pManager.ActionListener):
     Registration methods should have overload that accepts delivery Executor: `setWifiP2pChannels`
 
+HeavyBitSet: android.net.wifi.wificond.NativeScanResult#getCapabilities():
+    Type must not be heavy BitSet (method android.net.wifi.wificond.NativeScanResult.getCapabilities())
+PairedRegistration: android.net.wifi.wificond.WifiCondManager#registerApCallback(String, java.util.concurrent.Executor, android.net.wifi.wificond.WifiCondManager.SoftApCallback):
+    Found registerApCallback but not unregisterApCallback in android.net.wifi.wificond.WifiCondManager
+
 
 GenericException: android.app.prediction.AppPredictor#finalize():
     

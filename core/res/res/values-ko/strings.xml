@@ -188,8 +188,7 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"직장 프로필 관리 앱이 없거나 손상되어 직장 프로필 및 관련 데이터가 삭제되었습니다. 도움이 필요한 경우 관리자에게 문의하세요."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"직장 프로필을 이 기기에서 더 이상 사용할 수 없습니다."</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"비밀번호 입력을 너무 많이 시도함"</string>
-    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
-    <skip />
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"관리자가 기기를 개인용으로 전환했습니다."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"관리되는 기기"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"조직에서 이 기기를 관리하며 네트워크 트래픽을 모니터링할 수도 있습니다. 자세한 내용을 보려면 탭하세요."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"기기가 삭제됩니다."</string>
@@ -381,13 +380,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"앱에서 브로드캐스트가 끝난 후에도 남아 있는 스티키 브로드캐스트를 허용합니다. 지나치게 사용하면 Android TV 기기에서 메모리를 너무 많이 사용하여 기기가 불안정해지거나 속도가 저하될 수 있습니다."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"앱이 브로드캐스트가 끝난 후에 남은 브로드캐스트를 보낼 수 있도록 허용합니다. 앱을 지나치게 사용하면 휴대전화에서 메모리를 너무 많이 사용하도록 하여 속도를 저하시키거나 불안정하게 만들 수 있습니다."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"연락처 읽기"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 사용자 태블릿에 저장된 연락처에 대한 데이터를 앱이 읽도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 저장할 수 있으며, 악성 앱이 사용자 모르게 연락처 데이터를 공유할 수도 있습니다."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="2387823103274997441">"특정인과 전화, 이메일 또는 기타 방법으로 연락한 빈도를 비롯하여 Android TV 기기에 저장된 연락처에 관한 데이터를 앱이 읽도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 저장할 수 있으며, 악성 앱이 사용자가 모르게 연락처 데이터를 공유할 수도 있습니다."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 사용자 휴대전화에 저장된 연락처에 대한 데이터를 앱이 읽도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 저장할 수 있으며, 악성 앱이 사용자 모르게 연락처 데이터를 공유할 수도 있습니다."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"태블릿에 저장된 연락처에 관한 데이터를 앱이 읽도록 허용합니다. 또한 앱은 태블릿에서 연락처가 생성된 계정에도 액세스할 수 있습니다. 여기에는 설치한 앱에서 생성한 계정이 포함될 수 있습니다. 이 권한을 사용하면 앱이 연락처 데이터를 저장할 수 있으며, 악성 앱이 사용자가 모르게 연락처 데이터를 공유할 수도 있습니다."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Android TV 기기에 저장된 연락처에 관한 데이터를 앱이 읽도록 허용합니다. 또한 앱은 Android TV 기기에서 연락처가 생성된 계정에도 액세스할 수 있습니다. 여기에는 설치한 앱에서 생성한 계정이 포함될 수 있습니다. 이 권한을 사용하면 앱이 연락처 데이터를 저장할 수 있으며, 악성 앱이 사용자가 모르게 연락처 데이터를 공유할 수도 있습니다."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"휴대전화에 저장된 연락처에 관한 데이터를 앱이 읽도록 허용합니다. 또한 앱은 휴대전화에서 연락처가 생성된 계정에도 액세스할 수 있습니다. 여기에는 설치한 앱에서 생성한 계정이 포함될 수 있습니다. 이 권한을 사용하면 앱이 연락처 데이터를 저장할 수 있으며, 악성 앱이 사용자가 모르게 연락처 데이터를 공유할 수도 있습니다."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"연락처 수정"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 사용자 태블릿에 저장된 연락처에 대한 데이터를 앱이 수정할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 삭제할 수 있습니다."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="3870937407268625273">"특정인과 전화, 이메일 또는 기타 방법으로 연락한 빈도를 비롯하여 Android TV 기기에 저장된 연락처에 관한 데이터를 앱이 수정하도록 허용합니다. 이 권한을 사용하면 앱에서 연락처 데이터를 삭제할 수 있습니다."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"특정인과 전화, 이메일 또는 기타 수단으로 연락한 빈도를 포함하여 사용자 휴대전화에 저장된 연락처에 대한 데이터를 앱이 수정할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 삭제할 수 있습니다."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"태블릿에 저장된 연락처에 관한 데이터를 앱이 수정하도록 허용합니다. 이 권한을 사용하면 앱에서 연락처 데이터를 삭제할 수 있습니다."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Android TV 기기에 저장된 연락처에 관한 데이터를 앱이 수정하도록 허용합니다. 이 권한을 사용하면 앱에서 연락처 데이터를 삭제할 수 있습니다."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"휴대전화에 저장된 연락처에 관한 데이터를 앱이 수정하도록 허용합니다. 이 권한을 사용하면 앱에서 연락처 데이터를 삭제할 수 있습니다."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"통화 기록 읽기"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"이 앱은 통화 기록을 읽을 수 있습니다."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"통화 기록 쓰기"</string>
@@ -407,13 +406,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"추가 위치 제공업체 명령에 접근"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"앱이 추가 위치 정보 제공 기능의 명령에 접근하도록 허용합니다. 이 경우 앱이 GPS 또는 기타 위치 소스의 작동을 방해할 수 있습니다."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"포그라운드에서만 정확한 위치에 액세스"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"이 앱은 포그라운드에 있을 때만 나의 정확한 위치를 알 수 있습니다. 앱에서 위치 서비스를 사용하려면 휴대전화에서 위치 서비스가 사용 설정되어 있으며 사용할 수 있어야 합니다. 배터리 사용량이 늘어날 수 있습니다."</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"포그라운드에서만 대략적인 위치(네트워크 기반)에 액세스"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"앱이 포그라운드에 있을 때만 휴대전화 기지국과 Wi-Fi 네트워크 등의 네트워크 소스를 바탕으로 사용자의 위치를 파악할 수 있습니다. 앱에서 위치 서비스를 사용하려면 태블릿에서 위치 서비스가 켜져 있으며 사용 가능해야 합니다."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="6994518594789550469">"앱이 포그라운드에 있을 때만 휴대전화 기지국과 Wi-Fi 네트워크 등의 네트워크 소스를 바탕으로 사용자의 위치를 파악할 수 있습니다. 앱에서 위치 서비스를 사용하려면 Android TV 기기에서 위치 서비스를 지원하며 사용 설정되어 있어야 합니다."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"앱이 포그라운드에 있을 때만 휴대전화 기지국과 Wi-Fi 네트워크 등의 네트워크 소스를 바탕으로 사용자의 위치를 파악할 수 있습니다. 앱에서 위치 서비스를 사용하려면 휴대전화에서 위치 서비스가 켜져 있으며 사용 가능해야 합니다."</string>
+    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"이 앱은 포그라운드에 있을 때만 나의 정확한 위치를 확인할 수 있습니다. 앱에서 위치 서비스를 사용하려면 기기에서 위치 서비스가 지원되며 사용 설정되어 있어야 합니다. 배터리 사용량이 늘어날 수 있습니다."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"포그라운드에서만 대략적인 위치에 액세스"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"이 앱은 포그라운드에 있을 때만 나의 대략적인 위치를 확인할 수 있습니다. 앱에서 위치 서비스를 사용하려면 기기에서 위치 서비스가 지원되며 사용 설정되어 있어야 합니다."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"백그라운드에서 위치 정보 액세스"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"이 권한이 대략적인 위치 정보 또는 정확한 위치 정보 액세스 권한에 추가적으로 부여되면 앱이 백그라운드에서 실행되는 동안 위치에 액세스할 수 있습니다."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"이 앱이 포그라운드뿐만 아니라 백그라운드에서 실행되는 동안에도 위치에 액세스할 수 있습니다."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"오디오 설정 변경"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"앱이 음량이나 출력을 위해 사용하는 스피커 등 전체 오디오 설정을 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"오디오 녹음"</string>
@@ -494,6 +491,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"앱이 태블릿의 블루투스 설정을 확인하고 페어링된 기기에 연결하며 연결을 수락할 수 있도록 허용합니다."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"앱이 Android TV 기기에서 블루투스 설정을 보고 페어링된 기기에 연결하며 페어링된 기기와의 연결을 수락하도록 허용합니다."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"앱에서 휴대전화의 블루투스 설정을 확인하고 등록된 디바이스에 연결하며 연결을 수락할 수 있습니다."</string>
+    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
+    <skip />
+    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
+    <skip />
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC(Near Field Communication) 제어"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"앱이 NFC(근거리 무선 통신) 태그, 카드 및 리더와 통신할 수 있도록 허용합니다."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"화면 잠금 사용 중지"</string>
@@ -1862,7 +1863,11 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>에 연결됨"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"파일을 확인하려면 탭하세요."</string>
     <string name="pin_target" msgid="8036028973110156895">"고정"</string>
+    <!-- no translation found for pin_specific_target (7824671240625957415) -->
+    <skip />
     <string name="unpin_target" msgid="3963318576590204447">"고정 해제"</string>
+    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
+    <skip />
     <string name="app_info" msgid="6113278084877079851">"앱 정보"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"데모 시작 중..."</string>
@@ -1905,6 +1910,8 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"에서 <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> 및 <xliff:g id="TYPE_2">%3$s</xliff:g> 업데이트"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"저장"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"사용 안함"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"나중에"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"사용 안함"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"업데이트"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"계속"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"비밀번호"</string>
@@ -2000,5 +2007,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"화면 분할 모드 전환"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"잠금 화면"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"스크린샷"</string>
-    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"팝업 창의 <xliff:g id="APP_NAME">%1$s</xliff:g> 앱"</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>의 자막 표시줄입니다."</string>
 </resources>

@@ -23,7 +23,7 @@ import android.view.View;
 import androidx.collection.ArraySet;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -62,7 +62,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
 
     @Inject
     public VisualStabilityManager(
-            NotificationEntryManager notificationEntryManager, @MainHandler Handler handler) {
+            NotificationEntryManager notificationEntryManager, @Main Handler handler) {
 
         mHandler = handler;
 

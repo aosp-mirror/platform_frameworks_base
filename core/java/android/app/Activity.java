@@ -8674,10 +8674,23 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
-    @UnsupportedAppUsage
     public void registerRemoteAnimations(RemoteAnimationDefinition definition) {
         try {
             ActivityTaskManager.getService().registerRemoteAnimations(mToken, definition);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregisters all remote animations for this activity.
+     *
+     * @hide
+     */
+    @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
+    public void unregisterRemoteAnimations() {
+        try {
+            ActivityTaskManager.getService().unregisterRemoteAnimations(mToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

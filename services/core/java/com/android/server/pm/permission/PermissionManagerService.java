@@ -1583,15 +1583,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
 
             // If shared user we just reset the state to which only this app contributed.
-            final String sharedUserId =
-                    mPackageManagerInt.getSharedUserIdForPackage(pkg.getPackageName());
-            final String[] pkgNames =
-                    mPackageManagerInt.getPackagesForSharedUserId(sharedUserId, userId);
-            if (pkgNames != null && pkgNames.length > 0) {
+            final String[] pkgNames = mPackageManagerInt.getSharedUserPackagesForPackage(
+                    pkg.getPackageName(), userId);
+            if (pkgNames.length > 0) {
                 boolean used = false;
-                final int packageCount = pkgNames.length;
-                for (int j = 0; j < packageCount; j++) {
-                    final String sharedPkgName = pkgNames[j];
+                for (String sharedPkgName : pkgNames) {
                     final AndroidPackage sharedPkg =
                             mPackageManagerInt.getPackage(sharedPkgName);
                     if (sharedPkg != null && !sharedPkg.getPackageName().equals(packageName)

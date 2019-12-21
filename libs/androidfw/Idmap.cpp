@@ -43,6 +43,10 @@ static bool compare_overlay_entries(const Idmap_overlay_entry& e1, const uint32_
   return dtohl(e1.overlay_id) < overlay_id;
 }
 
+size_t Idmap_header::Size() const {
+  return sizeof(Idmap_header) + sizeof(uint8_t) * dtohl(debug_info_size);
+}
+
 OverlayStringPool::OverlayStringPool(const LoadedIdmap* loaded_idmap)
     : data_header_(loaded_idmap->data_header_),
       idmap_string_pool_(loaded_idmap->string_pool_.get()) { };
@@ -53,7 +57,7 @@ OverlayStringPool::~OverlayStringPool() {
 
 const char16_t* OverlayStringPool::stringAt(size_t idx, size_t* outLen) const {
   const size_t offset = dtohl(data_header_->string_pool_index_offset);
-  if (idmap_string_pool_ != nullptr && idx >= size() && idx >= offset) {
+  if (idmap_string_pool_ != nullptr && idx >= ResStringPool::size() && idx >= offset) {
     return idmap_string_pool_->stringAt(idx - offset, outLen);
   }
 
@@ -62,11 +66,15 @@ const char16_t* OverlayStringPool::stringAt(size_t idx, size_t* outLen) const {
 
 const char* OverlayStringPool::string8At(size_t idx, size_t* outLen) const {
   const size_t offset = dtohl(data_header_->string_pool_index_offset);
-  if (idmap_string_pool_ != nullptr && idx >= size() && idx >= offset) {
+  if (idmap_string_pool_ != nullptr && idx >= ResStringPool::size() && idx >= offset) {
     return idmap_string_pool_->string8At(idx - offset, outLen);
   }
 
   return ResStringPool::string8At(idx, outLen);
+}
+
+size_t OverlayStringPool::size() const {
+  return ResStringPool::size() + (idmap_string_pool_ != nullptr ? idmap_string_pool_->size() : 0U);
 }
 
 OverlayDynamicRefTable::OverlayDynamicRefTable(const Idmap_data_header* data_header,
@@ -211,8 +219,8 @@ std::unique_ptr<const LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_da
   }
 
   auto header = reinterpret_cast<const Idmap_header*>(idmap_data.data());
-  const uint8_t* data_ptr = reinterpret_cast<const uint8_t*>(idmap_data.data()) + sizeof(*header);
-  size_t data_size = idmap_data.size() - sizeof(*header);
+  const uint8_t* data_ptr = reinterpret_cast<const uint8_t*>(idmap_data.data()) + header->Size();
+  size_t data_size = idmap_data.size() - header->Size();
 
   // Currently idmap2 can only generate one data block.
   auto data_header = reinterpret_cast<const Idmap_data_header*>(data_ptr);

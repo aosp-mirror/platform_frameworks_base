@@ -1377,9 +1377,8 @@ public class ChooserActivity extends ResolverActivity implements
             for (TargetInfo innerInfo : mti.getTargets()) {
                 labels.add(innerInfo.getResolveInfo().loadLabel(getPackageManager()));
             }
-            f = new ResolverTargetActionsDialogFragment(
-                    mti.getResolveInfo().loadLabel(getPackageManager()), name, mti.getTargets(),
-                    labels);
+            f = new ResolverTargetActionsDialogFragment(mti.getDisplayLabel(), name,
+                    mti.getTargets(), labels);
         } else {
             f = new ResolverTargetActionsDialogFragment(
                     ti.getResolveInfo().loadLabel(getPackageManager()), name, pinned);

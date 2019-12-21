@@ -26,7 +26,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
-import com.android.systemui.dagger.qualifiers.MainResources;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public class ProximitySensor {
     };
 
     @Inject
-    public ProximitySensor(@MainResources Resources resources,
+    public ProximitySensor(@Main Resources resources,
             AsyncSensorManager sensorManager) {
         mSensorManager = sensorManager;
         Sensor sensor = findBrightnessSensor(resources);

@@ -307,6 +307,7 @@
     <protected-broadcast android:name="android.net.nsd.STATE_CHANGED" />
 
     <protected-broadcast android:name="android.nfc.action.ADAPTER_STATE_CHANGED" />
+    <protected-broadcast android:name="android.nfc.action.PREFERRED_PAYMENT_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.TRANSACTION_DETECTED" />
     <protected-broadcast android:name="com.android.nfc.action.LLCP_UP" />
     <protected-broadcast android:name="com.android.nfc.action.LLCP_DOWN" />
@@ -1757,6 +1758,14 @@
          <p>Protection level: normal
     -->
     <permission android:name="android.permission.NFC_TRANSACTION_EVENT"
+      android:protectionLevel="normal" />
+
+    <!-- Allows applications to receive NFC preferred payment service information.
+         <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.NFC_PREFERRED_PAYMENT_INFO"
+        android:description="@string/permdesc_preferredPaymentInfo"
+        android:label="@string/permlab_preferredPaymentInfo"
         android:protectionLevel="normal" />
 
     <!-- @deprecated This permission used to allow too broad access to sensitive methods and all its
@@ -4104,7 +4113,7 @@
     <permission android:name="android.permission.INTENT_FILTER_VERIFICATION_AGENT"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Must be required by intent filter verifier receiver, to ensure that only the
+    <!-- Must be required by intent filter verifier rintent-filtereceiver, to ensure that only the
          system can interact with it.
          @hide
     -->
@@ -5134,6 +5143,12 @@
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
-</application>
+        <service android:name="com.android.server.pm.PackageManagerShellCommandDataLoader">
+            <intent-filter>
+                <action android:name="android.intent.action.LOAD_DATA" />
+            </intent-filter>
+        </service>
+
+    </application>
 
 </manifest>

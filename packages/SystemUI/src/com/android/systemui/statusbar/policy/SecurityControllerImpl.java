@@ -49,7 +49,7 @@ import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.BgHandler;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.settings.CurrentUserTracker;
 
 import java.io.FileDescriptor;
@@ -101,7 +101,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     /**
      */
     @Inject
-    public SecurityControllerImpl(Context context, @BgHandler Handler bgHandler,
+    public SecurityControllerImpl(Context context, @Background Handler bgHandler,
             BroadcastDispatcher broadcastDispatcher) {
         this(context, bgHandler, broadcastDispatcher, null);
     }

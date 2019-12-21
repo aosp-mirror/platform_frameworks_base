@@ -427,6 +427,61 @@ public class TaskRecordTests extends ActivityTestsBase {
         assertNotEquals(origScreenH, task.getConfiguration().screenHeightDp);
     }
 
+    @Test
+    public void testInsetDisregardedWhenFreeformOverlapsNavBar() {
+        DisplayContent display = mService.mRootActivityContainer.getDefaultDisplay();
+        ActivityStack stack = display.createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
+                true /* onTop */);
+        DisplayInfo displayInfo = new DisplayInfo();
+        mService.mContext.getDisplay().getDisplayInfo(displayInfo);
+        final int displayHeight = displayInfo.logicalHeight;
+        final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
+        final Configuration inOutConfig = new Configuration();
+        final Configuration parentConfig = new Configuration();
+        final int longSide = 1200;
+        final int shortSide = 600;
+        parentConfig.densityDpi = 400;
+        parentConfig.screenHeightDp = 200; // 200 * 400 / 160 = 500px
+        parentConfig.screenWidthDp = 100; // 100 * 400 / 160 = 250px
+        parentConfig.windowConfiguration.setRotation(ROTATION_0);
+
+        final float density = 2.5f; // densityDpi / DENSITY_DEFAULT_SCALE = 400 / 160.0f
+        final int longSideDp = 480; // longSide / density = 1200 / 400 * 160
+        final int shortSideDp = 240; // shortSide / density = 600 / 400 * 160
+        final int screenLayout = parentConfig.screenLayout
+                & (Configuration.SCREENLAYOUT_LONG_MASK | Configuration.SCREENLAYOUT_SIZE_MASK);
+        final int reducedScreenLayout =
+                Configuration.reduceScreenLayout(screenLayout, longSideDp, shortSideDp);
+
+        // Portrait bounds overlapping with navigation bar, without insets.
+        inOutConfig.windowConfiguration.getBounds().set(0,
+                displayHeight - 10 - longSide,
+                shortSide,
+                displayHeight - 10);
+        // Set to freeform mode to verify bug fix.
+        inOutConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+
+        task.computeConfigResourceOverrides(inOutConfig, parentConfig);
+
+        assertEquals(parentConfig.screenWidthDp, inOutConfig.screenWidthDp);
+        assertEquals(parentConfig.screenHeightDp, inOutConfig.screenHeightDp);
+        assertEquals(reducedScreenLayout, inOutConfig.screenLayout);
+
+        inOutConfig.setToDefaults();
+        // Landscape bounds overlapping with navigtion bar, without insets.
+        inOutConfig.windowConfiguration.getBounds().set(0,
+                displayHeight - 10 - shortSide,
+                longSide,
+                displayHeight - 10);
+        inOutConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+
+        task.computeConfigResourceOverrides(inOutConfig, parentConfig);
+
+        assertEquals(parentConfig.screenWidthDp, inOutConfig.screenWidthDp);
+        assertEquals(parentConfig.screenHeightDp, inOutConfig.screenHeightDp);
+        assertEquals(reducedScreenLayout, inOutConfig.screenLayout);
+    }
+
     /** Ensures that the alias intent won't have target component resolved. */
     @Test
     public void testTaskIntentActivityAlias() {

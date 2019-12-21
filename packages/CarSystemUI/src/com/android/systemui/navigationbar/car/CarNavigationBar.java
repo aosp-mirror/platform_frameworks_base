@@ -35,7 +35,7 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarDeviceProvisionedListener;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NavigationBarController;
@@ -93,7 +93,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             DeviceProvisionedController deviceProvisionedController,
             CommandQueue commandQueue,
             Lazy<FacetButtonTaskStackListener> facetButtonTaskStackListenerLazy,
-            @MainHandler Handler mainHandler,
+            @Main Handler mainHandler,
             Lazy<KeyguardStateController> keyguardStateControllerLazy,
             Lazy<NavigationBarController> navigationBarControllerLazy,
             SuperStatusBarViewFactory superStatusBarViewFactory,

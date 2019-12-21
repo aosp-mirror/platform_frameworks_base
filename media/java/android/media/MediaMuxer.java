@@ -676,10 +676,9 @@ final public class MediaMuxer {
             throw new IllegalArgumentException("bufferInfo must not be null");
         }
         if (bufferInfo.size < 0 || bufferInfo.offset < 0
-                || (bufferInfo.offset + bufferInfo.size) > byteBuf.capacity()
-                || bufferInfo.presentationTimeUs < 0) {
+                || (bufferInfo.offset + bufferInfo.size) > byteBuf.capacity()) {
             throw new IllegalArgumentException("bufferInfo must specify a" +
-                    " valid buffer offset, size and presentation time");
+                    " valid buffer offset and size");
         }
 
         if (mNativeObject == 0) {

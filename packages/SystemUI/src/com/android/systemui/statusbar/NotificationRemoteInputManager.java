@@ -50,7 +50,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -263,7 +263,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             NotificationEntryManager notificationEntryManager,
             Lazy<StatusBar> statusBarLazy,
             StatusBarStateController statusBarStateController,
-            @MainHandler Handler mainHandler,
+            @Main Handler mainHandler,
             RemoteInputUriController remoteInputUriController) {
         mContext = context;
         mLockscreenUserManager = lockscreenUserManager;

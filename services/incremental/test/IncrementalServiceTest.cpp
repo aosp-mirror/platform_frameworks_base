@@ -138,10 +138,10 @@ public:
                 .WillByDefault(Invoke(this, &MockIncrementalManager::startDataLoaderOk));
     }
     void setDataLoaderStatusNotReady() {
-        mListener->onStatusChanged(mId, IDataLoaderStatusListener::DATA_LOADER_NOT_READY);
+        mListener->onStatusChanged(mId, IDataLoaderStatusListener::DATA_LOADER_DESTROYED);
     }
     void setDataLoaderStatusReady() {
-        mListener->onStatusChanged(mId, IDataLoaderStatusListener::DATA_LOADER_READY);
+        mListener->onStatusChanged(mId, IDataLoaderStatusListener::DATA_LOADER_CREATED);
     }
 
 private:
@@ -235,7 +235,7 @@ public:
         MockServiceManager serviceManager = MockServiceManager(mVold, mIncrementalManager, mIncFs);
         mIncrementalService = std::make_unique<IncrementalService>(serviceManager, mRootDir.path);
         mDataLoaderParcel.packageName = "com.test";
-        mDataLoaderParcel.staticArgs = "uri";
+        mDataLoaderParcel.arguments = "uri";
         mIncrementalService->onSystemReady();
     }
 

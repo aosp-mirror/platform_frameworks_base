@@ -177,8 +177,7 @@ private:
                   android::dataloader::ServiceParamsPtr) final {
         CHECK(ifs) << "ifs can't be null";
         CHECK(statusListener) << "statusListener can't be null";
-        ALOGE("[AdbDataLoader] onCreate: %s/%s/%d", params.staticArgs().c_str(),
-              params.packageName().c_str(), (int)params.dynamicArgs().size());
+        ALOGE("[AdbDataLoader] onCreate: %d/%s/%s/%s/%d", params.type(), params.packageName().c_str(), params.className().c_str(), params.arguments().c_str(), (int)params.dynamicArgs().size());
 
         if (params.dynamicArgs().empty()) {
             ALOGE("[AdbDataLoader] Invalid DataLoaderParams. Need in/out FDs.");
@@ -204,7 +203,7 @@ private:
         }
 
         std::string logFile;
-        if (const auto packageName = extractPackageName(params.staticArgs()); !packageName.empty()) {
+        if (const auto packageName = extractPackageName(params.arguments()); !packageName.empty()) {
             logFile = android::base::GetProperty("adb.readlog." + packageName, "");
         }
         if (logFile.empty()) {
@@ -288,8 +287,7 @@ private:
                           "inode=%d. Ignore.",
                           static_cast<int>(ino));
                     mRequestedFiles.erase(fileId);
-                    mStatusListener->reportStatus(
-                            INCREMENTAL_DATA_LOADER_NO_CONNECTION);
+                    mStatusListener->reportStatus(DATA_LOADER_NO_CONNECTION);
                 }
             }
             sendRequest(mOutFd, BLOCK_MISSING, fileId, blockIdx);
@@ -337,7 +335,7 @@ private:
             }
             if (res < 0) {
                 ALOGE("[AdbDataLoader] failed to poll. Abort.");
-                mStatusListener->reportStatus(INCREMENTAL_DATA_LOADER_NO_CONNECTION);
+                mStatusListener->reportStatus(DATA_LOADER_NO_CONNECTION);
                 break;
             }
             if (res == mEventFd) {
@@ -346,7 +344,7 @@ private:
             }
             if (!readChunk(mInFd, data)) {
                 ALOGE("[AdbDataLoader] failed to read a message. Abort.");
-                mStatusListener->reportStatus(INCREMENTAL_DATA_LOADER_NO_CONNECTION);
+                mStatusListener->reportStatus(DATA_LOADER_NO_CONNECTION);
                 break;
             }
             auto remainingData = std::span(data);

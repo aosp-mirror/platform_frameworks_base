@@ -188,8 +188,7 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Programu ya msimamizi wa wasifu wa kazini imepotea au ina hitilafu. Kwa sababu hiyo, wasifu wako wa kazini na data husika imefutwa. Wasiliana na msimamizi wako kwa usaidizi."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Wasifu wako wa kazini haupatikani tena kwenye kifaa hiki"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Umejaribu kuweka nenosiri mara nyingi mno"</string>
-    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
-    <skip />
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"Msimamizi aliacha kutumia kifaa kwa matumizi ya binafsi"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Kifaa kinadhibitiwa"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Shirika lako linadhibiti kifaa hiki na huenda likafuatilia shughuli kwenye mtandao. Gusa ili upate maelezo zaidi."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Data iliyomo kwenye kifaa chako itafutwa"</string>
@@ -381,13 +380,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"Huruhusu programu itume matangazo yanayonata, ambayo hubaki baada ya matangazo kuisha. Huenda matumizi zaidi yakapunguza kasi ya kifaa chako cha Android TV au kukifanya kisiwe thabiti kwa kukifanya kitumie hifadhi kubwa zaidi."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Inaruhusu programu kutuma matangazo nata, ambayo hubakia baada ya matangazo kuisha. Matumizi zaidi yanaweza kufanya simu kufanya kazi polepole au kuifanya isiwe thabiti kwa kuisababisha itumie kumbukumbu kubwa zaidi."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"kusoma anwani zako"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Inaruhusu programu kusoma data kuhusu anwani zako zilizohifadhiwa kwenye kompyuta kibao yako, ikiwa ni pamoja na mara ngapi umepiga simu, kutuma barua pepe au kuwasiliana kwa njia zingine na watu fulani. Idhini hii inaruhusu programu kuhifadhi data yako ya anwani, na programu hasidi zinaweza kushiriki data ya anwani bila ya kujua kwako."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="2387823103274997441">"Huruhusu programu isome data kuhusu anwani zako zilizohifadhiwa kwenye kifaa chako cha Android TV, ikiwa ni pamoja na mara ambazo umepiga simu, umetuma barua pepe au umewasiliana kwa njia zingine na watu mahususi. Idhini hii huruhusu programu kuhifadhi data yako ya anwani na huenda programu hasidi zikashiriki data ya anwani bila idhini yako."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Inaruhusu programu kusoma data kuhusu anwani zako zilizohifadhiwa kwenye simu yako, ikiwa ni pamoja na mara ngapi umepiga simu, kutuma barua pepe au kuwasiliana kwa njia zingine na watu fulani. Idhini hii inaruhusu programu kuhifadhi data yako ya anwani, na programu hasidi zinaweza kushiriki data ya anwani bila ya kujua kwako."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Huruhusu programu kusoma data kuhusu anwani zako zilizohifadhiwa kwenye kompyuta yako kibao. Programu pia zitafikia akaunti zilizo kwenye kompyuta yako kibao zilizounda anwani. Hii inaweza kujumuisha akaunti zilizoundwa na programu ambazo umesakinisha. Idhini hii huruhusu programu kuhifadhi data yako ya anwani na programu hasidi zinaweza kushiriki data ya anwani bila wewe kujua."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Huruhusu programu kusoma data kuhusu anwani zako zilizohifadhiwa kwenye kifaa chako cha Android TV. Programu pia zitafikia akaunti zilizo kwenye kifaa chako cha Android TV zilizounda anwani. Hii inaweza kujumuisha akaunti zilizoundwa na programu ambazo umesakinisha. Idhini hii huruhusu programu kuhifadhi data yako ya anwani na programu hasidi zinaweza kushiriki data ya anwani bila wewe kujua."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Huruhusu programu kusoma data kuhusu anwani zako zilizohifadhiwa kwenye simu yako. Programu pia zitafikia akaunti zilizo kwenye simu yako zilizounda anwani. Hii inaweza kujumuisha akaunti zilizoundwa na programu ambazo umesakinisha. Idhini hii huruhusu programu kuhifadhi data yako ya anwani na programu hasidi zinaweza kushiriki data ya anwani bila wewe kujua."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"kurekebisha anwani zako"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Huruhusu programu kurekebisha data kuhusu anwani ulizohifadhi kwenye kompyuta kibao yako, ikiwa ni pamoja na mara ambazo umepiga simu, kutuma barua pepe au kuwasiliana kwa njia nyingine na anwani maalum. Idhini hii inaruhusu programu kufuta data ya anwani."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="3870937407268625273">"Huruhusu programu ibadilishe data kuhusu anwani zako zilizohifadhiwa kwenye kifaa chako cha Android TV, ikiwa ni pamoja na mara ambazo umepiga simu, umetuma barua pepe au kuwasiliana kwa njia nyingine na anwani mahususi. Idhini hii huruhusu programu ifute data ya anwani."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Huruhusu programu kurekebisha data kuhusu anwani ulizohifadhi kwenye simu yako, ikiwa ni pamoja na mara ambazo umepiga simu, kutuma barua pepe au kuwasiliana kwa njia nyingine na anwani maalum. Idhini hii inaruhusu programu kufuta data ya anwani."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Huruhusu programu kubadilisha data kuhusu anwani zako zilizohifadhiwa kwenye kompyuta yako kibao. Idhini hii huruhusu programu kufuta data ya anwani."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Huruhusu programu kubadilisha data kuhusu anwani zako zilizohifadhiwa kwenye kifaa chako cha Android TV. Idhini hii huruhusu programu kufuta data ya anwani."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Huruhusu programu kurekebisha data kuhusu anwani zako zilizohifadhiwa kwenye simu yako. Idhini hii huruhusu programu kufuta data ya anwani."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"kusoma rekodi ya simu"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Programu hii inaweza kusoma rekodi yako ya simu zilizopigwa."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"kuandika rekodi ya simu"</string>
@@ -407,13 +406,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"fikia amri za ziada za mtoa huduma ya mahali"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Ruhusu programu kufikia amri za ziada za mtoa huduma za mahali. Hii huenda ikaruhusu programu ikatize matumizi ya GPS au vyanzo vingine vya eneo."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"kufikia mahali mahususi ikiwa tu programu imefunguliwa kwenye skrini"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"Programu hii inaweza kupata mahali halisi ikiwa tu umeifungua kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye simu yako ili programu iweze kuzitumia. Hatua hii inaweza kuongeza utumiaji wa betri."</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"fikia eneo linalokadiriwa (kulingana na mtandao) wakati tu programu inatumika kwenye skrini"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi, lakini hili hufanyika tu wakati programu inatumika kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye simu kibao yako ili programu iweze kuzitumia."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="6994518594789550469">"Programu hii inaweza kupata maelezo ya mahali ulipo kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi, lakini hili hufanyika tu wakati programu inatumika. Ni lazima huduma hizi za mahali ziwashwe na kupatikana kwenye kifaa chako cha Android TV ili programu iweze kuzitumia."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi, lakini hili hufanyika tu wakati programu inatumika kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye simu yako ili programu iweze kuzitumia."</string>
+    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Programu hii inaweza kupata mahali halisi ikiwa tu umeifungua kwenye skrini. Ni lazima uwashe huduma za mahali na zipatikane kwenye kifaa chako ili programu iweze kuzitumia. Hatua hii inaweza kuongeza matumizi ya betri."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"kufikia mahali palipokadiriwa ikiwa tu programu imefunguliwa kwenye skrini"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Programu hii inaweza kukadiria mahali ulipo ikiwa tu umeifungua kwenye skrini. Ni lazima huduma za mahali ziwashwe na zipatikane kwenye kifaa chako ili programu iweze kuzitumia."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"ifikie mahali inapotumika chinichini"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Kama ruhusa hii itatolewa, mbali na idhini ya kufikia mahali panapokadiriwa au mahali mahususi, programu inaweza kufikia mahali wakati inatumika chinichini."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Programu hii inaweza kufikia maelezo ya mahali inapotumika chinichini, pamoja na ufikiaji wa mahali wakati umeifungua kwenye skrini."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"badilisha mipangilio yako ya sauti"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Inaruhusu programu kurekebisha mipangilio ya sauti kila mahali kama vile sauti na ni kipaza sauti kipi ambacho kinatumika kwa kutoa."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"kurekodi sauti"</string>
@@ -494,6 +491,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Huruhusu programu kuona usanidi wa Bluetooth kwenye kompyuta kibao, na kutuma na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Huruhusu programu iangalie mipangilio iliyowekwa ya Bluetooth kwenye kifaa chako cha Android TV na kufanya na kukubali miunganisho na vifaa vilivyooanishwa."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Huruhusu programu kuona usanidi wa Bluetooth kwenye simu, na kutuma na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
+    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
+    <skip />
+    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
+    <skip />
     <string name="permlab_nfc" msgid="1904455246837674977">"kudhibiti Mawasiliano ya Vifaa Vilivyokaribu (NFC)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Inaruhusu programu kuwasiliana na lebo, kadi na wasomaji wa Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"zima kufuli la skrini yako"</string>
@@ -1862,7 +1863,11 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Imeunganishwa na <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Gusa ili uangalie faili"</string>
     <string name="pin_target" msgid="8036028973110156895">"Bandika"</string>
+    <!-- no translation found for pin_specific_target (7824671240625957415) -->
+    <skip />
     <string name="unpin_target" msgid="3963318576590204447">"Bandua"</string>
+    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
+    <skip />
     <string name="app_info" msgid="6113278084877079851">"Maelezo ya programu"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Inaanzisha onyesho..."</string>
@@ -1905,6 +1910,8 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Ungependa kusasisha vipengee hivi katika "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> na <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Hifadhi"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Hapana, asante"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"Si sasa"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"Kamwe"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Sasisha"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"Endelea"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"nenosiri"</string>
@@ -2000,5 +2007,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Geuza Skrini Iliyogawanywa"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Skrini Iliyofungwa"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Picha ya skrini"</string>
-    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"Programu ya <xliff:g id="APP_NAME">%1$s</xliff:g> katika dirisha Ibukizi."</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Upau wa manukuu wa <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
 </resources>

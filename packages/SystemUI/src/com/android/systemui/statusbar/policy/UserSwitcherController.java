@@ -60,7 +60,7 @@ import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.tiles.UserDetailView;
@@ -113,7 +113,7 @@ public class UserSwitcherController implements Dumpable {
 
     @Inject
     public UserSwitcherController(Context context, KeyguardStateController keyguardStateController,
-            @MainHandler Handler handler, ActivityStarter activityStarter,
+            @Main Handler handler, ActivityStarter activityStarter,
             BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;

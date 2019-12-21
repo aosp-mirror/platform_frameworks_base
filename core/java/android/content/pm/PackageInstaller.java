@@ -1082,8 +1082,12 @@ public class PackageInstaller {
          * @throws SecurityException if called after the session has been
          *             sealed or abandoned
          * @throws IllegalStateException if called for non-callback session
+         *
+         * WARNING: This is a system API to aid internal development.
+         * Use at your own risk. It will change or be removed without warning.
          * {@hide}
          */
+        @SystemApi
         public void addFile(@NonNull String name, long lengthBytes, @NonNull byte[] metadata) {
             try {
                 mSession.addFile(name, lengthBytes, metadata);
@@ -1457,10 +1461,9 @@ public class PackageInstaller {
         /** {@hide} */
         public long requiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
         /** {@hide} */
-        public DataLoaderParams incrementalParams;
-        /** TODO(b/146080380): add a class name to make it fully compatible with ComponentName.
-         * {@hide} */
-        public String dataLoaderPackageName;
+        public DataLoaderParams dataLoaderParams;
+        /** {@hide} */
+        public int rollbackDataPolicy = PackageManager.RollbackDataPolicy.RESTORE;
 
         /**
          * Construct parameters for a new package install session.
@@ -1497,10 +1500,9 @@ public class PackageInstaller {
             DataLoaderParamsParcel dataLoaderParamsParcel = source.readParcelable(
                     DataLoaderParamsParcel.class.getClassLoader());
             if (dataLoaderParamsParcel != null) {
-                incrementalParams = new DataLoaderParams(
-                        dataLoaderParamsParcel);
+                dataLoaderParams = new DataLoaderParams(dataLoaderParamsParcel);
             }
-            dataLoaderPackageName = source.readString();
+            rollbackDataPolicy = source.readInt();
         }
 
         /** {@hide} */
@@ -1524,8 +1526,8 @@ public class PackageInstaller {
             ret.isMultiPackage = isMultiPackage;
             ret.isStaged = isStaged;
             ret.requiredInstalledVersionCode = requiredInstalledVersionCode;
-            ret.incrementalParams = incrementalParams;
-            ret.dataLoaderPackageName = dataLoaderPackageName;
+            ret.dataLoaderParams = dataLoaderParams;
+            ret.rollbackDataPolicy = rollbackDataPolicy;
             return ret;
         }
 
@@ -1682,12 +1684,14 @@ public class PackageInstaller {
         }
 
         /**
-         * Request that rollbacks be enabled or disabled for the given upgrade.
+         * Request that rollbacks be enabled or disabled for the given upgrade with rollback data
+         * policy set to RESTORE.
          *
          * <p>If the parent session is staged or has rollback enabled, all children sessions
          * must have the same properties.
          *
          * @param enable set to {@code true} to enable, {@code false} to disable
+         * @see SessionParams#setEnableRollback(boolean, int)
          * @hide
          */
         @SystemApi @TestApi
@@ -1697,7 +1701,34 @@ public class PackageInstaller {
             } else {
                 installFlags &= ~PackageManager.INSTALL_ENABLE_ROLLBACK;
             }
+            rollbackDataPolicy = PackageManager.RollbackDataPolicy.RESTORE;
         }
+
+        /**
+         * Request that rollbacks be enabled or disabled for the given upgrade.
+         *
+         * <p>If the parent session is staged or has rollback enabled, all children sessions
+         * must have the same properties.
+         *
+         * <p> For a multi-package install, this method must be called on each child session to
+         * specify rollback data policies explicitly. Note each child session is allowed to have
+         * different policies.
+         *
+         * @param enable set to {@code true} to enable, {@code false} to disable
+         * @param dataPolicy the rollback data policy for this session
+         * @hide
+         */
+        @SystemApi @TestApi
+        public void setEnableRollback(boolean enable,
+                @PackageManager.RollbackDataPolicy int dataPolicy) {
+            if (enable) {
+                installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
+            } else {
+                installFlags &= ~PackageManager.INSTALL_ENABLE_ROLLBACK;
+            }
+            rollbackDataPolicy = dataPolicy;
+        }
+
 
         /**
          * @deprecated use {@link #setRequestDowngrade(boolean)}.
@@ -1856,27 +1887,18 @@ public class PackageInstaller {
         }
 
         /**
-         * Set Incremental data loader params.
-         *
-         * {@hide}
-         */
-        @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
-        public void setIncrementalParams(@NonNull DataLoaderParams incrementalParams) {
-            this.incrementalParams = incrementalParams;
-        }
-
-        /**
-         * Set the data provider params for the session.
-         * This also switches installation into callback mode and disallow direct writes into
+         * Set the data loader params for the session.
+         * This also switches installation into data provider mode and disallow direct writes into
          * staging folder.
-         * TODO(b/146080380): unify dataprovider params with Incremental.
          *
-         * @param dataLoaderPackageName name of the dataLoader package
+         * WARNING: This is a system API to aid internal development.
+         * Use at your own risk. It will change or be removed without warning.
          * {@hide}
          */
+        @SystemApi
         @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
-        public void setDataLoaderPackageName(String dataLoaderPackageName) {
-            this.dataLoaderPackageName = dataLoaderPackageName;
+        public void setDataLoaderParams(@NonNull DataLoaderParams dataLoaderParams) {
+            this.dataLoaderParams = dataLoaderParams;
         }
 
         /** {@hide} */
@@ -1899,7 +1921,8 @@ public class PackageInstaller {
             pw.printPair("isMultiPackage", isMultiPackage);
             pw.printPair("isStaged", isStaged);
             pw.printPair("requiredInstalledVersionCode", requiredInstalledVersionCode);
-            pw.printPair("dataLoaderPackageName", dataLoaderPackageName);
+            pw.printPair("dataLoaderParams", dataLoaderParams);
+            pw.printPair("rollbackDataPolicy", rollbackDataPolicy);
             pw.println();
         }
 
@@ -1929,12 +1952,12 @@ public class PackageInstaller {
             dest.writeBoolean(isMultiPackage);
             dest.writeBoolean(isStaged);
             dest.writeLong(requiredInstalledVersionCode);
-            if (incrementalParams != null) {
-                dest.writeParcelable(incrementalParams.getData(), flags);
+            if (dataLoaderParams != null) {
+                dest.writeParcelable(dataLoaderParams.getData(), flags);
             } else {
                 dest.writeParcelable(null, flags);
             }
-            dest.writeString(dataLoaderPackageName);
+            dest.writeInt(rollbackDataPolicy);
         }
 
         public static final Parcelable.Creator<SessionParams>
@@ -2072,6 +2095,9 @@ public class PackageInstaller {
         public long updatedMillis;
 
         /** {@hide} */
+        public int rollbackDataPolicy;
+
+        /** {@hide} */
         @UnsupportedAppUsage
         public SessionInfo() {
         }
@@ -2114,6 +2140,7 @@ public class PackageInstaller {
             mStagedSessionErrorCode = source.readInt();
             mStagedSessionErrorMessage = source.readString();
             isCommitted = source.readBoolean();
+            rollbackDataPolicy = source.readInt();
         }
 
         /**
@@ -2431,6 +2458,17 @@ public class PackageInstaller {
         }
 
         /**
+         * Return the data policy associated with the rollback for the given upgrade.
+         *
+         * @hide
+         */
+        @SystemApi @TestApi
+        @PackageManager.RollbackDataPolicy
+        public int getRollbackDataPolicy() {
+            return rollbackDataPolicy;
+        }
+
+        /**
          * Returns {@code true} if this session is an active staged session.
          *
          * We consider a session active if it has been committed and it is either pending
@@ -2592,6 +2630,7 @@ public class PackageInstaller {
             dest.writeInt(mStagedSessionErrorCode);
             dest.writeString(mStagedSessionErrorMessage);
             dest.writeBoolean(isCommitted);
+            dest.writeInt(rollbackDataPolicy);
         }
 
         public static final Parcelable.Creator<SessionInfo>

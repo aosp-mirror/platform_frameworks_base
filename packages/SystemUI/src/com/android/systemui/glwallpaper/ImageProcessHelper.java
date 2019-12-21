@@ -116,7 +116,8 @@ class ImageProcessHelper {
             int width = bitmap.getWidth();
             int height = bitmap.getHeight();
 
-            Bitmap grayscale = Bitmap.createBitmap(width, height, bitmap.getConfig());
+            Bitmap grayscale = Bitmap.createBitmap(width, height, bitmap.getConfig(),
+                    false /* hasAlpha */, bitmap.getColorSpace());
             Canvas canvas = new Canvas(grayscale);
             ColorMatrix cm = new ColorMatrix(LUMINOSITY_MATRIX);
             Paint paint = new Paint();

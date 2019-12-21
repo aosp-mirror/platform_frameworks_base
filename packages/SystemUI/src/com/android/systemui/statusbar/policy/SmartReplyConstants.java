@@ -28,7 +28,7 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -65,7 +65,7 @@ public final class SmartReplyConstants {
     private final KeyValueListParser mParser = new KeyValueListParser(',');
 
     @Inject
-    public SmartReplyConstants(@MainHandler Handler handler, Context context) {
+    public SmartReplyConstants(@Main Handler handler, Context context) {
         mHandler = handler;
         mContext = context;
         final Resources resources = mContext.getResources();

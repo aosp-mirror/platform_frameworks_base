@@ -23,6 +23,7 @@ import android.content.Context;
 import android.os.TelephonyServiceManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
+import android.telephony.ims.ImsManager;
 
 import com.android.internal.util.Preconditions;
 
@@ -87,6 +88,11 @@ public class TelephonyFrameworkInitializer {
                 Context.EUICC_CARD_SERVICE,
                 EuiccCardManager.class,
                 context -> new EuiccCardManager(context)
+        );
+        SystemServiceRegistry.registerContextAwareService(
+                Context.TELEPHONY_IMS_SERVICE,
+                ImsManager.class,
+                context -> new ImsManager(context)
         );
     }
 

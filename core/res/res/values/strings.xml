@@ -1345,6 +1345,12 @@
       connections with paired devices.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_preferredPaymentInfo">Preferred NFC Payment Service Information</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_preferredPaymentInfo">Allows the app to get preferred nfc payment service information like
+      registered aids and route destination.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_nfc">control Near Field Communication</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_nfc">Allows the app to communicate

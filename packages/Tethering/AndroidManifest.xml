@@ -21,6 +21,21 @@
           android:sharedUserId="android.uid.networkstack">
     <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="29" />
 
+    <!-- Permissions must be defined here, and not in the base manifest, as the tethering
+         running in the system server process does not need any permission, and having
+         privileged permissions added would cause crashes on startup unless they are also
+         added to the privileged permissions whitelist for that package. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.MANAGE_USB" />
+    <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_NETWORK_USAGE_HISTORY" />
+    <uses-permission android:name="android.permission.UPDATE_APP_OPS_STATS" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+
     <application
         android:process="com.android.networkstack.process"
         android:extractNativeLibs="false"

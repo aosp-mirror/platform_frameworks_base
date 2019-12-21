@@ -62,7 +62,14 @@ class RuleIndexingDetailsIdentifier {
         // Split the rules into the appropriate indexed pattern. The Tree Maps help us to keep the
         // entries sorted by their index key.
         for (Rule rule : rules) {
-            RuleIndexingDetails indexingDetails = getIndexingDetails(rule.getFormula());
+            RuleIndexingDetails indexingDetails;
+            try {
+                indexingDetails = getIndexingDetails(rule.getFormula());
+            } catch (Exception e) {
+                throw new IllegalArgumentException(
+                        String.format("Malformed rule identified. [%s]", rule.toString()));
+            }
+
             String ruleKey =
                     indexingDetails.getIndexType() != NOT_INDEXED
                             ? indexingDetails.getRuleKey()

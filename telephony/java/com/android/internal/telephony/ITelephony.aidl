@@ -30,6 +30,7 @@ import android.service.carrier.CarrierIdentifier;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telephony.CarrierRestrictionRules;
+import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
 import android.telephony.ClientRequestStats;
 import android.telephony.IccOpenLogicalChannelResponse;
@@ -305,7 +306,8 @@ interface ITelephony {
      */
     boolean isDataConnectivityPossible(int subId);
 
-    Bundle getCellLocation(String callingPkg, String callingFeatureId);
+    // Uses CellIdentity which is Parcelable here; will convert to CellLocation in client.
+    CellIdentity getCellLocation(String callingPkg, String callingFeatureId);
 
     /**
      * Returns the ISO country code equivalent of the current registered

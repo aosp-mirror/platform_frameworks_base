@@ -27,7 +27,7 @@ import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.internal.os.BinderInternal;
-import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
 
@@ -41,7 +41,7 @@ public class SystemUIService extends Service {
     private final Handler mMainHandler;
 
     @Inject
-    public SystemUIService(@MainHandler Handler mainHandler) {
+    public SystemUIService(@Main Handler mainHandler) {
         super();
         mMainHandler = mainHandler;
     }

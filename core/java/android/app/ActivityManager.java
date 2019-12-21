@@ -4547,4 +4547,17 @@ public class ActivityManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Method for the app to tell system that it's wedged and would like to trigger an ANR.
+     *
+     * @param reason The description of that what happened
+     */
+    public void appNotResponding(@NonNull final String reason) {
+        try {
+            getService().appNotResponding(reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

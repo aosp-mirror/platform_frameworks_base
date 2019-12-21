@@ -6162,8 +6162,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mRenderNode = RenderNode.create(getClass().getName(), new ViewAnimationHostBridge(this));
     }
 
-    final boolean debugDraw() {
+    /**
+     * Returns {@code true} when the View is attached and the system developer setting to show
+     * the layout bounds is enabled or {@code false} otherwise.
+     */
+    public final boolean isShowingLayoutBounds() {
         return DEBUG_DRAW || mAttachInfo != null && mAttachInfo.mDebugLayout;
+    }
+
+    /**
+     * Used to test isShowingLayoutBounds(). This sets the local value used
+     * by that function. This method does nothing if the layout isn't attached.
+     *
+     * @hide
+     */
+    @TestApi
+    public final void setShowingLayoutBounds(boolean debugLayout) {
+        if (mAttachInfo != null) {
+            mAttachInfo.mDebugLayout = debugLayout;
+        }
     }
 
     private static SparseArray<String> getAttributeMap() {
@@ -20881,7 +20898,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         if (mOverlay != null && !mOverlay.isEmpty()) {
                             mOverlay.getOverlayView().draw(canvas);
                         }
-                        if (debugDraw()) {
+                        if (isShowingLayoutBounds()) {
                             debugDrawFocus(canvas);
                         }
                     } else {
@@ -22026,7 +22043,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Step 7, draw the default focus highlight
             drawDefaultFocusHighlight(canvas);
 
-            if (debugDraw()) {
+            if (isShowingLayoutBounds()) {
                 debugDrawFocus(canvas);
             }
 
@@ -22201,7 +22218,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Step 6, draw decorations (foreground, scrollbars)
         onDrawForeground(canvas);
 
-        if (debugDraw()) {
+        if (isShowingLayoutBounds()) {
             debugDrawFocus(canvas);
         }
     }

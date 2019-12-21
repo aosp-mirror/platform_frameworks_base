@@ -101,7 +101,7 @@ import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.MainLooper;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -1496,7 +1496,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     @VisibleForTesting
     @Inject
-    protected KeyguardUpdateMonitor(Context context, @MainLooper Looper mainLooper,
+    protected KeyguardUpdateMonitor(Context context, @Main Looper mainLooper,
             BroadcastDispatcher broadcastDispatcher,
             DumpController dumpController) {
         mContext = context;

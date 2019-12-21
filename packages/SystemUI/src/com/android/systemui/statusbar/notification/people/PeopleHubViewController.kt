@@ -23,7 +23,7 @@ import android.os.Handler
 import android.os.UserHandle
 import android.provider.Settings
 import android.view.View
-import com.android.systemui.dagger.qualifiers.MainHandler
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager
 import javax.inject.Inject
@@ -164,7 +164,7 @@ private class PeopleHubViewModelFactoryImpl(
 
 @Singleton
 class PeopleHubSettingChangeDataSourceImpl @Inject constructor(
-    @MainHandler private val handler: Handler,
+    @Main private val handler: Handler,
     context: Context
 ) : DataSource<Boolean> {
 
