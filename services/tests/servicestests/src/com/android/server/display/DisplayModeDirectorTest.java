@@ -78,10 +78,9 @@ public class DisplayModeDirectorTest {
         int displayId = 0;
 
         // With no votes present, DisplayModeDirector should allow any refresh rate.
-        assertEquals(new DisplayModeDirector.DesiredDisplayConfigSpecs(/*defaultModeId=*/60,
-                             new DisplayModeDirector.RefreshRateRange(0f, Float.POSITIVE_INFINITY),
-                             intRange(60, 90)),
-                createDisplayModeDirectorWithDisplayFpsRange(60, 90).getDesiredDisplayConfigSpecs(
+        assertEquals(new DisplayModeDirector.DesiredDisplayModeSpecs(/*defaultModeId=*/60,
+                             new DisplayModeDirector.RefreshRateRange(0f, Float.POSITIVE_INFINITY)),
+                createDisplayModeDirectorWithDisplayFpsRange(60, 90).getDesiredDisplayModeSpecs(
                         displayId));
 
         int numPriorities =
@@ -105,11 +104,10 @@ public class DisplayModeDirectorTest {
                         priority, DisplayModeDirector.Vote.forRefreshRates(minFps + i, maxFps - i));
                 director.injectVotesByDisplay(votesByDisplay);
                 assertEquals(
-                        new DisplayModeDirector.DesiredDisplayConfigSpecs(
+                        new DisplayModeDirector.DesiredDisplayModeSpecs(
                                 /*defaultModeId=*/minFps + i,
-                                new DisplayModeDirector.RefreshRateRange(minFps + i, maxFps - i),
-                                intRange(minFps + i, maxFps - i)),
-                        director.getDesiredDisplayConfigSpecs(displayId));
+                                new DisplayModeDirector.RefreshRateRange(minFps + i, maxFps - i)),
+                        director.getDesiredDisplayModeSpecs(displayId));
             }
         }
 
@@ -128,10 +126,9 @@ public class DisplayModeDirectorTest {
             votes.put(DisplayModeDirector.Vote.MIN_PRIORITY,
                     DisplayModeDirector.Vote.forRefreshRates(70, 80));
             director.injectVotesByDisplay(votesByDisplay);
-            assertEquals(
-                    new DisplayModeDirector.DesiredDisplayConfigSpecs(/*defaultModeId=*/70,
-                            new DisplayModeDirector.RefreshRateRange(70, 80), intRange(70, 80)),
-                    director.getDesiredDisplayConfigSpecs(displayId));
+            assertEquals(new DisplayModeDirector.DesiredDisplayModeSpecs(/*defaultModeId=*/70,
+                                 new DisplayModeDirector.RefreshRateRange(70, 80)),
+                    director.getDesiredDisplayModeSpecs(displayId));
         }
     }
 }
