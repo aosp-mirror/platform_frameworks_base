@@ -63,6 +63,7 @@ int main(int, char**) {
             LOG(ERROR) << "failed to parse " << path;
             continue;
         }
+        LOG(INFO) << "Read version " << sdk_version.version() << " from " << path;
         versions.push_back(sdk_version.version());
     }
     auto itr = std::min_element(versions.begin(), versions.end());
@@ -73,5 +74,6 @@ int main(int, char**) {
         return EXIT_FAILURE;
     }
 
+    LOG(INFO) << "R extension version is " << prop_value;
     return EXIT_SUCCESS;
 }
