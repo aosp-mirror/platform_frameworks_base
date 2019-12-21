@@ -46,6 +46,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -192,5 +193,16 @@ public class AccessibilityManagerTest {
                 assertEquals("Accessibility off. Did you forget to check that?", ise.getMessage());
             }
         });
+    }
+
+    @Test
+    public void testSetWindowMagnificationConnection() throws Exception {
+        AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
+        IWindowMagnificationConnection connection = Mockito.mock(
+                IWindowMagnificationConnection.class);
+
+        manager.setWindowMagnificationConnection(connection);
+
+        verify(mMockService).setWindowMagnificationConnection(connection);
     }
 }
