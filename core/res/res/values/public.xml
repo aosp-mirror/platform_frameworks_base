@@ -3007,8 +3007,6 @@
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">
-      <!-- @hide @SystemApi -->
-      <public name="stat_notify_wifi_in_range" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e5">
@@ -3019,11 +3017,11 @@
     </public-group>
 
     <public-group type="string" first-id="0x01040025">
-      <!-- @hide @SystemApi -->
+      <!-- @hide -->
       <public name="notification_channel_network_status" />
-      <!-- @hide @SystemApi -->
+      <!-- @hide -->
       <public name="notification_channel_network_alerts" />
-      <!-- @hide @SystemApi -->
+      <!-- @hide -->
       <public name="notification_channel_network_available" />
       <!-- @hide @SystemApi -->
       <public name="config_defaultCallRedirection" />
