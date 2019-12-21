@@ -286,11 +286,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public void onDoubleTapAndHold() {
-        // Ignore the event if we aren't touch interacting.
-        if (!mState.isTouchInteracting()) {
-            return;
-        }
-
         // Pointers should not be zero when running this command.
         if (mState.getLastReceivedEvent().getPointerCount() == 0) {
             return;
@@ -304,10 +299,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public boolean onDoubleTap() {
-        if (!mState.isTouchInteracting()) {
-            return false;
-        }
-
         mAms.onTouchInteractionEnd();
         // Remove pending event deliveries.
         mSendHoverEnterAndMoveDelayed.cancel();
@@ -454,7 +445,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 handleActionDown(event, rawEvent, policyFlags);
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
-                handleActionPointerDown();
+                handleActionPointerDown(event, rawEvent, policyFlags);
                 break;
             case MotionEvent.ACTION_MOVE:
                 handleActionMoveStateTouchInteracting(event, rawEvent, policyFlags);
@@ -479,7 +470,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 // We should have already received ACTION_DOWN. Ignore.
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
-                handleActionPointerDown();
+                handleActionPointerDown(event, rawEvent, policyFlags);
                 break;
             case MotionEvent.ACTION_MOVE:
                 handleActionMoveStateTouchExploring(event, rawEvent, policyFlags);
@@ -496,12 +487,19 @@ public class TouchExplorer extends BaseEventStreamTransformation
      * Handles ACTION_POINTER_DOWN when in the touch exploring state. This event represents an
      * additional finger touching the screen.
      */
-    private void handleActionPointerDown() {
+    private void handleActionPointerDown(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         // Another finger down means that if we have not started to deliver
         // hover events, we will not have to. The code for ACTION_MOVE will
         // decide what we will actually do next.
-        mSendHoverEnterAndMoveDelayed.cancel();
-        mSendHoverExitDelayed.cancel();
+
+        if (mSendHoverEnterAndMoveDelayed.isPending()) {
+            mSendHoverEnterAndMoveDelayed.cancel();
+            mSendHoverExitDelayed.cancel();
+        } else {
+            // We have already delivered at least one hover event, so send hover exit to keep the
+            // stream consistent.
+            sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
+        }
     }
     /**
      * Handles ACTION_MOVE while in the touch interacting state. This is where transitions to

@@ -77,6 +77,8 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
         // Start with double tap.
         mGestures.add(new MultiTap(context, 2, GESTURE_DOUBLE_TAP, this));
         mGestures.add(new MultiTapAndHold(context, 2, GESTURE_DOUBLE_TAP_AND_HOLD, this));
+        // Second-finger double tap.
+        mGestures.add(new SecondFingerMultiTap(context, 2, GESTURE_DOUBLE_TAP, this));
         // One-direction swipes.
         mGestures.add(new Swipe(context, RIGHT, GESTURE_SWIPE_RIGHT, this));
         mGestures.add(new Swipe(context, LEFT, GESTURE_SWIPE_LEFT, this));
