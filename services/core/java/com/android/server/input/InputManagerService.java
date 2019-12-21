@@ -317,6 +317,7 @@ public class InputManagerService extends IInputManager.Stub
         this.mContext = context;
         this.mHandler = new InputManagerHandler(DisplayThread.get().getLooper());
 
+        mStaticAssociations = loadStaticInputPortAssociations();
         mUseDevInputEventForAudioJack =
                 context.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);
         Slog.i(TAG, "Initializing input manager, mUseDevInputEventForAudioJack="
@@ -328,7 +329,6 @@ public class InputManagerService extends IInputManager.Stub
         mDoubleTouchGestureEnableFile = TextUtils.isEmpty(doubleTouchGestureEnablePath) ? null :
             new File(doubleTouchGestureEnablePath);
 
-        mStaticAssociations = loadStaticInputPortAssociations();
         LocalServices.addService(InputManagerInternal.class, new LocalService());
     }
 
