@@ -15,8 +15,8 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.google.android.collect.Sets;
-
 import java.util.HashSet;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -58,7 +58,8 @@ public class NotificationEntryManagerGoogle extends NotificationEntryManager {
     @Override
     public void addNotification(StatusBarNotification statusBarNotification, RankingMap rankingMap) {
         super.addNotification(statusBarNotification, rankingMap);
-        if (mShouldBroadcastNotifications && mUserTracker.getCurrentUserId() == 0) {
+        boolean z = mUserTracker.getCurrentUserId() == 0;
+        if (mShouldBroadcastNotifications && z) {
             Intent intent = new Intent();
             intent.setPackage(mWallpaperPackage);
             intent.setAction("com.breel.wallpapers.NOTIFICATION_RECEIVED");
@@ -68,26 +69,19 @@ public class NotificationEntryManagerGoogle extends NotificationEntryManager {
     }
 
     private void checkNotificationBroadcastSupport() {
+        WallpaperInfo wallpaperInfo;
         mShouldBroadcastNotifications = false;
         WallpaperManager wallpaperManager = (WallpaperManager) mContext.getSystemService(WallpaperManager.class);
-        WallpaperInfo wallpaperInfo = wallpaperManager != null ? wallpaperManager.getWallpaperInfo() : null;
-        if (wallpaperInfo != null) {
+        if (wallpaperManager != null && (wallpaperInfo = wallpaperManager.getWallpaperInfo()) != null) {
             ComponentName component = wallpaperInfo.getComponent();
             String packageName = component.getPackageName();
             if (NOTIFYABLE_PACKAGES.contains(packageName)) {
                 mWallpaperPackage = packageName;
                 String className = component.getClassName();
-                String[] strArr = NOTIFYABLE_WALLPAPERS;
-                int length = strArr.length;
-                int i = 0;
-                while (true) {
-                    if (i >= length) {
-                        break;
-                    } else if (className.startsWith(strArr[i])) {
+                for (String startsWith : NOTIFYABLE_WALLPAPERS) {
+                    if (className.startsWith(startsWith)) {
                         mShouldBroadcastNotifications = true;
-                        break;
-                    } else {
-                        i++;
+                        return;
                     }
                 }
             }
