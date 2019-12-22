@@ -20,11 +20,11 @@ import java.util.function.Consumer;
 public class SystemUIGoogleFactory extends SystemUIFactory {
     @Override
     public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
-            ScrimView scrimForBubble, LockscreenWallpaper lockscreenWallpaper,
+            LockscreenWallpaper lockscreenWallpaper,
             TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
             Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
             AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
-        return new LiveWallpaperScrimController(scrimBehind, scrimInFront, scrimForBubble, lockscreenWallpaper,
+        return new LiveWallpaperScrimController(scrimBehind, scrimInFront, lockscreenWallpaper,
                 scrimStateListener, scrimVisibleListener, dozeParameters, alarmManager, keyguardMonitor);
     }
 }
