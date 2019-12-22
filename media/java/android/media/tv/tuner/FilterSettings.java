@@ -17,8 +17,7 @@
 package android.media.tv.tuner;
 
 import android.annotation.Nullable;
-import android.hardware.tv.tuner.V1_0.Constants;
-import android.media.tv.tuner.TunerConstants.FilterSettingsType;
+import android.media.tv.tuner.TunerConstants.FilterType;
 
 import java.util.List;
 
@@ -38,7 +37,8 @@ public abstract class FilterSettings {
     /**
      * Gets filter settings type
      */
-    @FilterSettingsType public abstract int getType();
+    @FilterType
+    public abstract int getType();
 
     // TODO: more builders and getters
 
@@ -55,7 +55,7 @@ public abstract class FilterSettings {
 
         @Override
         public int getType() {
-            return TunerConstants.FILTER_SETTINGS_TS;
+            return TunerConstants.FILTER_TYPE_TS;
         }
 
         /**
@@ -109,7 +109,7 @@ public abstract class FilterSettings {
 
         @Override
         public int getType() {
-            return TunerConstants.FILTER_SETTINGS_MMTP;
+            return TunerConstants.FILTER_TYPE_MMTP;
         }
     }
 
@@ -130,7 +130,7 @@ public abstract class FilterSettings {
 
         @Override
         public int getType() {
-            return TunerConstants.FILTER_SETTINGS_IP;
+            return TunerConstants.FILTER_TYPE_IP;
         }
     }
 
@@ -149,7 +149,7 @@ public abstract class FilterSettings {
 
         @Override
         public int getType() {
-            return TunerConstants.FILTER_SETTINGS_TLV;
+            return TunerConstants.FILTER_TYPE_TLV;
         }
     }
 
@@ -167,7 +167,7 @@ public abstract class FilterSettings {
 
         @Override
         public int getType() {
-            return TunerConstants.FILTER_SETTINGS_ALP;
+            return TunerConstants.FILTER_TYPE_ALP;
         }
     }
 
@@ -197,24 +197,7 @@ public abstract class FilterSettings {
     public static class SectionSettings extends Settings {
 
         private SectionSettings(int mainType) {
-            super(SectionSettings.findType(mainType));
-        }
-
-        private static int findType(int mainType) {
-            switch (mainType) {
-                case TunerConstants.FILTER_SETTINGS_TS:
-                    return Constants.DemuxTsFilterType.SECTION;
-                case TunerConstants.FILTER_SETTINGS_MMTP:
-                    return Constants.DemuxMmtpFilterType.SECTION;
-                case TunerConstants.FILTER_SETTINGS_IP:
-                    return Constants.DemuxIpFilterType.SECTION;
-                case TunerConstants.FILTER_SETTINGS_TLV:
-                    return Constants.DemuxTlvFilterType.SECTION;
-                case TunerConstants.FILTER_SETTINGS_ALP:
-                    return Constants.DemuxAlpFilterType.SECTION;
-            }
-            // UNDEFINED
-            return 0;
+            super(TunerUtils.getFilterSubtype(mainType, TunerConstants.FILTER_SUBTYPE_SECTION));
         }
     }
 
@@ -251,20 +234,9 @@ public abstract class FilterSettings {
         private boolean mIsRaw;
 
         private PesSettings(int mainType, int streamId, boolean isRaw) {
-            super(PesSettings.findType(mainType));
+            super(TunerUtils.getFilterSubtype(mainType, TunerConstants.FILTER_SUBTYPE_PES));
             mStreamId = streamId;
             mIsRaw = isRaw;
-        }
-
-        private static int findType(int mainType) {
-            switch (mainType) {
-                case TunerConstants.FILTER_SETTINGS_TS:
-                    return Constants.DemuxTsFilterType.PES;
-                case TunerConstants.FILTER_SETTINGS_MMTP:
-                    return Constants.DemuxMmtpFilterType.PES;
-            }
-            // UNDEFINED
-            return 0;
         }
 
         /**
@@ -319,22 +291,11 @@ public abstract class FilterSettings {
         private boolean mIsPassthrough;
 
         private AvSettings(int mainType, boolean isAudio) {
-            super(AvSettings.findType(mainType, isAudio));
-        }
-
-        private static int findType(int mainType, boolean isAudio) {
-            switch (mainType) {
-                case TunerConstants.FILTER_SETTINGS_TS:
-                    return isAudio
-                            ? Constants.DemuxTsFilterType.AUDIO
-                            : Constants.DemuxTsFilterType.VIDEO;
-                case TunerConstants.FILTER_SETTINGS_MMTP:
-                    return isAudio
-                            ? Constants.DemuxMmtpFilterType.AUDIO
-                            : Constants.DemuxMmtpFilterType.VIDEO;
-            }
-            // UNDEFINED
-            return 0;
+            super(TunerUtils.getFilterSubtype(
+                    mainType,
+                    isAudio
+                            ? TunerConstants.FILTER_SUBTYPE_AUDIO
+                            : TunerConstants.FILTER_SUBTYPE_VIDEO));
         }
     }
 
@@ -345,15 +306,7 @@ public abstract class FilterSettings {
         private int mDownloadId;
 
         public DownloadSettings(int mainType) {
-            super(DownloadSettings.findType(mainType));
-        }
-
-        private static int findType(int mainType) {
-            if (mainType == TunerConstants.FILTER_SETTINGS_MMTP) {
-                return Constants.DemuxMmtpFilterType.DOWNLOAD;
-            }
-            // UNDEFINED
-            return 0;
+            super(TunerUtils.getFilterSubtype(mainType, TunerConstants.FILTER_SUBTYPE_DOWNLOAD));
         }
     }
 
@@ -365,18 +318,7 @@ public abstract class FilterSettings {
         private int mIndexMask;
 
         public RecordSettings(int mainType) {
-            super(RecordSettings.findType(mainType));
-        }
-
-        private static int findType(int mainType) {
-            switch (mainType) {
-                case TunerConstants.FILTER_SETTINGS_TS:
-                    return Constants.DemuxTsFilterType.RECORD;
-                case TunerConstants.FILTER_SETTINGS_MMTP:
-                    return Constants.DemuxMmtpFilterType.RECORD;
-            }
-            // UNDEFINED
-            return 0;
+            super(TunerUtils.getFilterSubtype(mainType, TunerConstants.FILTER_SUBTYPE_RECORD));
         }
     }
 

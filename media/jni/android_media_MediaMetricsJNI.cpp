@@ -121,15 +121,15 @@ jobject MediaMetricsJNI::writeMetricsToBundle(
         return nullptr;
     }
 
-    bh.put("__key", item->getKey().c_str());
+    bh.put(mediametrics::BUNDLE_KEY, item->getKey().c_str());
     if (item->getPid() != -1) {
-        bh.put("__pid", (int32_t)item->getPid());
+        bh.put(mediametrics::BUNDLE_PID, (int32_t)item->getPid());
     }
     if (item->getTimestamp() > 0) {
-        bh.put("__timestamp", (int64_t)item->getTimestamp());
+        bh.put(mediametrics::BUNDLE_TIMESTAMP, (int64_t)item->getTimestamp());
     }
     if (item->getUid() != -1) {
-        bh.put("__uid", (int32_t)item->getUid());
+        bh.put(mediametrics::BUNDLE_UID, (int32_t)item->getUid());
     }
     for (const auto &prop : *item) {
         const char *name = prop.getName();

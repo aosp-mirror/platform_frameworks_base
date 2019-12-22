@@ -1320,6 +1320,13 @@ Status StatsService::unregisterPullerCallback(int32_t atomTag, const String16& p
     return Status::ok();
 }
 
+Status StatsService::unregisterPullAtomCallback(int32_t uid, int32_t atomTag) {
+    ENFORCE_UID(AID_SYSTEM);
+    VLOG("StatsService::unregisterPullAtomCallback called.");
+    mPullerManager->UnregisterPullAtomCallback(uid, atomTag);
+    return Status::ok();
+}
+
 Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& trainNameIn,
                                                     const int64_t trainVersionCodeIn,
                                                     const int options,

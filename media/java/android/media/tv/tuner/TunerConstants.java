@@ -91,15 +91,40 @@ final class TunerConstants {
     public static final int FRONTEND_SETTINGS_ISDBT = 9;
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({FILTER_SETTINGS_TS, FILTER_SETTINGS_MMTP, FILTER_SETTINGS_IP, FILTER_SETTINGS_TLV,
-            FILTER_SETTINGS_ALP})
-    public @interface FilterSettingsType {}
+    @IntDef({FILTER_TYPE_TS, FILTER_TYPE_MMTP, FILTER_TYPE_IP, FILTER_TYPE_TLV, FILTER_TYPE_ALP})
+    public @interface FilterType {}
 
-    public static final int FILTER_SETTINGS_TS = Constants.DemuxFilterMainType.TS;
-    public static final int FILTER_SETTINGS_MMTP = Constants.DemuxFilterMainType.MMTP;
-    public static final int FILTER_SETTINGS_IP = Constants.DemuxFilterMainType.IP;
-    public static final int FILTER_SETTINGS_TLV = Constants.DemuxFilterMainType.TLV;
-    public static final int FILTER_SETTINGS_ALP = Constants.DemuxFilterMainType.ALP;
+    public static final int FILTER_TYPE_TS = Constants.DemuxFilterMainType.TS;
+    public static final int FILTER_TYPE_MMTP = Constants.DemuxFilterMainType.MMTP;
+    public static final int FILTER_TYPE_IP = Constants.DemuxFilterMainType.IP;
+    public static final int FILTER_TYPE_TLV = Constants.DemuxFilterMainType.TLV;
+    public static final int FILTER_TYPE_ALP = Constants.DemuxFilterMainType.ALP;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FILTER_SUBTYPE_UNDEFINED, FILTER_SUBTYPE_SECTION, FILTER_SUBTYPE_PES,
+            FILTER_SUBTYPE_AUDIO, FILTER_SUBTYPE_VIDEO, FILTER_SUBTYPE_DOWNLOAD,
+            FILTER_SUBTYPE_RECORD, FILTER_SUBTYPE_TS, FILTER_SUBTYPE_PCR, FILTER_SUBTYPE_TEMI,
+            FILTER_SUBTYPE_MMPT, FILTER_SUBTYPE_NTP, FILTER_SUBTYPE_IP_PAYLOAD, FILTER_SUBTYPE_IP,
+            FILTER_SUBTYPE_PAYLOAD_THROUGH, FILTER_SUBTYPE_TLV, FILTER_SUBTYPE_PTP, })
+    public @interface FilterSubtype {}
+
+    public static final int FILTER_SUBTYPE_UNDEFINED = 0;
+    public static final int FILTER_SUBTYPE_SECTION = 1;
+    public static final int FILTER_SUBTYPE_PES = 2;
+    public static final int FILTER_SUBTYPE_AUDIO = 3;
+    public static final int FILTER_SUBTYPE_VIDEO = 4;
+    public static final int FILTER_SUBTYPE_DOWNLOAD = 5;
+    public static final int FILTER_SUBTYPE_RECORD = 6;
+    public static final int FILTER_SUBTYPE_TS = 7;
+    public static final int FILTER_SUBTYPE_PCR = 8;
+    public static final int FILTER_SUBTYPE_TEMI = 9;
+    public static final int FILTER_SUBTYPE_MMPT = 10;
+    public static final int FILTER_SUBTYPE_NTP = 11;
+    public static final int FILTER_SUBTYPE_IP_PAYLOAD = 12;
+    public static final int FILTER_SUBTYPE_IP = 13;
+    public static final int FILTER_SUBTYPE_PAYLOAD_THROUGH = 14;
+    public static final int FILTER_SUBTYPE_TLV = 15;
+    public static final int FILTER_SUBTYPE_PTP = 16;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({DVR_SETTINGS_RECORD, DVR_SETTINGS_PLAYBACK})

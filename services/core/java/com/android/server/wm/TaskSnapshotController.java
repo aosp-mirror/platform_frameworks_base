@@ -179,7 +179,7 @@ class TaskSnapshotController {
     }
 
     void snapshotTasks(ArraySet<Task> tasks) {
-        snapshotTasks(mTmpTasks, false /* allowSnapshotHome */);
+        snapshotTasks(tasks, false /* allowSnapshotHome */);
     }
 
     private void snapshotTasks(ArraySet<Task> tasks, boolean allowSnapshotHome) {

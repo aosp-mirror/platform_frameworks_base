@@ -760,6 +760,7 @@
     <dimen name="chooser_edge_margin_normal">24dp</dimen>
     <dimen name="chooser_preview_image_font_size">20sp</dimen>
     <dimen name="chooser_preview_image_border">1dp</dimen>
+    <dimen name="chooser_preview_image_max_dimen">200dp</dimen>
     <dimen name="chooser_preview_width">-1px</dimen>
     <dimen name="chooser_target_width">90dp</dimen>
     <dimen name="chooser_header_scroll_elevation">4dp</dimen>

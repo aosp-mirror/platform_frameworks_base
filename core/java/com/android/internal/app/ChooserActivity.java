@@ -120,7 +120,6 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.util.ImageUtils;
 import com.android.internal.widget.GridLayoutManager;
 import com.android.internal.widget.RecyclerView;
 import com.android.internal.widget.ResolverDrawerLayout;
@@ -345,7 +344,9 @@ public class ChooserActivity extends ResolverActivity implements
             mHandler.sendEmptyMessageDelayed(IMAGE_LOAD_TIMEOUT, mImageLoadTimeoutMillis);
 
             AsyncTask.THREAD_POOL_EXECUTOR.execute(() -> {
-                final Bitmap bmp = loadThumbnail(uri, new Size(200, 200));
+                int size = getResources().getDimensionPixelSize(
+                        R.dimen.chooser_preview_image_max_dimen);
+                final Bitmap bmp = loadThumbnail(uri, new Size(size, size));
                 final Message msg = Message.obtain();
                 msg.what = IMAGE_LOAD_INTO_VIEW;
                 msg.obj = new LoadUriTask(imageResourceId, uri, extraImages, bmp);
@@ -2127,7 +2128,7 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         try {
-            return ImageUtils.loadThumbnail(getContentResolver(), uri, size);
+            return getContentResolver().loadThumbnail(uri, size, null);
         } catch (IOException | NullPointerException | SecurityException ex) {
             logContentPreviewWarning(uri);
         }

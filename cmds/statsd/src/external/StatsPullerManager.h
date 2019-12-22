@@ -125,6 +125,8 @@ public:
 
     void UnregisterPullerCallback(int32_t atomTag);
 
+    void UnregisterPullAtomCallback(const int uid, const int32_t atomTag);
+
     static std::map<PullerKey, PullAtomInfo> kAllPullAtomInfo;
 
 private:
@@ -138,6 +140,8 @@ private:
 
     // mapping from simple matcher tagId to receivers
     std::map<int, std::list<ReceiverInfo>> mReceivers;
+
+    bool PullLocked(int tagId, vector<std::shared_ptr<LogEvent>>* data);
 
     // locks for data receiver and StatsCompanionService changes
     Mutex mLock;

@@ -294,6 +294,11 @@ StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
 }
 
 bool StatsPullerManager::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
+    AutoMutex _l(mLock);
+    return PullLocked(tagId, data);
+}
+
+bool StatsPullerManager::PullLocked(int tagId, vector<shared_ptr<LogEvent>>* data) {
     VLOG("Initiating pulling %d", tagId);
 
     if (kAllPullAtomInfo.find({.atomTag = tagId}) != kAllPullAtomInfo.end()) {
@@ -422,7 +427,7 @@ void StatsPullerManager::OnAlarmFired(int64_t elapsedTimeNs) {
 
     for (const auto& pullInfo : needToPull) {
         vector<shared_ptr<LogEvent>> data;
-        bool pullSuccess = Pull(pullInfo.first, &data);
+        bool pullSuccess = PullLocked(pullInfo.first, &data);
         if (pullSuccess) {
             StatsdStats::getInstance().notePullDelay(
                     pullInfo.first, getElapsedRealtimeNs() - elapsedTimeNs);
@@ -518,6 +523,12 @@ void StatsPullerManager::UnregisterPullerCallback(int32_t atomTag) {
     if (!isVendorPulledAtom(atomTag)) {
         return;
     }
+    StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/false);
+    kAllPullAtomInfo.erase({.atomTag = atomTag});
+}
+
+void StatsPullerManager::UnregisterPullAtomCallback(const int uid, const int32_t atomTag) {
+    AutoMutex _l(mLock);
     StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/false);
     kAllPullAtomInfo.erase({.atomTag = atomTag});
 }

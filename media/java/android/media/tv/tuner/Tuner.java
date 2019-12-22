@@ -21,8 +21,9 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.media.tv.tuner.TunerConstants.DemuxPidType;
+import android.media.tv.tuner.TunerConstants.FilterSubtype;
+import android.media.tv.tuner.TunerConstants.FilterType;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -43,7 +44,6 @@ public final class Tuner implements AutoCloseable  {
     private static final String TAG = "MediaTvTuner";
     private static final boolean DEBUG = false;
 
-    private static final String PERMISSION = android.Manifest.permission.ACCESS_TV_TUNER;
     private static final int MSG_ON_FRONTEND_EVENT = 1;
     private static final int MSG_ON_FILTER_EVENT = 2;
     private static final int MSG_ON_FILTER_STATUS = 3;
@@ -71,13 +71,6 @@ public final class Tuner implements AutoCloseable  {
     public Tuner(@NonNull Context context) {
         mContext = context;
         nativeSetup();
-    }
-
-    private void checkPermission() {
-        if (mContext.checkCallingOrSelfPermission(PERMISSION)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller must have " + PERMISSION + " permission.");
-        }
     }
 
     private long mNativeContext; // used by native jMediaTuner
@@ -255,7 +248,7 @@ public final class Tuner implements AutoCloseable  {
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     public int tune(@NonNull FrontendSettings settings) {
-        checkPermission();
+        TunerUtils.checkTunerPermission(mContext);
         return nativeTune(settings.getType(), settings);
     }
 
@@ -370,8 +363,10 @@ public final class Tuner implements AutoCloseable  {
         }
     }
 
-    private Filter openFilter(int type, int subType, int bufferSize, FilterCallback cb) {
-        Filter filter = nativeOpenFilter(type, subType, bufferSize);
+    private Filter openFilter(@FilterType int mainType, @FilterSubtype int subType, int bufferSize,
+            FilterCallback cb) {
+        Filter filter = nativeOpenFilter(
+                mainType, TunerUtils.getFilterSubtype(mainType, subType), bufferSize);
         if (filter != null) {
             filter.mCallback = cb;
             if (mHandler == null) {
@@ -459,7 +454,7 @@ public final class Tuner implements AutoCloseable  {
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Nullable
     public Descrambler openDescrambler() {
-        checkPermission();
+        TunerUtils.checkTunerPermission(mContext);
         return nativeOpenDescrambler();
     }
 

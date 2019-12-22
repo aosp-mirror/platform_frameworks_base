@@ -107,6 +107,20 @@ public final class StatsManager {
      */
     public static final String ACTION_STATSD_STARTED = "android.app.action.STATSD_STARTED";
 
+    // Pull atom callback return codes.
+    /**
+     * Value indicating that this pull was successful and that the result should be used.
+     *
+     * @hide
+     **/
+    public static final int PULL_SUCCESS = 0;
+
+    /**
+     * Value indicating that this pull was unsuccessful and that the result should not be used.
+     * @hide
+     **/
+    public static final int PULL_SKIP = 1;
+
     private static final long DEFAULT_COOL_DOWN_NS = 1_000_000_000L; // 1 second.
     private static final long DEFAULT_TIMEOUT_NS = 10_000_000_000L; // 10 seconds.
 
@@ -508,13 +522,11 @@ public final class StatsManager {
      *                          additive fields for mapping isolated to host uids.
      * @param callback          The callback to be invoked when the stats service pulls the atom.
      * @param executor          The executor in which to run the callback
-     * @throws RemoteException  if unsuccessful due to failing to connect to system server.
      *
      * @hide
      */
     public void registerPullAtomCallback(int atomTag, @Nullable PullAtomMetadata metadata,
-            @NonNull StatsPullAtomCallback callback, @NonNull Executor executor)
-            throws RemoteException, SecurityException {
+            @NonNull StatsPullAtomCallback callback, @NonNull Executor executor) {
         long coolDownNs = metadata == null ? DEFAULT_COOL_DOWN_NS : metadata.mCoolDownNs;
         long timeoutNs = metadata == null ? DEFAULT_TIMEOUT_NS : metadata.mTimeoutNs;
         int[] additiveFields = metadata == null ? new int[0] : metadata.mAdditiveFields;
@@ -522,10 +534,34 @@ public final class StatsManager {
             additiveFields = new int[0];
         }
         synchronized (sLock) {
-            IStatsCompanionService service = getIStatsCompanionServiceLocked();
-            PullAtomCallbackInternal rec =
+            try {
+                IStatsCompanionService service = getIStatsCompanionServiceLocked();
+                PullAtomCallbackInternal rec =
                     new PullAtomCallbackInternal(atomTag, callback, executor);
-            service.registerPullAtomCallback(atomTag, coolDownNs, timeoutNs, additiveFields, rec);
+                service.registerPullAtomCallback(atomTag, coolDownNs, timeoutNs, additiveFields,
+                        rec);
+            } catch (RemoteException e) {
+                throw new RuntimeException("Unable to register pull callback", e);
+            }
+        }
+    }
+
+    /**
+     * Unregisters a callback for an atom when that atom is to be pulled. Note that any ongoing
+     * pulls will still occur.
+     *
+     * @param atomTag           The tag of the atom of which to unregister
+     *
+     * @hide
+     */
+    public void unregisterPullAtomCallback(int atomTag) {
+        synchronized (sLock) {
+            try {
+                IStatsCompanionService service = getIStatsCompanionServiceLocked();
+                service.unregisterPullAtomCallback(atomTag);
+            } catch (RemoteException e) {
+                throw new RuntimeException("Unable to unregister pull atom callback");
+            }
         }
     }
 
@@ -544,9 +580,11 @@ public final class StatsManager {
         public void onPullAtom(int atomTag, IPullAtomResultReceiver resultReceiver) {
             mExecutor.execute(() -> {
                 List<StatsEvent> data = new ArrayList<>();
-                boolean success = mCallback.onPullAtom(atomTag, data);
+                int successInt = mCallback.onPullAtom(atomTag, data);
+                boolean success = successInt == PULL_SUCCESS;
                 StatsEventParcel[] parcels = new StatsEventParcel[data.size()];
                 for (int i = 0; i < data.size(); i++) {
+                    parcels[i] = new StatsEventParcel();
                     parcels[i].buffer = data.get(i).getBytes();
                 }
                 try {
@@ -649,9 +687,9 @@ public final class StatsManager {
     public interface StatsPullAtomCallback {
         /**
          * Pull data for the specified atom tag, filling in the provided list of StatsEvent data.
-         * @return if the pull was successful
+         * @return {@link #PULL_SUCCESS} if the pull was successful, or {@link #PULL_SKIP} if not.
          */
-        boolean onPullAtom(int atomTag, List<StatsEvent> data);
+        int onPullAtom(int atomTag, List<StatsEvent> data);
     }
 
     private class StatsdDeathRecipient implements IBinder.DeathRecipient {
