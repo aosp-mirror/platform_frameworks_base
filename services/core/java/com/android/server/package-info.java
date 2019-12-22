@@ -13,5 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @hide
+ * TODO(b/146466118) remove this javadoc tag
+ */
 @android.annotation.Hide
 package com.android.server;
