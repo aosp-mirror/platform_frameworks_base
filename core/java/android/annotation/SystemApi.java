@@ -41,4 +41,49 @@ import java.lang.annotation.Target;
 @Target({TYPE, FIELD, METHOD, CONSTRUCTOR, ANNOTATION_TYPE, PACKAGE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SystemApi {
+    enum Client {
+        /**
+         * Specifies that the intended clients of a SystemApi are privileged apps.
+         * This is the default value for {@link #client}. This implies
+         * MODULE_APPS and MODULE_LIBRARIES as well, which means that APIs will also
+         * be available to module apps and jars.
+         */
+        PRIVILEGED_APPS,
+
+        /**
+         * Specifies that the intended clients of a SystemApi are modules implemented
+         * as apps, like the NetworkStack app. This implies MODULE_LIBRARIES as well,
+         * which means that APIs will also be available to module jars.
+         */
+        MODULE_APPS,
+
+        /**
+         * Specifies that the intended clients of a SystemApi are modules implemented
+         * as libraries, like the conscrypt.jar in the conscrypt APEX.
+         */
+        MODULE_LIBRARIES
+    }
+
+    enum Process {
+        /**
+         * Specifies that the SystemAPI is available in every Java processes.
+         * This is the default value for {@link #process}.
+         */
+        ALL,
+
+        /**
+         * Specifies that the SystemAPI is available only in the system server process.
+         */
+        SYSTEM_SERVER
+    }
+
+    /**
+     * The intended client of this SystemAPI.
+     */
+    Client client() default android.annotation.SystemApi.Client.PRIVILEGED_APPS;
+
+    /**
+     * The process(es) that this SystemAPI is available
+     */
+    Process process() default android.annotation.SystemApi.Process.ALL;
 }

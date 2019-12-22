@@ -66,7 +66,7 @@ metalava_updatable_media_args = " --error UnhiddenSystemApi " +
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
     "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
-    "--hide HiddenTypedefConstant --show-annotation android.annotation.SystemApi "
+    "--hide HiddenTypedefConstant --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\) "
 
 droidstubs {
     name: "updatable-media-stubs",
