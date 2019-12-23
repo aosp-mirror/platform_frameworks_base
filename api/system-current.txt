@@ -4056,17 +4056,24 @@ package android.media {
     method public int getAllFlags();
     method public android.os.Bundle getBundle();
     method public int getCapturePreset();
+    method public int getSystemUsage();
+    method public static boolean isSystemUsage(int);
     field public static final int FLAG_BEACON = 8; // 0x8
     field public static final int FLAG_BYPASS_INTERRUPTION_POLICY = 64; // 0x40
     field public static final int FLAG_BYPASS_MUTE = 128; // 0x80
     field public static final int FLAG_HW_HOTWORD = 32; // 0x20
-    field @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public static final int USAGE_CALL_ASSISTANT = 17; // 0x11
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int USAGE_ANNOUNCEMENT = 1003; // 0x3eb
+    field @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.MODIFY_AUDIO_ROUTING}) public static final int USAGE_CALL_ASSISTANT = 17; // 0x11
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int USAGE_EMERGENCY = 1000; // 0x3e8
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int USAGE_SAFETY = 1001; // 0x3e9
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int USAGE_VEHICLE_STATUS = 1002; // 0x3ea
   }
 
   public static class AudioAttributes.Builder {
     method public android.media.AudioAttributes.Builder addBundle(@NonNull android.os.Bundle);
     method public android.media.AudioAttributes.Builder setCapturePreset(int);
     method public android.media.AudioAttributes.Builder setInternalCapturePreset(int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioAttributes.Builder setSystemUsage(int);
   }
 
   public final class AudioDeviceAddress implements android.os.Parcelable {

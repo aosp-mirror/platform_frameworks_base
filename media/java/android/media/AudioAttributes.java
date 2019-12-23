@@ -99,6 +99,10 @@ public final class AudioAttributes implements Parcelable {
     public final static int CONTENT_TYPE_SONIFICATION = 4;
 
     /**
+     * Invalid value, only ever used for an uninitialized usage value
+     */
+    private static final int USAGE_INVALID = -1;
+    /**
      * Usage value to use when the usage is unknown.
      */
     public final static int USAGE_UNKNOWN = 0;
@@ -184,8 +188,42 @@ public final class AudioAttributes implements Parcelable {
      * Usage value to use for assistant voice interaction with remote caller on Cell and VoIP calls.
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING
+    })
     public static final int USAGE_CALL_ASSISTANT = 17;
+
+    private static final int SYSTEM_USAGE_OFFSET = 1000;
+
+    /**
+     * @hide
+     * Usage value to use when the usage is an emergency.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int USAGE_EMERGENCY = SYSTEM_USAGE_OFFSET;
+    /**
+     * @hide
+     * Usage value to use when the usage is a safety sound.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int USAGE_SAFETY = SYSTEM_USAGE_OFFSET + 1;
+    /**
+     * @hide
+     * Usage value to use when the usage is a vehicle status.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int USAGE_VEHICLE_STATUS = SYSTEM_USAGE_OFFSET + 2;
+    /**
+     * @hide
+     * Usage value to use when the usage is an announcement.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int USAGE_ANNOUNCEMENT = SYSTEM_USAGE_OFFSET + 3;
 
     /**
      * IMPORTANT: when adding new usage types, add them to SDK_USAGES and update SUPPRESSIBLE_USAGES
@@ -489,6 +527,20 @@ public final class AudioAttributes implements Parcelable {
      * @return one of the values that can be set in {@link Builder#setUsage(int)}
      */
     public int getUsage() {
+        if (isSystemUsage(mUsage)) {
+            return USAGE_UNKNOWN;
+        }
+        return mUsage;
+    }
+
+    /**
+     * @hide
+     * Return the system usage.
+     * @return one of the values that can be set in {@link Builder#setUsage(int)} or
+     * {@link Builder#setSystemUsage(int)}
+     */
+    @SystemApi
+    public int getSystemUsage() {
         return mUsage;
     }
 
@@ -591,7 +643,8 @@ public final class AudioAttributes implements Parcelable {
      * {@link MediaPlayer} will use a default usage of {@link AudioAttributes#USAGE_MEDIA}.
      */
     public static class Builder {
-        private int mUsage = USAGE_UNKNOWN;
+        private int mUsage = USAGE_INVALID;
+        private int mSystemUsage = USAGE_INVALID;
         private int mContentType = CONTENT_TYPE_UNKNOWN;
         private int mSource = MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID;
         private int mFlags = 0x0;
@@ -637,7 +690,22 @@ public final class AudioAttributes implements Parcelable {
         public AudioAttributes build() {
             AudioAttributes aa = new AudioAttributes();
             aa.mContentType = mContentType;
-            aa.mUsage = mUsage;
+
+            if (mUsage == USAGE_INVALID) {
+                if (mSystemUsage == USAGE_INVALID) {
+                    aa.mUsage = USAGE_UNKNOWN;
+                } else {
+                    aa.mUsage = mSystemUsage;
+                }
+            } else {
+                if (mSystemUsage == USAGE_INVALID) {
+                    aa.mUsage = mUsage;
+                } else {
+                    throw new IllegalArgumentException(
+                            "Cannot set both usage and system usage on same builder");
+                }
+            }
+
             aa.mSource = mSource;
             aa.mFlags = mFlags;
             if (mMuteHapticChannels) {
@@ -669,24 +737,24 @@ public final class AudioAttributes implements Parcelable {
         /**
          * Sets the attribute describing what is the intended use of the the audio signal,
          * such as alarm or ringtone.
-         * @param usage one of {@link AudioAttributes#USAGE_UNKNOWN},
-         *     {@link AudioAttributes#USAGE_MEDIA},
-         *     {@link AudioAttributes#USAGE_VOICE_COMMUNICATION},
-         *     {@link AudioAttributes#USAGE_VOICE_COMMUNICATION_SIGNALLING},
-         *     {@link AudioAttributes#USAGE_ALARM}, {@link AudioAttributes#USAGE_NOTIFICATION},
-         *     {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE},
-         *     {@link AudioAttributes#USAGE_NOTIFICATION_COMMUNICATION_REQUEST},
-         *     {@link AudioAttributes#USAGE_NOTIFICATION_COMMUNICATION_INSTANT},
-         *     {@link AudioAttributes#USAGE_NOTIFICATION_COMMUNICATION_DELAYED},
-         *     {@link AudioAttributes#USAGE_NOTIFICATION_EVENT},
-         *     {@link AudioAttributes#USAGE_ASSISTANT},
-         *     {@link AudioAttributes#USAGE_ASSISTANCE_ACCESSIBILITY},
-         *     {@link AudioAttributes#USAGE_ASSISTANCE_NAVIGATION_GUIDANCE},
-         *     {@link AudioAttributes#USAGE_ASSISTANCE_SONIFICATION},
-         *     {@link AudioAttributes#USAGE_GAME}.
+         * @param usage one of {@link AttributeSdkUsage#USAGE_UNKNOWN},
+         *     {@link AttributeSdkUsage#USAGE_MEDIA},
+         *     {@link AttributeSdkUsage#USAGE_VOICE_COMMUNICATION},
+         *     {@link AttributeSdkUsage#USAGE_VOICE_COMMUNICATION_SIGNALLING},
+         *     {@link AttributeSdkUsage#USAGE_ALARM}, {@link AudioAttributes#USAGE_NOTIFICATION},
+         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_RINGTONE},
+         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_COMMUNICATION_REQUEST},
+         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_COMMUNICATION_INSTANT},
+         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_COMMUNICATION_DELAYED},
+         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_EVENT},
+         *     {@link AttributeSdkUsage#USAGE_ASSISTANT},
+         *     {@link AttributeSdkUsage#USAGE_ASSISTANCE_ACCESSIBILITY},
+         *     {@link AttributeSdkUsage#USAGE_ASSISTANCE_NAVIGATION_GUIDANCE},
+         *     {@link AttributeSdkUsage#USAGE_ASSISTANCE_SONIFICATION},
+         *     {@link AttributeSdkUsage#USAGE_GAME}.
          * @return the same Builder instance.
          */
-        public Builder setUsage(@AttributeUsage int usage) {
+        public Builder setUsage(@AttributeSdkUsage int usage) {
             switch (usage) {
                 case USAGE_UNKNOWN:
                 case USAGE_MEDIA:
@@ -705,12 +773,33 @@ public final class AudioAttributes implements Parcelable {
                 case USAGE_GAME:
                 case USAGE_VIRTUAL_SOURCE:
                 case USAGE_ASSISTANT:
-                case USAGE_CALL_ASSISTANT:
                     mUsage = usage;
                     break;
                 default:
                     throw new IllegalArgumentException("Invalid usage " + usage);
             }
+            return this;
+        }
+
+        /**
+         * @hide
+         * Sets the attribute describing what is the intended use of the audio signal for categories
+         * of sounds restricted to the system, such as vehicle status or emergency.
+         *
+         * <p>Note that the AudioAttributes have a single usage value, therefore it is illegal to
+         * call both this method and {@link #setUsage(int)}.
+         * @param systemUsage the system-restricted usage.
+         * @return the same Builder instance.
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+        public @NonNull Builder setSystemUsage(@AttributeSystemUsage int systemUsage) {
+            if (isSystemUsage(systemUsage)) {
+                mSystemUsage = systemUsage;
+            } else {
+                throw new IllegalArgumentException("Invalid system usage " + systemUsage);
+            }
+
             return this;
         }
 
@@ -1175,6 +1264,14 @@ public final class AudioAttributes implements Parcelable {
                 return new String("USAGE_ASSISTANT");
             case USAGE_CALL_ASSISTANT:
                 return new String("USAGE_CALL_ASSISTANT");
+            case USAGE_EMERGENCY:
+                return new String("USAGE_EMERGENCY");
+            case USAGE_SAFETY:
+                return new String("USAGE_SAFETY");
+            case USAGE_VEHICLE_STATUS:
+                return new String("USAGE_VEHICLE_STATUS");
+            case USAGE_ANNOUNCEMENT:
+                return new String("USAGE_ANNOUNCEMENT");
             default:
                 return new String("unknown usage " + usage);
         }
@@ -1218,6 +1315,25 @@ public final class AudioAttributes implements Parcelable {
             default:
                 return USAGE_UNKNOWN;
         }
+    }
+
+    /**
+     * @param usage one of {@link AttributeSystemUsage},
+     *     {@link AttributeSystemUsage#USAGE_CALL_ASSISTANT},
+     *     {@link AttributeSystemUsage#USAGE_EMERGENCY},
+     *     {@link AttributeSystemUsage#USAGE_SAFETY},
+     *     {@link AttributeSystemUsage#USAGE_VEHICLE_STATUS},
+     *     {@link AttributeSystemUsage#USAGE_ANNOUNCEMENT}
+     * @return boolean indicating if the usage is a system usage or not
+     * @hide
+     */
+    @SystemApi
+    public static boolean isSystemUsage(@AttributeSystemUsage int usage) {
+        return (usage == USAGE_CALL_ASSISTANT
+                || usage == USAGE_EMERGENCY
+                || usage == USAGE_SAFETY
+                || usage == USAGE_VEHICLE_STATUS
+                || usage == USAGE_ANNOUNCEMENT);
     }
 
     /**
@@ -1295,6 +1411,10 @@ public final class AudioAttributes implements Parcelable {
                 return AudioSystem.STREAM_NOTIFICATION;
             case USAGE_ASSISTANCE_ACCESSIBILITY:
                 return AudioSystem.STREAM_ACCESSIBILITY;
+            case USAGE_EMERGENCY:
+            case USAGE_SAFETY:
+            case USAGE_VEHICLE_STATUS:
+            case USAGE_ANNOUNCEMENT:
             case USAGE_UNKNOWN:
                 return AudioSystem.STREAM_MUSIC;
             default:
@@ -1327,6 +1447,39 @@ public final class AudioAttributes implements Parcelable {
 
     /** @hide */
     @IntDef({
+            USAGE_CALL_ASSISTANT,
+            USAGE_EMERGENCY,
+            USAGE_SAFETY,
+            USAGE_VEHICLE_STATUS,
+            USAGE_ANNOUNCEMENT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AttributeSystemUsage {}
+
+    /** @hide */
+    @IntDef({
+            USAGE_UNKNOWN,
+            USAGE_MEDIA,
+            USAGE_VOICE_COMMUNICATION,
+            USAGE_VOICE_COMMUNICATION_SIGNALLING,
+            USAGE_ALARM,
+            USAGE_NOTIFICATION,
+            USAGE_NOTIFICATION_RINGTONE,
+            USAGE_NOTIFICATION_COMMUNICATION_REQUEST,
+            USAGE_NOTIFICATION_COMMUNICATION_INSTANT,
+            USAGE_NOTIFICATION_COMMUNICATION_DELAYED,
+            USAGE_NOTIFICATION_EVENT,
+            USAGE_ASSISTANCE_ACCESSIBILITY,
+            USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,
+            USAGE_ASSISTANCE_SONIFICATION,
+            USAGE_GAME,
+            USAGE_ASSISTANT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AttributeSdkUsage {}
+
+    /** @hide */
+    @IntDef({
         USAGE_UNKNOWN,
         USAGE_MEDIA,
         USAGE_VOICE_COMMUNICATION,
@@ -1344,6 +1497,10 @@ public final class AudioAttributes implements Parcelable {
         USAGE_GAME,
         USAGE_ASSISTANT,
         USAGE_CALL_ASSISTANT,
+        USAGE_EMERGENCY,
+        USAGE_SAFETY,
+        USAGE_VEHICLE_STATUS,
+        USAGE_ANNOUNCEMENT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AttributeUsage {}
