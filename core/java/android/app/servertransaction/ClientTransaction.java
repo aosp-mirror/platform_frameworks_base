@@ -77,8 +77,9 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
 
     /** Get the list of callbacks. */
     @Nullable
+    @VisibleForTesting
     @UnsupportedAppUsage
-    List<ClientTransactionItem> getCallbacks() {
+    public List<ClientTransactionItem> getCallbacks() {
         return mActivityCallbacks;
     }
 

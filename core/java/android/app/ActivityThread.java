@@ -41,8 +41,10 @@ import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ActivityResultItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
+import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.PendingTransactionActions;
 import android.app.servertransaction.PendingTransactionActions.StopInfo;
+import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.TransactionExecutor;
 import android.app.servertransaction.TransactionExecutorHelper;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -522,6 +524,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         boolean startsNotResumed;
         public final boolean isForward;
         int pendingConfigChanges;
+        // Whether we are in the process of performing on user leaving.
+        boolean mIsUserLeaving;
 
         Window mPendingRemoveWindow;
         WindowManager mPendingRemoveWindowManager;
@@ -3763,6 +3767,66 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    @Override
+    public void handlePictureInPictureRequested(IBinder token) {
+        final ActivityClientRecord r = mActivities.get(token);
+        if (r == null) {
+            Log.w(TAG, "Activity to request PIP to no longer exists");
+            return;
+        }
+
+        r.activity.onPictureInPictureRequested();
+    }
+
+    /**
+     * Cycle activity through onPause and onUserLeaveHint so that PIP is entered if supported, then
+     * return to its previous state. This allows activities that rely on onUserLeaveHint instead of
+     * onPictureInPictureRequested to enter picture-in-picture.
+     */
+    public void schedulePauseAndReturnToCurrentState(IBinder token) {
+        final ActivityClientRecord r = mActivities.get(token);
+        if (r == null) {
+            Log.w(TAG, "Activity to request pause with user leaving hint to no longer exists");
+            return;
+        }
+
+        if (r.mIsUserLeaving) {
+            // The activity is about to perform user leaving, so there's no need to cycle ourselves.
+            return;
+        }
+
+        final int prevState = r.getLifecycleState();
+        if (prevState != ON_RESUME && prevState != ON_PAUSE) {
+            return;
+        }
+
+        switch (prevState) {
+            case ON_RESUME:
+                // Schedule a PAUSE then return to RESUME.
+                schedulePauseWithUserLeavingHint(r);
+                scheduleResume(r);
+                break;
+            case ON_PAUSE:
+                // Schedule a RESUME then return to PAUSE.
+                scheduleResume(r);
+                schedulePauseWithUserLeavingHint(r);
+                break;
+        }
+    }
+
+    private void schedulePauseWithUserLeavingHint(ActivityClientRecord r) {
+        final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
+        transaction.setLifecycleStateRequest(PauseActivityItem.obtain(r.activity.isFinishing(),
+                /* userLeaving */ true, r.activity.mConfigChangeFlags, /* dontReport */ false));
+        executeTransaction(transaction);
+    }
+
+    private void scheduleResume(ActivityClientRecord r) {
+        final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
+        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(/* isForward */ false));
+        executeTransaction(transaction);
+    }
+
     private void handleLocalVoiceInteractionStarted(IBinder token, IVoiceInteractor interactor) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
@@ -4483,6 +4547,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         if (r != null) {
             if (userLeaving) {
                 performUserLeavingActivity(r);
+                r.mIsUserLeaving = false;
             }
 
             r.activity.mConfigChangeFlags |= configChanges;
@@ -4497,6 +4562,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     final void performUserLeavingActivity(ActivityClientRecord r) {
+        r.mIsUserLeaving = true;
+        mInstrumentation.callActivityOnPictureInPictureRequested(r.activity);
         mInstrumentation.callActivityOnUserLeaving(r.activity);
     }
 
