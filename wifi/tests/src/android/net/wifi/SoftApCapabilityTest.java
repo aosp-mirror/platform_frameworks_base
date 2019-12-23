@@ -35,7 +35,9 @@ public class SoftApCapabilityTest {
      */
     @Test
     public void testCopyOperator() throws Exception {
-        SoftApCapability capability = new SoftApCapability();
+        int testSoftApFeature = SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT
+                | SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD;
+        SoftApCapability capability = new SoftApCapability(testSoftApFeature);
         capability.setMaxSupportedClients(10);
 
         SoftApCapability copiedCapability = new SoftApCapability(capability);
@@ -49,7 +51,9 @@ public class SoftApCapabilityTest {
      */
     @Test
     public void testParcelOperation() throws Exception {
-        SoftApCapability capability = new SoftApCapability();
+        int testSoftApFeature = SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT
+                | SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD;
+        SoftApCapability capability = new SoftApCapability(testSoftApFeature);
         capability.setMaxSupportedClients(10);
 
         Parcel parcelW = Parcel.obtain();

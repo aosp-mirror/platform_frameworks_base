@@ -5611,8 +5611,11 @@ package android.net.wifi {
   public final class SoftApCapability implements android.os.Parcelable {
     method public int describeContents();
     method public int getMaxSupportedClients();
+    method public boolean isFeatureSupported(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.SoftApCapability> CREATOR;
+    field public static final int SOFTAP_FEATURE_ACS_OFFLOAD = 1; // 0x1
+    field public static final int SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT = 2; // 0x2
   }
 
   public final class SoftApConfiguration implements android.os.Parcelable {
