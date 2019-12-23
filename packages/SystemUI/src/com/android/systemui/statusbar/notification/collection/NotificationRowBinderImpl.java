@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.collection;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -258,7 +258,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         row.setEntry(entry);
 
         if (mNotificationInterruptionStateProvider.shouldHeadsUp(entry)) {
-            row.updateInflationFlag(FLAG_CONTENT_VIEW_HEADS_UP, true /* shouldInflate */);
+            row.setInflationFlags(FLAG_CONTENT_VIEW_HEADS_UP);
         }
         row.setNeedsRedaction(
                 Dependency.get(NotificationLockscreenUserManager.class).needsRedaction(entry));

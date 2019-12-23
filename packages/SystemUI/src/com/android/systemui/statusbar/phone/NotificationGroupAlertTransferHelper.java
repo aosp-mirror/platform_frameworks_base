@@ -33,7 +33,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.AsyncInflationTask;
-import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.phone.NotificationGroupManager.NotificationGroup;
 import com.android.systemui.statusbar.phone.NotificationGroupManager.OnGroupChangeListener;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -395,7 +395,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         @InflationFlag int contentFlag = alertManager.getContentFlag();
         if (!entry.getRow().isInflationFlagSet(contentFlag)) {
             mPendingAlerts.put(entry.getKey(), new PendingAlertInfo(entry));
-            entry.getRow().updateInflationFlag(contentFlag, true /* shouldInflate */);
+            entry.getRow().setInflationFlags(contentFlag);
             entry.getRow().inflateViews();
             return;
         }
