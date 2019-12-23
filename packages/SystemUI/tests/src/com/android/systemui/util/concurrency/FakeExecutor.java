@@ -17,7 +17,6 @@
 package com.android.systemui.util.concurrency;
 
 import com.android.systemui.util.time.FakeSystemClock;
-import com.android.systemui.util.time.FakeSystemClock.ClockTickListener;
 
 import java.util.Collections;
 import java.util.PriorityQueue;
@@ -29,15 +28,6 @@ public class FakeExecutor implements DelayableExecutor {
     private PriorityQueue<QueuedRunnable> mQueuedRunnables = new PriorityQueue<>();
     private boolean mIgnoreClockUpdates;
 
-    private ClockTickListener mClockTickListener = new ClockTickListener() {
-        @Override
-        public void onUptimeMillis(long uptimeMillis) {
-            if (!mIgnoreClockUpdates) {
-                runAllReady();
-            }
-        }
-    };
-
     /**
      * Initializes a fake executor.
      *
@@ -47,7 +37,11 @@ public class FakeExecutor implements DelayableExecutor {
      */
     public FakeExecutor(FakeSystemClock clock) {
         mClock = clock;
-        mClock.addListener(mClockTickListener);
+        mClock.addListener(() -> {
+            if (!mIgnoreClockUpdates) {
+                runAllReady();
+            }
+        });
     }
 
     /**
