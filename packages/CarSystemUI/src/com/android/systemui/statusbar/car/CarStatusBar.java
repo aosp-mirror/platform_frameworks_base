@@ -1043,6 +1043,12 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mScrimController.setScrimBehindDrawable(mNotificationPanelBackground);
     }
 
+    @Override
+    public void onLocaleListChanged() {
+        connectNotificationsUI();
+        registerNavBarListeners();
+    }
+
     /**
      * Returns the {@link Drawable} that represents the wallpaper that the user has currently set.
      */
