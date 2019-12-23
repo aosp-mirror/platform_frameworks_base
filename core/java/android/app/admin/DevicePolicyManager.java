@@ -6764,8 +6764,9 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    public boolean checkDeviceIdentifierAccess(String packageName, int pid, int uid) {
-        throwIfParentInstance("checkDeviceIdentifierAccess");
+    @SystemApi
+    public boolean hasDeviceIdentifierAccess(@NonNull String packageName, int pid, int uid) {
+        throwIfParentInstance("hasDeviceIdentifierAccess");
         if (packageName == null) {
             return false;
         }
