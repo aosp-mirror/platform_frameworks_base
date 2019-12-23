@@ -135,6 +135,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityWindowInfo;
+import android.view.accessibility.IAccessibilityEmbeddedConnection;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -354,6 +355,8 @@ public final class ViewRootImpl implements ViewParent,
     public final WindowManager.LayoutParams mWindowAttributes = new WindowManager.LayoutParams();
 
     final W mWindow;
+
+    final IBinder mLeashToken;
 
     final int mTargetSdkVersion;
 
@@ -652,6 +655,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private final GestureExclusionTracker mGestureExclusionTracker = new GestureExclusionTracker();
 
+    private IAccessibilityEmbeddedConnection mEmbeddedConnection;
+
     static final class SystemUiVisibilityInfo {
         int seq;
         int globalVisibility;
@@ -685,6 +690,7 @@ public final class ViewRootImpl implements ViewParent,
         mVisRect = new Rect();
         mWinFrame = new Rect();
         mWindow = new W(this);
+        mLeashToken = new Binder();
         mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
         mViewVisibility = View.GONE;
         mTransparentRegion = new Region();
@@ -9157,6 +9163,10 @@ public final class ViewRootImpl implements ViewParent,
                         focusedView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
                     }
                 }
+                if (mAttachInfo.mLeashedParentToken != null) {
+                    mAccessibilityManager.associateEmbeddedHierarchy(
+                            mAttachInfo.mLeashedParentToken, mLeashToken);
+                }
             } else {
                 ensureNoConnection();
                 mHandler.obtainMessage(MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST).sendToTarget();
@@ -9169,6 +9179,7 @@ public final class ViewRootImpl implements ViewParent,
             if (!registered) {
                 mAttachInfo.mAccessibilityWindowId =
                         mAccessibilityManager.addAccessibilityInteractionConnection(mWindow,
+                                mLeashToken,
                                 mContext.getPackageName(),
                                 new AccessibilityInteractionConnection(ViewRootImpl.this));
             }
@@ -9353,6 +9364,17 @@ public final class ViewRootImpl implements ViewParent,
                         .notifyOutsideTouchClientThread();
             }
         }
+    }
+
+    /**
+     * Gets an accessibility embedded connection interface for this ViewRootImpl.
+     * @hide
+     */
+    public IAccessibilityEmbeddedConnection getEmbeddedConnection() {
+        if (mEmbeddedConnection == null) {
+            mEmbeddedConnection = new AccessibilityEmbeddedConnection(ViewRootImpl.this);
+        }
+        return mEmbeddedConnection;
     }
 
     private class SendWindowContentChangedAccessibilityEvent implements Runnable {
