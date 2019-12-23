@@ -8,6 +8,7 @@ import static android.app.WaitResult.LAUNCH_STATE_HOT;
 import static android.app.WaitResult.LAUNCH_STATE_WARM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
@@ -119,6 +120,7 @@ class ActivityMetricsLogger {
     private static final int WINDOW_STATE_SIDE_BY_SIDE = 1;
     private static final int WINDOW_STATE_FREEFORM = 2;
     private static final int WINDOW_STATE_ASSISTANT = 3;
+    private static final int WINDOW_STATE_MULTI_WINDOW = 4;
     private static final int WINDOW_STATE_INVALID = -1;
 
     /**
@@ -419,6 +421,9 @@ class ActivityMetricsLogger {
                 break;
             case WINDOWING_MODE_FREEFORM:
                 mWindowState = WINDOW_STATE_FREEFORM;
+                break;
+            case WINDOWING_MODE_MULTI_WINDOW:
+                mWindowState = WINDOW_STATE_MULTI_WINDOW;
                 break;
             default:
                 if (windowingMode != WINDOWING_MODE_UNDEFINED) {
