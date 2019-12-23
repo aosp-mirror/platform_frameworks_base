@@ -1626,39 +1626,35 @@ public class UserManager {
     }
 
     /**
-     * Returns the calling user's user type.
+     * Returns whether the current user is of the given user type, such as
+     * {@link UserManager#USER_TYPE_FULL_GUEST}.
      *
-     * // TODO(b/142482943): Decide on the appropriate permission requirements.
-     *
-     * @return the name of the user type, such as {@link UserManager#USER_TYPE_PROFILE_MANAGED}.
+     * @return true if the user is of the given user type.
      * @hide
      */
-    public @NonNull String getUserType() {
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public boolean isUserOfType(@NonNull String userType) {
         try {
-            return mService.getUserTypeForUser(UserHandle.myUserId());
+            return mService.isUserOfType(UserHandle.myUserId(), userType);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Returns the given user's user type.
-     *
-     * // TODO(b/142482943): Decide on the appropriate permission requirements.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} or
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission, otherwise the caller
-     * must be in the same profile group of specified user.
+     * Returns whether the given user is of the given user type, such as
+     * {@link UserManager#USER_TYPE_FULL_GUEST}.
      *
      * @param userHandle the user handle of the user whose type is being requested.
-     * @return the name of the user's user type, e.g. {@link UserManager#USER_TYPE_PROFILE_MANAGED},
-     *         or {@code null} if there is no such user.
+     * @param userType the name of the user's user type, e.g.
+     *                 {@link UserManager#USER_TYPE_PROFILE_MANAGED}.
+     * @return true if the userHandle user is of type userType
      * @hide
      */
-    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
-    public @Nullable String getUserTypeForUser(@NonNull UserHandle userHandle) {
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public boolean isUserOfType(@NonNull UserHandle userHandle, @NonNull String userType) {
         try {
-            return mService.getUserTypeForUser(userHandle.getIdentifier());
+            return mService.isUserOfType(userHandle.getIdentifier(), userType);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

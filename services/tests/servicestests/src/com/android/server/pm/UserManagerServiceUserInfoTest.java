@@ -139,18 +139,18 @@ public class UserManagerServiceUserInfoTest {
         assertEquals("A Name", mUserManagerService.getUserInfo(TEST_ID).name);
     }
 
-    /** Test UMS.getUserTypeForUser(). */
+    /** Test UMS.isUserOfType(). */
     @Test
-    public void testGetUserTypeForUser() throws Exception {
-        final String typeSys = mUserManagerService.getUserTypeForUser(UserHandle.USER_SYSTEM);
-        assertTrue("System user was of invalid type " + typeSys,
-                typeSys.equals(USER_TYPE_SYSTEM_HEADLESS) || typeSys.equals(USER_TYPE_FULL_SYSTEM));
+    public void testIsUserOfType() throws Exception {
+        assertTrue("System user was of invalid type",
+                mUserManagerService.isUserOfType(UserHandle.USER_SYSTEM, USER_TYPE_SYSTEM_HEADLESS)
+                || mUserManagerService.isUserOfType(UserHandle.USER_SYSTEM, USER_TYPE_FULL_SYSTEM));
 
         final int testId = 100;
         final String typeName = "A type";
         UserInfo userInfo = createUser(testId, 0, typeName);
         mUserManagerService.putUserInfo(userInfo);
-        assertEquals(typeName, mUserManagerService.getUserTypeForUser(testId));
+        assertTrue(mUserManagerService.isUserOfType(testId, typeName));
     }
 
     /** Tests upgradeIfNecessaryLP (but without locking) for upgrading from version 8 to 9+. */
@@ -169,22 +169,22 @@ public class UserManagerServiceUserInfoTest {
 
         mUserManagerService.upgradeIfNecessaryLP(null, versionToTest - 1);
 
-        assertEquals(USER_TYPE_PROFILE_MANAGED, mUserManagerService.getUserTypeForUser(100));
+        assertTrue(mUserManagerService.isUserOfType(100, USER_TYPE_PROFILE_MANAGED));
         assertTrue((mUserManagerService.getUserInfo(100).flags & FLAG_PROFILE) != 0);
 
-        assertEquals(USER_TYPE_FULL_GUEST, mUserManagerService.getUserTypeForUser(101));
+        assertTrue(mUserManagerService.isUserOfType(101, USER_TYPE_FULL_GUEST));
 
-        assertEquals(USER_TYPE_FULL_RESTRICTED, mUserManagerService.getUserTypeForUser(102));
+        assertTrue(mUserManagerService.isUserOfType(102, USER_TYPE_FULL_RESTRICTED));
         assertTrue((mUserManagerService.getUserInfo(102).flags & FLAG_PROFILE) == 0);
 
-        assertEquals(USER_TYPE_FULL_SECONDARY, mUserManagerService.getUserTypeForUser(103));
+        assertTrue(mUserManagerService.isUserOfType(103, USER_TYPE_FULL_SECONDARY));
         assertTrue((mUserManagerService.getUserInfo(103).flags & FLAG_PROFILE) == 0);
 
-        assertEquals(USER_TYPE_SYSTEM_HEADLESS, mUserManagerService.getUserTypeForUser(104));
+        assertTrue(mUserManagerService.isUserOfType(104, USER_TYPE_SYSTEM_HEADLESS));
 
-        assertEquals(USER_TYPE_FULL_SYSTEM, mUserManagerService.getUserTypeForUser(105));
+        assertTrue(mUserManagerService.isUserOfType(105, USER_TYPE_FULL_SYSTEM));
 
-        assertEquals(USER_TYPE_FULL_DEMO, mUserManagerService.getUserTypeForUser(106));
+        assertTrue(mUserManagerService.isUserOfType(106, USER_TYPE_FULL_DEMO));
     }
 
     /** Creates a UserInfo with the given flags and userType. */

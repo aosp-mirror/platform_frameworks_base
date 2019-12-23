@@ -341,8 +341,8 @@ public final class UserManagerTest {
         assertThat(mUserManager.getUserBadgeNoBackgroundResId(userId))
                 .isEqualTo(userTypeDetails.getBadgeNoBackground());
         assertThat(mUserManager.isProfile(userId)).isEqualTo(userTypeDetails.isProfile());
-        assertThat(mUserManager.getUserTypeForUser(asHandle(userId)))
-                .isEqualTo(userTypeDetails.getName());
+        assertThat(mUserManager.isUserOfType(asHandle(userId), userTypeDetails.getName()))
+                .isTrue();
 
         final int badgeIndex = userInfo.profileBadge;
         assertThat(mUserManager.getUserBadgeColor(userId)).isEqualTo(
