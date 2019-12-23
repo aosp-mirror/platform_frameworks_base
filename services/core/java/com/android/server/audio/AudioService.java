@@ -63,6 +63,7 @@ import android.hardware.input.InputManager;
 import android.hardware.usb.UsbManager;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.media.AudioAttributes;
+import android.media.AudioAttributes.AttributeSystemUsage;
 import android.media.AudioDeviceAddress;
 import android.media.AudioDeviceInfo;
 import android.media.AudioFocusInfo;
@@ -570,6 +571,11 @@ public class AudioService extends IAudioService.Stub
     @GuardedBy("mSettingsLock")
     private int mAssistantUid;
 
+    private final Object mSupportedSystemUsagesLock = new Object();
+    @GuardedBy("mSupportedSystemUsagesLock")
+    private @AttributeSystemUsage int[] mSupportedSystemUsages =
+            new int[]{AudioAttributes.USAGE_CALL_ASSISTANT};
+
     // Defines the format for the connection "address" for ALSA devices
     public static String makeAlsaAddressString(int card, int device) {
         return "card=" + card + ";device=" + device + ";";
@@ -1043,6 +1049,10 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
+        synchronized (mSupportedSystemUsagesLock) {
+            AudioSystem.setSupportedSystemUsages(mSupportedSystemUsages);
+        }
+
         synchronized (mAudioPolicies) {
             for (AudioPolicyProxy policy : mAudioPolicies.values()) {
                 final int status = policy.connectMixes();
@@ -1094,6 +1104,37 @@ public class AudioService extends IAudioService.Stub
                 } catch (InterruptedException e) {
                     Log.e(TAG, "Interrupted while waiting on volume handler.");
                 }
+            }
+        }
+    }
+
+    /**
+     * @see AudioManager#setSupportedSystemUsages(int[])
+     */
+    public void setSupportedSystemUsages(@NonNull @AttributeSystemUsage int[] systemUsages) {
+        enforceModifyAudioRoutingPermission();
+        verifySystemUsages(systemUsages);
+
+        synchronized (mSupportedSystemUsagesLock) {
+            AudioSystem.setSupportedSystemUsages(systemUsages);
+            mSupportedSystemUsages = systemUsages;
+        }
+    }
+
+    /**
+     * @see AudioManager#getSupportedSystemUsages()
+     */
+    public @NonNull @AttributeSystemUsage int[] getSupportedSystemUsages() {
+        enforceModifyAudioRoutingPermission();
+        synchronized (mSupportedSystemUsagesLock) {
+            return Arrays.copyOf(mSupportedSystemUsages, mSupportedSystemUsages.length);
+        }
+    }
+
+    private void verifySystemUsages(@NonNull int[] systemUsages) {
+        for (int i = 0; i < systemUsages.length; i++) {
+            if (!AudioAttributes.isSystemUsage(systemUsages[i])) {
+                throw new IllegalArgumentException("Non-system usage provided: " + systemUsages[i]);
             }
         }
     }
@@ -5720,10 +5761,48 @@ public class AudioService extends IAudioService.Stub
         return false;
     }
 
+    private boolean isSupportedSystemUsage(@AudioAttributes.AttributeUsage int usage) {
+        synchronized (mSupportedSystemUsagesLock) {
+            for (int i = 0; i < mSupportedSystemUsages.length; i++) {
+                if (mSupportedSystemUsages[i] == usage) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    private void validateAudioAttributesUsage(@NonNull AudioAttributes audioAttributes) {
+        @AudioAttributes.AttributeUsage int usage = audioAttributes.getSystemUsage();
+        if (AudioAttributes.isSystemUsage(usage)) {
+            if (callerHasPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)) {
+                if (!isSupportedSystemUsage(usage)) {
+                    throw new IllegalArgumentException(
+                            "Unsupported usage " + AudioAttributes.usageToString(usage));
+                }
+            } else {
+                throw new SecurityException("Missing MODIFY_AUDIO_ROUTING permission");
+            }
+        }
+    }
+
+    private boolean isValidAudioAttributesUsage(@NonNull AudioAttributes audioAttributes) {
+        @AudioAttributes.AttributeUsage int usage = audioAttributes.getSystemUsage();
+        if (AudioAttributes.isSystemUsage(usage)) {
+            return callerHasPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
+                    && isSupportedSystemUsage(usage);
+        }
+        return true;
+    }
+
     public int requestAudioFocus(AudioAttributes aa, int durationHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
             IAudioPolicyCallback pcb, int sdk) {
         // permission checks
+        if (aa != null && !isValidAudioAttributesUsage(aa)) {
+            Log.w(TAG, "Request using unsupported usage.");
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        }
         if ((flags & AudioManager.AUDIOFOCUS_FLAG_LOCK) == AudioManager.AUDIOFOCUS_FLAG_LOCK) {
             if (AudioSystem.IN_VOICE_COMM_FOCUS_ID.equals(clientId)) {
                 if (PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(
@@ -5754,6 +5833,10 @@ public class AudioService extends IAudioService.Stub
 
     public int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, AudioAttributes aa,
             String callingPackageName) {
+        if (aa != null && !isValidAudioAttributesUsage(aa)) {
+            Log.w(TAG, "Request using unsupported usage.");
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        }
         return mMediaFocusControl.abandonAudioFocus(fd, clientId, aa, callingPackageName);
     }
 
@@ -6313,6 +6396,17 @@ public class AudioService extends IAudioService.Stub
         sForceUseLogger.dump(pw);
         pw.println("\n");
         sVolumeLogger.dump(pw);
+        pw.println("\n");
+        dumpSupportedSystemUsage(pw);
+    }
+
+    private void dumpSupportedSystemUsage(PrintWriter pw) {
+        pw.println("Supported System Usages:");
+        synchronized (mSupportedSystemUsagesLock) {
+            for (int i = 0; i < mSupportedSystemUsages.length; i++) {
+                pw.printf("\t%s\n", AudioAttributes.usageToString(mSupportedSystemUsages[i]));
+            }
+        }
     }
 
     private static String safeMediaVolumeStateToString(int state) {
@@ -7090,10 +7184,16 @@ public class AudioService extends IAudioService.Stub
     }
 
     public int trackPlayer(PlayerBase.PlayerIdCard pic) {
+        if (pic != null && pic.mAttributes != null) {
+            validateAudioAttributesUsage(pic.mAttributes);
+        }
         return mPlaybackMonitor.trackPlayer(pic);
     }
 
     public void playerAttributes(int piid, AudioAttributes attr) {
+        if (attr != null) {
+            validateAudioAttributesUsage(attr);
+        }
         mPlaybackMonitor.playerAttributes(piid, attr, Binder.getCallingUid());
     }
 

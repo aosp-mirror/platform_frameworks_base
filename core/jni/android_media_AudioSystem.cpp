@@ -2239,6 +2239,31 @@ android_media_AudioSystem_isHapticPlaybackSupported(JNIEnv *env, jobject thiz)
     return AudioSystem::isHapticPlaybackSupported();
 }
 
+static jint android_media_AudioSystem_setSupportedSystemUsages(JNIEnv *env, jobject thiz,
+                                                               jintArray systemUsages) {
+    std::vector<audio_usage_t> nativeSystemUsagesVector;
+
+    if (systemUsages == nullptr) {
+        return (jint) AUDIO_JAVA_BAD_VALUE;
+    }
+
+    int *nativeSystemUsages = nullptr;
+    nativeSystemUsages = env->GetIntArrayElements(systemUsages, 0);
+
+    if (nativeSystemUsages != nullptr) {
+        jsize len = env->GetArrayLength(systemUsages);
+        for (size_t i = 0; i < len; i++) {
+            audio_usage_t nativeAudioUsage =
+                    static_cast<audio_usage_t>(nativeSystemUsages[i]);
+            nativeSystemUsagesVector.push_back(nativeAudioUsage);
+        }
+        env->ReleaseIntArrayElements(systemUsages, nativeSystemUsages, 0);
+    }
+
+    status_t status = AudioSystem::setSupportedSystemUsages(nativeSystemUsagesVector);
+    return (jint)nativeToJavaStatus(status);
+}
+
 static jint
 android_media_AudioSystem_setAllowedCapturePolicy(JNIEnv *env, jobject thiz, jint uid, jint flags) {
     return AudioSystem::setAllowedCapturePolicy(uid, flags);
@@ -2430,6 +2455,7 @@ static const JNINativeMethod gMethods[] = {
     {"isHapticPlaybackSupported", "()Z", (void *)android_media_AudioSystem_isHapticPlaybackSupported},
     {"getHwOffloadEncodingFormatsSupportedForA2DP", "(Ljava/util/ArrayList;)I",
                     (void*)android_media_AudioSystem_getHwOffloadEncodingFormatsSupportedForA2DP},
+    {"setSupportedSystemUsages", "([I)I", (void *)android_media_AudioSystem_setSupportedSystemUsages},
     {"setAllowedCapturePolicy", "(II)I", (void *)android_media_AudioSystem_setAllowedCapturePolicy},
     {"setRttEnabled",       "(Z)I",     (void *)android_media_AudioSystem_setRttEnabled},
     {"setAudioHalPids",  "([I)I", (void *)android_media_AudioSystem_setAudioHalPids},

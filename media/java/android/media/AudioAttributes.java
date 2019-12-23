@@ -735,7 +735,7 @@ public final class AudioAttributes implements Parcelable {
         }
 
         /**
-         * Sets the attribute describing what is the intended use of the the audio signal,
+         * Sets the attribute describing what is the intended use of the audio signal,
          * such as alarm or ringtone.
          * @param usage one of {@link AttributeSdkUsage#USAGE_UNKNOWN},
          *     {@link AttributeSdkUsage#USAGE_MEDIA},

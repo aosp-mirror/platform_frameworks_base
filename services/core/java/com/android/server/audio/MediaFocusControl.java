@@ -727,6 +727,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             case AudioAttributes.USAGE_ASSISTANT:
             case AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY:
             case AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE:
+            case AudioAttributes.USAGE_ANNOUNCEMENT:
                 return 700;
             case AudioAttributes.USAGE_VOICE_COMMUNICATION:
             case AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING:
@@ -736,7 +737,10 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             case AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_DELAYED:
             case AudioAttributes.USAGE_NOTIFICATION_EVENT:
             case AudioAttributes.USAGE_ASSISTANCE_SONIFICATION:
+            case AudioAttributes.USAGE_VEHICLE_STATUS:
                 return 500;
+            case AudioAttributes.USAGE_EMERGENCY:
+            case AudioAttributes.USAGE_SAFETY:
             case AudioAttributes.USAGE_UNKNOWN:
             default:
                 return 0;

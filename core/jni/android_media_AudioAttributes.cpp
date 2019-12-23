@@ -48,9 +48,7 @@ static struct {
     jfieldID    mFormattedTags; // AudioAttributes.mFormattedTags
 } gAudioAttributesFields;
 
-static struct {
-    jmethodID isSystemUsage;
-} gAudioAttributesClassMethods;
+static struct { jmethodID isSystemUsage; } gAudioAttributesClassMethods;
 
 static jclass gAudioAttributesBuilderClass;
 static jmethodID gAudioAttributesBuilderCstor;
@@ -120,11 +118,9 @@ static jint nativeAudioAttributesToJavaAudioAttributes(
                                                       attributes.usage);
     if (isSystemUsage) {
         env->CallObjectMethod(jAttributeBuilder.get(),
-                                  gAudioAttributesBuilderMethods.setSystemUsage,
-                                  attributes.usage);
+                              gAudioAttributesBuilderMethods.setSystemUsage, attributes.usage);
     } else {
-        env->CallObjectMethod(jAttributeBuilder.get(),
-                              gAudioAttributesBuilderMethods.setUsage,
+        env->CallObjectMethod(jAttributeBuilder.get(), gAudioAttributesBuilderMethods.setUsage,
                               attributes.usage);
     }
     env->CallObjectMethod(jAttributeBuilder.get(),
@@ -183,8 +179,8 @@ int register_android_media_AudioAttributes(JNIEnv *env)
 {
     jclass audioAttributesClass = FindClassOrDie(env, kClassPathName);
     gAudioAttributesClass = MakeGlobalRefOrDie(env, audioAttributesClass);
-    gAudioAttributesClassMethods.isSystemUsage = GetStaticMethodIDOrDie(env, gAudioAttributesClass,
-        "isSystemUsage", "(I)Z");
+    gAudioAttributesClassMethods.isSystemUsage =
+            GetStaticMethodIDOrDie(env, gAudioAttributesClass, "isSystemUsage", "(I)Z");
 
     gAudioAttributesFields.mUsage = GetFieldIDOrDie(env, audioAttributesClass, "mUsage", "I");
     gAudioAttributesFields.mSource = GetFieldIDOrDie(env, audioAttributesClass, "mSource", "I");
@@ -204,9 +200,9 @@ int register_android_media_AudioAttributes(JNIEnv *env)
     gAudioAttributesBuilderMethods.setUsage = GetMethodIDOrDie(
                 env, audioAttributesBuilderClass, "setUsage",
                 "(I)Landroid/media/AudioAttributes$Builder;");
-    gAudioAttributesBuilderMethods.setSystemUsage = GetMethodIDOrDie(
-                    env, audioAttributesBuilderClass, "setSystemUsage",
-                    "(I)Landroid/media/AudioAttributes$Builder;");
+    gAudioAttributesBuilderMethods.setSystemUsage =
+            GetMethodIDOrDie(env, audioAttributesBuilderClass, "setSystemUsage",
+                             "(I)Landroid/media/AudioAttributes$Builder;");
     gAudioAttributesBuilderMethods.setInternalCapturePreset = GetMethodIDOrDie(
                 env, audioAttributesBuilderClass, "setInternalCapturePreset",
                 "(I)Landroid/media/AudioAttributes$Builder;");
