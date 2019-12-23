@@ -210,7 +210,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren_vdOffscr
     auto surface = testContext.surface();
     int width = ANativeWindow_getWidth(surface.get());
     int height = ANativeWindow_getHeight(surface.get());
-    canvasContext->setSurface(std::move(surface));
+    canvasContext->setSurface(surface.get());
 
     TreeInfo info(TreeInfo::MODE_FULL, *canvasContext.get());
     DamageAccumulator damageAccumulator;

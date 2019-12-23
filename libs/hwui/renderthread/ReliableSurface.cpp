@@ -16,7 +16,10 @@
 
 #include "ReliableSurface.h"
 
+#include <log/log_main.h>
 #include <private/android/AHardwareBufferHelpers.h>
+// TODO: this should be including apex instead.
+#include <vndk/window.h>
 
 namespace android::uirenderer::renderthread {
 
@@ -26,8 +29,9 @@ namespace android::uirenderer::renderthread {
 // to propagate this error back to the caller
 constexpr bool DISABLE_BUFFER_PREFETCH = true;
 
-ReliableSurface::ReliableSurface(sp<Surface>&& surface) : mSurface(std::move(surface)) {
-    LOG_ALWAYS_FATAL_IF(!mSurface, "Error, unable to wrap a nullptr");
+ReliableSurface::ReliableSurface(ANativeWindow* window) : mWindow(window) {
+    LOG_ALWAYS_FATAL_IF(!mWindow, "Error, unable to wrap a nullptr");
+    ANativeWindow_acquire(mWindow);
 }
 
 ReliableSurface::~ReliableSurface() {
@@ -36,26 +40,27 @@ ReliableSurface::~ReliableSurface() {
     // As a concrete example, if the underlying ANativeWindow is associated with
     // an EGLSurface that is still in use, then if we don't clear out the
     // interceptors then we walk into undefined behavior.
-    ANativeWindow_setCancelBufferInterceptor(mSurface.get(), nullptr, nullptr);
-    ANativeWindow_setDequeueBufferInterceptor(mSurface.get(), nullptr, nullptr);
-    ANativeWindow_setQueueBufferInterceptor(mSurface.get(), nullptr, nullptr);
-    ANativeWindow_setPerformInterceptor(mSurface.get(), nullptr, nullptr);
+    ANativeWindow_setCancelBufferInterceptor(mWindow, nullptr, nullptr);
+    ANativeWindow_setDequeueBufferInterceptor(mWindow, nullptr, nullptr);
+    ANativeWindow_setQueueBufferInterceptor(mWindow, nullptr, nullptr);
+    ANativeWindow_setPerformInterceptor(mWindow, nullptr, nullptr);
+    ANativeWindow_release(mWindow);
 }
 
 void ReliableSurface::init() {
-    int result = ANativeWindow_setCancelBufferInterceptor(mSurface.get(), hook_cancelBuffer, this);
+    int result = ANativeWindow_setCancelBufferInterceptor(mWindow, hook_cancelBuffer, this);
     LOG_ALWAYS_FATAL_IF(result != NO_ERROR, "Failed to set cancelBuffer interceptor: error = %d",
                         result);
 
-    result = ANativeWindow_setDequeueBufferInterceptor(mSurface.get(), hook_dequeueBuffer, this);
+    result = ANativeWindow_setDequeueBufferInterceptor(mWindow, hook_dequeueBuffer, this);
     LOG_ALWAYS_FATAL_IF(result != NO_ERROR, "Failed to set dequeueBuffer interceptor: error = %d",
                         result);
 
-    result = ANativeWindow_setQueueBufferInterceptor(mSurface.get(), hook_queueBuffer, this);
+    result = ANativeWindow_setQueueBufferInterceptor(mWindow, hook_queueBuffer, this);
     LOG_ALWAYS_FATAL_IF(result != NO_ERROR, "Failed to set queueBuffer interceptor: error = %d",
                         result);
 
-    result = ANativeWindow_setPerformInterceptor(mSurface.get(), hook_perform, this);
+    result = ANativeWindow_setPerformInterceptor(mWindow, hook_perform, this);
     LOG_ALWAYS_FATAL_IF(result != NO_ERROR, "Failed to set perform interceptor: error = %d",
                         result);
 }
@@ -87,7 +92,7 @@ int ReliableSurface::reserveNext() {
     ANativeWindowBuffer* buffer = nullptr;
 
     // Note that this calls back into our own hooked method.
-    int result = ANativeWindow_dequeueBuffer(mSurface.get(), &buffer, &fenceFd);
+    int result = ANativeWindow_dequeueBuffer(mWindow, &buffer, &fenceFd);
 
     {
         std::lock_guard _lock{mMutex};
@@ -117,7 +122,7 @@ void ReliableSurface::clearReservedBuffer() {
         // Note that clearReservedBuffer may be reentrant here, so
         // mReservedBuffer must be cleared once we reach here to avoid recursing
         // forever.
-        ANativeWindow_cancelBuffer(mSurface.get(), buffer, releaseFd);
+        ANativeWindow_cancelBuffer(mWindow, buffer, releaseFd);
     }
 }
 
@@ -239,10 +244,10 @@ int ReliableSurface::hook_perform(ANativeWindow* window, ANativeWindow_performFn
             case ANATIVEWINDOW_PERFORM_SET_BUFFERS_GEOMETRY:
                 /* width */ va_arg(args, uint32_t);
                 /* height */ va_arg(args, uint32_t);
-                rs->mFormat = va_arg(args, PixelFormat);
+                rs->mFormat = static_cast<AHardwareBuffer_Format>(va_arg(args, int32_t));
                 break;
             case ANATIVEWINDOW_PERFORM_SET_BUFFERS_FORMAT:
-                rs->mFormat = va_arg(args, PixelFormat);
+                rs->mFormat = static_cast<AHardwareBuffer_Format>(va_arg(args, int32_t));
                 break;
         }
     }
