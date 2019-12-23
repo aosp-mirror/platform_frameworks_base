@@ -282,20 +282,27 @@ public final class ProcessList {
             "persist.device_config.runtime_native.use_app_image_startup_cache";
 
     // Low Memory Killer Daemon command codes.
-    // These must be kept in sync with the definitions in lmkd.c
+    // These must be kept in sync with lmk_cmd definitions in lmkd.h
     //
     // LMK_TARGET <minfree> <minkillprio> ... (up to 6 pairs)
     // LMK_PROCPRIO <pid> <uid> <prio>
     // LMK_PROCREMOVE <pid>
     // LMK_PROCPURGE
     // LMK_GETKILLCNT
+    // LMK_SUBSCRIBE
     // LMK_PROCKILL
     static final byte LMK_TARGET = 0;
     static final byte LMK_PROCPRIO = 1;
     static final byte LMK_PROCREMOVE = 2;
     static final byte LMK_PROCPURGE = 3;
     static final byte LMK_GETKILLCNT = 4;
-    static final byte LMK_PROCKILL = 5; // Note: this is an unsolicated command
+    static final byte LMK_SUBSCRIBE = 5;
+    static final byte LMK_PROCKILL = 6; // Note: this is an unsolicated command
+
+    // Low Memory Killer Daemon command codes.
+    // These must be kept in sync with async_event_type definitions in lmkd.h
+    //
+    static final int LMK_ASYNC_EVENT_KILL = 0;
 
     // lmkd reconnect delay in msecs
     private static final long LMKD_RECONNECT_DELAY_MS = 1000;
@@ -1354,6 +1361,11 @@ public final class ProcessList {
                 }
                 ostream.write(buf.array(), 0, buf.position());
             }
+            // Subscribe for kill event notifications
+            buf = ByteBuffer.allocate(4 * 2);
+            buf.putInt(LMK_SUBSCRIBE);
+            buf.putInt(LMK_ASYNC_EVENT_KILL);
+            ostream.write(buf.array(), 0, buf.position());
         } catch (IOException ex) {
             return false;
         }
