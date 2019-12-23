@@ -79,7 +79,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** Unit test for {@link com.android.server.integrity.AppIntegrityManagerServiceImpl} */
 @RunWith(AndroidJUnit4.class)
@@ -288,21 +290,30 @@ public class AppIntegrityManagerServiceImplTest {
         verify(mMockContext)
                 .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
         Intent intent = makeVerificationIntent();
-        when(mRuleEvaluationEngine.evaluate(any())).thenReturn(IntegrityCheckResult.allow());
+        when(mRuleEvaluationEngine.evaluate(any(), any())).thenReturn(IntegrityCheckResult.allow());
 
         broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
         runJobInHandler();
 
         ArgumentCaptor<AppInstallMetadata> metadataCaptor =
                 ArgumentCaptor.forClass(AppInstallMetadata.class);
-        verify(mRuleEvaluationEngine).evaluate(metadataCaptor.capture());
+        Map<String, String> allowedInstallers = new HashMap<>();
+        ArgumentCaptor<Map<String, String>> allowedInstallersCaptor =
+                ArgumentCaptor.forClass(allowedInstallers.getClass());
+        verify(mRuleEvaluationEngine)
+                .evaluate(metadataCaptor.capture(), allowedInstallersCaptor.capture());
         AppInstallMetadata appInstallMetadata = metadataCaptor.getValue();
+        allowedInstallers = allowedInstallersCaptor.getValue();
         assertEquals(PACKAGE_NAME, appInstallMetadata.getPackageName());
         assertEquals(APP_CERT, appInstallMetadata.getAppCertificate());
         assertEquals(INSTALLER_SHA256, appInstallMetadata.getInstallerName());
         assertEquals(INSTALLER_CERT, appInstallMetadata.getInstallerCertificate());
         assertEquals(VERSION_CODE, appInstallMetadata.getVersionCode());
         assertFalse(appInstallMetadata.isPreInstalled());
+        // These are hardcoded in the test apk
+        assertEquals(2, allowedInstallers.size());
+        assertEquals("cert_1", allowedInstallers.get("store_1"));
+        assertEquals("cert_2", allowedInstallers.get("store_2"));
     }
 
     @Test
@@ -312,7 +323,7 @@ public class AppIntegrityManagerServiceImplTest {
         verify(mMockContext)
                 .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
         Intent intent = makeVerificationIntent();
-        when(mRuleEvaluationEngine.evaluate(any())).thenReturn(IntegrityCheckResult.allow());
+        when(mRuleEvaluationEngine.evaluate(any(), any())).thenReturn(IntegrityCheckResult.allow());
 
         broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
         runJobInHandler();
@@ -328,7 +339,7 @@ public class AppIntegrityManagerServiceImplTest {
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
         verify(mMockContext)
                 .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
-        when(mRuleEvaluationEngine.evaluate(any()))
+        when(mRuleEvaluationEngine.evaluate(any(), any()))
                 .thenReturn(
                         IntegrityCheckResult.deny(
                                 new Rule(

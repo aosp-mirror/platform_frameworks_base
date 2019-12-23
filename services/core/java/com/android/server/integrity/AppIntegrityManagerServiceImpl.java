@@ -25,6 +25,7 @@ import static android.content.integrity.AppIntegrityManager.STATUS_FAILURE;
 import static android.content.integrity.AppIntegrityManager.STATUS_SUCCESS;
 import static android.content.pm.PackageManager.EXTRA_VERIFICATION_ID;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -41,6 +42,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.Signature;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.RemoteException;
@@ -63,6 +65,8 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 
 /** Implementation of {@link AppIntegrityManagerService}. */
 public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
@@ -72,6 +76,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
     private static final String PACKAGE_INSTALLER = "com.google.android.packageinstaller";
     private static final String BASE_APK_FILE = "base.apk";
+    private static final String ALLOWED_INSTALLERS_METADATA_NAME = "allowed-installers";
+    private static final String ALLOWED_INSTALLER_DELIMITER = ",";
+    private static final String INSTALLER_PACKAGE_CERT_DELIMITER = "\\|";
 
     private static final String ADB_INSTALLER = "adb";
     private static final String UNKNOWN_INSTALLER = "";
@@ -191,11 +198,21 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             Slog.i(TAG, "Received integrity verification intent " + intent.toString());
             Slog.i(TAG, "Extras " + intent.getExtras());
 
-            AppInstallMetadata.Builder builder = new AppInstallMetadata.Builder();
-
             String packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME);
+
+            PackageInfo packageInfo = getPackageArchiveInfo(intent.getData());
+            if (packageInfo == null) {
+                Slog.w(TAG, "Cannot parse package " + packageName);
+                // We can't parse the package.
+                mPackageManagerInternal.setIntegrityVerificationResult(
+                        verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
+                return;
+            }
+
             String installerPackageName = getInstallerPackageName(intent);
-            String appCert = getAppCertificateFingerprint(intent.getData());
+            String appCert = getCertificateFingerprint(packageInfo);
+
+            AppInstallMetadata.Builder builder = new AppInstallMetadata.Builder();
 
             builder.setPackageName(getPackageNameNormalized(packageName));
             builder.setAppCertificate(appCert == null ? "" : appCert);
@@ -208,7 +225,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             AppInstallMetadata appInstallMetadata = builder.build();
 
             Slog.i(TAG, "To be verified: " + appInstallMetadata);
-            IntegrityCheckResult result = mEvaluationEngine.evaluate(appInstallMetadata);
+            IntegrityCheckResult result =
+                    mEvaluationEngine.evaluate(
+                            appInstallMetadata, getAllowedInstallers(packageInfo));
             Slog.i(
                     TAG,
                     "Integrity check result: "
@@ -224,14 +243,12 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             // This exception indicates something is wrong with the input passed by package manager.
             // e.g., someone trying to trick the system. We block installs in this case.
             Slog.e(TAG, "Invalid input to integrity verification", e);
-
             mPackageManagerInternal.setIntegrityVerificationResult(
                     verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_REJECT);
         } catch (Exception e) {
             // Other exceptions indicate an error within the integrity component implementation and
             // we allow them.
             Slog.e(TAG, "Error handling integrity verification", e);
-
             mPackageManagerInternal.setIntegrityVerificationResult(
                     verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
         }
@@ -320,8 +337,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         }
     }
 
-    private String getAppCertificateFingerprint(Uri dataUri) {
-        PackageInfo packageInfo = getPackageArchiveInfo(dataUri);
+    private String getCertificateFingerprint(@NonNull PackageInfo packageInfo) {
         return getFingerprint(getSignature(packageInfo));
     }
 
@@ -333,14 +349,50 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             PackageInfo installerInfo =
                     mContext.getPackageManager()
                             .getPackageInfo(installer, PackageManager.GET_SIGNATURES);
-            return getFingerprint(getSignature(installerInfo));
+            return getCertificateFingerprint(installerInfo);
         } catch (PackageManager.NameNotFoundException e) {
             Slog.i(TAG, "Installer package " + installer + " not found.");
             return "";
         }
     }
 
-    private static Signature getSignature(PackageInfo packageInfo) {
+    /** Get the allowed installers and their associated certificate hashes from <meta-data> tag. */
+    private Map<String, String> getAllowedInstallers(@NonNull PackageInfo packageInfo) {
+        Map<String, String> packageCertMap = new HashMap<>();
+        if (packageInfo.applicationInfo != null && packageInfo.applicationInfo.metaData != null) {
+            Bundle metaData = packageInfo.applicationInfo.metaData;
+            String allowedInstallers = metaData.getString(ALLOWED_INSTALLERS_METADATA_NAME);
+            if (allowedInstallers != null) {
+                // parse the metadata for certs.
+                String[] installerCertPairs = allowedInstallers.split(ALLOWED_INSTALLER_DELIMITER);
+                for (String packageCertPair : installerCertPairs) {
+                    String[] packageAndCert =
+                            packageCertPair.split(INSTALLER_PACKAGE_CERT_DELIMITER);
+                    if (packageAndCert.length == 2) {
+                        String packageName = packageAndCert[0];
+                        String cert = packageAndCert[1];
+                        packageCertMap.put(packageName, cert);
+                    }
+                }
+            }
+        }
+
+        Slog.i("DEBUG", "allowed installers map " + packageCertMap);
+        return packageCertMap;
+    }
+
+    private boolean getPreInstalled(String packageName) {
+        try {
+            PackageInfo existingPackageInfo =
+                    mContext.getPackageManager().getPackageInfo(packageName, 0);
+            return existingPackageInfo.applicationInfo != null
+                    && existingPackageInfo.applicationInfo.isSystemApp();
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    private static Signature getSignature(@NonNull PackageInfo packageInfo) {
         if (packageInfo.signatures == null || packageInfo.signatures.length < 1) {
             throw new IllegalArgumentException("Package signature not found in " + packageInfo);
         }
@@ -402,7 +454,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 packageInfo =
                         mContext.getPackageManager()
                                 .getPackageArchiveInfo(
-                                        installationPath.getPath(), PackageManager.GET_SIGNATURES);
+                                        installationPath.getPath(),
+                                        PackageManager.GET_SIGNATURES
+                                                | PackageManager.GET_META_DATA);
             }
             return packageInfo;
         } catch (Exception e) {
