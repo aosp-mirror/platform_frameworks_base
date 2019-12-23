@@ -90,6 +90,15 @@ class ServiceManagerProxy implements IServiceManager {
         throw new RemoteException();
     }
 
+    public void registerClientCallback(String name, IBinder service, IClientCallback cb)
+            throws RemoteException {
+        throw new RemoteException();
+    }
+
+    public void tryUnregisterService(String name, IBinder service) throws RemoteException {
+        throw new RemoteException();
+    }
+
     /**
      * Same as mServiceManager but used by apps.
      *
