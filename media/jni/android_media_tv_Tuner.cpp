@@ -312,6 +312,15 @@ int JTuner::tune(const FrontendSettings& settings) {
     return (int)result;
 }
 
+int JTuner::scan(const FrontendSettings& settings, FrontendScanType scanType) {
+    if (mFe == NULL) {
+        ALOGE("frontend is not initialized");
+        return (int)Result::INVALID_STATE;
+    }
+    Result result = mFe->scan(settings, scanType);
+    return (int)result;
+}
+
 bool JTuner::openDemux() {
     if (mTuner == nullptr) {
         return false;
@@ -604,6 +613,13 @@ static int android_media_tv_Tuner_stop_tune(JNIEnv, jobject) {
     return 0;
 }
 
+static int android_media_tv_Tuner_scan(
+        JNIEnv *env, jobject thiz, jint settingsType, jobject settings, jint scanType) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->scan(getFrontendSettings(
+            env, settingsType, settings), static_cast<FrontendScanType>(scanType));
+}
+
 static int android_media_tv_Tuner_set_lnb(JNIEnv, jobject, jint) {
     return 0;
 }
@@ -863,6 +879,8 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeTune", "(ILandroid/media/tv/tuner/FrontendSettings;)I",
             (void *)android_media_tv_Tuner_tune },
     { "nativeStopTune", "()I", (void *)android_media_tv_Tuner_stop_tune },
+    { "nativeScan", "(ILandroid/media/tv/tuner/FrontendSettings;I)I",
+            (void *)android_media_tv_Tuner_scan },
     { "nativeSetLnb", "(I)I", (void *)android_media_tv_Tuner_set_lnb },
     { "nativeSetLna", "(Z)I", (void *)android_media_tv_Tuner_set_lna },
     { "nativeOpenFilter", "(III)Landroid/media/tv/tuner/Tuner$Filter;",
