@@ -1335,7 +1335,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // TODO: Bring these out of StatusBar.
         ((UserInfoControllerImpl) Dependency.get(UserInfoController.class))
                 .onDensityOrFontScaleChanged();
-        Dependency.get(UserSwitcherController.class).onDensityOrFontScaleChanged();
+        mUserSwitcherController.onDensityOrFontScaleChanged();
         if (mKeyguardUserSwitcher != null) {
             mKeyguardUserSwitcher.onDensityOrFontScaleChanged();
         }
@@ -3427,8 +3427,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // ringing.
         // Other transitions are covered in handleVisibleToUserChanged().
         if (mVisible && (newState == StatusBarState.SHADE_LOCKED
-                || (((SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class))
-                .goingToFullShade()))) {
+                || mStatusBarStateController.goingToFullShade())) {
             clearNotificationEffects();
         }
         if (newState == StatusBarState.KEYGUARD) {
