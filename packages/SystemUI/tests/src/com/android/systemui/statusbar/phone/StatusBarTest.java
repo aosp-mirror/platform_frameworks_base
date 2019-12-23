@@ -399,6 +399,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mViewMediatorCallback,
                 mInitController,
                 mDarkIconDispatcher,
+                new Handler(TestableLooper.get(this).getLooper()),
                 mDismissCallbackRegistry);
 
         when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(

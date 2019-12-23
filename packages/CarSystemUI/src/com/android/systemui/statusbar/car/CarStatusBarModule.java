@@ -17,8 +17,10 @@
 package com.android.systemui.statusbar.car;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
 import android.content.Context;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
 
@@ -193,6 +195,7 @@ public class CarStatusBarModule {
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
             DarkIconDispatcher darkIconDispatcher,
+            @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
             DismissCallbackRegistry dismissCallbackRegistry,
             CarServiceProvider carServiceProvider,
             Lazy<PowerManagerHelper> powerManagerHelperLazy,
@@ -273,6 +276,7 @@ public class CarStatusBarModule {
                 viewMediatorCallback,
                 initController,
                 darkIconDispatcher,
+                timeTickHandler,
                 dismissCallbackRegistry,
                 carServiceProvider,
                 powerManagerHelperLazy,

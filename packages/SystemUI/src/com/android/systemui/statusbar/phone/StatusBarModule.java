@@ -17,8 +17,10 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
 import android.content.Context;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
 
@@ -173,6 +175,7 @@ public class StatusBarModule {
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
             DarkIconDispatcher darkIconDispatcher,
+            @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
             DismissCallbackRegistry dismissCallbackRegistry) {
         return new StatusBar(
                 context,
@@ -249,6 +252,7 @@ public class StatusBarModule {
                 viewMediatorCallback,
                 initController,
                 darkIconDispatcher,
+                timeTickHandler,
                 dismissCallbackRegistry);
     }
 }

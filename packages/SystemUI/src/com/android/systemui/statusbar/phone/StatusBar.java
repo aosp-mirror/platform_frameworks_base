@@ -30,6 +30,7 @@ import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
@@ -685,6 +686,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
             DarkIconDispatcher darkIconDispatcher,
+            @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
             DismissCallbackRegistry dismissCallbackRegistry) {
         super(context);
         mFeatureFlags = featureFlags;
@@ -767,6 +769,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mEntryManager.updateNotifications("onBubbleExpandChanged");
                     updateScrimController();
                 };
+
+
+        DateTimeView.setReceiverHandler(timeTickHandler);
     }
 
     @Override
@@ -800,8 +805,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mVibrateOnOpening = mContext.getResources().getBoolean(
                 R.bool.config_vibrateOnIconAnimation);
-
-        DateTimeView.setReceiverHandler(Dependency.get(Dependency.TIME_TICK_HANDLER));
 
         // start old BaseStatusBar.start().
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();

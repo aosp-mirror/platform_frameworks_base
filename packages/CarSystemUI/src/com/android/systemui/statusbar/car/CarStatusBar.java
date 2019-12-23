@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.car;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -30,6 +31,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -323,6 +325,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
             DarkIconDispatcher darkIconDispatcher,
+            @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
             DismissCallbackRegistry dismissCallbackRegistry,
             /* Car Settings injected components. */
             CarServiceProvider carServiceProvider,
@@ -405,6 +408,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 viewMediatorCallback,
                 initController,
                 darkIconDispatcher,
+                timeTickHandler,
                 dismissCallbackRegistry);
         mScrimController = scrimController;
         mLockscreenLockIconController = lockscreenLockIconController;
