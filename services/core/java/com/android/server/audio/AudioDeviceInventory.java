@@ -77,6 +77,9 @@ public class AudioDeviceInventory {
     // List of preferred devices for strategies
     private final ArrayMap<Integer, AudioDeviceAddress> mPreferredDevices = new ArrayMap<>();
 
+    // the wrapper for AudioSystem static methods, allows us to spy AudioSystem
+    private final @NonNull AudioSystemAdapter mAudioSystem;
+
     private @NonNull AudioDeviceBroker mDeviceBroker;
 
     // Monitoring of audio routes.  Protected by mAudioRoutes.
@@ -86,12 +89,14 @@ public class AudioDeviceInventory {
 
     /*package*/ AudioDeviceInventory(@NonNull AudioDeviceBroker broker) {
         mDeviceBroker = broker;
+        mAudioSystem = AudioSystemAdapter.getDefaultAdapter();
     }
 
     //-----------------------------------------------------------
-    /** for mocking only */
-    /*package*/ AudioDeviceInventory() {
+    /** for mocking only, allows to inject AudioSystem adapter */
+    /*package*/ AudioDeviceInventory(@NonNull AudioSystemAdapter audioSystem) {
         mDeviceBroker = null;
+        mAudioSystem = audioSystem;
     }
 
     /*package*/ void setDeviceBroker(@NonNull AudioDeviceBroker broker) {
@@ -185,7 +190,7 @@ public class AudioDeviceInventory {
         synchronized (mDevicesLock) {
             //TODO iterate on mApmConnectedDevices instead once it handles all device types
             for (DeviceInfo di : mConnectedDevices.values()) {
-                AudioSystem.setDeviceConnectionState(
+                mAudioSystem.setDeviceConnectionState(
                         di.mDeviceType,
                         AudioSystem.DEVICE_STATE_AVAILABLE,
                         di.mDeviceAddress,
@@ -195,7 +200,7 @@ public class AudioDeviceInventory {
         }
         synchronized (mPreferredDevices) {
             mPreferredDevices.forEach((strategy, device) -> {
-                AudioSystem.setPreferredDeviceForStrategy(strategy, device); });
+                mAudioSystem.setPreferredDeviceForStrategy(strategy, device); });
         }
     }
 
@@ -355,7 +360,7 @@ public class AudioDeviceInventory {
                     mConnectedDevices.replace(key, di);
                 }
             }
-            final int res = AudioSystem.handleDeviceConfigChange(
+            final int res = mAudioSystem.handleDeviceConfigChange(
                     AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address,
                     BtHelper.getName(btDevice), a2dpCodec);
 
@@ -477,7 +482,7 @@ public class AudioDeviceInventory {
     /*package*/ int setPreferredDeviceForStrategySync(int strategy,
                                                       @NonNull AudioDeviceAddress device) {
         final long identity = Binder.clearCallingIdentity();
-        final int status = AudioSystem.setPreferredDeviceForStrategy(strategy, device);
+        final int status = mAudioSystem.setPreferredDeviceForStrategy(strategy, device);
         Binder.restoreCallingIdentity(identity);
 
         if (status == AudioSystem.SUCCESS) {
@@ -488,7 +493,7 @@ public class AudioDeviceInventory {
 
     /*package*/ int removePreferredDeviceForStrategySync(int strategy) {
         final long identity = Binder.clearCallingIdentity();
-        final int status = AudioSystem.removePreferredDeviceForStrategy(strategy);
+        final int status = mAudioSystem.removePreferredDeviceForStrategy(strategy);
         Binder.restoreCallingIdentity(identity);
 
         if (status == AudioSystem.SUCCESS) {
@@ -523,7 +528,7 @@ public class AudioDeviceInventory {
                 Slog.i(TAG, "deviceInfo:" + di + " is(already)Connected:" + isConnected);
             }
             if (connect && !isConnected) {
-                final int res = AudioSystem.setDeviceConnectionState(device,
+                final int res = mAudioSystem.setDeviceConnectionState(device,
                         AudioSystem.DEVICE_STATE_AVAILABLE, address, deviceName,
                         AudioSystem.AUDIO_FORMAT_DEFAULT);
                 if (res != AudioSystem.AUDIO_STATUS_OK) {
@@ -536,7 +541,7 @@ public class AudioDeviceInventory {
                 mDeviceBroker.postAccessoryPlugMediaUnmute(device);
                 return true;
             } else if (!connect && isConnected) {
-                AudioSystem.setDeviceConnectionState(device,
+                mAudioSystem.setDeviceConnectionState(device,
                         AudioSystem.DEVICE_STATE_UNAVAILABLE, address, deviceName,
                         AudioSystem.AUDIO_FORMAT_DEFAULT);
                 // always remove even if disconnection failed
@@ -713,7 +718,7 @@ public class AudioDeviceInventory {
         mDeviceBroker.setBluetoothA2dpOnInt(true, eventSource);
         // at this point there could be another A2DP device already connected in APM, but it
         // doesn't matter as this new one will overwrite the previous one
-        final int res = AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+        final int res = mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_AVAILABLE, address, name, a2dpCodec);
 
         if (res != AudioSystem.AUDIO_STATUS_OK) {
@@ -728,7 +733,7 @@ public class AudioDeviceInventory {
         }
 
         // Reset A2DP suspend state each time a new sink is connected
-        AudioSystem.setParameters("A2dpSuspended=false");
+        mAudioSystem.setParameters("A2dpSuspended=false");
 
         final DeviceInfo di = new DeviceInfo(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, name,
                 address, a2dpCodec);
@@ -761,7 +766,7 @@ public class AudioDeviceInventory {
 
         // device to remove was visible by APM, update APM
         mDeviceBroker.setAvrcpAbsoluteVolumeSupported(false);
-        final int res = AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+        final int res = mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE, address, "", a2dpCodec);
 
         if (res != AudioSystem.AUDIO_STATUS_OK) {
@@ -783,7 +788,7 @@ public class AudioDeviceInventory {
     private void makeA2dpDeviceUnavailableLater(String address, int delayMs) {
         // prevent any activity on the A2DP audio output to avoid unwanted
         // reconnection of the sink.
-        AudioSystem.setParameters("A2dpSuspended=true");
+        mAudioSystem.setParameters("A2dpSuspended=true");
         // retrieve DeviceInfo before removing device
         final String deviceKey =
                 DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address);
@@ -799,7 +804,7 @@ public class AudioDeviceInventory {
 
     @GuardedBy("mDevicesLock")
     private void makeA2dpSrcAvailable(String address) {
-        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP,
+        mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_AVAILABLE, address, "",
                 AudioSystem.AUDIO_FORMAT_DEFAULT);
         mConnectedDevices.put(
@@ -810,7 +815,7 @@ public class AudioDeviceInventory {
 
     @GuardedBy("mDevicesLock")
     private void makeA2dpSrcUnavailable(String address) {
-        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP,
+        mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE, address, "",
                 AudioSystem.AUDIO_FORMAT_DEFAULT);
         mConnectedDevices.remove(
@@ -824,7 +829,7 @@ public class AudioDeviceInventory {
                 AudioSystem.DEVICE_OUT_HEARING_AID);
         mDeviceBroker.postSetHearingAidVolumeIndex(hearingAidVolIndex, streamType);
 
-        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HEARING_AID,
+        mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HEARING_AID,
                 AudioSystem.DEVICE_STATE_AVAILABLE, address, name,
                 AudioSystem.AUDIO_FORMAT_DEFAULT);
         mConnectedDevices.put(
@@ -839,7 +844,7 @@ public class AudioDeviceInventory {
 
     @GuardedBy("mDevicesLock")
     private void makeHearingAidDeviceUnavailable(String address) {
-        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HEARING_AID,
+        mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HEARING_AID,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE, address, "",
                 AudioSystem.AUDIO_FORMAT_DEFAULT);
         mConnectedDevices.remove(
