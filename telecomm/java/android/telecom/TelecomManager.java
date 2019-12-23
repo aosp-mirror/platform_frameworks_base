@@ -326,6 +326,14 @@ public class TelecomManager {
             "android.telecom.extra.CALL_CREATED_TIME_MILLIS";
 
     /**
+     * Optional extra for incoming and outgoing calls containing a long which specifies the Epoch
+     * time the call was created.
+     * @hide
+     */
+    public static final String EXTRA_CALL_CREATED_EPOCH_TIME_MILLIS =
+            "android.telecom.extra.CALL_CREATED_EPOCH_TIME_MILLIS";
+
+    /**
      * Optional extra for incoming and outgoing calls containing a long which specifies the time
      * telecom began routing the call. This value is in milliseconds since boot.
      * @hide
