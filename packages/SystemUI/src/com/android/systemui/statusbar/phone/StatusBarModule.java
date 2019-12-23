@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
@@ -171,6 +172,7 @@ public class StatusBarModule {
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
+            DarkIconDispatcher darkIconDispatcher,
             DismissCallbackRegistry dismissCallbackRegistry) {
         return new StatusBar(
                 context,
@@ -246,6 +248,7 @@ public class StatusBarModule {
                 statusBarKeyguardViewManager,
                 viewMediatorCallback,
                 initController,
+                darkIconDispatcher,
                 dismissCallbackRegistry);
     }
 }
