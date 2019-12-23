@@ -34,17 +34,25 @@ message QuotaTrackerProto {
   // Current elapsed realtime.
   optional int64 elapsed_realtime = 3;
 
-  message AlarmListener {
+  message InQuotaAlarmListener {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    // Whether the listener is waiting for an alarm or not.
-    optional bool is_waiting = 1;
-    // The time at which the alarm should go off, in the elapsed realtime timebase. Only
-    // valid if is_waiting is true.
-    optional int64 trigger_time_elapsed = 2;
-  }
+    // The time at which the alarm is set to go off, in the elapsed realtime timebase.
+    optional int64 trigger_time_elapsed = 1;
 
-  // Next tag: 4
+    message Alarm {
+      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+      optional UptcProto uptc = 1;
+
+      // The time at which the UPTC will be in quota, in the elapsed realtime timebase.
+      optional int64 in_quota_time_elapsed = 2;
+    }
+    repeated Alarm alarms = 2;
+  }
+  optional InQuotaAlarmListener in_quota_alarm_listener = 4;
+
+  // Next tag: 5
 }
 
 // A com.android.util.quota.Category object.
@@ -118,8 +126,6 @@ message CountQuotaTrackerProto {
     repeated Event events = 3;
 
     repeated ExecutionStats execution_stats = 4;
-
-    optional QuotaTrackerProto.AlarmListener in_quota_alarm_listener = 5;
   }
   repeated UptcStats uptc_stats = 3;
 
@@ -195,8 +201,6 @@ message DurationQuotaTrackerProto {
     repeated TimingSession saved_sessions = 4;
 
     repeated ExecutionStats execution_stats = 5;
-
-    optional QuotaTrackerProto.AlarmListener in_quota_alarm_listener = 6;
   }
   repeated UptcStats uptc_stats = 3;
 
