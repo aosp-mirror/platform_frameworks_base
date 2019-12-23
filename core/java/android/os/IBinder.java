@@ -285,6 +285,13 @@ public interface IBinder {
      */
     public interface DeathRecipient {
         public void binderDied();
+
+        /**
+         * @hide
+         */
+        default void binderDied(IBinder who) {
+            binderDied();
+        }
     }
 
     /**

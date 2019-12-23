@@ -537,9 +537,9 @@ public:
         LOGDEATH("Receiving binderDied() on JavaDeathRecipient %p\n", this);
         if (mObject != NULL) {
             JNIEnv* env = javavm_to_jnienv(mVM);
-
+            jobject jBinderProxy = javaObjectForIBinder(env, who.promote());
             env->CallStaticVoidMethod(gBinderProxyOffsets.mClass,
-                    gBinderProxyOffsets.mSendDeathNotice, mObject);
+                                      gBinderProxyOffsets.mSendDeathNotice, mObject, jBinderProxy);
             if (env->ExceptionCheck()) {
                 jthrowable excep = env->ExceptionOccurred();
                 report_exception(env, excep,
@@ -1532,8 +1532,9 @@ static int int_register_android_os_BinderProxy(JNIEnv* env)
     gBinderProxyOffsets.mClass = MakeGlobalRefOrDie(env, clazz);
     gBinderProxyOffsets.mGetInstance = GetStaticMethodIDOrDie(env, clazz, "getInstance",
             "(JJ)Landroid/os/BinderProxy;");
-    gBinderProxyOffsets.mSendDeathNotice = GetStaticMethodIDOrDie(env, clazz, "sendDeathNotice",
-            "(Landroid/os/IBinder$DeathRecipient;)V");
+    gBinderProxyOffsets.mSendDeathNotice =
+            GetStaticMethodIDOrDie(env, clazz, "sendDeathNotice",
+                                   "(Landroid/os/IBinder$DeathRecipient;Landroid/os/IBinder;)V");
     gBinderProxyOffsets.mNativeData = GetFieldIDOrDie(env, clazz, "mNativeData", "J");
 
     clazz = FindClassOrDie(env, "java/lang/Class");

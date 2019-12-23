@@ -8,6 +8,7 @@ android_test {
         "EnabledTestApp/src/**/*.java",
         "BinderProxyCountingTestApp/src/**/*.java",
         "BinderProxyCountingTestService/src/**/*.java",
+        "BinderDeathRecipientHelperApp/src/**/*.java",
         "aidl/**/I*.aidl",
     ],
 
@@ -59,7 +60,11 @@ android_test {
     resource_dirs: ["res"],
     resource_zips: [":FrameworksCoreTests_apks_as_resources"],
 
-    data: [":BstatsTestApp"],
+    data: [
+        ":BstatsTestApp",
+        ":BinderDeathRecipientHelperApp1",
+        ":BinderDeathRecipientHelperApp2",
+    ],
 }
 
 // Rules to copy all the test apks to the intermediate raw resource directory
