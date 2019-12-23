@@ -218,79 +218,116 @@ public class RouteSessionInfo implements Parcelable {
         }
 
         /**
-         * Adds a selected route
+         * Clears the selected routes.
          */
         @NonNull
-        public Builder addSelectedRoute(String routeId) {
-            mSelectedRoutes.add(routeId);
+        public Builder clearSelectedRoutes() {
+            mSelectedRoutes.clear();
             return this;
         }
 
         /**
-         * Removes a selected route
+         * Adds a route to the selected routes.
          */
         @NonNull
-        public Builder removeSelectedRoute(String routeId) {
-            mSelectedRoutes.remove(routeId);
+        public Builder addSelectedRoute(@NonNull String routeId) {
+            mSelectedRoutes.add(Objects.requireNonNull(routeId, "routeId must not be null"));
             return this;
         }
 
         /**
-         * Adds a deselectable route
+         * Removes a route from the selected routes.
          */
         @NonNull
-        public Builder addDeselectableRoute(String routeId) {
-            mDeselectableRoutes.add(routeId);
+        public Builder removeSelectedRoute(@NonNull String routeId) {
+            mSelectedRoutes.remove(Objects.requireNonNull(routeId, "routeId must not be null"));
             return this;
         }
 
         /**
-         * Removes a deselecable route
+         * Clears the deselectable routes.
          */
         @NonNull
-        public Builder removeDeselectableRoute(String routeId) {
-            mDeselectableRoutes.remove(routeId);
+        public Builder clearDeselectableRoutes() {
+            mDeselectableRoutes.clear();
             return this;
         }
 
         /**
-         * Adds a groupable route
+         * Adds a route to the deselectable routes.
          */
         @NonNull
-        public Builder addGroupableRoute(String routeId) {
-            mGroupableRoutes.add(routeId);
+        public Builder addDeselectableRoute(@NonNull String routeId) {
+            mDeselectableRoutes.add(Objects.requireNonNull(routeId, "routeId must not be null"));
             return this;
         }
 
         /**
-         * Removes a groupable route
+         * Removes a route from the deselectable routes.
          */
         @NonNull
-        public Builder removeGroupableRoute(String routeId) {
-            mGroupableRoutes.remove(routeId);
+        public Builder removeDeselectableRoute(@NonNull String routeId) {
+            mDeselectableRoutes.remove(Objects.requireNonNull(routeId, "routeId must not be null"));
             return this;
         }
 
         /**
-         * Adds a transferrable route
+         * Clears the groupable routes.
          */
         @NonNull
-        public Builder addTransferrableRoute(String routeId) {
-            mTransferrableRoutes.add(routeId);
+        public Builder clearGroupableRoutes() {
+            mGroupableRoutes.clear();
             return this;
         }
 
         /**
-         * Removes a transferrable route
+         * Adds a route to the groupable routes.
          */
         @NonNull
-        public Builder removeTransferrableRoute(String routeId) {
-            mTransferrableRoutes.remove(routeId);
+        public Builder addGroupableRoute(@NonNull String routeId) {
+            mGroupableRoutes.add(Objects.requireNonNull(routeId, "routeId must not be null"));
             return this;
         }
 
         /**
-         * Builds a route session info
+         * Removes a route from the groupable routes.
+         */
+        @NonNull
+        public Builder removeGroupableRoute(@NonNull String routeId) {
+            mGroupableRoutes.remove(Objects.requireNonNull(routeId, "routeId must not be null"));
+            return this;
+        }
+
+        /**
+         * Clears the transferrable routes.
+         */
+        @NonNull
+        public Builder clearTransferrableRoutes() {
+            mTransferrableRoutes.clear();
+            return this;
+        }
+
+        /**
+         * Adds a route to the transferrable routes.
+         */
+        @NonNull
+        public Builder addTransferrableRoute(@NonNull String routeId) {
+            mTransferrableRoutes.add(Objects.requireNonNull(routeId, "routeId must not be null"));
+            return this;
+        }
+
+        /**
+         * Removes a route from the transferrable routes.
+         */
+        @NonNull
+        public Builder removeTransferrableRoute(@NonNull String routeId) {
+            mTransferrableRoutes.remove(
+                    Objects.requireNonNull(routeId, "routeId must not be null"));
+            return this;
+        }
+
+        /**
+         * Builds a route session info.
          */
         @NonNull
         public RouteSessionInfo build() {

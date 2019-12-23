@@ -27,8 +27,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -40,9 +45,13 @@ public abstract class MediaRoute2ProviderService extends Service {
     public static final String SERVICE_INTERFACE = "android.media.MediaRoute2ProviderService";
 
     private final Handler mHandler;
+    private final Object mSessionLock = new Object();
     private ProviderStub mStub;
     private IMediaRoute2ProviderClient mClient;
     private MediaRoute2ProviderInfo mProviderInfo;
+
+    @GuardedBy("mSessionLock")
+    private ArrayMap<Integer, RouteSessionInfo> mSessionInfo = new ArrayMap<>();
 
     public MediaRoute2ProviderService() {
         mHandler = new Handler(Looper.getMainLooper());
@@ -93,6 +102,7 @@ public abstract class MediaRoute2ProviderService extends Service {
 
     /**
      * Called when requestSetVolume is called on a route of the provider
+     *
      * @param routeId the id of the route
      * @param volume the target volume
      */
@@ -100,15 +110,164 @@ public abstract class MediaRoute2ProviderService extends Service {
 
     /**
      * Called when requestUpdateVolume is called on a route of the provider
+     *
      * @param routeId id of the route
      * @param delta the delta to add to the current volume
      */
     public abstract void onUpdateVolume(@NonNull String routeId, int delta);
 
     /**
-     * Updates provider info and publishes routes
+     * Gets information of the session with the given id.
+     *
+     * @param sessionId id of the session
+     * @return information of the session with the given id.
+     *         null if the session is destroyed or id is not valid.
      */
-    public final void setProviderInfo(MediaRoute2ProviderInfo info) {
+    @Nullable
+    public final RouteSessionInfo getSessionInfo(int sessionId) {
+        synchronized (mSessionLock) {
+            return mSessionInfo.get(sessionId);
+        }
+    }
+
+    /**
+     * Gets the list of {@link RouteSessionInfo session info} that the provider service maintains.
+     */
+    @NonNull
+    public final List<RouteSessionInfo> getAllSessionInfo() {
+        synchronized (mSessionLock) {
+            return new ArrayList<>(mSessionInfo.values());
+        }
+    }
+
+    /**
+     * Sets the information of the session with the given id.
+     * If there is no session matched with the given id, it will be ignored.
+     * A session will be destroyed if it has no selected route.
+     * Call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify clients of
+     * session info changes.
+     *
+     * @param sessionId id of the session that should update its information
+     * @param sessionInfo new session information
+     */
+    public final void setSessionInfo(int sessionId, @NonNull RouteSessionInfo sessionInfo) {
+        Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
+
+        synchronized (mSessionLock) {
+            if (mSessionInfo.containsKey(sessionId)) {
+                mSessionInfo.put(sessionId, sessionInfo);
+            } else {
+                Log.w(TAG, "Ignoring session info update.");
+            }
+        }
+    }
+
+    /**
+     * Notifies clients of that the session is created and ready for use. If the session can be
+     * controlled, pass a {@link Bundle} that contains how to control it.
+     *
+     * @param sessionId id of the session
+     * @param sessionInfo information of the new session.
+     *                    Pass {@code null} to reject the request or inform clients that
+     *                    session creation has failed.
+     * @param controlHints a {@link Bundle} that contains how to control the session.
+     */
+    //TODO: fail reason?
+    public final void notifySessionCreated(int sessionId, @Nullable RouteSessionInfo sessionInfo,
+            @Nullable Bundle controlHints) {
+        //TODO: validate sessionId (it must be in "waiting list")
+        synchronized (mSessionLock) {
+            mSessionInfo.put(sessionId, sessionInfo);
+            //TODO: notify media router service of session creation.
+        }
+    }
+
+    /**
+     * Releases a session with the given id.
+     * {@link #onDestroySession} is called if the session is released.
+     *
+     * @param sessionId id of the session to be released
+     * @see #onDestroySession(int, RouteSessionInfo)
+     */
+    public final void releaseSession(int sessionId) {
+        RouteSessionInfo sessionInfo;
+        synchronized (mSessionLock) {
+            sessionInfo = mSessionInfo.put(sessionId, null);
+        }
+        if (sessionInfo != null) {
+            mHandler.sendMessage(obtainMessage(
+                    MediaRoute2ProviderService::onDestroySession, this, sessionId, sessionInfo));
+        }
+    }
+
+    /**
+     * Called when a session should be created.
+     * You should create and maintain your own session and notifies the client of
+     * session info. Call {@link #notifySessionCreated(int, RouteSessionInfo, Bundle)}
+     * to notify the information of a new session.
+     * If you can't create the session or want to reject the request, pass {@code null}
+     * as session info in {@link #notifySessionCreated(int, RouteSessionInfo, Bundle)}.
+     *
+     * @param packageName the package name of the application that selected the route
+     * @param routeId the id of the route initially being connected
+     * @param controlCategory the control category of the new session
+     * @param sessionId the id of a new session
+     */
+    public abstract void onCreateSession(@NonNull String packageName, @NonNull String routeId,
+            @NonNull String controlCategory, int sessionId);
+
+    /**
+     * Called when a session is about to be destroyed.
+     * You can clean up your session here. This can happen by the
+     * client or provider itself.
+     *
+     * @param sessionId id of the session being destroyed.
+     * @param lastSessionInfo information of the session being destroyed.
+     * @see #releaseSession(int)
+     */
+    public abstract void onDestroySession(int sessionId, @NonNull RouteSessionInfo lastSessionInfo);
+
+    //TODO: make a way to reject the request
+    /**
+     * Called when a client requests adding a route to a session.
+     * After the route is added, call {@link #setSessionInfo(int, RouteSessionInfo)} to update
+     * session info and call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify
+     * clients of updated session info.
+     *
+     * @param sessionId id of the session
+     * @param routeId id of the route
+     * @see #setSessionInfo(int, RouteSessionInfo)
+     */
+    public abstract void onAddRoute(int sessionId, @NonNull String routeId);
+
+    //TODO: make a way to reject the request
+    /**
+     * Called when a client requests removing a route from a session.
+     * After the route is removed, call {@link #setSessionInfo(int, RouteSessionInfo)} to update
+     * session info and call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify
+     * clients of updated session info.
+     *
+     * @param sessionId id of the session
+     * @param routeId id of the route
+     */
+    public abstract void onRemoveRoute(int sessionId, @NonNull String routeId);
+
+    //TODO: make a way to reject the request
+    /**
+     * Called when a client requests transferring a session to a route.
+     * After the transfer is finished, call {@link #setSessionInfo(int, RouteSessionInfo)} to update
+     * session info and call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify
+     * clients of updated session info.
+     *
+     * @param sessionId id of the session
+     * @param routeId id of the route
+     */
+    public abstract void onTransferRoute(int sessionId, @NonNull String routeId);
+
+    /**
+     * Updates provider info and publishes routes and session info.
+     */
+    public final void updateProviderInfo(MediaRoute2ProviderInfo info) {
         mProviderInfo = info;
         publishState();
     }
@@ -142,6 +301,7 @@ public abstract class MediaRoute2ProviderService extends Service {
     }
 
     void publishState() {
+        //TODO: sends session info
         if (mClient == null) {
             return;
         }
@@ -179,35 +339,35 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void requestSelectRoute(String packageName, String id, int seq) {
+        public void requestSelectRoute(String packageName, String routeId, int seq) {
+            //TODO: call onCreateSession instead
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSelectRoute,
-                    MediaRoute2ProviderService.this, packageName, id,
-                    new SelectToken(packageName, id, seq)));
-
+                    MediaRoute2ProviderService.this, packageName, routeId,
+                    new SelectToken(packageName, routeId, seq)));
         }
 
         @Override
-        public void unselectRoute(String packageName, String id) {
+        public void unselectRoute(String packageName, String routeId) {
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onUnselectRoute,
-                    MediaRoute2ProviderService.this, packageName, id));
+                    MediaRoute2ProviderService.this, packageName, routeId));
         }
 
         @Override
-        public void notifyControlRequestSent(String id, Intent request) {
+        public void notifyControlRequestSent(String routeId, Intent request) {
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onControlRequest,
-                    MediaRoute2ProviderService.this, id, request));
+                    MediaRoute2ProviderService.this, routeId, request));
         }
 
         @Override
-        public void requestSetVolume(String id, int volume) {
+        public void requestSetVolume(String routeId, int volume) {
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSetVolume,
-                    MediaRoute2ProviderService.this, id, volume));
+                    MediaRoute2ProviderService.this, routeId, volume));
         }
 
         @Override
-        public void requestUpdateVolume(String id, int delta) {
+        public void requestUpdateVolume(String routeId, int delta) {
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onUpdateVolume,
-                    MediaRoute2ProviderService.this, id, delta));
+                    MediaRoute2ProviderService.this, routeId, delta));
         }
     }
 }
