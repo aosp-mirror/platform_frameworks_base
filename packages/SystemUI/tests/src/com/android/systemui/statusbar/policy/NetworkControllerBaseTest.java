@@ -309,12 +309,12 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     public void setVoiceRegState(int voiceRegState) {
-        when(mServiceState.getVoiceRegState()).thenReturn(voiceRegState);
+        when(mServiceState.getState()).thenReturn(voiceRegState);
         updateServiceState();
     }
 
     public void setDataRegState(int dataRegState) {
-        when(mServiceState.getDataRegState()).thenReturn(dataRegState);
+        when(mServiceState.getDataRegistrationState()).thenReturn(dataRegState);
         updateServiceState();
     }
 
