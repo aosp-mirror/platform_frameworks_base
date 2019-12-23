@@ -1306,21 +1306,39 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 }
 
                 // Traffic occurring on stacked interfaces is usually clatd.
-                // UID stats are always counted on the stacked interface and never
-                // on the base interface, because the packets on the base interface
-                // do not actually match application sockets until they are translated.
                 //
-                // Interface stats are more complicated. Packets subject to BPF offload
-                // never appear on the base interface and only appear on the stacked
-                // interface, so to ensure those packets increment interface stats, interface
-                // stats from stacked interfaces must be collected.
+                // UID stats are always counted on the stacked interface and never on the base
+                // interface, because the packets on the base interface do not actually match
+                // application sockets (they're not IPv4) and thus the app uid is not known.
+                // For receive this is obvious: packets must be translated from IPv6 to IPv4
+                // before the application socket can be found.
+                // For transmit: either they go through the clat daemon which by virtue of going
+                // through userspace strips the original socket association during the IPv4 to
+                // IPv6 translation process, or they are offloaded by eBPF, which doesn't:
+                // However, on an ebpf device the accounting is done in cgroup ebpf hooks,
+                // which don't trigger again post ebpf translation.
+                // (as such stats accounted to the clat uid are ignored)
+                //
+                // Interface stats are more complicated.
+                //
+                // eBPF offloaded 464xlat'ed packets never hit base interface ip6tables, and thus
+                // *all* statistics are collected by iptables on the stacked v4-* interface.
+                //
+                // Additionally for ingress all packets bound for the clat IPv6 address are dropped
+                // in ip6tables raw prerouting and thus even non-offloaded packets are only
+                // accounted for on the stacked interface.
+                //
+                // For egress, packets subject to eBPF offload never appear on the base interface
+                // and only appear on the stacked interface. Thus to ensure packets increment
+                // interface stats, we must collate data from stacked interfaces. For xt_qtaguid
+                // (or non eBPF offloaded) TX they would appear on both, however egress interface
+                // accounting is explicitly bypassed for traffic from the clat uid.
+                //
                 final List<LinkProperties> stackedLinks = state.linkProperties.getStackedLinks();
                 for (LinkProperties stackedLink : stackedLinks) {
                     final String stackedIface = stackedLink.getInterfaceName();
                     if (stackedIface != null) {
-                        if (mUseBpfTrafficStats) {
-                            findOrCreateNetworkIdentitySet(mActiveIfaces, stackedIface).add(ident);
-                        }
+                        findOrCreateNetworkIdentitySet(mActiveIfaces, stackedIface).add(ident);
                         findOrCreateNetworkIdentitySet(mActiveUidIfaces, stackedIface).add(ident);
                         if (isMobile) {
                             mobileIfaces.add(stackedIface);
