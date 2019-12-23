@@ -66,6 +66,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.DateTimeException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -250,7 +251,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     @Override
     public void onRestore(BackupDataInput data, int appVersionCode,
-            ParcelFileDescriptor newState) throws IOException {
+            ParcelFileDescriptor newState) {
+        throw new RuntimeException("SettingsBackupAgent has been migrated to use key exclusion");
+    }
+
+    @Override
+    public void onRestore(BackupDataInput data, long appVersionCode,
+            ParcelFileDescriptor newState, Set<String> dynamicBlockList) throws IOException {
 
         if (DEBUG) {
             Log.d(TAG, "onRestore(): appVersionCode: " + appVersionCode
@@ -266,7 +273,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         }
 
         // versionCode of com.android.providers.settings corresponds to SDK_INT
-        mRestoredFromSdkInt = appVersionCode;
+        mRestoredFromSdkInt = (int) appVersionCode;
 
         HashSet<String> movedToGlobal = new HashSet<String>();
         Settings.System.getMovedToGlobalSettings(movedToGlobal);
@@ -292,16 +299,29 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             switch (key) {
                 case KEY_SYSTEM :
                     restoreSettings(data, Settings.System.CONTENT_URI, movedToGlobal,
-                            movedToSecure);
+                            movedToSecure, R.array.restore_blocked_system_settings,
+                            dynamicBlockList);
                     mSettingsHelper.applyAudioSettings();
                     break;
 
                 case KEY_SECURE :
-                    restoreSettings(data, Settings.Secure.CONTENT_URI, movedToGlobal, null);
+                    restoreSettings(
+                            data,
+                            Settings.Secure.CONTENT_URI,
+                            movedToGlobal,
+                            null,
+                            R.array.restore_blocked_secure_settings,
+                            dynamicBlockList);
                     break;
 
                 case KEY_GLOBAL :
-                    restoreSettings(data, Settings.Global.CONTENT_URI, null, movedToSecure);
+                    restoreSettings(
+                            data,
+                            Settings.Global.CONTENT_URI,
+                            null,
+                            movedToSecure,
+                            R.array.restore_blocked_global_settings,
+                            dynamicBlockList);
                     break;
 
                 case KEY_WIFI_SUPPLICANT :
@@ -345,7 +365,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 case KEY_DEVICE_SPECIFIC_CONFIG:
                     byte[] restoredDeviceSpecificConfig = new byte[size];
                     data.readEntityData(restoredDeviceSpecificConfig, 0, size);
-                    restoreDeviceSpecificConfig(restoredDeviceSpecificConfig);
+                    restoreDeviceSpecificConfig(
+                            restoredDeviceSpecificConfig,
+                            R.array.restore_blocked_device_specific_settings,
+                            dynamicBlockList);
                     break;
 
                 default :
@@ -394,14 +417,22 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             byte[] buffer = new byte[nBytes];
             in.readFully(buffer, 0, nBytes);
             restoreSettings(buffer, nBytes, Settings.System.CONTENT_URI, movedToGlobal,
-                    movedToSecure);
+                    movedToSecure, R.array.restore_blocked_system_settings,
+                    Collections.emptySet());
 
             // secure settings
             nBytes = in.readInt();
             if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of secure settings data");
             if (nBytes > buffer.length) buffer = new byte[nBytes];
             in.readFully(buffer, 0, nBytes);
-            restoreSettings(buffer, nBytes, Settings.Secure.CONTENT_URI, movedToGlobal, null);
+            restoreSettings(
+                    buffer,
+                    nBytes,
+                    Settings.Secure.CONTENT_URI,
+                    movedToGlobal,
+                    null,
+                    R.array.restore_blocked_secure_settings,
+                    Collections.emptySet());
 
             // Global only if sufficiently new
             if (version >= FULL_BACKUP_ADDED_GLOBAL) {
@@ -411,7 +442,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 in.readFully(buffer, 0, nBytes);
                 movedToGlobal.clear();  // no redirection; this *is* the global namespace
                 restoreSettings(buffer, nBytes, Settings.Global.CONTENT_URI, movedToGlobal,
-                        movedToSecure);
+                        movedToSecure, R.array.restore_blocked_global_settings,
+                        Collections.emptySet());
             }
 
             // locale
@@ -612,8 +644,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         return baos.toByteArray();
     }
 
-    private void restoreSettings(BackupDataInput data, Uri contentUri,
-            HashSet<String> movedToGlobal, Set<String> movedToSecure) {
+    private void restoreSettings(
+            BackupDataInput data,
+            Uri contentUri,
+            HashSet<String> movedToGlobal,
+            Set<String> movedToSecure,
+            int blockedSettingsArrayId,
+            Set<String> dynamicBlockList) {
         byte[] settings = new byte[data.getDataSize()];
         try {
             data.readEntityData(settings, 0, settings.length);
@@ -621,16 +658,44 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             Log.e(TAG, "Couldn't read entity data");
             return;
         }
-        restoreSettings(settings, settings.length, contentUri, movedToGlobal, movedToSecure);
+        restoreSettings(
+                settings,
+                settings.length,
+                contentUri,
+                movedToGlobal,
+                movedToSecure,
+                blockedSettingsArrayId,
+                dynamicBlockList);
     }
 
-    private void restoreSettings(byte[] settings, int bytes, Uri contentUri,
-            HashSet<String> movedToGlobal, Set<String> movedToSecure) {
-        restoreSettings(settings, 0, bytes, contentUri, movedToGlobal, movedToSecure);
+    private void restoreSettings(
+            byte[] settings,
+            int bytes,
+            Uri contentUri,
+            HashSet<String> movedToGlobal,
+            Set<String> movedToSecure,
+            int blockedSettingsArrayId,
+            Set<String> dynamicBlockList) {
+        restoreSettings(
+                settings,
+                0,
+                bytes,
+                contentUri,
+                movedToGlobal,
+                movedToSecure,
+                blockedSettingsArrayId,
+                dynamicBlockList);
     }
 
-    private void restoreSettings(byte[] settings, int pos, int bytes, Uri contentUri,
-                HashSet<String> movedToGlobal, Set<String> movedToSecure) {
+    private void restoreSettings(
+            byte[] settings,
+            int pos,
+            int bytes,
+            Uri contentUri,
+            HashSet<String> movedToGlobal,
+            Set<String> movedToSecure,
+            int blockedSettingsArrayId,
+            Set<String> dynamicBlockList) {
         if (DEBUG) {
             Log.i(TAG, "restoreSettings: " + contentUri);
         }
@@ -662,9 +727,20 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         SettingsHelper settingsHelper = mSettingsHelper;
         ContentResolver cr = getContentResolver();
 
-        final int whiteListSize = whitelist.length;
-        for (int i = 0; i < whiteListSize; i++) {
-            String key = whitelist[i];
+        Set<String> blockedSettings = getBlockedSettings(blockedSettingsArrayId);
+
+        for (String key : whitelist) {
+            boolean isBlockedBySystem = blockedSettings != null && blockedSettings.contains(key);
+            if (isBlockedBySystem || isBlockedByDynamicList(dynamicBlockList, contentUri,  key)) {
+                Log.i(
+                        TAG,
+                        "Key "
+                                + key
+                                + " removed from restore by "
+                                + (isBlockedBySystem ? "system" : "dynamic")
+                                + " block list");
+                continue;
+            }
 
             String value = null;
             boolean hasValueToRestore = false;
@@ -720,6 +796,19 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 Log.d(TAG, "Restored setting: " + destination + " : " + key + "=" + value);
             }
         }
+    }
+
+    private boolean isBlockedByDynamicList(Set<String> dynamicBlockList, Uri areaUri, String key) {
+        String contentKey = Uri.withAppendedPath(areaUri, key).toString();
+        return dynamicBlockList.contains(contentKey);
+    }
+
+    // There may be other sources of blocked settings, so I'm separating out this
+    // code to make it easy to modify in the future.
+    @VisibleForTesting
+    protected Set<String> getBlockedSettings(int blockedSettingsArrayId) {
+        String[] blockedSettings = getResources().getStringArray(blockedSettingsArrayId);
+        return new HashSet<>(Arrays.asList(blockedSettings));
     }
 
     private boolean isValidSettingValue(String key, String value,
@@ -998,10 +1087,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
      * Restore the device specific settings.
      *
      * @param data The byte array holding a backed up version of another devices settings.
+     * @param blockedSettingsArrayId The string array resource holding the settings not to restore.
+     * @param dynamicBlocklist The dynamic list of settings not to restore fed into this agent.
      * @return true if the restore succeeded, false if it was stopped.
      */
     @VisibleForTesting
-    boolean restoreDeviceSpecificConfig(byte[] data) {
+    boolean restoreDeviceSpecificConfig(byte[] data, int blockedSettingsArrayId,
+            Set<String> dynamicBlocklist) {
         // We're using an AtomicInteger to wrap the position int and allow called methods to
         // modify it.
         AtomicInteger pos = new AtomicInteger(0);
@@ -1013,7 +1105,14 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
         int dataStart = pos.get();
         restoreSettings(
-                data, dataStart, data.length, Settings.Secure.CONTENT_URI, null, null);
+                data,
+                dataStart,
+                data.length,
+                Settings.Secure.CONTENT_URI,
+                null,
+                null,
+                blockedSettingsArrayId,
+                dynamicBlocklist);
 
         updateWindowManagerIfNeeded(originalDensity);
 
