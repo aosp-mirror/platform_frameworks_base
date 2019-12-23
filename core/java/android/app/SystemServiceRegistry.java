@@ -50,6 +50,8 @@ import android.content.ContentCaptureOptions;
 import android.content.Context;
 import android.content.IRestrictionsManager;
 import android.content.RestrictionsManager;
+import android.content.integrity.AppIntegrityManager;
+import android.content.integrity.IAppIntegrityManager;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayManager;
 import android.content.pm.CrossProfileApps;
@@ -1246,6 +1248,14 @@ public final class SystemServiceRegistry {
                                 IIncrementalManagerNative.Stub.asInterface(b));
                     }});
         //CHECKSTYLE:ON IndentationCheck
+        registerService(Context.APP_INTEGRITY_SERVICE, AppIntegrityManager.class,
+                new CachedServiceFetcher<AppIntegrityManager>() {
+                    @Override
+                    public AppIntegrityManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(Context.APP_INTEGRITY_SERVICE);
+                        return new AppIntegrityManager(IAppIntegrityManager.Stub.asInterface(b));
+                    }});
 
         sInitializing = true;
         try {

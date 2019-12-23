@@ -18,7 +18,9 @@ package com.android.server.integrity.engine;
 
 import android.content.integrity.AppInstallMetadata;
 import android.content.integrity.Rule;
+import android.util.Slog;
 
+import com.android.server.integrity.IntegrityFileManager;
 import com.android.server.integrity.model.IntegrityCheckResult;
 
 import java.util.ArrayList;
@@ -30,17 +32,23 @@ import java.util.List;
  * <p>Every app install is evaluated against rules (pushed by the verifier) by the evaluation engine
  * to allow/block that install.
  */
-public final class RuleEvaluationEngine {
+public class RuleEvaluationEngine {
     private static final String TAG = "RuleEvaluation";
 
     // The engine for loading rules, retrieving metadata for app installs, and evaluating app
     // installs against rules.
     private static RuleEvaluationEngine sRuleEvaluationEngine;
 
+    private final IntegrityFileManager mIntegrityFileManager;
+
+    private RuleEvaluationEngine(IntegrityFileManager integrityFileManager) {
+        mIntegrityFileManager = integrityFileManager;
+    }
+
     /** Provide a singleton instance of the rule evaluation engine. */
     public static synchronized RuleEvaluationEngine getRuleEvaluationEngine() {
         if (sRuleEvaluationEngine == null) {
-            return new RuleEvaluationEngine();
+            return new RuleEvaluationEngine(IntegrityFileManager.getInstance());
         }
         return sRuleEvaluationEngine;
     }
@@ -58,7 +66,11 @@ public final class RuleEvaluationEngine {
     }
 
     private List<Rule> loadRules(AppInstallMetadata appInstallMetadata) {
-        // TODO: Load rules
-        return new ArrayList<>();
+        try {
+            return mIntegrityFileManager.readRules(appInstallMetadata);
+        } catch (Exception e) {
+            Slog.e(TAG, "Error loading rules.", e);
+            return new ArrayList<>();
+        }
     }
 }

@@ -14,30 +14,28 @@
  * limitations under the License.
  */
 
-package com.android.server.integrity;
+package com.android.server.integrity.model;
 
-import android.content.Context;
+import android.annotation.Nullable;
 
-import com.android.server.SystemService;
+/** Data class containing relevant metadata associated with a rule set. */
+public class RuleMetadata {
 
-/**
- * Service that manages app integrity rules and verifications.
- *
- * @hide
- */
-public class AppIntegrityManagerService extends SystemService {
+    private final String mRuleProvider;
+    private final String mVersion;
 
-    private Context mContext;
-    private AppIntegrityManagerServiceImpl mService;
-
-    public AppIntegrityManagerService(Context context) {
-        super(context);
-        mContext = context;
+    public RuleMetadata(String ruleProvider, String version) {
+        mRuleProvider = ruleProvider;
+        mVersion = version;
     }
 
-    @Override
-    public void onStart() {
-        mService = AppIntegrityManagerServiceImpl.create(mContext);
-        publishBinderService(Context.APP_INTEGRITY_SERVICE, mService);
+    @Nullable
+    public String getRuleProvider() {
+        return mRuleProvider;
+    }
+
+    @Nullable
+    public String getVersion() {
+        return mVersion;
     }
 }
