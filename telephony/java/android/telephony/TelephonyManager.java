@@ -4243,7 +4243,7 @@ public class TelephonyManager {
      * The returned set of subscriber IDs will include the subscriber ID corresponding to this
      * TelephonyManager's subId.
      *
-     * This is deprecated and {@link #getMergedSubscriberIdsFromGroup()} should be used for data
+     * This is deprecated and {@link #getMergedImsisFromGroup()} should be used for data
      * usage merging purpose.
      * TODO: remove this API.
      *
@@ -4264,25 +4264,27 @@ public class TelephonyManager {
     }
 
     /**
-     * Return the set of subscriber IDs that should be considered "merged together" for data usage
-     * purposes. Unlike {@link #getMergedSubscriberIds()} this API merge subscriberIds based on
-     * subscription grouping: subscriberId of those in the same group will all be returned.
+     * Return the set of IMSIs that should be considered "merged together" for data usage
+     * purposes. Unlike {@link #getMergedSubscriberIds()} this API merge IMSIs based on
+     * subscription grouping: IMSI of those in the same group will all be returned.
+     * Return the current IMSI if there is no subscription group.
      *
      * <p>Requires the calling app to have READ_PRIVILEGED_PHONE_STATE permission.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public @Nullable String[] getMergedSubscriberIdsFromGroup() {
+    public @NonNull String[] getMergedImsisFromGroup() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getMergedSubscriberIdsFromGroup(getSubId(), getOpPackageName());
+                return telephony.getMergedImsisFromGroup(getSubId(), getOpPackageName());
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
-        return null;
+        return new String[0];
     }
 
     /**

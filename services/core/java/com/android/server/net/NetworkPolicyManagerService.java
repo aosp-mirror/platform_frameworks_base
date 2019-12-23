@@ -1828,7 +1828,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
 
             String[] mergedSubscriberId = ArrayUtils.defeatNullable(
-                    tm.createForSubscriptionId(subId).getMergedSubscriberIdsFromGroup());
+                    tm.createForSubscriptionId(subId).getMergedImsisFromGroup());
             mergedSubscriberIdsList.add(mergedSubscriberId);
         }
 

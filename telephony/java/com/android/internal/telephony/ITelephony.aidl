@@ -1136,7 +1136,7 @@ interface ITelephony {
     /**
      * @hide
      */
-    String[] getMergedSubscriberIdsFromGroup(int subId, String callingPackage);
+    String[] getMergedImsisFromGroup(int subId, String callingPackage);
 
     /**
      * Override the operator branding for the current ICCID.
