@@ -384,6 +384,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final ShadeController mShadeController;
     private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private final LightsOutNotifController mLightsOutNotifController;
+    private final InitController mInitController;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
 
     // expanded notifications
@@ -681,6 +682,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             SuperStatusBarViewFactory superStatusBarViewFactory,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
+            InitController initController,
             DismissCallbackRegistry dismissCallbackRegistry) {
         super(context);
         mFeatureFlags = featureFlags;
@@ -754,6 +756,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mLightsOutNotifController =  lightsOutNotifController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardViewMediatorCallback = viewMediatorCallback;
+        mInitController = initController;
         mDismissCallbackRegistry = dismissCallbackRegistry;
 
         mBubbleExpandListener =
@@ -903,7 +906,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // set the initial view visibility
         int disabledFlags1 = result.mDisabledFlags1;
         int disabledFlags2 = result.mDisabledFlags2;
-        Dependency.get(InitController.class).addPostInitTask(
+        mInitController.addPostInitTask(
                 () -> setUpDisableFlags(disabledFlags1, disabledFlags2));
 
         mPluginManager.addPluginListener(
@@ -1232,7 +1235,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mScrimController, mActivityLaunchAnimator, mDynamicPrivacyController,
                 mNotificationAlertingManager, rowBinder, mKeyguardStateController,
                 mKeyguardIndicationController,
-                this /* statusBar */, mShadeController, mCommandQueue);
+                this /* statusBar */, mShadeController, mCommandQueue, mInitController);
 
         mNotificationListController =
                 new NotificationListController(

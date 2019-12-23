@@ -47,9 +47,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.ActivityStarterDelegate;
-import com.android.systemui.Dependency;
 import com.android.systemui.ExpandHelper;
-import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -170,7 +168,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 ),
                 mock(NotificationEntryManager.KeyguardEnvironment.class));
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
-        Dependency.get(InitController.class).executePostInitTasks();
         mEntryManager.setUpForTest(mock(NotificationPresenter.class), null, mHeadsUpManager);
 
 

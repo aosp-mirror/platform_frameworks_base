@@ -267,7 +267,6 @@ public class Dependency {
     @Inject Lazy<KeyguardEnvironment> mKeyguardEnvironment;
     @Inject Lazy<ShadeController> mShadeController;
     @Inject Lazy<NotificationRemoteInputManager.Callback> mNotificationRemoteInputManagerCallback;
-    @Inject Lazy<InitController> mInitController;
     @Inject Lazy<AppOpsController> mAppOpsController;
     @Inject Lazy<NavigationBarController> mNavigationBarController;
     @Inject Lazy<StatusBarStateController> mStatusBarStateController;
@@ -455,8 +454,6 @@ public class Dependency {
         mProviders.put(ShadeController.class, mShadeController::get);
         mProviders.put(NotificationRemoteInputManager.Callback.class,
                 mNotificationRemoteInputManagerCallback::get);
-
-        mProviders.put(InitController.class, mInitController::get);
 
         mProviders.put(AppOpsController.class, mAppOpsController::get);
 

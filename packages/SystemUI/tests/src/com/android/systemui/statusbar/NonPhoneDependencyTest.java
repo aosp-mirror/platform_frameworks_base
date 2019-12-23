@@ -26,7 +26,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
-import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -86,7 +85,6 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
                 Dependency.get(NotificationLockscreenUserManager.class);
         NotificationViewHierarchyManager viewHierarchyManager =
                 Dependency.get(NotificationViewHierarchyManager.class);
-        Dependency.get(InitController.class).executePostInitTasks();
         entryManager.setUpWithPresenter(mPresenter, mListContainer, mHeadsUpManager);
         entryManager.addNotificationEntryListener(mEntryListener);
         gutsManager.setUpWithPresenter(mPresenter, mListContainer,

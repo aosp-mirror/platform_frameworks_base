@@ -57,6 +57,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
+import com.android.systemui.InitController;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
@@ -319,6 +320,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             ShadeController shadeController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
+            InitController initController,
             DismissCallbackRegistry dismissCallbackRegistry,
             /* Car Settings injected components. */
             CarServiceProvider carServiceProvider,
@@ -399,6 +401,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 superStatusBarViewFactory,
                 statusBarKeyguardViewManager,
                 viewMediatorCallback,
+                initController,
                 dismissCallbackRegistry);
         mScrimController = scrimController;
         mLockscreenLockIconController = lockscreenLockIconController;
