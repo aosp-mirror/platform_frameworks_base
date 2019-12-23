@@ -205,7 +205,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 Log.w(TAG, "Unknown session updated. Ignoring.");
                 return;
             }
-            if ((record.getFlags() & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
+            if (record.isSystemPriority()) {
                 if (DEBUG_KEY_EVENT) {
                     Log.d(TAG, "Global priority session is updated, active=" + record.isActive());
                 }
@@ -460,12 +460,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
 
-        try {
-            session.getCallback().asBinder().unlinkToDeath(session, 0);
-        } catch (Exception e) {
-            // ignore exceptions while destroying a session.
-        }
-        session.onDestroy();
+        session.close();
         mHandler.postSessionsChanged(session.getUserId());
     }
 
@@ -570,10 +565,10 @@ public class MediaSessionService extends SystemService implements Monitor {
             throw new RuntimeException("Session request from invalid user.");
         }
 
-        final MediaSessionRecord session = new MediaSessionRecord(callerPid, callerUid, userId,
-                callerPackageName, cb, tag, sessionInfo, this, mHandler.getLooper());
+        final MediaSessionRecord session;
         try {
-            cb.asBinder().linkToDeath(session, 0);
+            session = new MediaSessionRecord(callerPid, callerUid, userId,
+                    callerPackageName, cb, tag, sessionInfo, this, mHandler.getLooper());
         } catch (RemoteException e) {
             throw new RuntimeException("Media Session owner died prematurely.", e);
         }

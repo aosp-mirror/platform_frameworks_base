@@ -62,7 +62,7 @@ import java.util.List;
  * This is the system implementation of a Session. Apps will interact with the
  * MediaSession wrapper class instead.
  */
-public class MediaSessionRecord implements IBinder.DeathRecipient {
+public class MediaSessionRecord implements IBinder.DeathRecipient, AutoCloseable {
     private static final String TAG = "MediaSessionRecord";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -125,7 +125,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     public MediaSessionRecord(int ownerPid, int ownerUid, int userId, String ownerPackageName,
             ISessionCallback cb, String tag, Bundle sessionInfo,
-            MediaSessionService service, Looper handlerLooper) {
+            MediaSessionService service, Looper handlerLooper) throws RemoteException {
         mOwnerPid = ownerPid;
         mOwnerUid = ownerUid;
         mUserId = userId;
@@ -142,6 +142,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
         mAudioAttrs = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build();
+
+        // May throw RemoteException if the session app is killed.
+        mSessionCb.mCb.asBinder().linkToDeath(this, 0);
     }
 
     /**
@@ -151,15 +154,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      */
     public ISession getSessionBinder() {
         return mSession;
-    }
-
-    /**
-     * Get the controller binder for the {@link MediaController}.
-     *
-     * @return The controller binder apps talk to.
-     */
-    public ISessionController getControllerBinder() {
-        return mController;
     }
 
     /**
@@ -181,40 +175,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     /**
-     * Get the tag for the session.
-     *
-     * @return The session's tag.
-     */
-    public String getTag() {
-        return mTag;
-    }
-
-    /**
      * Get the intent the app set for their media button receiver.
      *
      * @return The pending intent set by the app or null.
      */
     public PendingIntent getMediaButtonReceiver() {
         return mMediaButtonReceiver;
-    }
-
-    /**
-     * Get this session's flags.
-     *
-     * @return The flags for this session.
-     */
-    public long getFlags() {
-        return mFlags;
-    }
-
-    /**
-     * Check if this session has the specified flag.
-     *
-     * @param flag The flag to check.
-     * @return True if this session has that flag set, false otherwise.
-     */
-    public boolean hasFlag(int flag) {
-        return (mFlags & flag) != 0;
     }
 
     /**
@@ -267,7 +233,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     public void adjustVolume(String packageName, String opPackageName, int pid, int uid,
             boolean asSystemService, int direction, int flags, boolean useSuggested) {
         int previousFlagPlaySound = flags & AudioManager.FLAG_PLAY_SOUND;
-        if (isPlaybackActive() || hasFlag(MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY)) {
+        if (checkPlaybackActiveState(true) || isSystemPriority()) {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
         }
         if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
@@ -360,84 +326,27 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     /**
-     * Get the playback state.
+     * Check if the session's playback active state matches with the expectation. This always return
+     * {@code false} if the playback state is {@code null}, where we cannot know the actual playback
+     * state associated with the session.
      *
-     * @return The current playback state.
+     * @param expected True if playback is expected to be active. false otherwise.
+     * @return True if the session's playback matches with the expectation. false otherwise.
      */
-    public PlaybackState getPlaybackState() {
-        return mPlaybackState;
+    public boolean checkPlaybackActiveState(boolean expected) {
+        if (mPlaybackState == null) {
+            return false;
+        }
+        return MediaSession.isActiveState(mPlaybackState.getState()) == expected;
     }
 
     /**
-     * Check if the session is currently performing playback.
+     * Get whether the playback is local.
      *
-     * @return True if the session is performing playback, false otherwise.
+     * @return {@code true} if the playback is local.
      */
-    public boolean isPlaybackActive() {
-        int state = mPlaybackState == null ? PlaybackState.STATE_NONE : mPlaybackState.getState();
-        return MediaSession.isActiveState(state);
-    }
-
-    /**
-     * Get the type of playback, either local or remote.
-     *
-     * @return The current type of playback.
-     */
-    public int getPlaybackType() {
-        return mVolumeType;
-    }
-
-    /**
-     * Get the local audio stream being used. Only valid if playback type is
-     * local.
-     *
-     * @return The audio stream the session is using.
-     */
-    public AudioAttributes getAudioAttributes() {
-        return mAudioAttrs;
-    }
-
-    /**
-     * Get the type of volume control. Only valid if playback type is remote.
-     *
-     * @return The volume control type being used.
-     */
-    public int getVolumeControl() {
-        return mVolumeControlType;
-    }
-
-    /**
-     * Get the max volume that can be set. Only valid if playback type is
-     * remote.
-     *
-     * @return The max volume that can be set.
-     */
-    public int getMaxVolume() {
-        return mMaxVolume;
-    }
-
-    /**
-     * Get the current volume for this session. Only valid if playback type is
-     * remote.
-     *
-     * @return The current volume of the remote playback.
-     */
-    public int getCurrentVolume() {
-        return mCurrentVolume;
-    }
-
-    /**
-     * Get the volume we'd like it to be set to. This is only valid for a short
-     * while after a call to adjust or set volume.
-     *
-     * @return The current optimistic volume or -1.
-     */
-    public int getOptimisticVolume() {
-        return mOptimisticVolume;
-    }
-
-    public boolean isTransportControlEnabled() {
-        return hasFlag(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+    public boolean isPlaybackLocal() {
+        return mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL;
     }
 
     @Override
@@ -449,19 +358,17 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * Finish cleaning up this session, including disconnecting if connected and
      * removing the death observer from the callback binder.
      */
-    public void onDestroy() {
+    @Override
+    public void close() {
         synchronized (mLock) {
             if (mDestroyed) {
                 return;
             }
+            mSessionCb.mCb.asBinder().unlinkToDeath(this, 0);
             mDestroyed = true;
             mPlaybackState = null;
             mHandler.post(MessageHandler.MSG_DESTROYED);
         }
-    }
-
-    public ISessionCallback getCallback() {
-        return mSessionCb.mCb;
     }
 
     /**
