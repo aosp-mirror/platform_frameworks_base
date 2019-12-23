@@ -1439,20 +1439,22 @@ public class ChooserActivity extends ResolverActivity implements
 
         final long selectionCost = System.currentTimeMillis() - mChooserShownTime;
 
-        // Stacked apps get a disambiguation first
         if (targetInfo instanceof MultiDisplayResolveInfo) {
             MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) targetInfo;
-            CharSequence[] labels = new CharSequence[mti.getTargets().size()];
-            int i = 0;
-            for (TargetInfo ti : mti.getTargets()) {
-                labels[i++] = ti.getResolveInfo().loadLabel(getPackageManager());
-            }
-            ChooserStackedAppDialogFragment f = new ChooserStackedAppDialogFragment(
-                    targetInfo.getDisplayLabel(),
-                    ((MultiDisplayResolveInfo) targetInfo).getTargets(), labels);
+            if (!mti.hasSelected()) {
+                // Stacked apps get a disambiguation first
+                CharSequence[] labels = new CharSequence[mti.getTargets().size()];
+                int i = 0;
+                for (TargetInfo ti : mti.getTargets()) {
+                    labels[i++] = ti.getResolveInfo().loadLabel(getPackageManager());
+                }
+                ChooserStackedAppDialogFragment f = new ChooserStackedAppDialogFragment(
+                        targetInfo.getDisplayLabel(),
+                        ((MultiDisplayResolveInfo) targetInfo), labels, which);
 
-            f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
-            return;
+                f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
+                return;
+            }
         }
 
         super.startSelected(which, always, filtered);

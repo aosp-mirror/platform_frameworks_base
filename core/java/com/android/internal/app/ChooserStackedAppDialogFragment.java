@@ -24,10 +24,7 @@ import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
-import com.android.internal.app.chooser.DisplayResolveInfo;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.android.internal.app.chooser.MultiDisplayResolveInfo;
 
 /**
  * Shows individual actions for a "stacked" app target - such as an app with multiple posting
@@ -38,24 +35,20 @@ public class ChooserStackedAppDialogFragment extends DialogFragment
     private static final String TITLE_KEY = "title";
     private static final String PINNED_KEY = "pinned";
 
-    private List<DisplayResolveInfo> mTargetInfos = new ArrayList<>();
+    private MultiDisplayResolveInfo mTargetInfos;
     private CharSequence[] mLabels;
+    private int mParentWhich;
 
     public ChooserStackedAppDialogFragment() {
     }
 
-    public ChooserStackedAppDialogFragment(CharSequence title) {
-        Bundle args = new Bundle();
-        args.putCharSequence(TITLE_KEY, title);
-        setArguments(args);
-    }
-
     public ChooserStackedAppDialogFragment(CharSequence title,
-            List<DisplayResolveInfo> targets, CharSequence[] labels) {
+            MultiDisplayResolveInfo targets, CharSequence[] labels, int parentWhich) {
         Bundle args = new Bundle();
         args.putCharSequence(TITLE_KEY, title);
         mTargetInfos = targets;
         mLabels = labels;
+        mParentWhich = parentWhich;
         setArguments(args);
     }
 
@@ -72,7 +65,8 @@ public class ChooserStackedAppDialogFragment extends DialogFragment
     @Override
     public void onClick(DialogInterface dialog, int which) {
         final Bundle args = getArguments();
-        mTargetInfos.get(which).start(getActivity(), null);
+        mTargetInfos.setSelected(which);
+        ((ChooserActivity) getActivity()).startSelected(mParentWhich, false, true);
         dismiss();
     }
 
