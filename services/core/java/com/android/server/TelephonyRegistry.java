@@ -1592,7 +1592,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                 TelephonyManager.DATA_UNKNOWN,
                                 TelephonyManager.NETWORK_TYPE_UNKNOWN,
                                 ApnSetting.getApnTypesBitmaskFromString(apnType), null, null,
-                                DataFailCause.NONE));
+                                DataFailCause.NONE, null));
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
                             PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)
@@ -1778,7 +1778,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                 TelephonyManager.DATA_UNKNOWN,
                                 TelephonyManager.NETWORK_TYPE_UNKNOWN,
                                 ApnSetting.getApnTypesBitmaskFromString(apnType), null, null,
-                                failCause));
+                                failCause, null));
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
                             PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)
