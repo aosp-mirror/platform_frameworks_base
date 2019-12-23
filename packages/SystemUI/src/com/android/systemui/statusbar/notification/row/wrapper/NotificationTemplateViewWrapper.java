@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.statusbar.notification.row.wrapper;
@@ -244,17 +244,18 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                 mUiOffloadThread = Dependency.get(UiOffloadThread.class);
             }
             if (view.isAttachedToWindow()) {
-                mUiOffloadThread.submit(() -> pendingIntent.registerCancelListener(listener));
+                mUiOffloadThread.execute(() -> pendingIntent.registerCancelListener(listener));
             }
             view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
                 @Override
                 public void onViewAttachedToWindow(View v) {
-                    mUiOffloadThread.submit(() -> pendingIntent.registerCancelListener(listener));
+                    mUiOffloadThread.execute(() -> pendingIntent.registerCancelListener(listener));
                 }
 
                 @Override
                 public void onViewDetachedFromWindow(View v) {
-                    mUiOffloadThread.submit(() -> pendingIntent.unregisterCancelListener(listener));
+                    mUiOffloadThread.execute(
+                            () -> pendingIntent.unregisterCancelListener(listener));
                 }
             });
         }

@@ -37,8 +37,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
-import com.android.systemui.UiOffloadThread;
 import com.android.systemui.analytics.DataCollector;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 /**
  * When the phone is locked, listens to touch, sensor and phone events and sends them to
@@ -77,7 +78,7 @@ public class FalsingManagerImpl implements FalsingManager {
     private final DataCollector mDataCollector;
     private final HumanInteractionClassifier mHumanInteractionClassifier;
     private final AccessibilityManager mAccessibilityManager;
-    private final UiOffloadThread mUiOffloadThread;
+    private final Executor mUiBgExecutor;
 
     private boolean mEnforceBouncer = false;
     private boolean mBouncerOn = false;
@@ -137,13 +138,13 @@ public class FalsingManagerImpl implements FalsingManager {
                 }
             };
 
-    FalsingManagerImpl(Context context) {
+    FalsingManagerImpl(Context context, @UiBackground Executor uiBgExecutor) {
         mContext = context;
         mSensorManager = Dependency.get(AsyncSensorManager.class);
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mDataCollector = DataCollector.getInstance(mContext);
         mHumanInteractionClassifier = HumanInteractionClassifier.getInstance(mContext);
-        mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+        mUiBgExecutor = uiBgExecutor;
         mScreenOn = context.getSystemService(PowerManager.class).isInteractive();
         mMetricsLogger = new MetricsLogger();
 
@@ -196,7 +197,7 @@ public class FalsingManagerImpl implements FalsingManager {
             }
 
             // This can be expensive, and doesn't need to happen on the main thread.
-            mUiOffloadThread.submit(() -> {
+            mUiBgExecutor.execute(() -> {
                 mSensorManager.unregisterListener(mSensorEventListener);
             });
         }
@@ -237,7 +238,7 @@ public class FalsingManagerImpl implements FalsingManager {
             if (s != null) {
 
                 // This can be expensive, and doesn't need to happen on the main thread.
-                mUiOffloadThread.submit(() -> {
+                mUiBgExecutor.execute(() -> {
                     mSensorManager.registerListener(
                             mSensorEventListener, s, SensorManager.SENSOR_DELAY_GAME);
                 });

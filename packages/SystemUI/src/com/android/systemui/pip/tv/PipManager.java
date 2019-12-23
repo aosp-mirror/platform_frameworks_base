@@ -750,7 +750,7 @@ public class PipManager implements BasePipManager {
     }
 
     private void updatePipVisibility(final boolean visible) {
-        Dependency.get(UiOffloadThread.class).submit(() -> {
+        Dependency.get(UiOffloadThread.class).execute(() -> {
             WindowManagerWrapper.getInstance().setPipVisibility(visible);
         });
     }

@@ -54,12 +54,13 @@ import com.android.systemui.Dependency;
 import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
-import com.android.systemui.UiOffloadThread;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.NotificationChannels;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -74,16 +75,18 @@ public class InstantAppNotifier extends SystemUI
     public static final int NUM_TASKS_FOR_INSTANT_APP_INFO = 5;
 
     private final Handler mHandler = new Handler();
-    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+    private final Executor mUiBgExecutor;
     private final ArraySet<Pair<String, Integer>> mCurrentNotifs = new ArraySet<>();
     private final CommandQueue mCommandQueue;
     private boolean mDockedStackExists;
     private KeyguardStateController mKeyguardStateController;
 
     @Inject
-    public InstantAppNotifier(Context context, CommandQueue commandQueue) {
+    public InstantAppNotifier(Context context, CommandQueue commandQueue,
+            @UiBackground Executor uiBgExecutor) {
         super(context);
         mCommandQueue = commandQueue;
+        mUiBgExecutor = uiBgExecutor;
     }
 
     @Override
@@ -151,7 +154,7 @@ public class InstantAppNotifier extends SystemUI
     private void updateForegroundInstantApps() {
         NotificationManager noMan = mContext.getSystemService(NotificationManager.class);
         IPackageManager pm = AppGlobals.getPackageManager();
-        mUiOffloadThread.submit(
+        mUiBgExecutor.execute(
                 () -> {
                     ArraySet<Pair<String, Integer>> notifs = new ArraySet<>(mCurrentNotifs);
                     try {

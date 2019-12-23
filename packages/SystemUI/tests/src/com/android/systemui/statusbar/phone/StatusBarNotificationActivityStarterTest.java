@@ -72,6 +72,8 @@ import com.android.systemui.statusbar.notification.NotificationInterruptionState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -126,6 +128,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     @Mock
     private NotificationPanelView mNotificationPanelView;
+    private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
     private NotificationTestHelper mNotificationTestHelper;
     private ExpandableNotificationRow mNotificationRow;
@@ -178,8 +181,9 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 mock(NotificationLockscreenUserManager.class),
                 mKeyguardStateController,
                 mock(NotificationInterruptionStateProvider.class), mock(MetricsLogger.class),
-                mock(LockPatternUtils.class), mHandler, mHandler, mActivityIntentHelper,
-                mBubbleController, mShadeController, mSuperStatusBarViewFactory))
+                mock(LockPatternUtils.class), mHandler, mHandler, mUiBgExecutor,
+                mActivityIntentHelper, mBubbleController, mShadeController,
+                mSuperStatusBarViewFactory))
                 .setStatusBar(mStatusBar)
                 .setNotificationPresenter(mock(NotificationPresenter.class))
                 .setActivityLaunchAnimator(mock(ActivityLaunchAnimator.class))
