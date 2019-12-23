@@ -72,7 +72,7 @@ abstract class MediaRoute2Provider {
         return mSessionInfos;
     }
 
-    void setAndNotifyProviderState(MediaRoute2ProviderInfo providerInfo,
+    void setProviderState(MediaRoute2ProviderInfo providerInfo,
             List<RoutingSessionInfo> sessionInfos) {
         if (providerInfo == null) {
             mProviderInfo = null;
@@ -89,10 +89,18 @@ abstract class MediaRoute2Provider {
                             .build());
         }
         mSessionInfos = sessionInfoWithProviderId;
+    }
 
+    void notifyProviderState() {
         if (mCallback != null) {
             mCallback.onProviderStateChanged(this);
         }
+    }
+
+    void setAndNotifyProviderState(MediaRoute2ProviderInfo providerInfo,
+            List<RoutingSessionInfo> sessionInfos) {
+        setProviderState(providerInfo, sessionInfos);
+        notifyProviderState();
     }
 
     public boolean hasComponentName(String packageName, String className) {
