@@ -240,8 +240,7 @@ class AudioPlayerStateMonitor {
                     if (!mPrevActiveAudioPlaybackConfigs.containsKey(
                             config.getPlayerInterfaceId())) {
                         if (DEBUG) {
-                            Log.d(TAG, "Found a new active media playback. "
-                                    + AudioPlaybackConfiguration.toLogFriendlyString(config));
+                            Log.d(TAG, "Found a new active media playback. " + config);
                         }
                         // New active audio playback.
                         int index = mSortedAudioPlaybackClientUids.indexOf(uid);
