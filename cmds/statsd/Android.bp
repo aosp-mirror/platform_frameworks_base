@@ -409,7 +409,7 @@ cc_benchmark {
 // ====  java proto device library (for test only)  ==============================
 java_library {
     name: "statsdprotolite",
-    sdk_version: "core_platform",
+    sdk_version: "core_current",
     proto: {
         type: "lite",
         include_dirs: ["external/protobuf/src"],
