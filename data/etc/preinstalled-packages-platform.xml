@@ -106,4 +106,7 @@ to pre-existing users, but cannot uninstall system packages from pre-existing us
         <install-in user-type="FULL" />
         <install-in user-type="PROFILE" />
     </install-in-user-type>
+    <install-in-user-type package="com.android.wallpaperbackup">
+        <install-in user-type="FULL" />
+    </install-in-user-type>
 </config>
