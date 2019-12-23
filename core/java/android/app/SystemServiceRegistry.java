@@ -162,6 +162,8 @@ import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
+import android.security.FileIntegrityManager;
+import android.security.IFileIntegrityService;
 import android.service.oemlock.IOemLockService;
 import android.service.oemlock.OemLockManager;
 import android.service.persistentdata.IPersistentDataBlockService;
@@ -1214,6 +1216,7 @@ public final class SystemServiceRegistry {
                         return new DynamicSystemManager(
                                 IDynamicSystemService.Stub.asInterface(b));
                     }});
+
         registerService(Context.BATTERY_STATS_SERVICE, BatteryStatsManager.class,
                 new CachedServiceFetcher<BatteryStatsManager>() {
                     @Override
@@ -1246,6 +1249,17 @@ public final class SystemServiceRegistry {
                         }
                         return new IncrementalManager(
                                 IIncrementalManagerNative.Stub.asInterface(b));
+                    }});
+
+        registerService(Context.FILE_INTEGRITY_SERVICE, FileIntegrityManager.class,
+                new CachedServiceFetcher<FileIntegrityManager>() {
+                    @Override
+                    public FileIntegrityManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.FILE_INTEGRITY_SERVICE);
+                        return new FileIntegrityManager(
+                                IFileIntegrityService.Stub.asInterface(b));
                     }});
         //CHECKSTYLE:ON IndentationCheck
         registerService(Context.APP_INTEGRITY_SERVICE, AppIntegrityManager.class,
