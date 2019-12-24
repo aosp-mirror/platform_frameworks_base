@@ -32,7 +32,7 @@ apex {
 
 sdk {
     name: "sdkext-sdk",
-    java_libs: [ "framework-sdkext-stubs-systemapi" ],
+    java_header_libs: [ "framework-sdkext-stubs-systemapi" ],
 }
 
 apex_key {
