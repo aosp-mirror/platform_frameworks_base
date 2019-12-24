@@ -38,6 +38,7 @@ import android.annotation.Nullable;
 import android.content.pm.DataLoaderParams;
 import android.content.pm.InstallationFile;
 import android.os.IVold;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.ArraySet;
@@ -208,7 +209,8 @@ public final class IncrementalFileStorages {
         if (!hasObb()) {
             return;
         }
-        final String mainObbDir = String.format("/storage/emulated/0/Android/obb/%s", mPackageName);
+        final String obbDir = "/storage/emulated/0/Android/obb";
+        final String packageObbDir = String.format("%s/%s", obbDir, mPackageName);
         final String packageObbDirRoot =
                 String.format("/mnt/runtime/%s/emulated/0/Android/obb/", mPackageName);
         final String[] obbDirs = {
@@ -217,12 +219,12 @@ public final class IncrementalFileStorages {
                 packageObbDirRoot + "full",
                 packageObbDirRoot + "default",
                 String.format("/data/media/0/Android/obb/%s", mPackageName),
-                mainObbDir,
+                packageObbDir,
         };
         try {
-            Slog.i(TAG, "Creating obb directory '" + mainObbDir + "'");
+            Slog.i(TAG, "Creating obb directory '" + packageObbDir + "'");
             final IVold vold = IVold.Stub.asInterface(ServiceManager.getServiceOrThrow("vold"));
-            vold.mkdirs(mainObbDir);
+            vold.setupAppDir(packageObbDir, obbDir, Process.ROOT_UID);
             for (String d : obbDirs) {
                 mObbStorage.bindPermanent(d);
             }
@@ -230,7 +232,7 @@ public final class IncrementalFileStorages {
             Slog.e(TAG, "vold service is not found.");
             cleanUp();
         } catch (IOException | RemoteException ex) {
-            Slog.e(TAG, "Failed to create obb dir at: " + mainObbDir, ex);
+            Slog.e(TAG, "Failed to create obb dir at: " + packageObbDir, ex);
             cleanUp();
         }
     }
