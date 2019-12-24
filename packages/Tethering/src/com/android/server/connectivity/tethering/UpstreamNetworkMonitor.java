@@ -32,7 +32,6 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.net.NetworkState;
 import android.net.util.PrefixUtils;
 import android.net.util.SharedLog;
 import android.os.Handler;
@@ -90,7 +89,7 @@ public class UpstreamNetworkMonitor {
     private final StateMachine mTarget;
     private final Handler mHandler;
     private final int mWhat;
-    private final HashMap<Network, NetworkState> mNetworkMap = new HashMap<>();
+    private final HashMap<Network, UpstreamNetworkState> mNetworkMap = new HashMap<>();
     private HashSet<IpPrefix> mLocalPrefixes;
     private ConnectivityManager mCM;
     private EntitlementManager mEntitlementMgr;
@@ -236,7 +235,7 @@ public class UpstreamNetworkMonitor {
     /**
      * Select the first available network from |perferredTypes|.
      */
-    public NetworkState selectPreferredUpstreamType(Iterable<Integer> preferredTypes) {
+    public UpstreamNetworkState selectPreferredUpstreamType(Iterable<Integer> preferredTypes) {
         final TypeStatePair typeStatePair = findFirstAvailableUpstreamByType(
                 mNetworkMap.values(), preferredTypes, isCellularUpstreamPermitted());
 
@@ -274,8 +273,8 @@ public class UpstreamNetworkMonitor {
      * preferred upstream would be DUN otherwise preferred upstream is the same as default network.
      * Returns null if no current upstream is available.
      */
-    public NetworkState getCurrentPreferredUpstream() {
-        final NetworkState dfltState = (mDefaultInternetNetwork != null)
+    public UpstreamNetworkState getCurrentPreferredUpstream() {
+        final UpstreamNetworkState dfltState = (mDefaultInternetNetwork != null)
                 ? mNetworkMap.get(mDefaultInternetNetwork)
                 : null;
         if (isNetworkUsableAndNotCellular(dfltState)) return dfltState;
@@ -312,11 +311,11 @@ public class UpstreamNetworkMonitor {
         if (mNetworkMap.containsKey(network)) return;
 
         if (VDBG) Log.d(TAG, "onAvailable for " + network);
-        mNetworkMap.put(network, new NetworkState(null, null, null, network, null, null));
+        mNetworkMap.put(network, new UpstreamNetworkState(null, null, network));
     }
 
     private void handleNetCap(Network network, NetworkCapabilities newNc) {
-        final NetworkState prev = mNetworkMap.get(network);
+        final UpstreamNetworkState prev = mNetworkMap.get(network);
         if (prev == null || newNc.equals(prev.networkCapabilities)) {
             // Ignore notifications about networks for which we have not yet
             // received onAvailable() (should never happen) and any duplicate
@@ -336,15 +335,15 @@ public class UpstreamNetworkMonitor {
             mLog.logf("upstream network signal strength: %s -> %s", prevSignal, newSignal);
         }
 
-        mNetworkMap.put(network, new NetworkState(
-                null, prev.linkProperties, newNc, network, null, null));
+        mNetworkMap.put(network, new UpstreamNetworkState(
+                prev.linkProperties, newNc, network));
         // TODO: If sufficient information is available to select a more
         // preferable upstream, do so now and notify the target.
         notifyTarget(EVENT_ON_CAPABILITIES, network);
     }
 
     private void handleLinkProp(Network network, LinkProperties newLp) {
-        final NetworkState prev = mNetworkMap.get(network);
+        final UpstreamNetworkState prev = mNetworkMap.get(network);
         if (prev == null || newLp.equals(prev.linkProperties)) {
             // Ignore notifications about networks for which we have not yet
             // received onAvailable() (should never happen) and any duplicate
@@ -357,8 +356,8 @@ public class UpstreamNetworkMonitor {
                     network, newLp));
         }
 
-        mNetworkMap.put(network, new NetworkState(
-                null, newLp, prev.networkCapabilities, network, null, null));
+        mNetworkMap.put(network, new UpstreamNetworkState(
+                newLp, prev.networkCapabilities, network));
         // TODO: If sufficient information is available to select a more
         // preferable upstream, do so now and notify the target.
         notifyTarget(EVENT_ON_LINKPROPERTIES, network);
@@ -509,11 +508,11 @@ public class UpstreamNetworkMonitor {
 
     private static class TypeStatePair {
         public int type = TYPE_NONE;
-        public NetworkState ns = null;
+        public UpstreamNetworkState ns = null;
     }
 
     private static TypeStatePair findFirstAvailableUpstreamByType(
-            Iterable<NetworkState> netStates, Iterable<Integer> preferredTypes,
+            Iterable<UpstreamNetworkState> netStates, Iterable<Integer> preferredTypes,
             boolean isCellularUpstreamPermitted) {
         final TypeStatePair result = new TypeStatePair();
 
@@ -532,7 +531,7 @@ public class UpstreamNetworkMonitor {
 
             nc.setSingleUid(Process.myUid());
 
-            for (NetworkState value : netStates) {
+            for (UpstreamNetworkState value : netStates) {
                 if (!nc.satisfiedByNetworkCapabilities(value.networkCapabilities)) {
                     continue;
                 }
@@ -546,10 +545,10 @@ public class UpstreamNetworkMonitor {
         return result;
     }
 
-    private static HashSet<IpPrefix> allLocalPrefixes(Iterable<NetworkState> netStates) {
+    private static HashSet<IpPrefix> allLocalPrefixes(Iterable<UpstreamNetworkState> netStates) {
         final HashSet<IpPrefix> prefixSet = new HashSet<>();
 
-        for (NetworkState ns : netStates) {
+        for (UpstreamNetworkState ns : netStates) {
             final LinkProperties lp = ns.linkProperties;
             if (lp == null) continue;
             prefixSet.addAll(PrefixUtils.localPrefixesFrom(lp));
@@ -563,7 +562,7 @@ public class UpstreamNetworkMonitor {
         return Integer.toString(nc.getSignalStrength());
     }
 
-    private static boolean isCellular(NetworkState ns) {
+    private static boolean isCellular(UpstreamNetworkState ns) {
         return (ns != null) && isCellular(ns.networkCapabilities);
     }
 
@@ -572,18 +571,19 @@ public class UpstreamNetworkMonitor {
                && nc.hasCapability(NET_CAPABILITY_NOT_VPN);
     }
 
-    private static boolean hasCapability(NetworkState ns, int netCap) {
+    private static boolean hasCapability(UpstreamNetworkState ns, int netCap) {
         return (ns != null) && (ns.networkCapabilities != null)
                && ns.networkCapabilities.hasCapability(netCap);
     }
 
-    private static boolean isNetworkUsableAndNotCellular(NetworkState ns) {
+    private static boolean isNetworkUsableAndNotCellular(UpstreamNetworkState ns) {
         return (ns != null) && (ns.networkCapabilities != null) && (ns.linkProperties != null)
                && !isCellular(ns.networkCapabilities);
     }
 
-    private static NetworkState findFirstDunNetwork(Iterable<NetworkState> netStates) {
-        for (NetworkState ns : netStates) {
+    private static UpstreamNetworkState findFirstDunNetwork(
+            Iterable<UpstreamNetworkState> netStates) {
+        for (UpstreamNetworkState ns : netStates) {
             if (isCellular(ns) && hasCapability(ns, NET_CAPABILITY_DUN)) return ns;
         }
 
