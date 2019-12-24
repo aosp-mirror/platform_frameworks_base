@@ -18,7 +18,6 @@ package android.net.wifi.wificond;
 
 import static org.junit.Assert.assertEquals;
 
-import android.net.wifi.IWifiScannerImpl;
 import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
