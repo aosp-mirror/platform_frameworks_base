@@ -46,7 +46,6 @@ import android.media.MediaRouter2;
 import android.media.MediaRouter2.SessionCreationCallback;
 import android.media.RouteSessionController;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -246,7 +245,7 @@ public class MediaRouter2Test {
         // Create session with this route
         SessionCreationCallback callback = new SessionCreationCallback() {
             @Override
-            public void onSessionCreated(RouteSessionController controller, Bundle controlHints) {
+            public void onSessionCreated(RouteSessionController controller) {
                 assertNotNull(controller);
                 assertTrue(controller.getSelectedRoutes().contains(ROUTE_ID1));
                 assertTrue(TextUtils.equals(CATEGORY_SAMPLE, controller.getCategory()));
@@ -284,7 +283,7 @@ public class MediaRouter2Test {
         // Create session with this route
         SessionCreationCallback callback = new SessionCreationCallback() {
             @Override
-            public void onSessionCreated(RouteSessionController controller, Bundle controlHints) {
+            public void onSessionCreated(RouteSessionController controller) {
                 successLatch.countDown();
             }
 

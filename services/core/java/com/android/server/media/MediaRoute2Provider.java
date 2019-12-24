@@ -86,7 +86,6 @@ abstract class MediaRoute2Provider {
                 @NonNull String clientPackageName, @NonNull MediaRoute2Info route,
                 @Nullable Bundle controlHints, int seq);
         void onSessionCreated(@NonNull MediaRoute2Provider provider,
-                @Nullable RouteSessionInfo sessionInfo, @Nullable Bundle controlHints,
-                int requestId);
+                @Nullable RouteSessionInfo sessionInfo, int requestId);
     }
 }

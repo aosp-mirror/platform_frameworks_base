@@ -747,10 +747,9 @@ class MediaRouter2ServiceImpl {
 
         @Override
         public void onSessionCreated(@NonNull MediaRoute2Provider provider,
-                @Nullable RouteSessionInfo sessionInfo, @Nullable Bundle controlHints,
-                int requestId) {
+                @Nullable RouteSessionInfo sessionInfo, int requestId) {
             sendMessage(PooledLambda.obtainMessage(UserHandler::handleCreateSessionResultOnHandler,
-                    this, provider, sessionInfo, controlHints, requestId));
+                    this, provider, sessionInfo, requestId));
         }
 
         private void updateProvider(MediaRoute2Provider provider) {
@@ -864,7 +863,7 @@ class MediaRouter2ServiceImpl {
 
         private void handleCreateSessionResultOnHandler(
                 @NonNull MediaRoute2Provider provider, @Nullable RouteSessionInfo sessionInfo,
-                @Nullable Bundle controlHints, int requestId) {
+                int requestId) {
             SessionCreationRequest matchingRequest = null;
             for (SessionCreationRequest request : mSessionCreationRequests) {
                 if (request.mRequestId == requestId
@@ -900,15 +899,14 @@ class MediaRouter2ServiceImpl {
             }
 
             // Succeeded
-            notifySessionCreated(matchingRequest.mClientRecord, sessionInfo, controlHints,
-                    requestId);
+            notifySessionCreated(matchingRequest.mClientRecord, sessionInfo, requestId);
             // TODO: Tell managers for the session creation
         }
 
         private void notifySessionCreated(Client2Record clientRecord, RouteSessionInfo sessionInfo,
-                Bundle controlHints, int requestId) {
+                int requestId) {
             try {
-                clientRecord.mClient.notifySessionCreated(sessionInfo, controlHints, requestId);
+                clientRecord.mClient.notifySessionCreated(sessionInfo, requestId);
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify client of the session creation."
                         + " Client probably died.", ex);
@@ -917,8 +915,7 @@ class MediaRouter2ServiceImpl {
 
         private void notifySessionCreationFailed(Client2Record clientRecord, int requestId) {
             try {
-                clientRecord.mClient.notifySessionCreated(
-                        null /* sessionInfo */, null /* controlHints */, requestId);
+                clientRecord.mClient.notifySessionCreated(/* sessionInfo= */ null, requestId);
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify client of the session creation failure."
                         + " Client probably died.", ex);

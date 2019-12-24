@@ -17,6 +17,9 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.os.Bundle;
+
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -39,6 +42,7 @@ public class RouteSessionController {
     private final int mSessionId;
     private final String mCategory;
     private final Object mLock = new Object();
+    private final Bundle mControlHints;
 
     private List<String> mSelectedRoutes;
 
@@ -55,6 +59,7 @@ public class RouteSessionController {
         mSessionId = sessionInfo.getSessionId();
         mCategory = sessionInfo.getControlCategory();
         mSelectedRoutes = sessionInfo.getSelectedRoutes();
+        mControlHints = sessionInfo.getControlHints();
         // TODO: Create getters for all other types of routes
     }
 
@@ -71,6 +76,14 @@ public class RouteSessionController {
     @NonNull
     public String getCategory() {
         return mCategory;
+    }
+
+    /**
+     * @return the control hints used to control route session if available.
+     */
+    @Nullable
+    public Bundle getControlHints() {
+        return mControlHints;
     }
 
     /**

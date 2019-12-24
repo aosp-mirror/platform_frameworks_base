@@ -281,11 +281,11 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     private void onSessionCreated(Connection connection, @Nullable RouteSessionInfo sessionInfo,
-            @Nullable Bundle controlHints, int requestId) {
+            int requestId) {
         if (mActiveConnection != connection) {
             return;
         }
-        mCallback.onSessionCreated(this, sessionInfo, controlHints, requestId);
+        mCallback.onSessionCreated(this, sessionInfo, requestId);
     }
 
     private void disconnect() {
@@ -391,9 +391,8 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
                     packageName, routeId, controlHints, seq));
         }
 
-        void postSessionCreated(@Nullable RouteSessionInfo sessionInfo,
-                @Nullable Bundle controlHints, int requestId) {
-            mHandler.post(() -> onSessionCreated(Connection.this, sessionInfo, controlHints,
+        void postSessionCreated(@Nullable RouteSessionInfo sessionInfo, int requestId) {
+            mHandler.post(() -> onSessionCreated(Connection.this, sessionInfo,
                     requestId));
         }
     }
@@ -427,11 +426,10 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         }
 
         @Override
-        public void notifySessionCreated(@Nullable RouteSessionInfo sessionInfo,
-                @Nullable Bundle controlHints, int requestId) {
+        public void notifySessionCreated(@Nullable RouteSessionInfo sessionInfo, int requestId) {
             Connection connection = mConnectionRef.get();
             if (connection != null) {
-                connection.postSessionCreated(sessionInfo, controlHints, requestId);
+                connection.postSessionCreated(sessionInfo, requestId);
             }
         }
     }

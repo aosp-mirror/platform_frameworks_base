@@ -17,6 +17,8 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -51,6 +53,7 @@ public class RouteSessionInfo implements Parcelable {
     final List<String> mDeselectableRoutes;
     final List<String> mGroupableRoutes;
     final List<String> mTransferrableRoutes;
+    final Bundle mControlHints;
 
     RouteSessionInfo(@NonNull Builder builder) {
         Objects.requireNonNull(builder, "builder must not be null.");
@@ -63,6 +66,8 @@ public class RouteSessionInfo implements Parcelable {
         mDeselectableRoutes = Collections.unmodifiableList(builder.mDeselectableRoutes);
         mGroupableRoutes = Collections.unmodifiableList(builder.mGroupableRoutes);
         mTransferrableRoutes = Collections.unmodifiableList(builder.mTransferrableRoutes);
+
+        mControlHints = builder.mControlHints;
     }
 
     RouteSessionInfo(@NonNull Parcel src) {
@@ -76,6 +81,8 @@ public class RouteSessionInfo implements Parcelable {
         mDeselectableRoutes = ensureList(src.createStringArrayList());
         mGroupableRoutes = ensureList(src.createStringArrayList());
         mTransferrableRoutes = ensureList(src.createStringArrayList());
+
+        mControlHints = src.readBundle();
     }
 
     private static String ensureString(String str) {
@@ -150,6 +157,14 @@ public class RouteSessionInfo implements Parcelable {
         return mTransferrableRoutes;
     }
 
+    /**
+     * Gets the control hints
+     */
+    @Nullable
+    public Bundle getControlHints() {
+        return mControlHints;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -164,6 +179,7 @@ public class RouteSessionInfo implements Parcelable {
         dest.writeStringList(mDeselectableRoutes);
         dest.writeStringList(mGroupableRoutes);
         dest.writeStringList(mTransferrableRoutes);
+        dest.writeBundle(mControlHints);
     }
 
     @Override
@@ -192,6 +208,7 @@ public class RouteSessionInfo implements Parcelable {
         final List<String> mDeselectableRoutes;
         final List<String> mGroupableRoutes;
         final List<String> mTransferrableRoutes;
+        Bundle mControlHints;
 
         public Builder(int sessionId, @NonNull String packageName,
                 @NonNull String controlCategory) {
@@ -215,6 +232,8 @@ public class RouteSessionInfo implements Parcelable {
             mDeselectableRoutes = new ArrayList<>(sessionInfo.mDeselectableRoutes);
             mGroupableRoutes = new ArrayList<>(sessionInfo.mGroupableRoutes);
             mTransferrableRoutes = new ArrayList<>(sessionInfo.mTransferrableRoutes);
+
+            mControlHints = sessionInfo.mControlHints;
         }
 
         /**
@@ -323,6 +342,15 @@ public class RouteSessionInfo implements Parcelable {
         public Builder removeTransferrableRoute(@NonNull String routeId) {
             mTransferrableRoutes.remove(
                     Objects.requireNonNull(routeId, "routeId must not be null"));
+            return this;
+        }
+
+        /**
+         * Sets control hints.
+         */
+        @NonNull
+        public Builder setControlHints(@Nullable Bundle controlHints) {
+            mControlHints = controlHints;
             return this;
         }
 

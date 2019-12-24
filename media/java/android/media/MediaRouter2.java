@@ -328,7 +328,7 @@ public class MediaRouter2 {
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to request to create session.", ex);
                 mHandler.sendMessage(obtainMessage(MediaRouter2::createControllerOnHandler,
-                        MediaRouter2.this, null, null, requestId));
+                        MediaRouter2.this, null, requestId));
             }
         }
     }
@@ -494,8 +494,7 @@ public class MediaRouter2 {
      * <p>
      * Pass {@code null} to sessionInfo for the failure case.
      */
-    void createControllerOnHandler(@Nullable RouteSessionInfo sessionInfo,
-            @Nullable Bundle controlHints, int requestId) {
+    void createControllerOnHandler(@Nullable RouteSessionInfo sessionInfo, int requestId) {
         SessionCreationRequest matchingRequest = null;
         for (SessionCreationRequest request : mSessionCreationRequests) {
             if (request.mRequestId == requestId) {
@@ -523,7 +522,7 @@ public class MediaRouter2 {
             // TODO: RouteSessionController should be created with full info (e.g. routes)
             //       from RouteSessionInfo.
             RouteSessionController controller = new RouteSessionController(sessionInfo);
-            executor.execute(() -> callback.onSessionCreated(controller, controlHints));
+            executor.execute(() -> callback.onSessionCreated(controller));
         }
     }
 
@@ -589,7 +588,7 @@ public class MediaRouter2 {
          *
          * @param controller the controller to control the created session
          */
-        public void onSessionCreated(RouteSessionController controller, Bundle controlHints) {}
+        public void onSessionCreated(RouteSessionController controller) {}
 
         /**
          * Called when the session creation request failed.
@@ -669,10 +668,9 @@ public class MediaRouter2 {
         }
 
         @Override
-        public void notifySessionCreated(@Nullable RouteSessionInfo sessionInfo,
-                @Nullable Bundle controlHints, int requestId) {
+        public void notifySessionCreated(@Nullable RouteSessionInfo sessionInfo, int requestId) {
             mHandler.sendMessage(obtainMessage(MediaRouter2::createControllerOnHandler,
-                    MediaRouter2.this, sessionInfo, controlHints, requestId));
+                    MediaRouter2.this, sessionInfo, requestId));
         }
     }
 }

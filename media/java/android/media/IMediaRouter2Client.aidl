@@ -28,6 +28,5 @@ oneway interface IMediaRouter2Client {
     void notifyRoutesAdded(in List<MediaRoute2Info> routes);
     void notifyRoutesRemoved(in List<MediaRoute2Info> routes);
     void notifyRoutesChanged(in List<MediaRoute2Info> routes);
-    void notifySessionCreated(in @nullable RouteSessionInfo sessionInfo,
-            in @nullable Bundle controlHints, int requestId);
+    void notifySessionCreated(in @nullable RouteSessionInfo sessionInfo, int requestId);
 }

@@ -182,7 +182,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
             int requestId) {
         if (TextUtils.equals(ROUTE_ID3_SESSION_CREATION_FAILED, routeId)) {
             // Tell the router that session cannot be created by passing null as sessionInfo.
-            notifySessionCreated(null /* sessionInfo */, null /* controlHitns */, requestId);
+            notifySessionCreated(/* sessionInfo= */ null, requestId);
             return;
         }
 
@@ -190,7 +190,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
                 SESSION_ID_1, packageName, controlCategory)
                 .addSelectedRoute(routeId)
                 .build();
-        notifySessionCreated(sessionInfo, null /* controlHints */, requestId);
+        notifySessionCreated(sessionInfo,  requestId);
     }
 
     @Override
@@ -203,7 +203,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         RouteSessionInfo newSessionInfo = new RouteSessionInfo.Builder(sessionInfo)
                 .addSelectedRoute(routeId)
                 .build();
-        setSessionInfo(sessionId, newSessionInfo);
+        updateSessionInfo(newSessionInfo);
         publishRoutes();
     }
 
@@ -213,7 +213,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         RouteSessionInfo newSessionInfo = new RouteSessionInfo.Builder(sessionInfo)
                 .removeSelectedRoute(routeId)
                 .build();
-        setSessionInfo(sessionId, newSessionInfo);
+        updateSessionInfo(newSessionInfo);
         publishRoutes();
     }
 
@@ -224,7 +224,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
                 .clearSelectedRoutes()
                 .addSelectedRoute(routeId)
                 .build();
-        setSessionInfo(sessionId, newSessionInfo);
+        updateSessionInfo(newSessionInfo);
         publishRoutes();
     }
 

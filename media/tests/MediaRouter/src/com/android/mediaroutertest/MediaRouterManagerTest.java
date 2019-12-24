@@ -352,8 +352,7 @@ public class MediaRouterManagerTest {
         CountDownLatch latch = new CountDownLatch(2);
 
         // A dummy callback is required to send control category info.
-        RouteCallback
-                routeCallback = new RouteCallback();
+        RouteCallback routeCallback = new RouteCallback();
         MediaRouter2Manager.Callback managerCallback = new MediaRouter2Manager.Callback() {
             @Override
             public void onRoutesAdded(List<MediaRoute2Info> routes) {
@@ -368,7 +367,8 @@ public class MediaRouterManagerTest {
 
             @Override
             public void onControlCategoriesChanged(String packageName, List<String> categories) {
-                if (TextUtils.equals(mPackageName, packageName)) {
+                if (TextUtils.equals(mPackageName, packageName)
+                        && controlCategories.equals(categories)) {
                     latch.countDown();
                 }
             }

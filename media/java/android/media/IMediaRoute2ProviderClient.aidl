@@ -28,6 +28,5 @@ oneway interface IMediaRoute2ProviderClient {
     void updateProviderInfo(in MediaRoute2ProviderInfo info);
     void notifyRouteSelected(String packageName, String routeId, in @nullable Bundle controlHints,
             int seq);
-    void notifySessionCreated(in @nullable RouteSessionInfo sessionInfo,
-            in @nullable Bundle controlHints, int requestId);
+    void notifySessionCreated(in @nullable RouteSessionInfo sessionInfo, int requestId);
 }
