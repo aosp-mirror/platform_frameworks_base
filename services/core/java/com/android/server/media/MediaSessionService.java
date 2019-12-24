@@ -25,7 +25,6 @@ import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -134,9 +133,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             new ArrayList<>();
 
     private KeyguardManager mKeyguardManager;
-    private IAudioService mAudioService;
     private AudioManagerInternal mAudioManagerInternal;
-    private ActivityManager mActivityManager;
     private ContentResolver mContentResolver;
     private SettingsObserver mSettingsObserver;
     private boolean mHasFeatureLeanback;
@@ -168,10 +165,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         publishBinderService(Context.MEDIA_SESSION_SERVICE, mSessionManagerImpl);
         Watchdog.getInstance().addMonitor(this);
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-        mAudioService = getAudioService();
         mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
-        mActivityManager =
-                (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance(mContext);
         mAudioPlayerStateMonitor.registerListener(
                 (config, isRemoved) -> {
@@ -2396,25 +2390,6 @@ public class MediaSessionService extends SystemService implements Monitor {
             public void onSendFinished(PendingIntent pendingIntent, Intent intent, int resultCode,
                     String resultData, Bundle resultExtras) {
                 onReceiveResult(resultCode, null);
-            }
-        };
-
-        BroadcastReceiver mKeyEventDone = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent == null) {
-                    return;
-                }
-                Bundle extras = intent.getExtras();
-                if (extras == null) {
-                    return;
-                }
-                synchronized (mLock) {
-                    if (extras.containsKey(EXTRA_WAKELOCK_ACQUIRED)
-                            && mMediaEventWakeLock.isHeld()) {
-                        mMediaEventWakeLock.release();
-                    }
-                }
             }
         };
     }
