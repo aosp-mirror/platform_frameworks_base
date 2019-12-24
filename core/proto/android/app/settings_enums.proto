@@ -2537,4 +2537,9 @@ enum PageId {
     // OS: R
     ACCESSIBILITY_CAPTION_MORE_OPTIONS = 1820;
 
+    // OPEN: Settings > Battery > Battery share
+    // CATEGORY: SETTINGS
+    // OS: R
+    FUELGAUGE_BATTERY_SHARE = 1821;
+
 }
