@@ -53,14 +53,16 @@ import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.ViewConfiguration;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.accessibility.gestures.GestureUtils;
+import com.android.server.accessibility.magnification.MagnificationGestureHandler;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
 /**
- * This class handles magnification in response to touch events.
+ * This class handles full screen magnification in response to touch events.
  *
  * The behavior is as follows:
  *
@@ -108,14 +110,14 @@ import java.util.Queue;
  * 7. The magnification scale will be persisted in settings and in the cloud.
  */
 @SuppressWarnings("WeakerAccess")
-class MagnificationGestureHandler extends BaseEventStreamTransformation {
-    private static final String LOG_TAG = "MagnificationGestureHandler";
+class FullScreenMagnificationGestureHandler extends MagnificationGestureHandler {
+    private static final String LOG_TAG = "FullScreenMagnificationGestureHandler";
 
     private static final boolean DEBUG_ALL = false;
-    private static final boolean DEBUG_STATE_TRANSITIONS = false || DEBUG_ALL;
-    private static final boolean DEBUG_DETECTING = false || DEBUG_ALL;
-    private static final boolean DEBUG_PANNING_SCALING = false || DEBUG_ALL;
-    private static final boolean DEBUG_EVENT_STREAM = false || DEBUG_ALL;
+    private static final boolean DEBUG_STATE_TRANSITIONS = false | DEBUG_ALL;
+    private static final boolean DEBUG_DETECTING = false | DEBUG_ALL;
+    private static final boolean DEBUG_PANNING_SCALING = false | DEBUG_ALL;
+    private static final boolean DEBUG_EVENT_STREAM = false | DEBUG_ALL;
 
     // The MIN_SCALE is different from MagnificationController.MIN_SCALE due
     // to AccessibilityService.MagnificationController#setScale() has
@@ -167,14 +169,14 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
      *                           {@code false} if it should ignore such triggers.
      * @param displayId The logical display id.
      */
-    public MagnificationGestureHandler(Context context,
+    FullScreenMagnificationGestureHandler(Context context,
             MagnificationController magnificationController,
             boolean detectTripleTap,
             boolean detectShortcutTrigger,
             int displayId) {
         if (DEBUG_ALL) {
             Log.i(LOG_TAG,
-                    "MagnificationGestureHandler(detectTripleTap = " + detectTripleTap
+                    "FullScreenMagnificationGestureHandler(detectTripleTap = " + detectTripleTap
                             + ", detectShortcutTrigger = " + detectShortcutTrigger + ")");
         }
 
@@ -263,7 +265,8 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
         clearAndTransitionToStateDetecting();
     }
 
-    void notifyShortcutTriggered() {
+    @Override
+    public void notifyShortcutTriggered() {
         if (mDetectShortcutTrigger) {
             boolean wasMagnifying = mMagnificationController.resetIfNeeded(mDisplayId,
                     /* animate */ true);
@@ -383,10 +386,10 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
         float mInitialScaleFactor = -1;
         boolean mScaling;
 
-        public PanningScalingState(Context context) {
+        PanningScalingState(Context context) {
             final TypedValue scaleValue = new TypedValue();
             context.getResources().getValue(
-                    com.android.internal.R.dimen.config_screen_magnification_scaling_threshold,
+                    R.dimen.config_screen_magnification_scaling_threshold,
                     scaleValue, false);
             mScalingThreshold = scaleValue.getFloat();
             mScaleGestureDetector = new ScaleGestureDetector(context, this, Handler.getMain());
@@ -407,7 +410,6 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
             } else if (action == ACTION_UP || action == ACTION_CANCEL) {
 
                 persistScaleAndTransitionTo(mDetectingState);
-
             }
         }
 
@@ -489,10 +491,9 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
         @Override
         public String toString() {
-            return "PanningScalingState{" +
-                    "mInitialScaleFactor=" + mInitialScaleFactor +
-                    ", mScaling=" + mScaling +
-                    '}';
+            return "PanningScalingState{" + "mInitialScaleFactor=" + mInitialScaleFactor
+                    + ", mScaling=" + mScaling
+                    + '}';
         }
     }
 
@@ -544,7 +545,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                     clear();
                     transitionTo(mDetectingState);
                 }
-                break;
+                    break;
 
                 case ACTION_DOWN:
                 case ACTION_POINTER_UP: {
@@ -561,10 +562,10 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
         @Override
         public String toString() {
-            return "ViewportDraggingState{" +
-                    "mZoomedInBeforeDrag=" + mZoomedInBeforeDrag +
-                    ", mLastMoveOutsideMagnifiedRegion=" + mLastMoveOutsideMagnifiedRegion +
-                    '}';
+            return "ViewportDraggingState{"
+                    + "mZoomedInBeforeDrag=" + mZoomedInBeforeDrag
+                    + ", mLastMoveOutsideMagnifiedRegion=" + mLastMoveOutsideMagnifiedRegion
+                    + '}';
         }
     }
 
@@ -577,16 +578,17 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
         @Override
         public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
 
-        	// Ensure that the state at the end of delegation is consistent with the last delegated
+            // Ensures that the state at the end of delegation is consistent with the last delegated
             // UP/DOWN event in queue: still delegating if pointer is down, detecting otherwise
             switch (event.getActionMasked()) {
                 case ACTION_UP:
                 case ACTION_CANCEL: {
                     transitionTo(mDetectingState);
-                } break;
+                }
+                    break;
 
                 case ACTION_DOWN: {
-                	transitionTo(mDelegatingState);
+                    transitionTo(mDelegatingState);
                     mLastDelegatedDownEventTime = event.getDownTime();
                 } break;
             }
@@ -630,11 +632,11 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
         @VisibleForTesting Handler mHandler = new Handler(Looper.getMainLooper(), this);
 
-        public DetectingState(Context context) {
+        DetectingState(Context context) {
             mLongTapMinDelay = ViewConfiguration.getLongPressTimeout();
             mMultiTapMaxDelay = ViewConfiguration.getDoubleTapTimeout()
                     + context.getResources().getInteger(
-                    com.android.internal.R.integer.config_screen_magnification_multi_tap_adjustment);
+                    R.integer.config_screen_magnification_multi_tap_adjustment);
             mSwipeMinDistance = ViewConfiguration.get(context).getScaledTouchSlop();
             mMultiTapMaxDistance = ViewConfiguration.get(context).getScaledDoubleTapSlop();
         }
@@ -913,11 +915,11 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
         @Override
         public String toString() {
-            return "DetectingState{" +
-                    "tapCount()=" + tapCount() +
-                    ", mShortcutTriggered=" + mShortcutTriggered +
-                    ", mDelayedEventQueue=" + MotionEventInfo.toString(mDelayedEventQueue) +
-                    '}';
+            return "DetectingState{"
+                    + "tapCount()=" + tapCount()
+                    + ", mShortcutTriggered=" + mShortcutTriggered
+                    + ", mDelayedEventQueue=" + MotionEventInfo.toString(mDelayedEventQueue)
+                    + '}';
         }
 
         void toggleShortcutTriggered() {
@@ -986,18 +988,18 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
     @Override
     public String toString() {
-        return "MagnificationGesture{" +
-                "mDetectingState=" + mDetectingState +
-                ", mDelegatingState=" + mDelegatingState +
-                ", mMagnifiedInteractionState=" + mPanningScalingState +
-                ", mViewportDraggingState=" + mViewportDraggingState +
-                ", mDetectTripleTap=" + mDetectTripleTap +
-                ", mDetectShortcutTrigger=" + mDetectShortcutTrigger +
-                ", mCurrentState=" + State.nameOf(mCurrentState) +
-                ", mPreviousState=" + State.nameOf(mPreviousState) +
-                ", mMagnificationController=" + mMagnificationController +
-                ", mDisplayId=" + mDisplayId +
-                '}';
+        return "MagnificationGesture{"
+                + "mDetectingState=" + mDetectingState
+                + ", mDelegatingState=" + mDelegatingState
+                + ", mMagnifiedInteractionState=" + mPanningScalingState
+                + ", mViewportDraggingState=" + mViewportDraggingState
+                + ", mDetectTripleTap=" + mDetectTripleTap
+                + ", mDetectShortcutTrigger=" + mDetectShortcutTrigger
+                + ", mCurrentState=" + State.nameOf(mCurrentState)
+                + ", mPreviousState=" + State.nameOf(mPreviousState)
+                + ", mMagnificationController=" + mMagnificationController
+                + ", mDisplayId=" + mDisplayId
+                + '}';
     }
 
     private static final class MotionEventInfo {
@@ -1085,9 +1087,10 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
      */
     private static class ScreenStateReceiver extends BroadcastReceiver {
         private final Context mContext;
-        private final MagnificationGestureHandler mGestureHandler;
+        private final FullScreenMagnificationGestureHandler mGestureHandler;
 
-        public ScreenStateReceiver(Context context, MagnificationGestureHandler gestureHandler) {
+        ScreenStateReceiver(Context context,
+                FullScreenMagnificationGestureHandler gestureHandler) {
             mContext = context;
             mGestureHandler = gestureHandler;
         }

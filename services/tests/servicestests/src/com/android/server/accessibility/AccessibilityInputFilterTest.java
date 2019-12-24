@@ -80,7 +80,7 @@ public class AccessibilityInputFilterTest {
     // The expected order of EventStreamTransformations.
     private final Class[] mExpectedEventHandlerTypes =
             {KeyboardInterceptor.class, MotionEventInjector.class,
-                    MagnificationGestureHandler.class, TouchExplorer.class,
+                    FullScreenMagnificationGestureHandler.class, TouchExplorer.class,
                     AutoclickController.class, AccessibilityInputFilter.class};
 
     private MagnificationController mMockMagnificationController;
