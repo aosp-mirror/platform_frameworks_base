@@ -16,6 +16,9 @@
 
 package com.android.mediarouteprovider.example;
 
+import static android.media.MediaRoute2Info.DEVICE_TYPE_SPEAKER;
+import static android.media.MediaRoute2Info.DEVICE_TYPE_TV;
+
 import android.content.Intent;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
@@ -57,9 +60,11 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     private void initializeRoutes() {
         MediaRoute2Info route1 = new MediaRoute2Info.Builder(ROUTE_ID1, ROUTE_NAME1)
                 .addSupportedCategory(CATEGORY_SAMPLE)
+                .setDeviceType(DEVICE_TYPE_TV)
                 .build();
         MediaRoute2Info route2 = new MediaRoute2Info.Builder(ROUTE_ID2, ROUTE_NAME2)
                 .addSupportedCategory(CATEGORY_SAMPLE)
+                .setDeviceType(DEVICE_TYPE_SPEAKER)
                 .build();
         MediaRoute2Info routeSpecial =
                 new MediaRoute2Info.Builder(ROUTE_ID_SPECIAL_CATEGORY, ROUTE_NAME_SPECIAL_CATEGORY)
@@ -123,7 +128,8 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
 
     @Override
     public void onControlRequest(String routeId, Intent request) {
-        if (ACTION_REMOVE_ROUTE.equals(request.getAction())) {
+        String action = request.getAction();
+        if (ACTION_REMOVE_ROUTE.equals(action)) {
             MediaRoute2Info route = mRoutes.get(routeId);
             if (route != null) {
                 mRoutes.remove(routeId);
