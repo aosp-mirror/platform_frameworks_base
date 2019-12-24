@@ -25,8 +25,6 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
-import com.android.systemui.power.EnhancedEstimates;
-import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
@@ -55,9 +53,6 @@ abstract class SystemUIDefaultModule {
     static String provideLeakReportEmail() {
         return null;
     }
-
-    @Binds
-    abstract EnhancedEstimates bindEnhancedEstimates(EnhancedEstimatesImpl enhancedEstimates);
 
     @Binds
     abstract DockManager bindDockManager(DockManagerImpl dockManager);

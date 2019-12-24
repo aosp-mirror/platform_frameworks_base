@@ -15,10 +15,15 @@ import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.power.EnhancedEstimates;
 import java.time.Duration;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class EnhancedEstimatesGoogleImpl implements EnhancedEstimates {
     private Context mContext;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
 
+    @Inject
     public EnhancedEstimatesGoogleImpl(Context context) {
         mContext = context;
     }
