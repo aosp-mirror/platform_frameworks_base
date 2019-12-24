@@ -4603,10 +4603,18 @@ package android.net {
 
   public class NetworkPolicyManager {
     method @NonNull public android.telephony.SubscriptionPlan[] getSubscriptionPlans(int, @NonNull String);
+    method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public void registerSubscriptionCallback(@NonNull android.net.NetworkPolicyManager.SubscriptionCallback);
     method public void setSubscriptionOverride(int, int, int, long, @NonNull String);
     method public void setSubscriptionPlans(int, @NonNull android.telephony.SubscriptionPlan[], @NonNull String);
+    method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public void unregisterSubscriptionCallback(@NonNull android.net.NetworkPolicyManager.SubscriptionCallback);
     field public static final int SUBSCRIPTION_OVERRIDE_CONGESTED = 2; // 0x2
     field public static final int SUBSCRIPTION_OVERRIDE_UNMETERED = 1; // 0x1
+  }
+
+  public static class NetworkPolicyManager.SubscriptionCallback {
+    ctor public NetworkPolicyManager.SubscriptionCallback();
+    method public void onSubscriptionOverride(int, int, int);
+    method public void onSubscriptionPlansChanged(int, @NonNull android.telephony.SubscriptionPlan[]);
   }
 
   public class NetworkProvider {
