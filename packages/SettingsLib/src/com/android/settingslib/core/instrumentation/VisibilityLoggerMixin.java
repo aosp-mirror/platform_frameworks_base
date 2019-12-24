@@ -40,7 +40,8 @@ public class VisibilityLoggerMixin implements LifecycleObserver, OnAttach {
 
     private MetricsFeatureProvider mMetricsFeature;
     private int mSourceMetricsCategory = MetricsProto.MetricsEvent.VIEW_UNKNOWN;
-    private long mTimestamp;
+    private long mCreationTimestamp;
+    private long mVisibleTimestamp;
 
     public VisibilityLoggerMixin(int metricsCategory, MetricsFeatureProvider metricsFeature) {
         mMetricsCategory = metricsCategory;
@@ -49,7 +50,7 @@ public class VisibilityLoggerMixin implements LifecycleObserver, OnAttach {
 
     @Override
     public void onAttach() {
-        mTimestamp = SystemClock.elapsedRealtime();
+        mCreationTimestamp = SystemClock.elapsedRealtime();
     }
 
     @OnLifecycleEvent(Event.ON_RESUME)
@@ -57,8 +58,9 @@ public class VisibilityLoggerMixin implements LifecycleObserver, OnAttach {
         if (mMetricsFeature == null || mMetricsCategory == METRICS_CATEGORY_UNKNOWN) {
             return;
         }
-        if (mTimestamp != 0L) {
-            final int elapse = (int) (SystemClock.elapsedRealtime() - mTimestamp);
+        mVisibleTimestamp = SystemClock.elapsedRealtime();
+        if (mCreationTimestamp != 0L) {
+            final int elapse = (int) (mVisibleTimestamp - mCreationTimestamp);
             mMetricsFeature.visible(null /* context */, mSourceMetricsCategory,
                     mMetricsCategory, elapse);
         } else {
@@ -69,9 +71,10 @@ public class VisibilityLoggerMixin implements LifecycleObserver, OnAttach {
 
     @OnLifecycleEvent(Event.ON_PAUSE)
     public void onPause() {
-        mTimestamp = 0;
+        mCreationTimestamp = 0;
         if (mMetricsFeature != null && mMetricsCategory != METRICS_CATEGORY_UNKNOWN) {
-            mMetricsFeature.hidden(null /* context */, mMetricsCategory);
+            final int elapse = (int) (SystemClock.elapsedRealtime() - mVisibleTimestamp);
+            mMetricsFeature.hidden(null /* context */, mMetricsCategory, elapse);
         }
     }
 
@@ -84,7 +87,7 @@ public class VisibilityLoggerMixin implements LifecycleObserver, OnAttach {
         if (mMetricsFeature == null || mMetricsCategory == METRICS_CATEGORY_UNKNOWN) {
             return;
         }
-        final int elapse = (int) (SystemClock.elapsedRealtime() - mTimestamp);
+        final int elapse = (int) (SystemClock.elapsedRealtime() - mCreationTimestamp);
         mMetricsFeature.action(METRICS_CATEGORY_UNKNOWN, action, mMetricsCategory, key, elapse);
     }
 
