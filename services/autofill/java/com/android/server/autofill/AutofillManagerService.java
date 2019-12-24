@@ -288,7 +288,14 @@ public final class AutofillManagerService
             boolean isTemporary) {
         mAugmentedAutofillState.setServiceInfo(userId, serviceName, isTemporary);
         synchronized (mLock) {
-            getServiceForUserLocked(userId).updateRemoteAugmentedAutofillService();
+            final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+            if (service == null) {
+                // If we cannot get the service from the services cache, it will call
+                // updateRemoteAugmentedAutofillService() finally. Skip call this update again.
+                getServiceForUserLocked(userId);
+            } else {
+                service.updateRemoteAugmentedAutofillService();
+            }
         }
     }
 
