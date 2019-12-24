@@ -28,6 +28,12 @@ import android.util.quota.CategoryProto;
  * @see Uptc
  */
 public final class Category {
+    /**
+     * A {@link Category} that can be used if every app should be treated the same (given the same
+     * category).
+     */
+    public static final Category SINGLE_CATEGORY = new Category("SINGLE");
+
     @NonNull
     private final String mName;
 
