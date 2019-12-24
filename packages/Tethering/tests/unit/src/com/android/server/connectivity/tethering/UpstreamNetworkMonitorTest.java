@@ -50,7 +50,6 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.net.NetworkState;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.Message;
@@ -539,7 +538,7 @@ public class UpstreamNetworkMonitorTest {
                 mUNM.selectPreferredUpstreamType(preferredTypes));
         verify(mEntitleMgr, times(1)).maybeRunProvisioning();
     }
-    private void assertSatisfiesLegacyType(int legacyType, NetworkState ns) {
+    private void assertSatisfiesLegacyType(int legacyType, UpstreamNetworkState ns) {
         if (legacyType == TYPE_NONE) {
             assertTrue(ns == null);
             return;
