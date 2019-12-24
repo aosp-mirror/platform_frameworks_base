@@ -39,6 +39,8 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -83,6 +85,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Build/Install/Run:
@@ -416,6 +419,36 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertThat(mCallbacksRecorder.mAdded).contains(task2);
         assertThat(mCallbacksRecorder.mTrimmed).isEmpty();
         assertThat(mCallbacksRecorder.mRemoved).isEmpty();
+    }
+
+    @Test
+    public void testAddTasksHomeClearUntrackedTasks_expectFinish() {
+        // There may be multiple tasks with the same base intent by flags (FLAG_ACTIVITY_NEW_TASK |
+        // FLAG_ACTIVITY_MULTIPLE_TASK). If the previous task is still active, it should be removed
+        // because user may not be able to return to the task.
+        final String className = ".PermissionsReview";
+        final Function<Boolean, Task> taskBuilder = visible -> {
+            final Task task = createTaskBuilder(className).build();
+            // Make the task non-empty.
+            final ActivityRecord r = new ActivityBuilder(mService).setTask(task).build();
+            r.setVisibility(visible);
+            return task;
+        };
+
+        final Task task1 = taskBuilder.apply(false /* visible */);
+        mRecentTasks.add(task1);
+        final Task task2 = taskBuilder.apply(true /* visible */);
+        mRecentTasks.add(task2);
+        // Only the last task is kept in recents and the previous 2 tasks will becomes untracked
+        // tasks because their intents are identical.
+        mRecentTasks.add(createTaskBuilder(className).build());
+        // Go home to trigger the removal of untracked tasks.
+        mRecentTasks.add(createTaskBuilder(".Home").setStack(mDisplay.getRootHomeTask()).build());
+
+        // All activities in the invisible task should be finishing or removed.
+        assertNull(task1.getTopNonFinishingActivity());
+        // The visible task should not be affected.
+        assertNotNull(task2.getTopNonFinishingActivity());
     }
 
     @Test

@@ -173,6 +173,9 @@ class RecentTasks {
     private final ArrayList<Task> mTasks = new ArrayList<>();
     private final ArrayList<Callbacks> mCallbacks = new ArrayList<>();
 
+    /** The non-empty tasks that are removed from recent tasks (see {@link #removeForAddTask}). */
+    private final ArrayList<Task> mHiddenTasks = new ArrayList<>();
+
     // These values are generally loaded from resources, but can be set dynamically in the tests
     private boolean mHasVisibleRecentTasks;
     private int mGlobalMaxNumTasks;
@@ -1024,6 +1027,12 @@ class RecentTasks {
     void add(Task task) {
         if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "add: task=" + task);
 
+        // Clean up the hidden tasks when going to home because the user may not be unable to return
+        // to the task from recents.
+        if (!mHiddenTasks.isEmpty() && task.isActivityTypeHome()) {
+            removeUnreachableHiddenTasks(task.getWindowingMode());
+        }
+
         final boolean isAffiliated = task.mAffiliatedTaskId != task.mTaskId
                 || task.mNextAffiliateTaskId != INVALID_TASK_ID
                 || task.mPrevAffiliateTaskId != INVALID_TASK_ID;
@@ -1390,6 +1399,28 @@ class RecentTasks {
         return display.getIndexOf(stack) < display.getIndexOf(display.getRootHomeTask());
     }
 
+    /** Remove the tasks that user may not be able to return. */
+    private void removeUnreachableHiddenTasks(int windowingMode) {
+        for (int i = mHiddenTasks.size() - 1; i >= 0; i--) {
+            final Task hiddenTask = mHiddenTasks.get(i);
+            if (!hiddenTask.hasChild()) {
+                // The task was removed by other path.
+                mHiddenTasks.remove(i);
+                continue;
+            }
+            if (hiddenTask.getWindowingMode() != windowingMode
+                    || hiddenTask.getTopVisibleActivity() != null) {
+                // The task may be reachable from the back stack of other windowing mode or it is
+                // currently in use. Keep the task in the hidden list to avoid losing track, e.g.
+                // after dismissing primary split screen.
+                continue;
+            }
+            mHiddenTasks.remove(i);
+            mSupervisor.removeTask(hiddenTask, false /* killProcess */,
+                    !REMOVE_FROM_RECENTS, "remove-hidden-task");
+        }
+    }
+
     /**
      * If needed, remove oldest existing entries in recents that are for the same kind
      * of task as the given one.
@@ -1406,6 +1437,14 @@ class RecentTasks {
         // callbacks here.
         final Task removedTask = mTasks.remove(removeIndex);
         if (removedTask != task) {
+            // The added task is in recents so it is not hidden.
+            mHiddenTasks.remove(task);
+            if (removedTask.hasChild()) {
+                // A non-empty task is replaced by a new task. Because the removed task is no longer
+                // managed by the recent tasks list, add it to the hidden list to prevent the task
+                // from becoming dangling.
+                mHiddenTasks.add(removedTask);
+            }
             notifyTaskRemoved(removedTask, false /* wasTrimmed */, false /* killProcess */);
             if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "Trimming task=" + removedTask
                     + " for addition of task=" + task);
@@ -1662,6 +1701,9 @@ class RecentTasks {
         pw.println("mFreezeTaskListReordering=" + mFreezeTaskListReordering);
         pw.println("mFreezeTaskListReorderingPendingTimeout="
                 + mService.mH.hasCallbacks(mResetFreezeTaskListOnTimeoutRunnable));
+        if (!mHiddenTasks.isEmpty()) {
+            pw.println("mHiddenTasks=" + mHiddenTasks);
+        }
         if (mTasks.isEmpty()) {
             return;
         }
