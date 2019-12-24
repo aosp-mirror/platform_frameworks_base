@@ -153,6 +153,7 @@ package android {
     field public static final String PROVIDE_TRUST_AGENT = "android.permission.PROVIDE_TRUST_AGENT";
     field public static final String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
     field public static final String READ_ACTIVE_EMERGENCY_SESSION = "android.permission.READ_ACTIVE_EMERGENCY_SESSION";
+    field public static final String READ_CARRIER_APP_INFO = "android.permission.READ_CARRIER_APP_INFO";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String READ_CONTENT_RATING_SYSTEMS = "android.permission.READ_CONTENT_RATING_SYSTEMS";
     field public static final String READ_DEVICE_CONFIG = "android.permission.READ_DEVICE_CONFIG";
@@ -1683,6 +1684,7 @@ package android.content {
     field public static final String SECURE_ELEMENT_SERVICE = "secure_element";
     field public static final String STATS_MANAGER = "stats";
     field public static final String STATUS_BAR_SERVICE = "statusbar";
+    field public static final String SYSTEM_CONFIG_SERVICE = "system_config";
     field public static final String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final String TELEPHONY_IMS_SERVICE = "telephony_ims";
     field public static final String TELEPHONY_REGISTRY_SERVICE = "telephony_registry";
@@ -7004,6 +7006,11 @@ package android.os {
     field public static final int LONG_VALUE_TYPE = 4; // 0x4
     field public static final int STRING_VALUE_TYPE = 2; // 0x2
     field public static final int TUPLE_VALUE_TYPE = 7; // 0x7
+  }
+
+  public class SystemConfigManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_CARRIER_APP_INFO) public java.util.Set<java.lang.String> getDisabledUntilUsedPreinstalledCarrierApps();
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_CARRIER_APP_INFO) public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
   }
 
   public class SystemProperties {

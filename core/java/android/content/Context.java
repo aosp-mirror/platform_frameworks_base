@@ -4971,6 +4971,14 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.os.SystemConfigManager}.
+     * @hide
+     */
+    @SystemApi
+    public static final String SYSTEM_CONFIG_SERVICE = "system_config";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.telephony.ims.RcsMessageManager}.
      * @hide
      */

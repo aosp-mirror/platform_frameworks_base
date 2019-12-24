@@ -153,6 +153,7 @@ applications that come with the platform
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS"/>
         <permission name="android.permission.PERFORM_CDMA_PROVISIONING"/>
+        <permission name="android.permission.READ_CARRIER_APP_INFO"/>
         <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.READ_SEARCH_INDEXABLES"/>
@@ -309,6 +310,7 @@ applications that come with the platform
         <!-- Needed for test only -->
         <permission name="android.permission.PACKET_KEEPALIVE_OFFLOAD" />
         <permission name="android.permission.POWER_SAVER" />
+        <permission name="android.permission.READ_CARRIER_APP_INFO"/>
         <permission name="android.permission.READ_FRAME_BUFFER"/>
         <permission name="android.permission.READ_LOWPAN_CREDENTIAL"/>
         <!-- Needed for test only -->

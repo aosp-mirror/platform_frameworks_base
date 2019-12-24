@@ -218,7 +218,10 @@
     <!-- Permission required for CTS test - UiModeManagerTest -->
     <uses-permission android:name="android.permission.ENTER_CAR_MODE_PRIORITIZED"/>
 
-      <!-- Permission required for CTS test - CarModeInCallServiceTest -->
+    <!-- Permission required for CTS test - SystemConfigTest -->
+    <uses-permission android:name="android.permission.READ_CARRIER_APP_INFO"/>
+
+    <!-- Permission required for CTS test - CarModeInCallServiceTest -->
     <uses-permission android:name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
 
     <!-- Permission requried for CTS test - CellBroadcastIntentsTest -->

@@ -2229,6 +2229,14 @@
     <permission android:name="android.permission.BIND_EUICC_SERVICE"
                 android:protectionLevel="signature|telephony" />
 
+    <!-- Required for reading information about carrier apps from SystemConfigManager.
+         <p>Protection level: signature|telephony
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.READ_CARRIER_APP_INFO"
+        android:protectionLevel="signature|telephony" />
+
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
     <!-- ================================== -->

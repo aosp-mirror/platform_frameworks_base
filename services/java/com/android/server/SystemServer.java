@@ -887,6 +887,11 @@ public final class SystemServer {
     private void startCoreServices(@NonNull TimingsTraceAndSlog t) {
         t.traceBegin("startCoreServices");
 
+        // Service for system config
+        t.traceBegin("StartSystemConfigService");
+        mSystemServiceManager.startService(SystemConfigService.class);
+        t.traceEnd();
+
         t.traceBegin("StartBatteryService");
         // Tracks the battery level.  Requires LightService.
         mSystemServiceManager.startService(BatteryService.class);

@@ -147,6 +147,7 @@ import android.os.RecoverySystem;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.SystemConfigManager;
 import android.os.SystemUpdateManager;
 import android.os.SystemVibrator;
 import android.os.UserHandle;
@@ -615,6 +616,13 @@ public final class SystemServiceRegistry {
                                 Context.SYSTEM_UPDATE_SERVICE);
                         ISystemUpdateManager service = ISystemUpdateManager.Stub.asInterface(b);
                         return new SystemUpdateManager(service);
+                    }});
+
+        registerService(Context.SYSTEM_CONFIG_SERVICE, SystemConfigManager.class,
+                new CachedServiceFetcher<SystemConfigManager>() {
+                    @Override
+                    public SystemConfigManager createService(ContextImpl ctx) {
+                        return new SystemConfigManager();
                     }});
 
         registerService(Context.TELEPHONY_REGISTRY_SERVICE, TelephonyRegistryManager.class,
