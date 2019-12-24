@@ -7619,11 +7619,22 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void dispatchInsetsChanged(InsetsState insetsState) {
+        if (Binder.getCallingPid() == android.os.Process.myPid()) {
+            insetsState = new InsetsState(insetsState, true /* copySource */);
+        }
         mHandler.obtainMessage(MSG_INSETS_CHANGED, insetsState).sendToTarget();
     }
 
     private void dispatchInsetsControlChanged(InsetsState insetsState,
             InsetsSourceControl[] activeControls) {
+        if (Binder.getCallingPid() == android.os.Process.myPid()) {
+            insetsState = new InsetsState(insetsState, true /* copySource */);
+            if (activeControls != null) {
+                for (int i = activeControls.length - 1; i >= 0; i--) {
+                    activeControls[i] = new InsetsSourceControl(activeControls[i]);
+                }
+            }
+        }
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = insetsState;
         args.arg2 = activeControls;

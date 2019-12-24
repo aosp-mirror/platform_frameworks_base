@@ -39,6 +39,17 @@ public class InsetsSourceControl implements Parcelable {
         mSurfacePosition = surfacePosition;
     }
 
+    public InsetsSourceControl(InsetsSourceControl other) {
+        mType = other.mType;
+        if (other.mLeash != null) {
+            mLeash = new SurfaceControl();
+            mLeash.copyFrom(other.mLeash);
+        } else {
+            mLeash = null;
+        }
+        mSurfacePosition = new Point(other.mSurfacePosition);
+    }
+
     public int getType() {
         return mType;
     }
