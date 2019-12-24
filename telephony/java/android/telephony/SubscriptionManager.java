@@ -3282,31 +3282,6 @@ public class SubscriptionManager {
         return subId;
     }
 
-    /**
-     * Set whether a subscription always allows MMS connection. If true, MMS network
-     * request will be accepted by telephony even if user turns "mobile data" off
-     * on this subscription.
-     *
-     * @param subId which subscription it's setting to.
-     * @param alwaysAllow whether Mms data is always allowed.
-     * @return whether operation is successful.
-     *
-     * @hide
-     */
-    public boolean setAlwaysAllowMmsData(int subId, boolean alwaysAllow) {
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                return iSub.setAlwaysAllowMmsData(subId, alwaysAllow);
-            }
-        } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
-        }
-        return false;
-    }
-
     private interface CallISubMethodHelper {
         int callMethod(ISub iSub) throws RemoteException;
     }
