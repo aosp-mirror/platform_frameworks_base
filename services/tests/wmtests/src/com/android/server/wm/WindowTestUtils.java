@@ -52,9 +52,9 @@ class WindowTestUtils {
     }
 
     static ActivityRecord createTestActivityRecord(ActivityStack stack) {
-        synchronized (stack.mService.mGlobalLock) {
+        synchronized (stack.mAtmService.mGlobalLock) {
             final ActivityRecord activity = new ActivityTestsBase.ActivityBuilder(
-                    stack.mService)
+                    stack.mAtmService)
                     .setStack(stack)
                     .setCreateTask(true)
                     .build();

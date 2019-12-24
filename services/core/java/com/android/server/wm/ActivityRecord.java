@@ -379,6 +379,27 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @VisibleForTesting static final int Z_BOOST_BASE = 800570000;
     static final int INVALID_PID = -1;
 
+    // How long we wait until giving up on the last activity to pause.  This
+    // is short because it directly impacts the responsiveness of starting the
+    // next activity.
+    private static final int PAUSE_TIMEOUT = 500;
+
+    // Ticks during which we check progress while waiting for an app to launch.
+    private static final int LAUNCH_TICK = 500;
+
+    // How long we wait for the activity to tell us it has stopped before
+    // giving up.  This is a good amount of time because we really need this
+    // from the application in order to get its saved state. Once the stop
+    // is complete we may start destroying client resources triggering
+    // crashes if the UI thread was hung. We put this timeout one second behind
+    // the ANR timeout so these situations will generate ANR instead of
+    // Surface lost or other errors.
+    private static final int STOP_TIMEOUT = 11 * 1000;
+
+    // How long we wait until giving up on an activity telling us it has
+    // finished destroying itself.
+    private static final int DESTROY_TIMEOUT = 10 * 1000;
+
     final ActivityTaskManagerService mAtmService;
     final ActivityInfo info; // activity info provided by developer in AndroidManifest
     // Non-null only for application tokens.
@@ -680,6 +701,55 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     // Token for targeting this activity for assist purposes.
     final Binder assistToken = new Binder();
+
+    private final Runnable mPauseTimeoutRunnable = new Runnable() {
+        @Override
+        public void run() {
+            // We don't at this point know if the activity is fullscreen,
+            // so we need to be conservative and assume it isn't.
+            Slog.w(TAG, "Activity pause timeout for " + ActivityRecord.this);
+            synchronized (mAtmService.mGlobalLock) {
+                if (hasProcess()) {
+                    mAtmService.logAppTooSlow(app, pauseTime, "pausing " + ActivityRecord.this);
+                }
+                activityPaused(true);
+            }
+        }
+    };
+
+    private final Runnable mLaunchTickRunnable = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (mAtmService.mGlobalLock) {
+                if (continueLaunchTicking()) {
+                    mAtmService.logAppTooSlow(
+                            app, launchTickTime, "launching " + ActivityRecord.this);
+                }
+            }
+        }
+    };
+
+    private final Runnable mDestroyTimeoutRunnable = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (mAtmService.mGlobalLock) {
+                Slog.w(TAG, "Activity destroy timeout for " + ActivityRecord.this);
+                destroyed("destroyTimeout");
+            }
+        }
+    };
+
+    private final Runnable mStopTimeoutRunnable = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (mAtmService.mGlobalLock) {
+                Slog.w(TAG, "Activity stop timeout for " + ActivityRecord.this);
+                if (isInHistory()) {
+                    activityStopped(null /*icicle*/, null /*persistentState*/, null /*description*/);
+                }
+            }
+        }
+    };
 
     private static String startingWindowStateToString(int state) {
         switch (state) {
@@ -2684,11 +2754,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         EventLogTags.writeWmDestroyActivity(mUserId, System.identityHashCode(this),
                 task.mTaskId, shortComponentName, reason);
 
-        final ActivityStack stack = getActivityStack();
-        if (hasProcess() && !stack.inLruList(this)) {
-            Slog.w(TAG, "Activity " + this + " being finished, but not in LRU list");
-        }
-
         boolean removedFromHistory = false;
 
         cleanUp(false /* cleanServices */, false /* setState */);
@@ -2735,7 +2800,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
                 setState(DESTROYING,
                         "destroyActivityLocked. finishing and not skipping destroy");
-                stack.scheduleDestroyTimeoutForActivity(this);
+                mAtmService.mH.postDelayed(mDestroyTimeoutRunnable, DESTROY_TIMEOUT);
             } else {
                 if (DEBUG_STATES) {
                     Slog.v(TAG_STATES, "Moving to DESTROYED: " + this + " (destroy skipped)");
@@ -2785,8 +2850,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         takeFromHistory();
-        final ActivityStack stack = getActivityStack();
-        stack.removeTimeoutsForActivity(this);
+        removeTimeouts();
         if (DEBUG_STATES) {
             Slog.v(TAG_STATES, "Moving to DESTROYED: " + this + " (removed from history)");
         }
@@ -2814,7 +2878,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * AND finished.
      */
     void destroyed(String reason) {
-        getActivityStack().removeDestroyTimeoutForActivity(this);
+        removeDestroyTimeout();
 
         if (DEBUG_CONTAINERS) Slog.d(TAG_CONTAINERS, "activityDestroyedLocked: r=" + this);
 
@@ -2872,7 +2936,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Get rid of any pending idle timeouts.
-        stack.removeTimeoutsForActivity(this);
+        removeTimeouts();
         // Clean-up activities are no longer relaunching (e.g. app process died). Notify window
         // manager so it can update its bookkeeping.
         clearRelaunching();
@@ -4737,6 +4801,73 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    void activityPaused(boolean timeout) {
+        if (DEBUG_PAUSE) Slog.v(TAG_PAUSE,
+                "Activity paused: token=" + appToken + ", timeout=" + timeout);
+
+        final ActivityStack stack = getStack();
+
+        if (stack != null) {
+            removePauseTimeout();
+
+            if (stack.mPausingActivity == this) {
+                if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to PAUSED: " + this
+                        + (timeout ? " (due to timeout)" : " (pause complete)"));
+                mAtmService.deferWindowLayout();
+                try {
+                    stack.completePauseLocked(true /* resumeNext */, null /* resumingActivity */);
+                } finally {
+                    mAtmService.continueWindowLayout();
+                }
+                return;
+            } else {
+                EventLogTags.writeWmFailedToPause(mUserId, System.identityHashCode(this),
+                        shortComponentName, stack.mPausingActivity != null
+                                ? stack.mPausingActivity.shortComponentName : "(none)");
+                if (isState(PAUSING)) {
+                    setState(PAUSED, "activityPausedLocked");
+                    if (finishing) {
+                        if (DEBUG_PAUSE) Slog.v(TAG,
+                                "Executing finish of failed to pause activity: " + this);
+                        completeFinishing("activityPausedLocked");
+                    }
+                }
+            }
+        }
+
+        mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+    }
+
+    /**
+     * Schedule a pause timeout in case the app doesn't respond. We don't give it much time because
+     * this directly impacts the responsiveness seen by the user.
+     */
+    void schedulePauseTimeout() {
+        pauseTime = SystemClock.uptimeMillis();
+        mAtmService.mH.postDelayed(mPauseTimeoutRunnable, PAUSE_TIMEOUT);
+        if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Waiting for pause to complete...");
+    }
+
+    private void removePauseTimeout() {
+        mAtmService.mH.removeCallbacks(mPauseTimeoutRunnable);
+    }
+
+    private void removeDestroyTimeout() {
+        mAtmService.mH.removeCallbacks(mDestroyTimeoutRunnable);
+    }
+
+    private void removeStopTimeout() {
+        mAtmService.mH.removeCallbacks(mStopTimeoutRunnable);
+    }
+
+    void removeTimeouts() {
+        mStackSupervisor.removeIdleTimeoutForActivity(this);
+        removePauseTimeout();
+        removeStopTimeout();
+        removeDestroyTimeout();
+        finishLaunchTickingLocked();
+    }
+
     void stopIfPossible() {
         if (DEBUG_SWITCH) Slog.d(TAG_SWITCH, "Stopping: " + this);
         final ActivityStack stack = getActivityStack();
@@ -4783,7 +4914,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (stack.shouldSleepOrShutDownActivities()) {
                 setSleeping(true);
             }
-            stack.scheduleStopTimeoutForActivity(this);
+            mAtmService.mH.postDelayed(mStopTimeoutRunnable, STOP_TIMEOUT);
         } catch (Exception e) {
             // Maybe just ignore exceptions here...  if the process has crashed, our death
             // notification will clean things up.
@@ -4798,13 +4929,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    final void activityStoppedLocked(Bundle newIcicle, PersistableBundle newPersistentState,
+    void activityStopped(Bundle newIcicle, PersistableBundle newPersistentState,
             CharSequence description) {
         final ActivityStack stack = getActivityStack();
         final boolean isStopping = mState == STOPPING;
         if (!isStopping && mState != RESTARTING_PROCESS) {
             Slog.i(TAG, "Activity reported stop, but no longer stopping: " + this);
-            stack.removeStopTimeoutForActivity(this);
+            removeStopTimeout();
             return;
         }
         if (newPersistentState != null) {
@@ -4822,7 +4953,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE, "Saving icicle of " + this + ": " + mIcicle);
         if (!stopped) {
             if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to STOPPED: " + this + " (stop complete)");
-            stack.removeStopTimeoutForActivity(this);
+            removeStopTimeout();
             stopped = true;
             if (isStopping) {
                 setState(STOPPED, "activityStoppedLocked");
@@ -4877,11 +5008,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         if (launchTickTime == 0) {
             launchTickTime = SystemClock.uptimeMillis();
-            continueLaunchTickingLocked();
+            continueLaunchTicking();
         }
     }
 
-    boolean continueLaunchTickingLocked() {
+    private boolean continueLaunchTicking() {
         if (launchTickTime == 0) {
             return false;
         }
@@ -4892,8 +5023,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         stack.removeLaunchTickMessages();
-        stack.scheduleLaunchTickForActivity(this);
+        mAtmService.mH.postDelayed(mLaunchTickRunnable, LAUNCH_TICK);
         return true;
+    }
+
+    void removeLaunchTickRunnable() {
+        mAtmService.mH.removeCallbacks(mLaunchTickRunnable);
     }
 
     void finishLaunchTickingLocked() {
@@ -7017,10 +7152,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             newIntents = null;
             mAtmService.getAppWarningsLocked().onResumeActivity(this);
         } else {
-            final ActivityStack stack = getActivityStack();
-            if (stack != null) {
-                stack.removePauseTimeoutForActivity(this);
-            }
+            removePauseTimeout();
             setState(PAUSED, "relaunchActivityLocked");
         }
 

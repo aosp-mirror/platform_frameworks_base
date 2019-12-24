@@ -54,6 +54,7 @@ import static com.android.server.wm.ActivityStackSupervisor.printThisActivity;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STATES;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RELEASE;
@@ -62,6 +63,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TASKS
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
+import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
 import static com.android.server.wm.Task.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.wm.Task.REPARENT_MOVE_STACK_TO_FRONT;
 
@@ -212,6 +214,28 @@ class RootActivityContainer extends ConfigurationContainer
 
     private boolean mTmpBoolean;
     private RemoteException mTmpRemoteException;
+
+    private String mDestroyAllActivitiesReason;
+    private final Runnable mDestroyAllActivitiesRunnable = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (mService.mGlobalLock) {
+                try {
+                    mStackSupervisor.beginDeferResume();
+
+                    final PooledConsumer c = PooledLambda.obtainConsumer(
+                            RootActivityContainer::destroyActivity, RootActivityContainer.this,
+                            PooledLambda.__(ActivityRecord.class));
+                    mRootWindowContainer.forAllActivities(c);
+                    c.recycle();
+                } finally {
+                    mStackSupervisor.endDeferResume();
+                    resumeFocusedStacksTopActivities();
+                }
+            }
+        }
+
+    };
 
     private final FindTaskResult mTmpFindTaskResult = new FindTaskResult();
     static class FindTaskResult implements Function<Task, Boolean> {
@@ -1710,14 +1734,19 @@ class RootActivityContainer extends ConfigurationContainer
         }
     }
 
-    void scheduleDestroyAllActivities(WindowProcessController app, String reason) {
-        for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
-            final DisplayContent display = getChildAt(displayNdx);
-            for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getStackAt(stackNdx);
-                stack.scheduleDestroyActivities(app, reason);
-            }
-        }
+    void scheduleDestroyAllActivities(String reason) {
+        mDestroyAllActivitiesReason = reason;
+        mService.mH.post(mDestroyAllActivitiesRunnable);
+    }
+
+    private void destroyActivity(ActivityRecord r) {
+        if (r.finishing || !r.isDestroyable()) return;
+
+        if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Destroying " + r + " in state " + r.getState()
+                + " resumed=" + r.getStack().mResumedActivity + " pausing="
+                + r.getStack().mPausingActivity + " for reason " + mDestroyAllActivitiesReason);
+
+        r.destroyImmediately(true /* removeFromTask */, mDestroyAllActivitiesReason);
     }
 
     // Tries to put all activity stacks to sleep. Returns true if all stacks were
@@ -2116,7 +2145,7 @@ class RootActivityContainer extends ConfigurationContainer
             final DisplayContent display = getChildAt(displayNdx);
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
-                hasVisibleActivities |= stack.handleAppDiedLocked(app);
+                hasVisibleActivities |= stack.handleAppDied(app);
             }
         }
         return hasVisibleActivities;
