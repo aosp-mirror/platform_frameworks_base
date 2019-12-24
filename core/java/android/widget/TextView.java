@@ -8668,6 +8668,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.initialSelStart = getSelectionStart();
                 outAttrs.initialSelEnd = getSelectionEnd();
                 outAttrs.initialCapsMode = ic.getCursorCapsMode(getInputType());
+                outAttrs.setInitialSurroundingText(mText);
                 return ic;
             }
         }
