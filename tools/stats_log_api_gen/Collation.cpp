@@ -405,9 +405,9 @@ int collate_atoms(const Descriptor *descriptor, Atoms *atoms) {
         atomDecl.whitelisted = true;
     }
 
-    if (atomField->options().HasExtension(os::statsd::log_from_module)) {
+    if (atomField->options().HasExtension(os::statsd::module)) {
         atomDecl.hasModule = true;
-        atomDecl.moduleName = atomField->options().GetExtension(os::statsd::log_from_module);
+        atomDecl.moduleName = atomField->options().GetExtension(os::statsd::module);
     }
 
     vector<java_type_t> signature;
