@@ -84,6 +84,7 @@ public final class ParcelableKeyGenParameterSpecTest {
                 .setIsStrongBoxBacked(true)
                 .setUserConfirmationRequired(true)
                 .setUnlockedDeviceRequired(true)
+                .setCriticalToDeviceEncryption(true)
                 .build();
     }
 
@@ -115,6 +116,7 @@ public final class ParcelableKeyGenParameterSpecTest {
         assertThat(spec.isStrongBoxBacked(), is(true));
         assertThat(spec.isUserConfirmationRequired(), is(true));
         assertThat(spec.isUnlockedDeviceRequired(), is(true));
+        assertThat(spec.isCriticalToDeviceEncryption(), is(true));
     }
 
     private Parcel parcelForReading(ParcelableKeyGenParameterSpec spec) {

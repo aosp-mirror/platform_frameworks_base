@@ -271,6 +271,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     private final boolean mIsStrongBoxBacked;
     private final boolean mUserConfirmationRequired;
     private final boolean mUnlockedDeviceRequired;
+    private final boolean mCriticalToDeviceEncryption;
     /*
      * ***NOTE***: All new fields MUST also be added to the following:
      * ParcelableKeyGenParameterSpec class.
@@ -307,7 +308,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             boolean invalidatedByBiometricEnrollment,
             boolean isStrongBoxBacked,
             boolean userConfirmationRequired,
-            boolean unlockedDeviceRequired) {
+            boolean unlockedDeviceRequired,
+            boolean criticalToDeviceEncryption) {
         if (TextUtils.isEmpty(keyStoreAlias)) {
             throw new IllegalArgumentException("keyStoreAlias must not be empty");
         }
@@ -357,6 +359,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         mIsStrongBoxBacked = isStrongBoxBacked;
         mUserConfirmationRequired = userConfirmationRequired;
         mUnlockedDeviceRequired = unlockedDeviceRequired;
+        mCriticalToDeviceEncryption = criticalToDeviceEncryption;
     }
 
     /**
@@ -710,6 +713,16 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     }
 
     /**
+     * Return whether this key is critical to the device encryption flow.
+     *
+     * @see android.security.KeyStore#FLAG_CRITICAL_TO_DEVICE_ENCRYPTION
+     * @hide
+     */
+    public boolean isCriticalToDeviceEncryption() {
+        return mCriticalToDeviceEncryption;
+    }
+
+    /**
      * Builder of {@link KeyGenParameterSpec} instances.
      */
     public final static class Builder {
@@ -741,6 +754,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         private boolean mIsStrongBoxBacked = false;
         private boolean mUserConfirmationRequired;
         private boolean mUnlockedDeviceRequired = false;
+        private boolean mCriticalToDeviceEncryption = false;
 
         /**
          * Creates a new instance of the {@code Builder}.
@@ -804,6 +818,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             mIsStrongBoxBacked = sourceSpec.isStrongBoxBacked();
             mUserConfirmationRequired = sourceSpec.isUserConfirmationRequired();
             mUnlockedDeviceRequired = sourceSpec.isUnlockedDeviceRequired();
+            mCriticalToDeviceEncryption = sourceSpec.isCriticalToDeviceEncryption();
         }
 
         /**
@@ -1339,6 +1354,20 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
+         * Set whether this key is critical to the device encryption flow
+         *
+         * This is a special flag only available to system servers to indicate the current key
+         * is part of the device encryption flow.
+         *
+         * @see android.security.KeyStore#FLAG_CRITICAL_TO_DEVICE_ENCRYPTION
+         * @hide
+         */
+        public Builder setCriticalToDeviceEncryption(boolean critical) {
+            mCriticalToDeviceEncryption = critical;
+            return this;
+        }
+
+        /**
          * Builds an instance of {@code KeyGenParameterSpec}.
          */
         @NonNull
@@ -1370,7 +1399,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
                     mInvalidatedByBiometricEnrollment,
                     mIsStrongBoxBacked,
                     mUserConfirmationRequired,
-                    mUnlockedDeviceRequired);
+                    mUnlockedDeviceRequired,
+                    mCriticalToDeviceEncryption);
         }
     }
 }
