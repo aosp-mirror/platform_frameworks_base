@@ -208,6 +208,7 @@ class AlarmManagerService extends SystemService {
     AppWakeupHistory mAppWakeupHistory;
     ClockReceiver mClockReceiver;
     final DeliveryTracker mDeliveryTracker = new DeliveryTracker();
+    IBinder.DeathRecipient mListenerDeathRecipient;
     Intent mTimeTickIntent;
     IAlarmListener mTimeTickTrigger;
     PendingIntent mDateChangeSender;
@@ -1447,6 +1448,18 @@ class AlarmManagerService extends SystemService {
     public void onStart() {
         mInjector.init();
 
+        mListenerDeathRecipient = new IBinder.DeathRecipient() {
+            @Override
+            public void binderDied() {
+            }
+
+            @Override
+            public void binderDied(IBinder who) {
+                final IAlarmListener listener = IAlarmListener.Stub.asInterface(who);
+                removeImpl(null, listener);
+            }
+        };
+
         synchronized (mLock) {
             mHandler = new AlarmHandler();
             mConstants = new Constants(mHandler);
@@ -1651,6 +1664,15 @@ class AlarmManagerService extends SystemService {
             // NB: previous releases failed silently here, so we are continuing to do the same
             // rather than throw an IllegalArgumentException.
             return;
+        }
+
+        if (directReceiver != null) {
+            try {
+                directReceiver.asBinder().linkToDeath(mListenerDeathRecipient, 0);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Dropping unreachable alarm listener " + listenerTag);
+                return;
+            }
         }
 
         // Sanity check the window length.  This will catch people mistakenly
