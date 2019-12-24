@@ -628,6 +628,10 @@ static int android_media_tv_Tuner_set_lna(JNIEnv, jobject, jint, jboolean) {
     return 0;
 }
 
+static jobjectArray android_media_tv_Tuner_get_frontend_status(JNIEnv, jobject, jintArray) {
+    return NULL;
+}
+
 static jobject android_media_tv_Tuner_get_lnb_ids(JNIEnv *env, jobject thiz) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->getLnbIds();
@@ -883,6 +887,8 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_scan },
     { "nativeSetLnb", "(I)I", (void *)android_media_tv_Tuner_set_lnb },
     { "nativeSetLna", "(Z)I", (void *)android_media_tv_Tuner_set_lna },
+    { "nativeGetFrontendStatus", "([I)[Landroid/media/tv/tuner/FrontendStatus;",
+            (void *)android_media_tv_Tuner_get_frontend_status },
     { "nativeOpenFilter", "(III)Landroid/media/tv/tuner/Tuner$Filter;",
             (void *)android_media_tv_Tuner_open_filter },
     { "nativeGetLnbIds", "()Ljava/util/List;",

@@ -104,6 +104,7 @@ public final class Tuner implements AutoCloseable  {
     private native int nativeScan(int settingsType, FrontendSettings settings, int scanType);
     private native int nativeSetLnb(int lnbId);
     private native int nativeSetLna(boolean enable);
+    private native FrontendStatus[] nativeGetFrontendStatus(int[] statusTypes);
     private native Filter nativeOpenFilter(int type, int subType, int bufferSize);
 
     private native List<Integer> nativeGetLnbIds();
@@ -305,6 +306,21 @@ public final class Tuner implements AutoCloseable  {
      */
     public int setLna(boolean enable) {
         return nativeSetLna(enable);
+    }
+
+    /**
+     * Gets the statuses of the frontend.
+     *
+     * This retrieve the statuses of the frontend for given status types.
+     *
+     * @param statusTypes an array of status type which the caller request.
+     *
+     * @return statuses an array of statuses which response the caller's
+     *         request.
+     * @hide
+     */
+    public FrontendStatus[] getFrontendStatus(int[] statusTypes) {
+        return nativeGetFrontendStatus(statusTypes);
     }
 
     private List<Integer> getFrontendIds() {
