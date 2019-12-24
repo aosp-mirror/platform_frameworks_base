@@ -19,7 +19,6 @@ package com.android.server.connectivity.tethering;
 import android.annotation.Nullable;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
-import android.net.NetworkState;
 import android.net.RouteInfo;
 import android.net.util.InterfaceSet;
 
@@ -35,7 +34,7 @@ public final class TetheringInterfaceUtils {
      * Get upstream interfaces for tethering based on default routes for IPv4/IPv6.
      * @return null if there is no usable interface, or a set of at least one interface otherwise.
      */
-    public static @Nullable InterfaceSet getTetheringInterfaces(NetworkState ns) {
+    public static @Nullable InterfaceSet getTetheringInterfaces(UpstreamNetworkState ns) {
         if (ns == null) {
             return null;
         }
@@ -51,7 +50,7 @@ public final class TetheringInterfaceUtils {
      * Get the upstream interface for IPv6 tethering.
      * @return null if there is no usable interface, or the interface name otherwise.
      */
-    public static @Nullable String getIPv6Interface(NetworkState ns) {
+    public static @Nullable String getIPv6Interface(UpstreamNetworkState ns) {
         // Broadly speaking:
         //
         //     [1] does the upstream have an IPv6 default route?
