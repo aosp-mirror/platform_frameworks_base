@@ -27,7 +27,9 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.media.ExifInterface;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.RemoteException;
@@ -49,6 +51,7 @@ import dalvik.system.CloseGuard;
 
 import com.google.android.collect.Sets;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -71,6 +74,7 @@ import java.util.stream.IntStream;
  */
 public class MtpDatabase implements AutoCloseable {
     private static final String TAG = MtpDatabase.class.getSimpleName();
+    private static final int MAX_THUMB_SIZE = (200 * 1024);
 
     private final Context mContext;
     private final ContentProviderClient mMediaProvider;
@@ -802,6 +806,28 @@ public class MtpDatabase implements AutoCloseable {
         return obj.getFormat();
     }
 
+    private byte[] getThumbnailProcess(String path, Bitmap bitmap) {
+        try {
+            if (bitmap == null) {
+                Log.d(TAG, "getThumbnailProcess: Fail to generate thumbnail. Probably unsupported or corrupted image");
+                return null;
+            }
+
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteStream);
+
+            if (byteStream.size() > MAX_THUMB_SIZE)
+                return null;
+
+            byte[] byteArray = byteStream.toByteArray();
+
+            return byteArray;
+        } catch (OutOfMemoryError oomEx) {
+            Log.w(TAG, "OutOfMemoryError:" + oomEx);
+        }
+        return null;
+    }
+
     @VisibleForNative
     private boolean getThumbnailInfo(int handle, long[] outLongs) {
         MtpStorageManager.MtpObject obj = mManager.getObject(handle);
@@ -824,6 +850,16 @@ public class MtpDatabase implements AutoCloseable {
                 } catch (IOException e) {
                     // ignore and fall through
                 }
+
+// Note: above formats will fall through and go on below thumbnail generation if Exif processing fails
+            case MtpConstants.FORMAT_PNG:
+            case MtpConstants.FORMAT_GIF:
+            case MtpConstants.FORMAT_BMP:
+                outLongs[0] = MAX_THUMB_SIZE;
+            // only non-zero Width & Height needed. Actual size will be retrieved upon getThumbnailData by Host
+                outLongs[1] = 320;
+                outLongs[2] = 240;
+                return true;
         }
         return false;
     }
@@ -845,6 +881,17 @@ public class MtpDatabase implements AutoCloseable {
                     return exif.getThumbnail();
                 } catch (IOException e) {
                     // ignore and fall through
+                }
+
+// Note: above formats will fall through and go on below thumbnail generation if Exif processing fails
+            case MtpConstants.FORMAT_PNG:
+            case MtpConstants.FORMAT_GIF:
+            case MtpConstants.FORMAT_BMP:
+                {
+                    Bitmap bitmap = ThumbnailUtils.createImageThumbnail(path, MediaStore.Images.Thumbnails.MINI_KIND);
+                    byte[] byteArray = getThumbnailProcess(path, bitmap);
+
+                    return byteArray;
                 }
         }
         return null;
