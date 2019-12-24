@@ -57,15 +57,5 @@
             android:textColor="@color/global_actions_text"
             android:textAppearance="?android:attr/textAppearanceSmall"
         />
-
-        <TextView
-            android:visibility="gone"
-            android:id="@*android:id/status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textColor="@color/global_actions_text"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-        />
     </LinearLayout>
 </LinearLayout>
