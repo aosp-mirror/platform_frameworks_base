@@ -688,6 +688,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (mForceSeamlesslyRotate || requested) {
+            if (mControllableInsetProvider != null) {
+                mControllableInsetProvider.startSeamlessRotation();
+            }
             mPendingSeamlessRotate = new SeamlessRotator(oldRotation, rotation, getDisplayInfo());
             mPendingSeamlessRotate.unrotate(transaction, this);
             getDisplayContent().getDisplayRotation().markForSeamlessRotation(this,
@@ -702,6 +705,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mPendingSeamlessRotate = null;
             getDisplayContent().getDisplayRotation().markForSeamlessRotation(this,
                     false /* seamlesslyRotated */);
+            if (mControllableInsetProvider != null) {
+                mControllableInsetProvider.finishSeamlessRotation(timeout);
+            }
         }
     }
 

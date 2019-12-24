@@ -322,12 +322,16 @@ class SurfaceAnimator {
         if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to leash");
         final SurfaceControl.Builder builder = mAnimatable.makeAnimationLeash()
                 .setParent(mAnimatable.getAnimationLeashParent())
+                .setHidden(hidden)
                 .setName(surface + " - animation-leash");
         final SurfaceControl leash = builder.build();
         t.setWindowCrop(leash, width, height);
+
+        // TODO: rely on builder.setHidden(hidden) instead of show and setAlpha when b/138459974 is
+        //       fixed.
         t.show(leash);
-        // TODO: change this back to use show instead of alpha when b/138459974 is fixed.
         t.setAlpha(leash, hidden ? 0 : 1);
+
         t.reparent(surface, leash);
         return leash;
     }
