@@ -29,6 +29,9 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,6 +80,7 @@ public class TextLinksTest {
         final TextLinks result = TextLinks.CREATOR.createFromParcel(parcel);
         final List<TextLinks.TextLink> resultList = new ArrayList<>(result.getLinks());
 
+        assertEquals(fullText, result.getText());
         assertEquals(2, resultList.size());
         assertEquals(0, resultList.get(0).getStart());
         assertEquals(4, resultList.get(0).getEnd());
@@ -103,10 +107,13 @@ public class TextLinksTest {
                 Arrays.asList(TextClassifier.HINT_TEXT_IS_EDITABLE),
                 Arrays.asList("a", "b", "c"),
                 Arrays.asList("b"));
+        final ZonedDateTime referenceTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(1000L),
+                ZoneId.of("UTC"));
         final TextLinks.Request reference = new TextLinks.Request.Builder("text")
                 .setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY))
                 .setEntityConfig(entityConfig)
                 .setExtras(BUNDLE)
+                .setReferenceTime(referenceTime)
                 .build();
         reference.setCallingPackageName(packageName);
 
@@ -124,5 +131,6 @@ public class TextLinksTest {
                 result.getEntityConfig().resolveEntityListModifications(Collections.emptyList()));
         assertEquals(BUNDLE_VALUE, result.getExtras().getString(BUNDLE_KEY));
         assertEquals(packageName, result.getCallingPackageName());
+        assertEquals(referenceTime, result.getReferenceTime());
     }
 }

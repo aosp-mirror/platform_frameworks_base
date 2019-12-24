@@ -726,10 +726,12 @@ public final class DefaultPermissionGrantPolicy {
                 userId, STORAGE_PERMISSIONS);
 
         // TextClassifier Service
-        String textClassifierPackageName =
-                mContext.getPackageManager().getSystemTextClassifierPackageName();
-        if (!TextUtils.isEmpty(textClassifierPackageName)) {
-            grantPermissionsToSystemPackage(textClassifierPackageName, userId,
+        final String[] packages = mContext.getPackageManager().getSystemTextClassifierPackages();
+        if (packages.length > 0) {
+            // We have a list of supported system TextClassifier package names, the first one
+            // package is the default system TextClassifier service. Grant permissions to default
+            // TextClassifier Service.
+            grantPermissionsToSystemPackage(packages[0], userId,
                     COARSE_BACKGROUND_LOCATION_PERMISSIONS, CONTACTS_PERMISSIONS);
         }
 
@@ -998,7 +1000,7 @@ public final class DefaultPermissionGrantPolicy {
     private void revokeRuntimePermissions(String packageName, Set<String> permissions,
             boolean systemFixed, int userId) {
         PackageInfo pkg = getSystemPackageInfo(packageName);
-        if (ArrayUtils.isEmpty(pkg.requestedPermissions)) {
+        if (pkg == null || ArrayUtils.isEmpty(pkg.requestedPermissions)) {
             return;
         }
         Set<String> revokablePermissions = new ArraySet<>(Arrays.asList(pkg.requestedPermissions));

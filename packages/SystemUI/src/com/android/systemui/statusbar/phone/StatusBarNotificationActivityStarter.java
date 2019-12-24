@@ -47,13 +47,12 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ActivityIntentHelper;
-import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
-import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -73,6 +72,8 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -115,6 +116,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final Handler mBackgroundHandler;
     private final ActivityIntentHelper mActivityIntentHelper;
     private final BubbleController mBubbleController;
+    private final Executor mUiBgExecutor;
 
     private boolean mIsCollapsingToShowActivityOverLockscreen;
 
@@ -133,7 +135,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             KeyguardStateController keyguardStateController,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             MetricsLogger metricsLogger, LockPatternUtils lockPatternUtils,
-            Handler mainThreadHandler, Handler backgroundHandler,
+            Handler mainThreadHandler, Handler backgroundHandler, Executor uiBgExecutor,
             ActivityIntentHelper activityIntentHelper, BubbleController bubbleController) {
         mContext = context;
         mNotificationPanel = panel;
@@ -160,6 +162,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mGroupManager = groupManager;
         mLockPatternUtils = lockPatternUtils;
         mBackgroundHandler = backgroundHandler;
+        mUiBgExecutor = uiBgExecutor;
         mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onPendingEntryAdded(NotificationEntry entry) {
@@ -418,7 +421,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             } else {
                 // Stop screensaver if the notification has a fullscreen intent.
                 // (like an incoming phone call)
-                Dependency.get(UiOffloadThread.class).submit(() -> {
+                mUiBgExecutor.execute(() -> {
                     try {
                         mDreamManager.awaken();
                     } catch (RemoteException e) {
@@ -521,6 +524,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         private final LockPatternUtils mLockPatternUtils;
         private final Handler mMainThreadHandler;
         private final Handler mBackgroundHandler;
+        private final Executor mUiBgExecutor;
         private final ActivityIntentHelper mActivityIntentHelper;
         private final BubbleController mBubbleController;
         private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
@@ -551,6 +555,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 LockPatternUtils lockPatternUtils,
                 @Main Handler mainThreadHandler,
                 @Background Handler backgroundHandler,
+                @UiBackground Executor uiBgExecutor,
                 ActivityIntentHelper activityIntentHelper,
                 BubbleController bubbleController,
                 ShadeController shadeController,
@@ -576,6 +581,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mLockPatternUtils = lockPatternUtils;
             mMainThreadHandler = mainThreadHandler;
             mBackgroundHandler = backgroundHandler;
+            mUiBgExecutor = uiBgExecutor;
             mActivityIntentHelper = activityIntentHelper;
             mBubbleController = bubbleController;
             mShadeController = shadeController;
@@ -624,6 +630,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     mLockPatternUtils,
                     mMainThreadHandler,
                     mBackgroundHandler,
+                    mUiBgExecutor,
                     mActivityIntentHelper,
                     mBubbleController);
         }

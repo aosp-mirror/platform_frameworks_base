@@ -724,21 +724,6 @@ public class WifiScanner {
         public int min24GHzRssi;
         /** Minimum 6GHz RSSI for a BSSID to be considered */
         public int min6GHzRssi;
-        /** Maximum score that a network can have before bonuses */
-        public int initialScoreMax;
-        /**
-         *  Only report when there is a network's score this much higher
-         *  than the current connection.
-         */
-        public int currentConnectionBonus;
-        /** score bonus for all networks with the same network flag */
-        public int sameNetworkBonus;
-        /** score bonus for networks that are not open */
-        public int secureBonus;
-        /** 5GHz RSSI score bonus (applied to all 5GHz networks) */
-        public int band5GHzBonus;
-        /** 6GHz RSSI score bonus (applied to all 5GHz networks) */
-        public int band6GHzBonus;
         /** Pno Network filter list */
         public PnoNetwork[] networkList;
 
@@ -753,12 +738,6 @@ public class WifiScanner {
             dest.writeInt(min5GHzRssi);
             dest.writeInt(min24GHzRssi);
             dest.writeInt(min6GHzRssi);
-            dest.writeInt(initialScoreMax);
-            dest.writeInt(currentConnectionBonus);
-            dest.writeInt(sameNetworkBonus);
-            dest.writeInt(secureBonus);
-            dest.writeInt(band5GHzBonus);
-            dest.writeInt(band6GHzBonus);
             if (networkList != null) {
                 dest.writeInt(networkList.length);
                 for (int i = 0; i < networkList.length; i++) {
@@ -781,12 +760,6 @@ public class WifiScanner {
                         settings.min5GHzRssi = in.readInt();
                         settings.min24GHzRssi = in.readInt();
                         settings.min6GHzRssi = in.readInt();
-                        settings.initialScoreMax = in.readInt();
-                        settings.currentConnectionBonus = in.readInt();
-                        settings.sameNetworkBonus = in.readInt();
-                        settings.secureBonus = in.readInt();
-                        settings.band5GHzBonus = in.readInt();
-                        settings.band6GHzBonus = in.readInt();
                         int numNetworks = in.readInt();
                         settings.networkList = new PnoNetwork[numNetworks];
                         for (int i = 0; i < numNetworks; i++) {

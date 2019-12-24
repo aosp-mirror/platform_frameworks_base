@@ -344,7 +344,7 @@ public final class TelephonyPermissions {
             DevicePolicyManager devicePolicyManager =
                     (DevicePolicyManager) context.getSystemService(
                             Context.DEVICE_POLICY_SERVICE);
-            if (devicePolicyManager != null && devicePolicyManager.checkDeviceIdentifierAccess(
+            if (devicePolicyManager != null && devicePolicyManager.hasDeviceIdentifierAccess(
                     callingPackage, pid, uid)) {
                 return true;
             }

@@ -56,6 +56,7 @@ public class SystemUIApplication extends Application implements
     private SystemUI[] mServices;
     private boolean mServicesStarted;
     private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
+    private SystemUIRootComponent mRootComponent;
 
     public SystemUIApplication() {
         super();
@@ -72,9 +73,9 @@ public class SystemUIApplication extends Application implements
                 Trace.TRACE_TAG_APP);
         log.traceBegin("DependencyInjection");
         mContextAvailableCallback.onContextAvailable(this);
-        SystemUIRootComponent root = SystemUIFactory.getInstance().getRootComponent();
-        mComponentHelper = root.getContextComponentHelper();
-        mBootCompleteCache = root.provideBootCacheImpl();
+        mRootComponent = SystemUIFactory.getInstance().getRootComponent();
+        mComponentHelper = mRootComponent.getContextComponentHelper();
+        mBootCompleteCache = mRootComponent.provideBootCacheImpl();
         log.traceEnd();
 
         // Set the application theme that is inherited by all services. Note that setting the
@@ -209,7 +210,7 @@ public class SystemUIApplication extends Application implements
                 mServices[i].onBootCompleted();
             }
         }
-        Dependency.get(InitController.class).executePostInitTasks();
+        mRootComponent.getInitController().executePostInitTasks();
         log.traceEnd();
 
         mServicesStarted = true;
@@ -218,11 +219,7 @@ public class SystemUIApplication extends Application implements
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (mServicesStarted) {
-            SystemUIFactory
-                    .getInstance()
-                    .getRootComponent()
-                    .getConfigurationController()
-                    .onConfigurationChanged(newConfig);
+            mRootComponent.getConfigurationController().onConfigurationChanged(newConfig);
             int len = mServices.length;
             for (int i = 0; i < len; i++) {
                 if (mServices[i] != null) {

@@ -84,6 +84,7 @@ import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Telephony.Carriers.DPC_URI;
 import static android.provider.Telephony.Carriers.ENFORCE_KEY;
 import static android.provider.Telephony.Carriers.ENFORCE_MANAGED_URI;
+import static android.security.keystore.AttestationUtils.USE_INDIVIDUAL_ATTESTATION;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
@@ -5825,7 +5826,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         idTypeToAttestationFlag.put(ID_TYPE_IMEI, AttestationUtils.ID_TYPE_IMEI);
         idTypeToAttestationFlag.put(ID_TYPE_MEID, AttestationUtils.ID_TYPE_MEID);
         idTypeToAttestationFlag.put(
-                ID_TYPE_INDIVIDUAL_ATTESTATION, AttestationUtils.USE_INDIVIDUAL_ATTESTATION);
+                ID_TYPE_INDIVIDUAL_ATTESTATION, USE_INDIVIDUAL_ATTESTATION);
 
         int numFlagsSet = Integer.bitCount(idAttestationFlags);
         // No flags are set - return null to indicate no device ID attestation information should
@@ -5865,6 +5866,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         if (deviceIdAttestationRequired && attestationUtilsFlags.length > 0) {
             enforceCallerCanRequestDeviceIdAttestation(who, callerPackage, callingUid);
+            enforceIndividualAttestationSupportedIfRequested(attestationUtilsFlags);
         } else {
             enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
                     DELEGATION_CERT_INSTALL);
@@ -5957,6 +5959,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mInjector.binderRestoreCallingIdentity(id);
         }
         return false;
+    }
+
+    private void enforceIndividualAttestationSupportedIfRequested(int[] attestationUtilsFlags) {
+        for (int attestationFlag : attestationUtilsFlags) {
+            if (attestationFlag == USE_INDIVIDUAL_ATTESTATION
+                    && !mInjector.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_DEVICE_UNIQUE_ATTESTATION)) {
+                throw new UnsupportedOperationException("Device Individual attestation is not "
+                        + "supported on this device.");
+            }
+        }
     }
 
     @Override

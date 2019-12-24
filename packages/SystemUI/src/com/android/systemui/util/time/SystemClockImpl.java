@@ -42,14 +42,4 @@ public class SystemClockImpl implements SystemClock {
     public long currentThreadTimeMillis() {
         return android.os.SystemClock.currentThreadTimeMillis();
     }
-
-    @Override
-    public long currentThreadTimeMicro() {
-        return android.os.SystemClock.currentThreadTimeMicro();
-    }
-
-    @Override
-    public long currentTimeMicro() {
-        return android.os.SystemClock.currentTimeMicro();
-    }
 }

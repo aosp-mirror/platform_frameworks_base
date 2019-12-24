@@ -36,7 +36,17 @@ public final class InlineSuggestionsRequest implements Parcelable {
     /** Constant used to indicate not putting a cap on the number of suggestions to return. */
     public static final int SUGGESTION_COUNT_UNLIMITED = Integer.MAX_VALUE;
 
+    /**
+     * Max number of suggestions expected from the response. Defaults to {@code
+     * SUGGESTION_COUNT_UNLIMITED} if not set.
+     */
     private final int mMaxSuggestionCount;
+
+    /**
+     * The {@link InlinePresentationSpec} for each suggestion in the response. If the max suggestion
+     * count is larger than the number of specs in the list, then the last spec is used for the
+     * remainder of the suggestions.
+     */
     private final @NonNull List<InlinePresentationSpec> mPresentationSpecs;
 
     private void onConstructed() {
@@ -79,11 +89,20 @@ public final class InlineSuggestionsRequest implements Parcelable {
         onConstructed();
     }
 
+    /**
+     * Max number of suggestions expected from the response. Defaults to {@code
+     * SUGGESTION_COUNT_UNLIMITED} if not set.
+     */
     @DataClass.Generated.Member
     public int getMaxSuggestionCount() {
         return mMaxSuggestionCount;
     }
 
+    /**
+     * The {@link InlinePresentationSpec} for each suggestion in the response. If the max suggestion
+     * count is larger than the number of specs in the list, then the last spec is used for the
+     * remainder of the suggestions.
+     */
     @DataClass.Generated.Member
     public @NonNull List<InlinePresentationSpec> getPresentationSpecs() {
         return mPresentationSpecs;
@@ -189,6 +208,14 @@ public final class InlineSuggestionsRequest implements Parcelable {
 
         private long mBuilderFieldsSet = 0L;
 
+        /**
+         * Creates a new Builder.
+         *
+         * @param presentationSpecs
+         *   The {@link InlinePresentationSpec} for each suggestion in the response. If the max suggestion
+         *   count is larger than the number of specs in the list, then the last spec is used for the
+         *   remainder of the suggestions.
+         */
         public Builder(
                 @NonNull List<InlinePresentationSpec> presentationSpecs) {
             mPresentationSpecs = presentationSpecs;
@@ -196,6 +223,10 @@ public final class InlineSuggestionsRequest implements Parcelable {
                     NonNull.class, null, mPresentationSpecs);
         }
 
+        /**
+         * Max number of suggestions expected from the response. Defaults to {@code
+         * SUGGESTION_COUNT_UNLIMITED} if not set.
+         */
         @DataClass.Generated.Member
         public @NonNull Builder setMaxSuggestionCount(int value) {
             checkNotUsed();
@@ -204,6 +235,11 @@ public final class InlineSuggestionsRequest implements Parcelable {
             return this;
         }
 
+        /**
+         * The {@link InlinePresentationSpec} for each suggestion in the response. If the max suggestion
+         * count is larger than the number of specs in the list, then the last spec is used for the
+         * remainder of the suggestions.
+         */
         @DataClass.Generated.Member
         @Override
         @NonNull Builder setPresentationSpecs(@NonNull List<InlinePresentationSpec> value) {
@@ -247,7 +283,7 @@ public final class InlineSuggestionsRequest implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1574406255024L,
+            time = 1576637222199L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/view/inputmethod/InlineSuggestionsRequest.java",
             inputSignatures = "public static final  int SUGGESTION_COUNT_UNLIMITED\nprivate final  int mMaxSuggestionCount\nprivate final @android.annotation.NonNull java.util.List<android.view.inline.InlinePresentationSpec> mPresentationSpecs\nprivate  void onConstructed()\nprivate static  int defaultMaxSuggestionCount()\nclass InlineSuggestionsRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setPresentationSpecs(java.util.List<android.view.inline.InlinePresentationSpec>)\nclass BaseBuilder extends java.lang.Object implements []")

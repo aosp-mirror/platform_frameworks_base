@@ -3560,13 +3560,14 @@
          set to empty string), a default textclassifier will be loaded in the calling app's process.
          See android.view.textclassifier.TextClassificationManager.
     -->
+    <!-- TODO(b/144896755) remove the config -->
     <string name="config_defaultTextClassifierPackage" translatable="false"></string>
 
-    <!-- A list of the default system textclassifier service package name. Only one of the packages
-         will be activated and the fist package is the default system textclassifier service. OS
-         only tries to bind the first trusted service and the others can be selected via device
-         config. These services must be trusted, as they can be activated without explicit consent
-         of the user. Example: "com.android.textclassifier"
+    <!-- A list of supported system textClassifier service package names. Only one of the packages
+         will be activated. The first package in the list is the default system textClassifier
+         service. OS only tries to bind and grant permissions to the first trusted service and the
+         others can be selected via device config. These services must be trusted, as they can be
+         activated without explicit consent of the user. Example: "com.android.textclassifier"
     -->
     <string-array name="config_defaultTextClassifierPackages" translatable="false">
         <item>android.ext.services</item>

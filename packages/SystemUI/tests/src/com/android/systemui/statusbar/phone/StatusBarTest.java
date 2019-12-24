@@ -74,11 +74,9 @@ import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
@@ -133,6 +131,8 @@ import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
 
 import org.junit.Before;
@@ -245,6 +245,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private StatusBarNotificationActivityStarter.Builder
             mStatusBarNotificationActivityStarterBuilder;
     private ShadeController mShadeController;
+    private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
+    private InitController mInitController = new InitController();
 
     @Before
     public void setup() throws Exception {
@@ -266,7 +268,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         mMetricsLogger = new FakeMetricsLogger();
         NotificationLogger notificationLogger = new NotificationLogger(mNotificationListener,
-                Dependency.get(UiOffloadThread.class), mEntryManager, mStatusBarStateController,
+                mUiBgExecutor, mEntryManager, mStatusBarStateController,
                 mExpansionStateLogger);
         notificationLogger.setVisibilityReporter(mock(Runnable.class));
 
@@ -349,7 +351,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotificationAlertingManager,
                 new DisplayMetrics(),
                 mMetricsLogger,
-                Dependency.get(UiOffloadThread.class),
+                mUiBgExecutor,
                 mNotificationMediaManager,
                 mLockscreenUserManager,
                 mRemoteInputManager,
@@ -393,6 +395,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mSuperStatusBarViewFactory,
                 mStatusBarKeyguardViewManager,
                 mViewMediatorCallback,
+                mInitController,
                 mDismissCallbackRegistry);
 
         when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
@@ -417,7 +420,7 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mBarService = mBarService;
         mStatusBar.mStackScroller = mStackScroller;
         mStatusBar.startKeyguard();
-        Dependency.get(InitController.class).executePostInitTasks();
+        mInitController.executePostInitTasks();
         notificationLogger.setUpWithContainer(mStackScroller);
     }
 
@@ -641,7 +644,7 @@ public class StatusBarTest extends SysuiTestCase {
     public void testLogHidden() {
         try {
             mStatusBar.handleVisibleToUserChanged(false);
-            waitForUiOffloadThread();
+            mUiBgExecutor.runAllReady();
             verify(mBarService, times(1)).onPanelHidden();
             verify(mBarService, never()).onPanelRevealed(anyBoolean(), anyInt());
         } catch (RemoteException e) {
@@ -659,7 +662,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         try {
             mStatusBar.handleVisibleToUserChanged(true);
-            waitForUiOffloadThread();
+            mUiBgExecutor.runAllReady();
             verify(mBarService, never()).onPanelHidden();
             verify(mBarService, times(1)).onPanelRevealed(false, 1);
         } catch (RemoteException e) {
@@ -678,7 +681,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         try {
             mStatusBar.handleVisibleToUserChanged(true);
-            waitForUiOffloadThread();
+            mUiBgExecutor.runAllReady();
             verify(mBarService, never()).onPanelHidden();
             verify(mBarService, times(1)).onPanelRevealed(true, 5);
         } catch (RemoteException e) {
@@ -696,7 +699,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         try {
             mStatusBar.handleVisibleToUserChanged(true);
-            waitForUiOffloadThread();
+            mUiBgExecutor.runAllReady();
             verify(mBarService, never()).onPanelHidden();
             verify(mBarService, times(1)).onPanelRevealed(false, 5);
         } catch (RemoteException e) {

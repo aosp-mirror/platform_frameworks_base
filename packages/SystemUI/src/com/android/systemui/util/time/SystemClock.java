@@ -37,10 +37,4 @@ public interface SystemClock {
 
     /** @see android.os.SystemClock#currentThreadTimeMillis() */
     long currentThreadTimeMillis();
-
-    /** @see android.os.SystemClock#currentThreadTimeMicro() */
-    long currentThreadTimeMicro();
-
-    /** @see android.os.SystemClock#currentTimeMicro() */
-    long currentTimeMicro();
 }

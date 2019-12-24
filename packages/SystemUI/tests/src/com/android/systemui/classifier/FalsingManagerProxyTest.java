@@ -34,7 +34,9 @@ import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
+import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.sensors.ProximitySensor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -55,6 +57,7 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
     private FalsingManagerProxy mProxy;
     private DeviceConfigProxy mDeviceConfig;
     private TestableLooper mTestableLooper;
+    private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setup() {
@@ -77,7 +80,7 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
     @Test
     public void test_brightLineFalsingManagerDisabled() {
         mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mHandler, mProximitySensor,
-                mDeviceConfig);
+                mDeviceConfig, mUiBgExecutor);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(FalsingManagerImpl.class));
     }
 
@@ -87,14 +90,14 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
                 BRIGHTLINE_FALSING_MANAGER_ENABLED, "true", false);
         mTestableLooper.processAllMessages();
         mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mHandler, mProximitySensor,
-                mDeviceConfig);
+                mDeviceConfig, mUiBgExecutor);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(BrightLineFalsingManager.class));
     }
 
     @Test
     public void test_brightLineFalsingManagerToggled() throws InterruptedException {
         mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mHandler, mProximitySensor,
-                mDeviceConfig);
+                mDeviceConfig, mUiBgExecutor);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(FalsingManagerImpl.class));
 
         mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,

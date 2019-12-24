@@ -86,6 +86,19 @@ public final class AppInstallMetadata {
         return mIsPreInstalled;
     }
 
+    @Override
+    public String toString() {
+        return String.format(
+                "AppInstallMetadata { PackageName = %s, AppCert = %s, InstallerName = %s,"
+                    + " InstallerCert = %s, VersionCode = %d, PreInstalled = %b }",
+                mPackageName,
+                mAppCertificate,
+                mInstallerName == null ? "null" : mInstallerName,
+                mInstallerCertificate == null ? "null" : mInstallerCertificate,
+                mVersionCode,
+                mIsPreInstalled);
+    }
+
     /** Builder class for constructing {@link AppInstallMetadata} objects. */
     public static final class Builder {
         private String mPackageName;

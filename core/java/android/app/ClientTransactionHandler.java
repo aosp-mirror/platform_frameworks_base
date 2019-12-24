@@ -158,6 +158,9 @@ public abstract class ClientTransactionHandler {
     public abstract void handlePictureInPictureModeChanged(IBinder token, boolean isInPipMode,
             Configuration overrideConfig);
 
+    /** Request that an activity enter picture-in-picture. */
+    public abstract void handlePictureInPictureRequested(IBinder token);
+
     /** Update window visibility. */
     public abstract void handleWindowVisibility(IBinder token, boolean show);
 

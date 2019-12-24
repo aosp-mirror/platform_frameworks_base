@@ -441,10 +441,16 @@ public final class SurfaceControl implements Parcelable {
     public static final int METADATA_TASK_ID = 3;
 
     /**
+     * The style of mouse cursor and hotspot.
+     * @hide
+     */
+    public static final int METADATA_MOUSE_CURSOR = 4;
+
+    /**
      * Accessibility ID to allow association between surfaces and accessibility tree.
      * @hide
      */
-    public static final int METADATA_ACCESSIBILITY_ID = 4;
+    public static final int METADATA_ACCESSIBILITY_ID = 5;
 
     /**
      * A wrapper around GraphicBuffer that contains extra information about how to

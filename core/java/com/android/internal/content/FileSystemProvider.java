@@ -66,6 +66,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Pattern;
 
 /**
  * A helper class for {@link android.provider.DocumentsProvider} to perform file operations on local
@@ -388,7 +389,9 @@ public abstract class FileSystemProvider extends DocumentsProvider {
                 resolveProjection(projection), parentDocumentId, parent);
         if (parent.isDirectory()) {
             for (File file : FileUtils.listFilesOrEmpty(parent)) {
-                includeFile(result, null, file);
+                if (!shouldHide(file)) {
+                    includeFile(result, null, file);
+                }
             }
         } else {
             Log.w(TAG, "parentDocumentId '" + parentDocumentId + "' is not Directory");
@@ -422,6 +425,8 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         pending.add(folder);
         while (!pending.isEmpty() && result.getCount() < 24) {
             final File file = pending.removeFirst();
+            if (shouldHide(file)) continue;
+
             if (file.isDirectory()) {
                 for (File child : file.listFiles()) {
                     pending.add(child);
@@ -540,6 +545,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         } else {
             file = getFileForDocId(docId);
         }
+
         final String mimeType = getDocumentType(docId, file);
         row.add(Document.COLUMN_DOCUMENT_ID, docId);
         row.add(Document.COLUMN_MIME_TYPE, mimeType);
@@ -596,6 +602,17 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
         // Return the row builder just in case any subclass want to add more stuff to it.
         return row;
+    }
+
+    private static final Pattern PATTERN_HIDDEN_PATH = Pattern.compile(
+            "(?i)^/storage/[^/]+/(?:[0-9]+/)?Android/(?:data|obb|sandbox)$");
+
+    /**
+     * In a scoped storage world, access to "Android/data" style directories are
+     * hidden for privacy reasons.
+     */
+    protected boolean shouldHide(@NonNull File file) {
+        return (PATTERN_HIDDEN_PATH.matcher(file.getAbsolutePath()).matches());
     }
 
     protected boolean shouldBlockFromTree(@NonNull String docId) {

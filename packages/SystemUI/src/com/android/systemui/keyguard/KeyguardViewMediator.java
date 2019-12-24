@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.keyguard;
@@ -81,8 +81,8 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
-import com.android.systemui.UiOffloadThread;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -95,6 +95,7 @@ import com.android.systemui.util.InjectionInflationController;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -211,7 +212,7 @@ public class KeyguardViewMediator extends SystemUI {
     private AudioManager mAudioManager;
     private StatusBarManager mStatusBarManager;
     private final StatusBarWindowController mStatusBarWindowController;
-    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+    private final Executor mUiBgExecutor;
 
     private boolean mSystemReady;
     private boolean mBootCompleted;
@@ -689,7 +690,8 @@ public class KeyguardViewMediator extends SystemUI {
             BroadcastDispatcher broadcastDispatcher,
             StatusBarWindowController statusBarWindowController,
             Lazy<StatusBarKeyguardViewManager> statusBarKeyguardViewManagerLazy,
-            DismissCallbackRegistry dismissCallbackRegistry) {
+            DismissCallbackRegistry dismissCallbackRegistry,
+            @UiBackground Executor uiBgExecutor) {
         super(context);
         mFalsingManager = falsingManager;
         mLockPatternUtils = lockPatternUtils;
@@ -697,6 +699,7 @@ public class KeyguardViewMediator extends SystemUI {
         mStatusBarWindowController = statusBarWindowController;
         mStatusBarKeyguardViewManagerLazy = statusBarKeyguardViewManagerLazy;
         mDismissCallbackRegistry = dismissCallbackRegistry;
+        mUiBgExecutor = uiBgExecutor;
     }
 
     public void userActivity() {
@@ -1662,7 +1665,7 @@ public class KeyguardViewMediator extends SystemUI {
     private void handleKeyguardDone() {
         Trace.beginSection("KeyguardViewMediator#handleKeyguardDone");
         final int currentUser = KeyguardUpdateMonitor.getCurrentUser();
-        mUiOffloadThread.submit(() -> {
+        mUiBgExecutor.execute(() -> {
             if (mLockPatternUtils.isSecure(currentUser)) {
                 mLockPatternUtils.getDevicePolicyManager().reportKeyguardDismissed(currentUser);
             }
@@ -1705,7 +1708,7 @@ public class KeyguardViewMediator extends SystemUI {
                 final UserHandle currentUser = new UserHandle(currentUserId);
                 final UserManager um = (UserManager) mContext.getSystemService(
                         Context.USER_SERVICE);
-                mUiOffloadThread.submit(() -> {
+                mUiBgExecutor.execute(() -> {
                     for (int profileId : um.getProfileIdsWithDisabled(currentUser.getIdentifier())) {
                         mContext.sendBroadcastAsUser(USER_PRESENT_INTENT, UserHandle.of(profileId));
                     }
@@ -1756,7 +1759,7 @@ public class KeyguardViewMediator extends SystemUI {
                 mUiSoundsStreamType = mAudioManager.getUiSoundsStreamType();
             }
 
-            mUiOffloadThread.submit(() -> {
+            mUiBgExecutor.execute(() -> {
                 // If the stream is muted, don't play the sound
                 if (mAudioManager.isStreamMute(mUiSoundsStreamType)) return;
 
@@ -1775,7 +1778,7 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void updateActivityLockScreenState(boolean showing, boolean aodShowing) {
-        mUiOffloadThread.submit(() -> {
+        mUiBgExecutor.execute(() -> {
             if (DEBUG) {
                 Log.d(TAG, "updateActivityLockScreenState(" + showing + ", " + aodShowing + ")");
             }
@@ -1854,7 +1857,7 @@ public class KeyguardViewMediator extends SystemUI {
             // Posting to mUiOffloadThread to ensure that calls to ActivityTaskManager will be in
             // order.
             final int keyguardFlag = flags;
-            mUiOffloadThread.submit(() -> {
+            mUiBgExecutor.execute(() -> {
                 try {
                     ActivityTaskManager.getService().keyguardGoingAway(keyguardFlag);
                 } catch (RemoteException e) {
@@ -2217,7 +2220,7 @@ public class KeyguardViewMediator extends SystemUI {
             }
         });
         updateInputRestrictedLocked();
-        mUiOffloadThread.submit(() -> {
+        mUiBgExecutor.execute(() -> {
             mTrustManager.reportKeyguardShowingChanged();
         });
     }

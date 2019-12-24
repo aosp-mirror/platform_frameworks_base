@@ -156,6 +156,8 @@ import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyCache;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
+import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.EnterPipRequestedItem;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -4953,6 +4955,44 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     mRootActivityContainer.getDisplayContentOrCreate(displayId);
             if (display != null) {
                 display.setDisplayToSingleTaskInstance();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Requests that an activity should enter picture-in-picture mode if possible.
+     */
+    @Override
+    public void requestPictureInPictureMode(IBinder token) throws RemoteException {
+        mAmInternal.enforceCallingPermission(Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "requestPictureInPictureMode");
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final ActivityRecord activity = ActivityRecord.forTokenLocked(token);
+                if (activity == null) {
+                    return;
+                }
+
+                final boolean canEnterPictureInPicture = activity.checkEnterPictureInPictureState(
+                        "requestPictureInPictureMode", /* beforeStopping */ false);
+                if (!canEnterPictureInPicture) {
+                    throw new IllegalStateException(
+                            "Requested PIP on an activity that doesn't support it");
+                }
+
+                try {
+                    final ClientTransaction transaction = ClientTransaction.obtain(
+                            activity.app.getThread(),
+                            activity.token);
+                    transaction.addCallback(EnterPipRequestedItem.obtain());
+                    getLifecycleManager().scheduleTransaction(transaction);
+                } catch (Exception e) {
+                    Slog.w(TAG, "Failed to send enter pip requested item: "
+                            + activity.intent.getComponent(), e);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

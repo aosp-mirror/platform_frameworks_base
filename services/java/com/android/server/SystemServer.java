@@ -146,6 +146,7 @@ import com.android.server.recoverysystem.RecoverySystemService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.role.RoleManagerService;
 import com.android.server.rollback.RollbackManagerService;
+import com.android.server.security.FileIntegrityService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.signedconfig.SignedConfigService;
@@ -671,6 +672,13 @@ public final class SystemServer {
         ServiceManager.addService(Context.PLATFORM_COMPAT_NATIVE_SERVICE,
                 new PlatformCompatNative(platformCompat));
         AppCompatCallbacks.install(new long[0]);
+        t.traceEnd();
+
+        // FileIntegrityService responds to requests from apps and the system. It needs to run after
+        // the source (i.e. keystore) is ready, and before the apps (or the first customer in the
+        // system) run.
+        t.traceBegin("StartFileIntegrityService");
+        mSystemServiceManager.startService(FileIntegrityService.class);
         t.traceEnd();
 
         // Wait for installd to finish starting up so that it has a chance to

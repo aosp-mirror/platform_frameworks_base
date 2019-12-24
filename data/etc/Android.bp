@@ -28,6 +28,13 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "preinstalled-packages-platform-overlays.xml",
+    product_specific: true,
+    sub_dir: "sysconfig",
+    src: "preinstalled-packages-platform-overlays.xml",
+}
+
+prebuilt_etc {
     name: "hiddenapi-package-whitelist.xml",
     sub_dir: "sysconfig",
     src: "hiddenapi-package-whitelist.xml",

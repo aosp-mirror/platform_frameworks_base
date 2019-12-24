@@ -1519,6 +1519,16 @@ public class Instrumentation {
     public void callActivityOnUserLeaving(Activity activity) {
         activity.performUserLeaving();
     }
+
+    /**
+     * Perform calling of an activity's {@link Activity#onPictureInPictureRequested} method.
+     * The default implementation simply calls through to that method.
+     *
+     * @param activity The activity being notified that picture-in-picture is being requested.
+     */
+    public void callActivityOnPictureInPictureRequested(@NonNull Activity activity) {
+        activity.onPictureInPictureRequested();
+    }
     
     /*
      * Starts allocation counting. This triggers a gc and resets the counts.

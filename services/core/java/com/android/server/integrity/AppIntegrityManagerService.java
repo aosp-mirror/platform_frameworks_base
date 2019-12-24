@@ -37,7 +37,7 @@ public class AppIntegrityManagerService extends SystemService {
 
     @Override
     public void onStart() {
-        mService = new AppIntegrityManagerServiceImpl(mContext);
-        // TODO: define and publish a binder service.
+        mService = AppIntegrityManagerServiceImpl.create(mContext);
+        publishBinderService(Context.APP_INTEGRITY_SERVICE, mService);
     }
 }

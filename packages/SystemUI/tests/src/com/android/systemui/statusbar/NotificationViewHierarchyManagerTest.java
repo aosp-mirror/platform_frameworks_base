@@ -38,8 +38,6 @@ import android.widget.LinearLayout;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.Dependency;
-import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
@@ -107,7 +105,6 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 mock(KeyguardBypassController.class),
                 mock(BubbleController.class),
                 mock(DynamicPrivacyController.class));
-        Dependency.get(InitController.class).executePostInitTasks();
         mViewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
     }
 

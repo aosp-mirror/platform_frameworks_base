@@ -22,10 +22,12 @@ import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
 import android.apex.ApexSessionParams;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
@@ -774,6 +776,17 @@ public class StagingManager {
         }
     }
 
+    void systemReady() {
+        // Register the receiver of boot completed intent for staging manager.
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context ctx, Intent intent) {
+                mPreRebootVerificationHandler.readyToStart();
+                ctx.unregisterReceiver(this);
+            }
+        }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+    }
+
     private static class LocalIntentReceiverAsync {
         final Consumer<Intent> mConsumer;
 
@@ -824,6 +837,9 @@ public class StagingManager {
     }
 
     private final class PreRebootVerificationHandler extends Handler {
+        // Hold session ids before handler gets ready to do the verification.
+        private IntArray mPendingSessionIds;
+        private boolean mIsReady;
 
         PreRebootVerificationHandler(Looper looper) {
             super(looper);
@@ -876,8 +892,26 @@ public class StagingManager {
             }
         }
 
+        // Notify the handler that system is ready, and reschedule the pre-reboot verifications.
+        private synchronized void readyToStart() {
+            mIsReady = true;
+            if (mPendingSessionIds != null) {
+                for (int i = 0; i < mPendingSessionIds.size(); i++) {
+                    startPreRebootVerification(mPendingSessionIds.get(i));
+                }
+                mPendingSessionIds = null;
+            }
+        }
+
         // Method for starting the pre-reboot verification
-        private void startPreRebootVerification(int sessionId) {
+        private synchronized void startPreRebootVerification(int sessionId) {
+            if (!mIsReady) {
+                if (mPendingSessionIds == null) {
+                    mPendingSessionIds = new IntArray();
+                }
+                mPendingSessionIds.add(sessionId);
+                return;
+            }
             obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, 0).sendToTarget();
         }
 

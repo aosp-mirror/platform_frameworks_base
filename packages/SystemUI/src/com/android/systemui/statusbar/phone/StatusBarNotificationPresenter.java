@@ -146,7 +146,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             KeyguardIndicationController keyguardIndicationController,
             StatusBar statusBar,
             ShadeController shadeController,
-            CommandQueue commandQueue) {
+            CommandQueue commandQueue,
+            InitController initController) {
         mContext = context;
         mKeyguardStateController = keyguardStateController;
         mNotificationPanel = panel;
@@ -193,7 +194,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 Dependency.get(StatusBarWindowController.class));
 
         NotificationListContainer notifListContainer = (NotificationListContainer) stackScroller;
-        Dependency.get(InitController.class).addPostInitTask(() -> {
+        initController.addPostInitTask(() -> {
             NotificationEntryListener notificationEntryListener = new NotificationEntryListener() {
                 @Override
                 public void onEntryRemoved(

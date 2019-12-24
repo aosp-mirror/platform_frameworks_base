@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.keyguard;
@@ -24,6 +24,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,10 +43,11 @@ public class DismissCallbackRegistryTest extends SysuiTestCase {
     private DismissCallbackRegistry mDismissCallbackRegistry;
     private @Mock IKeyguardDismissCallback mMockCallback;
     private @Mock IKeyguardDismissCallback mMockCallback2;
+    private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setUp() throws Exception {
-        mDismissCallbackRegistry =  new DismissCallbackRegistry();
+        mDismissCallbackRegistry =  new DismissCallbackRegistry(mUiBgExecutor);
         MockitoAnnotations.initMocks(this);
     }
 
@@ -52,7 +55,7 @@ public class DismissCallbackRegistryTest extends SysuiTestCase {
     public void testCancelled() throws Exception {
         mDismissCallbackRegistry.addCallback(mMockCallback);
         mDismissCallbackRegistry.notifyDismissCancelled();
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
         verify(mMockCallback).onDismissCancelled();
     }
 
@@ -61,7 +64,7 @@ public class DismissCallbackRegistryTest extends SysuiTestCase {
         mDismissCallbackRegistry.addCallback(mMockCallback);
         mDismissCallbackRegistry.addCallback(mMockCallback2);
         mDismissCallbackRegistry.notifyDismissCancelled();
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
         verify(mMockCallback).onDismissCancelled();
         verify(mMockCallback2).onDismissCancelled();
     }
@@ -70,7 +73,7 @@ public class DismissCallbackRegistryTest extends SysuiTestCase {
     public void testSucceeded() throws Exception {
         mDismissCallbackRegistry.addCallback(mMockCallback);
         mDismissCallbackRegistry.notifyDismissSucceeded();
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
         verify(mMockCallback).onDismissSucceeded();
     }
 
@@ -79,7 +82,7 @@ public class DismissCallbackRegistryTest extends SysuiTestCase {
         mDismissCallbackRegistry.addCallback(mMockCallback);
         mDismissCallbackRegistry.addCallback(mMockCallback2);
         mDismissCallbackRegistry.notifyDismissSucceeded();
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
         verify(mMockCallback).onDismissSucceeded();
         verify(mMockCallback2).onDismissSucceeded();
     }
@@ -89,7 +92,7 @@ public class DismissCallbackRegistryTest extends SysuiTestCase {
         mDismissCallbackRegistry.addCallback(mMockCallback);
         mDismissCallbackRegistry.notifyDismissSucceeded();
         mDismissCallbackRegistry.notifyDismissSucceeded();
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
         verify(mMockCallback, times(1)).onDismissSucceeded();
     }
 }

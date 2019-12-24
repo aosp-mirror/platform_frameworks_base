@@ -19,9 +19,9 @@ package com.android.systemui.statusbar.notification.row;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_ALL;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_PUBLIC;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -152,7 +152,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
         row.setNeedsRedaction(true);
 
-        assertTrue(row.getNotificationInflater().isInflationFlagSet(FLAG_CONTENT_VIEW_PUBLIC));
+        assertTrue(row.isInflationFlagSet(FLAG_CONTENT_VIEW_PUBLIC));
     }
 
     @Test

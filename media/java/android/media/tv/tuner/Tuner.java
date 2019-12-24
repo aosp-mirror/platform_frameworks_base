@@ -24,6 +24,7 @@ import android.content.Context;
 import android.media.tv.tuner.TunerConstants.DemuxPidType;
 import android.media.tv.tuner.TunerConstants.FilterSubtype;
 import android.media.tv.tuner.TunerConstants.FilterType;
+import android.media.tv.tuner.TunerConstants.FrontendScanType;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -100,9 +101,9 @@ public final class Tuner implements AutoCloseable  {
     private native Frontend nativeOpenFrontendById(int id);
     private native int nativeTune(int type, FrontendSettings settings);
     private native int nativeStopTune();
+    private native int nativeScan(int settingsType, FrontendSettings settings, int scanType);
     private native int nativeSetLnb(int lnbId);
     private native int nativeSetLna(boolean enable);
-
     private native Filter nativeOpenFilter(int type, int subType, int bufferSize);
 
     private native List<Integer> nativeGetLnbIds();
@@ -123,6 +124,12 @@ public final class Tuner implements AutoCloseable  {
          * Invoked when there is a frontend event.
          */
         void onEvent(int frontendEventType);
+
+        /**
+         * Invoked when there is a scan message.
+         * @param msg
+         */
+        void onScanMessage(ScanMessage msg);
     }
 
     /**
@@ -263,6 +270,14 @@ public final class Tuner implements AutoCloseable  {
      */
     public int stopTune() {
         return nativeStopTune();
+    }
+
+    /**
+     * Scan channels.
+     * @hide
+     */
+    public int scan(@NonNull FrontendSettings settings, @FrontendScanType int scanType) {
+        return nativeScan(settings.getType(), settings, scanType);
     }
 
     /**

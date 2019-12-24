@@ -353,9 +353,6 @@ java_library {
         "com.android.sysprop.apex",
         "PlatformProperties",
     ],
-    aidl: {
-        include_dirs: ["system/connectivity/wificond/aidl"],
-    },
     sdk_version: "core_platform",
     installable: false,
 }

@@ -25,6 +25,9 @@ import android.annotation.Nullable;
  * @see Uptc
  */
 public interface Categorizer {
+    /** A {@link Categorizer} that always returns {@link Category.SINGLE_CATEGORY}. */
+    Categorizer SINGLE_CATEGORIZER = (userId, packageName, tag) -> Category.SINGLE_CATEGORY;
+
     /**
      * Return the {@link Category} that this UPTC belongs to.
      *

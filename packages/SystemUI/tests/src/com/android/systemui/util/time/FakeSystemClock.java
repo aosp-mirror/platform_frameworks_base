@@ -16,94 +16,70 @@
 
 package com.android.systemui.util.time;
 
+import com.android.systemui.util.concurrency.FakeExecutor;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A fake {@link SystemClock} for use with {@link FakeExecutor}.
+ *
+ * Attempts to simulate the behavior of a real system clock. Time can be moved forward but not
+ * backwards. uptimeMillis, elapsedRealtime, and currentThreadTimeMillis are all kept in sync.
+ *
+ * Unless otherwise specified, uptimeMillis and elapsedRealtime will advance the same amount with
+ * every call to {@link #advanceTime(long)}. Thread time always lags by 50% of the uptime
+ * advancement to simulate time loss due to scheduling.
+ */
 public class FakeSystemClock implements SystemClock {
-    private long mUptimeMillis;
-    private long mElapsedRealtime;
-    private long mElapsedRealtimeNanos;
-    private long mCurrentThreadTimeMillis;
-    private long mCurrentThreadTimeMicro;
-    private long mCurrentTimeMicro;
+    private long mUptimeMillis = 10000;
+    private long mElapsedRealtime = 10000;
+    private long mCurrentThreadTimeMillis = 10000;
 
-    List<ClockTickListener> mListeners = new ArrayList<>();
+    private final List<ClockTickListener> mListeners = new ArrayList<>();
 
     @Override
     public long uptimeMillis() {
-        long value = mUptimeMillis;
-        return value;
+        return mUptimeMillis;
     }
 
     @Override
     public long elapsedRealtime() {
-        long value = mElapsedRealtime;
-        return value;
+        return mElapsedRealtime;
     }
 
     @Override
     public long elapsedRealtimeNanos() {
-        long value = mElapsedRealtimeNanos;
-        return value;
+        return mElapsedRealtime * 1000000 + 447;
     }
 
     @Override
     public long currentThreadTimeMillis() {
-        long value = mCurrentThreadTimeMillis;
-        return value;
+        return mCurrentThreadTimeMillis;
     }
 
-    @Override
-    public long currentThreadTimeMicro() {
-        long value = mCurrentThreadTimeMicro;
-        return value;
+    public void setUptimeMillis(long uptime) {
+        advanceTime(uptime - mUptimeMillis);
     }
 
-    @Override
-    public long currentTimeMicro() {
-        long value = mCurrentTimeMicro;
-        return value;
+    public void advanceTime(long uptime) {
+        advanceTime(uptime, 0);
     }
 
-    public void setUptimeMillis(long uptimeMillis) {
-        mUptimeMillis = uptimeMillis;
-        for (ClockTickListener listener : mListeners) {
-            listener.onUptimeMillis(mUptimeMillis);
+    public void advanceTime(long uptime, long sleepTime) {
+        if (uptime < 0 || sleepTime < 0) {
+            throw new IllegalArgumentException("Time cannot go backwards");
         }
-    }
 
-    public void setElapsedRealtime(long elapsedRealtime) {
-        mElapsedRealtime = elapsedRealtime;
-        for (ClockTickListener listener : mListeners) {
-            listener.onElapsedRealtime(mElapsedRealtime);
-        }
-    }
+        if (uptime > 0 || sleepTime > 0) {
+            mUptimeMillis += uptime;
+            mElapsedRealtime += uptime + sleepTime;
 
-    public void setElapsedRealtimeNanos(long elapsedRealtimeNanos) {
-        mElapsedRealtimeNanos = elapsedRealtimeNanos;
-        for (ClockTickListener listener : mListeners) {
-            listener.onElapsedRealtimeNanos(mElapsedRealtimeNanos);
-        }
-    }
+            mCurrentThreadTimeMillis += Math.ceil(uptime * 0.5);
 
-    public void setCurrentThreadTimeMillis(long currentThreadTimeMillis) {
-        mCurrentThreadTimeMillis = currentThreadTimeMillis;
-        for (ClockTickListener listener : mListeners) {
-            listener.onCurrentThreadTimeMillis(mCurrentThreadTimeMillis);
-        }
-    }
-
-    public void setCurrentThreadTimeMicro(long currentThreadTimeMicro) {
-        mCurrentThreadTimeMicro = currentThreadTimeMicro;
-        for (ClockTickListener listener : mListeners) {
-            listener.onCurrentThreadTimeMicro(mCurrentThreadTimeMicro);
-        }
-    }
-
-    public void setCurrentTimeMicro(long currentTimeMicro) {
-        mCurrentTimeMicro = currentTimeMicro;
-        for (ClockTickListener listener : mListeners) {
-            listener.onCurrentTimeMicro(mCurrentTimeMicro);
+            for (ClockTickListener listener : mListeners) {
+                listener.onClockTick();
+            }
         }
     }
 
@@ -115,30 +91,9 @@ public class FakeSystemClock implements SystemClock {
         mListeners.remove(listener);
     }
 
-    /** Alert all the listeners about the current time. */
-    public void synchronizeListeners() {
-        for (ClockTickListener listener : mListeners) {
-            listener.onUptimeMillis(mUptimeMillis);
-            listener.onElapsedRealtime(mElapsedRealtime);
-            listener.onElapsedRealtimeNanos(mElapsedRealtimeNanos);
-            listener.onCurrentThreadTimeMillis(mCurrentThreadTimeMillis);
-            listener.onCurrentThreadTimeMicro(mCurrentThreadTimeMicro);
-            listener.onCurrentTimeMicro(mCurrentTimeMicro);
-        }
-    }
-
-
     public interface ClockTickListener {
-        default void onUptimeMillis(long uptimeMillis) {}
-
-        default void onElapsedRealtime(long elapsedRealtime) {}
-
-        default void onElapsedRealtimeNanos(long elapsedRealtimeNanos) {}
-
-        default void onCurrentThreadTimeMillis(long currentThreadTimeMillis) {}
-
-        default void onCurrentThreadTimeMicro(long currentThreadTimeMicro) {}
-
-        default void onCurrentTimeMicro(long currentTimeMicro) {}
+        void onClockTick();
     }
+
+    private static final long START_TIME = 10000;
 }

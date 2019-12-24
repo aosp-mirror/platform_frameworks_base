@@ -117,7 +117,7 @@ public abstract class SysuiTestCase {
     }
 
     protected void waitForUiOffloadThread() {
-        Future<?> future = Dependency.get(UiOffloadThread.class).submit(() -> {});
+        Future<?> future = Dependency.get(UiOffloadThread.class).execute(() -> { });
         try {
             future.get();
         } catch (InterruptedException | ExecutionException e) {

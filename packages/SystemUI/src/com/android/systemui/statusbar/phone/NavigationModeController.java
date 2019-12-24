@@ -53,7 +53,7 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.UiOffloadThread;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
@@ -61,6 +61,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -82,7 +83,7 @@ public class NavigationModeController implements Dumpable {
     private Context mCurrentUserContext;
     private final IOverlayManager mOverlayManager;
     private final DeviceProvisionedController mDeviceProvisionedController;
-    private final UiOffloadThread mUiOffloadThread;
+    private final Executor mUiBgExecutor;
 
     private SparseBooleanArray mRestoreGesturalNavBarMode = new SparseBooleanArray();
 
@@ -146,12 +147,12 @@ public class NavigationModeController implements Dumpable {
     @Inject
     public NavigationModeController(Context context,
             DeviceProvisionedController deviceProvisionedController,
-            UiOffloadThread uiOffloadThread) {
+            @UiBackground Executor uiBgExecutor) {
         mContext = context;
         mCurrentUserContext = context;
         mOverlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
-        mUiOffloadThread = uiOffloadThread;
+        mUiBgExecutor = uiBgExecutor;
         mDeviceProvisionedController = deviceProvisionedController;
         mDeviceProvisionedController.addCallback(mDeviceProvisionedCallback);
 
@@ -242,7 +243,7 @@ public class NavigationModeController implements Dumpable {
         mCurrentUserContext = getCurrentUserContext();
         int mode = getCurrentInteractionMode(mCurrentUserContext);
         mMode = mode;
-        mUiOffloadThread.submit(() -> {
+        mUiBgExecutor.execute(() -> {
             Settings.Secure.putString(mCurrentUserContext.getContentResolver(),
                     Secure.NAVIGATION_MODE, String.valueOf(mode));
         });
@@ -379,7 +380,7 @@ public class NavigationModeController implements Dumpable {
     }
 
     public void setModeOverlay(String overlayPkg, int userId) {
-        mUiOffloadThread.submit(() -> {
+        mUiBgExecutor.execute(() -> {
             try {
                 mOverlayManager.setEnabledExclusiveInCategory(overlayPkg, userId);
                 if (DEBUG) {

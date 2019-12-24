@@ -24,7 +24,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 
 /**
  * Listener interface for changes sent by NotificationEntryManager.

@@ -217,6 +217,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     public void systemReady() {
         mAppOps = mContext.getSystemService(AppOpsManager.class);
+        mStagingManager.systemReady();
 
         synchronized (mSessions) {
             readSessionsLocked();
