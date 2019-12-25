@@ -2669,7 +2669,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         final Task task = taskTop.getTask();
 
         // If ActivityOptions are moved out and need to be aborted or moved to taskTop.
-        final ActivityOptions topOptions = sResetTargetTaskHelper.process(this, task, forceReset);
+        final ActivityOptions topOptions = sResetTargetTaskHelper.process(task, forceReset);
 
         if (mChildren.contains(task)) {
             final ActivityRecord newTop = task.getTopNonFinishingActivity();
