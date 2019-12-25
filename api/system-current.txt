@@ -4481,6 +4481,14 @@ package android.net {
     method @NonNull public android.net.StaticIpConfiguration.Builder setIpAddress(@Nullable android.net.LinkAddress);
   }
 
+  public final class StringNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
+    ctor public StringNetworkSpecifier(@NonNull String);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.StringNetworkSpecifier> CREATOR;
+    field @NonNull public final String specifier;
+  }
+
   public class TrafficStats {
     method public static void setThreadStatsTagApp();
     method public static void setThreadStatsTagBackup();
