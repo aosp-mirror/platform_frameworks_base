@@ -363,7 +363,7 @@ public class ConnectivityManager {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @UnsupportedAppUsage
     public static final String ACTION_TETHER_STATE_CHANGED =
-            "android.net.conn.TETHER_STATE_CHANGED";
+            TetheringManager.ACTION_TETHER_STATE_CHANGED;
 
     /**
      * @hide
@@ -371,14 +371,14 @@ public class ConnectivityManager {
      * tethering and currently available for tethering.
      */
     @UnsupportedAppUsage
-    public static final String EXTRA_AVAILABLE_TETHER = "availableArray";
+    public static final String EXTRA_AVAILABLE_TETHER = TetheringManager.EXTRA_AVAILABLE_TETHER;
 
     /**
      * @hide
      * gives a String[] listing all the interfaces currently in local-only
      * mode (ie, has DHCPv4+IPv6-ULA support and no packet forwarding)
      */
-    public static final String EXTRA_ACTIVE_LOCAL_ONLY = "localOnlyArray";
+    public static final String EXTRA_ACTIVE_LOCAL_ONLY = TetheringManager.EXTRA_ACTIVE_LOCAL_ONLY;
 
     /**
      * @hide
@@ -386,7 +386,7 @@ public class ConnectivityManager {
      * (ie, has DHCPv4 support and packets potentially forwarded/NATed)
      */
     @UnsupportedAppUsage
-    public static final String EXTRA_ACTIVE_TETHER = "tetherArray";
+    public static final String EXTRA_ACTIVE_TETHER = TetheringManager.EXTRA_ACTIVE_TETHER;
 
     /**
      * @hide
@@ -395,7 +395,7 @@ public class ConnectivityManager {
      * for any interfaces listed here.
      */
     @UnsupportedAppUsage
-    public static final String EXTRA_ERRORED_TETHER = "erroredArray";
+    public static final String EXTRA_ERRORED_TETHER = TetheringManager.EXTRA_ERRORED_TETHER;
 
     /**
      * Broadcast Action: The captive portal tracker has finished its test.
@@ -445,7 +445,7 @@ public class ConnectivityManager {
      * @see #startTethering(int, boolean, OnStartTetheringCallback)
      * @hide
      */
-    public static final int TETHERING_INVALID   = -1;
+    public static final int TETHERING_INVALID   = TetheringManager.TETHERING_INVALID;
 
     /**
      * Wifi tethering type.
@@ -453,7 +453,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    public static final int TETHERING_WIFI      = 0;
+    public static final int TETHERING_WIFI      = TetheringManager.TETHERING_WIFI;
 
     /**
      * USB tethering type.
@@ -461,7 +461,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    public static final int TETHERING_USB       = 1;
+    public static final int TETHERING_USB       = TetheringManager.TETHERING_USB;
 
     /**
      * Bluetooth tethering type.
@@ -469,7 +469,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    public static final int TETHERING_BLUETOOTH = 2;
+    public static final int TETHERING_BLUETOOTH = TetheringManager.TETHERING_BLUETOOTH;
 
     /**
      * Wifi P2p tethering type.
@@ -477,41 +477,41 @@ public class ConnectivityManager {
      * need to start from #startTethering(int, boolean, OnStartTetheringCallback).
      * @hide
      */
-    public static final int TETHERING_WIFI_P2P = 3;
+    public static final int TETHERING_WIFI_P2P = TetheringManager.TETHERING_WIFI_P2P;
 
     /**
      * Extra used for communicating with the TetherService. Includes the type of tethering to
      * enable if any.
      * @hide
      */
-    public static final String EXTRA_ADD_TETHER_TYPE = "extraAddTetherType";
+    public static final String EXTRA_ADD_TETHER_TYPE = TetheringManager.EXTRA_ADD_TETHER_TYPE;
 
     /**
      * Extra used for communicating with the TetherService. Includes the type of tethering for
      * which to cancel provisioning.
      * @hide
      */
-    public static final String EXTRA_REM_TETHER_TYPE = "extraRemTetherType";
+    public static final String EXTRA_REM_TETHER_TYPE = TetheringManager.EXTRA_REM_TETHER_TYPE;
 
     /**
      * Extra used for communicating with the TetherService. True to schedule a recheck of tether
      * provisioning.
      * @hide
      */
-    public static final String EXTRA_SET_ALARM = "extraSetAlarm";
+    public static final String EXTRA_SET_ALARM = TetheringManager.EXTRA_SET_ALARM;
 
     /**
      * Tells the TetherService to run a provision check now.
      * @hide
      */
-    public static final String EXTRA_RUN_PROVISION = "extraRunProvision";
+    public static final String EXTRA_RUN_PROVISION = TetheringManager.EXTRA_RUN_PROVISION;
 
     /**
      * Extra used for communicating with the TetherService. Contains the {@link ResultReceiver}
      * which will receive provisioning results. Can be left empty.
      * @hide
      */
-    public static final String EXTRA_PROVISION_CALLBACK = "extraProvisionCallback";
+    public static final String EXTRA_PROVISION_CALLBACK = TetheringManager.EXTRA_PROVISION_CALLBACK;
 
     /**
      * The absence of a connection type.

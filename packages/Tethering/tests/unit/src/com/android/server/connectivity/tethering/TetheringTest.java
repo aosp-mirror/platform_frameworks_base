@@ -19,16 +19,15 @@ package com.android.server.connectivity.tethering;
 import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
 import static android.hardware.usb.UsbManager.USB_FUNCTION_RNDIS;
-import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
-import static android.net.ConnectivityManager.EXTRA_ACTIVE_LOCAL_ONLY;
-import static android.net.ConnectivityManager.EXTRA_ACTIVE_TETHER;
-import static android.net.ConnectivityManager.EXTRA_AVAILABLE_TETHER;
-import static android.net.ConnectivityManager.TETHERING_USB;
-import static android.net.ConnectivityManager.TETHERING_WIFI;
-import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
-import static android.net.ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE;
-import static android.net.ConnectivityManager.TYPE_WIFI_P2P;
 import static android.net.RouteInfo.RTN_UNICAST;
+import static android.net.TetheringManager.ACTION_TETHER_STATE_CHANGED;
+import static android.net.TetheringManager.EXTRA_ACTIVE_LOCAL_ONLY;
+import static android.net.TetheringManager.EXTRA_ACTIVE_TETHER;
+import static android.net.TetheringManager.EXTRA_AVAILABLE_TETHER;
+import static android.net.TetheringManager.TETHERING_USB;
+import static android.net.TetheringManager.TETHERING_WIFI;
+import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
+import static android.net.TetheringManager.TETHER_ERROR_UNKNOWN_IFACE;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
@@ -80,7 +79,6 @@ import android.net.LinkProperties;
 import android.net.MacAddress;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.RouteInfo;
 import android.net.TetherStatesParcel;
@@ -491,15 +489,12 @@ public class TetheringTest {
         p2pInfo.groupFormed = isGroupFormed;
         p2pInfo.isGroupOwner = isGroupOwner;
 
-        NetworkInfo networkInfo = new NetworkInfo(TYPE_WIFI_P2P, 0, null, null);
-
         WifiP2pGroup group = new WifiP2pGroup();
         group.setIsGroupOwner(isGroupOwner);
         group.setInterface(ifname);
 
         final Intent intent = new Intent(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         intent.putExtra(WifiP2pManager.EXTRA_WIFI_P2P_INFO, p2pInfo);
-        intent.putExtra(WifiP2pManager.EXTRA_NETWORK_INFO, networkInfo);
         intent.putExtra(WifiP2pManager.EXTRA_WIFI_P2P_GROUP, group);
         mServiceContext.sendBroadcastAsUserMultiplePermissions(intent, UserHandle.ALL,
                 P2P_RECEIVER_PERMISSIONS_FOR_BROADCAST);
