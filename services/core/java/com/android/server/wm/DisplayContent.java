@@ -842,6 +842,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         // Update effect.
         w.mObscured = mTmpApplySurfaceChangesTransactionState.obscured;
+
         if (!mTmpApplySurfaceChangesTransactionState.obscured) {
             final boolean isDisplayed = w.isDisplayedLw();
 
@@ -872,6 +873,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     mTmpApplySurfaceChangesTransactionState.preferredRefreshRate
                             = w.mAttrs.preferredRefreshRate;
                 }
+
+                mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing
+                        |= w.mAttrs.preferMinimalPostProcessing;
+
                 final int preferredModeId = getDisplayPolicy().getRefreshRatePolicy()
                         .getPreferredModeId(w);
                 if (mTmpApplySurfaceChangesTransactionState.preferredModeId == 0
@@ -3755,6 +3760,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mLastHasContent,
                 mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,
                 mTmpApplySurfaceChangesTransactionState.preferredModeId,
+                mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing,
                 true /* inTraversal, must call performTraversalInTrans... below */);
 
         final boolean wallpaperVisible = mWallpaperController.isWallpaperVisible();
@@ -4066,6 +4072,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         boolean displayHasContent;
         boolean obscured;
         boolean syswin;
+        boolean preferMinimalPostProcessing;
         float preferredRefreshRate;
         int preferredModeId;
 
@@ -4073,6 +4080,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             displayHasContent = false;
             obscured = false;
             syswin = false;
+            preferMinimalPostProcessing = false;
             preferredRefreshRate = 0;
             preferredModeId = 0;
         }

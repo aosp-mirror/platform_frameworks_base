@@ -1193,12 +1193,16 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void setDisplayPropertiesInternal(int displayId, boolean hasContent,
-            float requestedRefreshRate, int requestedModeId, boolean inTraversal) {
+            float requestedRefreshRate, int requestedModeId, boolean requestedMinimalPostProcessing,
+            boolean inTraversal) {
         synchronized (mSyncRoot) {
             LogicalDisplay display = mLogicalDisplays.get(displayId);
             if (display == null) {
                 return;
             }
+
+            boolean shouldScheduleTraversal = false;
+
             if (display.hasContentLocked() != hasContent) {
                 if (DEBUG) {
                     Slog.d(TAG, "Display " + displayId + " hasContent flag changed: "
@@ -1206,7 +1210,7 @@ public final class DisplayManagerService extends SystemService {
                 }
 
                 display.setHasContentLocked(hasContent);
-                scheduleTraversalLocked(inTraversal);
+                shouldScheduleTraversal = true;
             }
             if (requestedModeId == 0 && requestedRefreshRate != 0) {
                 // Scan supported modes returned by display.getInfo() to find a mode with the same
@@ -1216,6 +1220,20 @@ public final class DisplayManagerService extends SystemService {
             }
             mDisplayModeDirector.getAppRequestObserver().setAppRequestedMode(
                     displayId, requestedModeId);
+
+
+            if (display.getDisplayInfoLocked().minimalPostProcessingSupported
+                    && (display.getRequestedMinimalPostProcessingLocked()
+                    != requestedMinimalPostProcessing)) {
+
+                display.setRequestedMinimalPostProcessingLocked(requestedMinimalPostProcessing);
+
+                shouldScheduleTraversal = true;
+            }
+
+            if (shouldScheduleTraversal) {
+                scheduleTraversalLocked(inTraversal);
+            }
         }
     }
 
@@ -2349,6 +2367,7 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private final class LocalService extends DisplayManagerInternal {
+
         @Override
         public void initPowerManagement(final DisplayPowerCallbacks callbacks, Handler handler,
                 SensorManager sensorManager) {
@@ -2437,9 +2456,10 @@ public final class DisplayManagerService extends SystemService {
 
         @Override
         public void setDisplayProperties(int displayId, boolean hasContent,
-                float requestedRefreshRate, int requestedMode, boolean inTraversal) {
+                float requestedRefreshRate, int requestedMode,
+                boolean requestedMinimalPostProcessing, boolean inTraversal) {
             setDisplayPropertiesInternal(displayId, hasContent, requestedRefreshRate,
-                    requestedMode, inTraversal);
+                    requestedMode, requestedMinimalPostProcessing, inTraversal);
         }
 
         @Override

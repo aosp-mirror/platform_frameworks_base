@@ -24,7 +24,6 @@ import android.util.IntArray;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
@@ -151,11 +150,15 @@ public abstract class DisplayManagerInternal {
      * has a preference.
      * @param requestedModeId The preferred mode id for the top-most visible window that has a
      * preference.
+     * @param requestedMinimalPostProcessing The preferred minimal post processing setting for the
+     * display. This is true when there is at least one visible window that wants minimal post
+     * processng on.
      * @param inTraversal True if called from WindowManagerService during a window traversal
      * prior to call to performTraversalInTransactionFromWindowManager.
      */
     public abstract void setDisplayProperties(int displayId, boolean hasContent,
-            float requestedRefreshRate, int requestedModeId, boolean inTraversal);
+            float requestedRefreshRate, int requestedModeId, boolean requestedMinimalPostProcessing,
+            boolean inTraversal);
 
     /**
      * Applies an offset to the contents of a display, for example to avoid burn-in.
