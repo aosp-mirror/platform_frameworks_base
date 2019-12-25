@@ -60,7 +60,7 @@
     <string name="speed_label_medium" msgid="3175763313268941953">"适中"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"快"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"很快"</string>
-    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"已断开连接"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"正在断开连接..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"正在连接..."</string>

@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -52,6 +53,7 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -88,6 +90,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private UserManager mUserManager;
     @Mock
     private DevicePolicyManager mDevicePolicyManager;
+    @Mock
+    private KeyguardBypassController mKeyguardBypassController;
     private TestableLooper mTestableLooper;
     private TestableKeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
@@ -99,7 +103,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(context.getPackageManager()).thenReturn(mPackageManager);
         doAnswer(invocation -> {
             IBiometricEnabledOnKeyguardCallback callback = invocation.getArgument(0);
-            callback.onChanged(BiometricSourceType.FACE, true /* enabled */);
+            callback.onChanged(BiometricSourceType.FACE, true /* enabled */,
+                    KeyguardUpdateMonitor.getCurrentUser());
             return null;
         }).when(mBiometricManager).registerEnabledOnKeyguardCallback(any());
         when(mFaceManager.isHardwareDetected()).thenReturn(true);
@@ -314,13 +319,44 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void skipsAuthentication_whenEncryptedKeyguard() {
-        reset(mUserManager);
-        when(mUserManager.isUserUnlocked(anyInt())).thenReturn(false);
+        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT);
+        mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
 
         mKeyguardUpdateMonitor.dispatchStartedWakingUp();
         mTestableLooper.processAllMessages();
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
-        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any());
+        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void requiresAuthentication_whenEncryptedKeyguard_andBypass() {
+        testStrongAuthExceptOnBouncer(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT);
+    }
+
+    @Test
+    public void requiresAuthentication_whenTimeoutKeyguard_andBypass() {
+        testStrongAuthExceptOnBouncer(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT);
+    }
+
+    private void testStrongAuthExceptOnBouncer(int strongAuth) {
+        when(mKeyguardBypassController.canBypass()).thenReturn(true);
+        mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
+        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(strongAuth);
+
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+
+        // Stop scanning when bouncer becomes visible
+        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true /* showingBouncer */);
+        mTestableLooper.processAllMessages();
+        clearInvocations(mFaceManager);
+        mKeyguardUpdateMonitor.requestFaceAuth();
+        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
     }
 
     @Test
@@ -329,6 +365,50 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.setAssistantVisible(true);
 
         verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void testTriesToAuthenticate_whenTrustOnAgentKeyguard_ifBypass() {
+        mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        when(mKeyguardBypassController.canBypass()).thenReturn(true);
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
+                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */);
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void testIgnoresAuth_whenTrustAgentOnKeyguard_withoutBypass() {
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
+                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */);
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void testIgnoresAuth_whenLockdown() {
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void testIgnoresAuth_whenLockout() {
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT);
+
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
     }
 
     @Test

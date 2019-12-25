@@ -166,6 +166,52 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /** System service that performs backup/restore operations. */
 public class UserBackupManagerService {
+    /** Wrapper over {@link PowerManager.WakeLock} to prevent double-free exceptions on release()
+     * after quit().
+     * */
+    public static class BackupWakeLock {
+        private final PowerManager.WakeLock mPowerManagerWakeLock;
+        private boolean mHasQuit = false;
+
+        public BackupWakeLock(PowerManager.WakeLock powerManagerWakeLock) {
+            mPowerManagerWakeLock = powerManagerWakeLock;
+        }
+
+        /** Acquires the {@link PowerManager.WakeLock} if hasn't been quit. */
+        public synchronized void acquire() {
+            if (mHasQuit) {
+                Slog.v(TAG, "Ignore wakelock acquire after quit:" + mPowerManagerWakeLock.getTag());
+                return;
+            }
+            mPowerManagerWakeLock.acquire();
+        }
+
+        /** Releases the {@link PowerManager.WakeLock} if hasn't been quit. */
+        public synchronized void release() {
+            if (mHasQuit) {
+                Slog.v(TAG, "Ignore wakelock release after quit:" + mPowerManagerWakeLock.getTag());
+                return;
+            }
+            mPowerManagerWakeLock.release();
+        }
+
+        /**
+         * Returns true if the {@link PowerManager.WakeLock} has been acquired but not yet released.
+         */
+        public synchronized boolean isHeld() {
+            return mPowerManagerWakeLock.isHeld();
+        }
+
+        /** Release the {@link PowerManager.WakeLock} till it isn't held. */
+        public synchronized void quit() {
+            while (mPowerManagerWakeLock.isHeld()) {
+                Slog.v(TAG, "Releasing wakelock:" + mPowerManagerWakeLock.getTag());
+                mPowerManagerWakeLock.release();
+            }
+            mHasQuit = true;
+        }
+    }
+
     // Persistently track the need to do a full init.
     private static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
 
@@ -252,7 +298,6 @@ public class UserBackupManagerService {
     private final @UserIdInt int mUserId;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final TransportManager mTransportManager;
-    private final HandlerThread mUserBackupThread;
 
     private final Context mContext;
     private final PackageManager mPackageManager;
@@ -263,7 +308,7 @@ public class UserBackupManagerService {
     private final AlarmManager mAlarmManager;
     private final IStorageManager mStorageManager;
     private final BackupManagerConstants mConstants;
-    private final PowerManager.WakeLock mWakelock;
+    private final BackupWakeLock mWakelock;
     private final BackupHandler mBackupHandler;
 
     private final IBackupManager mBackupManagerBinder;
@@ -367,6 +412,9 @@ public class UserBackupManagerService {
     private long mCurrentToken = 0;
     @Nullable private File mAncestralSerialNumberFile;
 
+    private final ContentObserver mSetupObserver;
+    private final BroadcastReceiver mRunBackupReceiver;
+    private final BroadcastReceiver mRunInitReceiver;
 
     /**
      * Creates an instance of {@link UserBackupManagerService} and initializes state for it. This
@@ -484,8 +532,7 @@ public class UserBackupManagerService {
         mAgentTimeoutParameters.start();
 
         checkNotNull(userBackupThread, "userBackupThread cannot be null");
-        mUserBackupThread = userBackupThread;
-        mBackupHandler = new BackupHandler(this, userBackupThread.getLooper());
+        mBackupHandler = new BackupHandler(this, userBackupThread);
 
         // Set up our bookkeeping
         final ContentResolver resolver = context.getContentResolver();
@@ -493,11 +540,11 @@ public class UserBackupManagerService {
         mAutoRestore = Settings.Secure.getIntForUser(resolver,
                 Settings.Secure.BACKUP_AUTO_RESTORE, 1, userId) != 0;
 
-        ContentObserver setupObserver = new SetupObserver(this, mBackupHandler);
+        mSetupObserver = new SetupObserver(this, mBackupHandler);
         resolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE),
                 /* notifyForDescendents */ false,
-                setupObserver,
+                mSetupObserver,
                 mUserId);
 
         mBaseStateDir = checkNotNull(baseStateDir, "baseStateDir cannot be null");
@@ -516,21 +563,21 @@ public class UserBackupManagerService {
         mBackupPasswordManager = new BackupPasswordManager(mContext, mBaseStateDir, mRng);
 
         // Receivers for scheduled backups and transport initialization operations.
-        BroadcastReceiver runBackupReceiver = new RunBackupReceiver(this);
+        mRunBackupReceiver = new RunBackupReceiver(this);
         IntentFilter filter = new IntentFilter();
         filter.addAction(RUN_BACKUP_ACTION);
         context.registerReceiverAsUser(
-                runBackupReceiver,
+                mRunBackupReceiver,
                 UserHandle.of(userId),
                 filter,
                 android.Manifest.permission.BACKUP,
                 /* scheduler */ null);
 
-        BroadcastReceiver runInitReceiver = new RunInitializeReceiver(this);
+        mRunInitReceiver = new RunInitializeReceiver(this);
         filter = new IntentFilter();
         filter.addAction(RUN_INITIALIZE_ACTION);
         context.registerReceiverAsUser(
-                runInitReceiver,
+                mRunInitReceiver,
                 UserHandle.of(userId),
                 filter,
                 android.Manifest.permission.BACKUP,
@@ -585,7 +632,10 @@ public class UserBackupManagerService {
         mBackupHandler.postDelayed(this::parseLeftoverJournals, INITIALIZATION_DELAY_MILLIS);
 
         // Power management
-        mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*-" + userId);
+        mWakelock = new BackupWakeLock(
+                mPowerManager.newWakeLock(
+                        PowerManager.PARTIAL_WAKE_LOCK,
+                        "*backup*-" + userId + "-" + userBackupThread.getThreadId()));
 
         // Set up the various sorts of package tracking we do
         mFullBackupScheduleFile = new File(mBaseStateDir, "fb-schedule");
@@ -599,7 +649,13 @@ public class UserBackupManagerService {
 
     /** Cleans up state when the user of this service is stopped. */
     void tearDownService() {
-        mUserBackupThread.quit();
+        mAgentTimeoutParameters.stop();
+        mConstants.stop();
+        mContext.getContentResolver().unregisterContentObserver(mSetupObserver);
+        mContext.unregisterReceiver(mRunBackupReceiver);
+        mContext.unregisterReceiver(mRunInitReceiver);
+        mContext.unregisterReceiver(mPackageTrackingReceiver);
+        mBackupHandler.stop();
     }
 
     public @UserIdInt int getUserId() {
@@ -659,7 +715,7 @@ public class UserBackupManagerService {
         mSetupComplete = setupComplete;
     }
 
-    public PowerManager.WakeLock getWakelock() {
+    public BackupWakeLock getWakelock() {
         return mWakelock;
     }
 
@@ -670,7 +726,7 @@ public class UserBackupManagerService {
     @VisibleForTesting
     public void setWorkSource(@Nullable WorkSource workSource) {
         // TODO: This is for testing, unfortunately WakeLock is final and WorkSource is not exposed
-        mWakelock.setWorkSource(workSource);
+        mWakelock.mPowerManagerWakeLock.setWorkSource(workSource);
     }
 
     public Handler getBackupHandler() {
@@ -747,7 +803,7 @@ public class UserBackupManagerService {
 
     @VisibleForTesting
     BroadcastReceiver getPackageTrackingReceiver() {
-        return mBroadcastReceiver;
+        return mPackageTrackingReceiver;
     }
 
     @Nullable
@@ -874,7 +930,7 @@ public class UserBackupManagerService {
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
         mContext.registerReceiverAsUser(
-                mBroadcastReceiver,
+                mPackageTrackingReceiver,
                 UserHandle.of(mUserId),
                 filter,
                 /* broadcastPermission */ null,
@@ -885,7 +941,7 @@ public class UserBackupManagerService {
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiverAsUser(
-                mBroadcastReceiver,
+                mPackageTrackingReceiver,
                 UserHandle.of(mUserId),
                 sdFilter,
                 /* broadcastPermission */ null,
@@ -1158,7 +1214,7 @@ public class UserBackupManagerService {
      * A {@link BroadcastReceiver} tracking changes to packages and sd cards in order to update our
      * internal bookkeeping.
      */
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mPackageTrackingReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             if (MORE_DEBUG) {
                 Slog.d(TAG, "Received broadcast " + intent);

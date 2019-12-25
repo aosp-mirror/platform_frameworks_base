@@ -262,7 +262,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public void enroll(byte[] token, CancellationSignal cancel,
+    public void enroll(int userId, byte[] token, CancellationSignal cancel,
             EnrollmentCallback callback, int[] disabledFeatures) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an enrollment callback");
@@ -281,7 +281,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             try {
                 mEnrollmentCallback = callback;
                 Trace.beginSection("FaceManager#enroll");
-                mService.enroll(mToken, token, mServiceReceiver,
+                mService.enroll(userId, mToken, token, mServiceReceiver,
                         mContext.getOpPackageName(), disabledFeatures);
             } catch (RemoteException e) {
                 Log.w(TAG, "Remote exception in enroll: ", e);
@@ -339,12 +339,13 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public void setFeature(int feature, boolean enabled, byte[] token,
+    public void setFeature(int userId, int feature, boolean enabled, byte[] token,
             SetFeatureCallback callback) {
         if (mService != null) {
             try {
                 mSetFeatureCallback = callback;
-                mService.setFeature(feature, enabled, token, mServiceReceiver);
+                mService.setFeature(userId, feature, enabled, token, mServiceReceiver,
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -355,11 +356,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public void getFeature(int feature, GetFeatureCallback callback) {
+    public void getFeature(int userId, int feature, GetFeatureCallback callback) {
         if (mService != null) {
             try {
                 mGetFeatureCallback = callback;
-                mService.getFeature(feature, mServiceReceiver);
+                mService.getFeature(userId, feature, mServiceReceiver, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -414,7 +415,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             try {
                 mRemovalCallback = callback;
                 mRemovalFace = face;
-                mService.remove(mToken, face.getBiometricId(), userId, mServiceReceiver);
+                mService.remove(mToken, face.getBiometricId(), userId, mServiceReceiver,
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Log.w(TAG, "Remote exception in remove: ", e);
                 if (callback != null) {
@@ -637,7 +639,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             }
         }
         Slog.w(TAG, "Invalid error message: " + errMsg + ", " + vendorCode);
-        return null;
+        return "";
     }
 
     /**

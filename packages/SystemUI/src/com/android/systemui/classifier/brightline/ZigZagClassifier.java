@@ -39,8 +39,8 @@ class ZigZagClassifier extends FalsingClassifier {
     // most swipes will follow somewhat of a 'C' or 'S' shape, we allow more deviance along the
     // `SECONDARY` axis.
     private static final float MAX_X_PRIMARY_DEVIANCE = .05f;
-    private static final float MAX_Y_PRIMARY_DEVIANCE = .05f;
-    private static final float MAX_X_SECONDARY_DEVIANCE = .3f;
+    private static final float MAX_Y_PRIMARY_DEVIANCE = .1f;
+    private static final float MAX_X_SECONDARY_DEVIANCE = .6f;
     private static final float MAX_Y_SECONDARY_DEVIANCE = .3f;
 
     private final float mMaxXPrimaryDeviance;

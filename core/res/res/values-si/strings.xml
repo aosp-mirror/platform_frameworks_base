@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"හඬ තැපැල් පණිවිඩ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi ඇමතීම"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM තත්ත්වය"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"ඉහළ ප්‍රමුඛතා SIM තත්ත්වය"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"සම ඉල්ලීම් කළ TTY ප්‍රකාරය පූර්ණයි"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"සම ඉල්ලීම් කළ TTY ප්‍රකාරය HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"සම ඉල්ලීම් කළ TTY ප්‍රකාරය VCO"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ඇඟිලි සලකුණු නිරූපකය"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"මුහුණු සත්‍යාපක දෘඪාංග කළමනාකරණය කරන්න"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"මුහුණු අඟුලු ඇරීමේ දෘඪාංග කළමනා කරන්න"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"මුහුණු අච්චු එකතු කිරීමට සහ ඉවත් කිරීමට අදාළ ක්‍රම භාවිතය සඳහා මෙම යෙදුමට ඉඩ දෙයි."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"මුහුණු සත්‍යාපක දෘඪාංග භාවිතා කරන්න"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"සත්‍යාපනය සඳහා සත්‍යාපක දෘඪාංග භාවිත කිරීමට යෙදුමට ඉඩ දෙයි"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"මුහුණු සත්‍යාපනය"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"මුහුණු අඟුලු ඇරීමේ දෘඪාංග භෘවිත කරන්න"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"සත්‍යාපනය සඳහා මුහුණු අඟුලු ඇරීමේ දෘඪාංග භාවිත කිරීමට යෙදුමට ඉඩ දෙයි"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"මුහුණු අඟුලු ඇරීම"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"ඔබේ මුහුණ යළි ලියාපදිංචි කරන්න"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"හඳුනා ගැනීම වැඩිදියුණු කිරීමට, ඔබේ මුහුණ යළි-ලියාපදිංචි කරන්න"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"නිරවද්‍ය මුහුණු දත්ත ගත නොහැකි විය. නැවත උත්සාහ කරන්න."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"දුරකථනය වමට ගෙන යන්න."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"දුරකථනය දකුණට ගෙන යන්න."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"ඔබේ උපාංගය වෙත තවත් ඍජුව බලන්න."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"ඔබේ මුහුණ දැකිය නොහැක. දුරකථනය වෙත බලන්න."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"ඔබේ මුහුණ දුරකථනයට සෘජුවම ඉදිරියෙන් ස්ථානගත කරන්න."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"චලනය ඉතා වැඩියි. දුරකථනය ස්ථිරව අල්ලා සිටින්න."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ඔබේ මුහුණ යළි ලියාපදිංචි කරන්න."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"තවදුරටත් මුහුණ හඳුනාගත නොහැක. නැවත උත්සාහ කරන්න."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ඔබේ හිස ටිකක් අඩුවෙන් කරකවන්න."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"ඔබේ හිස ටිකක් අඩුවෙන් කරකවන්න."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"ඔබේ මුහුණ සඟවන කිසිවක් ඉවත් කරන්න."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"තිරයේ ඉහළ කෙළවරේ සංවේදකය පිරිසිදු කරන්න."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"කලු තීරුව ඇතුළුව, ඔබේ තිරයෙහි මුදුන පිරිසිදු කරන්න"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"මුහුණ සත්‍යාපනය කළ නොහැක. දෘඩාංගය නොමැත."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"මුහුණු සත්‍යාපනයට උත්සාහ කරන්න."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"නැවතත් මුහුණු අඟුලු ඇරීම උත්සාහ කරන්න."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"නව මුහුණු දත්ත ගබඩා කළ නොහැක. පළමුව පැරණි එකක් මකන්න."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"මුහුණු මෙහෙයුම අවලංගුයි"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"පරිශීලකයා විසින් මුහුණ සත්‍යාපනය අවලංගු කර ඇත"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"මුහුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"පරිශීලකයා මුහුණු අඟුලු ඇරීම අවලංගු කර ඇත."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"උත්සාහයන් ඉතා වැඩි ගණනකි. පසුව නැවත උත්සාහ කරන්න."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"ප්‍රයත්නයන් බොහෝමයකි. මුහුණු සත්‍යාපනය අබලයි."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"ප්‍රයත්න ගණන වැඩියි. මුහුණු අඟුලු ඇරීම අබලයි."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"මුහුණ සත්‍යාපන කළ නොහැක. නැවත උත්සාහ කරන්න."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"ඔබ මුහුණු සත්‍යාපනය පිහිටුවා නැත"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"මෙම උපාංගයෙහි මුහුණු සත්‍යාපනයට සහාය නොදක්වයි"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"ඔබ මුහුණු අඟුලු ඇරීම සකසා නැත"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"මෙම උපාංගයෙහි මුහුණු අඟුලු ඇරීමට සහය නොදැක්වේ"</string>
     <string name="face_name_template" msgid="7004562145809595384">"මුහුණු <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1256,10 +1257,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"සියලු ජාල බැලීමට තට්ටු කරන්න"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"සම්බන්ධ කරන්න"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"සියලු ජාල"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Wi-Fi ජාල වෙත සම්බන්ධ කරන්නේද?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> විසින් යෝජනා කරන ලදි"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ඔව්"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"නැත"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"යෝජිත Wi-Fi ජාල ඉඩ දෙන්නද?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> යෝජිත ජාල. උපාංගය ස්වයංක්‍රියව සම්බන්ධ වනු ඇත."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"ඉඩ දෙන්න"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"එපා, ස්තූතියි"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ස්වයංක්‍රියව ක්‍රියාත්මක වනු ඇත"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ඔබ උසස් තත්ත්වයේ සුරැකි ජාලයක් අවට සිටින විට"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"නැවත ක්‍රියාත්මක නොකරන්න"</string>
@@ -1889,8 +1890,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"වර්ගීකරණය නොකළ"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"ඔබ මෙම දැනුම්දීම්වල වැදගත්කම සකසා ඇත."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"සම්බන්ධ වූ පුද්ගලයන් නිසා මෙය වැදගත් වේ."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> හට <xliff:g id="ACCOUNT">%2$s</xliff:g> සමගින් නව පරිශීලකයෙකු සෑදීමට ඉඩ දෙන්නද?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> හට <xliff:g id="ACCOUNT">%2$s</xliff:g> සමගින් නව පරිශීලකයෙකු සෑදීමට ඉඩ දෙන්නද (මෙම ගිණුම සහිත පරිශීලකයෙකු දැනටමත් සිටී) ?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="APP">%1$s</xliff:g> හට <xliff:g id="ACCOUNT">%2$s</xliff:g> සමගින් නව පරිශීලකයෙකු සෑදීමට ඉඩ දෙන්නද (මෙම ගිණුම සහිත පරිශීලකයෙකු දැනටමත් සිටී) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="APP">%1$s</xliff:g> හට <xliff:g id="ACCOUNT">%2$s</xliff:g> සමගින් නව පරිශීලකයෙකු සෑදීමට ඉඩ දෙන්නද ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"භාෂාවක් එක් කරන්න"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ප්‍රදේශ මනාපය"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"භාෂා නම ටයිප් කරන්න"</string>

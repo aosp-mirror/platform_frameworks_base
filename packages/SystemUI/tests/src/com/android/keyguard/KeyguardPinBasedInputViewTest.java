@@ -28,6 +28,7 @@ import android.view.LayoutInflater;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;

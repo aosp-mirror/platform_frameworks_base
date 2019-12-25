@@ -167,4 +167,7 @@
       <item quantity="many">SIM-карта отключена. Чтобы продолжить, введите PUK-код. Осталось <xliff:g id="_NUMBER_1">%d</xliff:g> попыток. После этого SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.</item>
       <item quantity="other">SIM-карта отключена. Чтобы продолжить, введите PUK-код. Осталось <xliff:g id="_NUMBER_1">%d</xliff:g> попытки. После этого SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"По умолчанию"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Пузырь"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Стрелки"</string>
 </resources>

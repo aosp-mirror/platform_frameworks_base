@@ -27,7 +27,7 @@ import java.io.PrintWriter;
 
 /**
  * RectF holds four float coordinates for a rectangle. The rectangle is
- * represented by the coordinates of its 4 edges (left, top, right bottom).
+ * represented by the coordinates of its 4 edges (left, top, right, bottom).
  * These fields can be accessed directly. Use width() and height() to retrieve
  * the rectangle's width and height. Note: most methods do not check to see that
  * the coordinates are sorted correctly (i.e. left <= right and top <= bottom).

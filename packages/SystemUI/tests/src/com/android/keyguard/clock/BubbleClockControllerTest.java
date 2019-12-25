@@ -18,6 +18,7 @@ package com.android.keyguard.clock;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -66,9 +67,9 @@ public final class BubbleClockControllerTest extends SysuiTestCase {
     public void setColorPalette_setDigitalClock() {
         ViewGroup smallClock = (ViewGroup) mClockController.getView();
         // WHEN text color is set
-        mClockController.setColorPalette(true, new int[]{42});
+        mClockController.setColorPalette(true, new int[]{Color.RED});
         // THEN child of small clock should have text color set.
         TextView digitalClock = (TextView) smallClock.getChildAt(0);
-        assertThat(digitalClock.getCurrentTextColor()).isEqualTo(42);
+        assertThat(digitalClock.getCurrentTextColor()).isEqualTo(Color.RED);
     }
 }

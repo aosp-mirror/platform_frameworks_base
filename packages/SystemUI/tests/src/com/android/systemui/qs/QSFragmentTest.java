@@ -39,6 +39,7 @@ import com.android.systemui.DumpController;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiBaseFragmentTest;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
@@ -139,6 +140,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 new RemoteInputQuickSettingsDisabler(context, mock(ConfigurationController.class)),
                 new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()),
                 context,
-                mock(QSTileHost.class));
+                mock(QSTileHost.class),
+                mock(StatusBarStateController.class));
     }
 }

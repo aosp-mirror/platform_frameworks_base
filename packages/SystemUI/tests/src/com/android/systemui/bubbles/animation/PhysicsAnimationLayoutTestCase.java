@@ -68,7 +68,7 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
     @Mock
     private DisplayCutout mCutout;
 
-    private int mMaxBubbles;
+    protected int mMaxBubbles;
 
     @Before
     public void setUp() throws Exception {
@@ -195,14 +195,13 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
         private void setTestEndActionForProperty(
                 Runnable action, DynamicAnimation.ViewProperty property) {
             final Runnable realEndAction = mEndActionForProperty.get(property);
-
-            setEndActionForProperty(() -> {
+            mLayout.mEndActionForProperty.put(property, () -> {
                 if (realEndAction != null) {
                     realEndAction.run();
                 }
 
                 action.run();
-            }, property);
+            });
         }
 
         /** PhysicsPropertyAnimator that posts its animations to the main thread. */
@@ -218,6 +217,11 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
                 mMainThreadHandler.post(() -> super.animateValueForChild(
                         property, view, value, startVel, startDelay, stiffness, dampingRatio,
                         afterCallbacks));
+            }
+
+            @Override
+            protected void startPathAnimation() {
+                mMainThreadHandler.post(super::startPathAnimation);
             }
         }
 

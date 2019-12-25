@@ -149,6 +149,7 @@ public class FaceDialogView extends BiometricDialogView {
     private final Runnable mErrorToIdleAnimationRunnable = () -> {
         updateState(STATE_IDLE);
         mErrorText.setVisibility(View.INVISIBLE);
+        announceAccessibilityEvent();
     };
 
     public FaceDialogView(Context context,
@@ -188,6 +189,7 @@ public class FaceDialogView extends BiometricDialogView {
             mDialog.invalidateOutline();
 
             mSize = newSize;
+            announceAccessibilityEvent();
         } else if (mSize == SIZE_SMALL && newSize == SIZE_BIG) {
             mSize = SIZE_GROWING;
 
@@ -287,14 +289,9 @@ public class FaceDialogView extends BiometricDialogView {
 
     @Override
     protected void handleResetMessage() {
-        mErrorText.setText(getHintStringResourceId());
-        mErrorText.setContentDescription(mContext.getString(getHintStringResourceId()));
         mErrorText.setTextColor(mTextColor);
-        if (getState() == STATE_AUTHENTICATING) {
-            mErrorText.setVisibility(View.VISIBLE);
-        } else {
-            mErrorText.setVisibility(View.INVISIBLE);
-        }
+        mErrorText.setVisibility(View.INVISIBLE);
+        announceAccessibilityEvent();
     }
 
     @Override
@@ -368,17 +365,19 @@ public class FaceDialogView extends BiometricDialogView {
                 mTryAgainButton.setVisibility(View.VISIBLE);
             } else {
                 mTryAgainButton.setVisibility(View.GONE);
+                announceAccessibilityEvent();
             }
         }
 
         if (show) {
             mPositiveButton.setVisibility(View.GONE);
+            announceAccessibilityEvent();
         }
     }
 
     @Override
     protected int getHintStringResourceId() {
-        return R.string.face_dialog_looking_for_face;
+        return 0;
     }
 
     @Override
@@ -403,7 +402,6 @@ public class FaceDialogView extends BiometricDialogView {
             mHandler.removeCallbacks(mErrorToIdleAnimationRunnable);
             if (mDialogAnimatedIn) {
                 mIconController.startPulsing();
-                mErrorText.setVisibility(View.VISIBLE);
             } else {
                 mIconController.showIcon(R.drawable.face_dialog_pulse_dark_to_light);
             }
@@ -462,6 +460,7 @@ public class FaceDialogView extends BiometricDialogView {
 
     @Override
     public void onDialogAnimatedIn() {
+        super.onDialogAnimatedIn();
         mDialogAnimatedIn = true;
         mIconController.startPulsing();
     }

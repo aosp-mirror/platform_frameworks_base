@@ -551,6 +551,30 @@ message WifiLog {
 
   // Histogram of the EAP method type of all installed Passpoint profiles for R2
   repeated PasspointProfileTypeCount installed_passpoint_profile_type_for_r2 = 148;
+
+  // Histogram of Tx link speed at 2G
+  repeated Int32Count tx_link_speed_count_2g = 149;
+
+  // Histogram of Tx link speed at 5G low band
+  repeated Int32Count tx_link_speed_count_5g_low = 150;
+
+  // Histogram of Tx link speed at 5G middle band
+  repeated Int32Count tx_link_speed_count_5g_mid = 151;
+
+  // Histogram of Tx link speed at 5G high band
+  repeated Int32Count tx_link_speed_count_5g_high = 152;
+
+  // Histogram of Rx link speed at 2G
+  repeated Int32Count rx_link_speed_count_2g = 153;
+
+  // Histogram of Rx link speed at 5G low band
+  repeated Int32Count rx_link_speed_count_5g_low = 154;
+
+  // Histogram of Rx link speed at 5G middle band
+  repeated Int32Count rx_link_speed_count_5g_mid = 155;
+
+  // Histogram of Rx link speed at 5G high band
+  repeated Int32Count rx_link_speed_count_5g_high = 156;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -826,6 +850,7 @@ message LinkSpeedCount {
   // Sum of squares of rssi values (dBm^2)
   optional int64 rssi_sum_of_squares_dbm_sq = 4;
 }
+
 
 // Number of occurrences of Soft AP session durations
 message SoftApDurationBucket {
@@ -1767,6 +1792,25 @@ message ExperimentValues {
 
   // Indicates if we are logging LinkSpeedCount in metrics
   optional bool link_speed_counts_logging_enabled = 4;
+
+  // Duration for evaluating Wifi condition to trigger a data stall
+  // measured in milliseconds
+  optional int32 data_stall_duration_ms = 5;
+
+  // Threshold of Tx throughput below which to trigger a data stall
+  // measured in Mbps
+  optional int32 data_stall_tx_tput_thr_mbps = 6;
+
+  // Threshold of Rx throughput below which to trigger a data stall
+  // measured in Mbps
+  optional int32 data_stall_rx_tput_thr_mbps = 7;
+
+  // Threshold of Tx packet error rate above which to trigger a data stall
+  // in percentage
+  optional int32 data_stall_tx_per_thr = 8;
+
+  // Threshold of CCA level above which to trigger a data stall in percentage
+  optional int32 data_stall_cca_level_thr = 9;
 }
 
 message WifiIsUnusableEvent {

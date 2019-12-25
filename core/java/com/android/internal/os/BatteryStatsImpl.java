@@ -906,8 +906,6 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     protected StopwatchTimer mBluetoothScanTimer;
 
-    boolean mIsCellularTxPowerHigh = false;
-
     int mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
     long mMobileRadioActiveStartTime;
     StopwatchTimer mMobileRadioActiveTimer;
@@ -5261,16 +5259,26 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @UnsupportedAppUsage
-    public void notePhoneDataConnectionStateLocked(int dataType, boolean hasData) {
+    public void notePhoneDataConnectionStateLocked(int dataType, boolean hasData, int serviceType) {
         // BatteryStats uses 0 to represent no network type.
         // Telephony does not have a concept of no network type, and uses 0 to represent unknown.
         // Unknown is included in DATA_CONNECTION_OTHER.
-        int bin = DATA_CONNECTION_NONE;
+        int bin = DATA_CONNECTION_OUT_OF_SERVICE;
         if (hasData) {
             if (dataType > 0 && dataType <= TelephonyManager.MAX_NETWORK_TYPE) {
                 bin = dataType;
             } else {
-                bin = DATA_CONNECTION_OTHER;
+                switch (serviceType) {
+                    case ServiceState.STATE_OUT_OF_SERVICE:
+                        bin = DATA_CONNECTION_OUT_OF_SERVICE;
+                        break;
+                    case ServiceState.STATE_EMERGENCY_ONLY:
+                        bin = DATA_CONNECTION_EMERGENCY_SERVICE;
+                        break;
+                    default:
+                        bin = DATA_CONNECTION_OTHER;
+                        break;
+                }
             }
         }
         if (DEBUG) Log.i(TAG, "Phone Data Connection -> " + dataType + " = " + hasData);
@@ -11190,19 +11198,9 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
         if (levelMaxTimeSpent == ModemActivityInfo.TX_POWER_LEVELS - 1) {
-            if (!mIsCellularTxPowerHigh) {
-                mHistoryCur.states2 |= HistoryItem.STATE2_CELLULAR_HIGH_TX_POWER_FLAG;
-                addHistoryRecordLocked(elapsedRealtime, uptime);
-                mIsCellularTxPowerHigh = true;
-            }
-            return;
-        }
-        if (mIsCellularTxPowerHigh) {
-            mHistoryCur.states2 &= ~HistoryItem.STATE2_CELLULAR_HIGH_TX_POWER_FLAG;
+            mHistoryCur.states2 |= HistoryItem.STATE2_CELLULAR_HIGH_TX_POWER_FLAG;
             addHistoryRecordLocked(elapsedRealtime, uptime);
-            mIsCellularTxPowerHigh = false;
         }
-        return;
     }
 
     private final class BluetoothActivityInfoCache {
@@ -13660,7 +13658,6 @@ public class BatteryStatsImpl extends BatteryStats {
         mCameraOnTimer.readSummaryFromParcelLocked(in);
         mBluetoothScanNesting = 0;
         mBluetoothScanTimer.readSummaryFromParcelLocked(in);
-        mIsCellularTxPowerHigh = false;
 
         int NRPMS = in.readInt();
         if (NRPMS > 10000) {
@@ -14644,7 +14641,6 @@ public class BatteryStatsImpl extends BatteryStats {
         mCameraOnTimer = new StopwatchTimer(mClocks, null, -13, null, mOnBatteryTimeBase, in);
         mBluetoothScanNesting = 0;
         mBluetoothScanTimer = new StopwatchTimer(mClocks, null, -14, null, mOnBatteryTimeBase, in);
-        mIsCellularTxPowerHigh = false;
         mDischargeUnplugLevel = in.readInt();
         mDischargePlugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();

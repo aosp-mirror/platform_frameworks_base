@@ -151,4 +151,7 @@
       <item quantity="one">ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም እስከመጨረሻው መጠቀም የማይቻል ከመሆኑ በፊት <xliff:g id="_NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።</item>
       <item quantity="other">ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም እስከመጨረሻው መጠቀም የማይቻል ከመሆኑ በፊት <xliff:g id="_NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"ነባሪ"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"አረፋ"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"አናሎግ"</string>
 </resources>

@@ -68,8 +68,7 @@ interface ITelephonyRegistry {
     void notifyOtaspChanged(in int subId, in int otaspMode);
     @UnsupportedAppUsage
     void notifyCellInfo(in List<CellInfo> cellInfo);
-    void notifyPhysicalChannelConfiguration(in List<PhysicalChannelConfig> configs);
-    void notifyPhysicalChannelConfigurationForSubscriber(in int subId,
+    void notifyPhysicalChannelConfigurationForSubscriber(in int phoneId, in int subId,
             in List<PhysicalChannelConfig> configs);
     void notifyPreciseCallState(int phoneId, int subId, int ringingCallState,
             int foregroundCallState, int backgroundCallState);

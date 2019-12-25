@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.Manifest.permission.BIND_VOICE_INTERACTION;
 import static android.Manifest.permission.CHANGE_CONFIGURATION;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
@@ -213,6 +215,7 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -1451,22 +1454,34 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .execute();
     }
 
+    /**
+     * Start the recents activity to perform the recents animation.
+     *
+     * @param intent The intent to start the recents activity.
+     * @param recentsAnimationRunner Pass {@code null} to only preload the activity.
+     */
     @Override
-    public void startRecentsActivity(Intent intent, IAssistDataReceiver assistDataReceiver,
-            IRecentsAnimationRunner recentsAnimationRunner) {
+    public void startRecentsActivity(Intent intent, @Deprecated IAssistDataReceiver unused,
+            @Nullable IRecentsAnimationRunner recentsAnimationRunner) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "startRecentsActivity()");
         final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final ComponentName recentsComponent = mRecentTasks.getRecentsComponent();
                 final int recentsUid = mRecentTasks.getRecentsComponentUid();
+                final WindowProcessController caller = getProcessController(callingPid, callingUid);
 
                 // Start a new recents animation
                 final RecentsAnimation anim = new RecentsAnimation(this, mStackSupervisor,
-                        getActivityStartController(), mWindowManager, callingPid);
-                anim.startRecentsActivity(intent, recentsAnimationRunner, recentsComponent,
-                        recentsUid, assistDataReceiver);
+                        getActivityStartController(), mWindowManager, intent, recentsComponent,
+                        recentsUid, caller);
+                if (recentsAnimationRunner == null) {
+                    anim.preloadRecentsActivity();
+                } else {
+                    anim.startRecentsActivity(recentsAnimationRunner);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -2510,15 +2525,22 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             @WindowConfiguration.ActivityType int ignoreActivityType,
             @WindowConfiguration.WindowingMode int ignoreWindowingMode) {
         final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        final boolean crossUser = isCrossUserAllowed(callingPid, callingUid);
+        final int[] profileIds = getUserManager().getProfileIds(
+                UserHandle.getUserId(callingUid), true);
+        ArraySet<Integer> callingProfileIds = new ArraySet<>();
+        for (int i = 0; i < profileIds.length; i++) {
+            callingProfileIds.add(profileIds[i]);
+        }
         ArrayList<ActivityManager.RunningTaskInfo> list = new ArrayList<>();
 
         synchronized (mGlobalLock) {
             if (DEBUG_ALL) Slog.v(TAG, "getTasks: max=" + maxNum);
 
-            final boolean allowed = isGetTasksAllowed("getTasks", Binder.getCallingPid(),
-                    callingUid);
+            final boolean allowed = isGetTasksAllowed("getTasks", callingPid, callingUid);
             mRootActivityContainer.getRunningTasks(maxNum, list, ignoreActivityType,
-                    ignoreWindowingMode, callingUid, allowed);
+                    ignoreWindowingMode, callingUid, allowed, crossUser, callingProfileIds);
         }
 
         return list;
@@ -3573,6 +3595,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     + " does not hold REAL_GET_TASKS; limiting output");
         }
         return allowed;
+    }
+
+    boolean isCrossUserAllowed(int pid, int uid) {
+        return checkPermission(INTERACT_ACROSS_USERS, pid, uid) == PERMISSION_GRANTED
+                || checkPermission(INTERACT_ACROSS_USERS_FULL, pid, uid) == PERMISSION_GRANTED;
     }
 
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
@@ -4640,7 +4667,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void registerRemoteAnimations(IBinder token, RemoteAnimationDefinition definition) {
         mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "registerRemoteAnimations");
-        definition.setCallingPid(Binder.getCallingPid());
+        definition.setCallingPidUid(Binder.getCallingPid(), Binder.getCallingUid());
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r == null) {
@@ -4660,7 +4687,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             RemoteAnimationAdapter adapter) {
         mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "registerRemoteAnimationForNextActivityStart");
-        adapter.setCallingPid(Binder.getCallingPid());
+        adapter.setCallingPidUid(Binder.getCallingPid(), Binder.getCallingUid());
         synchronized (mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
             try {
@@ -4677,7 +4704,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             RemoteAnimationDefinition definition) {
         mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "registerRemoteAnimations");
-        definition.setCallingPid(Binder.getCallingPid());
+        definition.setCallingPidUid(Binder.getCallingPid(), Binder.getCallingUid());
         synchronized (mGlobalLock) {
             final ActivityDisplay display = mRootActivityContainer.getActivityDisplay(displayId);
             if (display == null) {
@@ -4988,6 +5015,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      *  - the cmd arg isn't the flattened component name of an existing activity:
      *    dump all activity whose component contains the cmd as a substring
      *  - A hex number of the ActivityRecord object instance.
+     * <p>
+     * The caller should not hold lock when calling this method because it will wait for the
+     * activities to complete the dump.
      *
      *  @param dumpVisibleStacksOnly dump activity with {@param name} only if in a visible stack
      *  @param dumpFocusedStackOnly dump activity with {@param name} only if in the focused stack
@@ -5040,29 +5070,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private void dumpActivity(String prefix, FileDescriptor fd, PrintWriter pw,
             final ActivityRecord r, String[] args, boolean dumpAll) {
         String innerPrefix = prefix + "  ";
+        IApplicationThread appThread = null;
         synchronized (mGlobalLock) {
             pw.print(prefix); pw.print("ACTIVITY "); pw.print(r.shortComponentName);
             pw.print(" "); pw.print(Integer.toHexString(System.identityHashCode(r)));
             pw.print(" pid=");
-            if (r.hasProcess()) pw.println(r.app.getPid());
-            else pw.println("(not running)");
+            if (r.hasProcess()) {
+                pw.println(r.app.getPid());
+                appThread = r.app.getThread();
+            } else {
+                pw.println("(not running)");
+            }
             if (dumpAll) {
                 r.dump(pw, innerPrefix);
             }
         }
-        if (r.attachedToProcess()) {
+        if (appThread != null) {
             // flush anything that is already in the PrintWriter since the thread is going
             // to write to the file descriptor directly
             pw.flush();
-            try {
-                TransferPipe tp = new TransferPipe();
-                try {
-                    r.app.getThread().dumpActivity(tp.getWriteFd(),
-                            r.appToken, innerPrefix, args);
-                    tp.go(fd);
-                } finally {
-                    tp.kill();
-                }
+            try (TransferPipe tp = new TransferPipe()) {
+                appThread.dumpActivity(tp.getWriteFd(), r.appToken, innerPrefix, args);
+                tp.go(fd);
             } catch (IOException e) {
                 pw.println(innerPrefix + "Failure while dumping the activity: " + e);
             } catch (RemoteException e) {
@@ -6034,6 +6063,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return allUids.contains(uid);
     }
 
+    void notifySingleTaskDisplayEmpty(int displayId) {
+        mTaskChangeNotificationController.notifySingleTaskDisplayEmpty(displayId);
+    }
+
     final class H extends Handler {
         static final int REPORT_TIME_TRACKER_MSG = 1;
 
@@ -6100,11 +6133,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void notifyAppTransitionStarting(SparseIntArray reasons, long timestamp) {
+        public void notifyAppTransitionStarting(SparseIntArray reasons,
+                long timestamp) {
             synchronized (mGlobalLock) {
                 mStackSupervisor.getActivityMetricsLogger().notifyTransitionStarting(
                         reasons, timestamp);
             }
+        }
+
+        @Override
+        public void notifySingleTaskDisplayDrawn(int displayId) {
+            mTaskChangeNotificationController.notifySingleTaskDisplayDrawn(displayId);
         }
 
         @Override
@@ -7165,10 +7204,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,
                 String[] args, int opti, boolean dumpAll, boolean dumpVisibleStacksOnly,
                 boolean dumpFocusedStackOnly) {
-            synchronized (mGlobalLock) {
-                return ActivityTaskManagerService.this.dumpActivity(fd, pw, name, args, opti,
-                        dumpAll, dumpVisibleStacksOnly, dumpFocusedStackOnly);
-            }
+            return ActivityTaskManagerService.this.dumpActivity(fd, pw, name, args, opti, dumpAll,
+                    dumpVisibleStacksOnly, dumpFocusedStackOnly);
         }
 
         @Override

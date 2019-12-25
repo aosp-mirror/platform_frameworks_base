@@ -151,4 +151,7 @@
       <item quantity="one">SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Það er <xliff:g id="_NUMBER_1">%d</xliff:g> tilraun eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.</item>
       <item quantity="other">SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Það eru <xliff:g id="_NUMBER_1">%d</xliff:g> tilraunir eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Sjálfgefið"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Blaðra"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Með vísum"</string>
 </resources>

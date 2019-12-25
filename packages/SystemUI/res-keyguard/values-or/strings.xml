@@ -151,4 +151,7 @@
       <item quantity="other">SIM କାର୍ଡକୁ ବର୍ତ୍ତମାନ ଅକ୍ଷମ କରିଦିଆଯାଇଛି। ଜାରି ରଖିବାକୁ PUK କୋଡ୍‍ ଲେଖନ୍ତୁ। ଆଉ <xliff:g id="_NUMBER_1">%d</xliff:g> ଥର ଭୁଲ କୋଡ୍‍ ଲେଖିବା ପରେ SIM କାର୍ଡ ସ୍ଥାୟୀ ଭାବେ ଅନୁପଯୋଗୀ ହୋଇଯିବ। ବିବରଣୀ ପାଇଁ କେରିଅର୍‌ର ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।</item>
       <item quantity="one">SIM କାର୍ଡକୁ ବର୍ତ୍ତମାନ ଅକ୍ଷମ କରିଦିଆଯାଇଛି। ଜାରି ରଖିବାକୁ PUK କୋଡ୍‍ ଲେଖନ୍ତୁ। ଆଉ <xliff:g id="_NUMBER_0">%d</xliff:g> ଥର ଭୁଲ କୋଡ୍‍ ଲେଖିବା ପରେ SIM କାର୍ଡ ସ୍ଥାୟୀ ଭାବେ ଅନୁପଯୋଗୀ ହୋଇଯିବ। ବିବରଣୀ ପାଇଁ କେରିଅର୍‌ର ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"ଡିଫଲ୍ଟ"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"ବବଲ୍"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"ଆନାଲଗ୍"</string>
 </resources>

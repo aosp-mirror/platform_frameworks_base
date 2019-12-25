@@ -36,7 +36,6 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.STATS_PER_UID;
 import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
-import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_TETHERING;
 
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
@@ -1236,7 +1235,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     public NetworkStats getNetworkStatsDetail() {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            return mStatsFactory.readNetworkStatsDetail(UID_ALL, null, TAG_ALL, null);
+            return mStatsFactory.readNetworkStatsDetail();
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -1545,7 +1544,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     public NetworkStats getNetworkStatsUidDetail(int uid, String[] ifaces) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            return mStatsFactory.readNetworkStatsDetail(uid, ifaces, TAG_ALL, null);
+            return mStatsFactory.readNetworkStatsDetail(uid, ifaces, TAG_ALL);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

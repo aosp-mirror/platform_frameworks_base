@@ -49,7 +49,6 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
-import android.provider.Telephony;
 import android.service.sms.FinancialSmsService;
 import android.telephony.IFinancialSmsCallback;
 import android.text.TextUtils;
@@ -225,9 +224,10 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             //TODO gradually add more role migrations statements here for remaining roles
             // Make sure to implement LegacyRoleResolutionPolicy#getRoleHolders
             // for a given role before adding a migration statement for it here
-            migrateRoleIfNecessary(RoleManager.ROLE_SMS, userId);
             migrateRoleIfNecessary(RoleManager.ROLE_ASSISTANT, userId);
+            migrateRoleIfNecessary(RoleManager.ROLE_BROWSER, userId);
             migrateRoleIfNecessary(RoleManager.ROLE_DIALER, userId);
+            migrateRoleIfNecessary(RoleManager.ROLE_SMS, userId);
             migrateRoleIfNecessary(RoleManager.ROLE_EMERGENCY, userId);
 
             // Some vital packages state has changed since last role grant
@@ -681,7 +681,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         @Override
         public void getSmsMessagesForFinancialApp(
                 String callingPkg, Bundle params, IFinancialSmsCallback callback) {
-            int mode = PermissionChecker.checkCallingOrSelfPermission(
+            int mode = PermissionChecker.checkCallingOrSelfPermissionForDataDelivery(
                     getContext(),
                     AppOpsManager.OPSTR_SMS_FINANCIAL_TRANSACTIONS);
 

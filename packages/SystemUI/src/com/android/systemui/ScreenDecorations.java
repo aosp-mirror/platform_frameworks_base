@@ -305,7 +305,7 @@ public class ScreenDecorations extends SystemUI implements Tunable,
 
         mAssistHintBlocked = blocked;
         if (mAssistHintVisible && mAssistHintBlocked) {
-            setAssistHintVisible(false);
+            hideAssistHandles();
         }
     }
 

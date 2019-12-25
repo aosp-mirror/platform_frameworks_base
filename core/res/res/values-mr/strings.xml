@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"व्हॉइसमेल मेसेज"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"वाय-फाय कॉलिंग"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"सिम स्थिती"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"उच्च प्राधान्य सिम स्थिती"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"समवयस्क व्यक्तीने TTY मोड पूर्ण ची विनंती केली"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"समवयस्क व्यक्तीने TTY मोड HCO ची विनंती केली"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"समवयस्क व्यक्तीने TTY मोड VCO ची विनंती केली"</string>
@@ -301,8 +302,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"शारीरिक अ‍ॅक्टिव्हिटी अ‍ॅक्सेस करा"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमची शारीरिक अ‍ॅक्टिव्हिटी अ‍ॅक्सेस करण्याची अनुमती द्यायची का?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"कॅमेरा"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"चित्रे घेण्याची आणि व्हिडिओ रेकॉर्ड"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला फोटो घेऊ आणि व्हिडिओ रेकॉर्ड करू द्यायचे?"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"चित्रे काढण्याची आणि व्हिडिओ रेकॉर्ड करण्याची"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला फोटो काढू आणि व्हिडिओ रेकॉर्ड करू द्यायचे?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"कॉल लॉग"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"फोन कॉल लॉग वाचा आणि लिहा"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे फोन कॉल लॉग अ‍ॅक्सेस करण्याची अनुमती द्यायची का?"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"फिंगरप्रिंट आयकन"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"चेहरा ऑथेंटिकेशन हार्डवेअर व्यवस्थापित करा"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"फेस अनलॉक हार्डवेअर व्यवस्थापित करा"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"अॅपला वापरासाठी चेहरा टेम्पलेट जोडण्याच्या आणि हटवण्याच्या पद्धती जारी करू देते."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"चेहरा ऑथेंटिकेशन हार्डवेअर वापरा"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"अॅपला चेहरा ऑथेंटिकेशनसाठी ऑथेंटिकेशन हार्डवेअर वापरू देते"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"फेस ऑथेंटिकेशन"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"फेस अनलॉक हार्डवेअर वापरा"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"अ‍ॅपला ऑथेंटिकेशनसाठी फेस अनलॉक हार्डवेअर वापरण्याची अनुमती देते"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"फेस अनलॉक"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"तुमच्या चेहऱ्याची पुन्हा नोंदणी करा"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ओळखण्यामध्ये सुधारणा करण्यासाठी, कृपया तुमच्या चेहऱ्याची पुन्हा नोंदणी करा"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"अचूक फेस डेटा कॅप्चर करता आला नाही. पुन्हा करा."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"फोन डावीकडे हलवा."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"फोन उजवीकडे हलवा."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"कृपया तुमच्या डिव्हाइसकडे थेट पाहा"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"तुमचा चेहरा दिसत नाही. फोनकडे पहा."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"तुमचा चेहरा थेट फोन समोर आणा."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"खूप हलत आहे. फोन स्थिर धरून ठेवा."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"कृपया तुमच्या चेहऱ्याची पुन्हा नोंदणी करा."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"चेहरा ओळखू शकत नाही. पुन्हा प्रयत्न करा."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"तुमचे डोके थोडे कमी फिरवा."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"तुमचे डोके थोडे कमी फिरवा."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"तुमचा चहेरा लपवणारे काहीही काढून टाका."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"स्क्रीनच्या वरील उजव्या कडेवरील सेन्सर साफ करा."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"ब्लॅक बार सह तुमच्या स्क्रीनची वरची बाजू साफ करा"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"चेहरा पडताळू शकत नाही. हार्डवेअर उपलब्ध नाही."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"चेहरा ऑथेंटिकेशनचा पुन्हा प्रयत्न करा"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"फेस अनलॉकचा पुन्हा प्रयत्न करा."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"नवीन फेस डेटा स्टोअर करू शकत नाही. आधी जुना हटवा."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"फेस ऑपरेशन रद्द केले आहे"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"वापरकर्त्याने फेस ऑथेंटिकेशन रद्द केले आहे"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"चेहरा ऑपरेशन रद्द केले गेले."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"वापरकर्त्याने फेस अनलॉक रद्द केले आहे."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"खूप जास्त प्रयत्न केले. नंतर पुन्हा प्रयत्न करा."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"बरेच प्रयत्न. फेस ऑथेंटिकेशन बंद केले आहे."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"बरेच प्रयत्न. फेस अनलॉक बंद केले आहे."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"चेहरा पडताळणी करू शकत नाही. पुन्हा प्रयत्न करा."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"तुम्ही फेस ऑथेंटिकेशन सेट केले नाही"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"या डिव्हाइसवर फेस ऑथेंटिकेशन ला सपोर्ट होत नाही"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"तुम्ही फेस अनलॉक सेट केले नाही."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"या डिव्हाइसवर फेस अनलॉकला सपोर्ट नाही."</string>
     <string name="face_name_template" msgid="7004562145809595384">"चेहरा <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1254,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"सर्व नेटवर्क पाहण्यासाठी टॅप करा"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"कनेक्ट करा"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"सर्व नेटवर्क"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"वाय-फाय नेटवर्कशी कनेक्ट करायचे?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> ने सुचवले"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"होय"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"नाही"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"सुचवलेल्या वाय-फाय नेटवर्कना अनुमती द्यायची का?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> सुचवलेली नेटवर्क. डिव्हाइस आपोआप कनेक्ट होऊ शकते."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"अनुमती द्या"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"नाही, नको"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"वाय-फाय आपोआप चालू होईल"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"तुम्ही जेव्हा सेव्ह केलेल्या उच्च दर्जाच्या नेटवर्कजवळ असाल तेव्हा"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"पुन्हा चालू करू नका"</string>
@@ -1354,7 +1355,7 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"चार्जर लावलेले डिव्हाइस. आणखी पर्यायांसाठी टॅप करा"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"अॅनालॉग ऑडिओ अॅक्‍सेसरी आढळली"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"या फोनसह संलग्‍न केलेले डीव्‍हाइस सुसंगत नाही. अधिक जाणून घेण्‍यासाठी टॅप करा."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग करणे कनेक्‍ट केले"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबगिंग कनेक्‍ट केले"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB डीबगिंग बंद करण्यासाठी टॅप करा"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB डीबगिंग बंद करण्यासाठी निवडा."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"टेस्ट हार्नेस मोड सुरू केला आहे"</string>
@@ -1670,7 +1671,7 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"प्रवेशयोग्यता शॉर्टकटने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केली"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> वापरण्यासाठी दोन्ही व्हॉल्युम की तीन सेकंद दाबा आणि धरून ठेवा"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"तुम्ही अ‍ॅक्सेसिबिलिटी बटण दाबल्यावर वापरण्यासाठी वैशिष्ट्य निवडा:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"अ‍ॅक्सेसिबिलिटी जेश्चर ज्या सोबत वापराचे आहे अशी सेवा निवडा (स्क्रीनच्या खालच्या बाजूने दोन बोटांनी स्वाइप करा):"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"अ‍ॅक्सेसिबिलिटी जेश्चर ज्यासोबत वापराचे आहे अशी सेवा निवडा (स्क्रीनच्या खालच्या बाजूने दोन बोटांनी स्वाइप करा):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"अ‍ॅक्सेसिबिलिटी जेश्चर ज्या सोबत वापराचे आहे अशी सेवा निवडा (स्क्रीनच्या खालच्या बाजूने तीन बोटांनी स्वाइप करा):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"सेवांदरम्यान स्विच करण्यासाठी, अ‍ॅक्सेसिबिलिटी बटणाला स्पर्श करा आणि धरून ठेवा."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"सेवांदरम्यान स्विच करण्यासाठी, दोन बोटांनी वरच्या दिशेला स्वाइप करा आणि धरून ठेवा."</string>
@@ -1888,8 +1889,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"वर्गीकरण न केलेले"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"तुम्ही या सूचनांचे महत्त्व सेट केले."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"सामील असलेल्या लोकांमुळे हे महत्वाचे आहे."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची (हे खाते असलेला वापरकर्ता आधीपासून विद्यमान आहे) <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची (हे खाते असलेला वापरकर्ता आधीपासून अस्तित्वात आहे) <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची आहे का?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची आहे का?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"एक भाषा जोडा"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"प्रदेश प्राधान्य"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"भाषा नाव टाइप करा"</string>

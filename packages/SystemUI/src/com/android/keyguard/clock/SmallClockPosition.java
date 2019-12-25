@@ -20,6 +20,7 @@ import android.content.res.Resources;
 import android.util.MathUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.R;
 
 /**
  * Computes preferred position of clock by considering height of status bar and lock icon.
@@ -40,10 +41,10 @@ class SmallClockPosition {
     private float mDarkAmount;
 
     SmallClockPosition(Resources res) {
-        this(res.getDimensionPixelSize(com.android.keyguard.R.dimen.status_bar_height),
-                res.getDimensionPixelSize(com.android.keyguard.R.dimen.keyguard_lock_padding),
-                res.getDimensionPixelSize(com.android.keyguard.R.dimen.keyguard_lock_height),
-                res.getDimensionPixelSize(com.android.keyguard.R.dimen.burn_in_prevention_offset_y)
+        this(res.getDimensionPixelSize(R.dimen.status_bar_height),
+                res.getDimensionPixelSize(R.dimen.keyguard_lock_padding),
+                res.getDimensionPixelSize(R.dimen.keyguard_lock_height),
+                res.getDimensionPixelSize(R.dimen.burn_in_prevention_offset_y)
         );
     }
 
@@ -67,7 +68,8 @@ class SmallClockPosition {
      */
     int getPreferredY() {
         // On AOD, clock needs to appear below the status bar with enough room for pixel shifting
-        int aodY = mStatusBarHeight + mKeyguardLockPadding + mBurnInOffsetY;
+        int aodY = mStatusBarHeight + mKeyguardLockHeight + 2 * mKeyguardLockPadding
+                + mBurnInOffsetY;
         // On lock screen, clock needs to appear below the lock icon
         int lockY =  mStatusBarHeight + mKeyguardLockHeight + 2 * mKeyguardLockPadding;
         return (int) MathUtils.lerp(lockY, aodY, mDarkAmount);

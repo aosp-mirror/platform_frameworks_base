@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Vastaajaviestit"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi-puhelut"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM-kortin tila"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Tärkeät SIM-ilmoitukset"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Toinen käyttäjä vaihtoi TTY-tilaksi TÄYSI"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Toinen käyttäjä vaihtoi TTY-tilaksi HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Toinen käyttäjä vaihtoi TTY-tilaksi VCO"</string>
@@ -281,7 +282,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Saako &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; yhteystietojesi käyttöoikeuden?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Sijainti"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"käyttää laitteen sijaintia"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Saako &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tämän laitteen sijainnin käyttöoikeuden?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Saako &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; oikeuden nähdä tämän laitteen sijainnin?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Sovellus saa sijainnin käyttöoikeuden vain silloin, kun käytät sovellusta"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Saako &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; käyttää laitteen sijaintia &lt;b&gt;aina&lt;/b&gt;?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Sovellus saa tällä hetkellä sijainnin käyttöoikeuden vain, jos käytät sovellusta"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Sormenjälkikuvake"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"hallinnoida kasvojentodennuslaitteistoa"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"hallinnoida Face Unlock ‑laitteistoa"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Sallii sovelluksen käyttää menetelmiä, joilla voidaan lisätä tai poistaa kasvomalleja."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"käyttää kasvojentodennuslaitteistoa"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Sallii sovelluksen käyttää todennuslaitteistoa todennukseen"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Kasvojentunnistus"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"käyttää Face Unlock ‑laitteistoa"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Sallii sovelluksen käyttää Face Unlock ‑laitteistoa todennukseen"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Lisää kasvot uudelleen"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Lisää kasvosi uudelleen tunnistamisen parantamiseksi"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Tarkan kasvodatan tallennus epäonnistui. Yritä uudelleen."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Siirrä puhelinta vasemmalle."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Siirrä puhelinta oikealle."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Katso suoremmin laitteeseen."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Kasvojasi ei näy. Katso puhelinta."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Aseta kasvosi suoraan puhelimen eteen."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Laite liikkui liikaa. Pidä puhelin vakaana."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Rekisteröi kasvot uudelleen."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ei enää tunnista kasvoja. Yritä uudelleen."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Käännä päätä vähän vähemmän."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Käännä päätä vähän vähemmän."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Poista esteet kasvojesi edestä."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Puhdista näytön yläreunassa oleva anturi."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Puhdista näytön yläreuna, mukaan lukien musta palkki"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Kasvoja ei voi vahvistaa. Laitteisto ei käytettäv."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Yritä kasvojentunnistusta uudelleen."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Yritä käyttää Face Unlockia uudelleen."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Uutta kasvodataa ei voi tallentaa. Poista ensin vanhaa."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Kasvotoiminto peruutettu"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Käyttäjä peruutti kasvojentunnistuksen"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Kasvotoiminto peruutettu"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Käyttäjä peruutti Face Unlockin."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Liian monta yritystä. Yritä myöhemmin uudelleen."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Liian monta yritystä. Kasvojentunnistus poistettu käytöstä."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Liian monta yritystä. Face Unlock poistettu käytöstä."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Kasvoja ei voi vahvistaa. Yritä uudelleen."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Et ole määrittänyt kasvojentunnistusta"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Tämä laite ei tue kasvojentunnistusta."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Et ole määrittänyt Face Unlockia."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Tämä laite ei tue Face Unlockia."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Kasvot <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1254,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Napauta, niin näet kaikki verkot."</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Yhdistä"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Kaikki verkot"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Yhdistetäänkö Wi-Fi-verkkoihin?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Ehdottaja: <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Kyllä"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ei"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Sallitaanko ehdotetut Wi-Fi-verkot?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> ehdotti verkkoja. Laite voi muodostaa yhteyden automaattisesti."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Salli"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Ei kiitos"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi käynnistyy automaattisesti"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kun olet lähellä laadukasta tallennettua verkkoa"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Älä käynnistä uudelleen"</string>
@@ -1887,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Luokittelematon"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Voit valita näiden ilmoitusten tärkeyden."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Tämä on tärkeää siihen liittyvien ihmisten perusteella."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Myönnetäänkö sovellukselle <xliff:g id="APP">%1$s</xliff:g> oikeus luoda käyttäjä tilille <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Myönnetäänkö sovellukselle <xliff:g id="APP">%1$s</xliff:g> oikeus luoda käyttäjä tilille <xliff:g id="ACCOUNT">%2$s</xliff:g> (tilillä on jo käyttäjä)?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Saako <xliff:g id="APP">%1$s</xliff:g> luoda uuden käyttäjän (<xliff:g id="ACCOUNT">%2$s</xliff:g>) – tällä käyttäjällä on jo tili?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Saako <xliff:g id="APP">%1$s</xliff:g> luoda uuden käyttäjän (<xliff:g id="ACCOUNT">%2$s</xliff:g>)?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Lisää kieli"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Alueasetus"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Anna kielen nimi"</string>

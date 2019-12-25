@@ -39,8 +39,7 @@ import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import androidx.dynamicanimation.animation.DynamicAnimation;
-import androidx.dynamicanimation.animation.SpringAnimation;
+import androidx.annotation.Nullable;
 
 import com.android.systemui.R;
 import com.android.systemui.recents.TriangleShape;
@@ -57,6 +56,9 @@ public class BubbleFlyoutView extends FrameLayout {
     private final int mFlyoutSpaceFromBubble;
     private final int mPointerSize;
     private final int mBubbleSize;
+    private final int mBubbleIconBitmapSize;
+    private final float mBubbleIconTopPadding;
+
     private final int mFlyoutElevation;
     private final int mBubbleElevation;
     private final int mFloatingBackgroundColor;
@@ -64,14 +66,11 @@ public class BubbleFlyoutView extends FrameLayout {
 
     private final ViewGroup mFlyoutTextContainer;
     private final TextView mFlyoutText;
-    /** Spring animation for the flyout. */
-    private final SpringAnimation mFlyoutSpring =
-            new SpringAnimation(this, DynamicAnimation.TRANSLATION_X);
 
     /** Values related to the 'new' dot which we use to figure out where to collapse the flyout. */
     private final float mNewDotRadius;
     private final float mNewDotSize;
-    private final float mNewDotOffsetFromBubbleBounds;
+    private final float mOriginalDotSize;
 
     /**
      * The paint used to draw the background, whose color changes as the flyout transitions to the
@@ -113,7 +112,6 @@ public class BubbleFlyoutView extends FrameLayout {
      */
     private float mFlyoutToDotWidthDelta = 0f;
     private float mFlyoutToDotHeightDelta = 0f;
-    private float mFlyoutToDotCornerRadiusDelta;
 
     /** The translation values when the flyout is completely transitioned into the dot. */
     private float mTranslationXWhenDot = 0f;
@@ -126,11 +124,18 @@ public class BubbleFlyoutView extends FrameLayout {
     private float mBgTranslationX;
     private float mBgTranslationY;
 
+    private float[] mDotCenter;
+
     /** The flyout's X translation when at rest (not animating or dragging). */
     private float mRestingTranslationX = 0f;
 
+    /** The badge sizes are defined as percentages of the app icon size. Same value as Launcher3. */
+    private static final float SIZE_PERCENTAGE = 0.228f;
+
+    private static final float DOT_SCALE = 1f;
+
     /** Callback to run when the flyout is hidden. */
-    private Runnable mOnHide;
+    @Nullable private Runnable mOnHide;
 
     public BubbleFlyoutView(Context context) {
         super(context);
@@ -143,11 +148,16 @@ public class BubbleFlyoutView extends FrameLayout {
         mFlyoutPadding = res.getDimensionPixelSize(R.dimen.bubble_flyout_padding_x);
         mFlyoutSpaceFromBubble = res.getDimensionPixelSize(R.dimen.bubble_flyout_space_from_bubble);
         mPointerSize = res.getDimensionPixelSize(R.dimen.bubble_flyout_pointer_size);
+
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
+        mBubbleIconBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
+        mBubbleIconTopPadding  = (mBubbleSize - mBubbleIconBitmapSize) / 2f;
+
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mFlyoutElevation = res.getDimensionPixelSize(R.dimen.bubble_flyout_elevation);
-        mNewDotOffsetFromBubbleBounds = BadgeRenderer.getDotCenterOffset(context);
-        mNewDotRadius = BadgeRenderer.getDotRadius(mNewDotOffsetFromBubbleBounds);
+
+        mOriginalDotSize = SIZE_PERCENTAGE * mBubbleIconBitmapSize;
+        mNewDotRadius = (DOT_SCALE * mOriginalDotSize) / 2f;
         mNewDotSize = mNewDotRadius * 2f;
 
         final TypedArray ta = mContext.obtainStyledAttributes(
@@ -156,7 +166,6 @@ public class BubbleFlyoutView extends FrameLayout {
                         android.R.attr.dialogCornerRadius});
         mFloatingBackgroundColor = ta.getColor(0, Color.WHITE);
         mCornerRadius = ta.getDimensionPixelSize(1, 0);
-        mFlyoutToDotCornerRadiusDelta = mNewDotRadius - mCornerRadius;
         ta.recycle();
 
         // Add padding for the pointer on either side, onDraw will draw it in this space.
@@ -193,17 +202,17 @@ public class BubbleFlyoutView extends FrameLayout {
         super.onDraw(canvas);
     }
 
-    /** Configures the flyout and animates it in. */
-    void showFlyout(
+    /** Configures the flyout, collapsed into to dot form. */
+    void setupFlyoutStartingAsDot(
             CharSequence updateMessage, PointF stackPos, float parentWidth,
-            boolean arrowPointingLeft, int dotColor, Runnable onHide) {
+            boolean arrowPointingLeft, int dotColor, @Nullable Runnable onLayoutComplete,
+            @Nullable Runnable onHide, float[] dotCenter) {
         mArrowPointingLeft = arrowPointingLeft;
         mDotColor = dotColor;
         mOnHide = onHide;
+        mDotCenter = dotCenter;
 
-        setCollapsePercent(0f);
-        setAlpha(0f);
-        setVisibility(VISIBLE);
+        setCollapsePercent(1f);
 
         // Set the flyout TextView's max width in terms of percent, and then subtract out the
         // padding so that the entire flyout view will be the desired width (rather than the
@@ -214,14 +223,16 @@ public class BubbleFlyoutView extends FrameLayout {
 
         // Wait for the TextView to lay out so we know its line count.
         post(() -> {
+            float restingTranslationY;
             // Multi line flyouts get top-aligned to the bubble.
             if (mFlyoutText.getLineCount() > 1) {
-                setTranslationY(stackPos.y);
+                restingTranslationY = stackPos.y + mBubbleIconTopPadding;
             } else {
                 // Single line flyouts are vertically centered with respect to the bubble.
-                setTranslationY(
-                        stackPos.y + (mBubbleSize - mFlyoutTextContainer.getHeight()) / 2f);
+                restingTranslationY =
+                        stackPos.y + (mBubbleSize - mFlyoutTextContainer.getHeight()) / 2f;
             }
+            setTranslationY(restingTranslationY);
 
             // Calculate the translation required to position the flyout next to the bubble stack,
             // with the desired padding.
@@ -229,40 +240,30 @@ public class BubbleFlyoutView extends FrameLayout {
                     ? stackPos.x + mBubbleSize + mFlyoutSpaceFromBubble
                     : stackPos.x - getWidth() - mFlyoutSpaceFromBubble;
 
-            // Translate towards the stack slightly.
-            setTranslationX(
-                    mRestingTranslationX + (arrowPointingLeft ? -mBubbleSize : mBubbleSize));
-
-            // Fade in the entire flyout and spring it to its normal position.
-            animate().alpha(1f);
-            mFlyoutSpring.animateToFinalPosition(mRestingTranslationX);
-
             // Calculate the difference in size between the flyout and the 'dot' so that we can
             // transform into the dot later.
             mFlyoutToDotWidthDelta = getWidth() - mNewDotSize;
             mFlyoutToDotHeightDelta = getHeight() - mNewDotSize;
 
             // Calculate the translation values needed to be in the correct 'new dot' position.
-            final float distanceFromFlyoutLeftToDotCenterX =
-                    mFlyoutSpaceFromBubble + mNewDotOffsetFromBubbleBounds / 2;
-            if (mArrowPointingLeft) {
-                mTranslationXWhenDot = -distanceFromFlyoutLeftToDotCenterX - mNewDotRadius;
-            } else {
-                mTranslationXWhenDot =
-                        getWidth() + distanceFromFlyoutLeftToDotCenterX - mNewDotRadius;
-            }
+            final float dotPositionX = stackPos.x + mDotCenter[0] - (mOriginalDotSize / 2f);
+            final float dotPositionY = stackPos.y + mDotCenter[1] - (mOriginalDotSize / 2f);
 
-            mTranslationYWhenDot =
-                    getHeight() / 2f
-                            - mNewDotRadius
-                            - mBubbleSize / 2f
-                            + mNewDotOffsetFromBubbleBounds / 2;
+            final float distanceFromFlyoutLeftToDotCenterX = mRestingTranslationX - dotPositionX;
+            final float distanceFromLayoutTopToDotCenterY = restingTranslationY - dotPositionY;
+
+            mTranslationXWhenDot = -distanceFromFlyoutLeftToDotCenterX;
+            mTranslationYWhenDot = -distanceFromLayoutTopToDotCenterY;
+            if (onLayoutComplete != null) {
+                onLayoutComplete.run();
+            }
         });
     }
 
     /**
-     * Hides the flyout and runs the optional callback passed into showFlyout. The flyout has been
-     * animated into the 'new' dot by the time we call this, so no animations are needed.
+     * Hides the flyout and runs the optional callback passed into setupFlyoutStartingAsDot.
+     * The flyout has been animated into the 'new' dot by the time we call this, so no animations
+     * are needed.
      */
     void hideFlyout() {
         if (mOnHide != null) {
@@ -275,6 +276,13 @@ public class BubbleFlyoutView extends FrameLayout {
 
     /** Sets the percentage that the flyout should be collapsed into dot form. */
     void setCollapsePercent(float percentCollapsed) {
+        // This is unlikely, but can happen in a race condition where the flyout view hasn't been
+        // laid out and returns 0 for getWidth(). We check for this condition at the sites where
+        // this method is called, but better safe than sorry.
+        if (Float.isNaN(percentCollapsed)) {
+            return;
+        }
+
         mPercentTransitionedToDot = Math.max(0f, Math.min(percentCollapsed, 1f));
         mPercentStillFlyout = (1f - mPercentTransitionedToDot);
 
@@ -311,8 +319,8 @@ public class BubbleFlyoutView extends FrameLayout {
         // percentage.
         final float width = getWidth() - (mFlyoutToDotWidthDelta * mPercentTransitionedToDot);
         final float height = getHeight() - (mFlyoutToDotHeightDelta * mPercentTransitionedToDot);
-        final float cornerRadius = mCornerRadius
-                - (mFlyoutToDotCornerRadiusDelta * mPercentTransitionedToDot);
+        final float interpolatedRadius = mNewDotRadius * mPercentTransitionedToDot
+                + mCornerRadius * (1 - mPercentTransitionedToDot);
 
         // Translate the flyout background towards the collapsed 'dot' state.
         mBgTranslationX = mTranslationXWhenDot * mPercentTransitionedToDot;
@@ -336,7 +344,7 @@ public class BubbleFlyoutView extends FrameLayout {
         canvas.save();
         canvas.translate(mBgTranslationX, mBgTranslationY);
         renderPointerTriangle(canvas, width, height);
-        canvas.drawRoundRect(mBgRect, cornerRadius, cornerRadius, mBgPaint);
+        canvas.drawRoundRect(mBgRect, interpolatedRadius, interpolatedRadius, mBgPaint);
         canvas.restore();
     }
 
@@ -379,7 +387,10 @@ public class BubbleFlyoutView extends FrameLayout {
         if (!mTriangleOutline.isEmpty()) {
             // Draw the rect into the outline as a path so we can merge the triangle path into it.
             final Path rectPath = new Path();
-            rectPath.addRoundRect(mBgRect, mCornerRadius, mCornerRadius, Path.Direction.CW);
+            final float interpolatedRadius = mNewDotRadius * mPercentTransitionedToDot
+                    + mCornerRadius * (1 - mPercentTransitionedToDot);
+            rectPath.addRoundRect(mBgRect, interpolatedRadius,
+                    interpolatedRadius, Path.Direction.CW);
             outline.setConvexPath(rectPath);
 
             // Get rid of the triangle path once it has disappeared behind the flyout.

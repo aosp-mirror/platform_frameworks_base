@@ -33,8 +33,8 @@ import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_O
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_TOP;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RECENTS_ANIMATIONS;
 
+import android.annotation.Nullable;
 import android.app.ActivityOptions;
-import android.app.IAssistDataReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.RemoteException;
@@ -58,7 +58,12 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     private final ActivityStartController mActivityStartController;
     private final WindowManagerService mWindowManager;
     private final ActivityDisplay mDefaultDisplay;
-    private final int mCallingPid;
+    private final Intent mTargetIntent;
+    private final ComponentName mRecentsComponent;
+    private final int mRecentsUid;
+    private final @Nullable WindowProcessController mCaller;
+    private final int mUserId;
+    private final int mTargetActivityType;
 
     /**
      * The activity which has been launched behind. We need to remember the activity because the
@@ -66,27 +71,91 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
      * for the exact activity.
      */
     private ActivityRecord mLaunchedTargetActivity;
-    private int mTargetActivityType;
 
     // The stack to restore the target stack behind when the animation is finished
     private ActivityStack mRestoreTargetBehindStack;
 
     RecentsAnimation(ActivityTaskManagerService atm, ActivityStackSupervisor stackSupervisor,
             ActivityStartController activityStartController, WindowManagerService wm,
-            int callingPid) {
+            Intent targetIntent, ComponentName recentsComponent, int recentsUid,
+            @Nullable WindowProcessController caller) {
         mService = atm;
         mStackSupervisor = stackSupervisor;
         mDefaultDisplay = mService.mRootActivityContainer.getDefaultDisplay();
         mActivityStartController = activityStartController;
         mWindowManager = wm;
-        mCallingPid = callingPid;
+        mTargetIntent = targetIntent;
+        mRecentsComponent = recentsComponent;
+        mRecentsUid = recentsUid;
+        mCaller = caller;
+        mUserId = atm.getCurrentUserId();
+        mTargetActivityType = targetIntent.getComponent() != null
+                && recentsComponent.equals(targetIntent.getComponent())
+                        ? ACTIVITY_TYPE_RECENTS
+                        : ACTIVITY_TYPE_HOME;
     }
 
-    void startRecentsActivity(Intent intent, IRecentsAnimationRunner recentsAnimationRunner,
-            ComponentName recentsComponent, int recentsUid,
-            @Deprecated IAssistDataReceiver assistDataReceiver) {
-        if (DEBUG) Slog.d(TAG, "startRecentsActivity(): intent=" + intent
-                + " assistDataReceiver=" + assistDataReceiver);
+    /**
+     * Starts the recents activity in background without animation if the record doesn't exist or
+     * the client isn't launched. If the recents activity is already alive, ensure its configuration
+     * is updated to the current one.
+     */
+    void preloadRecentsActivity() {
+        if (DEBUG) Slog.d(TAG, "Preload recents with " + mTargetIntent);
+        ActivityStack targetStack = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
+                mTargetActivityType);
+        ActivityRecord targetActivity = getTargetActivity(targetStack);
+        if (targetActivity != null) {
+            if (targetActivity.visible || targetActivity.isTopRunningActivity()) {
+                // The activity is ready.
+                return;
+            }
+            if (targetActivity.attachedToProcess()) {
+                // The activity may be relaunched if it cannot handle the current configuration
+                // changes. The activity will be paused state if it is relaunched, otherwise it
+                // keeps the original stopped state.
+                targetActivity.ensureActivityConfiguration(0 /* globalChanges */,
+                        false /* preserveWindow */, true /* ignoreVisibility */);
+                if (DEBUG) Slog.d(TAG, "Updated config=" + targetActivity.getConfiguration());
+            }
+        } else {
+            // Create the activity record. Because the activity is invisible, this doesn't really
+            // start the client.
+            startRecentsActivityInBackground("preloadRecents");
+            targetStack = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED, mTargetActivityType);
+            targetActivity = getTargetActivity(targetStack);
+            if (targetActivity == null) {
+                Slog.w(TAG, "Cannot start " + mTargetIntent);
+                return;
+            }
+        }
+
+        if (!targetActivity.attachedToProcess()) {
+            if (DEBUG) Slog.d(TAG, "Real start recents");
+            mStackSupervisor.startSpecificActivityLocked(targetActivity, false /* andResume */,
+                    false /* checkConfig */);
+            // Make sure the activity won't be involved in transition.
+            if (targetActivity.mAppWindowToken != null) {
+                targetActivity.mAppWindowToken.getDisplayContent().mUnknownAppVisibilityController
+                        .appRemovedOrHidden(targetActivity.mAppWindowToken);
+            }
+        }
+
+        // Invisible activity should be stopped. If the recents activity is alive and its doesn't
+        // need to relaunch by current configuration, then it may be already in stopped state.
+        if (!targetActivity.isState(ActivityStack.ActivityState.STOPPING,
+                ActivityStack.ActivityState.STOPPED)) {
+            // Add to stopping instead of stop immediately. So the client has the chance to perform
+            // traversal in non-stopped state (ViewRootImpl.mStopped) that would initialize more
+            // things (e.g. the measure can be done earlier). The actual stop will be performed when
+            // it reports idle.
+            targetStack.addToStopping(targetActivity, true /* scheduleIdle */,
+                    true /* idleDelayed */, "preloadRecents");
+        }
+    }
+
+    void startRecentsActivity(IRecentsAnimationRunner recentsAnimationRunner) {
+        if (DEBUG) Slog.d(TAG, "startRecentsActivity(): intent=" + mTargetIntent);
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "RecentsAnimation#startRecentsActivity");
 
         // TODO(multi-display) currently only support recents animation in default display.
@@ -100,15 +169,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         }
 
         // If the activity is associated with the recents stack, then try and get that first
-        final int userId = mService.getCurrentUserId();
-        mTargetActivityType = intent.getComponent() != null
-                && recentsComponent.equals(intent.getComponent())
-                        ? ACTIVITY_TYPE_RECENTS
-                        : ACTIVITY_TYPE_HOME;
         ActivityStack targetStack = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
                 mTargetActivityType);
-        ActivityRecord targetActivity = getTargetActivity(targetStack, intent.getComponent(),
-                userId);
+        ActivityRecord targetActivity = getTargetActivity(targetStack);
         final boolean hasExistingActivity = targetActivity != null;
         if (hasExistingActivity) {
             final ActivityDisplay display = targetActivity.getDisplay();
@@ -127,9 +190,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     true /* forceSend */, targetActivity);
         }
 
-        mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunching(intent);
+        mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunching(mTargetIntent);
 
-        mService.mH.post(() -> mService.mAmInternal.setRunningRemoteAnimation(mCallingPid, true));
+        if (mCaller != null) {
+            mCaller.setRunningRecentsAnimation(true);
+        }
 
         mWindowManager.deferSurfaceLayout();
         try {
@@ -148,23 +213,12 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 }
             } else {
                 // No recents activity, create the new recents activity bottom most
-                ActivityOptions options = ActivityOptions.makeBasic();
-                options.setLaunchActivityType(mTargetActivityType);
-                options.setAvoidMoveToFront();
-                intent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NO_ANIMATION);
-
-                mActivityStartController
-                        .obtainStarter(intent, "startRecentsActivity_noTargetActivity")
-                        .setCallingUid(recentsUid)
-                        .setCallingPackage(recentsComponent.getPackageName())
-                        .setActivityOptions(SafeActivityOptions.fromBundle(options.toBundle()))
-                        .setMayWait(userId)
-                        .execute();
+                startRecentsActivityInBackground("startRecentsActivity_noTargetActivity");
 
                 // Move the recents activity into place for the animation
                 targetStack = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
                         mTargetActivityType);
-                targetActivity = getTargetActivity(targetStack, intent.getComponent(), userId);
+                targetActivity = getTargetActivity(targetStack);
                 mDefaultDisplay.moveStackBehindBottomMostVisibleStack(targetStack);
                 if (DEBUG) {
                     Slog.d(TAG, "Moved stack=" + targetStack + " behind stack="
@@ -176,7 +230,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
                 // TODO: Maybe wait for app to draw in this particular case?
 
-                if (DEBUG) Slog.d(TAG, "Started intent=" + intent);
+                if (DEBUG) Slog.d(TAG, "Started intent=" + mTargetIntent);
             }
 
             // Mark the target activity as launch-behind to bump its visibility for the
@@ -236,8 +290,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 mService.stopAppSwitches();
             }
 
-            mService.mH.post(
-                    () -> mService.mAmInternal.setRunningRemoteAnimation(mCallingPid, false));
+            if (mCaller != null) {
+                mCaller.setRunningRecentsAnimation(false);
+            }
 
             mWindowManager.inSurfaceTransaction(() -> {
                 Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER,
@@ -305,7 +360,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         // launch-behind state is restored. That also prevents the next transition
                         // type being disturbed if the visibility is updated after setting the next
                         // transition (the target activity will be one of closing apps).
-                        if (!controller.shouldCancelWithDeferredScreenshot()
+                        if (!controller.shouldDeferCancelWithScreenshot()
                                 && !targetStack.isFocusedStackOnDisplay()) {
                             targetStack.ensureActivitiesVisibleLocked(null /* starting */,
                                     0 /* starting */, false /* preserveWindows */);
@@ -365,16 +420,18 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         final DisplayContent dc =
                 mService.mRootActivityContainer.getDefaultDisplay().mDisplayContent;
         dc.mBoundsAnimationController.setAnimationType(
-                controller.shouldCancelWithDeferredScreenshot() ? FADE_IN : BOUNDS);
+                controller.shouldDeferCancelUntilNextTransition() ? FADE_IN : BOUNDS);
 
-        // Cancel running recents animation and screenshot previous task when the next
-        // transition starts in below cases:
-        // 1) The next launching task is not in recents animation task.
+        // We defer canceling the recents animation until the next app transition in the following
+        // cases:
+        // 1) The next launching task is not being animated by the recents animation
         // 2) The next task is home activity. (i.e. pressing home key to back home in recents).
         if ((!controller.isAnimatingTask(stack.getTaskStack().getTopChild())
                 || controller.isTargetApp(stack.getTopActivity().mAppWindowToken))
-                && controller.shouldCancelWithDeferredScreenshot()) {
-            controller.cancelOnNextTransitionStart();
+                && controller.shouldDeferCancelUntilNextTransition()) {
+            // Always prepare an app transition since we rely on the transition callbacks to cleanup
+            mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
+            controller.setCancelOnNextTransitionStart();
         } else {
             // Just cancel directly to unleash from launcher when the next launching task is the
             // current top task.
@@ -383,10 +440,25 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         }
     }
 
+    private void startRecentsActivityInBackground(String reason) {
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchActivityType(mTargetActivityType);
+        options.setAvoidMoveToFront();
+        mTargetIntent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NO_ANIMATION);
+
+        mActivityStartController
+                .obtainStarter(mTargetIntent, reason)
+                .setCallingUid(mRecentsUid)
+                .setCallingPackage(mRecentsComponent.getPackageName())
+                .setActivityOptions(new SafeActivityOptions(options))
+                .setMayWait(mUserId)
+                .execute();
+    }
+
     /**
      * Called only when the animation should be canceled prior to starting.
      */
-    private void notifyAnimationCancelBeforeStart(IRecentsAnimationRunner recentsAnimationRunner) {
+    static void notifyAnimationCancelBeforeStart(IRecentsAnimationRunner recentsAnimationRunner) {
         try {
             recentsAnimationRunner.onAnimationCanceled(false /* deferredWithScreenshot */);
         } catch (RemoteException e) {
@@ -412,15 +484,15 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
      * @return the top activity in the {@param targetStack} matching the {@param component}, or just
      * the top activity of the top task if no task matches the component.
      */
-    private ActivityRecord getTargetActivity(ActivityStack targetStack, ComponentName component,
-            int userId) {
+    private ActivityRecord getTargetActivity(ActivityStack targetStack) {
         if (targetStack == null) {
             return null;
         }
 
         for (int i = targetStack.getChildCount() - 1; i >= 0; i--) {
             final TaskRecord task = targetStack.getChildAt(i);
-            if (task.userId == userId && task.getBaseIntent().getComponent().equals(component)) {
+            if (task.userId == mUserId
+                    && task.getBaseIntent().getComponent().equals(mTargetIntent.getComponent())) {
                 return task.getTopActivity();
             }
         }

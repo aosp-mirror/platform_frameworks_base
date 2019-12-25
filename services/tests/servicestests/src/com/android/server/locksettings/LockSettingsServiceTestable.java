@@ -110,7 +110,7 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
 
         @Override
-        public boolean hasEnrolledBiometrics() {
+        public boolean hasEnrolledBiometrics(int userId) {
             return false;
         }
 

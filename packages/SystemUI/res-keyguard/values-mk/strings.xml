@@ -151,4 +151,7 @@
       <item quantity="one">SIM-картичката сега е оневозможена. Внесете PUK-код за да продолжите. Ви преостанува уште <xliff:g id="_NUMBER_1">%d</xliff:g> обид пред SIM-картичката да стане трајно неупотреблива. Контактирајте го операторот за детали.</item>
       <item quantity="other">SIM-картичката сега е оневозможена. Внесете PUK-код за да продолжите. Ви преостануваат уште <xliff:g id="_NUMBER_1">%d</xliff:g> обиди пред SIM-картичката да стане трајно неупотреблива. Контактирајте го операторот за детали.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Стандарден"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Балонче"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Аналоген"</string>
 </resources>

@@ -24,10 +24,10 @@
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Harap tunggu..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Laporan bug akan segera muncul di ponsel"</string>
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Pilih untuk membagikan laporan bug Anda"</string>
-    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Tap untuk membagikan laporan bug"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Ketuk untuk membagikan laporan bug"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Pilih untuk membagikan laporan bug tanpa screenshot atau menunggu screenshot selesai"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Tap untuk membagikan laporan bug tanpa screenshot atau menunggu screenshot selesai"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tap untuk membagikan laporan bug tanpa screenshot atau menunggu screenshot selesai"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Ketuk untuk membagikan laporan bug tanpa screenshot atau menunggu screenshot selesai"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Ketuk untuk membagikan laporan bug tanpa screenshot atau menunggu screenshot selesai"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Laporan bug berisi data dari berbagai file log sistem, yang mungkin mencakup data yang dianggap sensitif (seperti data penggunaan aplikasi dan lokasi). Hanya bagikan laporan bug dengan aplikasi dan orang yang Anda percaya."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Jangan tampilkan lagi"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Laporan bug"</string>

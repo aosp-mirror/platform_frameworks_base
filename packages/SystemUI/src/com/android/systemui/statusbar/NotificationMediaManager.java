@@ -17,6 +17,10 @@ package com.android.systemui.statusbar;
 
 import static com.android.systemui.Dependency.MAIN_HANDLER;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_UNLOCK_FADING;
+import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
+import static com.android.systemui.statusbar.phone.BiometricUnlockController
+        .MODE_WAKE_AND_UNLOCK_PULSING;
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_MEDIA_FAKE_ARTWORK;
 import static com.android.systemui.statusbar.phone.StatusBar.ENABLE_LOCKSCREEN_WALLPAPER;
 import static com.android.systemui.statusbar.phone.StatusBar.SHOW_LOCKSCREEN_MEDIA_ARTWORK;
@@ -57,6 +61,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ScrimState;
@@ -68,6 +73,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -89,6 +95,15 @@ public class NotificationMediaManager implements Dumpable {
             = Dependency.get(StatusBarStateController.class);
     private final SysuiColorExtractor mColorExtractor = Dependency.get(SysuiColorExtractor.class);
     private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+    private final KeyguardBypassController mKeyguardBypassController;
+    private static final HashSet<Integer> PAUSED_MEDIA_STATES = new HashSet<>();
+    static {
+        PAUSED_MEDIA_STATES.add(PlaybackState.STATE_NONE);
+        PAUSED_MEDIA_STATES.add(PlaybackState.STATE_STOPPED);
+        PAUSED_MEDIA_STATES.add(PlaybackState.STATE_PAUSED);
+        PAUSED_MEDIA_STATES.add(PlaybackState.STATE_ERROR);
+    }
+
 
     // Late binding
     private NotificationEntryManager mEntryManager;
@@ -173,9 +188,11 @@ public class NotificationMediaManager implements Dumpable {
             Lazy<ShadeController> shadeController,
             Lazy<StatusBarWindowController> statusBarWindowController,
             NotificationEntryManager notificationEntryManager,
-            MediaArtworkProcessor mediaArtworkProcessor) {
+            MediaArtworkProcessor mediaArtworkProcessor,
+            KeyguardBypassController keyguardBypassController) {
         mContext = context;
         mMediaArtworkProcessor = mediaArtworkProcessor;
+        mKeyguardBypassController = keyguardBypassController;
         mMediaListeners = new ArrayList<>();
         mMediaSessionManager
                 = (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
@@ -201,6 +218,10 @@ public class NotificationMediaManager implements Dumpable {
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
                 mContext.getMainExecutor(),
                 mPropertiesChangedListener);
+    }
+
+    public static boolean isPlayingState(int state) {
+        return !PAUSED_MEDIA_STATES.contains(state);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter) {
@@ -457,7 +478,7 @@ public class NotificationMediaManager implements Dumpable {
         }
 
         Bitmap artworkBitmap = null;
-        if (mediaMetadata != null) {
+        if (mediaMetadata != null && !mKeyguardBypassController.getBypassEnabled()) {
             artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
             if (artworkBitmap == null) {
                 artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
@@ -578,9 +599,11 @@ public class NotificationMediaManager implements Dumpable {
                 boolean cannotAnimateDoze = shadeController != null
                         && shadeController.isDozing()
                         && !ScrimState.AOD.getAnimateChange();
-                if (mBiometricUnlockController != null && mBiometricUnlockController.getMode()
+                boolean needsBypassFading = mKeyguardMonitor.isBypassFadingAnimation();
+                if (((mBiometricUnlockController != null && mBiometricUnlockController.getMode()
                         == BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
-                        || hideBecauseOccluded || cannotAnimateDoze) {
+                                || cannotAnimateDoze) && !needsBypassFading)
+                        || hideBecauseOccluded) {
 
                     // We are unlocking directly - no animation!
                     mBackdrop.setVisibility(View.GONE);
@@ -605,9 +628,7 @@ public class NotificationMediaManager implements Dumpable {
                             });
                     if (mKeyguardMonitor.isKeyguardFadingAway()) {
                         mBackdrop.animate()
-                                // Make it disappear faster, as the focus should be on the activity
-                                // behind.
-                                .setDuration(mKeyguardMonitor.getKeyguardFadingAwayDuration() / 2)
+                                .setDuration(mKeyguardMonitor.getShortenedFadingAwayDuration())
                                 .setStartDelay(mKeyguardMonitor.getKeyguardFadingAwayDelay())
                                 .setInterpolator(Interpolators.LINEAR)
                                 .start();

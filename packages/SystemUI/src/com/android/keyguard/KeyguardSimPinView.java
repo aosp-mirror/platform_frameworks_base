@@ -41,6 +41,7 @@ import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.systemui.R;
 
 /**
  * Displays a PIN pad for unlocking.
@@ -123,7 +124,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
             msg = rez.getString(R.string.kg_sim_lock_esim_instructions, msg);
         }
 
-        if (mSecurityMessageDisplay != null) {
+        if (mSecurityMessageDisplay != null && getVisibility() == VISIBLE) {
             mSecurityMessageDisplay.setMessage(msg);
         }
         mSimImageView.setImageTintList(ColorStateList.valueOf(color));

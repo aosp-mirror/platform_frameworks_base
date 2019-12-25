@@ -94,7 +94,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
@@ -184,7 +183,7 @@ public class KeyValueBackupTaskTest {
     private TransportData mTransport;
     private ShadowLooper mShadowBackupLooper;
     private Handler mBackupHandler;
-    private PowerManager.WakeLock mWakeLock;
+    private UserBackupManagerService.BackupWakeLock mWakeLock;
     private KeyValueBackupReporter mReporter;
     private PackageManager mPackageManager;
     private ShadowPackageManager mShadowPackageManager;

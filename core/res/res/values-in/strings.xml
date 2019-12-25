@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Notifikasi pesan suara"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Panggilan Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Status SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Status SIM prioritas tinggi"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Rekan meminta Mode TTY PENUH"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Rekan meminta Mode TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Rekan meminta Mode TTY VCO"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikon sidik jari"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"kelola hardware autentikasi wajah"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"kelola hardware face unlock"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Mengizinkan apl memicu metode untuk menambah &amp; menghapus template wajah untuk digunakan."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"gunakan hardware autentikasi wajah"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Mengizinkan aplikasi untuk menggunakan hardware autentikasi wajah untuk autentikasi"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Autentikasi Wajah"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"gunakan hardware face unlock"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Mengizinkan aplikasi untuk menggunakan hardware face unlock untuk autentikasi"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Face unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Daftarkan kembali wajah Anda"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Untuk menyempurnakan pengenalan wajah, daftarkan kembali wajah Anda"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Tidak bisa mengambil data wajah akurat. Coba lagi."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Gerakkan ponsel ke kiri."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Gerakkan ponsel ke kanan."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Lihat langsung ke perangkat."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Tidak dapat melihat wajah Anda. Lihat ke ponsel."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Posisikan wajah Anda langsung di depan ponsel."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Terlalu banyak gerakan. Stabilkan ponsel."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Daftarkan ulang wajah Anda."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Tidak lagi dapat mengenali wajah. Coba lagi."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Putar sedikit kepala Anda."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Putar sedikit kepala Anda."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Singkirkan apa saja yang menutupi wajah Anda."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Bersihkan sensor di tepi atas layar."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Bersihkan bagian atas layar, termasuk kotak hitam"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Tidak dapat memverifikasi wajah. Hardware tidak tersedia."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Coba autentikasi wajah lagi."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Coba face unlock lagi."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Tidak dapat menyimpan data wajah. Hapus dahulu data lama."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Pemrosesan wajah dibatalkan"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Autentikasi wajah dibatalkan oleh pengguna"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Pemrosesan wajah dibatalkan."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Face unlock dibatalkan oleh pengguna."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Terlalu banyak percobaan. Coba lagi nanti."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Terlalu banyak percobaan. Autentikasi wajah dinonaktifkan."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Terlalu banyak gagal. Face unlock dinonaktifkan."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Tidak dapat memverifikasi wajah. Coba lagi."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Anda belum menyiapkan autentikasi wajah"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Autentikasi wajah tidak didukung di perangkat ini"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Anda belum menyiapkan face unlock."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Face unlock tidak didukung di perangkat ini."</string>
     <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g> wajah"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1254,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Ketuk untuk melihat semua jaringan"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Hubungkan"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Semua jaringan"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Sambungkan perangkat ke jaringan Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Disarankan oleh <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ya"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Tidak"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Izinkan jaringan Wi-Fi yang disarankan?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Jaringan yang disarankan <xliff:g id="NAME">%s</xliff:g>. Perangkat dapat terhubung secara otomatis."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Izinkan"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Lain kali"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi akan aktif otomatis"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Saat berada di dekat jaringan berkualitas tinggi yang tersimpan"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Jangan aktifkan kembali"</string>
@@ -1887,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Belum dikategorikan"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Anda menyetel nilai penting notifikasi ini."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ini penting karena orang-orang yang terlibat."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Izinkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baru dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Izinkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baru dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> (Pengguna dengan akun ini sudah ada) ?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Izinkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baru dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> (Pengguna dengan akun ini sudah ada) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Izinkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baru dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Tambahkan bahasa"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Preferensi wilayah"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Ketik nama bahasa"</string>
@@ -1976,7 +1977,7 @@
     <string name="popup_window_default_title" msgid="4874318849712115433">"Jendela Pop-up"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Versi aplikasi di-downgrade, atau tidak kompatibel dengan pintasan ini"</string>
-    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Tidak dapat memulihkan pintasan karena aplikasi tidak mendukung backup dan pulihkan"</string>
+    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Tidak dapat memulihkan pintasan karena aplikasi tidak mendukung pencadangan dan pemulihan"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Tidak dapat memulihkan pintasan karena tanda tangan aplikasi tidak cocok"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Tidak dapat memulihkan pintasan."</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Pintasan dinonaktifkan"</string>

@@ -79,7 +79,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         S extends AbstractPerUserSystemService<S, M>> extends SystemService {
 
     /** On a package update, does not refresh the per-user service in the cache. */
-    public static final int PACKAGE_UPDATE_POLICY_NO_REFRESH = 0;
+    public static final int PACKAGE_UPDATE_POLICY_NO_REFRESH = 0x00000001;
 
     /**
      * On a package update, removes any existing per-user services in the cache.
@@ -87,20 +87,40 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      * <p>This does not immediately recreate these services. It is assumed they will be recreated
      * for the next user request.
      */
-    public static final int PACKAGE_UPDATE_POLICY_REFRESH_LAZY = 1;
+    public static final int PACKAGE_UPDATE_POLICY_REFRESH_LAZY = 0x00000002;
 
     /**
      * On a package update, removes and recreates any existing per-user services in the cache.
      */
-    public static final int PACKAGE_UPDATE_POLICY_REFRESH_EAGER = 2;
+    public static final int PACKAGE_UPDATE_POLICY_REFRESH_EAGER = 0x00000004;
 
-    @IntDef(flag = true, prefix = { "PACKAGE_UPDATE_POLICY_" }, value = {
+    /** On a package restart, does not refresh the per-user service in the cache. */
+    public static final int PACKAGE_RESTART_POLICY_NO_REFRESH = 0x00000010;
+
+    /**
+     * On a package restart, removes any existing per-user services in the cache.
+     *
+     * <p>This does not immediately recreate these services. It is assumed they will be recreated
+     * for the next user request.
+     */
+    public static final int PACKAGE_RESTART_POLICY_REFRESH_LAZY = 0x00000020;
+
+    /**
+     * On a package restart, removes and recreates any existing per-user services in the cache.
+     */
+    public static final int PACKAGE_RESTART_POLICY_REFRESH_EAGER = 0x00000040;
+
+    @IntDef(flag = true, prefix = { "PACKAGE_" }, value = {
             PACKAGE_UPDATE_POLICY_NO_REFRESH,
             PACKAGE_UPDATE_POLICY_REFRESH_LAZY,
-            PACKAGE_UPDATE_POLICY_REFRESH_EAGER
+            PACKAGE_UPDATE_POLICY_REFRESH_EAGER,
+            PACKAGE_RESTART_POLICY_NO_REFRESH,
+            PACKAGE_RESTART_POLICY_REFRESH_LAZY,
+            PACKAGE_RESTART_POLICY_REFRESH_EAGER
     })
+
     @Retention(RetentionPolicy.SOURCE)
-    public @interface PackageUpdatePolicy {}
+    public @interface ServicePackagePolicyFlags {}
 
     /**
      * Log tag
@@ -153,12 +173,10 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     private final SparseArray<S> mServicesCache = new SparseArray<>();
 
     /**
-     * Whether the per-user service should be removed from the cache when its apk is updated.
-     *
-     * <p>One of {@link #PACKAGE_UPDATE_POLICY_NO_REFRESH},
-     * {@link #PACKAGE_UPDATE_POLICY_REFRESH_LAZY} or {@link #PACKAGE_UPDATE_POLICY_REFRESH_EAGER}.
+     * Value that determines whether the per-user service should be removed from the cache when its
+     * apk is updated or restarted.
      */
-    private final @PackageUpdatePolicy int mPackageUpdatePolicy;
+    private final @ServicePackagePolicyFlags int mServicePackagePolicyFlags;
 
     /**
      * Name of the service packages whose APK are being updated, keyed by user id.
@@ -184,11 +202,11 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             @Nullable ServiceNameResolver serviceNameResolver,
             @Nullable String disallowProperty) {
         this(context, serviceNameResolver, disallowProperty,
-                /*packageUpdatePolicy=*/ PACKAGE_UPDATE_POLICY_REFRESH_LAZY);
+                PACKAGE_UPDATE_POLICY_REFRESH_LAZY | PACKAGE_RESTART_POLICY_REFRESH_LAZY);
     }
 
     /**
-     * Full constructor.
+     * Full Constructor.
      *
      * @param context system context.
      * @param serviceNameResolver resolver for
@@ -197,19 +215,32 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      * @param disallowProperty when not {@code null}, defines a {@link UserManager} restriction that
      *        disables the service. <b>NOTE: </b> you'll also need to add it to
      *        {@code UserRestrictionsUtils.USER_RESTRICTIONS}.
-     * @param packageUpdatePolicy when {@link #PACKAGE_UPDATE_POLICY_REFRESH_LAZY}, the
-     *        {@link AbstractPerUserSystemService} is removed from the cache when the service
-     *        package is updated; when {@link #PACKAGE_UPDATE_POLICY_REFRESH_EAGER}, the
-     *        {@link AbstractPerUserSystemService} is removed from the cache and immediately
-     *        re-added when the service package is updated; when
-     *        {@link #PACKAGE_UPDATE_POLICY_NO_REFRESH}, the service is untouched during the update.
+     * @param servicePackagePolicyFlags a combination of
+     *        {@link #PACKAGE_UPDATE_POLICY_NO_REFRESH},
+     *        {@link #PACKAGE_UPDATE_POLICY_REFRESH_LAZY},
+     *        {@link #PACKAGE_UPDATE_POLICY_REFRESH_EAGER},
+     *        {@link #PACKAGE_RESTART_POLICY_NO_REFRESH},
+     *        {@link #PACKAGE_RESTART_POLICY_REFRESH_LAZY} or
+     *        {@link #PACKAGE_RESTART_POLICY_REFRESH_EAGER}
      */
     protected AbstractMasterSystemService(@NonNull Context context,
-            @Nullable ServiceNameResolver serviceNameResolver,
-            @Nullable String disallowProperty, @PackageUpdatePolicy int packageUpdatePolicy) {
+            @Nullable ServiceNameResolver serviceNameResolver, @Nullable String disallowProperty,
+            @ServicePackagePolicyFlags int servicePackagePolicyFlags) {
         super(context);
 
-        mPackageUpdatePolicy = packageUpdatePolicy;
+        final int updatePolicyMask = PACKAGE_UPDATE_POLICY_NO_REFRESH
+                | PACKAGE_UPDATE_POLICY_REFRESH_LAZY | PACKAGE_UPDATE_POLICY_REFRESH_EAGER;
+        if ((servicePackagePolicyFlags & updatePolicyMask) == 0) {
+            // If the package update policy is not set, add the default flag
+            servicePackagePolicyFlags |= PACKAGE_UPDATE_POLICY_REFRESH_LAZY;
+        }
+        final int restartPolicyMask = PACKAGE_RESTART_POLICY_NO_REFRESH
+                | PACKAGE_RESTART_POLICY_REFRESH_LAZY | PACKAGE_RESTART_POLICY_REFRESH_EAGER;
+        if ((servicePackagePolicyFlags & restartPolicyMask) == 0) {
+            // If the package restart policy is not set, add the default flag
+            servicePackagePolicyFlags |= PACKAGE_RESTART_POLICY_REFRESH_LAZY;
+        }
+        mServicePackagePolicyFlags = servicePackagePolicyFlags;
 
         mServiceNameResolver = serviceNameResolver;
         if (mServiceNameResolver != null) {
@@ -606,6 +637,20 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     /**
+     * Called after the package data that provides the service for the given user is cleared.
+     */
+    protected void onServicePackageDataClearedLocked(@UserIdInt int userId) {
+        if (verbose) Slog.v(mTag, "onServicePackageDataCleared(" + userId + ")");
+    }
+
+    /**
+     * Called after the package that provides the service for the given user is restarted.
+     */
+    protected void onServicePackageRestartedLocked(@UserIdInt int userId) {
+        if (verbose) Slog.v(mTag, "onServicePackageRestarted(" + userId + ")");
+    }
+
+    /**
      * Called after the service is removed from the cache.
      */
     @SuppressWarnings("unused")
@@ -677,7 +722,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             final int size = mServicesCache.size();
             pw.print(prefix); pw.print("Debug: "); pw.print(realDebug);
             pw.print(" Verbose: "); pw.println(realVerbose);
-            pw.print("Refresh on package update: "); pw.println(mPackageUpdatePolicy);
+            pw.print("Package policy flags: "); pw.println(mServicePackagePolicyFlags);
             if (mUpdatingPackageNames != null) {
                 pw.print("Packages being updated: "); pw.println(mUpdatingPackageNames);
             }
@@ -733,7 +778,12 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                     }
                     mUpdatingPackageNames.put(userId, packageName);
                     onServicePackageUpdatingLocked(userId);
-                    if (mPackageUpdatePolicy != PACKAGE_UPDATE_POLICY_NO_REFRESH) {
+                    if ((mServicePackagePolicyFlags & PACKAGE_UPDATE_POLICY_NO_REFRESH) != 0) {
+                        if (debug) {
+                            Slog.d(mTag, "Holding service for user " + userId + " while package "
+                                    + activePackageName + " is being updated");
+                        }
+                    } else {
                         if (debug) {
                             Slog.d(mTag, "Removing service for user " + userId
                                     + " because package " + activePackageName
@@ -741,17 +791,13 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                         }
                         removeCachedServiceLocked(userId);
 
-                        if (mPackageUpdatePolicy == PACKAGE_UPDATE_POLICY_REFRESH_EAGER) {
+                        if ((mServicePackagePolicyFlags & PACKAGE_UPDATE_POLICY_REFRESH_EAGER)
+                                != 0) {
                             if (debug) {
                                 Slog.d(mTag, "Eagerly recreating service for user "
                                         + userId);
                             }
                             getServiceForUserLocked(userId);
-                        }
-                    } else {
-                        if (debug) {
-                            Slog.d(mTag, "Holding service for user " + userId + " while package "
-                                    + activePackageName + " is being updated");
                         }
                     }
                 }
@@ -804,13 +850,36 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                             if (!doit) {
                                 return true;
                             }
-                            removeCachedServiceLocked(getChangingUserId());
+                            final String action = intent.getAction();
+                            final int userId = getChangingUserId();
+                            if (Intent.ACTION_PACKAGE_RESTARTED.equals(action)) {
+                                handleActiveServiceRestartedLocked(activePackageName, userId);
+                            } else {
+                                removeCachedServiceLocked(userId);
+                            }
                         } else {
                             handlePackageUpdateLocked(pkg);
                         }
                     }
                 }
                 return false;
+            }
+
+            @Override
+            public void onPackageDataCleared(String packageName, int uid) {
+                if (verbose) Slog.v(mTag, "onPackageDataCleared(): " + packageName);
+                final int userId = getChangingUserId();
+                synchronized (mLock) {
+                    final S service = peekServiceForUserLocked(userId);
+                    if (service != null) {
+                        final ComponentName componentName = service.getServiceComponentName();
+                        if (componentName != null) {
+                            if (packageName.equals(componentName.getPackageName())) {
+                                onServicePackageDataClearedLocked(userId);
+                            }
+                        }
+                    }
+                }
             }
 
             private void handleActiveServiceRemoved(@UserIdInt int userId) {
@@ -822,6 +891,31 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                     Settings.Secure.putStringForUser(getContext().getContentResolver(),
                             serviceSettingsProperty, null, userId);
                 }
+            }
+
+            private void handleActiveServiceRestartedLocked(String activePackageName,
+                    @UserIdInt int userId) {
+                if ((mServicePackagePolicyFlags & PACKAGE_RESTART_POLICY_NO_REFRESH) != 0) {
+                    if (debug) {
+                        Slog.d(mTag, "Holding service for user " + userId + " while package "
+                                + activePackageName + " is being restarted");
+                    }
+                } else {
+                    if (debug) {
+                        Slog.d(mTag, "Removing service for user " + userId
+                                + " because package " + activePackageName
+                                + " is being restarted");
+                    }
+                    removeCachedServiceLocked(userId);
+
+                    if ((mServicePackagePolicyFlags & PACKAGE_RESTART_POLICY_REFRESH_EAGER) != 0) {
+                        if (debug) {
+                            Slog.d(mTag, "Eagerly recreating service for user " + userId);
+                        }
+                        getServiceForUserLocked(userId);
+                    }
+                }
+                onServicePackageRestartedLocked(userId);
             }
 
             private String getActiveServicePackageNameLocked() {

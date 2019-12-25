@@ -151,4 +151,7 @@
       <item quantity="other">SIM 卡已停用。請輸入 PUK 碼以繼續進行。您還可以再試 <xliff:g id="_NUMBER_1">%d</xliff:g> 次。如果仍然輸入錯誤，SIM 卡將永久無法使用。詳情請與流動網絡供應商聯絡。</item>
       <item quantity="one">SIM 卡已停用。請輸入 PUK 碼以繼續進行。您還可以再試 <xliff:g id="_NUMBER_0">%d</xliff:g> 次。如果仍然輸入錯誤，SIM 卡將永久無法使用。詳情請與流動網絡供應商聯絡。</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"預設"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"泡泡"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"指針"</string>
 </resources>

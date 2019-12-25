@@ -151,4 +151,7 @@
       <item quantity="other">सिम आता बंद केलेले आहे. सुरू ठेवण्यासाठी PUK कोड टाका. सिम कायमचे बंद होण्याआधी तुमच्याकडे <xliff:g id="_NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत. तपशीलांसाठी वाहकाशी संपर्क साधा.</item>
       <item quantity="one">सिम आता बंद केलेले आहे. सुरू ठेवण्यासाठी PUK कोड टाका. सिम कायमचे बंद होण्याआधी तुमच्याकडे <xliff:g id="_NUMBER_0">%d</xliff:g> प्रयत्न शिल्लक आहे. तपशीलांसाठी वाहकाशी संपर्क साधा.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"डीफॉल्ट"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"बबल"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"अॅनालॉग"</string>
 </resources>

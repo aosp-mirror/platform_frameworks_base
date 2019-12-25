@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"پیام‌های پست صوتی"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"‏تماس ازطریق Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"وضعیت سیم‌کارت"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"وضعیت سیم با اولویت بالا"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‏دستگاه مرتبط درخواست TTY حالت FULL کرد"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏دستگاه مرتبط درخواست TTY حالت HCO کرد"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏دستگاه مرتبط درخواست TTY حالت VCO کرد"</string>
@@ -290,7 +291,7 @@
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"‏به &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; اجازه داده شود به تقویم شما دسترسی پیدا کند؟"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"پیامک"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"ارسال و مشاهده پیامک‌ها"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"‏به &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; اجازه داده شود پیامک‌ها را ارسال و مشاهده کند؟"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"‏به «&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt;» اجازه داده شود پیامک ارسال و مشاهده کند؟"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"حافظه"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"دسترسی به عکس‌ها، رسانه‌ها و فایل‌های روی دستگاهتان"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"‏به برنامه &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; اجازه داده شود به عکس‌ها، رسانه، و فایل‌های موجود در دستگاهتان دسترسی داشته باشد؟"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"نماد اثر انگشت"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"مدیریت سخت‌افزار احراز هویت با چهره"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"مدیریت سخت‌افزار «بازگشایی با چهره»"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"به برنامه امکان می‌دهد روش‌هایی را برای افزودن و حذف الگوهای چهره جهت استفاده فرابخواند."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"استفاده از سخت‌افزار احراز هویت با چهره"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"به برنامه امکان می‌دهد از سخت‌افزار احراز هویت با چهره برای احراز هویت استفاده کند"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"احراز هویت با چهره"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"استفاده از سخت‌افزار «بازگشایی با چهره»"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"به برنامه امکان می‌دهد از سخت‌افزار «بازگشایی با چهره» برای احراز هویت استفاده کند"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"بازگشایی با چهره"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"ثبت مجدد چهره"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"برای بهبود تشخیص، لطفاً چهره‌تان را دوباره ثبت کنید"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"داده‌های دقیق چهره ضبط نشد. دوباره امتحان کنید."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"تلفن را به‌سمت چپ حرکت دهید."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"تلفن را به سمت راست حرکت دهید."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"لطفاً مستقیم به دستگاه نگه کنید."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"چهره‌تان دیده نمی‌شود. به تلفن نگاه کنید."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"صورتتان را مستقیماً روبروی تلفن قرار دهید."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"حرکت خیلی زیاد است. تلفن را ثابت نگه‌دارید."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"لطفاً چهره‌تان را مجدداً ثبت کنید."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"دیگر چهره را تشخیص نمی‌دهد. دوباره امتحان کنید."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"سرتان را کمی پایین آورید."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"سرتان را کمی پایین آورید."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"هرچیزی را که حائل چهره‌تان است بردارید."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"حسگر واقع در لبه بالای صفحه را تمیز کنید."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"بالای صفحه و همچنین نوار مشکی را تمیز کنید."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"چهره تأیید نشد. سخت‌افزار در دسترس نیست."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"احراز هویت با چهره با دوباره امتحان کنید."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"«بازگشایی با چهره» را دوباره امتحان کنید."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"داده‌ چهره جدید ذخیره نشد. اول داده‌ چهره قدیمی را حذف کنید."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"عملیات شناسایی چهره لغو شد"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"احراز هویت چهره توسط کاربر لغو شد"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"عملیات شناسایی چهره لغو شد."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"کاربر «بازگشایی با چهره» را لغو کرد."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"تعداد زیادی تلاش ناموفق. بعداً دوباره امتحان کنید."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"تعداد تلاش‌ها بیش‌ازحد مجاز است. احرازهویت چهره غیرفعال شد."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"تعداد تلاش‌ها بیش‌ازحد مجاز است. «بازگشایی با چهره» غیرفعال است."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"چهره تأیید نشد. دوباره امتحان کنید."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"احراز هویت چهره راه‌اندازی نشده است"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"احراز هویت چهره در این دستگاه پشتیبانی نمی‌شود."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"«بازگشایی با چهره» را راه‌اندازی نکرده‌اید."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"«بازگشایی با چهره» در این دستگاه پشتیبانی نمی‌شود."</string>
     <string name="face_name_template" msgid="7004562145809595384">"چهره <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1254,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"برای دیدن همه شبکه‌ها ضربه بزنید"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"اتصال"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"همه شبکه‌ها"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"‏به شبکه‌های Wi-Fi متصل می‌شوید؟"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"پیشنهاد <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"بله"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"خیر"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"‏شبکه‌های Wi‑Fi پیشنهادی مجاز شود؟"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"شبکه‌های پیشنهادی <xliff:g id="NAME">%s</xliff:g>. ممکن است دستگاه به‌طور خودکار متصل شود."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"مجاز"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"نه متشکرم"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏Wi‑Fi به‌طور خودکار روشن خواهد شد"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"وقتی نزدیک شبکه ذخیره‌شده با کیفیت بالا هستید"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"دوباره روشن نشود"</string>
@@ -1807,8 +1808,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"توسط سرپرست سیستم حذف شد"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"تأیید"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"بهینه‌سازی باتری فعالیت پس‌زمینه، برخی جلوه‌های دیداری، و سایر ویژگی‌های با مصرف بالای نیرو را خاموش یا محدود می‌کند تا عمر باتری افزایش یابد. "<annotation id="url">"بیشتر بدانید"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"بهینه‌سازی باتری فعالیت پس‌زمینه، برخی جلوه‌های دیداری، و سایر ویژگی‌های با مصرف بالای نیرو را خاموش یا محدود می‌کند تا عمر باتری افزایش یابد."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"«بهینه‌سازی باتری» فعالیت پس‌زمینه، برخی جلوه‌های دیداری، و سایر ویژگی‌های پرمصرف نیرو را خاموش یا محدود می‌کند تا عمر باتری افزایش یابد. "<annotation id="url">"بیشتر بدانید"</annotation></string>
+    <string name="battery_saver_description" msgid="6413346684861241431">"«بهینه‌سازی باتری» فعالیت پس‌زمینه، برخی جلوه‌های دیداری، و سایر ویژگی‌های پرمصرف نیرو را خاموش یا محدود می‌کند تا عمر باتری افزایش یابد."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه ازطرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تا زمانی که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"صرفه‌جویی داده روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"روشن کردن"</string>
@@ -1887,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"دسته‌بندی‌نشده"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"شما اهمیت این اعلان‌ها را تنظیم می‌کنید."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"به دلیل افراد درگیر مهم است."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"به <xliff:g id="APP">%1$s</xliff:g> امکان داده شود کاربر جدیدی با <xliff:g id="ACCOUNT">%2$s</xliff:g> اضافه کند؟"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"به <xliff:g id="APP">%1$s</xliff:g> امکان داده شود کاربر جدیدی با <xliff:g id="ACCOUNT">%2$s</xliff:g> ایجاد کند (کاربری با این حساب از قبل وجود دارد)؟"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"به<xliff:g id="APP">%1$s</xliff:g> اجازه می‌دهید با <xliff:g id="ACCOUNT">%2$s</xliff:g> (کاربری با این حساب درحال‌حاضر وجود دارد) کاربری جدید ایجاد کند؟"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"به <xliff:g id="APP">%1$s</xliff:g> اجازه می‌دهید با <xliff:g id="ACCOUNT">%2$s</xliff:g> کاربری جدید ایجاد کند؟"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"افزودن زبان"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"اولویت‌های منطقه"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"نام زبان را تایپ کنید"</string>
@@ -2000,15 +2001,15 @@
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"نمایش روی برنامه‌های دیگر در صفحه‌نمایش"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"اعلان اطلاعات حالت روال معمول"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"ممکن است شارژ باتری قبل از شارژ معمول تمام شود"</string>
-    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"جهت افزایش عمر باتری، بهینه‌سازی باتری فعال شد"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"جهت افزایش عمر باتری، «بهینه‌سازی باتری» فعال شد"</string>
     <string name="battery_saver_notification_channel_name" msgid="2083316159716201806">"بهینه‌سازی باتری"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="6376147579378764641">"تا وقتی شارژ باتری دوباره به سطح پایین نرسد، بهینه‌سازی باتری مجدداً فعال نخواهد شد"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="8090192609249817945">"باتری تا سطحی کافی شارژ شده است. تا وقتی شارژ باتری دوباره به سطح پایین نرسد، بهینه‌سازی باتری مجدداً فعال نخواهد شد."</string>
+    <string name="battery_saver_sticky_disabled_notification_title" msgid="6376147579378764641">"تا وقتی شارژ باتری دوباره به سطح پایین نرسد، «بهینه‌سازی باتری» مجدداً فعال نخواهد شد"</string>
+    <string name="battery_saver_sticky_disabled_notification_summary" msgid="8090192609249817945">"باتری درحد کافی شارژ شده است. تا وقتی شارژ باتری دوباره به سطح پایین نرسد، «بهینه‌سازی باتری» مجدداً فعال نخواهد شد."</string>
     <string name="battery_saver_charged_notification_title" product="default" msgid="2960978289873161288">"تلفن <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> شارژ شد"</string>
     <string name="battery_saver_charged_notification_title" product="tablet" msgid="7555713825806482451">"رایانه لوحی <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> شارژ شد"</string>
     <string name="battery_saver_charged_notification_title" product="device" msgid="5954873381559605660">"دستگاه <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> شارژ شد"</string>
-    <string name="battery_saver_off_notification_summary" msgid="1374222493681267143">"بهینه‌سازی باتری خاموش است. ویژگی‌ها دیگر محدود نمی‌شوند."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="4340727818546508436">"بهینه‌سازی باتری خاموش شد. ویژگی‌ها دیگر محدود نمی‌شوند."</string>
+    <string name="battery_saver_off_notification_summary" msgid="1374222493681267143">"«بهینه‌سازی باتری» خاموش است. ویژگی‌ها دیگر محدود نمی‌شوند."</string>
+    <string name="battery_saver_off_alternative_notification_summary" msgid="4340727818546508436">"«بهینه‌سازی باتری» خاموش شد. ویژگی‌ها دیگر محدود نمی‌شوند."</string>
     <string name="mime_type_folder" msgid="7111951698626315204">"پوشه"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"‏برنامه Android"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"فایل"</string>

@@ -28,7 +28,7 @@ import android.view.SurfaceSession;
  * Class used by {@link RecentsAnimationController} to create a surface control with taking
  * screenshot of task when canceling recents animation.
  *
- * @see {@link RecentsAnimationController#cancelOnNextTransitionStart}
+ * @see {@link RecentsAnimationController#setCancelOnNextTransitionStart}
  */
 class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
     private static final String TAG = "TaskScreenshotAnim";
@@ -69,7 +69,7 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
         if (buffer != null) {
             final Surface surface = new Surface();
             surface.copyFrom(mSurfaceControl);
-            surface.attachAndQueueBuffer(buffer);
+            surface.attachAndQueueBufferWithColorSpace(buffer, screenshotBuffer.getColorSpace());
             surface.release();
         }
         getPendingTransaction().show(mSurfaceControl);

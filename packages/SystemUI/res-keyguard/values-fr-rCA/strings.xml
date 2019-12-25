@@ -151,4 +151,7 @@
       <item quantity="one">La carte SIM est maintenant désactivée. Entrez le code PUK pour continuer. Il vous reste <xliff:g id="_NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM devienne définitivement inutilisable. Pour obtenir plus de détails, communiquez avec votre fournisseur de services.</item>
       <item quantity="other">La carte SIM est maintenant désactivée. Entrez le code PUK pour continuer. Il vous reste <xliff:g id="_NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM devienne définitivement inutilisable. Pour obtenir plus de détails, communiquez avec votre fournisseur de services.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Par défaut"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Bulle"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analogique"</string>
 </resources>

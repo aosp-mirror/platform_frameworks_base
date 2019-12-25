@@ -605,11 +605,11 @@ public final class ResponderLocation implements Parcelable {
             // Negative 2's complement value
             // Note: The Math.pow(...) method cannot return a NaN value because the bitFieldSize
             // for Lat or Lng is limited to exactly 34 bits.
-            angle = Math.scalb(fields[offset] - Math.pow(2, bitFieldSizes[offset]),
+            angle = Math.scalb((double) fields[offset] - Math.pow(2, bitFieldSizes[offset]),
                     -LATLNG_FRACTION_BITS);
         } else {
             // Positive 2's complement value
-            angle = Math.scalb(fields[offset], -LATLNG_FRACTION_BITS);
+            angle = Math.scalb((double) fields[offset], -LATLNG_FRACTION_BITS);
         }
         if (angle > limit) {
             angle = limit;
@@ -732,10 +732,11 @@ public final class ResponderLocation implements Parcelable {
 
         int maxBssidIndicator = (int) buffer[SUBELEMENT_BSSID_MAX_INDICATOR_INDEX] & BYTE_MASK;
         int bssidListLength = (buffer.length - 1) / BYTES_IN_A_BSSID;
-        // Check the max number of BSSIDs agrees with the list length.
-        if (maxBssidIndicator != bssidListLength) {
-            return false;
-        }
+        // The maxBSSIDIndicator is ignored. Its use is still being clarified in 802.11REVmd,
+        // which is not published at this time. This field will be used in a future
+        // release of Android after 802.11REVmd is public. Here, we interpret the following
+        // params as an explicit list of BSSIDs.
+
 
         int bssidOffset = SUBELEMENT_BSSID_LIST_INDEX;
         for (int i = 0; i < bssidListLength; i++) {

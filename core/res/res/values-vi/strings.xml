@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Thư thoại"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Gọi qua Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Trạng thái SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Trạng thái SIM có mức ưu tiên cao"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ ĐẦY ĐỦ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ VCO"</string>
@@ -520,7 +521,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Cho phép ứng dụng này sửa đổi bộ sưu tập ảnh của bạn."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"đọc vị trí từ bộ sưu tập phương tiện"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Cho phép ứng dụng này đọc vị trí từ bộ sưu tập phương tiện của bạn."</string>
-    <string name="biometric_dialog_default_title" msgid="881952973720613213">"Hãy xác minh đó là bạn"</string>
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"Xác minh danh tính của bạn"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Không có phần cứng sinh trắc học"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Đã hủy xác thực"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Không nhận dạng được"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Biểu tượng vân tay"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"quản lý phần cứng xác thực khuôn mặt"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"quản lý phần cứng mở khóa bằng khuôn mặt"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Cho phép ứng dụng gọi ra các phương pháp để thêm và xóa mẫu khuôn mặt sử dụng."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"sử dụng phần cứng xác thực khuôn mặt"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Cho phép ứng dụng sử dụng phần cứng xác thực khuôn mặt để tiến hành xác thực"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Xác thực khuôn mặt"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"sử dụng phần cứng mở khóa bằng khuôn mặt"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Cho phép ứng dụng dùng phần cứng mở khóa bằng khuôn mặt để tiến hành xác thực"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Mở khóa bằng khuôn mặt"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Đăng ký lại khuôn mặt của bạn"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Để cải thiện khả năng nhận dạng, hãy đăng ký lại khuôn mặt của bạn"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Không thể ghi lại đúng dữ liệu mặt. Hãy thử lại."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Đưa điện thoại sang bên trái."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Đưa điện thoại sang bên phải."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Vui lòng nhìn thẳng vào thiết bị."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Hệ thống không phát hiện được khuôn mặt bạn. Hãy nhìn vào điện thoại."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Hướng thẳng khuôn mặt về phía trước điện thoại."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Thiết bị di chuyển quá nhiều. Giữ yên thiết bị."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Vui lòng đăng ký lại khuôn mặt của bạn."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Không nhận ra khuôn mặt. Hãy thử lại."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Hãy bớt di chuyển đầu."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Hãy bớt di chuyển đầu."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Hãy loại bỏ mọi thứ che khuất khuôn mặt bạn."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Hãy lau sạch cảm biến ở cạnh trên của màn hình."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Vệ sinh phần đầu màn hình, bao gồm cả thanh màu đen"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Không thể xác minh khuôn mặt. Phần cứng không có sẵn."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Thử xác thực lại khuôn mặt."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Thử lại thao tác mở khóa bằng khuôn mặt."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Không lưu được dữ liệu khuôn mặt mới. Hãy xóa dữ liệu cũ trước."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Đã hủy thao tác dùng khuôn mặt"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Người dùng đã hủy thao tác xác thực khuôn mặt"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Đã hủy thao tác dùng khuôn mặt."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Người dùng đã hủy thao tác mở khóa bằng khuôn mặt."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Bạn đã thử quá nhiều lần. Hãy thử lại sau."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Quá nhiều lần thử. Tính năng xác thực khuôn mặt đã tắt."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Quá nhiều lần thử. Đã tắt tính năng mở khóa bằng khuôn mặt."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Không thể xác minh khuôn mặt. Hãy thử lại."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Bạn chưa thiết lập tính năng xác thực khuôn mặt"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Thiết bị này không hỗ trợ tính năng xác thực khuôn mặt"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Bạn chưa thiết lập tính năng mở khóa bằng khuôn mặt."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Thiết bị này không hỗ trợ tính năng mở khóa bằng khuôn mặt."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Khuôn mặt <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1254,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Nhấn để xem tất cả các mạng"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Kết nối"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Tất cả các mạng"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Bạn muốn kết nối với mạng Wi‑Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Do <xliff:g id="NAME">%s</xliff:g> đề xuất"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Có"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Không"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Cho phép các mạng Wi‑Fi được đề xuất?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Các mạng do <xliff:g id="NAME">%s</xliff:g> đề xuất. Thiết bị có thể kết nối tự động."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Cho phép"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Không, cảm ơn"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi sẽ tự động bật"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Khi bạn ở gần mạng đã lưu chất lượng cao"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Không bật lại"</string>
@@ -1353,9 +1354,9 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"Đang sạc thiết bị được kết nối. Hãy nhấn để biết thêm các tùy chọn."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Đã phát hiện phụ kiện âm thanh analog"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Thiết bị được kết nối không tương thích với điện thoại này. Nhấn để tìm hiểu thêm."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Đã kết nối gỡ lỗi USB"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"Nhấn để tắt tính năng gỡ lỗi USB"</string>
-    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Chọn để vô hiệu hóa gỡ lỗi USB."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Đã kết nối chế độ gỡ lỗi qua USB"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Nhấn để tắt chế độ gỡ lỗi qua USB"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Chọn để tắt chế độ gỡ lỗi qua USB."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Đã bật Chế độ khai thác kiểm thử"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Khôi phục cài đặt gốc để tắt Chế độ khai thác kiểm thử."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Có chất lỏng hoặc mảnh vỡ trong cổng USB"</string>
@@ -1669,8 +1670,8 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Đã tắt phím tắt trợ năng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Nhấn và giữ đồng thời cả hai phím âm lượng trong 3 giây để sử dụng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Chọn dịch vụ sẽ sử dụng khi bạn nhấn vào nút hỗ trợ tiếp cận:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Chọn dịch vụ sẽ sử dụng với cử chỉ hỗ trợ tiếp cận (vuốt lên từ cuối màn hình bằng 2 ngón tay):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Chọn dịch vụ sẽ sử dụng với cử chỉ hỗ trợ tiếp cận (vuốt lên từ cuối màn hình bằng 3 ngón tay):"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Chọn dịch vụ sẽ sử dụng với cử chỉ hỗ trợ tiếp cận này (vuốt lên từ cuối màn hình bằng 2 ngón tay):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Chọn dịch vụ sẽ sử dụng với cử chỉ hỗ trợ tiếp cận này (vuốt lên từ cuối màn hình bằng 3 ngón tay):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Để chuyển đổi giữa các dịch vụ, hãy chạm và giữ nút hỗ trợ tiếp cận."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Để chuyển đổi giữa các dịch vụ, hãy vuốt lên và giữ bằng 2 ngón tay."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Để chuyển đổi giữa các dịch vụ, hãy vuốt lên và giữ bằng 3 ngón tay."</string>
@@ -1887,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Chưa được phân loại"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Bạn đặt tầm quan trọng của các thông báo này."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Thông báo này quan trọng vì những người có liên quan."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g> (người dùng có tài khoản này đã tồn tại)?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g> (đã tồn tại người dùng có tài khoản này)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Thêm ngôn ngữ"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Tùy chọn khu vực"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Nhập tên ngôn ngữ"</string>
@@ -1927,7 +1928,7 @@
     <string name="app_category_maps" msgid="5878491404538024367">"Bản đồ và dẫn đường"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"Sản xuất"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Bộ nhớ của thiết bị"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"Gỡ lỗi USB"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"Gỡ lỗi qua USB"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"giờ"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"phút"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Đặt giờ"</string>

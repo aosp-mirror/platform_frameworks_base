@@ -47,6 +47,7 @@ import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.function.TriConsumer;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ScrimView;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.utils.os.FakeHandler;
 
@@ -96,7 +97,8 @@ public class ScrimControllerTest extends SysuiTestCase {
                     mScrimBehindAlpha = scrimBehindAlpha;
                     mScrimInFrontColor = scrimInFrontColor;
                 },
-                visible -> mScrimVisibility = visible, mDozeParamenters, mAlarmManager);
+                visible -> mScrimVisibility = visible, mDozeParamenters, mAlarmManager,
+                mock(KeyguardMonitor.class));
         mScrimController.setHasBackdrop(false);
         mScrimController.setWallpaperSupportsAmbientMode(false);
         mScrimController.transitionTo(ScrimState.KEYGUARD);
@@ -214,7 +216,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void transitionToPulsing() {
+    public void transitionToPulsing_withFrontAlphaUpdates() {
         // Pre-condition
         // Need to go to AoD first because PULSING doesn't change
         // the back scrim opacity - otherwise it would hide AoD wallpapers.
@@ -225,15 +227,26 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         mScrimController.transitionTo(ScrimState.PULSING);
         mScrimController.finishAnimationsImmediately();
-        // Front scrim should be transparent
+        // Front scrim should be transparent, but tinted
         // Back scrim should be semi-transparent so the user can see the wallpaper
         // Pulse callback should have been invoked
         assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
         assertScrimTint(mScrimBehind, true /* tinted */);
 
+        // ... and when ambient goes dark, front scrim should be semi-transparent
+        mScrimController.setAodFrontScrimAlpha(0.5f);
+        mScrimController.finishAnimationsImmediately();
+        // Front scrim should be semi-transparent
+        assertScrimVisibility(VISIBILITY_SEMI_TRANSPARENT /* front */,
+                VISIBILITY_FULLY_OPAQUE /* back */);
+
         mScrimController.setWakeLockScreenSensorActive(true);
         mScrimController.finishAnimationsImmediately();
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
+        assertScrimVisibility(VISIBILITY_SEMI_TRANSPARENT /* front */,
+                VISIBILITY_SEMI_TRANSPARENT /* back */);
+
+        // Reset value since enums are static.
+        mScrimController.setAodFrontScrimAlpha(0f);
     }
 
     @Test
@@ -680,9 +693,9 @@ public class ScrimControllerTest extends SysuiTestCase {
         SynchronousScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
                 TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
                 Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
-                AlarmManager alarmManager) {
+                AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
             super(scrimBehind, scrimInFront, scrimStateListener, scrimVisibleListener,
-                    dozeParameters, alarmManager);
+                    dozeParameters, alarmManager, keyguardMonitor);
         }
 
         @Override

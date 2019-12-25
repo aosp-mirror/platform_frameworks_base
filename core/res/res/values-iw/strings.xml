@@ -97,11 +97,12 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"הודעות קוליות"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"‏שיחות Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"‏סטטוס SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"‏סטטוס התראות SIM בעדיפות גבוהה"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‏העמית ביקש TTY במצב FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏העמית ביקש TTY במצב HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏העמית ביקש TTY במצב VCO"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"‏העמית ביקש TTY במצב OFF"</string>
-    <string name="serviceClassVoice" msgid="1258393812335258019">"Google Voice"</string>
+    <string name="serviceClassVoice" msgid="1258393812335258019">"קול"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Google Data"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"פקס"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
@@ -556,11 +557,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"סמל טביעת אצבע"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"ניהול של חומרה של זיהוי פנים לצורך אימות"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"ניהול החומרה לשחרור נעילה על ידי זיהוי פנים"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"מאפשרת לאפליקציה להפעיל שיטות להוספה ומחיקה של תבניות פנים שבהן ייעשה שימוש."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"שימוש בחומרה של זיהוי פנים לצורך אימות"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"מאפשרת לאפליקציה להשתמש בחומרה של זיהוי פנים לצורך אימות"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"אימות פנים"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"שימוש בחומרה לשחרור נעילה על ידי זיהוי פנים"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"מאפשרת לאפליקציה להשתמש בחומרה לשחרור נעילה על ידי זיהוי פנים לצורך אימות"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"שחרור נעילה על ידי זיהוי פנים"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"יש לבצע רישום מחדש של הפנים שלך"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"לשיפור הזיהוי יש לבצע רישום מחדש של הפנים שלך"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"לא ניתן היה לקלוט את הפנים במדויק. יש לנסות שוב."</string>
@@ -573,7 +574,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"צריך להזיז את הטלפון שמאלה."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"צריך להזיז את הטלפון ימינה."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"יש להביט ישירות אל המכשיר."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"אי אפשר לראות את הפנים שלך. צריך להביט אל הטלפון."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"עליך למקם את הפנים ישירות מול הטלפון."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"יותר מדי תנועה. יש להחזיק את הטלפון בצורה יציבה."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"יש לרשום מחדש את הפנים."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"כבר לא ניתן לזהות פנים. יש לנסות שוב."</string>
@@ -582,19 +583,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"עליך ליישר קצת את הראש."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"עליך ליישר קצת את הראש."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"יש להסיר כל דבר שמסתיר את הפנים."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"יש לנקות את החיישן שבקצה העליון של המסך."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"עליך לנקות את החלק העליון של המסך, כולל הסרגל השחור"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"לא ניתן לאמת את הפנים. החומרה לא זמינה."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"יש לנסות שוב את זיהוי הפנים לצורך אימות."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"יש לנסות שוב את שחרור הנעילה על ידי זיהוי פנים."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"לא ניתן לאחסן נתוני פנים. תחילה יש למחוק פנים ישנים."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"פעולת הפנים בוטלה"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"זיהוי הפנים בוטל על ידי המשתמש"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"פעולת הפנים בוטלה."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"שחרור הנעילה על ידי זיהוי פנים בוטל על ידי המשתמש."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"יותר מדי ניסיונות. יש לנסות שוב מאוחר יותר."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"יותר מדי ניסיונות. אימות פנים הושבת."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"יותר מדי ניסיונות. שחרור נעילה על ידי זיהוי פנים מושבת."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"לא ניתן לאמת את הפנים. יש לנסות שוב."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"לא הגדרת אימות פנים"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"המכשיר הזה לא תומך באימות פנים"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"לא הגדרת שחרור נעילה על ידי זיהוי פנים."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"המכשיר הזה לא תומך בשחרור נעילה על ידי זיהוי פנים."</string>
     <string name="face_name_template" msgid="7004562145809595384">"פנים <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1298,10 +1299,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"יש להקיש כדי לראות את כל הרשתות"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"התחבר"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"כל הרשתות"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"‏להתחבר לרשתות Wi‑Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"הוצע על-ידי <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"כן"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"לא"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"‏לאפשר הצעות לרשתות Wi-Fi?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"הצעות לרשתות <xliff:g id="NAME">%s</xliff:g>. ייתכן שחיבור המכשיר ייעשה באופן אוטומטי."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"אישור"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"לא תודה"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏ה-Wi-Fi יופעל אוטומטית"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"כשתימצאו בקרבת רשת באיכות גבוהה ששמרתם"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"אל תפעיל שוב"</string>
@@ -1955,8 +1956,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"ללא שיוך לקטגוריה"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"עליך להגדיר את החשיבות של ההתראות האלה."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ההודעה חשובה בשל האנשים המעורבים."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"האם לאפשר ל-<xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש לחשבון <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"האם לאפשר ל-<xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש לחשבון <xliff:g id="ACCOUNT">%2$s</xliff:g> (כבר קיים משתמש לחשבון הזה) ?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"האם לאפשר לאפליקציה <xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש באמצעות <xliff:g id="ACCOUNT">%2$s</xliff:g> (כבר קיים משתמש לחשבון הזה) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"האם לאפשר לאפליקציה <xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש באמצעות <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"הוספת שפה"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"העדפת אזור"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"הקלד שם שפה"</string>

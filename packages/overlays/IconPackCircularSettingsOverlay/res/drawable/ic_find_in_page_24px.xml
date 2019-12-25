@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Copyright (C) 2019 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="24dp"
+    android:tint="?android:attr/colorControlNormal"
+    android:viewportHeight="24"
+    android:viewportWidth="24"
+    android:width="24dp" >
+    <group
+        android:translateX="4.000100"
+        android:translateY="2.000100" >
+        <path
+            android:fillColor="@android:color/white"
+            android:fillType="evenOdd"
+            android:pathData="M7.9999,15.2499 C6.2079,15.2499 4.7499,13.7919 4.7499,11.9999 C4.7499,10.2079 6.2079,8.7499 7.9999,8.7499 C9.7919,8.7499 11.2499,10.2079 11.2499,11.9999 C11.2499,13.7919 9.7919,15.2499 7.9999,15.2499 L7.9999,15.2499 Z M1.4999,17.7779 L1.4999,2.2219 C1.4999,1.8239 1.8529,1.4999 2.2859,1.4999 L9.6769,1.4999 L14.4999,6.1889 L14.4999,17.5799 L11.8269,14.7879 C12.3999,14.0029 12.7499,13.0439 12.7499,11.9999 C12.7499,9.3809 10.6189,7.2499 7.9999,7.2499 C5.3809,7.2499 3.2499,9.3809 3.2499,11.9999 C3.2499,14.6189 5.3809,16.7499 7.9999,16.7499 C9.0329,16.7499 9.9829,16.4089 10.7649,15.8469 L13.3039,18.4999 L2.2859,18.4999 C1.8529,18.4999 1.4999,18.1759 1.4999,17.7779 L1.4999,17.7779 Z M10.2859,-0.0001 L2.2859,-0.0001 C1.0229,-0.0001 -0.0001,0.9949 -0.0001,2.2219 L-0.0001,17.7779 C-0.0001,19.0049 1.0229,19.9999 2.2859,19.9999 L13.7139,19.9999 C14.9769,19.9999 15.9999,19.0049 15.9999,17.7779 L15.9999,5.5559 L10.2859,-0.0001 Z"
+            android:strokeWidth="1" />
+    </group>
+</vector>

@@ -2737,7 +2737,9 @@ public class DeviceIdleController extends SystemService
                 resetIdleManagementLocked();
                 // Wait a small amount of time in case something (eg: background service from
                 // recently closed app) needs to finish running.
-                scheduleAlarmLocked(mConstants.QUICK_DOZE_DELAY_TIMEOUT, false);
+                // Use a non-wakeup alarm for going into quick doze in case an AlarmClock alarm
+                // is scheduled soon. The non-wakeup alarm will be delayed by at most 2 minutes.
+                scheduleAlarmLocked(mConstants.QUICK_DOZE_DELAY_TIMEOUT, false, false);
                 EventLogTags.writeDeviceIdle(mState, "no activity");
             } else if (mState == STATE_ACTIVE) {
                 mState = STATE_INACTIVE;
@@ -3362,6 +3364,10 @@ public class DeviceIdleController extends SystemService
     }
 
     void scheduleAlarmLocked(long delay, boolean idleUntil) {
+        scheduleAlarmLocked(delay, idleUntil, true);
+    }
+
+    private void scheduleAlarmLocked(long delay, boolean idleUntil, boolean useWakeupAlarm) {
         if (DEBUG) Slog.d(TAG, "scheduleAlarmLocked(" + delay + ", " + idleUntil + ")");
 
         if (mUseMotionSensor && mMotionSensor == null
@@ -3377,12 +3383,14 @@ public class DeviceIdleController extends SystemService
             // can continue until the user interacts with the device.
             return;
         }
+        final int alarmType = useWakeupAlarm
+                ? AlarmManager.ELAPSED_REALTIME_WAKEUP : AlarmManager.ELAPSED_REALTIME;
         mNextAlarmTime = SystemClock.elapsedRealtime() + delay;
         if (idleUntil) {
-            mAlarmManager.setIdleUntil(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            mAlarmManager.setIdleUntil(alarmType,
                     mNextAlarmTime, "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
         } else {
-            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            mAlarmManager.set(alarmType,
                     mNextAlarmTime, "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
         }
     }

@@ -22,28 +22,38 @@ import androidx.annotation.Nullable;
 
 import java.util.concurrent.Executor;
 
-class PhenotypeHelper {
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
-    PhenotypeHelper() {}
+/**
+ * Wrapper class for retrieving phenotype flag values.
+ *
+ * Can be mocked in tests for ease of testing the effects of particular values.
+ */
+@Singleton
+public class PhenotypeHelper {
 
-    long getLong(String name, long defaultValue) {
+    @Inject
+    public PhenotypeHelper() {}
+
+    public long getLong(String name, long defaultValue) {
         return DeviceConfig.getLong(DeviceConfig.NAMESPACE_SYSTEMUI, name, defaultValue);
     }
 
-    int getInt(String name, int defaultValue) {
+    public int getInt(String name, int defaultValue) {
         return DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI, name, defaultValue);
     }
 
     @Nullable
-    String getString(String name, @Nullable String defaultValue) {
+    public String getString(String name, @Nullable String defaultValue) {
         return DeviceConfig.getString(DeviceConfig.NAMESPACE_SYSTEMUI, name, defaultValue);
     }
 
-    boolean getBoolean(String name, boolean defaultValue) {
+    public boolean getBoolean(String name, boolean defaultValue) {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI, name, defaultValue);
     }
 
-    void addOnPropertiesChangedListener(
+    public void addOnPropertiesChangedListener(
             Executor executor, DeviceConfig.OnPropertiesChangedListener listener) {
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI, executor, listener);

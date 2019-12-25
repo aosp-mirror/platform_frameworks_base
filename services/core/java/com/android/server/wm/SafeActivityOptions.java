@@ -122,17 +122,20 @@ public class SafeActivityOptions {
         if (mOriginalOptions != null) {
             checkPermissions(intent, aInfo, callerApp, supervisor, mOriginalOptions,
                     mOriginalCallingPid, mOriginalCallingUid);
-            setCallingPidForRemoteAnimationAdapter(mOriginalOptions, mOriginalCallingPid);
+            setCallingPidUidForRemoteAnimationAdapter(mOriginalOptions, mOriginalCallingPid,
+                    mOriginalCallingUid);
         }
         if (mCallerOptions != null) {
             checkPermissions(intent, aInfo, callerApp, supervisor, mCallerOptions,
                     mRealCallingPid, mRealCallingUid);
-            setCallingPidForRemoteAnimationAdapter(mCallerOptions, mRealCallingPid);
+            setCallingPidUidForRemoteAnimationAdapter(mCallerOptions, mRealCallingPid,
+                    mRealCallingUid);
         }
         return mergeActivityOptions(mOriginalOptions, mCallerOptions);
     }
 
-    private void setCallingPidForRemoteAnimationAdapter(ActivityOptions options, int callingPid) {
+    private void setCallingPidUidForRemoteAnimationAdapter(ActivityOptions options,
+            int callingPid, int callingUid) {
         final RemoteAnimationAdapter adapter = options.getRemoteAnimationAdapter();
         if (adapter == null) {
             return;
@@ -141,7 +144,7 @@ public class SafeActivityOptions {
             Slog.wtf(TAG, "Safe activity options constructed after clearing calling id");
             return;
         }
-        adapter.setCallingPid(callingPid);
+        adapter.setCallingPidUid(callingPid, callingUid);
     }
 
     /**

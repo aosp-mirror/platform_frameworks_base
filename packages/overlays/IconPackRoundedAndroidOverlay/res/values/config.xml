@@ -30,4 +30,12 @@
     <string name="config_batterymeterPowersavePath" translatable="false">
         M 3.75,11.25 H 5.25 V 12.75 C 5.25,13.16 5.59,13.5 6,13.5 6.41,13.5 6.75,13.16 6.75,12.75 V 11.25 H 8.25 C 8.66,11.25 9,10.91 9,10.5 9,10.09 8.66,9.7499 8.25,9.7499 H 6.75 V 8.2499 C 6.75,7.8399 6.41,7.4999 6,7.4999 5.59,7.4999 5.2794,7.841 5.25,8.2499 V 9.7499 H 3.75 C 3.34,9.7499 3,10.09 3,10.5 3,10.91 3.3401,11.25 3.75,11.25 Z
     </string>
+    <!-- X path for SignalDrawable as defined on a 24x24 canvas. -->
+    <string name="config_signalXPath" translatable="false">
+        M 20.72,16.22 L 19,17.94 L 17.28,16.22 C 16.99,15.93 16.51,15.93 16.22,16.22 C 15.93,16.51 15.93,16.99 16.22,17.28 L 17.94,19 L 16.22,20.72 C 15.93,21.01 15.93,21.49 16.22,21.78 C 16.37,21.93 16.56,22 16.75,22 C 16.94,22 17.13,21.93 17.28,21.78 L 19,20.06 L 20.72,21.78 C 20.87,21.93 21.06,22 21.25,22 C 21.44,22 21.63,21.93 21.78,21.78 C 22.07,21.49 22.07,21.01 21.78,20.72 L 20.06,19 L 21.78,17.28 C 22.07,16.99 22.07,16.51 21.78,16.22 C 21.49,15.93 21.01,15.93 20.72,16.22 Z
+    </string>
+    <!-- config_signalCutout{Height,Width}Fraction define fraction of the 24x24 canvas that
+         should be cut out to display config_signalXPath.-->
+    <item name="config_signalCutoutWidthFraction" format="float" type="dimen">10</item>
+    <item name="config_signalCutoutHeightFraction" format="float" type="dimen">10</item>
 </resources>

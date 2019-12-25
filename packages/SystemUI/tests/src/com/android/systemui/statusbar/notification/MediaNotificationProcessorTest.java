@@ -38,8 +38,8 @@ import android.widget.RemoteViews;
 import androidx.palette.graphics.Palette;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.tests.R;
 
 import org.junit.After;
 import org.junit.Before;

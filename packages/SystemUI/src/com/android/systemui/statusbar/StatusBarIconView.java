@@ -112,7 +112,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     };
 
     private boolean mAlwaysScaleIcon;
-    private int mStatusBarIconDrawingSizeDark = 1;
+    private int mStatusBarIconDrawingSizeIncreased = 1;
     private int mStatusBarIconDrawingSize = 1;
     private int mStatusBarIconSize = 1;
     private StatusBarIcon mIcon;
@@ -139,7 +139,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private int mDrawableColor;
     private int mIconColor;
     private int mDecorColor;
-    private float mDarkAmount;
+    private float mDozeAmount;
     private ValueAnimator mColorAnimator;
     private int mCurrentSetColor = NO_COLOR;
     private int mAnimationStartColor = NO_COLOR;
@@ -158,6 +158,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private Runnable mLayoutRunnable;
     private boolean mDismissed;
     private Runnable mOnDismissListener;
+    private boolean mIncreasedSize;
 
     public StatusBarIconView(Context context, String slot, StatusBarNotification sbn) {
         this(context, slot, sbn, false);
@@ -196,12 +197,10 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     private void updateIconScaleForNotifications() {
-        final float imageBounds = NotificationUtils.interpolate(
-                mStatusBarIconDrawingSize,
-                mStatusBarIconDrawingSizeDark,
-                mDarkAmount);
+        final float imageBounds = mIncreasedSize ?
+                mStatusBarIconDrawingSizeIncreased : mStatusBarIconDrawingSize;
         final int outerBounds = mStatusBarIconSize;
-        mIconScale = (float)imageBounds / (float)outerBounds;
+        mIconScale = imageBounds / (float)outerBounds;
         updatePivot();
     }
 
@@ -225,8 +224,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         }
     }
 
-    public float getIconScaleFullyDark() {
-        return (float) mStatusBarIconDrawingSizeDark / mStatusBarIconDrawingSize;
+    public float getIconScaleIncreased() {
+        return (float) mStatusBarIconDrawingSizeIncreased / mStatusBarIconDrawingSize;
     }
 
     public float getIconScale() {
@@ -256,7 +255,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         Resources res = getResources();
         mStaticDotRadius = res.getDimensionPixelSize(R.dimen.overflow_dot_radius);
         mStatusBarIconSize = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
-        mStatusBarIconDrawingSizeDark =
+        mStatusBarIconDrawingSizeIncreased =
                 res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size_dark);
         mStatusBarIconDrawingSize =
                 res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
@@ -584,7 +583,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     private void updateDecorColor() {
-        int color = NotificationUtils.interpolateColors(mDecorColor, Color.WHITE, mDarkAmount);
+        int color = NotificationUtils.interpolateColors(mDecorColor, Color.WHITE, mDozeAmount);
         if (mDotPaint.getColor() != color) {
             mDotPaint.setColor(color);
 
@@ -618,13 +617,13 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
                 mMatrixColorFilter = new ColorMatrixColorFilter(mMatrix);
             }
             int color = NotificationUtils.interpolateColors(
-                    mCurrentSetColor, Color.WHITE, mDarkAmount);
-            updateTintMatrix(mMatrix, color, DARK_ALPHA_BOOST * mDarkAmount);
+                    mCurrentSetColor, Color.WHITE, mDozeAmount);
+            updateTintMatrix(mMatrix, color, DARK_ALPHA_BOOST * mDozeAmount);
             mMatrixColorFilter.setColorMatrixArray(mMatrix);
             setColorFilter(null);  // setColorFilter only invalidates if the instance changed.
             setColorFilter(mMatrixColorFilter);
         } else {
-            mDozer.updateGrayscale(this, mDarkAmount);
+            mDozer.updateGrayscale(this, mDozeAmount);
         }
     }
 
@@ -855,19 +854,18 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         mOnVisibilityChangedListener = listener;
     }
 
-    public void setDark(boolean dark, boolean fade, long delay) {
-        mDozer.setIntensityDark(f -> {
-            mDarkAmount = f;
-            maybeUpdateIconScaleDimens();
+    public void setDozing(boolean dozing, boolean fade, long delay) {
+        mDozer.setDozing(f -> {
+            mDozeAmount = f;
             updateDecorColor();
             updateIconColor();
             updateAllowAnimation();
-        }, dark, fade, delay, this);
+        }, dozing, fade, delay, this);
     }
 
     private void updateAllowAnimation() {
-        if (mDarkAmount == 0 || mDarkAmount == 1) {
-            setAllowAnimation(mDarkAmount == 0);
+        if (mDozeAmount == 0 || mDozeAmount == 1) {
+            setAllowAnimation(mDozeAmount == 0);
         }
     }
 
@@ -947,6 +945,11 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     @Override
     public boolean isIconBlocked() {
         return mBlocked;
+    }
+
+    public void setIncreasedSize(boolean increasedSize) {
+        mIncreasedSize = increasedSize;
+        maybeUpdateIconScaleDimens();
     }
 
     public interface OnVisibilityChangedListener {

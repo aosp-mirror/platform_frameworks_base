@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.telephony.SubscriptionManager;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,8 +41,10 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
+import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -75,6 +78,11 @@ public class CellularTile extends QSTileImpl<SignalState> {
     @Override
     public SignalState newTileState() {
         return new SignalState();
+    }
+
+    @Override
+    public QSIconView createTileView(Context context) {
+        return new SignalTileView(context);
     }
 
     @Override
@@ -199,12 +207,13 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     private CharSequence appendMobileDataType(CharSequence current, CharSequence dataType) {
         if (TextUtils.isEmpty(dataType)) {
-            return current;
+            return Html.fromHtml(current.toString(), 0);
         }
         if (TextUtils.isEmpty(current)) {
-            return dataType;
+            return Html.fromHtml(dataType.toString(), 0);
         }
-        return mContext.getString(R.string.mobile_carrier_text_format, current, dataType);
+        String concat = mContext.getString(R.string.mobile_carrier_text_format, current, dataType);
+        return Html.fromHtml(concat, 0);
     }
 
     private CharSequence getMobileDataContentName(CallbackInfo cb) {
@@ -245,14 +254,17 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
         @Override
         public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
-                int qsType, boolean activityIn, boolean activityOut, String typeContentDescription,
-                String description, boolean isWide, int subId, boolean roaming) {
+                int qsType, boolean activityIn, boolean activityOut,
+                CharSequence typeContentDescription,
+                CharSequence typeContentDescriptionHtml, CharSequence description,
+                boolean isWide, int subId, boolean roaming) {
             if (qsIcon == null) {
                 // Not data sim, don't display.
                 return;
             }
             mInfo.dataSubscriptionName = mController.getMobileDataNetworkName();
-            mInfo.dataContentDescription = (description != null) ? typeContentDescription : null;
+            mInfo.dataContentDescription =
+                    (description != null) ? typeContentDescriptionHtml : null;
             mInfo.activityIn = activityIn;
             mInfo.activityOut = activityOut;
             mInfo.roaming = roaming;

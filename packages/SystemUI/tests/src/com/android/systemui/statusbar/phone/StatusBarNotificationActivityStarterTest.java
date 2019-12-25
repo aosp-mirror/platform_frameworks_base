@@ -153,8 +153,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         StatusBarNotification bubbleSbn = mBubbleNotificationRow.getStatusBarNotification();
         bubbleSbn.getNotification().contentIntent = mContentIntent;
         bubbleSbn.getNotification().flags |= Notification.FLAG_AUTO_CANCEL;
-        // Do what BubbleController's NotificationEntryListener#onPendingEntryAdded does:
-        mBubbleNotificationRow.getEntry().setShowInShadeWhenBubble(true);
 
         mActiveNotifications = new ArrayList<>();
         mActiveNotifications.add(mNotificationRow.getEntry());

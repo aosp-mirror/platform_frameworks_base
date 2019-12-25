@@ -75,6 +75,14 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
         mMaster = master;
         mLock = lock;
         mUserId = userId;
+        updateIsSetupComplete(userId);
+    }
+
+    /** Updates whether setup is complete for current user */
+    private void updateIsSetupComplete(@UserIdInt int userId) {
+        final String setupComplete = Settings.Secure.getStringForUser(
+                getContext().getContentResolver(), Settings.Secure.USER_SETUP_COMPLETE, userId);
+        mSetupComplete = "1".equals(setupComplete);
     }
 
     /**
@@ -143,9 +151,7 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
                     + ", disabled=" + disabled + ", mDisabled=" + mDisabled);
         }
 
-        final String setupComplete = Settings.Secure.getStringForUser(
-                getContext().getContentResolver(), Settings.Secure.USER_SETUP_COMPLETE, mUserId);
-        mSetupComplete = "1".equals(setupComplete);
+        updateIsSetupComplete(mUserId);
         mDisabled = disabled;
 
         updateServiceInfoLocked();

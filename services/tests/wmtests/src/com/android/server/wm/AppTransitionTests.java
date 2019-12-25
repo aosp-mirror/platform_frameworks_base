@@ -207,7 +207,7 @@ public class AppTransitionTests extends WindowTestsBase {
         final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
                 runner, 100, 50, true /* changeNeedsSnapshot */);
         // RemoteAnimationController will tracking RemoteAnimationAdapter's caller with calling pid.
-        adapter.setCallingPid(123);
+        adapter.setCallingPidUid(123, 456);
 
         // Simulate activity finish flows to prepare app transition & set visibility,
         // make sure transition is set as expected.

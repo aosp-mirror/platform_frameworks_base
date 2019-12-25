@@ -159,4 +159,7 @@
       <item quantity="few">SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja pre nego što SIM postane trajno neupotrebljiv. Detaljne informacije potražite od mobilnog operatera.</item>
       <item quantity="other">SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja pre nego što SIM postane trajno neupotrebljiv. Detaljne informacije potražite od mobilnog operatera.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Podrazumevani"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Mehurići"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analogni"</string>
 </resources>

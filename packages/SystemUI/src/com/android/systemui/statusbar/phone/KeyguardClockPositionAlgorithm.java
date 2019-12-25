@@ -112,6 +112,17 @@ public class KeyguardClockPositionAlgorithm {
     private float mEmptyDragAmount;
 
     /**
+     * Setting if bypass is enabled. If true the clock should always be positioned like it's dark
+     * and other minor adjustments.
+     */
+    private boolean mBypassEnabled;
+
+    /**
+     * The stackscroller padding when unlocked
+     */
+    private int mUnlockedStackScrollerPadding;
+
+    /**
      * Refreshes the dimension values.
      */
     public void loadDimens(Resources res) {
@@ -132,7 +143,8 @@ public class KeyguardClockPositionAlgorithm {
 
     public void setup(int minTopMargin, int maxShadeBottom, int notificationStackHeight,
             float panelExpansion, int parentHeight, int keyguardStatusHeight, int clockPreferredY,
-            boolean hasCustomClock, boolean hasVisibleNotifs, float dark, float emptyDragAmount) {
+            boolean hasCustomClock, boolean hasVisibleNotifs, float dark, float emptyDragAmount,
+            boolean bypassEnabled, int unlockedStackScrollerPadding) {
         mMinTopMargin = minTopMargin + mContainerTopPadding;
         mMaxShadeBottom = maxShadeBottom;
         mNotificationStackHeight = notificationStackHeight;
@@ -144,18 +156,24 @@ public class KeyguardClockPositionAlgorithm {
         mHasVisibleNotifs = hasVisibleNotifs;
         mDarkAmount = dark;
         mEmptyDragAmount = emptyDragAmount;
+        mBypassEnabled = bypassEnabled;
+        mUnlockedStackScrollerPadding = unlockedStackScrollerPadding;
     }
 
     public void run(Result result) {
-        final int y = getClockY();
+        final int y = getClockY(mPanelExpansion);
         result.clockY = y;
         result.clockAlpha = getClockAlpha(y);
-        result.stackScrollerPadding = y + mKeyguardStatusHeight;
+        result.stackScrollerPadding = mBypassEnabled ? mUnlockedStackScrollerPadding
+                : y + mKeyguardStatusHeight;
+        result.stackScrollerPaddingExpanded = mBypassEnabled ? mUnlockedStackScrollerPadding
+                : getClockY(1.0f) + mKeyguardStatusHeight;
         result.clockX = (int) interpolate(0, burnInPreventionOffsetX(), mDarkAmount);
     }
 
     public float getMinStackScrollerPadding() {
-        return mMinTopMargin + mKeyguardStatusHeight + mClockNotificationsMargin;
+        return mBypassEnabled ? mUnlockedStackScrollerPadding
+                : mMinTopMargin + mKeyguardStatusHeight + mClockNotificationsMargin;
     }
 
     private int getMaxClockY() {
@@ -167,7 +185,7 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private int getExpandedPreferredClockY() {
-        return (mHasCustomClock && !mHasVisibleNotifs) ? getPreferredClockY()
+        return (mHasCustomClock && (!mHasVisibleNotifs || mBypassEnabled)) ? getPreferredClockY()
                 : getExpandedClockPosition();
     }
 
@@ -195,7 +213,7 @@ public class KeyguardClockPositionAlgorithm {
         return (int) y;
     }
 
-    private int getClockY() {
+    private int getClockY(float panelExpansion) {
         // Dark: Align the bottom edge of the clock at about half of the screen:
         float clockYDark = (mHasCustomClock ? getPreferredClockY() : getMaxClockY())
                 + burnInPreventionOffsetY();
@@ -205,11 +223,12 @@ public class KeyguardClockPositionAlgorithm {
         float clockYBouncer = -mKeyguardStatusHeight;
 
         // Move clock up while collapsing the shade
-        float shadeExpansion = Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(mPanelExpansion);
+        float shadeExpansion = Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(panelExpansion);
         float clockY = MathUtils.lerp(clockYBouncer, clockYRegular, shadeExpansion);
         clockYDark = MathUtils.lerp(clockYBouncer, clockYDark, shadeExpansion);
 
-        return (int) (MathUtils.lerp(clockY, clockYDark, mDarkAmount) + mEmptyDragAmount);
+        float darkAmount = mBypassEnabled && !mHasCustomClock ? 1.0f : mDarkAmount;
+        return (int) (MathUtils.lerp(clockY, clockYDark, darkAmount) + mEmptyDragAmount);
     }
 
     /**
@@ -257,5 +276,10 @@ public class KeyguardClockPositionAlgorithm {
          * The top padding of the stack scroller, in pixels.
          */
         public int stackScrollerPadding;
+
+        /**
+         * The top padding of the stack scroller, in pixels when fully expanded.
+         */
+        public int stackScrollerPaddingExpanded;
     }
 }

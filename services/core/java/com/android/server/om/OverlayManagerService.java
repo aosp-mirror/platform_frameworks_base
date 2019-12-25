@@ -751,7 +751,7 @@ public final class OverlayManagerService extends SystemService {
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             final DumpState dumpState = new DumpState();
-            dumpState.setUserId(UserHandle.getUserId(Binder.getCallingUid()));
+            dumpState.setUserId(UserHandle.USER_ALL);
 
             int opti = 0;
             while (opti < args.length) {
@@ -771,13 +771,13 @@ public final class OverlayManagerService extends SystemService {
                     pw.println("  so the following are equivalent: mState, mstate, State, state.");
                     return;
                 } else if ("--user".equals(opt)) {
-                    opti++;
                     if (opti >= args.length) {
                         pw.println("Error: user missing argument");
                         return;
                     }
                     try {
                         dumpState.setUserId(Integer.parseInt(args[opti]));
+                        opti++;
                     } catch (NumberFormatException e) {
                         pw.println("Error: user argument is not a number: " + args[opti]);
                         return;

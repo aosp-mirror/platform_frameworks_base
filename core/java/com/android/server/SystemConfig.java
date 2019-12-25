@@ -53,6 +53,8 @@ import java.util.Map;
 
 /**
  * Loads global system configuration info.
+ * Note: Initializing this class hits the disk and is slow.  This class should generally only be
+ * accessed by the system_server process.
  */
 public class SystemConfig {
     static final String TAG = "SystemConfig";
@@ -209,6 +211,11 @@ public class SystemConfig {
     private final ArraySet<String> mBugreportWhitelistedPackages = new ArraySet<>();
 
     public static SystemConfig getInstance() {
+        if (!isSystemProcess()) {
+            Slog.wtf(TAG, "SystemConfig is being accessed by a process other than "
+                    + "system_server.");
+        }
+
         synchronized (SystemConfig.class) {
             if (sInstance == null) {
                 sInstance = new SystemConfig();
@@ -1153,5 +1160,9 @@ public class SystemConfig {
         if (!newPermissions.isEmpty()) {
             mSplitPermissions.add(new SplitPermissionInfo(splitPerm, newPermissions, targetSdk));
         }
+    }
+
+    private static boolean isSystemProcess() {
+        return Process.myUid() == Process.SYSTEM_UID;
     }
 }

@@ -20,6 +20,8 @@ import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_NONE;
+import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -80,6 +82,7 @@ import static com.android.server.policy.WindowManagerPolicy.TRANSIT_ENTER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_EXIT;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.wm.AnimationSpecProto.MOVE;
+import static com.android.server.wm.DisplayContent.logsGestureExclusionRestrictions;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
@@ -170,9 +173,11 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.util.Slog;
+import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -225,6 +230,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // The thickness of a window resize handle outside the window bounds on the free form workspace
     // to capture touch events in that area.
     static final int RESIZE_HANDLE_WIDTH_IN_DP = 30;
+
+    static final int EXCLUSION_LEFT = 0;
+    static final int EXCLUSION_RIGHT = 1;
 
     final WindowManagerPolicy mPolicy;
     final Context mContext;
@@ -319,6 +327,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     int mLayoutSeq = -1;
 
+    /** @see #addEmbeddedDisplayContent(DisplayContent dc) */
+    private final ArraySet<DisplayContent> mEmbeddedDisplayContents = new ArraySet<>();
+
     /**
      * Used to store last reported to client configuration and check if we have newer available.
      * We'll send configuration to client only if it is different from the last applied one and
@@ -392,6 +403,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Coordinates are relative to the window's position.
      */
     private final List<Rect> mExclusionRects = new ArrayList<>();
+
+    // 0 = left, 1 = right
+    private final int[] mLastRequestedExclusionHeight = {0, 0};
+    private final int[] mLastGrantedExclusionHeight = {0, 0};
+    private final long[] mLastExclusionLogUptimeMillis = {0, 0};
+
+    private boolean mLastShownChangedReported;
 
     // If a window showing a wallpaper: the requested offset for the
     // wallpaper; if a wallpaper window: the currently applied offset.
@@ -539,6 +557,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final Point mTmpPoint = new Point();
 
     /**
+     * If a window is on a display which has been re-parented to a view in another window,
+     * use this offset to indicate the correct location.
+     */
+    private final Point mLastReportedDisplayOffset = new Point();
+
+    /**
      * Whether the window was resized by us while it was gone for layout.
      */
     boolean mResizedWhileGone = false;
@@ -667,6 +691,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 (mSystemUiVisibility & immersiveStickyFlags) == immersiveStickyFlags;
         return immersiveSticky && mWmService.mSystemGestureExcludedByPreQStickyImmersive
                 && mAppToken != null && mAppToken.mTargetSdk < Build.VERSION_CODES.Q;
+    }
+
+    void setLastExclusionHeights(int side, int requested, int granted) {
+        boolean changed = mLastGrantedExclusionHeight[side] != granted
+                || mLastRequestedExclusionHeight[side] != requested;
+
+        if (changed) {
+            if (mLastShownChangedReported) {
+                logExclusionRestrictions(side);
+            }
+
+            mLastGrantedExclusionHeight[side] = granted;
+            mLastRequestedExclusionHeight[side] = requested;
+        }
     }
 
     interface PowerManagerWrapper {
@@ -1792,11 +1830,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             startMoveAnimation(left, top);
         }
 
-        //TODO (multidisplay): Accessibility supported only for the default display.
-        if (mWmService.mAccessibilityController != null
-                && getDisplayContent().getDisplayId() == DEFAULT_DISPLAY) {
+        // TODO (multidisplay): Accessibility supported only for the default display and
+        // embedded displays
+        if (mWmService.mAccessibilityController != null && (getDisplayId() == DEFAULT_DISPLAY
+                || getDisplayContent().getParentWindow() != null)) {
             mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
         }
+        updateLocationInParentDisplayIfNeeded();
 
         try {
             mClient.moved(left, top);
@@ -2945,6 +2985,49 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mAnimatingExit = false;
     }
 
+    void onSurfaceShownChanged(boolean shown) {
+        if (mLastShownChangedReported == shown) {
+            return;
+        }
+        mLastShownChangedReported = shown;
+
+        if (shown) {
+            initExclusionRestrictions();
+        } else {
+            logExclusionRestrictions(EXCLUSION_LEFT);
+            logExclusionRestrictions(EXCLUSION_RIGHT);
+        }
+    }
+
+    private void logExclusionRestrictions(int side) {
+        if (!logsGestureExclusionRestrictions(this)
+                || SystemClock.uptimeMillis() < mLastExclusionLogUptimeMillis[side]
+                + mWmService.mSystemGestureExclusionLogDebounceTimeoutMillis) {
+            // Drop the log if we have just logged; this is okay, because what we would have logged
+            // was true only for a short duration.
+            return;
+        }
+
+        final long now = SystemClock.uptimeMillis();
+        final long duration = now - mLastExclusionLogUptimeMillis[side];
+        mLastExclusionLogUptimeMillis[side] = now;
+
+        final int requested = mLastRequestedExclusionHeight[side];
+        final int granted = mLastGrantedExclusionHeight[side];
+
+        StatsLog.write(StatsLog.EXCLUSION_RECT_STATE_CHANGED,
+                mAttrs.packageName, requested, requested - granted /* rejected */,
+                side + 1 /* Sides are 1-indexed in atoms.proto */,
+                (getConfiguration().orientation == ORIENTATION_LANDSCAPE),
+                isSplitScreenWindowingMode(getWindowingMode()), (int) duration);
+    }
+
+    private void initExclusionRestrictions() {
+        final long now = SystemClock.uptimeMillis();
+        mLastExclusionLogUptimeMillis[EXCLUSION_LEFT] = now;
+        mLastExclusionLogUptimeMillis[EXCLUSION_RIGHT] = now;
+    }
+
     @Override
     public boolean isDefaultDisplay() {
         final DisplayContent displayContent = getDisplayContent();
@@ -3177,11 +3260,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         displayCutout);
             }
 
-            //TODO (multidisplay): Accessibility supported only for the default display.
+            // TODO (multidisplay): Accessibility supported only for the default display and
+            // embedded displays
             if (mWmService.mAccessibilityController != null && (getDisplayId() == DEFAULT_DISPLAY
                     || getDisplayContent().getParentWindow() != null)) {
                 mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
             }
+            updateLocationInParentDisplayIfNeeded();
 
             mWindowFrames.resetInsetsChanged();
             mWinAnimator.mSurfaceResized = false;
@@ -3197,6 +3282,36 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mWmService.mWindowPlacerLocked.requestTraversal();
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    void updateLocationInParentDisplayIfNeeded() {
+        final int embeddedDisplayContentsSize = mEmbeddedDisplayContents.size();
+        // If there is any embedded display which is re-parented to this window, we need to
+        // notify all windows in the embedded display about the location change.
+        if (embeddedDisplayContentsSize != 0) {
+            for (int i = embeddedDisplayContentsSize - 1; i >= 0; i--) {
+                final DisplayContent edc = mEmbeddedDisplayContents.valueAt(i);
+                edc.notifyLocationInParentDisplayChanged();
+            }
+        }
+        // If this window is in a embedded display which is re-parented to another window,
+        // we may need to update its correct on-screen location.
+        final DisplayContent dc = getDisplayContent();
+        if (dc.getParentWindow() == null) {
+            return;
+        }
+
+        final Point offset = dc.getLocationInParentDisplay();
+        if (mLastReportedDisplayOffset.equals(offset)) {
+            return;
+        }
+
+        mLastReportedDisplayOffset.set(offset.x, offset.y);
+        try {
+            mClient.locationInParentDisplayChanged(mLastReportedDisplayOffset);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to update offset from DisplayContent", e);
+        }
     }
 
     /**
@@ -3618,6 +3733,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         pw.println(prefix + "isOnScreen=" + isOnScreen());
         pw.println(prefix + "isVisible=" + isVisible());
+        pw.println(prefix + "mEmbeddedDisplayContents=" + mEmbeddedDisplayContents);
     }
 
     @Override
@@ -4248,7 +4364,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        //TODO (multidisplay): Accessibility is supported only for the default display.
+        // TODO (multidisplay): Accessibility supported only for the default display and
+        // embedded displays
         if (mWmService.mAccessibilityController != null && (getDisplayId() == DEFAULT_DISPLAY
                 || getDisplayContent().getParentWindow() != null)) {
             mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
@@ -4617,6 +4734,28 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     boolean isLaidOut() {
         return mLayoutSeq != -1;
+    }
+
+    /**
+     * Add the DisplayContent of the embedded display which is re-parented to this window to
+     * the list of embedded displays.
+     *
+     * @param dc DisplayContent of the re-parented embedded display.
+     * @return {@code true} if the giving DisplayContent is added, {@code false} otherwise.
+     */
+    boolean addEmbeddedDisplayContent(DisplayContent dc) {
+        return mEmbeddedDisplayContents.add(dc);
+    }
+
+    /**
+     * Remove the DisplayContent of the embedded display which is re-parented to this window from
+     * the list of embedded displays.
+     *
+     * @param dc DisplayContent of the re-parented embedded display.
+     * @return {@code true} if the giving DisplayContent is removed, {@code false} otherwise.
+     */
+    boolean removeEmbeddedDisplayContent(DisplayContent dc) {
+        return mEmbeddedDisplayContents.remove(dc);
     }
 
     /**
@@ -5039,6 +5178,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         tempRegion.translate(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top);
         region.op(tempRegion, Region.Op.UNION);
         tempRegion.recycle();
+    }
+
+    boolean hasTapExcludeRegion() {
+        return mTapExcludeRegionHolder != null && !mTapExcludeRegionHolder.isEmpty();
     }
 
     @Override

@@ -24,7 +24,7 @@ import android.util.MathUtils;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.android.keyguard.R;
+import com.android.systemui.R;
 
 /**
  * Positions clock faces (analog, digital, typographic) and handles pixel shifting
@@ -94,7 +94,8 @@ public class ClockLayout extends FrameLayout {
                 getBurnInOffset(mBurnInPreventionOffsetX * 2, true) - mBurnInPreventionOffsetX,
                 mDarkAmount);
         final float offsetY = MathUtils.lerp(0f,
-                getBurnInOffset(mBurnInPreventionOffsetY * 2, false) - mBurnInPreventionOffsetY,
+                getBurnInOffset(mBurnInPreventionOffsetY * 2, false)
+                        - 0.5f * mBurnInPreventionOffsetY,
                 mDarkAmount);
 
         // Put the analog clock in the middle of the screen.

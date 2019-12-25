@@ -48,6 +48,8 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -390,6 +392,17 @@ class LockSettingsStorage {
         return stored;
     }
 
+    private void fsyncDirectory(File directory) {
+        try {
+            try (FileChannel file = FileChannel.open(directory.toPath(),
+                    StandardOpenOption.READ)) {
+                file.force(true);
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Error syncing directory: " + directory, e);
+        }
+    }
+
     private void writeFile(String name, byte[] hash) {
         synchronized (mFileWriteLock) {
             RandomAccessFile raf = null;
@@ -406,6 +419,7 @@ class LockSettingsStorage {
                     raf.write(hash, 0, hash.length);
                 }
                 raf.close();
+                fsyncDirectory((new File(name)).getAbsoluteFile().getParentFile());
             } catch (IOException e) {
                 Slog.e(TAG, "Error writing to file " + e);
             } finally {

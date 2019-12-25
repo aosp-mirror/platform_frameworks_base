@@ -16,9 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="backup_confirm_title" msgid="827563724209303345">"Backup sepenuhnya"</string>
+    <string name="backup_confirm_title" msgid="827563724209303345">"Pencadangan lengkap"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Pemulihan sepenuhnya"</string>
-    <string name="backup_confirm_text" msgid="1878021282758896593">"Backup lengkap semua data ke komputer yang tersambung telah diminta. Apakah Anda ingin mengizinkan hal ini dilakukan?\n\nJika Anda tidak meminta backup ini, jangan izinkan operasi dilanjutkan."</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"Pencadangan semua data ke komputer yang tersambung telah diminta. Apakah Anda ingin mengizinkan hal ini dilakukan?\n\nJika Anda tidak meminta pencadangan ini, jangan izinkan operasi dilanjutkan."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Cadangkan data saya"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Jangan mencadangkan"</string>
     <string name="restore_confirm_text" msgid="7499866728030461776">"Pemulihan lengkap semua data dari komputer desktop yang tersambung telah diminta. Apakah Anda ingin mengizinkan hal ini?\n\nJika Anda tidak meminta pemulihan ini, jangan izinkan operasi dilanjutkan. Operasi ini akan mengganti data apa pun yang saat ini ada dalam perangkat!"</string>
@@ -31,8 +31,8 @@
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Jika Anda ingin mengenkripsi data cadangan lengkap, masukkan sandi di bawah:"</string>
     <string name="backup_enc_password_required" msgid="7889652203371654149">"Karena perangkat Anda dienkripsi, Anda perlu mengenkripsi cadangan. Masukkan sandi di bawah:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Jika data pemulihan dienkripsi, masukkan sandi di bawah:"</string>
-    <string name="toast_backup_started" msgid="550354281452756121">"Backup dimulai..."</string>
-    <string name="toast_backup_ended" msgid="3818080769548726424">"Backup selesai"</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"Pencadangan dimulai..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"Pencadangan selesai"</string>
     <string name="toast_restore_started" msgid="7881679218971277385">"Pemulihan dimulai..."</string>
     <string name="toast_restore_ended" msgid="1764041639199696132">"Pemulihan berakhir"</string>
     <string name="toast_timeout" msgid="5276598587087626877">"Waktu tunggu operasi habis"</string>

@@ -88,7 +88,7 @@ public class WifiSignalController extends
                 && (mCurrentState.connected || !mHasMobileData || visibleWhenEnabled);
         String wifiDesc = wifiVisible ? mCurrentState.ssid : null;
         boolean ssidPresent = wifiVisible && mCurrentState.ssid != null;
-        String contentDescription = getStringIfExists(getContentDescription());
+        String contentDescription = getStringIfExists(getContentDescription()).toString();
         if (mCurrentState.inetCondition == 0) {
             contentDescription += ("," + mContext.getString(R.string.data_connection_no_internet));
         }

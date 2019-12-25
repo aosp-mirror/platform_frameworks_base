@@ -120,17 +120,6 @@ public abstract class ActivityManagerInternal {
     public abstract void setHasOverlayUi(int pid, boolean hasOverlayUi);
 
     /**
-     * Sets if the given pid is currently running a remote animation, which is taken a signal for
-     * determining oom adjustment and scheduling behavior.
-     *
-     * @param pid The pid we are setting overlay UI for.
-     * @param runningRemoteAnimation True if the process is running a remote animation, false
-     *                               otherwise.
-     * @see RemoteAnimationAdapter
-     */
-    public abstract void setRunningRemoteAnimation(int pid, boolean runningRemoteAnimation);
-
-    /**
      * Called after the network policy rules are updated by
      * {@link com.android.server.net.NetworkPolicyManagerService} for a specific {@param uid} and
      * {@param procStateSeq}.

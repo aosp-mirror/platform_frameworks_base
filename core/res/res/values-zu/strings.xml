@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Imilayezo yevoyisimeyili"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Ukushaya kwe-Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Isimo se-SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Isimo se-SIM esiphezulu kakhulu"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Umngani ucele imodi ye-TTY ephelele"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Umngani ucele imodi ye-TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Umngani ucele imodi ye-TTY VCO"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Isithonjana sezigxivizo zeminwe"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"phatha izingxenyekazi zekhompuyutha zokufakazela ubuqiniso zobuso"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"phatha izingxenyekazi zekhompuyutha ze-face unlock"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Ivumela uhlelo lokusebenza ukuthi luhoxise izindlela zokungeza nokususa amathempulethi obuso azosetshenziswa."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"sebenzisa izingxenyekazi zekhompuyutha zokufakazela ubuqiniso kobuso"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Ivumela uhlelo lokusebenza ukuthi lusebenzise ukufakazela ubuqiniso bobuso bezingxenyekazi ukuze kufakazelwe ubuqiniso"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Ukufakazela ubuqiniso bobuso"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"sebenzisa izingxenyekazi zekhompuyutha ze-face unlock"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Ivumela uhlelo lokusebenza ukuthi lusebenzise izingxenyekazi zekhompuyutha ze-face unlock ukuze kufakazelwe ubuqiniso"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"I-Face unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Phinda ubhalise ubuso bakho"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Ukuze uthuthukise ukubonwa, sicela uphinde ubhalise ubuso bakho"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Ayikwazanga ukuthwebula idatha enembile yobuso. Zama futhi."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Hambisa ifoni ngakwesokunxele."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Hambisa ifoni ngakwesokudla."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Sicela ubheke ngokuqondile kakhulu kudivayisi yakho."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Ayikwazi ukubona ubuso bakho. Bheka ifoni"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Beka ubuso bakho ngqo phambi kwefoni."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Ukunyakaza okuningi kakhulu. Bamba ifoni iqine."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Sicela uphinde ubhalise ubuso bakho."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ayisakwazi ukubona ubuso. Zama futhi."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Jikisa ikhanda lakho kancane."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Jikisa ikhanda lakho kancane."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Susa noma yini efihle ubuso bakho."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Hlanza inzwa kunqenqema oluphezulu lwesikrini."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Hlanza okuphezulu kwesikrini sakho, kufaka phakathi ibha emnyama"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Ayikwazi ukuqinisekisa ubuso. Izingxenyekazi zekhompyutha azitholakali."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Zama ukufakazela ubuqiniso bobuso futhi."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Zama i-face unlock futhi."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Ayikwazi ukulondoloza idatha yobuso. Susa endala."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Umsebenzi wobuso ukhanselwe"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Ukufakazela ubuqiniso kobuso kukhanselwe umsebenzisi"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Umsebenzi wobuso ukhanselwe."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"I-face unlock ikhanselwe umsebenzisi."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Imizamo eminingi kakhulu. Zama futhi emuva kwesikhathi."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Imizamo eminingi kakhulu. Ukugunyaza ubuso kukhutshaziwe."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Imizamo eminingi kakhulu. I-Face unlock ikhutshaziwe."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Ayikwazi ukuqinisekisa ubuso. Zama futhi."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Awukakasethi ukufakazela ubuqiniso bobuso"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Ukufakazela ubuqiniso bobuso akusekelwe kule divayisi"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Awukakasethi i-face unlock."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"I-face unlock ayisekelwe kule divayisi."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Ubuso be-<xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1254,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Thepha ukuze ubone onke amanethiwekhi"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Xhuma"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Onke amanethiwekhi"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Xhumeka kumanethiwekhi e-Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Kuphakanyiswe ngu-<xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Yebo"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Cha"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Vumela amanethiwekhi e-Wi-Fi aphakanyisiwe?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> amanethiwekhi aphakanyisiwe. Idivayisi ingaxhumeka ngokuzenzakalela."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Vumela"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Cha ngiyabonga"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"I-Wi-Fi izovuleka ngokuzenzakalela"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Uma useduze kwenethiwekhi yekhwalithi ephezulu elondoloziwe"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ungaphindi uvule"</string>
@@ -1887,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Akufakwanga esigabeni"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Usethe ukubaluleka kwalezi zaziso."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Lokhu kubalulekile ngenxa yabantu ababandakanyekayo."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Vumela i-<xliff:g id="APP">%1$s</xliff:g> ukudala umsebenzisi omusha nge-<xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Vumela i-<xliff:g id="APP">%1$s</xliff:g> ukudala umsebenzisi omusha nge-<xliff:g id="ACCOUNT">%2$s</xliff:g> (umsebenzisi onale akhawunti usuvel ukhona) ?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Vumela i-<xliff:g id="APP">%1$s</xliff:g> ukuthi idale umsebenzisi omusha nge-<xliff:g id="ACCOUNT">%2$s</xliff:g> (Umsebenzisi onale akhawunti usevele ukhona) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Vumela i-<xliff:g id="APP">%1$s</xliff:g> ukuthi idale umsebenzisi omusha nge-<xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Engeza ulwimi"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Okuncamelayo kwesifunda"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Thayipha igama lolimi"</string>

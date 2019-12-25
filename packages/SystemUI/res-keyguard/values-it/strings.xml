@@ -151,4 +151,7 @@
       <item quantity="other">La scheda SIM è ora disattivata. Inserisci il codice PUK per continuare. Hai ancora <xliff:g id="_NUMBER_1">%d</xliff:g> tentativi a disposizione prima che la SIM diventi definitivamente inutilizzabile. Per informazioni dettagliate, contatta l\'operatore.</item>
       <item quantity="one">La scheda SIM è ora disattivata. Inserisci il codice PUK per continuare. Hai ancora <xliff:g id="_NUMBER_0">%d</xliff:g> tentativo a disposizione prima che la SIM diventi definitivamente inutilizzabile. Per informazioni dettagliate, contatta l\'operatore.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Predefinito"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Bolla"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analogico"</string>
 </resources>
