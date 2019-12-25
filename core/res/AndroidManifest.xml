@@ -228,6 +228,8 @@
     <protected-broadcast android:name="android.bluetooth.mapmce.profile.action.MESSAGE_RECEIVED" />
     <protected-broadcast android:name="android.bluetooth.mapmce.profile.action.MESSAGE_SENT_SUCCESSFULLY" />
     <protected-broadcast android:name="android.bluetooth.mapmce.profile.action.MESSAGE_DELIVERED_SUCCESSFULLY" />
+    <protected-broadcast android:name="android.bluetooth.mapmce.profile.action.MESSAGE_READ_STATUS_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.mapmce.profile.action.MESSAGE_DELETED_STATUS_CHANGED" />
     <protected-broadcast
         android:name="com.android.bluetooth.BluetoothMapContentObserver.action.MESSAGE_SENT" />
     <protected-broadcast
