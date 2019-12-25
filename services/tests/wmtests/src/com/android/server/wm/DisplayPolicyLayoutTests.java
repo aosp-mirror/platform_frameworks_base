@@ -272,7 +272,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
 
         final InsetsState state =
-                mDisplayContent.getInsetsStateController().getInsetsForDispatch(mWindow);
+                mDisplayContent.getInsetsPolicy().getInsetsForDispatch(mWindow);
         state.getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         state.getSource(InsetsState.ITYPE_NAVIGATION_BAR).setVisible(false);
         mWindow.mAttrs.setFitIgnoreVisibility(true);
@@ -294,7 +294,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
 
         final InsetsState state =
-                mDisplayContent.getInsetsStateController().getInsetsForDispatch(mWindow);
+                mDisplayContent.getInsetsPolicy().getInsetsForDispatch(mWindow);
         state.getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         state.getSource(InsetsState.ITYPE_NAVIGATION_BAR).setVisible(false);
         mWindow.mAttrs.setFitIgnoreVisibility(false);
@@ -452,7 +452,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_FULLSCREEN;
-        mDisplayContent.getInsetsStateController().getInsetsForDispatch(mWindow)
+        mDisplayContent.getInsetsPolicy().getInsetsForDispatch(mWindow)
                 .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         addWindow(mWindow);
 
@@ -473,7 +473,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_FULLSCREEN;
-        mDisplayContent.getInsetsStateController().getInsetsForDispatch(mWindow)
+        mDisplayContent.getInsetsPolicy().getInsetsForDispatch(mWindow)
                 .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         addWindow(mWindow);

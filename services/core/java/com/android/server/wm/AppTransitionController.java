@@ -624,8 +624,8 @@ public class AppTransitionController {
             // If we start the app transition at this point, we will interrupt it halfway with a
             // new rotation animation after the old one finally finishes. It's better to defer the
             // app transition.
-            if (screenRotationAnimation != null && screenRotationAnimation.isAnimating() &&
-                    mDisplayContent.getDisplayRotation().needsUpdate()) {
+            if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()
+                    && mDisplayContent.getDisplayRotation().needsUpdate()) {
                 ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                         "Delaying app transition for screen rotation animation to finish");
                 return false;

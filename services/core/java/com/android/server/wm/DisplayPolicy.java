@@ -1878,7 +1878,7 @@ public class DisplayPolicy {
             final Rect dfu = displayFrames.mUnrestricted;
             Insets insets = Insets.of(0, 0, 0, 0);
             for (int i = types.size() - 1; i >= 0; i--) {
-                insets = Insets.max(insets, mDisplayContent.getInsetsStateController()
+                insets = Insets.max(insets, mDisplayContent.getInsetsPolicy()
                         .getInsetsForDispatch(win).getSource(types.valueAt(i))
                         .calculateInsets(dfu, attrs.getFitIgnoreVisibility()));
             }

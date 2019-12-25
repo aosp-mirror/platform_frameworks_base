@@ -1651,7 +1651,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     outFrame, outContentInsets, outStableInsets, outDisplayCutout)) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS;
             }
-            outInsetsState.set(displayContent.getInsetsPolicy().getInsetsForDispatch(win));
+            outInsetsState.set(displayContent.getInsetsPolicy().getInsetsForDispatch(win),
+                    win.mClient instanceof IWindow.Stub /* copySource */);
 
             if (mInTouchMode) {
                 res |= WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE;
@@ -2335,7 +2336,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     outStableInsets);
             outCutout.set(win.getWmDisplayCutout().getDisplayCutout());
             outBackdropFrame.set(win.getBackdropFrame(win.getFrameLw()));
-            outInsetsState.set(displayContent.getInsetsPolicy().getInsetsForDispatch(win));
+            outInsetsState.set(displayContent.getInsetsPolicy().getInsetsForDispatch(win),
+                    win.mClient instanceof IWindow.Stub /* copySource */);
             if (DEBUG) {
                 Slog.v(TAG_WM, "Relayout given client " + client.asBinder()
                         + ", requestedWidth=" + requestedWidth

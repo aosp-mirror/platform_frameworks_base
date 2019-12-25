@@ -16,7 +16,6 @@
 
 package android.net.wifi.wificond;
 
-import android.net.wifi.IWifiScannerImpl;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;

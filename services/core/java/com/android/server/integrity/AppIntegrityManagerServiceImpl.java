@@ -25,6 +25,8 @@ import static android.content.integrity.AppIntegrityManager.STATUS_FAILURE;
 import static android.content.integrity.AppIntegrityManager.STATUS_SUCCESS;
 import static android.content.pm.PackageManager.EXTRA_VERIFICATION_ID;
 
+import static com.android.server.integrity.IntegrityUtils.getHexDigest;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
@@ -331,7 +333,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
             byte[] hashBytes = messageDigest.digest(packageName.getBytes(StandardCharsets.UTF_8));
-            return toHexString(hashBytes);
+            return getHexDigest(hashBytes);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 algorithm not found", e);
         }
@@ -425,19 +427,10 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] publicKey = digest.digest(certificate.getEncoded());
-            return toHexString(publicKey);
+            return getHexDigest(publicKey);
         } catch (NoSuchAlgorithmException | CertificateEncodingException e) {
             throw new IllegalArgumentException("Error error computing fingerprint", e);
         }
-    }
-
-    private static String toHexString(byte[] bytes) {
-        // each byte is represented by two hex chars
-        StringBuffer hexString = new StringBuffer(bytes.length * 2);
-        for (int i = 0; i < bytes.length; i++) {
-            hexString.append(String.format("%02X", bytes[i]));
-        }
-        return new String(hexString);
     }
 
     private PackageInfo getPackageArchiveInfo(Uri dataUri) {

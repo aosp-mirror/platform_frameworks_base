@@ -16,19 +16,31 @@
 
 package com.android.mediaroutertest;
 
+import static android.media.MediaRoute2Info.CONNECTION_STATE_CONNECTED;
+import static android.media.MediaRoute2Info.CONNECTION_STATE_CONNECTING;
+import static android.media.MediaRoute2Info.DEVICE_TYPE_SPEAKER;
+import static android.media.MediaRoute2Info.DEVICE_TYPE_TV;
+import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
+import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE;
+
 import static com.android.mediaroutertest.MediaRouterManagerTest.CATEGORIES_ALL;
 import static com.android.mediaroutertest.MediaRouterManagerTest.CATEGORIES_SPECIAL;
+import static com.android.mediaroutertest.MediaRouterManagerTest.CATEGORY_SAMPLE;
+import static com.android.mediaroutertest.MediaRouterManagerTest.CATEGORY_SPECIAL;
 import static com.android.mediaroutertest.MediaRouterManagerTest.ROUTE_ID_SPECIAL_CATEGORY;
 import static com.android.mediaroutertest.MediaRouterManagerTest.ROUTE_ID_VARIABLE_VOLUME;
 import static com.android.mediaroutertest.MediaRouterManagerTest.SYSTEM_PROVIDER_ID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2;
+import android.net.Uri;
+import android.os.Parcel;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -85,6 +97,90 @@ public class MediaRouter2Test {
 
         assertEquals(1, routes.size());
         assertNotNull(routes.get(ROUTE_ID_SPECIAL_CATEGORY));
+    }
+
+    @Test
+    public void testRouteInfoEquality() {
+        MediaRoute2Info routeInfo = new MediaRoute2Info.Builder("id", "name")
+                .setDescription("description")
+                .setClientPackageName("com.android.mediaroutertest")
+                .setConnectionState(CONNECTION_STATE_CONNECTING)
+                .setIconUri(new Uri.Builder().path("icon").build())
+                .setVolume(5)
+                .setVolumeMax(20)
+                .addSupportedCategory(CATEGORY_SAMPLE)
+                .setVolumeHandling(PLAYBACK_VOLUME_VARIABLE)
+                .setDeviceType(DEVICE_TYPE_SPEAKER)
+                .build();
+
+        MediaRoute2Info routeInfoRebuilt = new MediaRoute2Info.Builder(routeInfo).build();
+        assertEquals(routeInfo, routeInfoRebuilt);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeParcelable(routeInfo, 0);
+        parcel.setDataPosition(0);
+        MediaRoute2Info routeInfoFromParcel = parcel.readParcelable(null);
+
+        assertEquals(routeInfo, routeInfoFromParcel);
+    }
+
+    @Test
+    public void testRouteInfoInequality() {
+        MediaRoute2Info route = new MediaRoute2Info.Builder("id", "name")
+                .setDescription("description")
+                .setClientPackageName("com.android.mediaroutertest")
+                .setConnectionState(CONNECTION_STATE_CONNECTING)
+                .setIconUri(new Uri.Builder().path("icon").build())
+                .addSupportedCategory(CATEGORY_SAMPLE)
+                .setVolume(5)
+                .setVolumeMax(20)
+                .setVolumeHandling(PLAYBACK_VOLUME_VARIABLE)
+                .setDeviceType(DEVICE_TYPE_SPEAKER)
+                .build();
+
+        MediaRoute2Info routeId = new MediaRoute2Info.Builder(route)
+                .setId("another id").build();
+        assertNotEquals(route, routeId);
+
+        MediaRoute2Info routeName = new MediaRoute2Info.Builder(route)
+                .setName("another name").build();
+        assertNotEquals(route, routeName);
+
+        MediaRoute2Info routeDescription = new MediaRoute2Info.Builder(route)
+                .setDescription("another description").build();
+        assertNotEquals(route, routeDescription);
+
+        MediaRoute2Info routeConnectionState = new MediaRoute2Info.Builder(route)
+                .setConnectionState(CONNECTION_STATE_CONNECTED).build();
+        assertNotEquals(route, routeConnectionState);
+
+        MediaRoute2Info routeIcon = new MediaRoute2Info.Builder(route)
+                .setIconUri(new Uri.Builder().path("new icon").build()).build();
+        assertNotEquals(route, routeIcon);
+
+        MediaRoute2Info routeClient = new MediaRoute2Info.Builder(route)
+                .setClientPackageName("another.client.package").build();
+        assertNotEquals(route, routeClient);
+
+        MediaRoute2Info routeCategory = new MediaRoute2Info.Builder(route)
+                .addSupportedCategory(CATEGORY_SPECIAL).build();
+        assertNotEquals(route, routeCategory);
+
+        MediaRoute2Info routeVolume = new MediaRoute2Info.Builder(route)
+                .setVolume(10).build();
+        assertNotEquals(route, routeVolume);
+
+        MediaRoute2Info routeVolumeMax = new MediaRoute2Info.Builder(route)
+                .setVolumeMax(30).build();
+        assertNotEquals(route, routeVolumeMax);
+
+        MediaRoute2Info routeVolumeHandling = new MediaRoute2Info.Builder(route)
+                .setVolumeHandling(PLAYBACK_VOLUME_FIXED).build();
+        assertNotEquals(route, routeVolumeHandling);
+
+        MediaRoute2Info routeDeviceType = new MediaRoute2Info.Builder(route)
+                .setVolume(DEVICE_TYPE_TV).build();
+        assertNotEquals(route, routeDeviceType);
     }
 
     @Test
