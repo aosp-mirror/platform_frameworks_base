@@ -3175,6 +3175,34 @@ public class SubscriptionManager {
     }
 
     /**
+     * Set uicc applications being enabled or disabled.
+     * The value will be remembered on the subscription and will be applied whenever it's present.
+     * If the subscription in currently present, it will also apply the setting to modem
+     * immediately.
+     *
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     *
+     * @param enabled whether uicc applications are enabled or disabled.
+     * @param subscriptionId which subscription to operate on.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public void setUiccApplicationsEnabled(boolean enabled, int subscriptionId) {
+        if (VDBG) {
+            logd("setUiccApplicationsEnabled subId= " + subscriptionId + " enable " + enabled);
+        }
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                iSub.setUiccApplicationsEnabled(enabled, subscriptionId);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+    }
+
+    /**
      * Whether it's supported to disable / re-enable a subscription on a physical (non-euicc) SIM.
      *
      * Physical SIM refers non-euicc, or aka non-programmable SIM.
