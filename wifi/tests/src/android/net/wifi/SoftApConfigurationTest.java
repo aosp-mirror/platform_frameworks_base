@@ -50,6 +50,7 @@ public class SoftApConfigurationTest {
         assertThat(original.getBand()).isEqualTo(SoftApConfiguration.BAND_2GHZ);
         assertThat(original.getChannel()).isEqualTo(0);
         assertThat(original.isHiddenSsid()).isEqualTo(false);
+        assertThat(original.getMaxNumberOfClients()).isEqualTo(0);
 
         SoftApConfiguration unparceled = parcelUnparcel(original);
         assertThat(unparceled).isNotSameAs(original);
@@ -73,7 +74,7 @@ public class SoftApConfigurationTest {
         assertThat(original.getBand()).isEqualTo(SoftApConfiguration.BAND_2GHZ);
         assertThat(original.getChannel()).isEqualTo(0);
         assertThat(original.isHiddenSsid()).isEqualTo(false);
-
+        assertThat(original.getMaxNumberOfClients()).isEqualTo(0);
 
         SoftApConfiguration unparceled = parcelUnparcel(original);
         assertThat(unparceled).isNotSameAs(original);
@@ -87,12 +88,13 @@ public class SoftApConfigurationTest {
     }
 
     @Test
-    public void testWpa2WithBandAndChannelAndHiddenNetwork() {
+    public void testWpa2WithAllFieldCustomized() {
         SoftApConfiguration original = new SoftApConfiguration.Builder()
                 .setWpa2Passphrase("secretsecret")
                 .setBand(SoftApConfiguration.BAND_ANY)
                 .setChannel(149, SoftApConfiguration.BAND_5GHZ)
                 .setHiddenSsid(true)
+                .setMaxNumberOfClients(10)
                 .build();
         assertThat(original.getWpa2Passphrase()).isEqualTo("secretsecret");
         assertThat(original.getSecurityType()).isEqualTo(
@@ -100,7 +102,7 @@ public class SoftApConfigurationTest {
         assertThat(original.getBand()).isEqualTo(SoftApConfiguration.BAND_5GHZ);
         assertThat(original.getChannel()).isEqualTo(149);
         assertThat(original.isHiddenSsid()).isEqualTo(true);
-
+        assertThat(original.getMaxNumberOfClients()).isEqualTo(10);
 
         SoftApConfiguration unparceled = parcelUnparcel(original);
         assertThat(unparceled).isNotSameAs(original);

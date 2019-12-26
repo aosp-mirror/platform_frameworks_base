@@ -3932,6 +3932,32 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG, 2000);
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP | CellSignalStrengthLte.USE_RSSNR);
+        // Default wifi configurations.
+        sDefaults.putAll(Wifi.getDefaults());
+    }
+
+    /**
+     * Wi-Fi configs used in WiFi Module.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class Wifi {
+        /** Prefix of all Wifi.KEY_* constants. */
+        public static final String KEY_PREFIX = "wifi.";
+        /**
+        * It contains the maximum client count definition that the carrier owns.
+        */
+        public static final String KEY_HOTSPOT_MAX_CLIENT_COUNT =
+                KEY_PREFIX + "hotspot_maximum_client_count";
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            defaults.putInt(KEY_HOTSPOT_MAX_CLIENT_COUNT, 0);
+            return defaults;
+        }
+
+        private Wifi() {}
     }
 
     /**

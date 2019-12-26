@@ -164,6 +164,11 @@ public final class SoftApConfiguration implements Parcelable {
     private final int mChannel;
 
     /**
+     * The maximim allowed number of clients that can associate to the AP.
+     */
+    private final int mMaxNumberOfClients;
+
+    /**
      * The operating security type of the AP.
      * One of the security types from {@link @SecurityType}
      */
@@ -191,7 +196,7 @@ public final class SoftApConfiguration implements Parcelable {
     /** Private constructor for Builder and Parcelable implementation. */
     private SoftApConfiguration(@Nullable String ssid, @Nullable MacAddress bssid,
             @Nullable String wpa2Passphrase, boolean hiddenSsid, @BandType int band, int channel,
-            @SecurityType int securityType) {
+            @SecurityType int securityType, int maxNumberOfClients) {
         mSsid = ssid;
         mBssid = bssid;
         mWpa2Passphrase = wpa2Passphrase;
@@ -199,6 +204,7 @@ public final class SoftApConfiguration implements Parcelable {
         mBand = band;
         mChannel = channel;
         mSecurityType = securityType;
+        mMaxNumberOfClients = maxNumberOfClients;
     }
 
     @Override
@@ -216,13 +222,14 @@ public final class SoftApConfiguration implements Parcelable {
                 && mHiddenSsid == other.mHiddenSsid
                 && mBand == other.mBand
                 && mChannel == other.mChannel
-                && mSecurityType == other.mSecurityType;
+                && mSecurityType == other.mSecurityType
+                && mMaxNumberOfClients == other.mMaxNumberOfClients;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mSsid, mBssid, mWpa2Passphrase, mHiddenSsid,
-                mBand, mChannel, mSecurityType);
+                mBand, mChannel, mSecurityType, mMaxNumberOfClients);
     }
 
     @Override
@@ -236,6 +243,7 @@ public final class SoftApConfiguration implements Parcelable {
         sbuf.append(" \n Band =").append(mBand);
         sbuf.append(" \n Channel =").append(mChannel);
         sbuf.append(" \n SecurityType=").append(getSecurityType());
+        sbuf.append(" \n MaxClient=").append(mMaxNumberOfClients);
         return sbuf.toString();
     }
 
@@ -248,6 +256,7 @@ public final class SoftApConfiguration implements Parcelable {
         dest.writeInt(mBand);
         dest.writeInt(mChannel);
         dest.writeInt(mSecurityType);
+        dest.writeInt(mMaxNumberOfClients);
     }
 
     @Override
@@ -262,7 +271,8 @@ public final class SoftApConfiguration implements Parcelable {
             return new SoftApConfiguration(
                     in.readString(),
                     in.readParcelable(MacAddress.class.getClassLoader()),
-                    in.readString(), in.readBoolean(), in.readInt(), in.readInt(), in.readInt());
+                    in.readString(), in.readBoolean(), in.readInt(), in.readInt(), in.readInt(),
+                    in.readInt());
         }
 
         @Override
@@ -282,7 +292,7 @@ public final class SoftApConfiguration implements Parcelable {
 
     /**
      * Returns MAC address set to be BSSID for the AP.
-     * {@link #setBssid(MacAddress)}.
+     * {@link Builder#setBssid(MacAddress)}.
      */
     @Nullable
     public MacAddress getBssid() {
@@ -291,7 +301,7 @@ public final class SoftApConfiguration implements Parcelable {
 
     /**
      * Returns String set to be passphrase for the WPA2-PSK AP.
-     * {@link #setWpa2Passphrase(String)}.
+     * {@link Builder#setWpa2Passphrase(String)}.
      */
     @Nullable
     public String getWpa2Passphrase() {
@@ -301,7 +311,7 @@ public final class SoftApConfiguration implements Parcelable {
     /**
      * Returns Boolean set to be indicate hidden (true: doesn't broadcast its SSID) or
      * not (false: broadcasts its SSID) for the AP.
-     * {@link #setHiddenSsid(boolean)}.
+     * {@link Builder#setHiddenSsid(boolean)}.
      */
     public boolean isHiddenSsid() {
         return mHiddenSsid;
@@ -309,7 +319,7 @@ public final class SoftApConfiguration implements Parcelable {
 
     /**
      * Returns {@link BandType} set to be the band for the AP.
-     * {@link #setBand(@BandType int)}.
+     * {@link Builder#setBand(@BandType int)}.
      */
     public @BandType int getBand() {
         return mBand;
@@ -317,7 +327,7 @@ public final class SoftApConfiguration implements Parcelable {
 
     /**
      * Returns Integer set to be the channel for the AP.
-     * {@link #setChannel(int)}.
+     * {@link Builder#setChannel(int)}.
      */
     public int getChannel() {
         return mChannel;
@@ -330,6 +340,14 @@ public final class SoftApConfiguration implements Parcelable {
      */
     public @SecurityType int getSecurityType() {
         return mSecurityType;
+    }
+
+    /**
+     * Returns the maximum number of clients that can associate to the AP.
+     * {@link Builder#setMaxNumberOfClients(int)}.
+     */
+    public int getMaxNumberOfClients() {
+        return mMaxNumberOfClients;
     }
 
     /**
@@ -346,6 +364,7 @@ public final class SoftApConfiguration implements Parcelable {
         private boolean mHiddenSsid;
         private int mBand;
         private int mChannel;
+        private int mMaxNumberOfClients;
 
         private int setSecurityType() {
             int securityType = SECURITY_TYPE_OPEN;
@@ -369,6 +388,7 @@ public final class SoftApConfiguration implements Parcelable {
             mHiddenSsid = false;
             mBand = BAND_2GHZ;
             mChannel = 0;
+            mMaxNumberOfClients = 0;
         }
 
         /**
@@ -383,6 +403,7 @@ public final class SoftApConfiguration implements Parcelable {
             mHiddenSsid = other.mHiddenSsid;
             mBand = other.mBand;
             mChannel = other.mChannel;
+            mMaxNumberOfClients = other.mMaxNumberOfClients;
         }
 
         /**
@@ -393,7 +414,7 @@ public final class SoftApConfiguration implements Parcelable {
         @NonNull
         public SoftApConfiguration build() {
             return new SoftApConfiguration(mSsid, mBssid, mWpa2Passphrase,
-                mHiddenSsid, mBand, mChannel, setSecurityType());
+                mHiddenSsid, mBand, mChannel, setSecurityType(), mMaxNumberOfClients);
         }
 
         /**
@@ -521,6 +542,38 @@ public final class SoftApConfiguration implements Parcelable {
             }
             mBand = band;
             mChannel = channel;
+            return this;
+        }
+
+        /**
+         * Specifies the maximum number of clients that can associate to the AP.
+         *
+         * The maximum number of clients (STAs) which can associate to the AP.
+         * The AP will reject association from any clients above this number.
+         * Specify a value of 0 to have the framework automatically use the maximum number
+         * which the device can support (based on hardware and carrier constraints).
+         * <p>
+         * Use {@link WifiManager.SoftApCallback#onCapabilityChanged(SoftApCapability)} and
+         * {@link SoftApCapability#getMaxSupportedClients} to get the maximum number of clients
+         * which the device supports (based on hardware and carrier constraints).
+         *
+         * <p>
+         * <li>If not set, defaults to 0.</li>
+         *
+         * This method requires hardware support. If the method is used to set a
+         * non-zero {@code maxNumberOfClients} value then
+         * {@link WifiManager#startTetheredHotspot} will report error code
+         * {@link WifiManager#SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION}.
+         *
+         * @param maxNumberOfClients maximum client number of the AP.
+         * @return Builder for chaining.
+         */
+        @NonNull
+        public Builder setMaxNumberOfClients(int maxNumberOfClients) {
+            if (maxNumberOfClients < 0) {
+                throw new IllegalArgumentException("maxNumberOfClients should be not negative");
+            }
+            mMaxNumberOfClients = maxNumberOfClients;
             return this;
         }
     }
