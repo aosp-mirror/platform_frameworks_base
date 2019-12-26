@@ -609,7 +609,7 @@ static int android_media_tv_Tuner_tune(JNIEnv *env, jobject thiz, jint type, job
     return tuner->tune(getFrontendSettings(env, type, settings));
 }
 
-static int android_media_tv_Tuner_stop_tune(JNIEnv, jobject) {
+static int android_media_tv_Tuner_stop_tune(JNIEnv*, jobject) {
     return 0;
 }
 
@@ -620,11 +620,15 @@ static int android_media_tv_Tuner_scan(
             env, settingsType, settings), static_cast<FrontendScanType>(scanType));
 }
 
-static int android_media_tv_Tuner_set_lnb(JNIEnv, jobject, jint) {
+static int android_media_tv_Tuner_stop_scan(JNIEnv*, jobject) {
     return 0;
 }
 
-static int android_media_tv_Tuner_set_lna(JNIEnv, jobject, jint, jboolean) {
+static int android_media_tv_Tuner_set_lnb(JNIEnv*, jobject, jint) {
+    return 0;
+}
+
+static int android_media_tv_Tuner_set_lna(JNIEnv*, jobject, jint, jboolean) {
     return 0;
 }
 
@@ -747,31 +751,42 @@ static int android_media_tv_Tuner_configure_filter(
     return (int)res;
 }
 
-static bool android_media_tv_Tuner_start_filter(JNIEnv *env, jobject filter) {
+static int android_media_tv_Tuner_get_filter_id(JNIEnv*, jobject) {
+    return 0;
+}
+
+static int android_media_tv_Tuner_set_filter_data_source(JNIEnv*, jobject, jobject) {
+    return 0;
+}
+
+static int android_media_tv_Tuner_start_filter(JNIEnv *env, jobject filter) {
     sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     if (filterSp == NULL) {
         ALOGD("Failed to start filter: filter not found");
         return false;
     }
-    return filterSp->start() == Result::SUCCESS;
+    Result r = filterSp->start();
+    return (int) r;
 }
 
-static bool android_media_tv_Tuner_stop_filter(JNIEnv *env, jobject filter) {
+static int android_media_tv_Tuner_stop_filter(JNIEnv *env, jobject filter) {
     sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     if (filterSp == NULL) {
         ALOGD("Failed to stop filter: filter not found");
         return false;
     }
-    return filterSp->stop() == Result::SUCCESS;
+    Result r = filterSp->stop();
+    return (int) r;
 }
 
-static bool android_media_tv_Tuner_flush_filter(JNIEnv *env, jobject filter) {
+static int android_media_tv_Tuner_flush_filter(JNIEnv *env, jobject filter) {
     sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     if (filterSp == NULL) {
         ALOGD("Failed to flush filter: filter not found");
         return false;
     }
-    return filterSp->flush() == Result::SUCCESS;
+    Result r = filterSp->flush();
+    return (int) r;
 }
 
 static int android_media_tv_Tuner_read_filter_fmq(
@@ -782,6 +797,10 @@ static int android_media_tv_Tuner_read_filter_fmq(
         return 0;
     }
     return copyData(env, filterSp, buffer, offset, size);
+}
+
+static int android_media_tv_Tuner_close_filter(JNIEnv*, jobject) {
+    return 0;
 }
 
 static jobject android_media_tv_Tuner_open_descrambler(JNIEnv *env, jobject thiz) {
@@ -824,24 +843,24 @@ static jobject android_media_tv_Tuner_open_dvr(JNIEnv *env, jobject thiz, jint t
     return tuner->openDvr(static_cast<DvrType>(type), bufferSize);
 }
 
-static bool android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobject filter) {
+static int android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobject filter) {
     sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
     sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     if (dvrSp == NULL || filterSp == NULL) {
         return false;
     }
     Result result = dvrSp->attachFilter(filterSp);
-    return result == Result::SUCCESS;
+    return (int) result;
 }
 
-static bool android_media_tv_Tuner_detach_filter(JNIEnv *env, jobject dvr, jobject filter) {
+static int android_media_tv_Tuner_detach_filter(JNIEnv *env, jobject dvr, jobject filter) {
     sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
     sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     if (dvrSp == NULL || filterSp == NULL) {
         return false;
     }
     Result result = dvrSp->detachFilter(filterSp);
-    return result == Result::SUCCESS;
+    return (int) result;
 }
 
 static int android_media_tv_Tuner_configure_dvr(JNIEnv *env, jobject dvr, jobject settings) {
@@ -854,31 +873,38 @@ static int android_media_tv_Tuner_configure_dvr(JNIEnv *env, jobject dvr, jobjec
     return (int)result;
 }
 
-static bool android_media_tv_Tuner_start_dvr(JNIEnv *env, jobject dvr) {
+static int android_media_tv_Tuner_start_dvr(JNIEnv *env, jobject dvr) {
     sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
     if (dvrSp == NULL) {
         ALOGD("Failed to start dvr: dvr not found");
         return false;
     }
-    return dvrSp->start() == Result::SUCCESS;
+    Result result = dvrSp->start();
+    return (int) result;
 }
 
-static bool android_media_tv_Tuner_stop_dvr(JNIEnv *env, jobject dvr) {
+static int android_media_tv_Tuner_stop_dvr(JNIEnv *env, jobject dvr) {
     sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
     if (dvrSp == NULL) {
         ALOGD("Failed to stop dvr: dvr not found");
         return false;
     }
-    return dvrSp->stop() == Result::SUCCESS;
+    Result result = dvrSp->stop();
+    return (int) result;
 }
 
-static bool android_media_tv_Tuner_flush_dvr(JNIEnv *env, jobject dvr) {
+static int android_media_tv_Tuner_flush_dvr(JNIEnv *env, jobject dvr) {
     sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
     if (dvrSp == NULL) {
         ALOGD("Failed to flush dvr: dvr not found");
         return false;
     }
-    return dvrSp->flush() == Result::SUCCESS;
+    Result result = dvrSp->flush();
+    return (int) result;
+}
+
+static int android_media_tv_Tuner_close_dvr(JNIEnv*, jobject) {
+    return 0;
 }
 
 static const JNINativeMethod gTunerMethods[] = {
@@ -893,6 +919,7 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeStopTune", "()I", (void *)android_media_tv_Tuner_stop_tune },
     { "nativeScan", "(ILandroid/media/tv/tuner/FrontendSettings;I)I",
             (void *)android_media_tv_Tuner_scan },
+    { "nativeStopScan", "()I", (void *)android_media_tv_Tuner_stop_scan },
     { "nativeSetLnb", "(I)I", (void *)android_media_tv_Tuner_set_lnb },
     { "nativeSetLna", "(Z)I", (void *)android_media_tv_Tuner_set_lna },
     { "nativeGetFrontendStatus", "([I)[Landroid/media/tv/tuner/FrontendStatus;",
@@ -912,10 +939,14 @@ static const JNINativeMethod gTunerMethods[] = {
 static const JNINativeMethod gFilterMethods[] = {
     { "nativeConfigureFilter", "(IILandroid/media/tv/tuner/FilterSettings;)I",
             (void *)android_media_tv_Tuner_configure_filter },
-    { "nativeStartFilter", "()Z", (void *)android_media_tv_Tuner_start_filter },
-    { "nativeStopFilter", "()Z", (void *)android_media_tv_Tuner_stop_filter },
-    { "nativeFlushFilter", "()Z", (void *)android_media_tv_Tuner_flush_filter },
+    { "nativeGetId", "()I", (void *)android_media_tv_Tuner_get_filter_id },
+    { "nativeSetDataSource", "(Landroid/media/tv/tuner/Tuner$Filter;)I",
+            (void *)android_media_tv_Tuner_set_filter_data_source },
+    { "nativeStartFilter", "()I", (void *)android_media_tv_Tuner_start_filter },
+    { "nativeStopFilter", "()I", (void *)android_media_tv_Tuner_stop_filter },
+    { "nativeFlushFilter", "()I", (void *)android_media_tv_Tuner_flush_filter },
     { "nativeRead", "([BII)I", (void *)android_media_tv_Tuner_read_filter_fmq },
+    { "nativeCloseFilter", "()I", (void *)android_media_tv_Tuner_close_filter },
 };
 
 static const JNINativeMethod gDescramblerMethods[] = {
@@ -928,15 +959,16 @@ static const JNINativeMethod gDescramblerMethods[] = {
 };
 
 static const JNINativeMethod gDvrMethods[] = {
-    { "nativeAttachFilter", "(Landroid/media/tv/tuner/Tuner$Filter;)Z",
+    { "nativeAttachFilter", "(Landroid/media/tv/tuner/Tuner$Filter;)I",
             (void *)android_media_tv_Tuner_attach_filter },
-    { "nativeDetachFilter", "(Landroid/media/tv/tuner/Tuner$Filter;)Z",
+    { "nativeDetachFilter", "(Landroid/media/tv/tuner/Tuner$Filter;)I",
             (void *)android_media_tv_Tuner_detach_filter },
     { "nativeConfigureDvr", "(Landroid/media/tv/tuner/DvrSettings;)I",
             (void *)android_media_tv_Tuner_configure_dvr },
-    { "nativeStartDvr", "()Z", (void *)android_media_tv_Tuner_start_dvr },
-    { "nativeStopDvr", "()Z", (void *)android_media_tv_Tuner_stop_dvr },
-    { "nativeFlushDvr", "()Z", (void *)android_media_tv_Tuner_flush_dvr },
+    { "nativeStartDvr", "()I", (void *)android_media_tv_Tuner_start_dvr },
+    { "nativeStopDvr", "()I", (void *)android_media_tv_Tuner_stop_dvr },
+    { "nativeFlushDvr", "()I", (void *)android_media_tv_Tuner_flush_dvr },
+    { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_dvr },
 };
 
 static bool register_android_media_tv_Tuner(JNIEnv *env) {
