@@ -5934,7 +5934,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mAnimationBoundsLayer = createAnimationBoundsLayer(t);
 
             // Crop to stack bounds.
-            t.setWindowCrop(mAnimationBoundsLayer, mTmpRect);
+            if (!WindowManagerService.sHierarchicalAnimations) {
+                // For Hierarchical animation, we don't need to set window crop since the leash
+                // surface size has already same as the animating container.
+                t.setWindowCrop(mAnimationBoundsLayer, mTmpRect);
+            }
             t.setLayer(mAnimationBoundsLayer, layer);
 
             // Reparent leash to animation bounds layer.
@@ -5982,9 +5986,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         clearThumbnail();
+        final Transaction transaction = getAnimatingContainer().getPendingTransaction();
         mThumbnail = new WindowContainerThumbnail(mWmService.mSurfaceFactory,
-                getPendingTransaction(), this, thumbnailHeader);
-        mThumbnail.startAnimation(getPendingTransaction(), loadThumbnailAnimation(thumbnailHeader));
+                transaction, getAnimatingContainer(), thumbnailHeader);
+        mThumbnail.startAnimation(transaction, loadThumbnailAnimation(thumbnailHeader));
     }
 
     /**
@@ -6011,13 +6016,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (thumbnail == null) {
             return;
         }
+        final Transaction transaction = getAnimatingContainer().getPendingTransaction();
         mThumbnail = new WindowContainerThumbnail(mWmService.mSurfaceFactory,
-                getPendingTransaction(), this, thumbnail);
+                transaction, getAnimatingContainer(), thumbnail);
         final Animation animation =
                 getDisplayContent().mAppTransition.createCrossProfileAppsThumbnailAnimationLocked(
                         win.getFrameLw());
-        mThumbnail.startAnimation(getPendingTransaction(), animation, new Point(frame.left,
-                frame.top));
+        mThumbnail.startAnimation(transaction, animation, new Point(frame.left, frame.top));
     }
 
     private Animation loadThumbnailAnimation(GraphicBuffer thumbnailHeader) {

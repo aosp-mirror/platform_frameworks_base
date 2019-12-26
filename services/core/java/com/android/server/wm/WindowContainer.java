@@ -42,6 +42,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.logWithStack;
+import static com.android.server.wm.WindowManagerService.sHierarchicalAnimations;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 
 import android.annotation.CallSuper;
@@ -1855,7 +1856,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     // TODO: Remove this and use #getBounds() instead once we set an app transition animation
     // on TaskStack.
     Rect getAnimationBounds(int appStackClipMode) {
-        return getBounds();
+        return getDisplayedBounds();
     }
 
     /**
@@ -1929,7 +1930,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         // Separate position and size for use in animators.
         mTmpRect.set(getAnimationBounds(appStackClipMode));
-        mTmpPoint.set(mTmpRect.left, mTmpRect.top);
+        if (sHierarchicalAnimations) {
+            getRelativeDisplayedPosition(mTmpPoint);
+        } else {
+            mTmpPoint.set(mTmpRect.left, mTmpRect.top);
+        }
         mTmpRect.offsetTo(0, 0);
 
         final RemoteAnimationController controller =
