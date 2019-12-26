@@ -780,6 +780,33 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         return enableRollbackForPackageSession(newRollback.rollback, packageSession);
     }
 
+    private void removeRollbackForPackageSessionId(int sessionId) {
+        if (LOCAL_LOGV) {
+            Slog.v(TAG, "removeRollbackForPackageSessionId=" + sessionId);
+        }
+
+        synchronized (mLock) {
+            NewRollback newRollback = getNewRollbackForPackageSessionLocked(sessionId);
+            if (newRollback != null) {
+                Slog.w(TAG, "Delete new rollback id=" + newRollback.rollback.info.getRollbackId()
+                        + " for session id=" + sessionId);
+                mNewRollbacks.remove(newRollback);
+                newRollback.rollback.delete(mAppDataRollbackHelper);
+            }
+            Iterator<Rollback> iter = mRollbacks.iterator();
+            while (iter.hasNext()) {
+                Rollback rollback = iter.next();
+                if (rollback.getStagedSessionId() == sessionId) {
+                    Slog.w(TAG, "Delete rollback id=" + rollback.info.getRollbackId()
+                            + " for session id=" + sessionId);
+                    iter.remove();
+                    rollback.delete(mAppDataRollbackHelper);
+                    break;
+                }
+            }
+        }
+    }
+
     /**
      * Do code and userdata backups to enable rollback of the given session.
      * In case of multiPackage sessions, <code>session</code> should be one of
@@ -1110,7 +1137,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     }
                 }
             } else {
-                // TODO: delete rollbacks for this failed session
+                removeRollbackForPackageSessionId(sessionId);
             }
 
             // Clear the queue so it will never be leaked to next tests.
