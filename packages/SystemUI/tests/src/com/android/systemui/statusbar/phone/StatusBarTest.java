@@ -127,6 +127,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
@@ -249,6 +250,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private DarkIconDispatcher mDarkIconDispatcher;
     @Mock private PluginDependencyProvider mPluginDependencyProvider;
     @Mock private KeyguardDismissUtil mKeyguardDismissUtil;
+    @Mock private ExtensionController mExtensionController;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InitController mInitController = new InitController();
@@ -404,6 +406,7 @@ public class StatusBarTest extends SysuiTestCase {
                 new Handler(TestableLooper.get(this).getLooper()),
                 mPluginDependencyProvider,
                 mKeyguardDismissUtil,
+                mExtensionController,
                 mDismissCallbackRegistry);
 
         when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(

@@ -389,6 +389,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final DarkIconDispatcher mDarkIconDispatcher;
     private final PluginDependencyProvider mPluginDependencyProvider;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
+    private final ExtensionController mExtensionController;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
 
     // expanded notifications
@@ -691,6 +692,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
             PluginDependencyProvider pluginDependencyProvider,
             KeyguardDismissUtil keyguardDismissUtil,
+            ExtensionController extensionController,
             DismissCallbackRegistry dismissCallbackRegistry) {
         super(context);
         mFeatureFlags = featureFlags;
@@ -768,6 +770,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDarkIconDispatcher = darkIconDispatcher;
         mPluginDependencyProvider = pluginDependencyProvider;
         mKeyguardDismissUtil = keyguardDismissUtil;
+        mExtensionController = extensionController;
         mDismissCallbackRegistry = dismissCallbackRegistry;
 
         mBubbleExpandListener =
@@ -1129,7 +1132,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (container != null) {
             FragmentHostManager fragmentHostManager = FragmentHostManager.get(container);
             ExtensionFragmentListener.attachExtensonToFragment(container, QS.TAG, R.id.qs_frame,
-                    Dependency.get(ExtensionController.class)
+                    mExtensionController
                             .newExtension(QS.class)
                             .withPlugin(QS.class)
                             .withDefault(this::createDefaultQSFragment)
