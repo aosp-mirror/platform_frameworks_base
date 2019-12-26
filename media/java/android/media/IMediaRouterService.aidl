@@ -48,13 +48,9 @@ interface IMediaRouterService {
     void sendControlRequest(IMediaRouter2Client client, in MediaRoute2Info route, in Intent request);
     void requestSetVolume2(IMediaRouter2Client client, in MediaRoute2Info route, int volume);
     void requestUpdateVolume2(IMediaRouter2Client client, in MediaRoute2Info route, int direction);
-    /**
-     * Changes the selected route of the client.
-     *
-     * @param client the client that changes it's selected route
-     * @param route the route to be selected
-     */
-    void requestSelectRoute2(IMediaRouter2Client client, in @nullable MediaRoute2Info route);
+
+    void requestCreateSession(IMediaRouter2Client client, in MediaRoute2Info route,
+            String controlCategory, int requestId);
     void setControlCategories(IMediaRouter2Client client, in List<String> categories);
 
     void registerManager(IMediaRouter2Manager manager, String packageName);

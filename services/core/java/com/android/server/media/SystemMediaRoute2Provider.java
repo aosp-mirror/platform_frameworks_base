@@ -88,6 +88,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         initializeRoutes();
     }
 
+    @Override
+    public void requestCreateSession(String packageName, String routeId, String controlCategory,
+            int requestId) {
+        // Do nothing
+    }
+
     //TODO: implement method
     @Override
     public void requestSelectRoute(@NonNull String packageName, @NonNull String routeId, int seq) {

@@ -17,6 +17,7 @@
 package com.android.server.media;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import android.media.IMediaRoute2ProviderClient;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
+import android.media.RouteSessionInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -71,6 +73,16 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         pw.println(prefix + "  mBound=" + mBound);
         pw.println(prefix + "  mActiveConnection=" + mActiveConnection);
         pw.println(prefix + "  mConnectionReady=" + mConnectionReady);
+    }
+
+    @Override
+    public void requestCreateSession(String packageName, String routeId, String controlCategory,
+            int requestId) {
+        if (mConnectionReady) {
+            mActiveConnection.requestCreateSession(packageName, routeId, controlCategory,
+                    requestId);
+            updateBinding();
+        }
     }
 
     @Override
@@ -268,6 +280,14 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         mCallback.onRouteSelected(this, packageName, route, controlHints, seq);
     }
 
+    private void onSessionCreated(Connection connection, @Nullable RouteSessionInfo sessionInfo,
+            @Nullable Bundle controlHints, int requestId) {
+        if (mActiveConnection != connection) {
+            return;
+        }
+        mCallback.onSessionCreated(this, sessionInfo, controlHints, requestId);
+    }
+
     private void disconnect() {
         if (mActiveConnection != null) {
             mConnectionReady = false;
@@ -306,6 +326,15 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         public void dispose() {
             mProvider.asBinder().unlinkToDeath(this, 0);
             mClient.dispose();
+        }
+
+        public void requestCreateSession(String packageName, String routeId, String controlCategory,
+                int requestId) {
+            try {
+                mProvider.requestCreateSession(packageName, routeId, controlCategory, requestId);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "Failed to deliver request to create a session.", ex);
+            }
         }
 
         public void requestSelectRoute(String packageName, String routeId, int seq) {
@@ -361,6 +390,12 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             mHandler.post(() -> onRouteSelected(Connection.this,
                     packageName, routeId, controlHints, seq));
         }
+
+        void postSessionCreated(@Nullable RouteSessionInfo sessionInfo,
+                @Nullable Bundle controlHints, int requestId) {
+            mHandler.post(() -> onSessionCreated(Connection.this, sessionInfo, controlHints,
+                    requestId));
+        }
     }
 
     private static final class ProviderClient extends IMediaRoute2ProviderClient.Stub  {
@@ -391,5 +426,13 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             }
         }
 
+        @Override
+        public void notifySessionCreated(@Nullable RouteSessionInfo sessionInfo,
+                @Nullable Bundle controlHints, int requestId) {
+            Connection connection = mConnectionRef.get();
+            if (connection != null) {
+                connection.postSessionCreated(sessionInfo, controlHints, requestId);
+            }
+        }
     }
 }
