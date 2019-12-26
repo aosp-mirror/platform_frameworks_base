@@ -40,8 +40,12 @@ public class EventLogWriter implements LogWriter {
     }
 
     @Override
-    public void hidden(Context context, int category) {
-        MetricsLogger.hidden(context, category);
+    public void hidden(Context context, int category, int visibleTime) {
+        final LogMaker logMaker = new LogMaker(category)
+                .setType(MetricsProto.MetricsEvent.TYPE_CLOSE)
+                .addTaggedData(MetricsProto.MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_INT_VALUE,
+                        visibleTime);
+        MetricsLogger.action(logMaker);
     }
 
     @Override

@@ -83,9 +83,15 @@ public class MetricsFeatureProvider {
         }
     }
 
-    public void hidden(Context context, int category) {
+    /**
+     * Logs an event when target page is hidden.
+     *
+     * @param category the target page id
+     * @param visibleTime the time spending on target page since being visible
+     */
+    public void hidden(Context context, int category, int visibleTime) {
         for (LogWriter writer : mLoggerWriters) {
-            writer.hidden(context, category);
+            writer.hidden(context, category, visibleTime);
         }
     }
 

@@ -88,7 +88,7 @@ public class VisibilityLoggerMixinTest {
         mMixin.onPause();
 
         verify(mMetricsFeature, times(1))
-                .hidden(nullable(Context.class), eq(TestInstrumentable.TEST_METRIC));
+                .hidden(nullable(Context.class), eq(TestInstrumentable.TEST_METRIC), anyInt());
     }
 
     @Test
@@ -98,7 +98,7 @@ public class VisibilityLoggerMixinTest {
         mMixin.onPause();
 
         verify(mMetricsFeature, never())
-                .hidden(nullable(Context.class), anyInt());
+                .hidden(nullable(Context.class), anyInt(), anyInt());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class VisibilityLoggerMixinTest {
         mMixin.onPause();
 
         verify(mMetricsFeature, never())
-                .hidden(nullable(Context.class), anyInt());
+                .hidden(nullable(Context.class), anyInt(), anyInt());
     }
 
     @Test
@@ -121,7 +121,7 @@ public class VisibilityLoggerMixinTest {
         verify(testActivity.mMetricsFeatureProvider, times(1)).visible(any(), anyInt(), anyInt(),
                 anyInt());
         ac.pause().stop().destroy();
-        verify(testActivity.mMetricsFeatureProvider, times(1)).hidden(any(), anyInt());
+        verify(testActivity.mMetricsFeatureProvider, times(1)).hidden(any(), anyInt(), anyInt());
     }
 
     public static class TestActivity extends FragmentActivity {
