@@ -30,6 +30,7 @@ import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
@@ -385,6 +386,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private final LightsOutNotifController mLightsOutNotifController;
     private final InitController mInitController;
+    private final DarkIconDispatcher mDarkIconDispatcher;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
 
     // expanded notifications
@@ -683,6 +685,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
+            DarkIconDispatcher darkIconDispatcher,
+            @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
             DismissCallbackRegistry dismissCallbackRegistry) {
         super(context);
         mFeatureFlags = featureFlags;
@@ -757,6 +761,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardViewMediatorCallback = viewMediatorCallback;
         mInitController = initController;
+        mDarkIconDispatcher = darkIconDispatcher;
         mDismissCallbackRegistry = dismissCallbackRegistry;
 
         mBubbleExpandListener =
@@ -764,6 +769,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mEntryManager.updateNotifications("onBubbleExpandChanged");
                     updateScrimController();
                 };
+
+
+        DateTimeView.setReceiverHandler(timeTickHandler);
     }
 
     @Override
@@ -797,8 +805,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mVibrateOnOpening = mContext.getResources().getBoolean(
                 R.bool.config_vibrateOnIconAnimation);
-
-        DateTimeView.setReceiverHandler(Dependency.get(Dependency.TIME_TICK_HANDLER));
 
         // start old BaseStatusBar.start().
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
@@ -987,7 +993,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel.setOnReinflationListener(mNotificationIconAreaController::initAodIcons);
         mNotificationPanel.addExpansionListener(mWakeUpCoordinator);
 
-        Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mNotificationIconAreaController);
+        mDarkIconDispatcher.addDarkReceiver(mNotificationIconAreaController);
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
         Dependency.get(PluginDependencyProvider.class)
                 .allowPluginDependency(DarkIconDispatcher.class);
@@ -1335,7 +1341,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // TODO: Bring these out of StatusBar.
         ((UserInfoControllerImpl) Dependency.get(UserInfoController.class))
                 .onDensityOrFontScaleChanged();
-        Dependency.get(UserSwitcherController.class).onDensityOrFontScaleChanged();
+        mUserSwitcherController.onDensityOrFontScaleChanged();
         if (mKeyguardUserSwitcher != null) {
             mKeyguardUserSwitcher.onDensityOrFontScaleChanged();
         }
@@ -3427,8 +3433,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // ringing.
         // Other transitions are covered in handleVisibleToUserChanged().
         if (mVisible && (newState == StatusBarState.SHADE_LOCKED
-                || (((SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class))
-                .goingToFullShade()))) {
+                || mStatusBarStateController.goingToFullShade())) {
             clearNotificationEffects();
         }
         if (newState == StatusBarState.KEYGUARD) {
