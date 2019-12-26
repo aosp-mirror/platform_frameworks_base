@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<scale xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:interpolator/accelerate_cubic"
+    android:duration="50"
+    android:pivotX="50%"
+    android:pivotY="50%"
+    android:fromXScale="1"
+    android:toXScale="0"
+    android:fromYScale="1"
+    android:toYScale="0"/>

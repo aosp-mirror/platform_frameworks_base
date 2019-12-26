@@ -204,4 +204,15 @@
 
     <color name="GM2_yellow_500">#FFFBBC04</color>
     <color name="GM2_green_500">#FF34A853</color>
+
+    <!-- Color for the Assistant invocation lights -->
+    <color name="edge_light_blue">#ff4185f4</color>
+    <color name="edge_light_green">#ff3aa853</color>
+    <color name="edge_light_red">#ffea4234</color>
+    <color name="edge_light_yellow">#fffbbc06</color>
+
+    <!-- OOS Clear all Notification buttin -->
+    <color name="recents_dismiss_all_background_color">@android:color/white</color>
+    <color name="recents_dismiss_all_icon_color">#8a000000</color>
+
 </resources>

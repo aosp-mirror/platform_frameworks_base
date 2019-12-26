@@ -81,6 +81,18 @@
         <include
             layout="@layout/keyguard_status_bar"
             android:visibility="invisible" />
+        
+        <ImageButton 
+            android:layout_gravity="bottom|center_vertical|center_horizontal|center"
+            android:id="@+id/clear_notifications"
+            android:background="@drawable/floating_action_button"
+            android:visibility="gone"
+            android:layout_width="@dimen/dismiss_all_button_width"
+            android:layout_height="@dimen/dismiss_all_button_height" 
+            android:layout_marginBottom="@dimen/dismiss_all_button_margin_bottom" 
+            android:src="@drawable/recents_dismiss_all_icon" 
+            android:scaleType="centerInside" 
+            android:elevation="@dimen/dismiss_all_button_elevation"/>
 
         <Button
             android:id="@+id/report_rejected_touch"
