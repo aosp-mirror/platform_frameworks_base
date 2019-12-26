@@ -374,7 +374,7 @@ public class RecentsAnimationController implements DeathRecipient {
             final PooledConsumer c = PooledLambda.obtainConsumer((t, outList) ->
 	            { if (!outList.contains(t)) outList.add(t); }, PooledLambda.__(Task.class),
                     visibleTasks);
-            targetStack.forAllTasks(c);
+            targetStack.forAllTasks(c, true /* traverseTopToBottom */, targetStack);
             c.recycle();
         }
 

@@ -306,7 +306,7 @@ import java.util.Set;
  */
 public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityTaskManagerService" : TAG_ATM;
-    private static final String TAG_STACK = TAG + POSTFIX_STACK;
+    static final String TAG_STACK = TAG + POSTFIX_STACK;
     static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_IMMERSIVE = TAG + POSTFIX_IMMERSIVE;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
@@ -2057,8 +2057,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public int getDisplayId(IBinder activityToken) throws RemoteException {
         synchronized (mGlobalLock) {
             final ActivityStack stack = ActivityRecord.getStackLocked(activityToken);
-            if (stack != null && stack.getDisplayId() != INVALID_DISPLAY) {
-                return stack.getDisplayId();
+            if (stack != null) {
+                final int displayId = stack.getDisplayId();
+                return displayId != INVALID_DISPLAY ? displayId : DEFAULT_DISPLAY;
             }
             return DEFAULT_DISPLAY;
         }
@@ -3216,8 +3217,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 final ActivityStack stack = r.getActivityStack();
                 final Task task = stack.createTask(
-                        mStackSupervisor.getNextTaskIdForUser(r.mUserId), ainfo, intent,
-                        null /* voiceSession */, null /* voiceInteractor */, !ON_TOP);
+                        mStackSupervisor.getNextTaskIdForUser(r.mUserId), ainfo, intent, !ON_TOP);
                 if (!mRecentTasks.addToBottom(task)) {
                     // The app has too many tasks already and we can't add any more
                     stack.removeChild(task, "addAppTask");
@@ -4385,7 +4385,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         if (params.hasSetAspectRatio()
                 && !mWindowManager.isValidPictureInPictureAspectRatio(
-                        r.getDisplayId(), params.getAspectRatio())) {
+                        r.getDisplay(), params.getAspectRatio())) {
             final float minAspectRatio = mContext.getResources().getFloat(
                     com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
             final float maxAspectRatio = mContext.getResources().getFloat(

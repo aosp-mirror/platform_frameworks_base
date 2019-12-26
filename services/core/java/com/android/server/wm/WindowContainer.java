@@ -562,6 +562,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return false;
     }
 
+    /** @return true if this window container is a descendant of the input container. */
+    boolean isDescendantOf(WindowContainer ancestor) {
+        final WindowContainer parent = getParent();
+        if (parent == ancestor) return true;
+        return (parent != null) && parent.isDescendantOf(ancestor);
+    }
+
     /**
      * Move a child from it's current place in siblings list to the specified position,
      * with an option to move all its parents to top.
@@ -2234,5 +2241,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     void setSurfaceControl(SurfaceControl sc) {
         mSurfaceControl = sc;
+    }
+
+    /** Cheap way of doing cast and instanceof. */
+    Task asTask() {
+        return null;
+    }
+
+    /** Cheap way of doing cast and instanceof. */
+    ActivityRecord asActivityRecord() {
+        return null;
     }
 }

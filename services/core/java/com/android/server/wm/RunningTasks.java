@@ -93,6 +93,9 @@ class RunningTasks {
     }
 
     private void processTask(Task task) {
+        if (task.isRootTask()) {
+            return;
+        }
         if (task.getTopNonFinishingActivity() == null) {
             // Skip if there are no activities in the task
             return;
