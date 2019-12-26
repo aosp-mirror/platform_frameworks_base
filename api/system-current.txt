@@ -5403,18 +5403,6 @@ package android.net.wifi {
     method public void onFailure(int);
     method public void onFailure(int, @Nullable String, @NonNull android.util.SparseArray<int[]>, @NonNull int[]);
     method public abstract void onProgress(int);
-    field public static final int EASY_CONNECT_EVENT_FAILURE_AUTHENTICATION = -2; // 0xfffffffe
-    field public static final int EASY_CONNECT_EVENT_FAILURE_BUSY = -5; // 0xfffffffb
-    field public static final int EASY_CONNECT_EVENT_FAILURE_CANNOT_FIND_NETWORK = -10; // 0xfffffff6
-    field public static final int EASY_CONNECT_EVENT_FAILURE_CONFIGURATION = -4; // 0xfffffffc
-    field public static final int EASY_CONNECT_EVENT_FAILURE_ENROLLEE_AUTHENTICATION = -11; // 0xfffffff5
-    field public static final int EASY_CONNECT_EVENT_FAILURE_ENROLLEE_REJECTED_CONFIGURATION = -12; // 0xfffffff4
-    field public static final int EASY_CONNECT_EVENT_FAILURE_GENERIC = -7; // 0xfffffff9
-    field public static final int EASY_CONNECT_EVENT_FAILURE_INVALID_NETWORK = -9; // 0xfffffff7
-    field public static final int EASY_CONNECT_EVENT_FAILURE_INVALID_URI = -1; // 0xffffffff
-    field public static final int EASY_CONNECT_EVENT_FAILURE_NOT_COMPATIBLE = -3; // 0xfffffffd
-    field public static final int EASY_CONNECT_EVENT_FAILURE_NOT_SUPPORTED = -8; // 0xfffffff8
-    field public static final int EASY_CONNECT_EVENT_FAILURE_TIMEOUT = -6; // 0xfffffffa
     field public static final int EASY_CONNECT_EVENT_PROGRESS_AUTHENTICATION_SUCCESS = 0; // 0x0
     field public static final int EASY_CONNECT_EVENT_PROGRESS_CONFIGURATION_ACCEPTED = 3; // 0x3
     field public static final int EASY_CONNECT_EVENT_PROGRESS_CONFIGURATION_SENT_WAITING_RESPONSE = 2; // 0x2
