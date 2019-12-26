@@ -1609,7 +1609,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
             handleRemoveListLocked();
         }
-        broadcastDataConnectionFailed(apnType, subId);
     }
 
     @Override
@@ -2255,13 +2254,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         intent.putExtra(TelephonyManager.EXTRA_STATE, dataStateToString(state));
 
         intent.putExtra(PhoneConstants.DATA_APN_KEY, apn);
-        intent.putExtra(PhoneConstants.DATA_APN_TYPE_KEY, apnType);
-        intent.putExtra(PHONE_CONSTANTS_SUBSCRIPTION_KEY, subId);
-        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
-    }
-
-    private void broadcastDataConnectionFailed(String apnType, int subId) {
-        Intent intent = new Intent(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
         intent.putExtra(PhoneConstants.DATA_APN_TYPE_KEY, apnType);
         intent.putExtra(PHONE_CONSTANTS_SUBSCRIPTION_KEY, subId);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
