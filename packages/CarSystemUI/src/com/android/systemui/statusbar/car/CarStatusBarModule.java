@@ -41,6 +41,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.navigationbar.car.CarNavigationBarController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -196,6 +197,7 @@ public class CarStatusBarModule {
             InitController initController,
             DarkIconDispatcher darkIconDispatcher,
             @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
+            PluginDependencyProvider pluginDependencyProvider,
             DismissCallbackRegistry dismissCallbackRegistry,
             CarServiceProvider carServiceProvider,
             Lazy<PowerManagerHelper> powerManagerHelperLazy,
@@ -277,6 +279,7 @@ public class CarStatusBarModule {
                 initController,
                 darkIconDispatcher,
                 timeTickHandler,
+                pluginDependencyProvider,
                 dismissCallbackRegistry,
                 carServiceProvider,
                 powerManagerHelperLazy,

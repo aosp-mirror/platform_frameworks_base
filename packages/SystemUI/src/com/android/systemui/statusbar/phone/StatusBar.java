@@ -387,6 +387,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final LightsOutNotifController mLightsOutNotifController;
     private final InitController mInitController;
     private final DarkIconDispatcher mDarkIconDispatcher;
+    private final PluginDependencyProvider mPluginDependencyProvider;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
 
     // expanded notifications
@@ -687,6 +688,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             InitController initController,
             DarkIconDispatcher darkIconDispatcher,
             @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
+            PluginDependencyProvider pluginDependencyProvider,
             DismissCallbackRegistry dismissCallbackRegistry) {
         super(context);
         mFeatureFlags = featureFlags;
@@ -762,6 +764,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardViewMediatorCallback = viewMediatorCallback;
         mInitController = initController;
         mDarkIconDispatcher = darkIconDispatcher;
+        mPluginDependencyProvider = pluginDependencyProvider;
         mDismissCallbackRegistry = dismissCallbackRegistry;
 
         mBubbleExpandListener =
@@ -995,10 +998,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mDarkIconDispatcher.addDarkReceiver(mNotificationIconAreaController);
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
-        Dependency.get(PluginDependencyProvider.class)
-                .allowPluginDependency(DarkIconDispatcher.class);
-        Dependency.get(PluginDependencyProvider.class)
-                .allowPluginDependency(StatusBarStateController.class);
+        mPluginDependencyProvider.allowPluginDependency(DarkIconDispatcher.class);
+        mPluginDependencyProvider.allowPluginDependency(StatusBarStateController.class);
         FragmentHostManager.get(mStatusBarWindow)
                 .addTagListener(CollapsedStatusBarFragment.TAG, (tag, fragment) -> {
                     CollapsedStatusBarFragment statusBarFragment =
