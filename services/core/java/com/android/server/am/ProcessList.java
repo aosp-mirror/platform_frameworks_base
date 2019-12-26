@@ -2101,6 +2101,10 @@ public final class ProcessList {
      */
     @GuardedBy("mService")
     private boolean isProcessAliveLiteLocked(ProcessRecord app) {
+        // If somehow the pid is invalid, let's think it's dead.
+        if (app.pid <= 0) {
+            return false;
+        }
         try {
             Os.kill(app.pid, 0);
         } catch (ErrnoException e) {
