@@ -72,7 +72,7 @@ class TestDisplayContent extends DisplayContent {
         private final DisplayInfo mInfo;
         private boolean mCanRotate = true;
         private int mWindowingMode = WINDOWING_MODE_FULLSCREEN;
-        private int mPosition = POSITION_TOP;
+        private int mPosition = POSITION_BOTTOM;
         private final ActivityTaskManagerService mService;
         private boolean mSystemDecorations = false;
 
@@ -127,13 +127,13 @@ class TestDisplayContent extends DisplayContent {
             return this;
         }
         TestDisplayContent build() {
+            SystemServicesTestRule.checkHoldsLock(mService.mGlobalLock);
+
             final int displayId = SystemServicesTestRule.sNextDisplayId++;
             final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                     mInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
-            final TestDisplayContent newDisplay;
-            synchronized (mService.mGlobalLock) {
-                newDisplay = new TestDisplayContent(mService.mStackSupervisor, display);
-            }
+            final TestDisplayContent newDisplay =
+                    new TestDisplayContent(mService.mStackSupervisor, display);
             // disable the normal system decorations
             final DisplayPolicy displayPolicy = newDisplay.mDisplayContent.getDisplayPolicy();
             spyOn(displayPolicy);
@@ -153,6 +153,10 @@ class TestDisplayContent extends DisplayContent {
                 doReturn(false).when(newDisplay.mDisplayContent)
                         .handlesOrientationChangeFromDescendant();
             }
+            // Please add stubbing before this line. Services will start using this display in other
+            // threads immediately after adding it to hierarchy. Calling doAnswer() type of stubbing
+            // reduces chance of races, but still doesn't eliminate race conditions.
+            mService.mRootWindowContainer.addChild(newDisplay, mPosition);
             return newDisplay;
         }
     }

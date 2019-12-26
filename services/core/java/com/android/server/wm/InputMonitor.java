@@ -151,10 +151,10 @@ final class InputMonitor {
 
     private final UpdateInputWindows mUpdateInputWindows = new UpdateInputWindows();
 
-    public InputMonitor(WindowManagerService service, int displayId) {
+    InputMonitor(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
-        mDisplayContent = mService.mRoot.getDisplayContent(displayId);
-        mDisplayId = displayId;
+        mDisplayContent = displayContent;
+        mDisplayId = displayContent.getDisplayId();
         mInputTransaction = mService.mTransactionFactory.get();
         mHandler = mService.mAnimationHandler;
         mUpdateInputForAllWindowsConsumer = new UpdateInputForAllWindowsConsumer();

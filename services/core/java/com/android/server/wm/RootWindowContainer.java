@@ -1377,6 +1377,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         for (int displayNdx = 0; displayNdx < displays.length; ++displayNdx) {
             final Display display = displays[displayNdx];
             final DisplayContent displayContent = new DisplayContent(display, this);
+            addChild(displayContent, POSITION_BOTTOM);
             if (displayContent.mDisplayId == DEFAULT_DISPLAY) {
                 mDefaultDisplay = displayContent;
             }
@@ -1445,6 +1446,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
         // The display hasn't been added to ActivityManager yet, create a new record now.
         displayContent = new DisplayContent(display, this);
+        addChild(displayContent, POSITION_BOTTOM);
         return displayContent;
     }
 
