@@ -40,8 +40,6 @@ static const char* kPathWhitelist[] = {
   "/apex/com.android.mediaprovider/javalib/framework-mediaprovider.jar",
   "/apex/com.android.os.statsd/javalib/framework-statsd.jar",
   "/apex/com.android.sdkext/javalib/framework-sdkext.jar",
-  "/apex/com.android.telephony/javalib/telephony-common.jar",
-  "/apex/com.android.telephony/javalib/ims-common.jar",
   "/apex/com.android.wifi/javalib/framework-wifi.jar",
   "/apex/com.android.tethering/javalib/framework-tethering.jar",
   "/dev/null",
