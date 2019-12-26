@@ -188,12 +188,13 @@ public class PhoneStateListener {
     /**
      * Listen for {@link PreciseDataConnectionState} on the data connection (cellular).
      *
-     * @see #onPreciseDataConnectionStateChanged
+     * <p>Requires permission {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     * or the calling app has carrier privileges
+     * (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
-     * @hide
+     * @see #onPreciseDataConnectionStateChanged
      */
-    @RequiresPermission((android.Manifest.permission.READ_PRECISE_PHONE_STATE))
-    @SystemApi
+    @RequiresPermission((android.Manifest.permission.MODIFY_PHONE_STATE))
     public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE            = 0x00001000;
 
     /**
@@ -680,8 +681,9 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when data connection state changes with precise information
-     * on the registered subscription.
+     * Callback providing update about the default/internet data connection on the registered
+     * subscription.
+     *
      * Note, the registration subId comes from {@link TelephonyManager} object which registers
      * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
      * If this TelephonyManager object was created with
@@ -689,12 +691,13 @@ public class PhoneStateListener {
      * subId. Otherwise, this callback applies to
      * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
-     * @param dataConnectionState {@link PreciseDataConnectionState}
+     * <p>Requires permission {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     * or the calling app has carrier privileges
+     * (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
-     * @hide
+     * @param dataConnectionState {@link PreciseDataConnectionState}
      */
-    @RequiresPermission((android.Manifest.permission.READ_PRECISE_PHONE_STATE))
-    @SystemApi
+    @RequiresPermission((android.Manifest.permission.MODIFY_PHONE_STATE))
     public void onPreciseDataConnectionStateChanged(
             @NonNull PreciseDataConnectionState dataConnectionState) {
         // default implementation empty
@@ -1002,11 +1005,21 @@ public class PhoneStateListener {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
 
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> {
-                        psl.onDataConnectionStateChanged(state, networkType);
-                        psl.onDataConnectionStateChanged(state);
-                    }));
+            if (state == TelephonyManager.DATA_DISCONNECTING
+                    && VMRuntime.getRuntime().getTargetSdkVersion() < Build.VERSION_CODES.R) {
+                Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                        () -> {
+                            psl.onDataConnectionStateChanged(
+                                    TelephonyManager.DATA_CONNECTED, networkType);
+                            psl.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED);
+                        }));
+            } else {
+                Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                        () -> {
+                            psl.onDataConnectionStateChanged(state, networkType);
+                            psl.onDataConnectionStateChanged(state);
+                        }));
+            }
         }
 
         public void onDataActivity(int direction) {

@@ -8578,7 +8578,6 @@ package android.telephony {
     method public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber);
     method public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber);
     method @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public void onPreciseCallStateChanged(@NonNull android.telephony.PreciseCallState);
-    method @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public void onPreciseDataConnectionStateChanged(@NonNull android.telephony.PreciseDataConnectionState);
     method public void onRadioPowerStateChanged(int);
     method public void onSrvccStateChanged(int);
     method public void onVoiceActivationStateChanged(int);
@@ -8586,7 +8585,6 @@ package android.telephony {
     field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_EMERGENCY_CALL = 268435456; // 0x10000000
     field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_EMERGENCY_SMS = 536870912; // 0x20000000
     field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_PRECISE_CALL_STATE = 2048; // 0x800
-    field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 4096; // 0x1000
     field public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 8388608; // 0x800000
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int LISTEN_SRVCC_STATE_CHANGED = 16384; // 0x4000
     field public static final int LISTEN_VOICE_ACTIVATION_STATE = 131072; // 0x20000
@@ -8613,13 +8611,12 @@ package android.telephony {
   }
 
   public final class PreciseDataConnectionState implements android.os.Parcelable {
-    method public int describeContents();
-    method @Nullable public String getDataConnectionApn();
-    method public int getDataConnectionApnTypeBitMask();
-    method public int getDataConnectionFailCause();
-    method public int getDataConnectionState();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PreciseDataConnectionState> CREATOR;
+    method @Deprecated @NonNull public String getDataConnectionApn();
+    method @Deprecated public int getDataConnectionApnTypeBitMask();
+    method @Deprecated public int getDataConnectionFailCause();
+    method @Deprecated @Nullable public android.net.LinkProperties getDataConnectionLinkProperties();
+    method @Deprecated public int getDataConnectionNetworkType();
+    method @Deprecated public int getDataConnectionState();
   }
 
   public final class PreciseDisconnectCause {

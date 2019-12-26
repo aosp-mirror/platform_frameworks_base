@@ -3004,6 +3004,10 @@ package android.telephony {
     field @RequiresPermission("android.permission.READ_ACTIVE_EMERGENCY_SESSION") public static final int LISTEN_OUTGOING_EMERGENCY_SMS = 536870912; // 0x20000000
   }
 
+  public final class PreciseDataConnectionState implements android.os.Parcelable {
+    ctor @Deprecated public PreciseDataConnectionState(int, int, int, @NonNull String, @Nullable android.net.LinkProperties, int);
+  }
+
   public class ServiceState implements android.os.Parcelable {
     method public void addNetworkRegistrationInfo(android.telephony.NetworkRegistrationInfo);
     method public void setCdmaSystemAndNetworkId(int, int);
