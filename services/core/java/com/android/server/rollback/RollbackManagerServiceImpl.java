@@ -971,7 +971,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
             }
 
-            Rollback rollback = completeEnableRollback(newRollback, true);
+            Rollback rollback = completeEnableRollback(newRollback);
             if (rollback == null) {
                 result.offer(-1);
             } else {
@@ -1131,7 +1131,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
 
                 if (newRollback != null) {
-                    Rollback rollback = completeEnableRollback(newRollback, success);
+                    Rollback rollback = completeEnableRollback(newRollback);
                     if (rollback != null && !rollback.isStaged()) {
                         makeRollbackAvailable(rollback);
                     }
@@ -1152,16 +1152,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      * @return the Rollback instance for a successfully enable-completed rollback,
      * or null on error.
      */
-    private Rollback completeEnableRollback(NewRollback newRollback, boolean success) {
+    private Rollback completeEnableRollback(NewRollback newRollback) {
         Rollback rollback = newRollback.rollback;
         if (LOCAL_LOGV) {
-            Slog.v(TAG, "completeEnableRollback id="
-                    + rollback.info.getRollbackId() + " success=" + success);
-        }
-        if (!success) {
-            // The install session was aborted, clean up the pending install.
-            rollback.delete(mAppDataRollbackHelper);
-            return null;
+            Slog.v(TAG, "completeEnableRollback id=" + rollback.info.getRollbackId());
         }
 
         if (newRollback.isCancelled()) {
