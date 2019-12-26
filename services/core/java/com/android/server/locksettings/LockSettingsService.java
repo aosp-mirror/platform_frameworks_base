@@ -27,8 +27,6 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSW
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
-import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_ENABLED_BY_DEFAULT;
-import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_ENABLED_KEY;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
@@ -2582,23 +2580,12 @@ public class LockSettingsService extends ILockSettings.Stub {
             return type == PersistentData.TYPE_SP || type == PersistentData.TYPE_SP_WEAVER;
         }
         long handle = getSyntheticPasswordHandleLocked(userId);
-        // This is a global setting
-        long enabled = getLong(SYNTHETIC_PASSWORD_ENABLED_KEY,
-                SYNTHETIC_PASSWORD_ENABLED_BY_DEFAULT, UserHandle.USER_SYSTEM);
-      return enabled != 0 && handle != SyntheticPasswordManager.DEFAULT_HANDLE;
+        return handle != SyntheticPasswordManager.DEFAULT_HANDLE;
     }
 
     @VisibleForTesting
     protected boolean shouldMigrateToSyntheticPasswordLocked(int userId) {
-        long handle = getSyntheticPasswordHandleLocked(userId);
-        // This is a global setting
-        long enabled = getLong(SYNTHETIC_PASSWORD_ENABLED_KEY,
-                SYNTHETIC_PASSWORD_ENABLED_BY_DEFAULT, UserHandle.USER_SYSTEM);
-        return enabled != 0 && handle == SyntheticPasswordManager.DEFAULT_HANDLE;
-    }
-
-    private void enableSyntheticPasswordLocked() {
-        setLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 1, UserHandle.USER_SYSTEM);
+        return true;
     }
 
     private VerifyCredentialResponse spBasedDoVerifyCredential(LockscreenCredential userCredential,
@@ -2937,7 +2924,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     private long addEscrowToken(byte[] token, int userId, EscrowTokenStateChangeCallback callback) {
         if (DEBUG) Slog.d(TAG, "addEscrowToken: user=" + userId);
         synchronized (mSpManager) {
-            enableSyntheticPasswordLocked();
             // Migrate to synthetic password based credentials if the user has no password,
             // the token can then be activated immediately.
             AuthenticationToken auth = null;
