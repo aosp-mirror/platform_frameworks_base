@@ -178,6 +178,7 @@ public class StatusBarModule {
             DarkIconDispatcher darkIconDispatcher,
             @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
             PluginDependencyProvider pluginDependencyProvider,
+            KeyguardDismissUtil keyguardDismissUtil,
             DismissCallbackRegistry dismissCallbackRegistry) {
         return new StatusBar(
                 context,
@@ -256,6 +257,7 @@ public class StatusBarModule {
                 darkIconDispatcher,
                 timeTickHandler,
                 pluginDependencyProvider,
+                keyguardDismissUtil,
                 dismissCallbackRegistry);
     }
 }

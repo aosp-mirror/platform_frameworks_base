@@ -388,6 +388,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final InitController mInitController;
     private final DarkIconDispatcher mDarkIconDispatcher;
     private final PluginDependencyProvider mPluginDependencyProvider;
+    private final KeyguardDismissUtil mKeyguardDismissUtil;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
 
     // expanded notifications
@@ -689,6 +690,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             DarkIconDispatcher darkIconDispatcher,
             @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
             PluginDependencyProvider pluginDependencyProvider,
+            KeyguardDismissUtil keyguardDismissUtil,
             DismissCallbackRegistry dismissCallbackRegistry) {
         super(context);
         mFeatureFlags = featureFlags;
@@ -765,6 +767,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mInitController = initController;
         mDarkIconDispatcher = darkIconDispatcher;
         mPluginDependencyProvider = pluginDependencyProvider;
+        mKeyguardDismissUtil = keyguardDismissUtil;
         mDismissCallbackRegistry = dismissCallbackRegistry;
 
         mBubbleExpandListener =
@@ -1410,7 +1413,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mLightBarController.setBiometricUnlockController(mBiometricUnlockController);
         mMediaManager.setBiometricUnlockController(mBiometricUnlockController);
-        Dependency.get(KeyguardDismissUtil.class).setDismissHandler(this::executeWhenUnlocked);
+        mKeyguardDismissUtil.setDismissHandler(this::executeWhenUnlocked);
         Trace.endSection();
     }
 

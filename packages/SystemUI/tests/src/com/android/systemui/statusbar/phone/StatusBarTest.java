@@ -248,6 +248,7 @@ public class StatusBarTest extends SysuiTestCase {
             mStatusBarNotificationActivityStarterBuilder;
     @Mock private DarkIconDispatcher mDarkIconDispatcher;
     @Mock private PluginDependencyProvider mPluginDependencyProvider;
+    @Mock private KeyguardDismissUtil mKeyguardDismissUtil;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InitController mInitController = new InitController();
@@ -256,7 +257,6 @@ public class StatusBarTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         mDependency.injectTestDependency(NotificationFilter.class, mNotificationFilter);
-        mDependency.injectMockDependency(KeyguardDismissUtil.class);
 
         IPowerManager powerManagerService = mock(IPowerManager.class);
         mPowerManager = new PowerManager(mContext, powerManagerService,
@@ -403,6 +403,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mDarkIconDispatcher,
                 new Handler(TestableLooper.get(this).getLooper()),
                 mPluginDependencyProvider,
+                mKeyguardDismissUtil,
                 mDismissCallbackRegistry);
 
         when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
