@@ -336,7 +336,7 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void updateTapExcludeRegion(android.view.IWindow window, int regionId,
+    public void updateTapExcludeRegion(android.view.IWindow window,
             android.graphics.Region region) {
     }
 

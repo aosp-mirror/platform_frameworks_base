@@ -6648,14 +6648,14 @@ public class WindowManagerService extends IWindowManager.Stub
      * </ol>
      * Passing an invalid region will remove the area from the exclude region of this window.
      */
-    void updateTapExcludeRegion(IWindow client, int regionId, Region region) {
+    void updateTapExcludeRegion(IWindow client, Region region) {
         synchronized (mGlobalLock) {
             final WindowState callingWin = windowForClientLocked(null, client, false);
             if (callingWin == null) {
                 ProtoLog.w(WM_ERROR, "Bad requesting window %s", client);
                 return;
             }
-            callingWin.updateTapExcludeRegion(regionId, region);
+            callingWin.updateTapExcludeRegion(region);
         }
     }
 

@@ -595,7 +595,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /**
      * A region inside of this window to be excluded from touch.
      */
-    private TapExcludeRegionHolder mTapExcludeRegionHolder;
+    private final Region mTapExcludeRegion = new Region();
 
     /**
      * Used for testing because the real PowerManager is final.
@@ -1996,11 +1996,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (WindowManagerService.excludeWindowTypeFromTapOutTask(type)) {
             dc.mTapExcludedWindows.remove(this);
         }
-        if (mTapExcludeRegionHolder != null) {
-            // If a tap exclude region container was initialized for this window, then it should've
-            // also been registered in display.
-            dc.mTapExcludeProvidingWindows.remove(this);
-        }
+
+        // Remove this window from mTapExcludeProvidingWindows. If it was not registered, this will
+        // not do anything.
+        dc.mTapExcludeProvidingWindows.remove(this);
         dc.getDisplayPolicy().removeWindowLw(this);
 
         disposeInputChannel();
@@ -3239,11 +3238,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * region.
      */
     private void subtractTouchExcludeRegionIfNeeded(Region touchableRegion) {
-        if (mTapExcludeRegionHolder == null) {
+        if (mTapExcludeRegion.isEmpty()) {
             return;
         }
         final Region touchExcludeRegion = Region.obtain();
-        amendTapExcludeRegion(touchExcludeRegion);
+        getTapExcludeRegion(touchExcludeRegion);
         if (!touchExcludeRegion.isEmpty()) {
             touchableRegion.op(touchExcludeRegion, Region.Op.DIFFERENCE);
         }
@@ -5268,21 +5267,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Update a tap exclude region identified by provided id. The requested area will be clipped to
      * the window bounds.
      */
-    void updateTapExcludeRegion(int regionId, Region region) {
+    void updateTapExcludeRegion(Region region) {
         final DisplayContent currentDisplay = getDisplayContent();
         if (currentDisplay == null) {
             throw new IllegalStateException("Trying to update window not attached to any display.");
         }
 
-        if (mTapExcludeRegionHolder == null) {
-            mTapExcludeRegionHolder = new TapExcludeRegionHolder();
-
+        // Clear the tap excluded region if the region passed in is null or empty.
+        if (region == null || region.isEmpty()) {
+            mTapExcludeRegion.setEmpty();
+            // Remove this window from mTapExcludeProvidingWindows since it won't be providing
+            // tap exclude regions.
+            currentDisplay.mTapExcludeProvidingWindows.remove(this);
+        } else {
+            mTapExcludeRegion.set(region);
             // Make sure that this window is registered as one that provides a tap exclude region
             // for its containing display.
             currentDisplay.mTapExcludeProvidingWindows.add(this);
         }
 
-        mTapExcludeRegionHolder.updateRegion(regionId, region);
         // Trigger touch exclude region update on current display.
         currentDisplay.updateTouchExcludeRegion();
         // Trigger touchable region update for this window.
@@ -5290,24 +5293,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * Union the region with current tap exclude region that this window provides.
+     * Get the tap excluded region for this window in screen coordinates.
      *
-     * @param region The region to be amended. It is on the screen coordinates.
+     * @param outRegion The returned tap excluded region. It is on the screen coordinates.
      */
-    void amendTapExcludeRegion(Region region) {
-        final Region tempRegion = Region.obtain();
+    void getTapExcludeRegion(Region outRegion) {
         mTmpRect.set(mWindowFrames.mFrame);
         mTmpRect.offsetTo(0, 0);
-        mTapExcludeRegionHolder.amendRegion(tempRegion, mTmpRect);
-        // The region held by the holder is on the window coordinates. We need to translate it to
-        // the screen coordinates.
-        tempRegion.translate(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top);
-        region.op(tempRegion, Region.Op.UNION);
-        tempRegion.recycle();
+
+        outRegion.set(mTapExcludeRegion);
+        outRegion.op(mTmpRect, Region.Op.INTERSECT);
+
+        // The region is on the window coordinates, so it needs to  be translated into screen
+        // coordinates. There's no need to scale since that will be done by native code.
+        outRegion.translate(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top);
     }
 
     boolean hasTapExcludeRegion() {
-        return mTapExcludeRegionHolder != null && !mTapExcludeRegionHolder.isEmpty();
+        return !mTapExcludeRegion.isEmpty();
     }
 
     @Override

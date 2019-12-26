@@ -293,7 +293,7 @@ interface IWindowSession {
      * will neither be dispatched to this window nor change the focus to this window. Passing an
      * invalid region will remove the area from the exclude region of this window.
      */
-    void updateTapExcludeRegion(IWindow window, int regionId, in Region region);
+    void updateTapExcludeRegion(IWindow window, in Region region);
 
     /**
      * Called when the client has changed the local insets state, and now the server should reflect

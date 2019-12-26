@@ -448,10 +448,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void updateTapExcludeRegion(IWindow window, int regionId, Region region) {
+    public void updateTapExcludeRegion(IWindow window, Region region) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            mService.updateTapExcludeRegion(window, regionId, region);
+            mService.updateTapExcludeRegion(window, region);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
