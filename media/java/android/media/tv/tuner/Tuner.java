@@ -443,24 +443,79 @@ public final class Tuner implements AutoCloseable  {
      * <p> Descrambler is a hardware component used to descramble data.
      *
      * <p> This class controls the TIS interaction with Tuner HAL.
-     *
+     * TODO: make it static and extends Closable.
      */
     public class Descrambler {
         private long mNativeContext;
 
-        private native boolean nativeAddPid(int pidType, int pid, Filter filter);
-        private native boolean nativeRemovePid(int pidType, int pid, Filter filter);
+        private native int nativeAddPid(int pidType, int pid, Filter filter);
+        private native int nativeRemovePid(int pidType, int pid, Filter filter);
+        private native int nativeSetKeyToken(byte[] keyToken);
+        private native int nativeClose();
 
         private Descrambler() {}
 
-        /** @hide */
-        public boolean addPid(@DemuxPidType int pidType, int pid, Filter filter) {
+        /**
+         * Add packets' PID to the descrambler for descrambling.
+         *
+         * The descrambler will start descrambling packets with this PID. Multiple PIDs can be added
+         * into one descrambler instance because descambling can happen simultaneously on packets
+         * from different PIDs.
+         *
+         * If the Descrambler previously contained a filter for the PID, the old filter is replaced
+         * by the specified filter.
+         *
+         * @param pidType the type of the PID.
+         * @param pid the PID of packets to start to be descrambled.
+         * @param filter an optional filter instance to identify upper stream.
+         * @return result status of the operation.
+         *
+         * @hide
+         */
+        public int addPid(@DemuxPidType int pidType, int pid, @Nullable Filter filter) {
             return nativeAddPid(pidType, pid, filter);
         }
 
-        /** @hide */
-        public boolean removePid(@DemuxPidType int pidType, int pid, Filter filter) {
+        /**
+         * Remove packets' PID from the descrambler
+         *
+         * The descrambler will stop descrambling packets with this PID.
+         *
+         * @param pidType the type of the PID.
+         * @param pid the PID of packets to stop to be descrambled.
+         * @param filter an optional filter instance to identify upper stream.
+         * @return result status of the operation.
+         *
+         * @hide
+         */
+        public int removePid(@DemuxPidType int pidType, int pid, @Nullable Filter filter) {
             return nativeRemovePid(pidType, pid, filter);
+        }
+
+        /**
+         * Set a key token to link descrambler to a key slot
+         *
+         * A descrambler instance can have only one key slot to link, but a key slot can hold a few
+         * keys for different purposes.
+         *
+         * @param keyToken the token to be used to link the key slot.
+         * @return result status of the operation.
+         *
+         * @hide
+         */
+        public int setKeyToken(byte[] keyToken) {
+            return nativeSetKeyToken(keyToken);
+        }
+
+        /**
+         * Release the descrambler instance.
+         *
+         * @return result status of the operation.
+         *
+         * @hide
+         */
+        public int close() {
+            return nativeClose();
         }
 
     }
