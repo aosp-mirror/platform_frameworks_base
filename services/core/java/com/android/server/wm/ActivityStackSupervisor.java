@@ -52,9 +52,7 @@ import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
-import static com.android.server.wm.ActivityStack.TAG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_IDLE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
@@ -958,6 +956,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         r.launchFailed = false;
+        if (stack.updateLruList(r)) {
+            Slog.w(TAG, "Activity " + r + " being launched, but already in LRU list");
+        }
 
         // TODO(lifecycler): Resume or pause requests are done as part of launch transaction,
         // so updating the state should be done accordingly.
@@ -2161,7 +2162,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     if (!processPausingActivities && s.isState(PAUSING)) {
                         // Defer processing pausing activities in this iteration and reschedule
                         // a delayed idle to reprocess it again
-                        removeIdleTimeoutForActivity(idleActivity);
+                        removeTimeoutsForActivityLocked(idleActivity);
                         scheduleIdleTimeoutLocked(idleActivity);
                         continue;
                     }
@@ -2178,29 +2179,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         return stops;
-    }
-
-    void removeHistoryRecords(WindowProcessController app) {
-        removeHistoryRecords(mStoppingActivities, app, "mStoppingActivities");
-        removeHistoryRecords(mGoingToSleepActivities, app, "mGoingToSleepActivities");
-        removeHistoryRecords(mFinishingActivities, app, "mFinishingActivities");
-    }
-
-    private void removeHistoryRecords(ArrayList<ActivityRecord> list, WindowProcessController app,
-            String listName) {
-        int i = list.size();
-        if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
-                "Removing app " + this + " from list " + listName + " with " + i + " entries");
-        while (i > 0) {
-            i--;
-            ActivityRecord r = list.get(i);
-            if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP, "Record #" + i + " " + r);
-            if (r.app == app) {
-                if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP, "---> REMOVING this entry!");
-                list.remove(i);
-                r.removeTimeouts();
-            }
-        }
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -2393,7 +2371,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         scheduleTopResumedActivityStateIfNeeded();
     }
 
-    void removeIdleTimeoutForActivity(ActivityRecord r) {
+    void removeTimeoutsForActivityLocked(ActivityRecord r) {
         if (DEBUG_IDLE) Slog.d(TAG_IDLE, "removeTimeoutsForActivity: Callers="
                 + Debug.getCallers(4));
         mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
