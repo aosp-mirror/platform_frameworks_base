@@ -606,6 +606,11 @@
     <!-- UI debug setting: Select Bluetooth AVRCP Version -->
     <string name="bluetooth_select_avrcp_version_dialog_title">Select Bluetooth AVRCP Version</string>
 
+    <!-- UI debug setting: Select Bluetooth MAP Version [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_select_map_version_string">Bluetooth MAP Version</string>
+    <!-- UI debug setting: Select Bluetooth MAP Version [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_select_map_version_dialog_title">Select Bluetooth MAP Version</string>
+
     <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection -->
     <string name="bluetooth_select_a2dp_codec_type">Bluetooth Audio Codec</string>
     <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection -->
