@@ -147,7 +147,6 @@ class TestDisplayContent extends DisplayContent {
             final TestDisplayContent newDisplay;
             synchronized (mService.mGlobalLock) {
                 newDisplay = new TestDisplayContent(mService.mStackSupervisor, display);
-                mService.mRootActivityContainer.addChild(newDisplay, mPosition);
             }
             // disable the normal system decorations
             final DisplayPolicy displayPolicy = newDisplay.mDisplayContent.getDisplayPolicy();

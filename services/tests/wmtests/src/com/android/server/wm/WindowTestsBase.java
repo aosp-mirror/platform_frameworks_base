@@ -129,6 +129,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                         TYPE_APPLICATION_MEDIA_OVERLAY,
                         "mChildAppWindowBelow");
             }
+
             // Adding a display will cause freezing the display. Make sure to wait until it's
             // unfrozen to not run into race conditions with the tests.
             waitUntilHandlersIdle();

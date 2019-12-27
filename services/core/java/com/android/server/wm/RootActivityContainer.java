@@ -36,13 +36,13 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 
-import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
 import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
 import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
 import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
 import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
 import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
+import static com.android.server.am.ActivityStackSupervisorProto.ROOT_WINDOW_CONTAINER;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
@@ -135,7 +135,7 @@ import java.util.function.Function;
  * TODO: This class is mostly temporary to separate things out of ActivityStackSupervisor.java. The
  * intention is to have this merged with RootWindowContainer.java as part of unifying the hierarchy.
  */
-class RootActivityContainer extends ConfigurationContainer
+class RootActivityContainer extends RootWindowContainer
         implements DisplayManager.DisplayListener {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RootActivityContainer" : TAG_ATM;
@@ -168,14 +168,6 @@ class RootActivityContainer extends ConfigurationContainer
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
     private DisplayManagerInternal mDisplayManagerInternal;
-    // TODO(root-unify): Remove after object merge with RootWindowContainer.
-    RootWindowContainer mRootWindowContainer;
-
-    /**
-     * List of displays which contain activities, sorted by z-order.
-     * The last entry in the list is the topmost.
-     */
-    private final ArrayList<DisplayContent> mDisplayContents = new ArrayList<>();
 
     /** Reference to default display so we can quickly look it up. */
     private DisplayContent mDefaultDisplay;
@@ -337,7 +329,8 @@ class RootActivityContainer extends ConfigurationContainer
         }
     }
 
-    RootActivityContainer(ActivityTaskManagerService service) {
+    RootActivityContainer(ActivityTaskManagerService service, WindowManagerService wmService) {
+        super(wmService);
         mService = service;
         mStackSupervisor = service.mStackSupervisor;
         mStackSupervisor.mRootActivityContainer = this;
@@ -345,8 +338,6 @@ class RootActivityContainer extends ConfigurationContainer
 
     void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
-        mRootWindowContainer = mWindowManager.mRoot;
-        mRootWindowContainer.setRootActivityContainer(this);
         mDisplayManager = mService.mContext.getSystemService(DisplayManager.class);
         mDisplayManager.registerDisplayListener(this, mService.mUiHandler);
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
@@ -358,14 +349,13 @@ class RootActivityContainer extends ConfigurationContainer
             if (displayContent.mDisplayId == DEFAULT_DISPLAY) {
                 mDefaultDisplay = displayContent;
             }
-            addChild(displayContent, DisplayContent.POSITION_TOP);
         }
         calculateDefaultMinimalSizeOfResizeableTasks();
 
         final DisplayContent defaultDisplay = getDefaultDisplay();
 
         defaultDisplay.getOrCreateStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-        positionChildAt(defaultDisplay, DisplayContent.POSITION_TOP);
+        positionChildAt(POSITION_TOP, defaultDisplay, false /* includingParents */);
     }
 
     // TODO(multi-display): Look at all callpoints to make sure they make sense in multi-display.
@@ -424,7 +414,6 @@ class RootActivityContainer extends ConfigurationContainer
         }
         // The display hasn't been added to ActivityManager yet, create a new record now.
         displayContent = new DisplayContent(display, this);
-        addChild(displayContent, DisplayContent.POSITION_BOTTOM);
         return displayContent;
     }
 
@@ -750,7 +739,7 @@ class RootActivityContainer extends ConfigurationContainer
 
         // Force-update the orientation from the WindowManager, since we need the true configuration
         // to send to the client now.
-        final DisplayContent displayContent = mRootWindowContainer.getDisplayContent(displayId);
+        final DisplayContent displayContent = getDisplayContent(displayId);
         Configuration config = null;
         if (displayContent != null) {
             config = displayContent.updateOrientation(
@@ -1564,55 +1553,9 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     @Override
-    protected int getChildCount() {
-        return mDisplayContents.size();
-    }
-
-    @Override
-    protected DisplayContent getChildAt(int index) {
-        return mDisplayContents.get(index);
-    }
-
-    @Override
-    protected ConfigurationContainer getParent() {
-        return null;
-    }
-
-    // TODO: remove after object merge with RootWindowContainer
-    void onChildPositionChanged(DisplayContent display, int position) {
-        // Assume AM lock is held from positionChildAt of controller in each hierarchy.
-        if (display != null) {
-            positionChildAt(display, position);
-        }
-    }
-
-    /** Change the z-order of the given display. */
-    private void positionChildAt(DisplayContent display, int position) {
-        if (position >= mDisplayContents.size()) {
-            position = mDisplayContents.size() - 1;
-        } else if (position < 0) {
-            position = 0;
-        }
-
-        if (mDisplayContents.isEmpty()) {
-            mDisplayContents.add(display);
-        } else if (mDisplayContents.get(position) != display) {
-            mDisplayContents.remove(display);
-            mDisplayContents.add(position, display);
-        }
+    void positionChildAt(int position, DisplayContent child, boolean includingParents) {
+        super.positionChildAt(position, child, includingParents);
         mStackSupervisor.updateTopResumedActivityIfNeeded();
-    }
-
-    @VisibleForTesting
-    void addChild(DisplayContent displayContent, int position) {
-        positionChildAt(displayContent, position);
-        mRootWindowContainer.positionChildAt(position, displayContent);
-    }
-
-    void removeChild(DisplayContent displayContent) {
-        // The caller must tell the controller of {@link DisplayContent} to release its container
-        // {@link DisplayContent}. That is done in {@link DisplayContent#releaseSelfIfNeeded}).
-        mDisplayContents.remove(displayContent);
     }
 
     Configuration getDisplayOverrideConfiguration(int displayId) {
@@ -1664,7 +1607,7 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     void addStartingWindowsForVisibleActivities() {
-        mRootWindowContainer.forAllActivities((r) -> {
+        forAllActivities((r) -> {
             if (r.mVisibleRequested) {
                 r.showStartingWindow(null /* prev */, false /* newTask */, true /*taskSwitch*/);
             }
@@ -1676,7 +1619,7 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     void rankTaskLayersIfNeeded() {
-        if (!mTaskLayersChanged || mRootWindowContainer == null) {
+        if (!mTaskLayersChanged) {
             return;
         }
         mTaskLayersChanged = false;
@@ -1684,7 +1627,7 @@ class RootActivityContainer extends ConfigurationContainer
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 RootActivityContainer::rankTaskLayerForActivity, this,
                 PooledLambda.__(ActivityRecord.class));
-        mRootWindowContainer.forAllActivities(c);
+        forAllActivities(c);
         c.recycle();
     }
 
@@ -1700,7 +1643,7 @@ class RootActivityContainer extends ConfigurationContainer
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 RootActivityContainer::clearOtherAppTimeTrackers,
                 PooledLambda.__(ActivityRecord.class), except);
-        mRootWindowContainer.forAllActivities(c);
+        forAllActivities(c);
         c.recycle();
     }
 
@@ -1748,7 +1691,7 @@ class RootActivityContainer extends ConfigurationContainer
     void handleAppCrash(WindowProcessController app) {
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 RootActivityContainer::handleAppCrash, PooledLambda.__(ActivityRecord.class), app);
-        mRootWindowContainer.forAllActivities(c);
+        forAllActivities(c);
         c.recycle();
     }
 
@@ -1773,7 +1716,7 @@ class RootActivityContainer extends ConfigurationContainer
         final PooledPredicate p = PooledLambda.obtainPredicate(
                 RootActivityContainer::matchesActivity, PooledLambda.__(ActivityRecord.class),
                 userId, compareIntentFilters, intent, cls);
-        final ActivityRecord r = mRootWindowContainer.getActivity(p);
+        final ActivityRecord r = getActivity(p);
         p.recycle();
         return r;
     }
@@ -2123,7 +2066,7 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     void closeSystemDialogs() {
-        mRootWindowContainer.forAllActivities((r) -> {
+        forAllActivities((r) -> {
             if ((r.info.flags & ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
                 r.finishIfPossible("close-sys", true /* oomAdj */);
             }
@@ -2161,7 +2104,7 @@ class RootActivityContainer extends ConfigurationContainer
             final PooledFunction f = PooledLambda.obtainFunction(
                     FinishDisabledPackageActivitiesHelper::processActivity, this,
                     PooledLambda.__(ActivityRecord.class));
-            mRootWindowContainer.forAllActivities(f);
+            forAllActivities(f);
             f.recycle();
             return mDidSomething;
         }
@@ -2213,7 +2156,7 @@ class RootActivityContainer extends ConfigurationContainer
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 RootActivityContainer::updateActivityApplicationInfo,
                 PooledLambda.__(ActivityRecord.class), aInfo, userId, packageName);
-        mRootWindowContainer.forAllActivities(c);
+        forAllActivities(c);
         c.recycle();
     }
 
@@ -2341,7 +2284,7 @@ class RootActivityContainer extends ConfigurationContainer
             final PooledConsumer c = PooledLambda.obtainConsumer(
                     RootActivityContainer::taskTopActivityIsUser, this, PooledLambda.__(Task.class),
                     userId);
-            mRootWindowContainer.forAllTasks(c);
+            forAllTasks(c);
             c.recycle();
         } finally {
             mService.continueWindowLayout();
@@ -2409,7 +2352,7 @@ class RootActivityContainer extends ConfigurationContainer
 
         final PooledPredicate p = PooledLambda.obtainPredicate(
                 Task::isTaskId, PooledLambda.__(Task.class), id);
-        Task task = mRootWindowContainer.getTask(p);
+        Task task = getTask(p);
         p.recycle();
 
         if (task != null) {
@@ -2621,10 +2564,11 @@ class RootActivityContainer extends ConfigurationContainer
         return printed;
     }
 
-    protected void dumpDebug(ProtoOutputStream proto, long fieldId,
+    @Override
+    public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         final long token = proto.start(fieldId);
-        super.dumpDebug(proto, CONFIGURATION_CONTAINER, logLevel);
+        dumpDebugInner(proto, ROOT_WINDOW_CONTAINER, logLevel);
         for (int displayNdx = 0; displayNdx < getChildCount(); ++displayNdx) {
             final DisplayContent displayContent = getChildAt(displayNdx);
             displayContent.dumpDebug(proto, DISPLAYS, logLevel);

@@ -653,7 +653,7 @@ public class LockTaskController {
             taskChanged = true;
         }
 
-        mSupervisor.mRootActivityContainer.mRootWindowContainer.forAllTasks(Task::setLockTaskAuth);
+        mSupervisor.mRootActivityContainer.forAllTasks(Task::setLockTaskAuth);
 
         final ActivityRecord r = mSupervisor.mRootActivityContainer.topRunningActivity();
         final Task task = (r != null) ? r.getTask() : null;

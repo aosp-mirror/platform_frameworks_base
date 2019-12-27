@@ -76,7 +76,7 @@ class RunningTasks {
 
         final PooledConsumer c = PooledLambda.obtainConsumer(RunningTasks::processTask, this,
                 PooledLambda.__(Task.class));
-        root.mRootWindowContainer.forAllTasks(c, false);
+        root.forAllTasks(c, false);
         c.recycle();
 
         // Take the first {@param maxNum} tasks and create running task infos for them

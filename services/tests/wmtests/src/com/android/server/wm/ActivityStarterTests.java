@@ -802,7 +802,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // Create a secondary display with an activity.
         final TestDisplayContent secondaryDisplay =
                 new TestDisplayContent.Builder(mService, 1000, 1500).build();
-        mRootActivityContainer.addChild(secondaryDisplay, POSITION_TOP);
+        mRootActivityContainer.positionChildAt(POSITION_TOP, secondaryDisplay,
+                false /* includingParents */);
         final ActivityRecord singleTaskActivity = createSingleTaskActivityOn(
                 secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
                         ACTIVITY_TYPE_STANDARD, false /* onTop */));

@@ -50,7 +50,6 @@ import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_C
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING;
 
-import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -85,15 +84,11 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /** Root {@link WindowContainer} for the device. */
-class RootWindowContainer extends WindowContainer<DisplayContent>
-        implements ConfigurationContainerListener {
+class RootWindowContainer extends WindowContainer<DisplayContent> {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RootWindowContainer" : TAG_WM;
 
     private static final int SET_SCREEN_BRIGHTNESS_OVERRIDE = 1;
     private static final int SET_USER_ACTIVITY_TIMEOUT = 2;
-
-    // TODO: Remove after object merge with RootActivityContainer.
-    private RootActivityContainer mRootActivityContainer;
 
     private Object mLastWindowFreezeSource = null;
     private Session mHoldScreen = null;
@@ -154,13 +149,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         super(service);
         mDisplayTransaction = service.mTransactionFactory.get();
         mHandler = new MyHandler(service.mH.getLooper());
-    }
-
-    void setRootActivityContainer(RootActivityContainer container) {
-        mRootActivityContainer = container;
-        if (container != null) {
-            container.registerConfigurationChangeListener(this);
-        }
     }
 
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
@@ -1006,9 +994,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     }
 
-    @CallSuper
-    @Override
-    public void dumpDebug(ProtoOutputStream proto, long fieldId,
+    public void dumpDebugInner(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
             return;
@@ -1034,19 +1020,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     @Override
     String getName() {
         return "ROOT";
-    }
-
-    @Override
-    void positionChildAt(int position, DisplayContent child, boolean includingParents) {
-        super.positionChildAt(position, child, includingParents);
-        if (mRootActivityContainer != null) {
-            mRootActivityContainer.onChildPositionChanged(child, position);
-        }
-    }
-
-    void positionChildAt(int position, DisplayContent child) {
-        // Only called from controller so no need to notify the change to controller.
-        super.positionChildAt(position, child, false /* includingParents */);
     }
 
     @Override
