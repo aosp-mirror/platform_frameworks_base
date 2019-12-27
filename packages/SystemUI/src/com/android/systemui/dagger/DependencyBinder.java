@@ -20,6 +20,7 @@ import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.appops.AppOpsControllerImpl;
 import com.android.systemui.classifier.FalsingManagerProxy;
+import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -82,7 +83,7 @@ import dagger.Module;
 /**
  * Maps interfaces to implementations for use with Dagger.
  */
-@Module
+@Module(includes = {ControlsModule.class})
 public abstract class DependencyBinder {
 
     /**
