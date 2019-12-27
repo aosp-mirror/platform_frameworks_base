@@ -4103,6 +4103,23 @@ public class WifiManager {
     }
 
     /**
+     * Configure auto-join settings for a Passpoint profile.
+     *
+     * @param fqdn the FQDN (fully qualified domain name) of the passpoint profile.
+     * @param enableAutoJoin true to enable autojoin, false to disable autojoin.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void allowAutojoinPasspoint(@NonNull String fqdn, boolean enableAutoJoin) {
+        try {
+            mService.allowAutojoinPasspoint(fqdn, enableAutoJoin);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Disable an ephemeral network.
      *
      * @param ssid in the format of WifiConfiguration's SSID.

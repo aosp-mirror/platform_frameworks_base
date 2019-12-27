@@ -182,6 +182,11 @@ public class BaseWifiService extends IWifiManager.Stub {
     }
 
     @Override
+    public void allowAutojoinPasspoint(String fqdn, boolean enableAutoJoin) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean startScan(String packageName, String featureId) {
         throw new UnsupportedOperationException();
     }
