@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_HIDDEN;
+import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
 import static android.view.InsetsState.ISIDE_BOTTOM;
 import static android.view.InsetsState.ISIDE_FLOATING;
 import static android.view.InsetsState.ISIDE_LEFT;
@@ -30,6 +32,7 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.SparseSetArray;
+import android.view.InsetsController.LayoutInsetsDuringAnimation;
 import android.view.InsetsState.InternalInsetsSide;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetsType;
@@ -80,7 +83,8 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     public InsetsAnimationControlImpl(SparseArray<InsetsSourceControl> controls, Rect frame,
             InsetsState state, WindowInsetsAnimationControlListener listener,
             @InsetsType int types,
-            InsetsAnimationControlCallbacks controller, long durationMs, boolean fade) {
+            InsetsAnimationControlCallbacks controller, long durationMs, boolean fade,
+            @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
         mControls = controls;
         mListener = listener;
         mTypes = types;
@@ -95,14 +99,11 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mFrame = new Rect(frame);
         buildTypeSourcesMap(mTypeSideMap, mSideSourceMap, mControls);
 
-        // TODO: Check for controllability first and wait for IME if needed.
-        listener.onReady(this, types);
-
         mAnimation = new WindowInsetsAnimationCallback.InsetsAnimation(mTypes,
                 InsetsController.INTERPOLATOR, durationMs);
         mAnimation.setAlpha(getCurrentAlpha());
-        mController.dispatchAnimationStarted(mAnimation,
-                new AnimationBounds(mHiddenInsets, mShownInsets));
+        mController.startAnimation(this, listener, types, mAnimation,
+                new AnimationBounds(mHiddenInsets, mShownInsets), layoutInsetsDuringAnimation);
     }
 
     @Override

@@ -53,7 +53,7 @@ public class InsetsSourceConsumer {
     }
 
     protected final InsetsController mController;
-    protected boolean mVisible;
+    protected boolean mRequestedVisible;
     private final Supplier<Transaction> mTransactionSupplier;
     private final @InternalInsetsType int mType;
     private final InsetsState mState;
@@ -66,7 +66,7 @@ public class InsetsSourceConsumer {
         mState = state;
         mTransactionSupplier = transactionSupplier;
         mController = controller;
-        mVisible = InsetsState.getDefaultVisibility(type);
+        mRequestedVisible = InsetsState.getDefaultVisibility(type);
     }
 
     public void setControl(@Nullable InsetsSourceControl control) {
@@ -94,12 +94,12 @@ public class InsetsSourceConsumer {
 
     @VisibleForTesting
     public void show() {
-        setVisible(true);
+        setRequestedVisible(true);
     }
 
     @VisibleForTesting
     public void hide() {
-        setVisible(false);
+        setRequestedVisible(false);
     }
 
     /**
@@ -126,16 +126,16 @@ public class InsetsSourceConsumer {
         if (mSourceControl == null) {
             return false;
         }
-        if (mState.getSource(mType).isVisible() == mVisible) {
+        if (mState.getSource(mType).isVisible() == mRequestedVisible) {
             return false;
         }
-        mState.getSource(mType).setVisible(mVisible);
+        mState.getSource(mType).setVisible(mRequestedVisible);
         return true;
     }
 
     @VisibleForTesting
-    public boolean isVisible() {
-        return mVisible;
+    public boolean isRequestedVisible() {
+        return mRequestedVisible;
     }
 
     /**
@@ -157,11 +157,15 @@ public class InsetsSourceConsumer {
         // no-op for types that always return ShowResult#SHOW_IMMEDIATELY.
     }
 
-    private void setVisible(boolean visible) {
-        if (mVisible == visible) {
+    /**
+     * Sets requested visibility from the client, regardless of whether we are able to control it at
+     * the moment.
+     */
+    private void setRequestedVisible(boolean requestedVisible) {
+        if (mRequestedVisible == requestedVisible) {
             return;
         }
-        mVisible = visible;
+        mRequestedVisible = requestedVisible;
         applyLocalVisibilityOverride();
         mController.notifyVisibilityChanged();
     }
@@ -173,7 +177,7 @@ public class InsetsSourceConsumer {
         }
 
         final Transaction t = mTransactionSupplier.get();
-        if (mVisible) {
+        if (mRequestedVisible) {
             t.show(mSourceControl.getLeash());
         } else {
             t.hide(mSourceControl.getLeash());

@@ -11117,7 +11117,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Dispatches {@link WindowInsetsAnimationCallback#onStarted(InsetsAnimation, AnimationBounds)}
+     * Dispatches {@link WindowInsetsAnimationCallback#onPrepare(InsetsAnimation)}
+     * when Window Insets animation is being prepared.
+     * @param animation current animation
+     *
+     * @see WindowInsetsAnimationCallback#onPrepare(InsetsAnimation)
+     */
+    public void dispatchWindowInsetsAnimationPrepare(
+            @NonNull InsetsAnimation animation) {
+        if (mListenerInfo != null && mListenerInfo.mWindowInsetsAnimationCallback != null) {
+            mListenerInfo.mWindowInsetsAnimationCallback.onPrepare(animation);
+        }
+    }
+
+    /**
+     * Dispatches {@link WindowInsetsAnimationCallback#onStart(InsetsAnimation, AnimationBounds)}
      * when Window Insets animation is started.
      * @param animation current animation
      * @param bounds the upper and lower {@link AnimationBounds} that provides range of
@@ -11125,10 +11139,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the upper and lower {@link AnimationBounds}.
      */
     @NonNull
-    public AnimationBounds dispatchWindowInsetsAnimationStarted(
+    public AnimationBounds dispatchWindowInsetsAnimationStart(
             @NonNull InsetsAnimation animation, @NonNull AnimationBounds bounds) {
         if (mListenerInfo != null && mListenerInfo.mWindowInsetsAnimationCallback != null) {
-            return mListenerInfo.mWindowInsetsAnimationCallback.onStarted(animation, bounds);
+            return mListenerInfo.mWindowInsetsAnimationCallback.onStart(animation, bounds);
         }
         return bounds;
     }
@@ -11149,13 +11163,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Dispatches {@link WindowInsetsAnimationCallback#onFinished(InsetsAnimation)}
+     * Dispatches {@link WindowInsetsAnimationCallback#onFinish(InsetsAnimation)}
      * when Window Insets animation finishes.
      * @param animation The current ongoing {@link InsetsAnimation}.
      */
-    public void dispatchWindowInsetsAnimationFinished(@NonNull InsetsAnimation animation) {
+    public void dispatchWindowInsetsAnimationFinish(@NonNull InsetsAnimation animation) {
         if (mListenerInfo != null && mListenerInfo.mWindowInsetsAnimationCallback != null) {
-            mListenerInfo.mWindowInsetsAnimationCallback.onFinished(animation);
+            mListenerInfo.mWindowInsetsAnimationCallback.onFinish(animation);
         }
     }
 

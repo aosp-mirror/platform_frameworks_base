@@ -90,12 +90,12 @@ public class ImeInsetsSourceConsumerTest {
             mImeConsumer.onWindowFocusGained();
             mImeConsumer.applyImeVisibility(true);
             mController.cancelExistingAnimation();
-            assertTrue(mController.getSourceConsumer(ime.getType()).isVisible());
+            assertTrue(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
 
             // test if setVisibility can hide IME
             mImeConsumer.applyImeVisibility(false);
             mController.cancelExistingAnimation();
-            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+            assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
         });
     }
 
