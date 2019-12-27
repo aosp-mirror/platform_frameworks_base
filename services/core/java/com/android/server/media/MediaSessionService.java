@@ -1836,7 +1836,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                                     break;
                             }
                             record.adjustVolume(packageName, opPackageName, pid, uid,
-                                    null /* caller */, true /* asSystemService */, direction,
+                                    true /* asSystemService */, direction,
                                     AudioManager.FLAG_SHOW_UI, false /* useSuggested */);
                             break;
                         }
@@ -1846,8 +1846,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                                     AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE
                                             | AudioManager.FLAG_FROM_KEY;
                             record.adjustVolume(packageName, opPackageName, pid, uid,
-                                    null /* caller */, true /* asSystemService */, 0,
-                                    flags, false /* useSuggested */);
+                                    true /* asSystemService */, 0, flags, false /* useSuggested */);
                         }
                     }
                 }
@@ -2081,7 +2080,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                             + flags + ", suggestedStream=" + suggestedStream
                             + ", preferSuggestedStream=" + preferSuggestedStream);
                 }
-                session.adjustVolume(packageName, opPackageName, pid, uid, null, asSystemService,
+                session.adjustVolume(packageName, opPackageName, pid, uid, asSystemService,
                         direction, flags, true);
             }
         }
