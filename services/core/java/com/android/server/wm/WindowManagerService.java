@@ -6874,21 +6874,12 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "shouldShowIme()")) {
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
-
+        boolean show;
         synchronized (mGlobalLock) {
-            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            if (displayContent == null) {
-                ProtoLog.w(WM_ERROR,
-                        "Attempted to get IME flag of a display that does not exist: %d",
-                        displayId);
-                return false;
-            }
-            if (displayContent.isUntrustedVirtualDisplay()) {
-                return false;
-            }
-            return mDisplayWindowSettings.shouldShowImeLocked(displayContent)
-                    || mForceDesktopModeOnExternalDisplays;
+            show = shouldShowImeSystemWindowUncheckedLocked(displayId);
         }
+
+        return show;
     }
 
     @Override
@@ -7311,18 +7302,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (imeTarget == null) {
                     return;
                 }
-                final DisplayContent displayContent = imeTarget.getDisplayContent();
-                if (displayContent == null) {
-                    Slog.w(TAG_WM, "Attempted to show IME on an IME target that does not exist: "
-                            + imeTarget.getName());
+                final int displayId = imeTarget.getDisplayId();
+                if (!shouldShowImeSystemWindowUncheckedLocked(displayId)) {
                     return;
                 }
-                if (displayContent.isUntrustedVirtualDisplay()) {
-                    throw new SecurityException("Attempted to show IME on an untrusted "
-                            + "virtual display: " + displayContent.getDisplayId());
-                }
 
-                displayContent.getInsetsStateController().getImeSourceProvider()
+                mRoot.getDisplayContent(displayId).getInsetsStateController().getImeSourceProvider()
                         .scheduleShowImePostLayout(imeTarget);
             }
         }
@@ -7841,5 +7826,20 @@ public class WindowManagerService extends IWindowManager.Stub
         outSurfaceControl.copyFrom(mirror);
 
         return true;
+    }
+
+    private boolean shouldShowImeSystemWindowUncheckedLocked(final int displayId) {
+        final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+        if (displayContent == null) {
+            ProtoLog.w(WM_ERROR,
+                    "Attempted to get IME flag of a display that does not exist: %d",
+                    displayId);
+            return false;
+        }
+        if (displayContent.isUntrustedVirtualDisplay()) {
+            return false;
+        }
+        return mDisplayWindowSettings.shouldShowImeLocked(displayContent)
+                || mForceDesktopModeOnExternalDisplays;
     }
 }
