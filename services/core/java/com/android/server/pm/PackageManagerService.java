@@ -2654,6 +2654,9 @@ public class PackageManagerService extends IPackageManager.Stub
     public PackageManagerService(Injector injector, boolean onlyCore, boolean factoryTest) {
         PackageManager.disableApplicationInfoCache();
         PackageManager.disablePackageInfoCache();
+        ApplicationPackageManager.invalidateGetPackagesForUidCache();
+        ApplicationPackageManager.disableGetPackagesForUidCache();
+        ApplicationPackageManager.invalidateHasSystemFeatureCache();
 
         // Avoid invalidation-thrashing by preventing cache invalidations from causing property
         // writes if the cache isn't enabled yet.  We re-enable writes later when we're
@@ -2747,7 +2750,6 @@ public class PackageManagerService extends IPackageManager.Stub
         t.traceBegin("get system config");
         SystemConfig systemConfig = SystemConfig.getInstance();
         mAvailableFeatures = systemConfig.getAvailableFeatures();
-        ApplicationPackageManager.invalidateHasSystemFeatureCache();
         t.traceEnd();
 
         mProtectedPackages = new ProtectedPackages(mContext);
@@ -5947,6 +5949,11 @@ public class PackageManagerService extends IPackageManager.Stub
      * </ol>
      * The second is an artifact of the current data structures and should be fixed. See
      * b/111075456 for one such instance.
+     * This binder API is cached.  If the algorithm in this method changes,
+     * or if the underlying objecs (as returned by getSettingLPr()) change
+     * then the logic that invalidates the cache must be revisited.  See
+     * calls to invalidateGetPackagesForUidCache() to locate the points at
+     * which the cache is invalidated.
      */
     @Override
     public String[] getPackagesForUid(int uid) {
@@ -16216,6 +16223,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 updateInstantAppInstallerLocked(packageName);
             }
         }
+        ApplicationPackageManager.invalidateGetPackagesForUidCache();
     }
 
     /**
@@ -17834,6 +17842,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     updateInstantAppInstallerLocked(packageName);
                 }
             }
+            ApplicationPackageManager.invalidateGetPackagesForUidCache();
         }
 
         if (res) {
