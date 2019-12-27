@@ -19,7 +19,6 @@ package com.android.server.locksettings.recoverablekeystore;
 import static android.security.keystore.recovery.RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT;
 import static android.security.keystore.recovery.RecoveryController.ERROR_DECRYPTION_FAILED;
 import static android.security.keystore.recovery.RecoveryController.ERROR_DOWNGRADE_CERTIFICATE;
-import static android.security.keystore.recovery.RecoveryController.ERROR_INSECURE_USER;
 import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_CERTIFICATE;
 import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_KEY_FORMAT;
 import static android.security.keystore.recovery.RecoveryController.ERROR_NO_SNAPSHOT_PENDING;
@@ -46,7 +45,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
-import com.android.internal.util.Preconditions;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertParsingException;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertUtils;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertValidationException;
@@ -76,8 +74,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.crypto.AEADBadTagException;
 
@@ -89,13 +88,14 @@ import javax.crypto.AEADBadTagException;
  */
 public class RecoverableKeyStoreManager {
     private static final String TAG = "RecoverableKeyStoreMgr";
+    private static final long SYNC_DELAY_MILLIS = 2000;
 
     private static RecoverableKeyStoreManager mInstance;
 
     private final Context mContext;
     private final RecoverableKeyStoreDb mDatabase;
     private final RecoverySessionStorage mRecoverySessionStorage;
-    private final ExecutorService mExecutorService;
+    private final ScheduledExecutorService mExecutorService;
     private final RecoverySnapshotListenersStorage mListenersStorage;
     private final RecoverableKeyGenerator mRecoverableKeyGenerator;
     private final RecoverySnapshotStorage mSnapshotStorage;
@@ -136,7 +136,7 @@ public class RecoverableKeyStoreManager {
                     context.getApplicationContext(),
                     db,
                     new RecoverySessionStorage(),
-                    Executors.newSingleThreadExecutor(),
+                    Executors.newScheduledThreadPool(1),
                     snapshotStorage,
                     new RecoverySnapshotListenersStorage(),
                     platformKeyManager,
@@ -152,7 +152,7 @@ public class RecoverableKeyStoreManager {
             Context context,
             RecoverableKeyStoreDb recoverableKeyStoreDb,
             RecoverySessionStorage recoverySessionStorage,
-            ExecutorService executorService,
+            ScheduledExecutorService executorService,
             RecoverySnapshotStorage snapshotStorage,
             RecoverySnapshotListenersStorage listenersStorage,
             PlatformKeyManager platformKeyManager,
@@ -724,8 +724,6 @@ public class RecoverableKeyStoreManager {
             throw new RuntimeException(e);
         } catch (KeyStoreException | UnrecoverableKeyException | IOException e) {
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
-        } catch (InsecureUserException e) {
-            throw new ServiceSpecificException(ERROR_INSECURE_USER, e.getMessage());
         }
 
         try {
@@ -793,8 +791,6 @@ public class RecoverableKeyStoreManager {
             throw new RuntimeException(e);
         } catch (KeyStoreException | UnrecoverableKeyException | IOException e) {
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
-        } catch (InsecureUserException e) {
-            throw new ServiceSpecificException(ERROR_INSECURE_USER, e.getMessage());
         }
 
         try {
@@ -915,7 +911,7 @@ public class RecoverableKeyStoreManager {
             int storedHashType, @NonNull byte[] credential, int userId) {
         // So as not to block the critical path unlocking the phone, defer to another thread.
         try {
-            mExecutorService.execute(KeySyncTask.newInstance(
+            mExecutorService.schedule(KeySyncTask.newInstance(
                     mContext,
                     mDatabase,
                     mSnapshotStorage,
@@ -923,7 +919,10 @@ public class RecoverableKeyStoreManager {
                     userId,
                     storedHashType,
                     credential,
-                    /*credentialUpdated=*/ false));
+                    /*credentialUpdated=*/ false),
+                    SYNC_DELAY_MILLIS,
+                    TimeUnit.MILLISECONDS
+            );
         } catch (NoSuchAlgorithmException e) {
             Log.wtf(TAG, "Should never happen - algorithm unavailable for KeySync", e);
         } catch (KeyStoreException e) {
@@ -947,7 +946,7 @@ public class RecoverableKeyStoreManager {
             int userId) {
         // So as not to block the critical path unlocking the phone, defer to another thread.
         try {
-            mExecutorService.execute(KeySyncTask.newInstance(
+            mExecutorService.schedule(KeySyncTask.newInstance(
                     mContext,
                     mDatabase,
                     mSnapshotStorage,
@@ -955,7 +954,10 @@ public class RecoverableKeyStoreManager {
                     userId,
                     storedHashType,
                     credential,
-                    /*credentialUpdated=*/ true));
+                    /*credentialUpdated=*/ true),
+                    SYNC_DELAY_MILLIS,
+                    TimeUnit.MILLISECONDS
+            );
         } catch (NoSuchAlgorithmException e) {
             Log.wtf(TAG, "Should never happen - algorithm unavailable for KeySync", e);
         } catch (KeyStoreException e) {

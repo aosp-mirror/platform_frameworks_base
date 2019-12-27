@@ -20,6 +20,7 @@ import static android.security.keystore.recovery.KeyChainProtectionParams.TYPE_L
 
 import android.content.Context;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.security.Scrypt;
 import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
@@ -163,16 +164,28 @@ public class KeySyncTask implements Runnable {
     }
 
     private void syncKeys() throws RemoteException {
+        int generation = mPlatformKeyManager.getGenerationId(mUserId);
         if (mCredentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
             // Application keys for the user will not be available for sync.
             Log.w(TAG, "Credentials are not set for user " + mUserId);
-            int generation = mPlatformKeyManager.getGenerationId(mUserId);
-            mPlatformKeyManager.invalidatePlatformKey(mUserId, generation);
+            if (generation < PlatformKeyManager.MIN_GENERATION_ID_FOR_UNLOCKED_DEVICE_REQUIRED
+                    || mUserId != UserHandle.USER_SYSTEM) {
+                // Only invalidate keys with legacy protection param.
+                mPlatformKeyManager.invalidatePlatformKey(mUserId, generation);
+            }
             return;
         }
         if (isCustomLockScreen()) {
-            Log.w(TAG, "Unsupported credential type " + mCredentialType + "for user " + mUserId);
-            mRecoverableKeyStoreDb.invalidateKeysForUserIdOnCustomScreenLock(mUserId);
+            Log.w(TAG, "Unsupported credential type " + mCredentialType + " for user " + mUserId);
+            // Keys will be synced when user starts using non custom screen lock.
+            if (generation < PlatformKeyManager.MIN_GENERATION_ID_FOR_UNLOCKED_DEVICE_REQUIRED
+                    || mUserId != UserHandle.USER_SYSTEM) {
+                mRecoverableKeyStoreDb.invalidateKeysForUserIdOnCustomScreenLock(mUserId);
+            }
+            return;
+        }
+        if (mPlatformKeyManager.isDeviceLocked(mUserId) && mUserId == UserHandle.USER_SYSTEM) {
+            Log.w(TAG, "Can't sync keys for locked user " + mUserId);
             return;
         }
 

@@ -29,6 +29,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
@@ -84,7 +85,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -157,7 +158,7 @@ public class RecoverableKeyStoreManagerTest {
     @Mock private PlatformKeyManager mPlatformKeyManager;
     @Mock private ApplicationKeyStorage mApplicationKeyStorage;
     @Mock private CleanupManager mCleanupManager;
-    @Mock private ExecutorService mExecutorService;
+    @Mock private ScheduledExecutorService mExecutorService;
     @Spy private TestOnlyInsecureCertificateHelper mTestOnlyInsecureCertificateHelper;
 
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
@@ -1253,7 +1254,7 @@ public class RecoverableKeyStoreManagerTest {
         mRecoverableKeyStoreManager.lockScreenSecretAvailable(
                 LockPatternUtils.CREDENTIAL_TYPE_PATTERN, "password".getBytes(), 11);
 
-        verify(mExecutorService).execute(any());
+        verify(mExecutorService).schedule(any(Runnable.class), anyLong(), any());
     }
 
     @Test
@@ -1263,7 +1264,7 @@ public class RecoverableKeyStoreManagerTest {
                 "password".getBytes(),
                 11);
 
-        verify(mExecutorService).execute(any());
+        verify(mExecutorService).schedule(any(Runnable.class), anyLong(), any());
     }
 
     private static byte[] encryptedApplicationKey(
