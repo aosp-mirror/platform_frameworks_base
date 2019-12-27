@@ -24,7 +24,6 @@ import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
 import android.media.RouteSessionInfo;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
 
@@ -62,6 +61,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     public static final int SESSION_ID_1 = 1000;
 
     Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
+    Map<String, Integer> mRouteSessionMap = new HashMap<>();
 
     private void initializeRoutes() {
         MediaRoute2Info route1 = new MediaRoute2Info.Builder(ROUTE_ID1, ROUTE_NAME1)
@@ -113,31 +113,6 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onSelectRoute(String packageName, String routeId, SelectToken token) {
-        MediaRoute2Info route = mRoutes.get(routeId);
-        if (route == null) {
-            return;
-        }
-        mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
-                .setClientPackageName(packageName)
-                .build());
-        publishRoutes();
-        notifyRouteSelected(token, Bundle.EMPTY);
-    }
-
-    @Override
-    public void onUnselectRoute(String packageName, String routeId) {
-        MediaRoute2Info route = mRoutes.get(routeId);
-        if (route == null) {
-            return;
-        }
-        mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
-                .setClientPackageName(null)
-                .build());
-        publishRoutes();
-    }
-
-    @Override
     public void onControlRequest(String routeId, Intent request) {
         String action = request.getAction();
         if (ACTION_REMOVE_ROUTE.equals(action)) {
@@ -180,26 +155,56 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     @Override
     public void onCreateSession(String packageName, String routeId, String controlCategory,
             int requestId) {
-        if (TextUtils.equals(ROUTE_ID3_SESSION_CREATION_FAILED, routeId)) {
+        MediaRoute2Info route = mRoutes.get(routeId);
+        if (route == null || TextUtils.equals(ROUTE_ID3_SESSION_CREATION_FAILED, routeId)) {
             // Tell the router that session cannot be created by passing null as sessionInfo.
             notifySessionCreated(/* sessionInfo= */ null, requestId);
             return;
         }
+        maybeRemoveRoute(routeId);
+
+        int sessionId = SESSION_ID_1;
+
+        mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
+                .setClientPackageName(packageName)
+                .build());
+        mRouteSessionMap.put(routeId, sessionId);
 
         RouteSessionInfo sessionInfo = new RouteSessionInfo.Builder(
-                SESSION_ID_1, packageName, controlCategory)
+                sessionId, packageName, controlCategory)
                 .addSelectedRoute(routeId)
                 .build();
-        notifySessionCreated(sessionInfo,  requestId);
+        notifySessionCreated(sessionInfo, requestId);
+        publishRoutes();
     }
 
     @Override
-    public void onDestroySession(int sessionId, RouteSessionInfo lastSessionInfo) {}
+    public void onDestroySession(int sessionId, RouteSessionInfo lastSessionInfo) {
+        for (String routeId : lastSessionInfo.getSelectedRoutes()) {
+            mRouteSessionMap.remove(routeId);
+            MediaRoute2Info route = mRoutes.get(routeId);
+            if (route != null) {
+                mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
+                        .setClientPackageName(null)
+                        .build());
+            }
+        }
+    }
 
     @Override
     public void onAddRoute(int sessionId, String routeId) {
         RouteSessionInfo sessionInfo = getSessionInfo(sessionId);
-        //TODO: we may want to remove route if it belongs to another session
+        MediaRoute2Info route = mRoutes.get(routeId);
+        if (route == null || sessionInfo == null) {
+            return;
+        }
+        maybeRemoveRoute(routeId);
+
+        mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
+                .setClientPackageName(sessionInfo.getPackageName())
+                .build());
+        mRouteSessionMap.put(routeId, sessionId);
+
         RouteSessionInfo newSessionInfo = new RouteSessionInfo.Builder(sessionInfo)
                 .addSelectedRoute(routeId)
                 .build();
@@ -210,6 +215,16 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     @Override
     public void onRemoveRoute(int sessionId, String routeId) {
         RouteSessionInfo sessionInfo = getSessionInfo(sessionId);
+        MediaRoute2Info route = mRoutes.get(routeId);
+
+        mRouteSessionMap.remove(routeId);
+        if (sessionInfo == null || route == null) {
+            return;
+        }
+        mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
+                .setClientPackageName(null)
+                .build());
+
         RouteSessionInfo newSessionInfo = new RouteSessionInfo.Builder(sessionInfo)
                 .removeSelectedRoute(routeId)
                 .build();
@@ -226,6 +241,15 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
                 .build();
         updateSessionInfo(newSessionInfo);
         publishRoutes();
+    }
+
+    void maybeRemoveRoute(String routeId) {
+        if (!mRouteSessionMap.containsKey(routeId)) {
+            return;
+        }
+
+        int sessionId = mRouteSessionMap.get(routeId);
+        onRemoveRoute(sessionId, routeId);
     }
 
     void publishRoutes() {

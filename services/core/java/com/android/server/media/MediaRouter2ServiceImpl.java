@@ -28,14 +28,12 @@ import android.media.IMediaRouter2Client;
 import android.media.IMediaRouter2Manager;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
-import android.media.MediaRouter2;
 import android.media.RouteSessionInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -77,8 +75,6 @@ class MediaRouter2ServiceImpl {
     private final ArrayMap<IBinder, ManagerRecord> mAllManagerRecords = new ArrayMap<>();
     @GuardedBy("mLock")
     private int mCurrentUserId = -1;
-    @GuardedBy("mLock")
-    private int mSelectRouteRequestSequenceNumber = 1;
 
     MediaRouter2ServiceImpl(Context context) {
         mContext = context;
@@ -246,12 +242,12 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    public void selectClientRoute2(@NonNull IMediaRouter2Manager manager,
-            String packageName, @Nullable MediaRoute2Info route) {
+    public void requestCreateClientSession(IMediaRouter2Manager manager, String packageName,
+            MediaRoute2Info route, int requestId) {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                selectClientRoute2Locked(manager, packageName, route);
+                requestClientCreateSessionLocked(manager, packageName, route, requestId);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -374,42 +370,6 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    private void requestSelectRoute2Locked(Client2Record clientRecord, boolean selectedByManager,
-            MediaRoute2Info route) {
-        if (clientRecord != null) {
-            MediaRoute2Info oldRoute = clientRecord.mSelectedRoute;
-            clientRecord.mSelectingRoute = route;
-            clientRecord.mIsManagerSelecting = selectedByManager;
-
-            UserHandler handler = clientRecord.mUserRecord.mHandler;
-            //TODO: Handle transfer instead of unselect and select
-            if (oldRoute != null) {
-                handler.sendMessage(obtainMessage(
-                        UserHandler::unselectRoute, handler, clientRecord.mPackageName, oldRoute));
-            }
-            if (route != null) {
-                final int seq = mSelectRouteRequestSequenceNumber;
-                mSelectRouteRequestSequenceNumber++;
-
-                handler.sendMessage(obtainMessage(
-                        UserHandler::requestSelectRoute, handler, clientRecord.mPackageName,
-                        route, seq));
-                // Remove all previous timeout messages
-                for (int previousSeq : clientRecord.mSelectRouteSequenceNumbers) {
-                    clientRecord.mUserRecord.mHandler.removeMessages(previousSeq);
-                }
-                clientRecord.mSelectRouteSequenceNumbers.clear();
-
-                // When the request is not handled in timeout, set the client's route to default.
-                Message timeoutMsg = obtainMessage(UserHandler::handleRouteSelectionTimeout,
-                        handler, clientRecord.mPackageName, route);
-                timeoutMsg.what = seq; // Make the message cancelable.
-                handler.sendMessageDelayed(timeoutMsg, ROUTE_SELECTION_REQUEST_TIMEOUT_MS);
-                clientRecord.mSelectRouteSequenceNumbers.add(seq);
-            }
-        }
-    }
-
     private void setControlCategoriesLocked(Client2Record clientRecord, List<String> categories) {
         if (clientRecord != null) {
             if (clientRecord.mControlCategories.equals(categories)) {
@@ -512,17 +472,19 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    private void selectClientRoute2Locked(IMediaRouter2Manager manager,
-            String packageName, MediaRoute2Info route) {
+    private void requestClientCreateSessionLocked(IMediaRouter2Manager manager,
+            String packageName, MediaRoute2Info route, int requestId) {
         ManagerRecord managerRecord = mAllManagerRecords.get(manager.asBinder());
         if (managerRecord != null) {
             Client2Record clientRecord =
                     managerRecord.mUserRecord.findClientRecordLocked(packageName);
             if (clientRecord == null) {
-                Slog.w(TAG, "Ignoring route selection for unknown client.");
+                Slog.w(TAG, "Ignoring session creation for unknown client.");
             }
             if (clientRecord != null && managerRecord.mTrusted) {
-                requestSelectRoute2Locked(clientRecord, true, route);
+                //TODO: select category properly
+                requestCreateSessionLocked(clientRecord.mClient, route,
+                        route.getSupportedCategories().get(0), requestId);
             }
         }
     }
@@ -550,7 +512,6 @@ class MediaRouter2ServiceImpl {
                             managerRecord.mUserRecord.mHandler, route, delta));
         }
     }
-
 
     private void initializeUserLocked(UserRecord userRecord) {
         if (DEBUG) {
@@ -738,14 +699,6 @@ class MediaRouter2ServiceImpl {
         }
 
         @Override
-        public void onRouteSelected(@NonNull MediaRoute2ProviderProxy provider,
-                String clientPackageName, MediaRoute2Info route, Bundle controlHints, int seq) {
-            sendMessage(PooledLambda.obtainMessage(
-                    UserHandler::updateSelectedRoute, this, provider, clientPackageName, route,
-                    controlHints, seq));
-        }
-
-        @Override
         public void onSessionCreated(@NonNull MediaRoute2Provider provider,
                 @Nullable RouteSessionInfo sessionInfo, int requestId) {
             sendMessage(PooledLambda.obtainMessage(UserHandler::handleCreateSessionResultOnHandler,
@@ -865,6 +818,7 @@ class MediaRouter2ServiceImpl {
                 @NonNull MediaRoute2Provider provider, @Nullable RouteSessionInfo sessionInfo,
                 int requestId) {
             SessionCreationRequest matchingRequest = null;
+
             for (SessionCreationRequest request : mSessionCreationRequests) {
                 if (request.mRequestId == requestId
                         && TextUtils.equals(
@@ -880,26 +834,34 @@ class MediaRouter2ServiceImpl {
                 return;
             }
 
+            mSessionCreationRequests.remove(matchingRequest);
+
             if (sessionInfo == null) {
                 // Failed
                 notifySessionCreationFailed(matchingRequest.mClientRecord, requestId);
                 return;
             }
 
+            RouteSessionInfo sessionInfoWithProviderId = new RouteSessionInfo.Builder(sessionInfo)
+                    .setProviderId(provider.getUniqueId())
+                    .build();
+
             String originalRouteId = matchingRequest.mRoute.getId();
             String originalCategory = matchingRequest.mControlCategory;
-            if (!sessionInfo.getSelectedRoutes().contains(originalRouteId)
-                    || !TextUtils.equals(originalCategory, sessionInfo.getControlCategory())) {
+            if (!sessionInfoWithProviderId.getSelectedRoutes().contains(originalRouteId)
+                    || !TextUtils.equals(originalCategory,
+                        sessionInfoWithProviderId.getControlCategory())) {
                 Slog.w(TAG, "Created session doesn't match the original request."
                         + " originalRouteId=" + originalRouteId
-                        + ", originalCategory=" + originalCategory
-                        + ", requestId=" + requestId + ", sessionInfo=" + sessionInfo);
+                        + ", originalCategory=" + originalCategory + ", requestId=" + requestId
+                        + ", sessionInfo=" + sessionInfoWithProviderId);
                 notifySessionCreationFailed(matchingRequest.mClientRecord, requestId);
                 return;
             }
 
             // Succeeded
-            notifySessionCreated(matchingRequest.mClientRecord, sessionInfo, requestId);
+            notifySessionCreated(matchingRequest.mClientRecord,
+                    sessionInfoWithProviderId, requestId);
             // TODO: Tell managers for the session creation
         }
 
@@ -919,109 +881,6 @@ class MediaRouter2ServiceImpl {
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify client of the session creation failure."
                         + " Client probably died.", ex);
-            }
-        }
-
-        private void updateSelectedRoute(MediaRoute2ProviderProxy provider,
-                String clientPackageName, MediaRoute2Info selectedRoute, Bundle controlHints,
-                int seq) {
-            if (selectedRoute == null
-                    || !TextUtils.equals(clientPackageName, selectedRoute.getClientPackageName())) {
-                Log.w(TAG, "Ignoring route selection which has non-matching clientPackageName.");
-                return;
-            }
-
-            MediaRouter2ServiceImpl service = mServiceRef.get();
-            if (service == null) {
-                return;
-            }
-
-            Client2Record clientRecord;
-            synchronized (service.mLock) {
-                clientRecord = mUserRecord.findClientRecordLocked(clientPackageName);
-            }
-
-            //TODO: handle a case such that controlHints is null. (How should we notify MR2?)
-
-            if (clientRecord.mSelectingRoute == null || !TextUtils.equals(
-                    clientRecord.mSelectingRoute.getUniqueId(), selectedRoute.getUniqueId())) {
-                Log.w(TAG, "Ignoring invalid updateSelectedRoute call. selectingRoute="
-                        + clientRecord.mSelectingRoute + " route=" + selectedRoute);
-                unselectRoute(clientPackageName, selectedRoute);
-                return;
-            }
-            clientRecord.mSelectingRoute = null;
-            clientRecord.mSelectedRoute = selectedRoute;
-
-            notifyRouteSelectedToClient(clientRecord.mClient,
-                    selectedRoute,
-                    clientRecord.mIsManagerSelecting
-                            ? MediaRouter2.SELECT_REASON_SYSTEM_SELECTED :
-                            MediaRouter2.SELECT_REASON_USER_SELECTED,
-                    controlHints);
-            updateClientUsage(clientRecord);
-
-            // Remove the fallback route selection message.
-            removeMessages(seq);
-        }
-
-        private void handleRouteSelectionTimeout(String clientPackageName,
-                MediaRoute2Info selectingRoute) {
-            MediaRouter2ServiceImpl service = mServiceRef.get();
-            if (service == null) {
-                return;
-            }
-
-            Client2Record clientRecord;
-            synchronized (service.mLock) {
-                clientRecord = mUserRecord.findClientRecordLocked(clientPackageName);
-            }
-
-            if (clientRecord == null) {
-                Log.w(TAG, "The client has gone. packageName=" + clientPackageName
-                        + " selectingRoute=" + selectingRoute);
-                return;
-            }
-
-            if (clientRecord.mSelectingRoute == null || !TextUtils.equals(
-                    clientRecord.mSelectingRoute.getUniqueId(), selectingRoute.getUniqueId())) {
-                Log.w(TAG, "Ignoring invalid selectFallbackRoute call. "
-                        + "Current selectingRoute=" + clientRecord.mSelectingRoute
-                        + " , original selectingRoute=" + selectingRoute);
-                return;
-            }
-
-            clientRecord.mSelectingRoute = null;
-            // TODO: When the default route is introduced, make mSelectedRoute always non-null.
-            MediaRoute2Info fallbackRoute = null;
-            clientRecord.mSelectedRoute = fallbackRoute;
-
-            notifyRouteSelectedToClient(clientRecord.mClient,
-                    fallbackRoute,
-                    MediaRouter2.SELECT_REASON_FALLBACK,
-                    Bundle.EMPTY /* controlHints */);
-            updateClientUsage(clientRecord);
-        }
-
-        private void requestSelectRoute(String clientPackageName, MediaRoute2Info route, int seq) {
-            if (route != null) {
-                MediaRoute2Provider provider = findProvider(route.getProviderId());
-                if (provider == null) {
-                    Slog.w(TAG, "Ignoring to select route of unknown provider " + route);
-                } else {
-                    provider.requestSelectRoute(clientPackageName, route.getId(), seq);
-                }
-            }
-        }
-
-        private void unselectRoute(String clientPackageName, MediaRoute2Info route) {
-            if (route != null) {
-                MediaRoute2Provider provider = findProvider(route.getProviderId());
-                if (provider == null) {
-                    Slog.w(TAG, "Ignoring to unselect route of unknown provider " + route);
-                } else {
-                    provider.unselectRoute(clientPackageName, route.getId());
-                }
             }
         }
 

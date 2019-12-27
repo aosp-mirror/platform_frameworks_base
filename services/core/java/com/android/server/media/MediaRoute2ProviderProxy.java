@@ -28,7 +28,6 @@ import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
 import android.media.RouteSessionInfo;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
@@ -86,18 +85,31 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     @Override
-    public void requestSelectRoute(String packageName, String routeId, int seq) {
+    public void releaseSession(int sessionId) {
         if (mConnectionReady) {
-            mActiveConnection.requestSelectRoute(packageName, routeId, seq);
+            mActiveConnection.releaseSession(sessionId);
             updateBinding();
         }
     }
 
     @Override
-    public void unselectRoute(String packageName, String routeId) {
+    public void addRoute(int sessionId, MediaRoute2Info route) {
         if (mConnectionReady) {
-            mActiveConnection.unselectRoute(packageName, routeId);
-            updateBinding();
+            mActiveConnection.addRoute(sessionId, route.getId());
+        }
+    }
+
+    @Override
+    public void removeRoute(int sessionId, MediaRoute2Info route) {
+        if (mConnectionReady) {
+            mActiveConnection.removeRoute(sessionId, route.getId());
+        }
+    }
+
+    @Override
+    public void transferRoute(int sessionId, MediaRoute2Info route) {
+        if (mConnectionReady) {
+            mActiveConnection.transferRoute(sessionId, route.getId());
         }
     }
 
@@ -266,20 +278,6 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         setAndNotifyProviderInfo(info);
     }
 
-    private void onRouteSelected(Connection connection,
-            String packageName, String routeId, Bundle controlHints, int seq) {
-        if (mActiveConnection != connection) {
-            return;
-        }
-        MediaRoute2ProviderInfo providerInfo = getProviderInfo();
-        MediaRoute2Info route = (providerInfo == null) ? null : providerInfo.getRoute(routeId);
-        if (route == null) {
-            Slog.w(TAG, this + ": Unknown route " + routeId + " is selected from remove provider");
-            return;
-        }
-        mCallback.onRouteSelected(this, packageName, route, controlHints, seq);
-    }
-
     private void onSessionCreated(Connection connection, @Nullable RouteSessionInfo sessionInfo,
             int requestId) {
         if (mActiveConnection != connection) {
@@ -331,25 +329,42 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         public void requestCreateSession(String packageName, String routeId, String controlCategory,
                 int requestId) {
             try {
-                mProvider.requestCreateSession(packageName, routeId, controlCategory, requestId);
+                mProvider.requestCreateSession(packageName, routeId,
+                        controlCategory, requestId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to deliver request to create a session.", ex);
             }
         }
 
-        public void requestSelectRoute(String packageName, String routeId, int seq) {
+        public void releaseSession(int sessionId) {
             try {
-                mProvider.requestSelectRoute(packageName, routeId, seq);
+                mProvider.releaseSession(sessionId);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to deliver request to set discovery mode.", ex);
+                Slog.e(TAG, "Failed to deliver request to release a session.", ex);
             }
         }
 
-        public void unselectRoute(String packageName, String routeId) {
+        public void addRoute(int sessionId, String routeId) {
             try {
-                mProvider.unselectRoute(packageName, routeId);
+                mProvider.addRoute(sessionId, routeId);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to deliver request to set discovery mode.", ex);
+                Slog.e(TAG, "Failed to deliver request to add a route to a session.", ex);
+            }
+        }
+
+        public void removeRoute(int sessionId, String routeId) {
+            try {
+                mProvider.removeRoute(sessionId, routeId);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "Failed to deliver request to remove a route from a session.", ex);
+            }
+        }
+
+        public void transferRoute(int sessionId, String routeId) {
+            try {
+                mProvider.transferRoute(sessionId, routeId);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "Failed to deliver request to transfer a session to a route.", ex);
             }
         }
 
@@ -386,11 +401,6 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             mHandler.post(() -> onProviderInfoUpdated(Connection.this, info));
         }
 
-        void postRouteSelected(String packageName, String routeId, Bundle controlHints, int seq) {
-            mHandler.post(() -> onRouteSelected(Connection.this,
-                    packageName, routeId, controlHints, seq));
-        }
-
         void postSessionCreated(@Nullable RouteSessionInfo sessionInfo, int requestId) {
             mHandler.post(() -> onSessionCreated(Connection.this, sessionInfo,
                     requestId));
@@ -413,15 +423,6 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             Connection connection = mConnectionRef.get();
             if (connection != null) {
                 connection.postProviderInfoUpdated(info);
-            }
-        }
-
-        @Override
-        public void notifyRouteSelected(String packageName, String routeId,
-                Bundle controlHints, int seq) {
-            Connection connection = mConnectionRef.get();
-            if (connection != null) {
-                connection.postRouteSelected(packageName, routeId, controlHints, seq);
             }
         }
 
