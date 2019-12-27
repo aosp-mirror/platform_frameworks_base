@@ -1246,7 +1246,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // First time we are adding the activity to the system.
             mVoiceInteraction = newTask.voiceSession != null;
             mInputDispatchingTimeoutNanos = getInputDispatchingTimeoutLocked(this) * 1000000L;
-            onDisplayChanged(task.getDisplayContent());
+
             // TODO(b/36505427): Maybe this call should be moved inside
             // updateOverrideConfiguration()
             newTask.updateOverrideConfigurationFromLaunchBounds();

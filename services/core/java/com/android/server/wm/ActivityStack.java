@@ -637,7 +637,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     }
 
     ActivityStack(DisplayContent display, int stackId, ActivityStackSupervisor supervisor,
-            int windowingMode, int activityType, boolean onTop) {
+            int activityType) {
         super(supervisor.mService.mWindowManager);
         mStackId = stackId;
         mDockedStackMinimizeThickness =
@@ -654,10 +654,6 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         // stacks on a wrong display.
         mDisplayId = display.mDisplayId;
         setActivityType(activityType);
-        display.addStack(this, onTop ? POSITION_TOP : POSITION_BOTTOM);
-        setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
-                false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,
-                true /* creating */);
     }
 
     /**
