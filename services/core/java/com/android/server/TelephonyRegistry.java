@@ -45,6 +45,7 @@ import android.telephony.Annotation;
 import android.telephony.Annotation.DataFailureCause;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SrvccState;
+import android.telephony.BarringInfo;
 import android.telephony.CallAttributes;
 import android.telephony.CallQuality;
 import android.telephony.CellIdentity;
@@ -258,6 +259,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int[] mCallPreciseDisconnectCause;
 
+    private List<BarringInfo> mBarringInfo = null;
+
     private boolean mCarrierNetworkChangeState = false;
 
     private PhoneCapability mPhoneCapability = null;
@@ -451,6 +454,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             cutListToSize(mCellInfo, mNumPhones);
             cutListToSize(mImsReasonInfo, mNumPhones);
             cutListToSize(mPreciseDataConnectionStates, mNumPhones);
+            cutListToSize(mBarringInfo, mNumPhones);
             return;
         }
 
@@ -483,6 +487,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mBackgroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
             mPreciseDataConnectionStates.add(new HashMap<String, PreciseDataConnectionState>());
             mDisplayInfos[i] = null;
+            mBarringInfo.add(i, new BarringInfo());
         }
     }
 
@@ -541,6 +546,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mOutgoingCallEmergencyNumber = new EmergencyNumber[numPhones];
         mOutgoingSmsEmergencyNumber = new EmergencyNumber[numPhones];
         mDisplayInfos = new DisplayInfo[numPhones];
+        mBarringInfo = new ArrayList<>();
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
             mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
@@ -569,6 +575,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mBackgroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
             mPreciseDataConnectionStates.add(new HashMap<String, PreciseDataConnectionState>());
             mDisplayInfos[i] = null;
+            mBarringInfo.add(i, new BarringInfo());
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -1027,6 +1034,19 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if ((events & PhoneStateListener.LISTEN_CALL_ATTRIBUTES_CHANGED) != 0) {
                         try {
                             r.callback.onCallAttributesChanged(mCallAttributes[phoneId]);
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
+                    }
+                    if ((events & PhoneStateListener.LISTEN_BARRING_INFO) != 0) {
+                        BarringInfo barringInfo = mBarringInfo.get(phoneId);
+                        BarringInfo biNoLocation = barringInfo != null
+                                ? barringInfo.createLocationInfoSanitizedCopy() : null;
+                        if (VDBG) log("listen: call onBarringInfoChanged=" + barringInfo);
+                        try {
+                            r.callback.onBarringInfoChanged(
+                                    checkFineLocationAccess(r, Build.VERSION_CODES.R)
+                                            ? barringInfo : biNoLocation);
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -2207,6 +2227,52 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    /**
+     * Send a notification of changes to barring status to PhoneStateListener registrants.
+     *
+     * @param phoneId the phoneId
+     * @param subId the subId
+     * @param barringInfo a structure containing the complete updated barring info.
+     */
+    public void notifyBarringInfoChanged(int phoneId, int subId, @NonNull BarringInfo barringInfo) {
+        if (!checkNotifyPermission("notifyBarringInfo()")) {
+            return;
+        }
+        if (barringInfo == null) {
+            log("Received null BarringInfo for subId=" + subId + ", phoneId=" + phoneId);
+            mBarringInfo.set(phoneId, new BarringInfo());
+            return;
+        }
+
+        synchronized (mRecords) {
+            if (validatePhoneId(phoneId)) {
+                mBarringInfo.set(phoneId, barringInfo);
+                // Barring info is non-null
+                BarringInfo biNoLocation = barringInfo.createLocationInfoSanitizedCopy();
+                if (VDBG) log("listen: call onBarringInfoChanged=" + barringInfo);
+                for (Record r : mRecords) {
+                    if (r.matchPhoneStateListenerEvent(
+                            PhoneStateListener.LISTEN_BARRING_INFO)
+                            && idMatch(r.subId, subId, phoneId)) {
+                        try {
+                            if (DBG_LOC) {
+                                log("notifyBarringInfo: mBarringInfo="
+                                        + barringInfo + " r=" + r);
+                            }
+                            r.callback.onBarringInfoChanged(
+                                    checkFineLocationAccess(r, Build.VERSION_CODES.R)
+                                        ? barringInfo : biNoLocation);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
@@ -2247,6 +2313,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mPreciseDataConnectionStates=" + mPreciseDataConnectionStates.get(i));
                 pw.println("mOutgoingCallEmergencyNumber=" + mOutgoingCallEmergencyNumber[i]);
                 pw.println("mOutgoingSmsEmergencyNumber=" + mOutgoingSmsEmergencyNumber[i]);
+                pw.println("mBarringInfo=" + mBarringInfo.get(i));
                 pw.decreaseIndent();
             }
             pw.println("mCarrierNetworkChangeState=" + mCarrierNetworkChangeState);

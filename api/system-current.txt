@@ -8170,6 +8170,11 @@ package android.telephony {
     field public static final int FREQUENCY_RANGE_GROUP_UNKNOWN = 0; // 0x0
   }
 
+  public final class BarringInfo implements android.os.Parcelable {
+    ctor public BarringInfo();
+    method @NonNull public android.telephony.BarringInfo createLocationInfoSanitizedCopy();
+  }
+
   public final class CallAttributes implements android.os.Parcelable {
     ctor public CallAttributes(@NonNull android.telephony.PreciseCallState, int, @NonNull android.telephony.CallQuality);
     method public int describeContents();
