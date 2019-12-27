@@ -20,6 +20,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
@@ -38,6 +39,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @SystemApi
 public class ContextHubClient implements Closeable {
+    private static final String TAG = "ContextHubClient";
+
     /*
      * The proxy to the client interface at the service.
      */
@@ -138,6 +141,14 @@ public class ContextHubClient implements Closeable {
     @ContextHubTransaction.Result
     public int sendMessageToNanoApp(@NonNull NanoAppMessage message) {
         Preconditions.checkNotNull(message, "NanoAppMessage cannot be null");
+
+        int maxPayloadBytes = mAttachedHub.getMaxPacketLengthBytes();
+        byte[] payload = message.getMessageBody();
+        if (payload != null && payload.length > maxPayloadBytes) {
+            Log.e(TAG, "Message (" + payload.length + " bytes) exceeds max payload length ("
+                    + maxPayloadBytes + " bytes)");
+            return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
+        }
 
         try {
             return mClientProxy.sendMessageToNanoApp(message);
