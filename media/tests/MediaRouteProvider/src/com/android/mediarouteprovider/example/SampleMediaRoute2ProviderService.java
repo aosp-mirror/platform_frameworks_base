@@ -58,10 +58,9 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     public static final String CATEGORY_SPECIAL =
             "com.android.mediarouteprovider.CATEGORY_SPECIAL";
 
-    public static final int SESSION_ID_1 = 1000;
-
     Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
     Map<String, Integer> mRouteSessionMap = new HashMap<>();
+    private int mNextSessionId = 1000;
 
     private void initializeRoutes() {
         MediaRoute2Info route1 = new MediaRoute2Info.Builder(ROUTE_ID1, ROUTE_NAME1)
@@ -163,7 +162,8 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         }
         maybeRemoveRoute(routeId);
 
-        int sessionId = SESSION_ID_1;
+        final int sessionId = mNextSessionId;
+        mNextSessionId++;
 
         mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
                 .setClientPackageName(packageName)

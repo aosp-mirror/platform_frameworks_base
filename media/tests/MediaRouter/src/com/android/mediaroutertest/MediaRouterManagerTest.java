@@ -384,12 +384,12 @@ public class MediaRouterManagerTest {
         };
         mManager.registerCallback(mExecutor, managerCallback);
         mRouter2.setControlCategories(controlCategories);
-        mRouter2.registerCallback(mExecutor, routeCallback);
+        mRouter2.registerRouteCallback(mExecutor, routeCallback);
         try {
             latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
             return createRouteMap(mManager.getAvailableRoutes(mPackageName));
         } finally {
-            mRouter2.unregisterCallback(routeCallback);
+            mRouter2.unregisterRouteCallback(routeCallback);
             mManager.unregisterCallback(managerCallback);
         }
     }
@@ -432,7 +432,7 @@ public class MediaRouterManagerTest {
 
     private void addRouterCallback(RouteCallback routeCallback) {
         mRouteCallbacks.add(routeCallback);
-        mRouter2.registerCallback(mExecutor, routeCallback);
+        mRouter2.registerRouteCallback(mExecutor, routeCallback);
     }
 
     private void clearCallbacks() {
@@ -442,7 +442,7 @@ public class MediaRouterManagerTest {
         mManagerCallbacks.clear();
 
         for (RouteCallback routeCallback : mRouteCallbacks) {
-            mRouter2.unregisterCallback(routeCallback);
+            mRouter2.unregisterRouteCallback(routeCallback);
         }
         mRouteCallbacks.clear();
     }
