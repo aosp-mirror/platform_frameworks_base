@@ -306,7 +306,7 @@ import java.util.Set;
 public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityTaskManagerService" : TAG_ATM;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
-    private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
+    static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_IMMERSIVE = TAG + POSTFIX_IMMERSIVE;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
@@ -1730,9 +1730,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "activityPaused");
-            ActivityStack stack = ActivityRecord.getStackLocked(token);
-            if (stack != null) {
-                stack.activityPausedLocked(token, false);
+            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+            if (r != null) {
+                r.activityPaused(false);
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -1765,7 +1765,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     restartingName = r.app.mName;
                     restartingUid = r.app.mUid;
                 }
-                r.activityStoppedLocked(icicle, persistentState, description);
+                r.activityStopped(icicle, persistentState, description);
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -7304,7 +7304,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void scheduleDestroyAllActivities(String reason) {
             synchronized (mGlobalLock) {
-                mRootActivityContainer.scheduleDestroyAllActivities(null, reason);
+                mRootActivityContainer.scheduleDestroyAllActivities(reason);
             }
         }
 
