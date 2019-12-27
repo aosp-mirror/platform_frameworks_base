@@ -25,6 +25,10 @@ import android.media.tv.tuner.TunerConstants.DemuxPidType;
 import android.media.tv.tuner.TunerConstants.FilterSubtype;
 import android.media.tv.tuner.TunerConstants.FilterType;
 import android.media.tv.tuner.TunerConstants.FrontendScanType;
+import android.media.tv.tuner.TunerConstants.LnbPosition;
+import android.media.tv.tuner.TunerConstants.LnbTone;
+import android.media.tv.tuner.TunerConstants.LnbVoltage;
+import android.media.tv.tuner.TunerConstants.Result;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -144,6 +148,15 @@ public final class Tuner implements AutoCloseable  {
          * Invoked when there is a LNB event.
          */
         void onEvent(int lnbEventType);
+
+        /**
+         * Invoked when there is a new DiSEqC message.
+         *
+         * @param diseqcMessage a byte array of data for DiSEqC (Digital Satellite
+         * Equipment Control) message which is specified by EUTELSAT Bus Functional
+         * Specification Version 4.2.
+         */
+        void onDiseqcMessage(byte[] diseqcMessage);
     }
 
     /**
@@ -486,6 +499,12 @@ public final class Tuner implements AutoCloseable  {
         private int mId;
         private LnbCallback mCallback;
 
+        private native int nativeSetVoltage(int voltage);
+        private native int nativeSetTone(int tone);
+        private native int nativeSetSatellitePosition(int position);
+        private native int nativeSendDiseqcMessage(byte[] message);
+        private native int nativeClose();
+
         private Lnb(int id) {
             mId = id;
         }
@@ -498,6 +517,64 @@ public final class Tuner implements AutoCloseable  {
             if (mHandler == null) {
                 mHandler = createEventHandler();
             }
+        }
+
+        /**
+         * Sets the LNB's power voltage.
+         *
+         * @param voltage the power voltage the Lnb to use.
+         * @return result status of the operation.
+         */
+        @Result
+        public int setVoltage(@LnbVoltage int voltage) {
+            return nativeSetVoltage(voltage);
+        }
+
+        /**
+         * Sets the LNB's tone mode.
+         *
+         * @param tone the tone mode the Lnb to use.
+         * @return result status of the operation.
+         */
+        @Result
+        public int setTone(@LnbTone int tone) {
+            return nativeSetTone(tone);
+        }
+
+        /**
+         * Selects the LNB's position.
+         *
+         * @param position the position the Lnb to use.
+         * @return result status of the operation.
+         */
+        @Result
+        public int setSatellitePosition(@LnbPosition int position) {
+            return nativeSetSatellitePosition(position);
+        }
+
+        /**
+         * Sends DiSEqC (Digital Satellite Equipment Control) message.
+         *
+         * The response message from the device comes back through callback onDiseqcMessage.
+         *
+         * @param message a byte array of data for DiSEqC message which is specified by EUTELSAT Bus
+         *         Functional Specification Version 4.2.
+         *
+         * @return result status of the operation.
+         */
+        @Result
+        public int sendDiseqcMessage(byte[] message) {
+            return nativeSendDiseqcMessage(message);
+        }
+
+        /**
+         * Releases the LNB instance
+         *
+         * @return result status of the operation.
+         */
+        @Result
+        public int close() {
+            return nativeClose();
         }
     }
 

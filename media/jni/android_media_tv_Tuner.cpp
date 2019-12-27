@@ -907,6 +907,26 @@ static int android_media_tv_Tuner_close_dvr(JNIEnv*, jobject) {
     return 0;
 }
 
+static int android_media_tv_Tuner_lnb_set_voltage(JNIEnv*, jobject, jint) {
+    return 0;
+}
+
+static int android_media_tv_Tuner_lnb_set_tone(JNIEnv*, jobject, jint) {
+    return 0;
+}
+
+static int android_media_tv_Tuner_lnb_set_position(JNIEnv*, jobject, jint) {
+    return 0;
+}
+
+static int android_media_tv_Tuner_lnb_send_diseqc_msg(JNIEnv*, jobject, jbyteArray) {
+    return 0;
+}
+
+static int android_media_tv_Tuner_close_lnb(JNIEnv*, jobject) {
+    return 0;
+}
+
 static const JNINativeMethod gTunerMethods[] = {
     { "nativeInit", "()V", (void *)android_media_tv_Tuner_native_init },
     { "nativeSetup", "()V", (void *)android_media_tv_Tuner_native_setup },
@@ -971,6 +991,14 @@ static const JNINativeMethod gDvrMethods[] = {
     { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_dvr },
 };
 
+static const JNINativeMethod gLnbMethods[] = {
+    { "nativeSetVoltage", "(I)I", (void *)android_media_tv_Tuner_lnb_set_voltage },
+    { "nativeSetTone", "(I)I", (void *)android_media_tv_Tuner_lnb_set_tone },
+    { "nativeSetSatellitePosition", "(I)I", (void *)android_media_tv_Tuner_lnb_set_position },
+    { "nativeSendDiseqcMessage", "([B)I", (void *)android_media_tv_Tuner_lnb_send_diseqc_msg },
+    { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_lnb },
+};
+
 static bool register_android_media_tv_Tuner(JNIEnv *env) {
     if (AndroidRuntime::registerNativeMethods(
             env, "android/media/tv/tuner/Tuner", gTunerMethods, NELEM(gTunerMethods)) != JNI_OK) {
@@ -996,6 +1024,13 @@ static bool register_android_media_tv_Tuner(JNIEnv *env) {
             gDvrMethods,
             NELEM(gDvrMethods)) != JNI_OK) {
         ALOGE("Failed to register dvr native methods");
+        return false;
+    }
+    if (AndroidRuntime::registerNativeMethods(
+            env, "android/media/tv/tuner/Tuner$Lnb",
+            gLnbMethods,
+            NELEM(gLnbMethods)) != JNI_OK) {
+        ALOGE("Failed to register lnb native methods");
         return false;
     }
     return true;
