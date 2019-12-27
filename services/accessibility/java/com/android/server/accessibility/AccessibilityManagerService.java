@@ -1054,6 +1054,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // The user changed.
             mCurrentUserId = userId;
 
+            if (mWindowMagnificationMgr != null) {
+                mWindowMagnificationMgr.setUserId(mCurrentUserId);
+            }
             AccessibilityUserState userState = getCurrentUserStateLocked();
 
             readConfigurationForUserStateLocked(userState);
@@ -2641,7 +2644,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     WindowMagnificationManager getWindowMagnificationMgr() {
         synchronized (mLock) {
             if (mWindowMagnificationMgr == null) {
-                mWindowMagnificationMgr = new WindowMagnificationManager();
+                mWindowMagnificationMgr = new WindowMagnificationManager(mContext, mCurrentUserId);
             }
             return mWindowMagnificationMgr;
         }
