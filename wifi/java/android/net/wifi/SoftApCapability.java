@@ -61,11 +61,20 @@ public final class SoftApCapability implements Parcelable {
      */
     public static final int SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT = 1 << 1;
 
+
+    /**
+     * Support for WPA3 Simultaneous Authentication of Equals (WPA3-SAE).
+     *
+     * flag when {@link config_wifi_softap_sae_supported)} is true.
+     */
+    public static final int SOFTAP_FEATURE_WPA3_SAE = 1 << 2;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "SOFTAP_FEATURE_" }, value = {
             SOFTAP_FEATURE_ACS_OFFLOAD,
             SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT,
+            SOFTAP_FEATURE_WPA3_SAE,
     })
     public @interface HotspotFeatures {}
 

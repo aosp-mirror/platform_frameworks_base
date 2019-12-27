@@ -5739,6 +5739,7 @@ package android.net.wifi {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.SoftApCapability> CREATOR;
     field public static final int SOFTAP_FEATURE_ACS_OFFLOAD = 1; // 0x1
     field public static final int SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT = 2; // 0x2
+    field public static final int SOFTAP_FEATURE_WPA3_SAE = 4; // 0x4
   }
 
   public final class SoftApConfiguration implements android.os.Parcelable {
@@ -5747,6 +5748,7 @@ package android.net.wifi {
     method @Nullable public android.net.MacAddress getBssid();
     method public int getChannel();
     method public int getMaxNumberOfClients();
+    method @Nullable public String getPassphrase();
     method public int getSecurityType();
     method @Nullable public String getSsid();
     method @Nullable public String getWpa2Passphrase();
@@ -5759,6 +5761,8 @@ package android.net.wifi {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.SoftApConfiguration> CREATOR;
     field public static final int SECURITY_TYPE_OPEN = 0; // 0x0
     field public static final int SECURITY_TYPE_WPA2_PSK = 1; // 0x1
+    field public static final int SECURITY_TYPE_WPA3_SAE = 3; // 0x3
+    field public static final int SECURITY_TYPE_WPA3_SAE_TRANSITION = 2; // 0x2
   }
 
   public static final class SoftApConfiguration.Builder {
@@ -5770,6 +5774,7 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setChannel(int, int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setHiddenSsid(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setMaxNumberOfClients(int);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setPassphrase(@Nullable String, int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setSsid(@Nullable String);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setWpa2Passphrase(@Nullable String);
   }
