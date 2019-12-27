@@ -60,9 +60,8 @@
     <string name="speed_label_okay" msgid="1253594383880810424">"Correct"</string>
     <string name="speed_label_medium" msgid="9078405312828606976">"Moyenne"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Élevée"</string>
-    <string name="speed_label_very_fast" msgid="8215718029533182439">"Très élevée"</string>
-    <!-- no translation found for wifi_passpoint_expired (6540867261754427561) -->
-    <skip />
+    <string name="speed_label_very_fast" msgid="8215718029533182439">"Très rapide"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Arrivé à expiration"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Déconnecté"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Déconnexion…"</string>
@@ -228,6 +227,7 @@
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Accélération matérielle pour le partage de connexion"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Afficher les appareils Bluetooth sans nom"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Désactiver le volume absolu"</string>
+    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Activer Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Version Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Sélectionner la version Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Codec audio Bluetooth"</string>
@@ -276,6 +276,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Vérifier que les applications installées par ADB/ADT ne présentent pas de comportement dangereux"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Les appareils Bluetooth sans nom (adresses MAC seulement) seront affichés"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Désactive la fonctionnalité de volume absolu du Bluetooth en cas de problème de volume sur les appareils à distance, par exemple si le volume est trop élevé ou s\'il ne peut pas être contrôlé"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"Active la pile de fonctionnalités Bluetooth Gabeldorsche."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Activer l\'application Terminal permettant l\'accès au shell local"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Vérification HDCP"</string>
@@ -380,7 +381,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (rouge/vert)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (bleu-jaune)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Correction couleur"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"Cette fonctionnalité est expérimentale et peut affecter les performances."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"La correction des couleurs aide les personnes atteintes de daltonisme à mieux percevoir les couleurs"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Remplacé par <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Temps restant : environ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>

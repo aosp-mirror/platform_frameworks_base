@@ -227,6 +227,7 @@
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Vélbúnaðarhröðun fyrir tjóðrun"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Sýna Bluetooth-tæki án heita"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Slökkva á samstillingu hljóðstyrks"</string>
+    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Virkja Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP-útgáfa"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Velja Bluetooth AVRCP-útgáfu"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Bluetooth hljóðkóðari"</string>
@@ -275,6 +276,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Kanna skaðlega hegðun forrita sem sett eru upp frá ADB/ADT."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth-tæki án heita (aðeins MAC-vistfang) verða birt"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Slekkur á samstillingu Bluetooth-hljóðstyrks ef vandamál koma upp með hljóðstyrk hjá fjartengdum tækjum, svo sem of hár hljóðstyrkur eða erfiðleikar við stjórnun."</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"Virkjar Bluetooth Gabeldorche eiginleikastafla."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Staðbundin skipanalína"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Virkja skipanalínuforrit sem leyfir staðbundinn skeljaraðgang"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-athugun"</string>
@@ -379,7 +381,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Litblinda (rauðgræn)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Litblinda (blágul)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Litaleiðrétting"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"Þessi eiginleiki er á tilraunastigi og getur haft áhrif á frammistöðu."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"Litaleiðrétting hjálpar fólki með litblindu að sjá réttari liti"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Hnekkt af <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Um það bil <xliff:g id="TIME_REMAINING">%1$s</xliff:g> eftir"</string>

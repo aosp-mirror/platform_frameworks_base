@@ -227,6 +227,7 @@
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"การเร่งฮาร์ดแวร์การเชื่อมต่ออินเทอร์เน็ตผ่านมือถือ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"แสดงอุปกรณ์บลูทูธที่ไม่มีชื่อ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ปิดใช้การควบคุมระดับเสียงของอุปกรณ์อื่น"</string>
+    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"เปิดใช้ Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"เวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"เลือกเวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ตัวแปลงสัญญาณเสียงบลูทูธ"</string>
@@ -275,6 +276,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ตรวจสอบแอปที่ติดตั้งผ่าน ADB/ADT เพื่อตรวจดูพฤติกรรมที่เป็นอันตราย"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"ระบบจะแสดงอุปกรณ์บลูทูธที่ไม่มีชื่อ (มีเฉพาะที่อยู่ MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ปิดใช้ฟีเจอร์การควบคุมระดับเสียงของอุปกรณ์อื่นผ่านบลูทูธในกรณีที่มีปัญหาเกี่ยวกับระดับเสียงของอุปกรณ์ระยะไกล เช่น ระดับเสียงที่ดังเกินไปหรือระดับเสียงที่ไม่มีการควบคุม"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"เปิดใช้สแต็กฟีเจอร์ Bluetooth Gabeldorche"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"เทอร์มินัลในตัวเครื่อง"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"เปิดใช้งานแอปเทอร์มินัลที่ให้การเข้าถึงเชลล์ในตัวเครื่อง"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"การตรวจสอบ HDCP"</string>
@@ -379,7 +381,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ตาบอดจางสีแดง (สีแดง/เขียว)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ตาบอดจางสีน้ำเงิน (สีน้ำเงิน/เหลือง)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"การแก้สี"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"ฟีเจอร์นี้เป็นแบบทดลองและอาจส่งผลต่อประสิทธิภาพการทำงาน"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"การแก้ไขสีช่วยให้ผู้ที่มีอาการตาบอดสีเห็นสีต่างๆ ได้ตรงตามจริงยิ่งขึ้น"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"แทนที่โดย <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"เหลืออีกประมาณ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>

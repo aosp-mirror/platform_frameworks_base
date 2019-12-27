@@ -227,6 +227,7 @@
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"टेदरिंग हार्डवेअर प्रवेग"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"नावांशिवाय ब्‍लूटूथ डिव्‍हाइस दाखवा"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"संपूर्ण आवाज बंद करा"</string>
+    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"गाबलडॉर्ष सुरू करा"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ब्लूटूथ AVRCP आवृत्ती"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ब्लूटूथ AVRCP आवृत्ती निवडा"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ब्लूटूथ ऑडिओ कोडेक"</string>
@@ -275,6 +276,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"हानिकारक वर्तनासाठी ADB/ADT द्वारे इंस्टॉल अ‍ॅप्स तपासा."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"नावांशिवाय ब्‍लूटूथ डीव्‍हाइस (फक्‍त MAC पत्‍ते) दाखवले जातील"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"रिमोट डिव्हाइसमध्ये सहन न होणारा मोठा आवाज किंवा नियंत्रणाचा अभाव यासारखी आवाजाची समस्या असल्यास ब्लूटूथ संपूर्ण आवाज वैशिष्ट्य बंद करते."</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"ब्लूटूथ गाबलडॉर्ष वैशिष्ट्य स्टॅक सुरू करते."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"स्थानिक टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"स्थानिक शेल प्रवेश देणारा टर्मिनल अ‍ॅप सुरू करा"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP तपासणी"</string>
@@ -379,7 +381,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"क्षीण रक्तवर्णांधता (लाल-हिरवा)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"रंग दृष्टी कमतरता (निळा-पिवळा)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रंग सुधारणा"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"हे वैशिष्‍ट्य प्रायोगिक आहे आणि कदाचित कार्यप्रदर्शन प्रभावित करू शकते."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"रंग सुधारणा ही वर्णांधता असलेल्या लोकांना रंग अधिक अचूक दिसण्यात मदत करते"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारे अधिलिखित"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"अंदाजे <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाकी आहे"</string>

@@ -227,6 +227,7 @@
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ಟೆಥರಿಂಗ್‍‍ಗಾಗಿ ಹಾರ್ಡ್‍ವೇರ್ ವೇಗವರ್ಧನೆ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"ಹೆಸರುಗಳಿಲ್ಲದ ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ಸಂಪೂರ್ಣ ವಾಲ್ಯೂಮ್‌ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
+    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ಬ್ಲೂಟೂತ್ AVRCP ಆವೃತ್ತಿ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ಬ್ಲೂಟೂತ್ AVRCP ಆವೃತ್ತಿಯನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ ಕೋಡೆಕ್"</string>
@@ -275,6 +276,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ಹಾನಿಮಾಡುವಂತಹ ವರ್ತನೆಗಾಗಿ ADB/ADT ಮೂಲಕ ಸ್ಥಾಪಿಸಲಾದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"ಹೆಸರುಗಳಿಲ್ಲದ (ಕೇವಲ MAC ವಿಳಾಸಗಳು ಮಾತ್ರ) ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ಪ್ರದರ್ಶಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ರಿಮೋಟ್ ಸಾಧನಗಳಲ್ಲಿ ಕಂಡುಬರುವ ಸ್ವೀಕಾರಾರ್ಹವಲ್ಲದ ಜೋರಾದ ವಾಲ್ಯೂಮ್ ಅಥವಾ ನಿಯಂತ್ರಣದ ಕೊರತೆಯಂತಹ ವಾಲ್ಯೂಮ್ ಸಮಸ್ಯೆಗಳಂತಹ ಸಂದರ್ಭದಲ್ಲಿ ಬ್ಲೂಟೂತ್‍ನ ನಿಚ್ಚಳ ವಾಲ್ಯೂಮ್ ವೈಶಿಷ್ಟ್ಯವನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ."</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"ಬ್ಲೂಟೂತ್ Gabeldorche ವೈಶಿಷ್ಟ್ಯದ ಸ್ಟ್ಯಾಕ್‌ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ಸ್ಥಳೀಯ ಟರ್ಮಿನಲ್"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"ಸ್ಥಳೀಯ ಶೆಲ್ ಪ್ರವೇಶವನ್ನು ಒದಗಿಸುವ ಟರ್ಮಿನಲ್ ಅಪ್ಲಿಕೇಶನ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ಪರೀಕ್ಷಿಸುವಿಕೆ"</string>
@@ -379,7 +381,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ಪ್ರೊಟನೋಮಲಿ (ಕೆಂಪು-ಹಸಿರು)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ಟ್ರಿಟನೋಮಲಿ (ನೀಲಿ-ಹಳದಿ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ಬಣ್ಣದ ತಿದ್ದುಪಡಿ"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"ಇದು ಪ್ರಾಯೋಗಿಕ ವೈಶಿಷ್ಟ್ಯವಾಗಿದೆ. ಕಾರ್ಯಕ್ಷಮತೆ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರಬಹುದು."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"ವರ್ಣ ಅಂಧತ್ವ ಹೊಂದಿರುವ ಜನರಿಗೆ ಬಣ್ಣಗಳನ್ನು ಹೆಚ್ಚು ನಿಖರವಾಗಿ ವೀಕ್ಷಿಸಲು ಬಣ್ಣ ತಿದ್ದುಪಡಿ ಸಹಾಯ ಮಾಡುತ್ತದೆ"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ಮೂಲಕ ಅತಿಕ್ರಮಿಸುತ್ತದೆ"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ಸಮಯ ಬಾಕಿ ಉಳಿದಿದೆ"</string>

@@ -227,6 +227,7 @@
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"टेदरिङको लागि हार्डवेयरको प्रवेग"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"नामकरण नगरिएका ब्लुटुथ यन्त्रहरू देखाउनुहोस्"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"निरपेक्ष आवाज असक्षम गर्नुहोस्"</string>
+    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche सक्षम पार्नुहोस्"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ब्लुटुथको AVRCP संस्करण"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ब्लुटुथको AVRCP संस्करण चयन गर्नुहोस्"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ब्लुटुथ अडियोको कोडेक"</string>
@@ -275,6 +276,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"हानिकारक व्यवहारको लागि ADB/ADT को माध्यमबाट स्थापित अनुप्रयोगहरूको जाँच गर्नुहोस्।"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"नामकरण नगरिएका ब्लुटुथ यन्त्रहरू (MAC ठेगाना भएका मात्र) देखाइनेछ"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"रिमोट यन्त्रहरूमा अस्वीकार्य चर्को आवाज वा नियन्त्रणमा कमी जस्ता आवाज सम्बन्धी समस्याहरूको अवस्थामा ब्लुटुथ निरपेक्ष आवाज सुविधालाई असक्षम गराउँछ।"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"ब्लुटुथ Gabeldorche सुविधाको स्ट्याक सक्षम पार्नुहोस्।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"स्थानीय टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"स्थानीय सेल पहुँच प्रदान गर्ने टर्मिनल अनुप्रयोग सक्षम गर्नुहोस्"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP जाँच गर्दै"</string>
@@ -379,7 +381,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"प्रोटानेमली (रातो, हरियो)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ट्रिटानोमेली (निलो-पंहेलो)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रङ्ग सुधार"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"यो सुविधा प्रयोगात्मक छ र प्रदर्शनमा असर गर्न सक्छ।"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"रङ सुधार गर्नुले रङ छुट्याउन नसक्ने मान्छेलाई थप सही रङ देख्न मद्दत गर्दछ"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारा अधिरोहित"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ"</string>
