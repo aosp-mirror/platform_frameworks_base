@@ -127,6 +127,8 @@ public final class Tuner implements AutoCloseable  {
 
     private native Dvr nativeOpenDvr(int type, int bufferSize);
 
+    private static native DemuxCapabilities nativeGetDemuxCapabilities();
+
     /**
      * Frontend Callback.
      *
@@ -432,6 +434,11 @@ public final class Tuner implements AutoCloseable  {
             throw new IllegalStateException("frontend is not initialized");
         }
         return mFrontend.mId;
+    }
+
+    /** @hide */
+    private static DemuxCapabilities getDemuxCapabilities() {
+        return nativeGetDemuxCapabilities();
     }
 
     private List<Integer> getFrontendIds() {

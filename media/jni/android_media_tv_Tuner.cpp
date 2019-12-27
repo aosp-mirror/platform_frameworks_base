@@ -880,6 +880,10 @@ static jobject android_media_tv_Tuner_open_dvr(JNIEnv *env, jobject thiz, jint t
     return tuner->openDvr(static_cast<DvrType>(type), bufferSize);
 }
 
+static jobject android_media_tv_Tuner_get_demux_caps(JNIEnv*, jobject) {
+    return NULL;
+}
+
 static int android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobject filter) {
     sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
     sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
@@ -1123,6 +1127,8 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_open_descrambler },
     { "nativeOpenDvr", "(II)Landroid/media/tv/tuner/Tuner$Dvr;",
             (void *)android_media_tv_Tuner_open_dvr },
+    { "nativeGetDemuxCapabilities", "()Landroid/media/tv/tuner/DemuxCapabilities;",
+            (void *)android_media_tv_Tuner_get_demux_caps },
 };
 
 static const JNINativeMethod gFilterMethods[] = {
