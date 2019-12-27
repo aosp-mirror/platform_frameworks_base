@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.service.autofill.Dataset;
 import android.service.autofill.augmented.AugmentedAutofillService;
 import android.service.autofill.augmented.IAugmentedAutofillService;
 import android.service.autofill.augmented.IFillCallback;
@@ -152,7 +153,8 @@ final class RemoteAugmentedAutofillService
                     service.onFillRequest(sessionId, realClient, taskId, activityComponent,
                             focusedId, focusedValue, requestTime, new IFillCallback.Stub() {
                                 @Override
-                                public void onSuccess() {
+                                public void onSuccess(@Nullable Dataset[] inlineSuggestionsData) {
+                                    // TODO(b/146453195): handle non-null inline suggestions data.
                                     requestAutofill.complete(null);
                                 }
 

@@ -236,9 +236,9 @@ public abstract class AugmentedAutofillService extends Service {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-
-        onFillRequest(new FillRequest(proxy), cancellationSignal, new FillController(proxy),
-                new FillCallback(proxy));
+        // TODO(b/146453195): pass the inline suggestion request over.
+        onFillRequest(new FillRequest(proxy, /* inlineSuggestionsRequest= */null),
+                cancellationSignal, new FillController(proxy), new FillCallback(proxy));
     }
 
     private void handleOnDestroyAllFillWindowsRequest() {
@@ -500,7 +500,7 @@ public abstract class AugmentedAutofillService extends Service {
                         }
                     }
                     try {
-                        mCallback.onSuccess();
+                        mCallback.onSuccess(/* mInlineSuggestionsData= */null);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Error reporting success: " + e);
                     }
