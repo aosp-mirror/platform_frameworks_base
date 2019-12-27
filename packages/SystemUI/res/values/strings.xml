@@ -1146,7 +1146,7 @@
     <string name="media_projection_dialog_service_text">The service providing this function will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
 
     <!-- Media projection permission dialog warning title for system services. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_service_title">Start recording or casting ?</string>
+    <string name="media_projection_dialog_service_title">Start recording or casting?</string>
 
     <!-- Media projection permission dialog warning title. [CHAR LIMIT=NONE] -->
     <string name="media_projection_dialog_title">Start recording or casting with <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g>?</string>
