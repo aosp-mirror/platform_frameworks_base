@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"ऐप्स को टैबलेट पर ब्लूटूथ का कॉन्‍फ़िगरेशन देखने, और युग्‍मित डिवाइस के साथ कनेक्‍शन बनाने और स्‍वीकार करने देता है."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"यह ऐप्लिकेशन को आपके Android TV डिवाइस पर ब्लूटूथ कॉन्फ़िगरेशन देखने की अनुमति देता है. साथ ही, यह ब्लूटूथ कनेक्शन से दूसरे डिवाइस को जोड़ने की सुविधा भी देता है."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"ऐप्स को फ़ोन पर ब्लूटूथ का कॉन्‍फ़िगरेशन देखने, और युग्‍मित डिवाइस के साथ कनेक्‍शन बनाने और स्‍वीकार करने देता है."</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC का इस्तेमाल करने वाली पैसे चुकाने की पसंदीदा सेवा की जानकारी"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"अगर ऐप्लिकेशन को अनुमति दी जाती है, तो वह पैसे चुकाने की आपकी उस पसंदीदा सेवा के बारे में जानकारी पा सकता है जो NFC का इस्तेमाल करती है. इसमें रजिस्टर किए गए डिवाइस और उनके आउटपुट के रूट जैसी जानकारी शामिल होती है."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"नियर फ़ील्‍ड कम्‍यूनिकेशन नियंत्रित करें"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"ऐप्स  को नियर फ़ील्ड कम्यूनिकेशन (NFC) टैग, कार्ड, और रीडर के साथ संचार करने देता है."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"अपना स्‍क्रीन लॉक अक्षम करें"</string>
@@ -902,11 +900,11 @@
     <string name="factorytest_reboot" msgid="2050147445567257365">"रीबूट करें"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"\'<xliff:g id="TITLE">%s</xliff:g>\' पर यह पेज दर्शाता है:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
-    <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"मार्गदर्शक की दुबारा पूछें"</string>
+    <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"नेविगेशन की पुष्टि करें"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"इस पेज से आगे बढ़ें"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"इस पेज पर बने रहें"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nक्या आप वाकई इस पेज से दूर नेविगेट करना चाहते हैं?"</string>
-    <string name="save_password_label" msgid="9161712335355510035">"दुबारा पूछें"</string>
+    <string name="save_password_label" msgid="9161712335355510035">"पुष्टि करें"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"सलाह: ज़ूम इन और आउट करने के लिए दो बार छूएं."</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"अपने आप भरने की सुविधा"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"अपने आप भरें जाना सेट करें"</string>
@@ -1580,7 +1578,7 @@
     <string name="kg_password_instructions" msgid="7179782578809398050">"पासवर्ड डालें"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"सिम अब अक्षम हो गई है. जारी रखने के लिए PUK कोड डालें. विवरण के लिए कैरियर से संपर्क करें."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"इच्छित पिन कोड डालें"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"इच्छित पिन कोड की दुबारा पूछें"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"पिन कोड की पुष्टि करें"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"सिम कार्ड अनलॉक कर रहा है…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"गलत PIN कोड."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"ऐसा PIN लिखें, जो 4 से 8 अंकों का हो."</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"सुलभता शॉर्टकट ने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को चालू किया"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"सुलभता शॉर्टकट ने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को बंद किया"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> इस्तेमाल करने के लिए आवाज़ वाले दोनों बटन तीन सेकंड तक दबाकर रखें"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"\'सुलभता\' बटन पर टैप करके इस्तेमाल करने के लिए सेवा चुनें:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"सुलभता वाले जेस्चर के साथ इस्तेमाल करने के लिए सेवा चुनें (दो उंगलियों से स्क्रीन पर सबसे नीचे से ऊपर की ओर स्वाइप करें):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"सुलभता वाले जेस्चर के साथ इस्तेमाल करने के लिए सेवा चुनें (तीन उंगलियों से स्क्रीन पर सबसे नीचे से ऊपर की ओर स्वाइप करें):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"एक सेवा से दूसरी सेवा पर जाने के लिए, \'सुलभता\' बटन को कुछ देर दबाकर रखें."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"एक सेवा से दूसरी सेवा पर जाने के लिए, स्क्रीन पर दो उंगलियों से ऊपर की ओर स्वाइप करें और थोड़ी देर तक स्क्रीन पर उंगलियां रखे रहें."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"एक सेवा से दूसरी सेवा पर जाने के लिए, स्क्रीन पर तीन उंगलियों से ऊपर की ओर स्वाइप करें और थोड़ी देर तक स्क्रीन पर उंगलियां रखे रहें."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"बड़ा करना"</string>
     <string name="user_switched" msgid="7249833311585228097">"मौजूदा उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> पर स्विच किया जा रहा है…"</string>
@@ -1728,7 +1720,7 @@
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"गलत"</string>
     <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"वर्तमान पिन"</string>
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"नया पिन"</string>
-    <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"नए पिन की दुबारा पूछें"</string>
+    <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"नए पिन की पुष्टि करें"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"प्रतिबंधों को बदलने के लिए PIN बनाएं"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN मेल नहीं खाते हैं. फिर से कोशिश करें."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN बहुत छोटा है. कम से कम 4 अंकों का होना चाहिए."</string>

@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Овозможува апликацијата да ја види конфигурацијата на Bluetooth на таблетот и да прави и да прифаќа врски со спарени уреди."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Дозволува апликацијата да ја прикажува конфигурацијата на Bluetooth на вашиот уред Android TV и да прави и прифаќа врски со спарените уреди."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Овозможува апликацијата да ја види конфигурацијата на Bluetooth на телефонот и да прави и да прифаќа врски со спарени уреди."</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информации за претпочитаната услуга за плаќање преку NFC"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволува апликацијата да добие информации за претпочитаната услуга за плаќање преку NFC, како регистрирани помагала и дестинација на маршрутата."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролирај комуникација на блиско поле"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Дозволува апликацијата да комуницира со ознаки, картички и читачи за Комуникација при непосредна близина (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"оневозможи заклучување на екран"</string>
@@ -1621,12 +1619,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"Кратенката за пристапност ја вклучи <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"Кратенката за пристапност ја исклучи <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Притиснете ги и задржете ги двете копчиња за јачина на звукот во траење од три секунди за да користите <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"Изберете ја услугата што ќе ја користите кога ќе го допрете копчето за пристапност:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Изберете ја услугата што ќе ја користите со движењето за пристапност (повлекување нагоре од дното на екранот со два прста):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Изберете ја услугата што ќе ја користите со движењето за пристапност (повлекување нагоре од дното на екранот со три прста):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"За да се префрлате помеѓу услуги, допрете и задржете го копчето за пристапност."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"За да се префрлате помеѓу услуги, лизгајте нагоре со два прста и задржете."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"За да се префрлате помеѓу услуги, лизгајте нагоре со три прста и задржете."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Зголемување"</string>
     <string name="user_switched" msgid="7249833311585228097">"Тековен корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Се префрла на <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1865,11 +1857,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Поврзан на <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Допрете за да ги погледнете датотеките"</string>
     <string name="pin_target" msgid="8036028973110156895">"Прикачете"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"Прикачи <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Откачете"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"Откачи <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Информации за апликација"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Се вклучува демонстрацијата…"</string>

@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"აპს შეეძლება, ნახოს Bluetooth-ის კონფიგურაცია ტაბლეტზე, შექმნას და მიიღოს კავშირები დაწყვილებულ მოწყობილობებთან."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"ნებას რთავს აპს, თქვენს Android TV მოწყობილობაზე ნახოს Bluetooth-ის კონფიგურაცია, ასევე, დაამყაროს და მიიღოს კავშირები დაწყვილებულ მოწყობილობებთან."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"აპს შეეძლება, ნახოს Bluetooth-ის კონფიგურაცია ტელეფონზე და შექმნას და მიიღოს კავშირები დაწყვილებულ მოწყობილობებთან."</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"უპირატესი NFC გადახდის სერვისის ინფორმაცია"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"საშუალებას აძლევს აპს, მიიღოს უპირატესი NFC გადახდის სერვისის ინფორმაცია, მაგალითად, რეგისტრირებული დახმარება და დანიშნულება."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ახლო მოქმედების რადიოკავშირი (NFC) მართვა"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"აპს შეეძლება ახლო მოქმედების რადიოკავშირის (NFC) მეშვეობით ტეგების, ბარათებისა და წამკითხველების შემცველი მონაცემების მიმოცვლა."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"თქვენი ეკრანის ბლოკის გათიშვა"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"მარტივი წვდომის მალსახმობმა ჩართო <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"მარტივი წვდომის მალსახმობმა გამორთო <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> რომ გამოიყენოთ, დააჭირეთ ხმის ორივე ღილაკზე 3 წამის განმავლობაში"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"აირჩიეთ მარტივი წვდომის ღილაკზე შეხებისას გამოსაყენებელი სერვისი:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"აირჩიეთ მარტივი წვდომის ჟესტთან (ორი თითით გადაფურცვლა ეკრანის ქვედა კიდიდან ზემოთ) გამოსაყენებელი სერვისი:"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"აირჩიეთ მარტივი წვდომის ჟესტთან (სამი თითით გადაფურცვლა ეკრანის ქვედა კიდიდან ზემოთ) გამოსაყენებელი სერვისი:"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"სერვისების გადასართავად, ხანგრძლივად შეეხეთ მარტივი წვდომის ღილაკს."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"სერვისების გადასართავად, ორი თითით გადაფურცლეთ ზემოთ და დააყოვნეთ."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"სერვისების გადასართავად, სამი თითით გადაფურცლეთ ზემოთ და დააყოვნეთ."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"გადიდება"</string>
     <string name="user_switched" msgid="7249833311585228097">"ამჟამინდელი მომხმარებელი <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>-ზე გადართვა…"</string>
@@ -1863,11 +1855,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"დაკავშირებულია <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>-თან"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"შეეხეთ ფაილების სანახავად"</string>
     <string name="pin_target" msgid="8036028973110156895">"ჩამაგრება"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g>-ის ჩამაგრება"</string>
     <string name="unpin_target" msgid="3963318576590204447">"ჩამაგრების მოხსნა"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g>-ის ჩამაგრების მოხსნა"</string>
     <string name="app_info" msgid="6113278084877079851">"აპის შესახებ"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"მიმდინარეობს დემონსტრაციის დაწყება…"</string>

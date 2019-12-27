@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Allows the app to view the configuration of Bluetooth on the tablet and to make and accept connections with paired devices."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Allows the app to view the configuration of Bluetooth on your Android TV device and to make and accept connections with paired devices."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Allows the app to view the configuration of the Bluetooth on the phone and to make and accept connections with paired devices."</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferred NFC payment service information"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Allows the app to get preferred NFC payment service information, such as registered aids and route destination."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"control Near-Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Allows the app to communicate with Near Field Communication (NFC) tags, cards and readers."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"disable your screen lock"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"Accessibility Shortcut turned <xliff:g id="SERVICE_NAME">%1$s</xliff:g> on"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"Accessibility Shortcut turned <xliff:g id="SERVICE_NAME">%1$s</xliff:g> off"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Press and hold both volume keys for three seconds to use <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"Choose a service to use when you tap the accessibility button:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Choose a service to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Choose a service to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"To switch between services, touch &amp; hold the accessibility button."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"To switch between services, swipe up with two fingers and hold."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"To switch between services, swipe up with three fingers and hold."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Magnification"</string>
     <string name="user_switched" msgid="7249833311585228097">"Current user <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Switching to <xliff:g id="NAME">%1$s</xliff:g>…"</string>

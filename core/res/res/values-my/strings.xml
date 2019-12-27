@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"အပလီကေးရှင်းအား တက်ဘလက်ပေါ်မှ ဘလူးတုသ် အပြင်အဆင်အား ကြည့်ခွင့်၊ တခြားစက်များနဲ့ ဆက်သွယ်ခြင်း၊ ဆက်သွယ်ခြင်းကို လက်ခံခွင့်ပြုပါ။"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"သင့် Android TV စက်ပစ္စည်းပေါ်ရှိ ဘလူးတုသ် စီစဉ်သတ်မှတ်ချက်များကို ကြည့်ရှုခွင့်အပြင် တွဲချိတ်ထားသည့် စက်ပစ္စည်းများနှင့် ချိတ်ဆက်မှုပြုလုပ်ခြင်းနှင့် လက်ခံခြင်းတို့ကို အက်ပ်အား ပြုလုပ်ခွင့်ပေးသည်။"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"အပလီကေးရှင်းအား ဖုန်းမှဘလူးတု အပြင်အဆင်အား ကြည့်ခွင့်၊ တခြားစက်များနဲ့ ဆက်သွယ်ခြင်း၊ ဆက်သွယ်ခြင်းကို လက်ခံခွင့်ပြုပါ။"</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ဦးစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များ"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"အက်ပ်အား ဦစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များဖြစ်သည့် မှတ်ပုံတင်ထားသော အကူအညီများနှင့် သွားလာရာ လမ်းကြောင်းတို့ကို ရယူရန် ခွင့်ပြုသည်။"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communicationအား ထိန်းချုပ်ရန်"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"အက်ပ်အား တာတို စက်ကွင်း ဆက်သွယ်ရေး (NFC) တဲဂ်များ၊ ကဒ်များ နှင့် ဖတ်ကြသူတို့နှင့် ဆက်သွယ်ပြောဆိုခွင့် ပြုသည်။"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ဖန်သားပြင် သော့ချခြင်းအား မလုပ်နိုင်အောင် ပိတ်ရန်"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်သည် <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို ဖွင့်လိုက်ပါသည်"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်သည် <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို ပိတ်လိုက်ပါသည်"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို သုံးရန် အသံအတိုးအလျှော့ ခလုတ်နှစ်ခုလုံးကို သုံးစက္ကန့်ကြာ ဖိထားပါ"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"အများသုံးစွဲနိုင်မှု ခလုတ်ကို တို့သည့်အခါ အသုံးပြုမည့် ဝန်ဆောင်မှုကို ရွေးချယ်ပါ−"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"အများသုံးစွဲနိုင်မှုလက်ဟန်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုတစ်ခုကို ရွေးပါ (မျက်နှာပြင်အောက်ခြေမှနေ၍ လက်နှစ်ချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပါ)-"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"အများသုံးစွဲနိုင်မှုလက်ဟန်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုတစ်ခုကို ရွေးပါ (မျက်နှာပြင်အောက်ခြေမှနေ၍ လက်သုံးချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပါ)-"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် အများသုံးစွဲနိုင်မှုခလုတ်ကို ဖိထားပါ။"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် လက်နှစ်ချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် လက်သုံးချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ချဲ့ခြင်း"</string>
     <string name="user_switched" msgid="7249833311585228097">"လက်ရှိအသုံးပြုနေသူ <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>သို့ ပြောင်းနေ…"</string>
@@ -1863,11 +1855,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> ချိတ်ဆက်ထားသည်"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"ဖိုင်များကိုကြည့်ရန် တို့ပါ"</string>
     <string name="pin_target" msgid="8036028973110156895">"တွဲပါ"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g> ကို ပင်ထိုးရန်"</string>
     <string name="unpin_target" msgid="3963318576590204447">"ဖြုတ်ပါ"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g> ကို ပင်ဖြုတ်ရန်"</string>
     <string name="app_info" msgid="6113278084877079851">"အက်ပ်အချက်အလက်"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"သရုပ်ပြချက်ကို စတင်နေသည်…"</string>

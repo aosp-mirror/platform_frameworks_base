@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"டேப்லெட்டில் புளூடூத் இன் உள்ளமைவைப் பார்க்க மற்றும் இணைந்த சாதனங்களுடன் இணைப்புகளை ஏற்படுத்த மற்றும் ஏற்க ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Android TVயில் புளூடூத்தின் உள்ளமைவைப் பார்க்கவும் இணைக்கப்பட்ட சாதனங்களுடன் இணைப்புகளை உருவாக்கவும் ஏற்கவும் ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"மொபைலில் புளூடூத் இன் உள்ளமைவைப் பார்க்க மற்றும் இணைந்த சாதனங்களுடன் இணைப்புகளை ஏற்படுத்த மற்றும் ஏற்க ஆப்ஸை அனுமதிக்கிறது."</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்கள்"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"பதிவுசெய்யப்பட்ட கருவிகள், சேருமிடத்திற்கான வழி போன்ற விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்களைப் பெற ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"குறுகிய இடைவெளி தகவல்பரிமாற்றத்தைக் கட்டுப்படுத்துதல்"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"குறுகிய இடைவெளி தகவல்பரிமாற்றம் (NFC), குறிகள், கார்டுகள் மற்றும் ரீடர்கள் ஆகியவற்றுடன் தொடர்புகொள்ள, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"உங்கள் திரைப் பூட்டை முடக்குதல்"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"அணுகல்தன்மை ஷார்ட்கட்டானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ இயக்கியது"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"அணுகல்தன்மை ஷார்ட்கட்டானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ முடக்கியது"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐப் பயன்படுத்த 3 விநாடிகளுக்கு இரண்டு ஒலியளவு பட்டன்களையும் அழுத்திப் பிடிக்கவும்"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"அணுகல்தன்மை பட்டனுக்கான சேவையைத் தேர்வுசெய்யவும்:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"அணுகல்தன்மை சைகைக்கான சேவையைத் தேர்வுசெய்யவும் (இரண்டு விரல்களால் திரையின் கீழிருந்து மேல் நோக்கி ஸ்வைப் செய்யவும்):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"அணுகல்தன்மை சைகைக்கான சேவையைத் தேர்வுசெய்யவும் (மூன்று விரல்களால் திரையின் கீழிருந்து மேல் நோக்கி ஸ்வைப் செய்யவும்):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"சேவைகளுக்கு இடையே மாற அணுகல்தன்மை பட்டனைத் தொட்டுப் பிடிக்கவும்."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"சேவைகளுக்கு இடையே மாற இரண்டு விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடிக்கவும்."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"சேவைகளுக்கு இடையே மாற மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடிக்கவும்."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"பெரிதாக்கல்"</string>
     <string name="user_switched" msgid="7249833311585228097">"நடப்பு பயனர் <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>க்கு மாறுகிறது…"</string>

@@ -494,10 +494,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Permite aplicației să vadă configurația tabletei Bluetooth, să efectueze și să accepte conexiuni cu dispozitive împerecheate."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Permite aplicației să vadă configurația conexiunii prin Bluetooth a dispozitivului Android TV, să efectueze și să accepte conexiuni cu dispozitive împerecheate."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Permite aplicației să vadă configurația telefonului Bluetooth, să efectueze și să accepte conexiuni cu dispozitive împerecheate."</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informații despre serviciul de plăți NFC preferat"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite aplicației să obțină informații despre serviciul de plăți NFC preferat, de exemplu, identificatorii de aplicație înregistrați și destinația traseului."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlare schimb de date prin Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Permite aplicației să comunice cu etichetele, cardurile și cititoarele NFC (Near Field Communication)."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"dezactivează blocarea ecranului"</string>
@@ -1641,12 +1639,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"Comanda rapidă de accesibilitate a activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"Comanda rapidă de accesibilitate a dezactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Apăsați ambele butoane de volum timp de trei secunde pentru a folosi <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"Alegeți un serviciu pe care să îl folosiți când atingeți butonul de accesibilitate:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Alegeți un serviciu pe care să îl folosiți cu gestul de accesibilitate (glisați în sus cu două degete din partea de jos a ecranului):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Alegeți un serviciu pe care să îl folosiți cu gestul de accesibilitate (glisați în sus cu trei degete din partea de jos a ecranului):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"Pentru a comuta între servicii, atingeți lung butonul de accesibilitate."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"Pentru a schimba între servicii, glisați în sus cu două degete și țineți lung."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"Pentru a schimba între servicii, glisați în sus cu trei degete și țineți lung."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Mărire"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilizator curent: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Se comută la <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1895,11 +1887,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Conectat la <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Atingeți pentru a vedea fișierele"</string>
     <string name="pin_target" msgid="8036028973110156895">"Fixați"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"Fixați <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Anulați fixarea"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"Anulați fixarea pentru <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Informații despre aplicație"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Se pornește demonstrația…"</string>
