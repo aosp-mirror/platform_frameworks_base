@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Permite á aplicación ver a configuración do Bluetooth na tableta e efectuar e aceptar conexións con dispositivos sincronizados."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Permite que a aplicación consulte a configuración do Bluetooth no dispositivo Android TV, e efectúe e acepte conexións con dispositivos vinculados."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Permite á aplicación ver a configuración do Bluetooth no teléfono e efectuar e aceptar conexións con dispositivos sincronizados."</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Información do servizo de pago de NFC preferido"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que a aplicación obteña información do servizo de pago de NFC preferido, como as axudas rexistradas e o destino da ruta."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Permite á aplicación comunicarse con etiquetas, tarxetas e lectores Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"desactivar o bloqueo da pantalla"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"O atallo de accesibilidade activou <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"O atallo de accesibilidade desactivou <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Mantén premidas as teclas do volume durante tres segudos para usar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"Escolle o servizo que queres utilizar cando toques o botón de accesibilidade:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Escolle o servizo que queres usar co xesto de accesibilidade (pasa dous dedos cara arriba desde a parte inferior da pantalla):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Escolle o servizo que queres usar co xesto de accesibilidade (pasa tres dedos cara arriba desde a parte inferior da pantalla):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"Para cambiar de servizo, mantén premido o botón de accesibilidade."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"Para cambiar de servizo, pasa dous dedos cara arriba e mantén premida a pantalla."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"Para cambiar de servizo, pasa tres dedos cara arriba pola pantalla e mantén premido."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ampliación"</string>
     <string name="user_switched" msgid="7249833311585228097">"Usuario actual <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Cambiando a <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1760,8 +1752,8 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para aumentar a duración da batería, a función Aforro de batería fai o seguinte:\n·Activa o tema escuro\n·Desactiva ou restrinxe a actividade en segundo plano, algúns efectos visuais e outras funcións, como \"Ok Google\"\n\n"<annotation id="url">"Máis información"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Para aumentar a duración da batería, a función Aforro de batería fai o seguinte:\n·Activa o tema escuro\n·Desactiva ou restrinxe a actividade en segundo plano, algúns efectos visuais e outras funcións, como \"Ok Google\""</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Para contribuír a reducir o uso de datos, o Economizador de datos impide que algunhas aplicacións envíen ou reciban datos en segundo plano. Cando esteas utilizando unha aplicación, esta poderá acceder aos datos, pero é posible que o faga con menos frecuencia. Por exemplo, é posible que as imaxes non se mostren ata que as toques."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Queres activar o economizador de datos?"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Para contribuír a reducir o uso de datos, o aforro de datos impide que algunhas aplicacións envíen ou reciban datos en segundo plano. Cando esteas utilizando unha aplicación, esta poderá acceder aos datos, pero é posible que o faga con menos frecuencia. Por exemplo, é posible que as imaxes non se mostren ata que as toques."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Queres activar o aforro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">Durante %1$d minutos (ata as <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1863,11 +1855,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Conectado a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Toca para ver os ficheiros"</string>
     <string name="pin_target" msgid="8036028973110156895">"Fixar"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"Fixar a <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Deixar de fixar"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"Deixar de fixar a <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Info. da aplicación"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Iniciando demostración…"</string>

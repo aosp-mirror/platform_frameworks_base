@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Leyfir forriti að skoða grunnstillingu Bluetooth í spjaldtölvunni og koma á og samþykkja tengingar við pöruð tæki."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Leyfir forriti að skoða stillingu Bluetooth í Android TV og tengjast og samþykkja tengingar við pöruð tæki."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Leyfir forriti að skoða grunnstillingu Bluetooth í símanum og koma á og samþykkja tengingar við pöruð tæki."</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Upplýsingar um valda NFC-greiðsluþjónustu"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Gerir forritinu kleift að fá valda NFC-greiðsluþjónustu, svo sem skráða aðstoð og áfangastað leiðar."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"stjórna nándarsamskiptum (NFC)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Leyfir forriti að eiga samskipti við NFC-merki, -spjöld og -lesara (nándarsamskipti)."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"slökkva á skjálásnum"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"Flýtileið aðgengisstillingar kveikti á <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"Flýtileið aðgengisstillingar slökkti á <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Haltu báðum hljóðstyrkstökkunum inni í þrjár sekúndur til að nota <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"Veldu þjónustu sem á að nota þegar ýtt er á aðgengishnappinn:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Veldu þjónustu sem á að nota með aðgengisbendingunni (strjúka upp frá neðri hluta skjásins með tveimur fingrum):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Veldu þjónustu sem á að nota með aðgengisbendingunni (strjúka upp frá neðri hluta skjásins með þremur fingrum):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"Til að skipta á milli þjónusta skaltu halda aðgengishnappinum inni."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"Til að skipta á milli þjónusta skaltu strjúka upp með tveimur fingrum og halda inni."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"Til að skipta á milli þjónusta skaltu strjúka upp með þremur fingrum og halda inni."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Stækkun"</string>
     <string name="user_switched" msgid="7249833311585228097">"Núverandi notandi <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Skiptir yfir á <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1863,11 +1855,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Tengt við <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Ýttu til að skoða skrárnar"</string>
     <string name="pin_target" msgid="8036028973110156895">"Festa"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"Festa <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Losa"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"Losa <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Forritsupplýsingar"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Byrjar kynningu…"</string>

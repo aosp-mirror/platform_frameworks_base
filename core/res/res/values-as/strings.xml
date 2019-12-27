@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"টেবলেটত ব্লুটুথৰ কনফিগাৰেশ্বন চাবলৈ আৰু যোৰা লগোৱা ডিভাইচসমূহৰ জৰিয়তে সংযোগ কৰিবলৈ আৰু সংযোগৰ অনুৰোধ স্বীকাৰ কৰিবলৈ এপটোক অনুমতি দিয়ে৷"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"এপ্‌টোক আপোনাৰ Android TV ডিভাইচটোত ব্লুটুথৰ কনফিগাৰেশ্বন চাবলৈ আৰু পেয়াৰ কৰি থোৱা ডিভাইচসমূহৰ সৈতে সংযোগ কৰিবলৈ আৰু গ্ৰহণ কৰিবলৈ অনুমতি দিয়ে।"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"ফ\'নটোত ব্লুটুথৰ কনফিগাৰেশ্বন চাবলৈ আৰু যোৰা লগোৱা ডিভাইচসমূহৰ জৰিয়তে সংযোগ কৰিবলৈ আৰু সংযোগৰ অনুৰোধ স্বীকাৰ কৰিবলৈ এপটোক অনুমতি দিয়ে৷"</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"অগ্ৰাধিকাৰ দিয়া NFC পৰিশোধ সেৱাৰ তথ্য"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"এপ্‌টোক অগ্ৰাধিকাৰ দিয়া nfc পৰিশোধ সেৱাৰ পঞ্জীকৃত সহায়কসমূহ আৰু পৰিশোধ কৰিব লগা লক্ষ্যস্থান দৰে তথ্য পাবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়েৰ ফিল্ড কমিউনিকেশ্বন নিয়ন্ত্ৰণ কৰক"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"এপটোক নিয়েৰ ফিল্ড কমিউনিকেশ্বন (NFC) টেগ, কাৰ্ড আৰু ৰিডাৰসমূহৰ সৈতে যোগাযোগ কৰিবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"আপোনাৰ স্ক্ৰীণ ল\'ক অক্ষম কৰক"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"দিব্যাংগসকলৰ সুবিধাৰ শ্বৰ্টকাটটোৱে <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ক অন কৰিছে"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"দিব্যাংগসকলৰ সুবিধাৰ শ্বৰ্টকাটটোৱে <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ক অফ কৰিছে"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ব্যৱহাৰ কৰিবলৈ দুয়োটা ভলিউম বুটাম তিনি ছেকেণ্ডৰ বাবে হেঁচি ৰাখক"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"আপুনি সাধ্য সুবিধাৰ বুটামটো টিপিলে ব্যৱহাৰ কৰিবলৈ এটা সেৱা বাছনি কৰক:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"সাধ্য সুবিধা ভংগিমাৰ সৈতে ব্যৱহাৰ কৰিবলৈ এটা সেৱা বাছনি কৰক (দুটা আঙুলিৰে স্ক্রীণখনৰ একেবাৰে তলিৰ পৰা ওপৰলৈ ছোৱাইপ কৰক):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"সাধ্য সুবিধা ভংগিমাৰ সৈতে ব্যৱহাৰ কৰিবলৈ এটা সেৱা বাছনি কৰক (তিনিটা আঙুলিৰে স্ক্রীণখনৰ একেবাৰে তলিৰ পৰা ওপৰলৈ ছোৱাইপ কৰক):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"সেৱাসমূহ সালসলনিকৈ ব্যৱহাৰ কৰিবলৈ সাধ্য সুবিধাৰ বুটামটো স্পৰ্শ কৰি ধৰি ৰাখক।"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"সেৱাসমূহ সালসলনিকৈ ব্যৱহাৰ কৰিবলৈ দুটা আঙুলিৰে ওপৰলৈ ছোৱাইপ কৰি ধৰি ৰাখক।"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"সেৱাসমূহ সালসলনিকৈ ব্যৱহাৰ কৰিবলৈ তিনিটা আঙুলিৰে ওপৰলৈ ছোৱাইপ কৰি ধৰি ৰাখক।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"বিবৰ্ধন"</string>
     <string name="user_switched" msgid="7249833311585228097">"বৰ্তমানৰ ব্যৱহাৰকাৰী <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>লৈ সলনি কৰি থকা হৈছে…"</string>
@@ -1863,11 +1855,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>ৰ সৈতে সংযুক্ত হৈ আছে"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"ফাইলসমূহ চাবৰ বাবে টিপক"</string>
     <string name="pin_target" msgid="8036028973110156895">"পিন"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g>ক পিন কৰক"</string>
     <string name="unpin_target" msgid="3963318576590204447">"আনপিন"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g>ক আনপিন কৰক"</string>
     <string name="app_info" msgid="6113278084877079851">"এপ্ সম্পৰ্কীয় তথ্য"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"ডেম\' আৰম্ভ কৰি থকা হৈছে…"</string>

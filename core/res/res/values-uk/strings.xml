@@ -497,10 +497,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Дозволяє програмі переглядати конфігурацію Bluetooth на планшетному ПК, а також створювати та приймати з’єднання зі спареними пристроями."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Дозволяє додатку зчитувати конфігурацію Bluetooth на вашому пристрої Android TV, а також створювати та приймати з\'єднання зі спареними пристроями."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Дозволяє програмі переглядати конфігурацію Bluetooth на телефоні, а також створювати та приймати з’єднання зі спареними пристроями."</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Використання інформації з платіжного NFC-сервісу"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволяє додатку отримувати доступ до інформації потрібного платіжного NFC-сервісу (наприклад, пов\'язаних ідентифікаторів чи даних про маршрутизацію трансакцій)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрол. Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Дозволяє програмі обмінюватися даними з тегами, картками та читачами екрана Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"вимикати блокування екрана"</string>
@@ -1663,12 +1661,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"Сервіс <xliff:g id="SERVICE_NAME">%1$s</xliff:g> увімкнено"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"Сервіс <xliff:g id="SERVICE_NAME">%1$s</xliff:g> вимкнено"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Щоб скористатися службою <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, утримуйте обидві клавіші гучності впродовж трьох секунд"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"Виберіть сервіс для кнопки спеціальних можливостей:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Виберіть сервіс для жесту спеціальних можливостей (проведення двома пальцями знизу вгору):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Виберіть сервіс для жесту спеціальних можливостей (проведення трьома пальцями знизу вгору):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"Щоб переключитися між сервісами, натисніть і утримуйте кнопку спеціальних можливостей."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"Щоб переключитися між сервісами, проведіть двома пальцями вгору й утримуйте екран."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"Щоб переключитися між сервісами, проведіть трьома пальцями вгору й утримуйте екран."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Збільшення"</string>
     <string name="user_switched" msgid="7249833311585228097">"Поточний користувач: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Перехід в обліковий запис \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>
@@ -1927,11 +1919,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Під’єднано до пристрою <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Торкніться, щоб переглянути файли"</string>
     <string name="pin_target" msgid="8036028973110156895">"Закріпити"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"Закріпити додаток <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Відкріпити"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"Відкріпити додаток <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Про додатки"</string>
     <string name="negative_duration" msgid="1938335096972945232">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Запуск демонстрації…"</string>

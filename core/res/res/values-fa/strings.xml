@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"‏به برنامه اجازه می‎دهد تا پیکربندی بلوتوث در رایانهٔ لوحی را مشاهده کند و اتصال با دستگاه‌های مرتبط را برقرار کرده و بپذیرد."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"‏به برنامه اجازه می‌دهد پیکربندی بلوتوث را در دستگاه Android TV شما ببیند، و اتصالات با دستگاه‌های مرتبط‌شده را بپذیرد یا این اتصالات را برقرار کند."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"‏به برنامه اجازه می‎دهد تا پیکربندی بلوتوث در تلفن را مشاهده کند، و اتصالات دستگاه‌های مرتبط را برقرار کرده و بپذیرد."</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی NFC"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی «سرویس پولی NFC»، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"کنترل ارتباط راه نزدیک"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"‏به برنامه اجازه می‎دهد تا با تگ‌های «ارتباط میدان نزدیک» (NFC)، کارت‌ها و فایل‌خوان ارتباط برقرار کند."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"غیرفعال کردن قفل صفحه شما"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"«میان‌بر دسترس‌پذیری» <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را روشن کرد"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"«میان‌بر دسترس‌پذیری» <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را خاموش کرد"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"برای استفاده از <xliff:g id="SERVICE_NAME">%1$s</xliff:g>، هر دو کلید صدا را فشار دهید و سه ثانیه نگه دارید"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"سرویسی را انتخاب کنید که می‌خواهید هنگام ضربه زدن روی دکمه دسترس‌پذیری استفاده شود:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"سرویسی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با دو انگشت صفحه را از پایین تند به بالا بکشید):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"سرویسی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با سه انگشت صفحه را از پایین تند به بالا بکشید):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"برای جابه‌جایی بین سرویس‌ها، دکمه دسترس‌پذیری را لمس کنید و نگه‌دارید."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"برای جابه‌جایی بین سرویس‌ها، با دو انگشت صفحه را تند به بالا بکشید و نگه‌دارید."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"برای جابه‌جایی بین سرویس‌ها، با سه انگشت صفحه را تند به بالا بکشید و نگه‌دارید."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"درشت‌نمایی"</string>
     <string name="user_switched" msgid="7249833311585228097">"کاربر کنونی <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"در حالت تغییر به <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1863,11 +1855,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"به <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> متصل شد"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"برای دیدن فایل‌ها، ضربه بزنید"</string>
     <string name="pin_target" msgid="8036028973110156895">"پین کردن"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"پین کردن <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"برداشتن پین"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"برداشتن پین <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"اطلاعات برنامه"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"در حال شروع نسخه نمایشی…"</string>

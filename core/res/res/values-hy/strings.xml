@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Թույլ է տալիս հավելվածին տեսնել Bluetooth-ի կարգավորումը պլանշետի վրա և կապվել ու կապեր ընդունել զուգակցված սարքերի հետ:"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Թույլ է տալիս հավելվածին տեսնել Bluetooth-ի կազմաձևումը Android TV սարքի վրա և կապվել ու թույլ տալ կապակցումները զուգակցված սարքերի հետ:"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Թույլ է տալիս հավելվածին տեսնել Bluetooth-ի կարգավորումը հեռախոսի վրա և կապվել ու կապեր ընդունել զուգակցված սարքերի հետ:"</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Տեղեկություններ NFC վճարային ծառայության մասին"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Թույլ է տալիս հավելվածին ստանալ նախընտրելի NFC վճարային ծառայության մասին տեղեկություններ (օր․՝ գրանցված լրացուցիչ սարքերի և երթուղու նպատակակետի մասին տվյալներ)։"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"վերահսկել Մոտ Տարածությամբ Հաղորդակցումը"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Թույլ է տալիս հավելվածին հաղորդակցվել Մոտ տարածությամբ հաղորդակցման (NFC) պիտակների, քարտերի և ընթերցիչների հետ:"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"անջատել ձեր էկրանի կողպեքը"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"Մատչելիության դյուրանցումն միացրել է <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"Մատչելիության դյուրանցումն անջատել է <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"«<xliff:g id="SERVICE_NAME">%1$s</xliff:g>» ծառայությունն օգտագործելու համար սեղմեք և 3 վայրկյան պահեք ձայնի ուժգնության երկու կոճակները"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"Ընտրեք ծառայությունը, որը կգործարկվի «Հատուկ գործառույթներ» կոճակին հպելու դեպքում՝"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Ընտրեք ծառայությունը, որը կգործարկվի հատուկ գործառույթների ժեստն անելու դեպքում (երկու մատը էկրանի ներքևից սահեցրեք վերև)՝"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Ընտրեք ծառայությունը, որը կգործարկվի հատուկ գործառույթների ժեստն անելու դեպքում (երեք մատը էկրանի ներքևից սահեցրեք վերև)՝"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"Մեկ ծառայությունից մյուսին անցնելու համար հպեք «Հատուկ գործառույթներ» կոճակին և պահեք:"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"Մեկ ծառայությունից մյուսին անցնելու համար երկու մատը սահեցրեք վերև և պահեք:"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"Մեկ ծառայությունից մյուսին անցնելու համար երեք մատը սահեցրեք վերև և պահեք:"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Խոշորացում"</string>
     <string name="user_switched" msgid="7249833311585228097">"Ներկայիս օգտատերը <xliff:g id="NAME">%1$s</xliff:g>:"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Փոխարկվում է <xliff:g id="NAME">%1$s</xliff:g>-ին..."</string>
@@ -1863,11 +1855,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Միացված է <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>-ին"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Հպեք՝ ֆայլերը տեսնելու համար"</string>
     <string name="pin_target" msgid="8036028973110156895">"Ամրացնել"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"Ամրացնել <xliff:g id="LABEL">%1$s</xliff:g> հավելվածը"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Ապամրացնել"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"Ապամրացնել <xliff:g id="LABEL">%1$s</xliff:g> հավելվածը"</string>
     <string name="app_info" msgid="6113278084877079851">"Հավելվածի տվյալներ"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Ցուցադրական օգտատերը գործարկվում է…"</string>

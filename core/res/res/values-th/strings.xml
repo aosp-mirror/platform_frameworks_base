@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"อนุญาตให้แอปพลิเคชันดูการกำหนดค่าบลูทูธของแท็บเล็ต ตลอดจนเชื่อมต่อและยอมรับการเชื่อมต่อกับอุปกรณ์ที่จับคู่ไว้"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"อนุญาตให้แอปดูการกำหนดค่าบลูทูธในอุปกรณ์ Android TV ตลอดจนเชื่อมต่อและยอมรับการเชื่อมต่อกับอุปกรณ์ที่จับคู่ไว้"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"อนุญาตให้แอปพลิเคชันดูการกำหนดค่าบลูทูธของโทรศัพท์ ตลอดจนเชื่อมต่อและยอมรับการเชื่อมต่อกับอุปกรณ์ที่จับคู่ไว้"</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ข้อมูลบริการชำระเงิน NFC ที่ต้องการ"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"อนุญาตให้แอปรับข้อมูลบริการชำระเงิน NFC ที่ต้องการ เช่น รหัสแอป (AID) ที่ลงทะเบียนและปลายทางของเส้นทาง"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ควบคุม Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"อนุญาตให้แอปพลิเคชันสื่อสารกับแท็ก Near Field Communication (NFC) การ์ด และโปรแกรมอ่าน"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ปิดใช้งานการล็อกหน้าจอของคุณ"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"ทางลัดการเข้าถึงเปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"ทางลัดการเข้าถึงปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"กดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มค้างไว้ 3 วินาทีเพื่อใช้ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"เลือกบริการที่จะใช้เมื่อคุณแตะปุ่มการช่วยเหลือพิเศษ:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"เลือกบริการที่จะใช้กับท่าทางสัมผัสการช่วยเหลือพิเศษ (ใช้ 2 นิ้วเลื่อนขึ้นจากด้านล่างของหน้าจอ):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"เลือกบริการที่จะใช้กับท่าทางสัมผัสการช่วยเหลือพิเศษ (ใช้ 3 นิ้วเลื่อนขึ้นจากด้านล่างของหน้าจอ):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"หากต้องการสลับระหว่างบริการ ให้แตะปุ่มการช่วยเหลือพิเศษค้างไว้"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"หากต้องการสลับระหว่างบริการ ให้ใช้ 2 นิ้วเลื่อนขึ้นค้างไว้"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"หากต้องการสลับระหว่างบริการ ให้ใช้ 3 นิ้วเลื่อนขึ้นค้างไว้"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"การขยาย"</string>
     <string name="user_switched" msgid="7249833311585228097">"ผู้ใช้ปัจจุบัน <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"กำลังเปลี่ยนเป็น <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1863,11 +1855,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"เชื่อมต่อ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"แตะเพื่อดูไฟล์"</string>
     <string name="pin_target" msgid="8036028973110156895">"ปักหมุด"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"ตรึง <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"เลิกปักหมุด"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"เลิกตรึง <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"ข้อมูลแอป"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"กำลังเริ่มการสาธิต…"</string>

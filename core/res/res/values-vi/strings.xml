@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Cho phép ứng dụng xem cấu hình của Bluetooth trên máy tính bảng và tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Cho phép ứng dụng xem cấu hình của Bluetooth trên thiết bị Android TV, đồng thời tạo và chấp nhận các kết nối với thiết bị được ghép nối."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Cho phép ứng dụng xem cấu hình của Bluetooth trên điện thoại, tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần (NFC) được ưu tiên"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Cho phép ứng dụng nhận thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần mà bạn ưu tiên, chẳng hạn như các hình thức hỗ trợ đã đăng ký và điểm đến trong hành trình."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kiểm soát Liên lạc trường gần"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Cho phép ứng dụng giao tiếp với thẻ Giao tiếp trường gần (NFC), thẻ và trình đọc."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"vô hiệu hóa khóa màn hình của bạn"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"Đã bật phím tắt trợ năng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"Đã tắt phím tắt trợ năng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Nhấn và giữ đồng thời cả hai phím âm lượng trong 3 giây để sử dụng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"Chọn dịch vụ sẽ sử dụng khi bạn nhấn vào nút hỗ trợ tiếp cận:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Chọn dịch vụ sẽ sử dụng với cử chỉ hỗ trợ tiếp cận này (vuốt lên từ cuối màn hình bằng 2 ngón tay):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Chọn dịch vụ sẽ sử dụng với cử chỉ hỗ trợ tiếp cận này (vuốt lên từ cuối màn hình bằng 3 ngón tay):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"Để chuyển đổi giữa các dịch vụ, hãy chạm và giữ nút hỗ trợ tiếp cận."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"Để chuyển đổi giữa các dịch vụ, hãy vuốt lên và giữ bằng 2 ngón tay."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"Để chuyển đổi giữa các dịch vụ, hãy vuốt lên và giữ bằng 3 ngón tay."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Phóng to"</string>
     <string name="user_switched" msgid="7249833311585228097">"Người dùng hiện tại <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Đang chuyển sang <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1863,11 +1855,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Đã kết nối với <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Nhấn để xem tệp"</string>
     <string name="pin_target" msgid="8036028973110156895">"Ghim"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"Ghim <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Bỏ ghim"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"Bỏ ghim <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Thông tin ứng dụng"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Đang bắt đầu bản trình diễn..."</string>

@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"ایپ کو ٹیبلیٹ پر بلوٹوتھ کی ترتیب دیکھنے اور جوڑا بنائے ہوئے آلات کے ساتھ کنکشنز بنانے اور قبول کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"‏ایپ کو آپ کے Android TV آلہ پر بلوٹوتھ کنفیگریشن دیکھنے، اور جوڑا بنائے ہوئے آلات کے ساتھ کنکشنز بنانے اور قبول کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"ایپ کو فون پر بلوٹوتھ کی ترتیب دیکھنے اور جوڑا بنائے ہوئے آلات کے ساتھ کنکشنز بنانے اور قبول کرنے کی اجازت دیتا ہے۔"</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏ترجیح شدہ NFC ادائیگی کی سروس کی معلومات"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏ایپ کو رجسٹرشدہ ایڈز اور روٹ ڈسٹنیشن جیسی ترجیح شدہ nfc ادائیگی سروس کی معلومات حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"‏Near Field کمیونیکیشن کنٹرول کریں"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"‏ایپ کو Near Field Communication (NFC)‎ ٹیگز، کارڈز اور ریڈرز کے ساتھ مواصلت کرنے کی اجازت دیٹا ہے۔"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"اپنے اسکرین لاک کو غیر فعال کریں"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"ایکسیسبیلٹی شارٹ کٹ نے <xliff:g id="SERVICE_NAME">%1$s</xliff:g> کو آن کر دیا"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"ایکسیسبیلٹی شارٹ کٹ نے <xliff:g id="SERVICE_NAME">%1$s</xliff:g> کو آف کر دیا"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> کا استعمال کرنے کے لیے 3 سیکنڈ تک والیوم کی دونوں کلیدوں کو چھوئیں اور دبائے رکھیں"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"ایکسیسبیلٹی بٹن پر تھپتھپانے وقت استعمال کرنے کیلئے ایک سروس چنیں:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"ایکسیسبیلٹی اشارہ کے ساتھ استعمال کرنے کے لیے ایک سروس چنیں (دو انگلیوں سے اسکرین کے نیچے سے اوپر کی طرف سوائپ کریں):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"ایکسیسبیلٹی اشارہ کے ساتھ استعمال کرنے کے لیے ایک سروس چنیں (تین انگلیوں سے اسکرین کے نیچے سے اوپر کی طرف سوائپ کریں):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"سروسز کے مابین سوئچ کرنے کے لیے، ایکسیسبیلٹی بٹن کو ٹچ کرکے ہولڈ کریں۔"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"سروسز کے مابین سوئچ کرنے کے لیے، دو انگلیوں سے اوپر سوائپ کرکے ہولڈ کریں۔"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"سروسز کے مابین سوئچ کرنے کے لیے، تین انگلیوں سے اوپر سوائپ کرکے ہولڈ کریں۔"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"میگنیفکیشن"</string>
     <string name="user_switched" msgid="7249833311585228097">"موجودہ صارف <xliff:g id="NAME">%1$s</xliff:g>۔"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> پر سوئچ کیا جا رہا ہے…"</string>
@@ -1863,11 +1855,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> سے منسلک"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"فائلوں کو دیکھنے کیلئے تھپتھپائیں"</string>
     <string name="pin_target" msgid="8036028973110156895">"پن کریں"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g> کو پن کریں"</string>
     <string name="unpin_target" msgid="3963318576590204447">"پن ہٹائیں"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g> سے پن ہٹائیں"</string>
     <string name="app_info" msgid="6113278084877079851">"ایپ کی معلومات"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"ڈیمو شروع ہو رہا ہے…"</string>
