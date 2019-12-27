@@ -601,7 +601,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // Set state to STOPPING, or ActivityRecord#activityStoppedLocked() call will be ignored.
         mActivity.setState(STOPPING, "test");
-        mActivity.activityStopped(savedState, persistentSavedState, "desc");
+        mActivity.activityStoppedLocked(savedState, persistentSavedState, "desc");
         assertTrue(mActivity.hasSavedState());
         assertEquals(savedState, mActivity.getSavedState());
         assertEquals(persistentSavedState, mActivity.getPersistentSavedState());
@@ -609,7 +609,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Sending 'null' for saved state can only happen due to timeout, so previously stored saved
         // states should not be overridden.
         mActivity.setState(STOPPING, "test");
-        mActivity.activityStopped(null /* savedState */, null /* persistentSavedState */,
+        mActivity.activityStoppedLocked(null /* savedState */, null /* persistentSavedState */,
                 "desc");
         assertTrue(mActivity.hasSavedState());
         assertEquals(savedState, mActivity.getSavedState());

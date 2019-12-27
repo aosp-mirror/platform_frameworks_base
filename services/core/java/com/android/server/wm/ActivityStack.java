@@ -192,7 +192,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStack" : TAG_ATM;
     static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_APP = TAG + POSTFIX_APP;
-    static final String TAG_CLEANUP = TAG + POSTFIX_CLEANUP;
+    private static final String TAG_CLEANUP = TAG + POSTFIX_CLEANUP;
     private static final String TAG_PAUSE = TAG + POSTFIX_PAUSE;
     private static final String TAG_RELEASE = TAG + POSTFIX_RELEASE;
     private static final String TAG_RESULTS = TAG + POSTFIX_RESULTS;
@@ -203,6 +203,27 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     private static final String TAG_TRANSITION = TAG + POSTFIX_TRANSITION;
     private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
     static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
+
+    // Ticks during which we check progress while waiting for an app to launch.
+    private static final int LAUNCH_TICK = 500;
+
+    // How long we wait until giving up on the last activity to pause.  This
+    // is short because it directly impacts the responsiveness of starting the
+    // next activity.
+    private static final int PAUSE_TIMEOUT = 500;
+
+    // How long we wait for the activity to tell us it has stopped before
+    // giving up.  This is a good amount of time because we really need this
+    // from the application in order to get its saved state. Once the stop
+    // is complete we may start destroying client resources triggering
+    // crashes if the UI thread was hung. We put this timeout one second behind
+    // the ANR timeout so these situations will generate ANR instead of
+    // Surface lost or other errors.
+    private static final int STOP_TIMEOUT = 11 * 1000;
+
+    // How long we wait until giving up on an activity telling us it has
+    // finished destroying itself.
+    private static final int DESTROY_TIMEOUT = 10 * 1000;
 
     // Set to false to disable the preview that is shown while a new activity
     // is being started.
@@ -249,7 +270,15 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         RESTARTING_PROCESS
     }
 
-    final ActivityTaskManagerService mAtmService;
+    final ActivityTaskManagerService mService;
+    final WindowManagerService mWindowManager;
+
+    /**
+     * List of running activities, sorted by recent usage.
+     * The first entry in the list is the least recently used.
+     * It contains HistoryRecord objects.
+     */
+    private final ArrayList<ActivityRecord> mLruActivities = new ArrayList<>();
 
     /**
      * When we are in the process of pausing an activity, before starting the
@@ -389,7 +418,21 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     private boolean mTopActivityOccludesKeyguard;
     private ActivityRecord mTopDismissingKeyguardActivity;
 
-    private static final int TRANSLUCENT_TIMEOUT_MSG = FIRST_ACTIVITY_STACK_MSG + 1;
+    private static final int PAUSE_TIMEOUT_MSG = FIRST_ACTIVITY_STACK_MSG + 1;
+    private static final int DESTROY_TIMEOUT_MSG = FIRST_ACTIVITY_STACK_MSG + 2;
+    private static final int LAUNCH_TICK_MSG = FIRST_ACTIVITY_STACK_MSG + 3;
+    private static final int STOP_TIMEOUT_MSG = FIRST_ACTIVITY_STACK_MSG + 4;
+    private static final int DESTROY_ACTIVITIES_MSG = FIRST_ACTIVITY_STACK_MSG + 5;
+    private static final int TRANSLUCENT_TIMEOUT_MSG = FIRST_ACTIVITY_STACK_MSG + 6;
+
+    private static class ScheduleDestroyArgs {
+        final WindowProcessController mOwner;
+        final String mReason;
+        ScheduleDestroyArgs(WindowProcessController owner, String reason) {
+            mOwner = owner;
+            mReason = reason;
+        }
+    }
 
     private final Handler mHandler;
 
@@ -402,8 +445,57 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case PAUSE_TIMEOUT_MSG: {
+                    ActivityRecord r = (ActivityRecord)msg.obj;
+                    // We don't at this point know if the activity is fullscreen,
+                    // so we need to be conservative and assume it isn't.
+                    Slog.w(TAG, "Activity pause timeout for " + r);
+                    synchronized (mService.mGlobalLock) {
+                        if (r.hasProcess()) {
+                            mService.logAppTooSlow(r.app, r.pauseTime, "pausing " + r);
+                        }
+                        activityPausedLocked(r.appToken, true);
+                    }
+                } break;
+                case LAUNCH_TICK_MSG: {
+                    ActivityRecord r = (ActivityRecord)msg.obj;
+                    synchronized (mService.mGlobalLock) {
+                        if (r.continueLaunchTickingLocked()) {
+                            mService.logAppTooSlow(r.app, r.launchTickTime, "launching " + r);
+                        }
+                    }
+                } break;
+                case DESTROY_TIMEOUT_MSG: {
+                    ActivityRecord r = (ActivityRecord)msg.obj;
+                    // We don't at this point know if the activity is fullscreen,
+                    // so we need to be conservative and assume it isn't.
+                    Slog.w(TAG, "Activity destroy timeout for " + r);
+                    synchronized (mService.mGlobalLock) {
+                        if (r != null) {
+                            r.destroyed("destroyTimeout");
+                        }
+                    }
+                } break;
+                case STOP_TIMEOUT_MSG: {
+                    ActivityRecord r = (ActivityRecord)msg.obj;
+                    // We don't at this point know if the activity is fullscreen,
+                    // so we need to be conservative and assume it isn't.
+                    Slog.w(TAG, "Activity stop timeout for " + r);
+                    synchronized (mService.mGlobalLock) {
+                        if (r.isInHistory()) {
+                            r.activityStoppedLocked(null /* icicle */,
+                                    null /* persistentState */, null /* description */);
+                        }
+                    }
+                } break;
+                case DESTROY_ACTIVITIES_MSG: {
+                    ScheduleDestroyArgs args = (ScheduleDestroyArgs)msg.obj;
+                    synchronized (mService.mGlobalLock) {
+                        destroyActivities(args.mOwner, args.mReason);
+                    }
+                } break;
                 case TRANSLUCENT_TIMEOUT_MSG: {
-                    synchronized (mAtmService.mGlobalLock) {
+                    synchronized (mService.mGlobalLock) {
                         notifyActivityDrawnLocked(null);
                     }
                 } break;
@@ -645,11 +737,12 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                         com.android.internal.R.dimen.docked_stack_minimize_thickness);
         EventLogTags.writeWmStackCreated(stackId);
         mStackSupervisor = supervisor;
-        mAtmService = supervisor.mService;
-        mRootActivityContainer = mAtmService.mRootActivityContainer;
+        mService = supervisor.mService;
+        mRootActivityContainer = mService.mRootActivityContainer;
         mHandler = new ActivityStackHandler(supervisor.mLooper);
+        mWindowManager = mService.mWindowManager;
         mRemoteToken = new RemoteToken(this);
-        mCurrentUser = mAtmService.mAmInternal.getCurrentUserId();
+        mCurrentUser = mService.mAmInternal.getCurrentUserId();
         // Set display id before setting activity and window type to make sure it won't affect
         // stacks on a wrong display.
         mDisplayId = display.mDisplayId;
@@ -678,7 +771,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                     + reason);
             setResumedActivity(record, reason + " - onActivityStateChanged");
             if (record == mRootActivityContainer.getTopResumedActivity()) {
-                mAtmService.setResumedActivityUncheckLocked(record, reason);
+                mService.setResumedActivityUncheckLocked(record, reason);
             }
             mStackSupervisor.mRecentTasks.add(record.getTask());
         }
@@ -833,7 +926,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
      */
     void setWindowingMode(int preferredWindowingMode, boolean animate, boolean showRecents,
             boolean enteringSplitScreenMode, boolean deferEnsuringVisibility, boolean creating) {
-        mWmService.inSurfaceTransaction(() -> setWindowingModeInSurfaceTransaction(
+        mWindowManager.inSurfaceTransaction(() -> setWindowingModeInSurfaceTransaction(
                 preferredWindowingMode, animate, showRecents, enteringSplitScreenMode,
                 deferEnsuringVisibility, creating));
     }
@@ -881,7 +974,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 // Looks like we can't launch in split screen mode or the stack we are launching
                 // doesn't support split-screen mode, go ahead an dismiss split-screen and display a
                 // warning toast about it.
-                mAtmService.getTaskChangeNotificationController().notifyActivityDismissingDockedStack();
+                mService.getTaskChangeNotificationController().notifyActivityDismissingDockedStack();
                 final ActivityStack primarySplitStack = display.getSplitScreenPrimaryStack();
                 primarySplitStack.setWindowingModeInSurfaceTransaction(WINDOWING_MODE_UNDEFINED,
                         false /* animate */, false /* showRecents */,
@@ -915,11 +1008,11 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             // Inform the user that they are starting an app that may not work correctly in
             // multi-window mode.
             final String packageName = topActivity.info.applicationInfo.packageName;
-            mAtmService.getTaskChangeNotificationController().notifyActivityForcedResizable(
+            mService.getTaskChangeNotificationController().notifyActivityForcedResizable(
                     topTask.mTaskId, FORCED_RESIZEABLE_REASON_SPLIT_SCREEN, packageName);
         }
 
-        mAtmService.deferWindowLayout();
+        mService.deferWindowLayout();
         try {
             if (!animate && topActivity != null) {
                 mStackSupervisor.mNoAnimActivities.add(topActivity);
@@ -974,16 +1067,16 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 // task, and from the tests
                 // TODO (b/78247419): Fix the rotation animation from fullscreen to minimized mode
                 final boolean isRecentsComponentHome =
-                        mAtmService.getRecentTasks().isRecentsComponentHomeActivity(mCurrentUser);
+                        mService.getRecentTasks().isRecentsComponentHomeActivity(mCurrentUser);
                 final ActivityStack recentStack = display.getOrCreateStack(
                         WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
                         isRecentsComponentHome ? ACTIVITY_TYPE_HOME : ACTIVITY_TYPE_RECENTS,
                         true /* onTop */);
                 recentStack.moveToFront("setWindowingMode");
                 // If task moved to docked stack - show recents if needed.
-                mWmService.showRecentApps();
+                mService.mWindowManager.showRecentApps();
             }
-            mAtmService.continueWindowLayout();
+            mService.continueWindowLayout();
         }
 
         if (!deferEnsuringVisibility) {
@@ -1151,6 +1244,18 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         return display != null && display.isSingleTaskInstance();
     }
 
+    /** @return {@code true} if LRU list contained the specified activity. */
+    final boolean inLruList(ActivityRecord activity) {
+        return mLruActivities.contains(activity);
+    }
+
+    /** @return {@code true} if the given activity was contained in LRU list. */
+    final boolean updateLruList(ActivityRecord r) {
+        final boolean contained = mLruActivities.remove(r);
+        mLruActivities.add(r);
+        return contained;
+    }
+
     final boolean isHomeOrRecentsStack() {
         return isActivityTypeHome() || isActivityTypeRecents();
     }
@@ -1274,7 +1379,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     private void clearLaunchTime(ActivityRecord r) {
         // Make sure that there is no activity waiting for this to launch.
         if (!mStackSupervisor.mWaitingActivityLaunched.isEmpty()) {
-            mStackSupervisor.removeIdleTimeoutForActivity(r);
+            mStackSupervisor.removeTimeoutsForActivityLocked(r);
             mStackSupervisor.scheduleIdleTimeoutLocked(r);
         }
     }
@@ -1284,7 +1389,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         forAllActivities((Consumer<ActivityRecord>) (r) -> r.setSleeping(false));
         if (mPausingActivity != null) {
             Slog.d(TAG, "awakeFromSleepingLocked: previously pausing activity didn't pause");
-            mPausingActivity.activityPaused(true);
+            activityPausedLocked(mPausingActivity.appToken, true);
         }
     }
 
@@ -1419,7 +1524,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         prev.getTask().touchActiveTime();
         clearLaunchTime(prev);
 
-        mAtmService.updateCpuStats();
+        mService.updateCpuStats();
 
         boolean pauseImmediately = false;
         if (resuming != null && (resuming.info.flags & FLAG_RESUME_WHILE_PAUSING) != 0) {
@@ -1440,7 +1545,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
                         prev.shortComponentName, "userLeaving=" + userLeaving);
 
-                mAtmService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
+                mService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
                         prev.appToken, PauseActivityItem.obtain(prev.finishing, userLeaving,
                                 prev.configChangeFlags, pauseImmediately));
             } catch (Exception e) {
@@ -1458,7 +1563,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
 
         // If we are not going to sleep, we want to ensure the device is
         // awake until the next activity is started.
-        if (!uiSleeping && !mAtmService.isSleepingOrShuttingDownLocked()) {
+        if (!uiSleeping && !mService.isSleepingOrShuttingDownLocked()) {
             mStackSupervisor.acquireLaunchWakelock();
         }
 
@@ -1480,7 +1585,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 return false;
 
             } else {
-                prev.schedulePauseTimeout();
+                schedulePauseTimeoutForActivity(prev);
                 return true;
             }
 
@@ -1493,6 +1598,41 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             }
             return false;
         }
+    }
+
+    final void activityPausedLocked(IBinder token, boolean timeout) {
+        if (DEBUG_PAUSE) Slog.v(TAG_PAUSE,
+            "Activity paused: token=" + token + ", timeout=" + timeout);
+
+        final ActivityRecord r = isInStackLocked(token);
+
+        if (r != null) {
+            mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
+            if (mPausingActivity == r) {
+                if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to PAUSED: " + r
+                        + (timeout ? " (due to timeout)" : " (pause complete)"));
+                mService.deferWindowLayout();
+                try {
+                    completePauseLocked(true /* resumeNext */, null /* resumingActivity */);
+                } finally {
+                    mService.continueWindowLayout();
+                }
+                return;
+            } else {
+                EventLogTags.writeWmFailedToPause(r.mUserId, System.identityHashCode(r),
+                        r.shortComponentName, mPausingActivity != null
+                                ? mPausingActivity.shortComponentName : "(none)");
+                if (r.isState(PAUSING)) {
+                    r.setState(PAUSED, "activityPausedLocked");
+                    if (r.finishing) {
+                        if (DEBUG_PAUSE) Slog.v(TAG,
+                                "Executing finish of failed to pause activity: " + r);
+                        r.completeFinishing("activityPausedLocked");
+                    }
+                }
+            }
+        }
+        mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
     }
 
     @VisibleForTesting
@@ -1566,10 +1706,10 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 if (diff > 0) {
                     final Runnable r = PooledLambda.obtainRunnable(
                             ActivityManagerInternal::updateForegroundTimeIfOnBattery,
-                            mAtmService.mAmInternal, prev.info.packageName,
+                            mService.mAmInternal, prev.info.packageName,
                             prev.info.applicationInfo.uid,
                             diff);
-                    mAtmService.mH.post(r);
+                    mService.mH.post(r);
                 }
             }
             prev.cpuTimeAtResume = 0; // reset it
@@ -1580,7 +1720,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         // task stack changes, because its positioning may depend on it.
         if (mStackSupervisor.mAppVisibilitiesChangedSinceLastPause
                 || (getDisplay() != null && getDisplay().hasPinnedStack())) {
-            mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
+            mService.getTaskChangeNotificationController().notifyTaskStackChanged();
             mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = false;
         }
 
@@ -1703,7 +1843,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                     if (activityType == ACTIVITY_TYPE_HOME
                             || (activityType == ACTIVITY_TYPE_ASSISTANT
-                                && mWmService.getRecentsAnimationController() != null)) {
+                                && mWindowManager.getRecentsAnimationController() != null)) {
                         break;
                     }
                 }
@@ -1949,7 +2089,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             mHandler.removeMessages(TRANSLUCENT_TIMEOUT_MSG);
 
             if (waitingActivity != null) {
-                mWmService.setWindowOpaqueLocked(waitingActivity.appToken, false);
+                mWindowManager.setWindowOpaqueLocked(waitingActivity.appToken, false);
                 if (waitingActivity.attachedToProcess()) {
                     try {
                         waitingActivity.app.getThread().scheduleTranslucentConversionComplete(
@@ -2046,7 +2186,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
 
     @GuardedBy("mService")
     private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options) {
-        if (!mAtmService.isBooting() && !mAtmService.isBooted()) {
+        if (!mService.isBooting() && !mService.isBooted()) {
             // Not ready yet!
             return false;
         }
@@ -2101,7 +2241,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             // If the current top activity may be able to occlude keyguard but the occluded state
             // has not been set, update visibility and check again if we should continue to resume.
             boolean nothingToResume = true;
-            if (!mAtmService.mShuttingDown) {
+            if (!mService.mShuttingDown) {
                 final boolean canShowWhenLocked = !mTopActivityOccludesKeyguard
                         && next.canShowWhenLocked();
                 final boolean mayDismissKeyguard = mTopDismissingKeyguardActivity != next
@@ -2126,7 +2266,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         // Make sure that the user who owns this activity is started.  If not,
         // we will just leave it as is because someone should be bringing
         // another user's activities to the top of the stack.
-        if (!mAtmService.mAmInternal.hasStartedUserState(next.mUserId)) {
+        if (!mService.mAmInternal.hasStartedUserState(next.mUserId)) {
             Slog.w(TAG, "Skipping resume of top activity " + next
                     + ": user " + next.mUserId + " is stopped");
             return false;
@@ -2186,7 +2326,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 // activity isn't running, we can start the process earlier to save the time to wait
                 // for the current activity to be paused.
                 final boolean isTop = this == display.getFocusedStack();
-                mAtmService.startProcessAsync(next, false /* knownToBeDead */, isTop,
+                mService.startProcessAsync(next, false /* knownToBeDead */, isTop,
                         isTop ? "pre-top-activity" : "pre-activity");
             }
             if (lastResumed != null) {
@@ -2243,7 +2383,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         // Launching this app's activity, make sure the app is no longer
         // considered stopped.
         try {
-            mAtmService.getPackageManager().setPackageStoppedState(
+            mService.getPackageManager().setPackageStoppedState(
                     next.packageName, false, next.mUserId); /* TODO: Verify if correct userid */
         } catch (RemoteException e1) {
         } catch (IllegalArgumentException e) {
@@ -2329,7 +2469,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                     lastFocusedStack == null ? null : lastFocusedStack.mResumedActivity;
             final ActivityState lastState = next.getState();
 
-            mAtmService.updateCpuStats();
+            mService.updateCpuStats();
 
             if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to RESUMED: " + next
                     + " (in existing)");
@@ -2338,6 +2478,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
 
             next.app.updateProcessInfo(false /* updateServiceConnectionActivities */,
                     true /* activityChange */, true /* updateOomAdj */);
+            updateLruList(next);
 
             // Have the window manager re-evaluate the orientation of
             // the screen based on the new activity order.
@@ -2406,13 +2547,13 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                         next.getTask().mTaskId, next.shortComponentName);
 
                 next.sleeping = false;
-                mAtmService.getAppWarningsLocked().onResumeActivity(next);
-                next.app.setPendingUiCleanAndForceProcessStateUpTo(mAtmService.mTopProcessState);
+                mService.getAppWarningsLocked().onResumeActivity(next);
+                next.app.setPendingUiCleanAndForceProcessStateUpTo(mService.mTopProcessState);
                 next.clearOptionsLocked();
                 transaction.setLifecycleStateRequest(
                         ResumeActivityItem.obtain(next.app.getReportedProcState(),
                                 dc.isNextTransitionForward()));
-                mAtmService.getLifecycleManager().scheduleTransaction(transaction);
+                mService.getLifecycleManager().scheduleTransaction(transaction);
 
                 if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed "
                         + next);
@@ -2724,7 +2865,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             // Set focused app directly because if the next focused activity is already resumed
             // (e.g. the next top activity is on a different display), there won't have activity
             // state change to update it.
-            mAtmService.setResumedActivityUncheckLocked(stack.mResumedActivity, reason);
+            mService.setResumedActivityUncheckLocked(stack.mResumedActivity, reason);
         }
         return stack;
     }
@@ -2755,7 +2896,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         if (activityBelow != null) {
             if (activityBelow.isState(STARTED, RESUMED, PAUSING, PAUSED)) {
                 if (!activityBelow.isActivityTypeHome()
-                        || mAtmService.mHomeProcess != activityBelow.app) {
+                        || mService.mHomeProcess != activityBelow.app) {
                     Slog.w(TAG, "  Force finishing activity "
                             + activityBelow.intent.getComponent().flattenToShortString());
                     activityBelow.finishIfPossible(reason, false /* oomAdj */);
@@ -2886,7 +3027,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
 
         // TODO: There is a dup. of this block of code in ActivityTaskManagerService.finishActivity
         // We should consolidate.
-        IActivityController controller = mAtmService.mController;
+        IActivityController controller = mService.mController;
         if (controller != null) {
             ActivityRecord next = topRunningActivity(srec.appToken, INVALID_TASK_ID);
             if (next != null) {
@@ -2895,7 +3036,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 try {
                     resumeOK = controller.activityResuming(next.packageName);
                 } catch (RemoteException e) {
-                    mAtmService.mController = null;
+                    mService.mController = null;
                     Watchdog.getInstance().setActivityController(null);
                 }
 
@@ -2939,7 +3080,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                             destIntent.getComponent(), ActivityManagerService.STOCK_PM_FLAGS,
                             srec.mUserId);
                     // TODO(b/64750076): Check if calling pid should really be -1.
-                    final int res = mAtmService.getActivityStartController()
+                    final int res = mService.getActivityStartController()
                             .obtainStarter(destIntent, "navigateUpTo")
                             .setCaller(srec.app.getThread())
                             .setActivityInfo(aInfo)
@@ -2967,9 +3108,10 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
      * an activity moves away from the stack.
      */
     void onActivityRemovedFromStack(ActivityRecord r) {
-        r.removeTimeouts();
+        removeTimeoutsForActivity(r);
 
         mExitingActivities.remove(r);
+        mLruActivities.remove(r);
 
         if (mResumedActivity != null && mResumedActivity == r) {
             setResumedActivity(null, "onActivityRemovedFromStack");
@@ -2983,10 +3125,120 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         if (r.isState(RESUMED)) {
             setResumedActivity(r, "onActivityAddedToStack");
         }
+        if (r.hasProcess()) {
+            updateLruList(r);
+        }
+    }
+
+    void removeTimeoutsForActivity(ActivityRecord r) {
+        mStackSupervisor.removeTimeoutsForActivityLocked(r);
+        removePauseTimeoutForActivity(r);
+        removeStopTimeoutForActivity(r);
+        removeDestroyTimeoutForActivity(r);
+        r.finishLaunchTickingLocked();
+    }
+
+    void scheduleDestroyActivities(WindowProcessController owner, String reason) {
+        final Message msg = mHandler.obtainMessage(DESTROY_ACTIVITIES_MSG);
+        msg.obj = new ScheduleDestroyArgs(owner, reason);
+        mHandler.sendMessage(msg);
+    }
+
+    void scheduleDestroyTimeoutForActivity(ActivityRecord r) {
+        final Message msg = mHandler.obtainMessage(DESTROY_TIMEOUT_MSG, r);
+        mHandler.sendMessageDelayed(msg, DESTROY_TIMEOUT);
+    }
+
+    void removeDestroyTimeoutForActivity(ActivityRecord r) {
+        mHandler.removeMessages(DESTROY_TIMEOUT_MSG, r);
+    }
+
+    void scheduleStopTimeoutForActivity(ActivityRecord r) {
+        final Message msg = mHandler.obtainMessage(STOP_TIMEOUT_MSG, r);
+        mHandler.sendMessageDelayed(msg, STOP_TIMEOUT);
+    }
+
+    void removeStopTimeoutForActivity(ActivityRecord r) {
+        mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
+    }
+
+    /**
+     * Schedule a pause timeout in case the app doesn't respond. We don't give it much time because
+     * this directly impacts the responsiveness seen by the user.
+     */
+    private void schedulePauseTimeoutForActivity(ActivityRecord r) {
+        final Message msg = mHandler.obtainMessage(PAUSE_TIMEOUT_MSG, r);
+        r.pauseTime = SystemClock.uptimeMillis();
+        mHandler.sendMessageDelayed(msg, PAUSE_TIMEOUT);
+        if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Waiting for pause to complete...");
+    }
+
+    void removePauseTimeoutForActivity(ActivityRecord r) {
+        mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
+    }
+
+    void scheduleLaunchTickForActivity(ActivityRecord r) {
+        final Message msg = mHandler.obtainMessage(LAUNCH_TICK_MSG, r);
+        mHandler.sendMessageDelayed(msg, LAUNCH_TICK);
     }
 
     void removeLaunchTickMessages() {
-        forAllActivities(ActivityRecord::removeLaunchTickRunnable);
+        mHandler.removeMessages(LAUNCH_TICK_MSG);
+    }
+    /// HANDLER INTERFACE END
+
+    private void destroyActivities(WindowProcessController owner, String reason) {
+        try {
+            mStackSupervisor.beginDeferResume();
+
+            final PooledConsumer c = PooledLambda.obtainConsumer(ActivityStack::destroyActivity,
+                    PooledLambda.__(ActivityRecord.class), owner, reason);
+            forAllActivities(c);
+            c.recycle();
+        } finally {
+            mStackSupervisor.endDeferResume();
+            mRootActivityContainer.resumeFocusedStacksTopActivities();
+        }
+    }
+
+    private static void destroyActivity(
+            ActivityRecord r, WindowProcessController owner, String reason) {
+        if (r.finishing || (owner != null && r.app != owner) || !r.isDestroyable()) return;
+
+        if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Destroying " + r
+                + " in state " + r.getState()
+                + " resumed=" + r.getStack().mResumedActivity
+                + " pausing=" + r.getStack().mPausingActivity + " for reason " + reason);
+
+        r.destroyImmediately(true /* removeFromTask */, reason);
+    }
+
+    private void removeHistoryRecordsForApp(ArrayList<ActivityRecord> list,
+            WindowProcessController app, String listName) {
+        int i = list.size();
+        if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
+            "Removing app " + app + " from list " + listName + " with " + i + " entries");
+        while (i > 0) {
+            i--;
+            ActivityRecord r = list.get(i);
+            if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP, "Record #" + i + " " + r);
+            if (r.app == app) {
+                if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP, "---> REMOVING this entry!");
+                list.remove(i);
+                removeTimeoutsForActivity(r);
+            }
+        }
+    }
+
+    private boolean removeHistoryRecordsForApp(WindowProcessController app) {
+        removeHistoryRecordsForApp(mLruActivities, app, "mLruActivities");
+        removeHistoryRecordsForApp(mStackSupervisor.mStoppingActivities, app,
+                "mStoppingActivities");
+        removeHistoryRecordsForApp(mStackSupervisor.mGoingToSleepActivities, app,
+                "mGoingToSleepActivities");
+        removeHistoryRecordsForApp(mStackSupervisor.mFinishingActivities, app,
+                "mFinishingActivities");
+        return mRemoveHistoryRecordsForApp.process(app);
     }
 
     private void updateTransitLocked(int transit, ActivityOptions options) {
@@ -3076,7 +3328,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
 
             mRootActivityContainer.resumeFocusedStacksTopActivities();
             EventLogTags.writeWmTaskToFront(tr.mUserId, tr.mTaskId);
-            mAtmService.getTaskChangeNotificationController().notifyTaskMovedToFront(tr.getTaskInfo());
+            mService.getTaskChangeNotificationController().notifyTaskMovedToFront(tr.getTaskInfo());
         } finally {
             getDisplay().continueUpdateImeTarget();
         }
@@ -3098,14 +3350,14 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
 
         // In LockTask mode, moving a locked task to the back of the stack may expose unlocked
         // ones. Therefore we need to check if this operation is allowed.
-        if (!mAtmService.getLockTaskController().canMoveTaskToBack(tr)) {
+        if (!mService.getLockTaskController().canMoveTaskToBack(tr)) {
             return false;
         }
 
         // If we have a watcher, preflight the move before committing to it.  First check
         // for *other* available tasks, but if none are available, then try again allowing the
         // current task to be selected.
-        if (isTopStackOnDisplay() && mAtmService.mController != null) {
+        if (isTopStackOnDisplay() && mService.mController != null) {
             ActivityRecord next = topRunningActivity(null, tr.mTaskId);
             if (next == null) {
                 next = topRunningActivity(null, INVALID_TASK_ID);
@@ -3114,9 +3366,9 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 // ask watcher if this is allowed
                 boolean moveOK = true;
                 try {
-                    moveOK = mAtmService.mController.activityResuming(next.packageName);
+                    moveOK = mService.mController.activityResuming(next.packageName);
                 } catch (RemoteException e) {
-                    mAtmService.mController = null;
+                    mService.mController = null;
                     Watchdog.getInstance().setActivityController(null);
                 }
                 if (!moveOK) {
@@ -3167,7 +3419,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         }
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "stack.resize_" + mStackId);
-        mAtmService.deferWindowLayout();
+        mService.deferWindowLayout();
         try {
             // Update override configurations of all tasks in the stack.
             final Rect taskBounds = tempTaskBounds != null ? tempTaskBounds : bounds;
@@ -3183,7 +3435,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 ensureVisibleActivitiesConfiguration(topRunningActivity(), preserveWindows);
             }
         } finally {
-            mAtmService.continueWindowLayout();
+            mService.continueWindowLayout();
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
@@ -3266,7 +3518,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
      * @param app The app of the activity that died.
      * @return result from removeHistoryRecordsForAppLocked.
      */
-    boolean handleAppDied(WindowProcessController app) {
+    boolean handleAppDiedLocked(WindowProcessController app) {
         if (mPausingActivity != null && mPausingActivity.app == app) {
             if (DEBUG_PAUSE || DEBUG_CLEANUP) Slog.v(TAG_PAUSE,
                     "App died while pausing: " + mPausingActivity);
@@ -3277,8 +3529,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             mLastNoHistoryActivity = null;
         }
 
-        mStackSupervisor.removeHistoryRecords(app);
-        return mRemoveHistoryRecordsForApp.process(app);
+        return removeHistoryRecordsForApp(app);
     }
 
     boolean dump(FileDescriptor fd, PrintWriter pw, boolean dumpAll, boolean dumpClient,
@@ -3290,6 +3541,10 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         pw.println("  mBounds=" + getRequestedOverrideBounds());
 
         boolean printed = dumpActivities(fd, pw, dumpAll, dumpClient, dumpPackage, needSep);
+
+        printed |= dumpHistoryList(fd, pw, mLruActivities, "    ", "Run", false,
+                !dumpAll, false, dumpPackage, true,
+                "    Running activities (most recent first):", null);
 
         needSep = printed;
         boolean pr = printThisActivity(pw, mPausingActivity, dumpPackage, needSep,
@@ -3415,7 +3670,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         EventLogTags.writeWmRemoveTask(((Task) child).mTaskId, mStackId);
 
         if (display.isSingleTaskInstance()) {
-            mAtmService.notifySingleTaskDisplayEmpty(display.mDisplayId);
+            mService.notifySingleTaskDisplayEmpty(display.mDisplayId);
         }
 
         display.mDisplayContent.setLayoutNeeded();
@@ -3443,11 +3698,11 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             boolean toTop, ActivityRecord activity, ActivityRecord source,
             ActivityOptions options) {
         final Task task = Task.create(
-                mAtmService, taskId, info, intent, voiceSession, voiceInteractor, this);
+                mService, taskId, info, intent, voiceSession, voiceInteractor, this);
         // add the task to stack first, mTaskPositioner might need the stack association
         addChild(task, toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
         final int displayId = mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY;
-        final boolean isLockscreenShown = mAtmService.mStackSupervisor.getKeyguardController()
+        final boolean isLockscreenShown = mService.mStackSupervisor.getKeyguardController()
                 .isKeyguardOrAodShowing(displayId);
         if (!mStackSupervisor.getLaunchParamsController()
                 .layoutTask(task, info.windowLayout, activity, source, options)
@@ -3539,18 +3794,19 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         // Apps may depend on onResume()/onPause() being called in pairs.
         if (setResume) {
             r.setState(RESUMED, "moveToFrontAndResumeStateIfNeeded");
+            updateLruList(r);
         }
         // If the activity was previously pausing, then ensure we transfer that as well
         if (setPause) {
             mPausingActivity = r;
-            r.schedulePauseTimeout();
+            schedulePauseTimeoutForActivity(r);
         }
         // Move the stack in which we are placing the activity to the front.
         moveToFront(reason);
         // If the original state is resumed, there is no state change to update focused app.
         // So here makes sure the activity focus is set if it is the top.
         if (origState == RESUMED && r == mRootActivityContainer.getTopResumedActivity()) {
-            mAtmService.setResumedActivityUncheckLocked(r, reason);
+            mService.setResumedActivityUncheckLocked(r, reason);
         }
     }
 
@@ -3650,14 +3906,14 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             top.savePinnedStackBounds();
         }
 
-        mWmService.inSurfaceTransaction(() -> {
+        mWindowManager.inSurfaceTransaction(() -> {
             final Task task = getBottomMostTask();
             setWindowingMode(WINDOWING_MODE_UNDEFINED);
 
             getDisplay().positionStackAtTop(this, false /* includingParents */);
 
             mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, this);
-            MetricsLoggerWrapper.logPictureInPictureFullScreen(mAtmService.mContext,
+            MetricsLoggerWrapper.logPictureInPictureFullScreen(mService.mContext,
                     task.effectiveUid, task.realActivity.flattenToString());
         });
     }
@@ -5125,11 +5381,11 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             return false;
         }
 
-        return display != null ? display.isSleeping() : mAtmService.isSleepingLocked();
+        return display != null ? display.isSleeping() : mService.isSleepingLocked();
     }
 
     boolean shouldSleepOrShutDownActivities() {
-        return shouldSleepActivities() || mAtmService.mShuttingDown;
+        return shouldSleepActivities() || mService.mShuttingDown;
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId,

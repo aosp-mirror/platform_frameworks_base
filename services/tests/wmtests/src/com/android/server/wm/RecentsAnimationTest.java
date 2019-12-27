@@ -161,7 +161,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         assertFalse(recentsActivity.mVisibleRequested);
 
         // Assume it is stopped to test next use case.
-        recentsActivity.activityStopped(null /* newIcicle */, null /* newPersistentState */,
+        recentsActivity.activityStoppedLocked(null /* newIcicle */, null /* newPersistentState */,
                 null /* description */);
         mSupervisor.mStoppingActivities.remove(recentsActivity);
 
