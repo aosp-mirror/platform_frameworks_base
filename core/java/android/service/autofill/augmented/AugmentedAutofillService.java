@@ -38,6 +38,7 @@ import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.service.autofill.Dataset;
 import android.service.autofill.augmented.PresentationParams.SystemPopupPresentationParams;
 import android.util.Log;
 import android.util.Pair;
@@ -47,6 +48,7 @@ import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAugmentedAutofillManagerClient;
 import android.view.autofill.IAutofillWindowPresenter;
+import android.view.inputmethod.InlineSuggestionsRequest;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -106,10 +108,11 @@ public abstract class AugmentedAutofillService extends Service {
         @Override
         public void onFillRequest(int sessionId, IBinder client, int taskId,
                 ComponentName componentName, AutofillId focusedId, AutofillValue focusedValue,
-                long requestTime, IFillCallback callback) {
+                long requestTime, @Nullable InlineSuggestionsRequest inlineSuggestionsRequest,
+                IFillCallback callback) {
             mHandler.sendMessage(obtainMessage(AugmentedAutofillService::handleOnFillRequest,
                     AugmentedAutofillService.this, sessionId, client, taskId, componentName,
-                    focusedId, focusedValue, requestTime, callback));
+                    focusedId, focusedValue, requestTime, inlineSuggestionsRequest, callback));
         }
 
         @Override
@@ -212,6 +215,7 @@ public abstract class AugmentedAutofillService extends Service {
     private void handleOnFillRequest(int sessionId, @NonNull IBinder client, int taskId,
             @NonNull ComponentName componentName, @NonNull AutofillId focusedId,
             @Nullable AutofillValue focusedValue, long requestTime,
+            @Nullable InlineSuggestionsRequest inlineSuggestionsRequest,
             @NonNull IFillCallback callback) {
         if (mAutofillProxies == null) {
             mAutofillProxies = new SparseArray<>();
@@ -236,9 +240,8 @@ public abstract class AugmentedAutofillService extends Service {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-        // TODO(b/146453195): pass the inline suggestion request over.
-        onFillRequest(new FillRequest(proxy, /* inlineSuggestionsRequest= */null),
-                cancellationSignal, new FillController(proxy), new FillCallback(proxy));
+        onFillRequest(new FillRequest(proxy, inlineSuggestionsRequest), cancellationSignal,
+                new FillController(proxy), new FillCallback(proxy));
     }
 
     private void handleOnDestroyAllFillWindowsRequest() {
@@ -481,6 +484,14 @@ public abstract class AugmentedAutofillService extends Service {
         public AutofillValue getFocusedValue() {
             synchronized (mLock) {
                 return mFocusedValue;
+            }
+        }
+
+        public void onInlineSuggestionsDataReady(@NonNull List<Dataset> inlineSuggestionsData) {
+            try {
+                mCallback.onSuccess(inlineSuggestionsData.toArray(new Dataset[]{}));
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling back with the inline suggestions data: " + e);
             }
         }
 
