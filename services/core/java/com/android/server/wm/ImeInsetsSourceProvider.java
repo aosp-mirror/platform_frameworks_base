@@ -96,8 +96,11 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
         // TODO(b/139861270): Remove the child & sublayer check once IMMS is aware of
         //  actual IME target.
         final WindowState dcTarget = mDisplayContent.mInputMethodTarget;
+        if (dcTarget == null) {
+            return false;
+        }
         return (!dcTarget.isClosing() && mImeTargetFromIme == dcTarget)
-                || (dcTarget.getParentWindow() == mImeTargetFromIme
+                || (mImeTargetFromIme != null && dcTarget.getParentWindow() == mImeTargetFromIme
                         && dcTarget.mSubLayer > mImeTargetFromIme.mSubLayer);
     }
 
