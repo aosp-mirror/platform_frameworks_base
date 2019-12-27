@@ -82,8 +82,6 @@
     <item msgid="1049450003868150455">"Audio <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
     <item msgid="2908219194098827570">"Audio <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g>"</item>
     <item msgid="3825367753087348007">"LDAC"</item>
-    <item msgid="5832677994279829983">"Attiva codec facoltativi"</item>
-    <item msgid="9205039209798344398">"Disattiva codec facoltativi"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
     <item msgid="8868109554557331312">"Usa selezione di sistema (predefinita)"</item>
@@ -92,8 +90,6 @@
     <item msgid="8627333814413492563">"Audio <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
     <item msgid="3517061573669307965">"Audio <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g>"</item>
     <item msgid="2553206901068987657">"LDAC"</item>
-    <item msgid="221347164942544028">"Attiva codec facoltativi"</item>
-    <item msgid="7416462860415701287">"Disattiva codec facoltativi"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="926809261293414607">"Usa selezione di sistema (predefinita)"</item>
@@ -150,7 +146,7 @@
     <item msgid="5001852592115448348">", attivo (telefono)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="1191094707770726722">"Off"</item>
+    <item msgid="1191094707770726722">"OFF"</item>
     <item msgid="7839165897132179888">"64 kB"</item>
     <item msgid="2715700596495505626">"256 kB"</item>
     <item msgid="7099386891713159947">"1 MB"</item>
@@ -158,13 +154,13 @@
     <item msgid="8243549501764402572">"16 MB"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
-    <item msgid="1145807928339101085">"Off"</item>
+    <item msgid="1145807928339101085">"OFF"</item>
     <item msgid="4064786181089783077">"64 kB"</item>
     <item msgid="3052710745383602630">"256 kB"</item>
     <item msgid="3691785423374588514">"1 MB"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
-    <item msgid="409235464399258501">"Off"</item>
+    <item msgid="409235464399258501">"OFF"</item>
     <item msgid="4195153527464162486">"64 kB/buffer log"</item>
     <item msgid="7464037639415220106">"256 kB/buffer log"</item>
     <item msgid="8539423820514360724">"1 MB/buffer log"</item>
@@ -172,13 +168,13 @@
     <item msgid="7892098981256010498">"16 MB/buffer log"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
-    <item msgid="704720725704372366">"Off"</item>
+    <item msgid="704720725704372366">"OFF"</item>
     <item msgid="6014837961827347618">"Tutti"</item>
     <item msgid="7387060437894578132">"Tutti tranne il segnale radio"</item>
     <item msgid="7300881231043255746">"solo kernel"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
-    <item msgid="97587758561106269">"Off"</item>
+    <item msgid="97587758561106269">"OFF"</item>
     <item msgid="7126170197336963369">"Tutti i buffer log"</item>
     <item msgid="7167543126036181392">"Tutti tranne i buffer log del segnale radio"</item>
     <item msgid="5135340178556563979">"solo buffer log kernel"</item>
@@ -231,17 +227,17 @@
     <item msgid="7345673972166571060">"Stack di chiamate su glGetError"</item>
   </string-array>
   <string-array name="show_non_rect_clip_entries">
-    <item msgid="2482978351289846212">"Off"</item>
+    <item msgid="2482978351289846212">"OFF"</item>
     <item msgid="3405519300199774027">"Area ritaglio non rettangolare blu"</item>
     <item msgid="1212561935004167943">"Evidenzia cmd disegno test in verde"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="634406443901014984">"Off"</item>
+    <item msgid="634406443901014984">"OFF"</item>
     <item msgid="1288760936356000927">"Su schermo sotto forma di barre"</item>
     <item msgid="5023908510820531131">"Tra <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="1968128556747588800">"Off"</item>
+    <item msgid="1968128556747588800">"OFF"</item>
     <item msgid="3033215374382962216">"Mostra aree overdraw"</item>
     <item msgid="3474333938380896988">"Mostra aree con deuteranomalia"</item>
   </string-array>

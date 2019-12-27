@@ -227,6 +227,7 @@
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"টেডাৰিং হাৰ্ডৱেৰ ত্বৰণ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"নামবিহীন ব্লুটুথ ডিভাইচসমূহ দেখুৱাওক"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"পূৰ্ণ মাত্ৰাৰ ভলিউম অক্ষম কৰক"</string>
+    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche সক্ষম কৰক"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ব্লুটুথ AVRCP সংস্কৰণ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ব্লুটুথ AVRCP সংস্কৰণ বাছনি কৰক"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ব্লুটুথ অডিঅ’ ক’ডেক"</string>
@@ -275,6 +276,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADTৰ যোগেৰে ইনষ্টল কৰা এপসমূহে কিবা ক্ষতিকাৰক আচৰণ কৰিছে নেকি পৰীক্ষা কৰক।"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"নামহীন ব্লুটুথ ডিভাইচসমূহ (মাত্ৰ MAC ঠিকনাযুক্ত) দেখুওৱা হ\'ব"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ৰিম\'ট ডিভাইচবিলাকৰ সৈতে ভলিউম সম্পৰ্কীয় সমস্যা, যেনেকৈ অতি উচ্চ ভলিউম বা নিয়ন্ত্ৰণ কৰিবই নোৱাৰা অৱস্থাত ব্লুটুথৰ পূৰ্ণ ভলিউম সুবিধা অক্ষম কৰে।"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"ব্লুটুথ Gabeldorche সুবিধাৰ সমষ্টিটো সক্ষম কৰে।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"স্থানীয় টাৰ্মিনেল"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"স্থানীয় শ্বেল প্ৰৱেশাধিকাৰ দিয়া টাৰ্মিনেল এপ্ সক্ষম কৰক"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP পৰীক্ষণ"</string>
@@ -379,7 +381,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"প্ৰ’টানোমালি (ৰঙা-সেউজীয়া)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ট্ৰাইটান\'মেলী (নীলা-হালধীয়া)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ৰং শুধৰণী"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"এই সুবিধাটো পৰীক্ষামূলক, সেয়ে ই কাৰ্যক্ষমতাৰ ওপৰত প্ৰভাৱ পেলাব পাৰে।"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"ৰং শুধৰণী কৰা কার্যই বর্ণান্ধলোকসকলক ৰংবোৰ অধিক সঠিককৈ দেখাত সহায় কৰে"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g>ৰ দ্বাৰা অগ্ৰাহ্য কৰা হৈছে"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"প্রায় <xliff:g id="TIME_REMAINING">%1$s</xliff:g> বাকী আছে"</string>

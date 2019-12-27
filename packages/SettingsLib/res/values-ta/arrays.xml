@@ -82,8 +82,6 @@
     <item msgid="1049450003868150455">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ஆடியோ"</item>
     <item msgid="2908219194098827570">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ஆடியோ"</item>
     <item msgid="3825367753087348007">"LDAC"</item>
-    <item msgid="5832677994279829983">"கட்டாயமில்லா கோடெக்குகளை இயக்கு"</item>
-    <item msgid="9205039209798344398">"கட்டாயமில்லா கோடெக்குகளை முடக்கு"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
     <item msgid="8868109554557331312">"சாதனத் தேர்வைப் பயன்படுத்து (இயல்பு)"</item>
@@ -92,8 +90,6 @@
     <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ஆடியோ"</item>
     <item msgid="3517061573669307965">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ஆடியோ"</item>
     <item msgid="2553206901068987657">"LDAC"</item>
-    <item msgid="221347164942544028">"கட்டாயமில்லா கோடெக்குகளை இயக்கு"</item>
-    <item msgid="7416462860415701287">"கட்டாயமில்லா கோடெக்குகளை முடக்கு"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="926809261293414607">"சாதனத் தேர்வைப் பயன்படுத்து (இயல்பு)"</item>
