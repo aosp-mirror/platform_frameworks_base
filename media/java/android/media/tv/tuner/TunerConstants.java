@@ -536,21 +536,6 @@ final class TunerConstants {
     public static final int SPECTRAL_INVERSION_INVERTED =
             Constants.FrontendDvbcSpectralInversion.INVERTED;
 
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({LNB_VOLTAGE_NONE, LNB_VOLTAGE_VOLTAGE_5V, LNB_VOLTAGE_VOLTAGE_11V,
-            LNB_VOLTAGE_VOLTAGE_12V, LNB_VOLTAGE_VOLTAGE_13V, LNB_VOLTAGE_VOLTAGE_14V,
-            LNB_VOLTAGE_VOLTAGE_15V, LNB_VOLTAGE_VOLTAGE_18V})
-    public @interface LnbVoltage {}
-
-    public static final int LNB_VOLTAGE_NONE = Constants.LnbVoltage.NONE;
-    public static final int LNB_VOLTAGE_VOLTAGE_5V = Constants.LnbVoltage.VOLTAGE_5V;
-    public static final int LNB_VOLTAGE_VOLTAGE_11V = Constants.LnbVoltage.VOLTAGE_11V;
-    public static final int LNB_VOLTAGE_VOLTAGE_12V = Constants.LnbVoltage.VOLTAGE_12V;
-    public static final int LNB_VOLTAGE_VOLTAGE_13V = Constants.LnbVoltage.VOLTAGE_13V;
-    public static final int LNB_VOLTAGE_VOLTAGE_14V = Constants.LnbVoltage.VOLTAGE_14V;
-    public static final int LNB_VOLTAGE_VOLTAGE_15V = Constants.LnbVoltage.VOLTAGE_15V;
-    public static final int LNB_VOLTAGE_VOLTAGE_18V = Constants.LnbVoltage.VOLTAGE_18V;
-
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({HIERARCHY_UNDEFINED, HIERARCHY_AUTO, HIERARCHY_NON_NATIVE, HIERARCHY_1_NATIVE,
@@ -592,6 +577,38 @@ final class TunerConstants {
 
     public static final int DVR_SETTINGS_RECORD = Constants.DvrType.RECORD;
     public static final int DVR_SETTINGS_PLAYBACK = Constants.DvrType.PLAYBACK;
+
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({LNB_VOLTAGE_NONE, LNB_VOLTAGE_5V, LNB_VOLTAGE_11V, LNB_VOLTAGE_12V, LNB_VOLTAGE_13V,
+            LNB_VOLTAGE_14V, LNB_VOLTAGE_15V, LNB_VOLTAGE_18V, LNB_VOLTAGE_19V})
+    public @interface LnbVoltage {}
+
+    public static final int LNB_VOLTAGE_NONE = Constants.LnbVoltage.NONE;
+    public static final int LNB_VOLTAGE_5V = Constants.LnbVoltage.VOLTAGE_5V;
+    public static final int LNB_VOLTAGE_11V = Constants.LnbVoltage.VOLTAGE_11V;
+    public static final int LNB_VOLTAGE_12V = Constants.LnbVoltage.VOLTAGE_12V;
+    public static final int LNB_VOLTAGE_13V = Constants.LnbVoltage.VOLTAGE_13V;
+    public static final int LNB_VOLTAGE_14V = Constants.LnbVoltage.VOLTAGE_14V;
+    public static final int LNB_VOLTAGE_15V = Constants.LnbVoltage.VOLTAGE_15V;
+    public static final int LNB_VOLTAGE_18V = Constants.LnbVoltage.VOLTAGE_18V;
+    public static final int LNB_VOLTAGE_19V = Constants.LnbVoltage.VOLTAGE_19V;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({LNB_TONE_NONE, LNB_TONE_CONTINUOUS})
+    public @interface LnbTone {}
+
+    public static final int LNB_TONE_NONE = Constants.LnbTone.NONE;
+    public static final int LNB_TONE_CONTINUOUS = Constants.LnbTone.CONTINUOUS;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({LNB_POSITION_UNDEFINED, LNB_POSITION_A, LNB_POSITION_B})
+    public @interface LnbPosition {}
+
+    public static final int LNB_POSITION_UNDEFINED = Constants.LnbPosition.UNDEFINED;
+    public static final int LNB_POSITION_A = Constants.LnbPosition.POSITION_A;
+    public static final int LNB_POSITION_B = Constants.LnbPosition.POSITION_B;
+
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({RESULT_SUCCESS, RESULT_UNAVAILABLE, RESULT_NOT_INITIALIZED, RESULT_INVALID_STATE,
