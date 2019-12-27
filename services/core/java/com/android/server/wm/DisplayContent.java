@@ -2500,10 +2500,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @param inOutRegion The region to be amended.
      */
     private void amendWindowTapExcludeRegion(Region inOutRegion) {
+        final Region region = Region.obtain();
         for (int i = mTapExcludeProvidingWindows.size() - 1; i >= 0; i--) {
             final WindowState win = mTapExcludeProvidingWindows.valueAt(i);
-            win.amendTapExcludeRegion(inOutRegion);
+            win.getTapExcludeRegion(region);
+            inOutRegion.op(region, Op.UNION);
         }
+        region.recycle();
     }
 
     @Override
