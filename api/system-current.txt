@@ -4366,6 +4366,8 @@ package android.net {
   public final class NetworkCapabilities implements android.os.Parcelable {
     method @NonNull public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
+    method @NonNull public android.net.NetworkCapabilities setSSID(@Nullable String);
+    method @NonNull public android.net.NetworkCapabilities setTransportInfo(@NonNull android.net.TransportInfo);
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
     field public static final int NET_CAPABILITY_PARTIAL_CONNECTIVITY = 24; // 0x18
   }
