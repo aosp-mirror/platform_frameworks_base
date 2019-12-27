@@ -110,6 +110,10 @@ public final class Tuner implements AutoCloseable  {
     private native int nativeSetLnb(int lnbId);
     private native int nativeSetLna(boolean enable);
     private native FrontendStatus[] nativeGetFrontendStatus(int[] statusTypes);
+    private native int nativeGetAvSyncHwId(Filter filter);
+    private native long nativeGetAvSyncTime(int avSyncId);
+    private native int nativeConnectCiCam(int ciCamId);
+    private native int nativeDisconnectCiCam();
     private native Filter nativeOpenFilter(int type, int subType, int bufferSize);
 
     private native List<Integer> nativeGetLnbIds();
@@ -349,6 +353,59 @@ public final class Tuner implements AutoCloseable  {
      */
     public FrontendStatus[] getFrontendStatus(int[] statusTypes) {
         return nativeGetFrontendStatus(statusTypes);
+    }
+
+    /**
+     * Gets hardware sync ID for audio and video.
+     *
+     * @param filter the filter instance for the hardware sync ID.
+     * @return the id of hardware A/V sync.
+     * @hide
+     */
+    public int getAvSyncHwId(Filter filter) {
+        return nativeGetAvSyncHwId(filter);
+    }
+    /**
+     * Gets the current timestamp for A/V sync
+     *
+     * The timestamp is maintained by hardware. The timestamp based on 90KHz, and it's format is the
+     * same as PTS (Presentation Time Stamp).
+     *
+     * @param avSyncHwId the hardware id of A/V sync.
+     * @return the current timestamp of hardware A/V sync.
+     * @hide
+     */
+    public long getAvSyncTime(int avSyncHwId) {
+        return nativeGetAvSyncTime(avSyncHwId);
+    }
+
+
+    /**
+     * Connects Conditional Access Modules (CAM) through Common Interface (CI)
+     *
+     * The demux uses the output from the frontend as the input by default, and must change to use
+     * the output from CI-CAM as the input after this call.
+     *
+     * @param ciCamId specify CI-CAM Id to connect.
+     * @return result status of the operation.
+     * @hide
+     */
+    @Result
+    public int connectCiCam(int ciCamId) {
+        return nativeConnectCiCam(ciCamId);
+    }
+
+    /**
+     * Disconnects Conditional Access Modules (CAM)
+     *
+     * The demux will use the output from the frontend as the input after this call.
+     *
+     * @return result status of the operation.
+     * @hide
+     */
+    @Result
+    public int disconnectCiCam() {
+        return nativeDisconnectCiCam();
     }
 
     private List<Integer> getFrontendIds() {

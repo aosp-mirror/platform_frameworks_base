@@ -636,6 +636,22 @@ static jobjectArray android_media_tv_Tuner_get_frontend_status(JNIEnv, jobject, 
     return NULL;
 }
 
+static int android_media_tv_Tuner_gat_av_sync_hw_id(JNIEnv*, jobject, jobject) {
+    return 0;
+}
+
+static jlong android_media_tv_Tuner_gat_av_sync_time(JNIEnv*, jobject, jint) {
+    return 0;
+}
+
+static int android_media_tv_Tuner_connect_cicam(JNIEnv*, jobject, jint) {
+    return 0;
+}
+
+static int android_media_tv_Tuner_disconnect_cicam(JNIEnv*, jobject) {
+    return 0;
+}
+
 static jobject android_media_tv_Tuner_get_lnb_ids(JNIEnv *env, jobject thiz) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->getLnbIds();
@@ -944,6 +960,11 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeSetLna", "(Z)I", (void *)android_media_tv_Tuner_set_lna },
     { "nativeGetFrontendStatus", "([I)[Landroid/media/tv/tuner/FrontendStatus;",
             (void *)android_media_tv_Tuner_get_frontend_status },
+    { "nativeGetAvSyncHwId", "(Landroid/media/tv/tuner/Tuner$Filter;)I",
+            (void *)android_media_tv_Tuner_gat_av_sync_hw_id },
+    { "nativeGetAvSyncTime", "(I)J", (void *)android_media_tv_Tuner_gat_av_sync_time },
+    { "nativeConnectCiCam", "(I)I", (void *)android_media_tv_Tuner_connect_cicam },
+    { "nativeDisconnectCiCam", "()I", (void *)android_media_tv_Tuner_disconnect_cicam },
     { "nativeOpenFilter", "(III)Landroid/media/tv/tuner/Tuner$Filter;",
             (void *)android_media_tv_Tuner_open_filter },
     { "nativeGetLnbIds", "()Ljava/util/List;",
