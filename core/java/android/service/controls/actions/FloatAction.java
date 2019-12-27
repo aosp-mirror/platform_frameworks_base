@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package android.service.controls;
+package android.service.controls.actions;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.service.controls.templates.RangeTemplate;
+import android.service.controls.templates.ToggleRangeTemplate;
 
 /**
- * Action sent by a {@link RangeTemplate}.
+ * Action sent by a {@link RangeTemplate}, {@link ToggleRangeTemplate}.
  * @hide
  */
 public final class FloatAction extends ControlAction {
 
+    private static final @ActionType int TYPE = TYPE_FLOAT;
     private static final String KEY_NEW_VALUE = "key_new_value";
 
     private final float mNewValue;
@@ -70,7 +73,7 @@ public final class FloatAction extends ControlAction {
      */
     @Override
     public int getActionType() {
-        return TYPE_FLOAT;
+        return TYPE;
     }
 
     @Override
@@ -83,6 +86,8 @@ public final class FloatAction extends ControlAction {
     public static final @NonNull Creator<FloatAction> CREATOR = new Creator<FloatAction>() {
         @Override
         public FloatAction createFromParcel(Parcel source) {
+            int type = source.readInt();
+            verifyType(type, TYPE);
             return new FloatAction(source.readBundle());
         }
 

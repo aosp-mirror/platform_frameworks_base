@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package android.service.controls;
+package android.service.controls.templates;
 
 import android.annotation.NonNull;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.service.controls.Control;
+import android.service.controls.actions.BooleanAction;
 
 import com.android.internal.util.Preconditions;
 
@@ -35,11 +37,12 @@ import com.android.internal.util.Preconditions;
  */
 public class DiscreteToggleTemplate extends ControlTemplate {
 
+    private static final @TemplateType int TYPE = TYPE_DISCRETE_TOGGLE;
     private static final String KEY_NEGATIVE_BUTTON = "key_negative_button";
     private static final String KEY_POSITIVE_BUTTON = "key_positive_button";
 
-    private final @NonNull ControlButton mNegativeButton;
     private final @NonNull ControlButton mPositiveButton;
+    private final @NonNull ControlButton mNegativeButton;
 
     /**
      * @param templateId the identifier for this template object
@@ -83,7 +86,7 @@ public class DiscreteToggleTemplate extends ControlTemplate {
      */
     @Override
     public int getTemplateType() {
-        return TYPE_DISCRETE_TOGGLE;
+        return TYPE;
     }
 
 
@@ -95,8 +98,8 @@ public class DiscreteToggleTemplate extends ControlTemplate {
     @Override
     protected Bundle getDataBundle() {
         Bundle b = super.getDataBundle();
-        b.putObject(KEY_NEGATIVE_BUTTON, mNegativeButton);
-        b.putObject(KEY_POSITIVE_BUTTON, mPositiveButton);
+        b.putParcelable(KEY_NEGATIVE_BUTTON, mNegativeButton);
+        b.putParcelable(KEY_POSITIVE_BUTTON, mPositiveButton);
         return b;
     }
 
@@ -104,6 +107,8 @@ public class DiscreteToggleTemplate extends ControlTemplate {
             new Creator<DiscreteToggleTemplate>() {
                 @Override
                 public DiscreteToggleTemplate createFromParcel(Parcel source) {
+                    int type = source.readInt();
+                    verifyType(type, TYPE);
                     return new DiscreteToggleTemplate(source.readBundle());
                 }
 

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package android.service.controls;
+package android.service.controls.templates;
 
 import android.annotation.NonNull;
-import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,24 +26,20 @@ import com.android.internal.util.Preconditions;
  * Button element for {@link ControlTemplate}.
  * @hide
  */
-public class ControlButton implements Parcelable {
+public final class ControlButton implements Parcelable {
 
     private final boolean mChecked;
-    private final @NonNull Icon mIcon;
-    private final @NonNull CharSequence mContentDescription;
+    private final @NonNull CharSequence mActionDescription;
 
     /**
      * @param checked true if the button should be rendered as active.
-     * @param icon icon to display in the button.
-     * @param contentDescription content description for the button.
+     * @param actionDescription action description for the button.
      */
-    public ControlButton(boolean checked, @NonNull Icon icon,
-            @NonNull CharSequence contentDescription) {
-        Preconditions.checkNotNull(icon);
-        Preconditions.checkNotNull(contentDescription);
+    public ControlButton(boolean checked,
+            @NonNull CharSequence actionDescription) {
+        Preconditions.checkNotNull(actionDescription);
         mChecked = checked;
-        mIcon = icon;
-        mContentDescription = contentDescription;
+        mActionDescription = actionDescription;
     }
 
     /**
@@ -55,19 +50,11 @@ public class ControlButton implements Parcelable {
     }
 
     /**
-     * The icon for this button.
-     */
-    @NonNull
-    public Icon getIcon() {
-        return mIcon;
-    }
-
-    /**
      * The content description for this button.
      */
     @NonNull
-    public CharSequence getContentDescription() {
-        return mContentDescription;
+    public CharSequence getActionDescription() {
+        return mActionDescription;
     }
 
 
@@ -79,14 +66,12 @@ public class ControlButton implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByte(mChecked ? (byte) 1 : (byte) 0);
-        mIcon.writeToParcel(dest, flags);
-        dest.writeCharSequence(mContentDescription);
+        dest.writeCharSequence(mActionDescription);
     }
 
     ControlButton(Parcel in) {
         mChecked = in.readByte() != 0;
-        mIcon = Icon.CREATOR.createFromParcel(in);
-        mContentDescription = in.readCharSequence();
+        mActionDescription = in.readCharSequence();
     }
 
     public static final Creator<ControlButton> CREATOR = new Creator<ControlButton>() {

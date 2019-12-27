@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package android.service.controls;
+package android.service.controls.templates;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Parcel;
-
-import java.security.InvalidParameterException;
+import android.service.controls.Control;
+import android.service.controls.ControlState;
+import android.service.controls.actions.FloatAction;
 
 /**
  * A template for a {@link Control} with inputs in a "continuous" range of values.
@@ -31,6 +32,7 @@ import java.security.InvalidParameterException;
  */
 public final class RangeTemplate extends ControlTemplate {
 
+    private static final @TemplateType int TYPE = TYPE_RANGE;
     private static final String KEY_MIN_VALUE = "key_min_value";
     private static final String KEY_MAX_VALUE = "key_max_value";
     private static final String KEY_CURRENT_VALUE = "key_current_value";
@@ -63,7 +65,7 @@ public final class RangeTemplate extends ControlTemplate {
      * @param stepValue minimum value of increments/decrements when interacting with this control.
      * @param formatString a formatting string as per {@link String#format} used to display the
      *                    {@code currentValue}. If {@code null} is passed, the "%.1f" is used.
-     * @throws InvalidParameterException if the parameters passed do not make a valid range.
+     * @throws IllegalArgumentException if the parameters passed do not make a valid range.
      */
     public RangeTemplate(@NonNull String templateId,
             float minValue,
@@ -87,7 +89,7 @@ public final class RangeTemplate extends ControlTemplate {
     /**
      * Construct a new {@link RangeTemplate} from a {@link Parcel}.
      *
-     * @throws InvalidParameterException if the parameters passed do not make a valid range
+     * @throws IllegalArgumentException if the parameters passed do not make a valid range
      * @see RangeTemplate#RangeTemplate(String, float, float, float, float, CharSequence)
      * @hide
      */
@@ -144,7 +146,7 @@ public final class RangeTemplate extends ControlTemplate {
      */
     @Override
     public int getTemplateType() {
-        return TYPE_RANGE;
+        return TYPE;
     }
 
     @Override
@@ -161,29 +163,31 @@ public final class RangeTemplate extends ControlTemplate {
     /**
      * Validate constructor parameters
      *
-     * @throws InvalidParameterException if the parameters passed do not make a valid range
+     * @throws IllegalArgumentException if the parameters passed do not make a valid range
      */
     private void validate() {
         if (Float.compare(mMinValue, mMaxValue) > 0) {
-            throw new InvalidParameterException(
+            throw new IllegalArgumentException(
                     String.format("minValue=%f > maxValue=%f", mMinValue, mMaxValue));
         }
         if (Float.compare(mMinValue, mCurrentValue) > 0) {
-            throw new InvalidParameterException(
+            throw new IllegalArgumentException(
                     String.format("minValue=%f > currentValue=%f", mMinValue, mCurrentValue));
         }
         if (Float.compare(mCurrentValue, mMaxValue) > 0) {
-            throw new InvalidParameterException(
+            throw new IllegalArgumentException(
                     String.format("currentValue=%f > maxValue=%f", mCurrentValue, mMaxValue));
         }
         if (mStepValue <= 0) {
-            throw new InvalidParameterException(String.format("stepValue=%f <= 0", mStepValue));
+            throw new IllegalArgumentException(String.format("stepValue=%f <= 0", mStepValue));
         }
     }
 
     public static final Creator<RangeTemplate> CREATOR = new Creator<RangeTemplate>() {
         @Override
         public RangeTemplate createFromParcel(Parcel source) {
+            int type = source.readInt();
+            verifyType(type, TYPE);
             return new RangeTemplate(source.readBundle());
         }
 

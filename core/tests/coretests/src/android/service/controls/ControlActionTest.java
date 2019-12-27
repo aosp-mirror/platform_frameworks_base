@@ -22,6 +22,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import android.os.Parcel;
+import android.service.controls.actions.BooleanAction;
+import android.service.controls.actions.CommandAction;
+import android.service.controls.actions.ControlAction;
+import android.service.controls.actions.FloatAction;
+import android.service.controls.actions.ModeAction;
+import android.service.controls.actions.MultiFloatAction;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -53,6 +59,36 @@ public class ControlActionTest {
 
         assertEquals(ControlAction.TYPE_FLOAT, fromParcel.getActionType());
         assertTrue(fromParcel instanceof FloatAction);
+    }
+
+    @Test
+    public void testUnparcelingCorrectClass_multiFloat() {
+        ControlAction toParcel = new MultiFloatAction(TEST_ID, new float[] {0f, 1f});
+
+        ControlAction fromParcel = parcelAndUnparcel(toParcel);
+
+        assertEquals(ControlAction.TYPE_MULTI_FLOAT, fromParcel.getActionType());
+        assertTrue(fromParcel instanceof MultiFloatAction);
+    }
+
+    @Test
+    public void testUnparcelingCorrectClass_mode() {
+        ControlAction toParcel = new ModeAction(TEST_ID, 1);
+
+        ControlAction fromParcel = parcelAndUnparcel(toParcel);
+
+        assertEquals(ControlAction.TYPE_MODE, fromParcel.getActionType());
+        assertTrue(fromParcel instanceof ModeAction);
+    }
+
+    @Test
+    public void testUnparcelingCorrectClass_command() {
+        ControlAction toParcel = new CommandAction(TEST_ID);
+
+        ControlAction fromParcel = parcelAndUnparcel(toParcel);
+
+        assertEquals(ControlAction.TYPE_COMMAND, fromParcel.getActionType());
+        assertTrue(fromParcel instanceof CommandAction);
     }
 
     private ControlAction parcelAndUnparcel(ControlAction toParcel) {
