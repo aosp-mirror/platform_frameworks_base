@@ -450,9 +450,6 @@ public class InputMethodService extends AbstractInputMethodService {
     @Nullable
     private InlineSuggestionsRequestInfo mInlineSuggestionsRequestInfo = null;
 
-    @Nullable
-    private InlineSuggestionsResponseCallbackImpl mInlineSuggestionsResponseCallback = null;
-
     private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
 
     final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer = info -> {
@@ -752,14 +749,12 @@ public class InputMethodService extends AbstractInputMethodService {
                 Log.w(TAG, "onCreateInlineSuggestionsRequest() returned null request");
                 requestCallback.onInlineSuggestionsUnsupported();
             } else {
-                if (mInlineSuggestionsResponseCallback == null) {
-                    mInlineSuggestionsResponseCallback =
-                            new InlineSuggestionsResponseCallbackImpl(this,
-                                    mInlineSuggestionsRequestInfo.mComponentName,
-                                    mInlineSuggestionsRequestInfo.mFocusedId);
-                }
+                final IInlineSuggestionsResponseCallback inlineSuggestionsResponseCallback =
+                        new InlineSuggestionsResponseCallbackImpl(this,
+                                mInlineSuggestionsRequestInfo.mComponentName,
+                                mInlineSuggestionsRequestInfo.mFocusedId);
                 requestCallback.onInlineSuggestionsRequest(request,
-                        mInlineSuggestionsResponseCallback);
+                        inlineSuggestionsResponseCallback);
             }
         } catch (RemoteException e) {
             Log.w(TAG, "makeInlinedSuggestionsRequest() remote exception:" + e);
