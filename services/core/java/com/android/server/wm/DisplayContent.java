@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
@@ -6032,6 +6033,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         if (!supportsMultiWindow) {
             return false;
+        }
+
+        if (windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
+            return true;
         }
 
         final int displayWindowingMode = getWindowingMode();

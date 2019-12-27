@@ -28,6 +28,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
@@ -1979,7 +1980,9 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             return false;
         }
         final int windowingMode = getWindowingMode();
-        return windowingMode != WINDOWING_MODE_FREEFORM && windowingMode != WINDOWING_MODE_PINNED;
+        return windowingMode != WINDOWING_MODE_FREEFORM
+                && windowingMode != WINDOWING_MODE_PINNED
+                && windowingMode != WINDOWING_MODE_MULTI_WINDOW;
     }
 
     /**

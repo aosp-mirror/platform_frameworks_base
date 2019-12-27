@@ -50,7 +50,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /**
      * bounds that can differ from app bounds, which may include things such as insets.
      *
-     * TODO: Investigate combining with {@link mAppBounds}. Can the latter be a product of the
+     * TODO: Investigate combining with {@link #mAppBounds}. Can the latter be a product of the
      * former?
      */
     private Rect mBounds = new Rect();
@@ -87,6 +87,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** Always on-top (always visible). of other siblings in its parent container. */
     public static final int WINDOWING_MODE_PINNED = 2;
     /** The primary container driving the screen to be in split-screen mode. */
+    // TODO: Remove once split-screen is migrated to wm-shell.
     public static final int WINDOWING_MODE_SPLIT_SCREEN_PRIMARY = 3;
     /**
      * The containers adjacent to the {@link #WINDOWING_MODE_SPLIT_SCREEN_PRIMARY} container in
@@ -97,6 +98,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * mode
      * @see #WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY
      */
+    // TODO: Remove once split-screen is migrated to wm-shell.
     public static final int WINDOWING_MODE_SPLIT_SCREEN_SECONDARY = 4;
     /**
      * Alias for {@link #WINDOWING_MODE_SPLIT_SCREEN_SECONDARY} that makes it clear that the usage
@@ -104,15 +106,20 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * will launch into fullscreen or split-screen secondary depending on if the device is currently
      * in fullscreen mode or split-screen mode.
      */
+    // TODO: Remove once split-screen is migrated to wm-shell.
     public static final int WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY =
             WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
     /** Can be freely resized within its parent container. */
+    // TODO: Remove once freeform is migrated to wm-shell.
     public static final int WINDOWING_MODE_FREEFORM = 5;
+    /** Generic multi-window with no presentation attribution from the window manager. */
+    public static final int WINDOWING_MODE_MULTI_WINDOW = 6;
 
     /** @hide */
     @IntDef(prefix = { "WINDOWING_MODE_" }, value = {
             WINDOWING_MODE_UNDEFINED,
             WINDOWING_MODE_FULLSCREEN,
+            WINDOWING_MODE_MULTI_WINDOW,
             WINDOWING_MODE_PINNED,
             WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
             WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
@@ -669,7 +676,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * @hide
      */
     public boolean hasWindowShadow() {
-        return tasksAreFloating();
+        return mWindowingMode != WINDOWING_MODE_MULTI_WINDOW && tasksAreFloating();
     }
 
     /**
@@ -688,7 +695,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * @hide
      */
     public boolean canResizeTask() {
-        return mWindowingMode == WINDOWING_MODE_FREEFORM;
+        return mWindowingMode == WINDOWING_MODE_FREEFORM
+                || mWindowingMode == WINDOWING_MODE_MULTI_WINDOW;
     }
 
     /** Returns true if the task bounds should persist across power cycles.
@@ -738,8 +746,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * @hide
      */
     public boolean isAlwaysOnTop() {
-        return mWindowingMode == WINDOWING_MODE_PINNED
-                || (mWindowingMode == WINDOWING_MODE_FREEFORM && mAlwaysOnTop == ALWAYS_ON_TOP_ON);
+        return mWindowingMode == WINDOWING_MODE_PINNED || (mAlwaysOnTop == ALWAYS_ON_TOP_ON
+                && (mWindowingMode == WINDOWING_MODE_FREEFORM
+                    || mWindowingMode == WINDOWING_MODE_MULTI_WINDOW));
     }
 
     /**
@@ -797,6 +806,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         switch (windowingMode) {
             case WINDOWING_MODE_UNDEFINED: return "undefined";
             case WINDOWING_MODE_FULLSCREEN: return "fullscreen";
+            case WINDOWING_MODE_MULTI_WINDOW: return "multi-window";
             case WINDOWING_MODE_PINNED: return "pinned";
             case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY: return "split-screen-primary";
             case WINDOWING_MODE_SPLIT_SCREEN_SECONDARY: return "split-screen-secondary";
