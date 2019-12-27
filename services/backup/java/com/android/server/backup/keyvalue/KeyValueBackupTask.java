@@ -57,7 +57,6 @@ import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.KeyValueBackupJob;
-import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
 import com.android.server.backup.internal.OnTaskFinishedListener;
@@ -233,7 +232,6 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
     private final UserBackupManagerService mBackupManagerService;
     private final PackageManager mPackageManager;
-    private final TransportManager mTransportManager;
     private final TransportClient mTransportClient;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final KeyValueBackupReporter mReporter;
@@ -300,7 +298,6 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             boolean userInitiated,
             boolean nonIncremental) {
         mBackupManagerService = backupManagerService;
-        mTransportManager = backupManagerService.getTransportManager();
         mPackageManager = backupManagerService.getPackageManager();
         mTransportClient = transportClient;
         mOriginalQueue = queue;
