@@ -16,37 +16,28 @@
 ** limitations under the License.
 */
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:minWidth="80dp"
-              android:gravity="center"
-              android:paddingTop="8dp"
-              android:paddingBottom="8dp"
-              android:background="?attr/selectableItemBackgroundBorderless">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:paddingBottom="12dp"
+    android:paddingEnd="16dp"
+    android:paddingStart="16dp"
+    android:paddingTop="12dp">
 
-    <ImageView android:id="@+id/accessibility_button_target_icon"
-               android:layout_width="48dp"
-               android:layout_height="48dp"
-               android:layout_marginLeft="3dp"
-               android:layout_marginRight="3dp"
-               android:layout_marginBottom="3dp"
-               android:scaleType="fitCenter"/>
+    <ImageView
+        android:id="@+id/accessibility_button_target_icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:scaleType="fitCenter"/>
 
-    <TextView android:id="@+id/accessibility_button_target_label"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginTop="8dp"
-              android:layout_marginLeft="4dp"
-              android:layout_marginRight="4dp"
-              android:textAppearance="?attr/textAppearanceSmall"
-              android:textColor="?attr/textColorPrimary"
-              android:textSize="12sp"
-              android:fontFamily="sans-serif-condensed"
-              android:gravity="top|center_horizontal"
-              android:minLines="2"
-              android:maxLines="2"
-              android:ellipsize="marquee"/>
+    <TextView
+        android:id="@+id/accessibility_button_target_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:textColor="?attr/textColorPrimary"/>
 </LinearLayout>
 
