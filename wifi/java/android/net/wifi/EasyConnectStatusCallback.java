@@ -28,29 +28,27 @@ import java.util.concurrent.Executor;
 
 /**
  * Easy Connect (DPP) Status Callback. Use this callback to get status updates (success, failure,
- * progress) from the Easy Connect operation started with
- * {@link WifiManager#startEasyConnectAsConfiguratorInitiator(String, int, int, Executor,
- * EasyConnectStatusCallback)} or {@link WifiManager#startEasyConnectAsEnrolleeInitiator(String,
- * Executor, EasyConnectStatusCallback)}
- *
- * @hide
+ * progress) from the Easy Connect operations.
  */
-@SystemApi
 public abstract class EasyConnectStatusCallback {
     /**
      * Easy Connect R1 Success event: Configuration sent (Configurator mode). This is the last
      * and final Easy Connect event when either the local device or remote device implement R1.
      * If both devices implement R2, this event will never be received, and the
-     * {@link EASY_CONNECT_EVENT_SUCCESS_CONFIGURATION_APPLIED} will be received.
+     * {@link #EASY_CONNECT_EVENT_SUCCESS_CONFIGURATION_APPLIED} will be received.
+     * @hide
      */
+    @SystemApi
     public static final int EASY_CONNECT_EVENT_SUCCESS_CONFIGURATION_SENT = 0;
 
     /**
      * East Connect R2 Success event: Configuration applied by Enrollee (Configurator mode).
      * This is the last and final Easy Connect event when both the local device and remote device
      * implement R2. If either the local device or remote device implement R1, this event will never
-     * be received, and the {@link EASY_CONNECT_EVENT_SUCCESS_CONFIGURATION_SENT} will be received.
+     * be received, and the {@link #EASY_CONNECT_EVENT_SUCCESS_CONFIGURATION_SENT} will be received.
+     * @hide
      */
+    @SystemApi
     public static final int EASY_CONNECT_EVENT_SUCCESS_CONFIGURATION_APPLIED = 1;
 
     /** @hide */
@@ -64,22 +62,30 @@ public abstract class EasyConnectStatusCallback {
 
     /**
      * Easy Connect Progress event: Initial authentication with peer succeeded.
+     * @hide
      */
+    @SystemApi
     public static final int EASY_CONNECT_EVENT_PROGRESS_AUTHENTICATION_SUCCESS = 0;
 
     /**
      * Easy Connect Progress event: Peer requires more time to process bootstrapping.
+     * @hide
      */
+    @SystemApi
     public static final int EASY_CONNECT_EVENT_PROGRESS_RESPONSE_PENDING = 1;
 
     /**
      * Easy Connect R2 Progress event: Configuration sent to Enrollee, waiting for response
+     * @hide
      */
+    @SystemApi
     public static final int EASY_CONNECT_EVENT_PROGRESS_CONFIGURATION_SENT_WAITING_RESPONSE = 2;
 
     /**
      * Easy Connect R2 Progress event: Configuration accepted by Enrollee, waiting for response
+     * @hide
      */
+    @SystemApi
     public static final int EASY_CONNECT_EVENT_PROGRESS_CONFIGURATION_ACCEPTED = 3;
 
     /** @hide */
@@ -174,6 +180,12 @@ public abstract class EasyConnectStatusCallback {
     public @interface EasyConnectFailureStatusCode {
     }
 
+    /** @hide */
+    @SystemApi
+    public EasyConnectStatusCallback() {
+        // Fully-static utility classes must not have constructor
+    }
+
     /**
      * Called when local Easy Connect Enrollee successfully receives a new Wi-Fi configuration from
      * the
@@ -185,7 +197,9 @@ public abstract class EasyConnectStatusCallback {
      * EasyConnectStatusCallback)} .
      *
      * @param newNetworkId New Wi-Fi configuration with a network ID received from the configurator
+     * @hide
      */
+    @SystemApi
     public abstract void onEnrolleeSuccess(int newNetworkId);
 
     /**
@@ -197,7 +211,9 @@ public abstract class EasyConnectStatusCallback {
      * int, Executor,EasyConnectStatusCallback)}.
      *
      * @param code Easy Connect success status code.
+     * @hide
      */
+    @SystemApi
     public abstract void onConfiguratorSuccess(@EasyConnectSuccessStatusCode int code);
 
     /**
@@ -205,7 +221,9 @@ public abstract class EasyConnectStatusCallback {
      * end of the current Easy Connect session, and no further callbacks will be called.
      *
      * @param code Easy Connect failure status code.
+     * @hide
      */
+    @SystemApi
     public void onFailure(@EasyConnectFailureStatusCode int code) {}
 
     /**
@@ -227,7 +245,9 @@ public abstract class EasyConnectStatusCallback {
      * @param operatingClassArray Array of bands the Enrollee supports as expressed as the Global
      *                            Operating Class, see Table E-4 in IEEE Std 802.11-2016 - Global
      *                            operating classes.
+     * @hide
      */
+    @SystemApi
     public void onFailure(@EasyConnectFailureStatusCode int code, @Nullable String ssid,
             @NonNull SparseArray<int[]> channelListArray, @NonNull int[] operatingClassArray) {
         onFailure(code);
@@ -238,6 +258,8 @@ public abstract class EasyConnectStatusCallback {
      * to show progress.
      *
      * @param code Easy Connect progress status code.
+     * @hide
      */
+    @SystemApi
     public abstract void onProgress(@EasyConnectProgressStatusCode int code);
 }

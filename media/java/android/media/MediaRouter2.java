@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
@@ -46,6 +47,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A new Media Router
@@ -98,7 +100,10 @@ public class MediaRouter2 {
     private final Context mContext;
     private final IMediaRouterService mMediaRouterService;
 
-    private final CopyOnWriteArrayList<CallbackRecord> mCallbackRecords =
+    private final CopyOnWriteArrayList<RouteCallbackRecord> mRouteCallbackRecords =
+            new CopyOnWriteArrayList<>();
+
+    private final CopyOnWriteArrayList<SessionCreationRequest> mSessionCreationRequests =
             new CopyOnWriteArrayList<>();
 
     private final String mPackageName;
@@ -108,11 +113,11 @@ public class MediaRouter2 {
     @GuardedBy("sLock")
     private List<String> mControlCategories = Collections.emptyList();
 
-    private MediaRoute2Info mSelectedRoute;
-    @GuardedBy("sLock")
-    private MediaRoute2Info mSelectingRoute;
+    // TODO: Make MediaRouter2 is always connected to the MediaRouterService.
     @GuardedBy("sLock")
     private Client2 mClient;
+
+    private AtomicInteger mSessionCreationRequestCnt = new AtomicInteger(1);
 
     final Handler mHandler;
     @GuardedBy("sLock")
@@ -154,18 +159,14 @@ public class MediaRouter2 {
         for (MediaRoute2Info route : currentSystemRoutes) {
             mRoutes.put(route.getId(), route);
         }
-        // The first route is the currently selected system route.
-        // For example, if there are two system routes (BT and device speaker),
-        // BT will be the first route in the list.
-        mSelectedRoute = currentSystemRoutes.get(0);
     }
 
     /**
      * Registers a callback to discover routes and to receive events when they change.
      */
     public void registerCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull Callback callback) {
-        registerCallback(executor, callback, 0);
+            @NonNull RouteCallback routeCallback) {
+        registerCallback(executor, routeCallback, 0);
     }
 
     /**
@@ -175,12 +176,12 @@ public class MediaRouter2 {
      * </p>
      */
     public void registerCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull Callback callback, int flags) {
+            @NonNull RouteCallback routeCallback, int flags) {
         Objects.requireNonNull(executor, "executor must not be null");
-        Objects.requireNonNull(callback, "callback must not be null");
+        Objects.requireNonNull(routeCallback, "callback must not be null");
 
-        CallbackRecord record = new CallbackRecord(callback, executor, flags);
-        if (!mCallbackRecords.addIfAbsent(record)) {
+        RouteCallbackRecord record = new RouteCallbackRecord(executor, routeCallback, flags);
+        if (!mRouteCallbackRecords.addIfAbsent(record)) {
             Log.w(TAG, "Ignoring the same callback");
             return;
         }
@@ -205,19 +206,20 @@ public class MediaRouter2 {
      * Unregisters the given callback. The callback will no longer receive events.
      * If the callback has not been added or been removed already, it is ignored.
      *
-     * @param callback the callback to unregister
+     * @param routeCallback the callback to unregister
      * @see #registerCallback
      */
-    public void unregisterCallback(@NonNull Callback callback) {
-        Objects.requireNonNull(callback, "callback must not be null");
+    public void unregisterCallback(@NonNull RouteCallback routeCallback) {
+        Objects.requireNonNull(routeCallback, "callback must not be null");
 
-        if (!mCallbackRecords.remove(new CallbackRecord(callback, null, 0))) {
+        if (!mRouteCallbackRecords.remove(
+                new RouteCallbackRecord(null, routeCallback, 0))) {
             Log.w(TAG, "Ignoring unknown callback");
             return;
         }
 
         synchronized (sLock) {
-            if (mCallbackRecords.size() == 0 && mClient != null) {
+            if (mRouteCallbackRecords.size() == 0 && mClient != null) {
                 try {
                     mMediaRouterService.unregisterClient2(mClient);
                 } catch (RemoteException ex) {
@@ -282,38 +284,51 @@ public class MediaRouter2 {
     }
 
     /**
-     * Gets the currently selected route.
+     * Requests the media route provider service to create a session with the given route.
      *
-     * @return the selected route
+     * @param route the route you want to create a session with.
+     * @param controlCategory the control category of the session. Should not be empty
+     * @param executor the executor to get the result of the session creation
+     * @param callback the callback to get the result of the session creation
+     *
+     * @see SessionCreationCallback#onSessionCreated(RouteSessionController, Bundle)
+     * @see SessionCreationCallback#onSessionCreationFailed()
      */
     @NonNull
-    public MediaRoute2Info getSelectedRoute() {
-        return mSelectedRoute;
-    }
-
-    /**
-     * Request to select the specified route. When the route is selected,
-     * {@link Callback#onRouteSelected(MediaRoute2Info, int, Bundle)} will be called.
-     *
-     * @param route the route to select
-     */
-    public void requestSelectRoute(@NonNull MediaRoute2Info route) {
+    public void requestCreateSession(@NonNull MediaRoute2Info route,
+            @NonNull String controlCategory,
+            @CallbackExecutor Executor executor, @NonNull SessionCreationCallback callback) {
         Objects.requireNonNull(route, "route must not be null");
+        if (TextUtils.isEmpty(controlCategory)) {
+            throw new IllegalArgumentException("controlCategory must not be empty");
+        }
+        Objects.requireNonNull(executor, "executor must not be null");
+        Objects.requireNonNull(callback, "callback must not be null");
+
+        // TODO: Check the given route exists
+        // TODO: Check the route supports the given controlCategory
+
+        final int requestId;
+        // TODO: This does not ensure the uniqueness of the request ID.
+        //       Find the way to ensure it. (e.g. have mapping inside MediaRouterService)
+        requestId = Process.myPid() * 10000 + mSessionCreationRequestCnt.getAndIncrement();
+
+        SessionCreationRequest request = new SessionCreationRequest(
+                requestId, route, controlCategory, executor, callback);
+        mSessionCreationRequests.add(request);
 
         Client2 client;
         synchronized (sLock) {
-            if (mSelectingRoute == route) {
-                Log.w(TAG, "The route selection request is already sent.");
-                return;
-            }
-            mSelectingRoute = route;
             client = mClient;
         }
         if (client != null) {
             try {
-                mMediaRouterService.requestSelectRoute2(client, route);
+                mMediaRouterService.requestCreateSession(
+                        client, route, controlCategory, requestId);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to request to select route.", ex);
+                Log.e(TAG, "Unable to request to create session.", ex);
+                mHandler.sendMessage(obtainMessage(MediaRouter2::createControllerOnHandler,
+                        MediaRouter2.this, null, requestId));
             }
         }
     }
@@ -472,57 +487,70 @@ public class MediaRouter2 {
         }
     }
 
-    void selectRouteOnHandler(MediaRoute2Info route, int reason, Bundle controlHints) {
-        synchronized (sLock) {
-            if (reason == SELECT_REASON_USER_SELECTED) {
-                if (mSelectingRoute == null
-                        || !TextUtils.equals(mSelectingRoute.getUniqueId(), route.getUniqueId())) {
-                    Log.w(TAG, "Ignoring invalid or outdated notifyRouteSelected call. "
-                            + "selectingRoute=" + mSelectingRoute + " route=" + route);
-                    return;
-                }
+    /**
+     * Creates a controller and calls the {@link SessionCreationCallback#onSessionCreated}.
+     * If session creation has failed, then it calls
+     * {@link SessionCreationCallback#onSessionCreationFailed()}.
+     * <p>
+     * Pass {@code null} to sessionInfo for the failure case.
+     */
+    void createControllerOnHandler(@Nullable RouteSessionInfo sessionInfo, int requestId) {
+        SessionCreationRequest matchingRequest = null;
+        for (SessionCreationRequest request : mSessionCreationRequests) {
+            if (request.mRequestId == requestId) {
+                matchingRequest = request;
+                break;
             }
-            mSelectingRoute = null;
         }
-        if (reason == SELECT_REASON_SYSTEM_SELECTED) {
-            reason = SELECT_REASON_USER_SELECTED;
+
+        if (matchingRequest == null) {
+            Log.w(TAG, "Ignoring session creation result for unknown request."
+                    + " requestId=" + requestId + ", sessionInfo=" + sessionInfo);
+            return;
         }
-        mSelectedRoute = route;
-        notifyRouteSelected(route, reason, controlHints);
+
+        mSessionCreationRequests.remove(matchingRequest);
+
+        final Executor executor = matchingRequest.mExecutor;
+        final SessionCreationCallback callback = matchingRequest.mSessionCreationCallback;
+
+        if (sessionInfo == null) {
+            // TODO: We may need to distinguish between failure and rejection.
+            //       One way can be introducing 'reason'.
+            executor.execute(callback::onSessionCreationFailed);
+        } else {
+            // TODO: RouteSessionController should be created with full info (e.g. routes)
+            //       from RouteSessionInfo.
+            RouteSessionController controller = new RouteSessionController(sessionInfo);
+            executor.execute(() -> callback.onSessionCreated(controller));
+        }
     }
 
     private void notifyRoutesAdded(List<MediaRoute2Info> routes) {
-        for (CallbackRecord record: mCallbackRecords) {
+        for (RouteCallbackRecord record: mRouteCallbackRecords) {
             record.mExecutor.execute(
-                    () -> record.mCallback.onRoutesAdded(routes));
+                    () -> record.mRouteCallback.onRoutesAdded(routes));
         }
     }
 
     private void notifyRoutesRemoved(List<MediaRoute2Info> routes) {
-        for (CallbackRecord record: mCallbackRecords) {
+        for (RouteCallbackRecord record: mRouteCallbackRecords) {
             record.mExecutor.execute(
-                    () -> record.mCallback.onRoutesRemoved(routes));
+                    () -> record.mRouteCallback.onRoutesRemoved(routes));
         }
     }
 
     private void notifyRoutesChanged(List<MediaRoute2Info> routes) {
-        for (CallbackRecord record: mCallbackRecords) {
+        for (RouteCallbackRecord record: mRouteCallbackRecords) {
             record.mExecutor.execute(
-                    () -> record.mCallback.onRoutesChanged(routes));
-        }
-    }
-
-    private void notifyRouteSelected(MediaRoute2Info route, int reason, Bundle controlHints) {
-        for (CallbackRecord record: mCallbackRecords) {
-            record.mExecutor.execute(
-                    () -> record.mCallback.onRouteSelected(route, reason, controlHints));
+                    () -> record.mRouteCallback.onRoutesChanged(routes));
         }
     }
 
     /**
-     * Interface for receiving events about media routing changes.
+     * Callback for receiving events about media route discovery.
      */
-    public static class Callback {
+    public static class RouteCallback {
         /**
          * Called when routes are added. Whenever you registers a callback, this will
          * be invoked with known routes.
@@ -549,30 +577,33 @@ public class MediaRouter2 {
          * @param routes the list of routes that have been changed. It's never empty.
          */
         public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
-
-        /**
-         * Called when a route is selected. Exactly one route can be selected at a time.
-         *
-         * @param route the selected route.
-         * @param reason the reason why the route is selected.
-         * @param controlHints An optional bundle of provider-specific arguments which may be
-         *                     used to control the selected route. Can be empty.
-         * @see #SELECT_REASON_UNKNOWN
-         * @see #SELECT_REASON_USER_SELECTED
-         * @see #SELECT_REASON_FALLBACK
-         * @see #getSelectedRoute()
-         */
-        public void onRouteSelected(@NonNull MediaRoute2Info route, @SelectReason int reason,
-                @NonNull Bundle controlHints) {}
     }
 
-    final class CallbackRecord {
-        public final Callback mCallback;
-        public Executor mExecutor;
-        public int mFlags;
+    /**
+     * Callback for receiving a result of session creation.
+     */
+    public static class SessionCreationCallback {
+        /**
+         * Called when the route session is created by the route provider.
+         *
+         * @param controller the controller to control the created session
+         */
+        public void onSessionCreated(RouteSessionController controller) {}
 
-        CallbackRecord(@NonNull Callback callback, @Nullable Executor executor, int flags) {
-            mCallback = callback;
+        /**
+         * Called when the session creation request failed.
+         */
+        public void onSessionCreationFailed() {}
+    }
+
+    final class RouteCallbackRecord {
+        public final Executor mExecutor;
+        public final RouteCallback mRouteCallback;
+        public final int mFlags;
+
+        RouteCallbackRecord(@Nullable Executor executor, @NonNull RouteCallback routeCallback,
+                int flags) {
+            mRouteCallback = routeCallback;
             mExecutor = executor;
             mFlags = flags;
         }
@@ -582,15 +613,35 @@ public class MediaRouter2 {
             if (this == obj) {
                 return true;
             }
-            if (!(obj instanceof CallbackRecord)) {
+            if (!(obj instanceof RouteCallbackRecord)) {
                 return false;
             }
-            return mCallback == ((CallbackRecord) obj).mCallback;
+            return mRouteCallback
+                    == ((RouteCallbackRecord) obj).mRouteCallback;
         }
 
         @Override
         public int hashCode() {
-            return mCallback.hashCode();
+            return mRouteCallback.hashCode();
+        }
+    }
+
+    final class SessionCreationRequest {
+        public final MediaRoute2Info mRoute;
+        public final String mControlCategory;
+        public final Executor mExecutor;
+        public final SessionCreationCallback mSessionCreationCallback;
+        public final int mRequestId;
+
+        SessionCreationRequest(int requestId, @NonNull MediaRoute2Info route,
+                @NonNull String controlCategory,
+                @Nullable Executor executor,
+                @NonNull SessionCreationCallback sessionCreationCallback) {
+            mRoute = route;
+            mControlCategory = controlCategory;
+            mExecutor = executor;
+            mSessionCreationCallback = sessionCreationCallback;
+            mRequestId = requestId;
         }
     }
 
@@ -617,10 +668,9 @@ public class MediaRouter2 {
         }
 
         @Override
-        public void notifyRouteSelected(MediaRoute2Info route, int reason,
-                Bundle controlHints) {
-            mHandler.sendMessage(obtainMessage(MediaRouter2::selectRouteOnHandler,
-                    MediaRouter2.this, route, reason, controlHints));
+        public void notifySessionCreated(@Nullable RouteSessionInfo sessionInfo, int requestId) {
+            mHandler.sendMessage(obtainMessage(MediaRouter2::createControllerOnHandler,
+                    MediaRouter2.this, sessionInfo, requestId));
         }
     }
 }

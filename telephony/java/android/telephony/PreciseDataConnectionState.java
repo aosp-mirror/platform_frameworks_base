@@ -81,18 +81,20 @@ public final class PreciseDataConnectionState implements Parcelable {
 
 
     /**
-     * Constructor
+     * Constructor of PreciseDataConnectionState
      *
      * @param state the state of the data connection
      * @param networkType the access network that is/would carry this data connection
      * @param apnTypes the APN types that this data connection carries
-     * @param apnSetting if there is a valid APN for this Data Connection, then the APN Settings;
-     *        if there is no valid APN setting for the specific type, then this will be null
+     * @param apn the APN of this data connection
      * @param linkProperties if the data connection is connected, the properties of the connection
      * @param failCause in case a procedure related to this data connection fails, a non-zero error
      *        code indicating the cause of the failure.
+     * @param apnSetting if there is a valid APN for this Data Connection, then the APN Settings;
+     *        if there is no valid APN setting for the specific type, then this will be null
      * @hide
      */
+    @SystemApi
     public PreciseDataConnectionState(@DataState int state,
                                       @NetworkType int networkType,
                                       @ApnType int apnTypes, @NonNull String apn,

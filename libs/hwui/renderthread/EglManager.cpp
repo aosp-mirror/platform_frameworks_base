@@ -22,7 +22,6 @@
 #include <log/log.h>
 #include <private/gui/SyncFeatures.h>
 #include <sync/sync.h>
-#include <system/window.h>
 #include <utils/Trace.h>
 
 #include <string>

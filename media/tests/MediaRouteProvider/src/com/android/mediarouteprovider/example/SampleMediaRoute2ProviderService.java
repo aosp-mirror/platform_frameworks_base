@@ -26,6 +26,7 @@ import android.media.MediaRoute2ProviderService;
 import android.media.RouteSessionInfo;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.TextUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +38,9 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     public static final String ROUTE_NAME1 = "Sample Route 1";
     public static final String ROUTE_ID2 = "route_id2";
     public static final String ROUTE_NAME2 = "Sample Route 2";
+    public static final String ROUTE_ID3_SESSION_CREATION_FAILED =
+            "route_id3_session_creation_failed";
+    public static final String ROUTE_NAME3 = "Sample Route 3 - Session creation failed";
 
     public static final String ROUTE_ID_SPECIAL_CATEGORY = "route_special_category";
     public static final String ROUTE_NAME_SPECIAL_CATEGORY = "Special Category Route";
@@ -55,6 +59,8 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     public static final String CATEGORY_SPECIAL =
             "com.android.mediarouteprovider.CATEGORY_SPECIAL";
 
+    public static final int SESSION_ID_1 = 1000;
+
     Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
 
     private void initializeRoutes() {
@@ -65,6 +71,10 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         MediaRoute2Info route2 = new MediaRoute2Info.Builder(ROUTE_ID2, ROUTE_NAME2)
                 .addSupportedCategory(CATEGORY_SAMPLE)
                 .setDeviceType(DEVICE_TYPE_SPEAKER)
+                .build();
+        MediaRoute2Info route3 = new MediaRoute2Info.Builder(
+                ROUTE_ID3_SESSION_CREATION_FAILED, ROUTE_NAME3)
+                .addSupportedCategory(CATEGORY_SAMPLE)
                 .build();
         MediaRoute2Info routeSpecial =
                 new MediaRoute2Info.Builder(ROUTE_ID_SPECIAL_CATEGORY, ROUTE_NAME_SPECIAL_CATEGORY)
@@ -85,6 +95,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
 
         mRoutes.put(route1.getId(), route1);
         mRoutes.put(route2.getId(), route2);
+        mRoutes.put(route3.getId(), route3);
         mRoutes.put(routeSpecial.getId(), routeSpecial);
         mRoutes.put(fixedVolumeRoute.getId(), fixedVolumeRoute);
         mRoutes.put(variableVolumeRoute.getId(), variableVolumeRoute);
@@ -168,12 +179,18 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
 
     @Override
     public void onCreateSession(String packageName, String routeId, String controlCategory,
-            int sessionId) {
+            int requestId) {
+        if (TextUtils.equals(ROUTE_ID3_SESSION_CREATION_FAILED, routeId)) {
+            // Tell the router that session cannot be created by passing null as sessionInfo.
+            notifySessionCreated(/* sessionInfo= */ null, requestId);
+            return;
+        }
+
         RouteSessionInfo sessionInfo = new RouteSessionInfo.Builder(
-                sessionId, packageName, controlCategory)
+                SESSION_ID_1, packageName, controlCategory)
                 .addSelectedRoute(routeId)
                 .build();
-        notifySessionCreated(sessionId, sessionInfo, null);
+        notifySessionCreated(sessionInfo,  requestId);
     }
 
     @Override
@@ -186,7 +203,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         RouteSessionInfo newSessionInfo = new RouteSessionInfo.Builder(sessionInfo)
                 .addSelectedRoute(routeId)
                 .build();
-        setSessionInfo(sessionId, newSessionInfo);
+        updateSessionInfo(newSessionInfo);
         publishRoutes();
     }
 
@@ -196,7 +213,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         RouteSessionInfo newSessionInfo = new RouteSessionInfo.Builder(sessionInfo)
                 .removeSelectedRoute(routeId)
                 .build();
-        setSessionInfo(sessionId, newSessionInfo);
+        updateSessionInfo(newSessionInfo);
         publishRoutes();
     }
 
@@ -207,7 +224,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
                 .clearSelectedRoutes()
                 .addSelectedRoute(routeId)
                 .build();
-        setSessionInfo(sessionId, newSessionInfo);
+        updateSessionInfo(newSessionInfo);
         publishRoutes();
     }
 

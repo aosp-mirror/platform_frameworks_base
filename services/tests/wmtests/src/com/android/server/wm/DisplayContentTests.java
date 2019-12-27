@@ -514,6 +514,13 @@ public class DisplayContentTests extends WindowTestsBase {
         // Prevent mInitialDisplayCutout from being updated from real display (e.g. null
         // if the device has no cutout).
         final DisplayContent dc = createDisplayNoUpdateDisplayInfo();
+        // This test assumes it's a top cutout on a portrait display, so if it happens to be a
+        // landscape display let's rotate it.
+        if (dc.mInitialDisplayHeight < dc.mInitialDisplayWidth) {
+            int tmp = dc.mInitialDisplayHeight;
+            dc.mInitialDisplayHeight = dc.mInitialDisplayWidth;
+            dc.mInitialDisplayWidth = tmp;
+        }
         // Rotation may use real display info to compute bound, so here also uses the
         // same width and height.
         final int displayWidth = dc.mInitialDisplayWidth;

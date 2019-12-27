@@ -1075,6 +1075,7 @@ genrule {
 filegroup {
     name: "framework-telephony-stack-shared-srcs",
     srcs: [
+        "core/java/android/os/BasicShellCommandHandler.java",
         "core/java/android/os/RegistrantList.java",
         "core/java/android/os/Registrant.java",
         "core/java/android/util/LocalLog.java",

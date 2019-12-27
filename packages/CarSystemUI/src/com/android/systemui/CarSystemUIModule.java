@@ -32,7 +32,7 @@ import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImplementation;
-import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.DividerModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
@@ -52,17 +52,14 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.volume.CarVolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
 
-import java.util.Optional;
-
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Binds;
-import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
-@Module
+@Module(includes = {DividerModule.class})
 abstract class CarSystemUIModule {
 
     @Binds
@@ -82,12 +79,6 @@ abstract class CarSystemUIModule {
     @Binds
     abstract NotificationEntryManager bindNotificationEntryManager(
             CarNotificationEntryManager notificationEntryManager);
-
-    @Singleton
-    @Provides
-    static Divider provideDivider(Context context, Optional<Lazy<Recents>> recentsOptionalLazy) {
-        return new Divider(context, recentsOptionalLazy);
-    }
 
     @Singleton
     @Provides

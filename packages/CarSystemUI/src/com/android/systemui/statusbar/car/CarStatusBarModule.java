@@ -17,8 +17,10 @@
 package com.android.systemui.statusbar.car;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
 import android.content.Context;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
 
@@ -37,6 +39,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.navigationbar.car.CarNavigationBarController;
+import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
@@ -191,6 +194,8 @@ public class CarStatusBarModule {
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
+            DarkIconDispatcher darkIconDispatcher,
+            @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
             DismissCallbackRegistry dismissCallbackRegistry,
             CarServiceProvider carServiceProvider,
             Lazy<PowerManagerHelper> powerManagerHelperLazy,
@@ -270,6 +275,8 @@ public class CarStatusBarModule {
                 statusBarKeyguardViewManager,
                 viewMediatorCallback,
                 initController,
+                darkIconDispatcher,
+                timeTickHandler,
                 dismissCallbackRegistry,
                 carServiceProvider,
                 powerManagerHelperLazy,

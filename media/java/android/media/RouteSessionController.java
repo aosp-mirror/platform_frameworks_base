@@ -17,9 +17,13 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.os.Bundle;
+
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -38,6 +42,9 @@ public class RouteSessionController {
     private final int mSessionId;
     private final String mCategory;
     private final Object mLock = new Object();
+    private final Bundle mControlHints;
+
+    private List<String> mSelectedRoutes;
 
     @GuardedBy("mLock")
     private final CopyOnWriteArrayList<CallbackRecord> mCallbackRecords =
@@ -46,12 +53,14 @@ public class RouteSessionController {
     private volatile boolean mIsReleased;
 
     /**
-     * @param sessionId the ID of the session.
-     * @param category The category of media routes that the session includes.
+     * @param sessionInfo
      */
-    RouteSessionController(int sessionId, @NonNull String category) {
-        mSessionId = sessionId;
-        mCategory = category;
+    RouteSessionController(@NonNull RouteSessionInfo sessionInfo) {
+        mSessionId = sessionInfo.getSessionId();
+        mCategory = sessionInfo.getControlCategory();
+        mSelectedRoutes = sessionInfo.getSelectedRoutes();
+        mControlHints = sessionInfo.getControlHints();
+        // TODO: Create getters for all other types of routes
     }
 
     /**
@@ -70,12 +79,19 @@ public class RouteSessionController {
     }
 
     /**
-     * @return the list of currently connected routes
+     * @return the control hints used to control route session if available.
+     */
+    @Nullable
+    public Bundle getControlHints() {
+        return mControlHints;
+    }
+
+    /**
+     * @return the list of currently selected routes
      */
     @NonNull
-    public List<MediaRoute2Info> getRoutes() {
-        // TODO: Implement this when SessionInfo is introduced.
-        return null;
+    public List<String> getSelectedRoutes() {
+        return Collections.unmodifiableList(mSelectedRoutes);
     }
 
     /**
@@ -93,7 +109,7 @@ public class RouteSessionController {
     /**
      * Add routes to the remote session.
      *
-     * @see #getRoutes()
+     * @see #getSelectedRoutes()
      * @see Callback#onSessionInfoChanged
      */
     public void addRoutes(List<MediaRoute2Info> routes) {
@@ -102,9 +118,10 @@ public class RouteSessionController {
 
     /**
      * Remove routes from this session. Media may be stopped on those devices.
-     * Route removal requests that are not currently in {@link #getRoutes()} will be ignored.
+     * Route removal requests that are not currently in {@link #getSelectedRoutes()} will be
+     * ignored.
      *
-     * @see #getRoutes()
+     * @see #getSelectedRoutes()
      * @see Callback#onSessionInfoChanged
      */
     public void removeRoutes(List<MediaRoute2Info> routes) {

@@ -29,12 +29,12 @@ namespace renderthread {
 
 static int InvertTransform(int transform) {
     switch (transform) {
-        case NATIVE_WINDOW_TRANSFORM_ROT_90:
-            return NATIVE_WINDOW_TRANSFORM_ROT_270;
-        case NATIVE_WINDOW_TRANSFORM_ROT_180:
-            return NATIVE_WINDOW_TRANSFORM_ROT_180;
-        case NATIVE_WINDOW_TRANSFORM_ROT_270:
-            return NATIVE_WINDOW_TRANSFORM_ROT_90;
+        case ANATIVEWINDOW_TRANSFORM_ROTATE_90:
+            return ANATIVEWINDOW_TRANSFORM_ROTATE_270;
+        case ANATIVEWINDOW_TRANSFORM_ROTATE_180:
+            return ANATIVEWINDOW_TRANSFORM_ROTATE_180;
+        case ANATIVEWINDOW_TRANSFORM_ROTATE_270:
+            return ANATIVEWINDOW_TRANSFORM_ROTATE_90;
         default:
             return 0;
     }
@@ -47,11 +47,11 @@ static SkMatrix GetPreTransformMatrix(SkISize windowSize, int transform) {
     switch (transform) {
         case 0:
             return SkMatrix::I();
-        case NATIVE_WINDOW_TRANSFORM_ROT_90:
+        case ANATIVEWINDOW_TRANSFORM_ROTATE_90:
             return SkMatrix::MakeAll(0, -1, height, 1, 0, 0, 0, 0, 1);
-        case NATIVE_WINDOW_TRANSFORM_ROT_180:
+        case ANATIVEWINDOW_TRANSFORM_ROTATE_180:
             return SkMatrix::MakeAll(-1, 0, width, 0, -1, height, 0, 0, 1);
-        case NATIVE_WINDOW_TRANSFORM_ROT_270:
+        case ANATIVEWINDOW_TRANSFORM_ROTATE_270:
             return SkMatrix::MakeAll(0, 1, 0, -1, 0, width, 0, 0, 1);
         default:
             LOG_ALWAYS_FATAL("Unsupported Window Transform (%d)", transform);
@@ -168,7 +168,7 @@ bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode 
     outWindowInfo->transform = query_value;
 
     outWindowInfo->actualSize = outWindowInfo->size;
-    if (outWindowInfo->transform & NATIVE_WINDOW_TRANSFORM_ROT_90) {
+    if (outWindowInfo->transform & ANATIVEWINDOW_TRANSFORM_ROTATE_90) {
         outWindowInfo->actualSize.set(outWindowInfo->size.height(), outWindowInfo->size.width());
     }
 

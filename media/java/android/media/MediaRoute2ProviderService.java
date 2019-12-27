@@ -47,6 +47,7 @@ public abstract class MediaRoute2ProviderService extends Service {
     private final Handler mHandler;
     private final Object mSessionLock = new Object();
     private ProviderStub mStub;
+    // TODO: Rename this to mService (and accordingly IMediaRoute2ProviderClient to something else)
     private IMediaRoute2ProviderClient mClient;
     private MediaRoute2ProviderInfo mProviderInfo;
 
@@ -141,23 +142,24 @@ public abstract class MediaRoute2ProviderService extends Service {
     }
 
     /**
-     * Sets the information of the session with the given id.
-     * If there is no session matched with the given id, it will be ignored.
+     * Updates the information of a session.
+     * If the session is destroyed or not created before, it will be ignored.
      * A session will be destroyed if it has no selected route.
      * Call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify clients of
      * session info changes.
      *
-     * @param sessionId id of the session that should update its information
      * @param sessionInfo new session information
+     * @see #notifySessionCreated(RouteSessionInfo, int)
      */
-    public final void setSessionInfo(int sessionId, @NonNull RouteSessionInfo sessionInfo) {
+    public final void updateSessionInfo(@NonNull RouteSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
+        int sessionId = sessionInfo.getSessionId();
 
         synchronized (mSessionLock) {
             if (mSessionInfo.containsKey(sessionId)) {
                 mSessionInfo.put(sessionId, sessionInfo);
             } else {
-                Log.w(TAG, "Ignoring session info update.");
+                Log.w(TAG, "Ignoring unknown session info.");
             }
         }
     }
@@ -166,19 +168,27 @@ public abstract class MediaRoute2ProviderService extends Service {
      * Notifies clients of that the session is created and ready for use. If the session can be
      * controlled, pass a {@link Bundle} that contains how to control it.
      *
-     * @param sessionId id of the session
      * @param sessionInfo information of the new session.
      *                    Pass {@code null} to reject the request or inform clients that
      *                    session creation has failed.
-     * @param controlHints a {@link Bundle} that contains how to control the session.
+     * @param requestId id of the previous request to create this session
      */
     //TODO: fail reason?
-    public final void notifySessionCreated(int sessionId, @Nullable RouteSessionInfo sessionInfo,
-            @Nullable Bundle controlHints) {
-        //TODO: validate sessionId (it must be in "waiting list")
-        synchronized (mSessionLock) {
-            mSessionInfo.put(sessionId, sessionInfo);
-            //TODO: notify media router service of session creation.
+    public final void notifySessionCreated(@Nullable RouteSessionInfo sessionInfo, int requestId) {
+        //TODO: validate sessionInfo.getSessionId() (it must be in "waiting list")
+        if (sessionInfo != null) {
+            synchronized (mSessionLock) {
+                mSessionInfo.put(sessionInfo.getSessionId(), sessionInfo);
+            }
+        }
+
+        if (mClient == null) {
+            return;
+        }
+        try {
+            mClient.notifySessionCreated(sessionInfo, requestId);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Failed to notify session created.");
         }
     }
 
@@ -203,18 +213,19 @@ public abstract class MediaRoute2ProviderService extends Service {
     /**
      * Called when a session should be created.
      * You should create and maintain your own session and notifies the client of
-     * session info. Call {@link #notifySessionCreated(int, RouteSessionInfo, Bundle)}
-     * to notify the information of a new session.
+     * session info. Call {@link #notifySessionCreated(RouteSessionInfo, int)}
+     * with the given {@code requestId} to notify the information of a new session.
      * If you can't create the session or want to reject the request, pass {@code null}
-     * as session info in {@link #notifySessionCreated(int, RouteSessionInfo, Bundle)}.
+     * as session info in {@link #notifySessionCreated(RouteSessionInfo, int)}
+     * with the given {@code requestId}.
      *
      * @param packageName the package name of the application that selected the route
      * @param routeId the id of the route initially being connected
      * @param controlCategory the control category of the new session
-     * @param sessionId the id of a new session
+     * @param requestId the id of this session creation request
      */
     public abstract void onCreateSession(@NonNull String packageName, @NonNull String routeId,
-            @NonNull String controlCategory, int sessionId);
+            @NonNull String controlCategory, int requestId);
 
     /**
      * Called when a session is about to be destroyed.
@@ -230,20 +241,20 @@ public abstract class MediaRoute2ProviderService extends Service {
     //TODO: make a way to reject the request
     /**
      * Called when a client requests adding a route to a session.
-     * After the route is added, call {@link #setSessionInfo(int, RouteSessionInfo)} to update
+     * After the route is added, call {@link #updateSessionInfo(RouteSessionInfo)} to update
      * session info and call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify
      * clients of updated session info.
      *
      * @param sessionId id of the session
      * @param routeId id of the route
-     * @see #setSessionInfo(int, RouteSessionInfo)
+     * @see #updateSessionInfo(RouteSessionInfo)
      */
     public abstract void onAddRoute(int sessionId, @NonNull String routeId);
 
     //TODO: make a way to reject the request
     /**
      * Called when a client requests removing a route from a session.
-     * After the route is removed, call {@link #setSessionInfo(int, RouteSessionInfo)} to update
+     * After the route is removed, call {@link #updateSessionInfo(RouteSessionInfo)} to update
      * session info and call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify
      * clients of updated session info.
      *
@@ -255,7 +266,7 @@ public abstract class MediaRoute2ProviderService extends Service {
     //TODO: make a way to reject the request
     /**
      * Called when a client requests transferring a session to a route.
-     * After the transfer is finished, call {@link #setSessionInfo(int, RouteSessionInfo)} to update
+     * After the transfer is finished, call {@link #updateSessionInfo(RouteSessionInfo)} to update
      * session info and call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify
      * clients of updated session info.
      *
@@ -336,6 +347,14 @@ public abstract class MediaRoute2ProviderService extends Service {
         public void setClient(IMediaRoute2ProviderClient client) {
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::setClient,
                     MediaRoute2ProviderService.this, client));
+        }
+
+        @Override
+        public void requestCreateSession(String packageName, String routeId, String controlCategory,
+                int requestId) {
+            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onCreateSession,
+                    MediaRoute2ProviderService.this, packageName, routeId, controlCategory,
+                    requestId));
         }
 
         @Override

@@ -15,6 +15,7 @@
  */
 
 package android.net.wifi;
+import android.net.wifi.SoftApCapability;
 import android.net.wifi.SoftApInfo;
 
 import android.net.wifi.WifiClient;
@@ -51,4 +52,12 @@ oneway interface ISoftApCallback
      * @param softApInfo is the softap information. {@link SoftApInfo}
      */
     void onInfoChanged(in SoftApInfo softApInfo);
+
+
+    /**
+     * Service to manager callback providing information of softap.
+     *
+     * @param capability is the softap capability. {@link SoftApCapability}
+     */
+    void onCapabilityChanged(in SoftApCapability capability);
 }

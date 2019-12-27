@@ -415,8 +415,10 @@ public class AudioService extends IAudioService.Stub
         public void onError(int error) {
             switch (error) {
                 case AudioSystem.AUDIO_STATUS_SERVER_DIED:
-                    mRecordMonitor.onAudioServerDied();
-
+                    // check for null in case error callback is called during instance creation
+                    if (mRecordMonitor != null) {
+                        mRecordMonitor.onAudioServerDied();
+                    }
                     sendMsg(mAudioHandler, MSG_AUDIO_SERVER_DIED,
                             SENDMSG_NOOP, 0, 0, null, 0);
                     sendMsg(mAudioHandler, MSG_DISPATCH_AUDIO_SERVER_STATE,

@@ -628,6 +628,10 @@ static int android_media_tv_Tuner_set_lna(JNIEnv, jobject, jint, jboolean) {
     return 0;
 }
 
+static jobjectArray android_media_tv_Tuner_get_frontend_status(JNIEnv, jobject, jintArray) {
+    return NULL;
+}
+
 static jobject android_media_tv_Tuner_get_lnb_ids(JNIEnv *env, jobject thiz) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->getLnbIds();
@@ -785,7 +789,7 @@ static jobject android_media_tv_Tuner_open_descrambler(JNIEnv *env, jobject thiz
     return tuner->openDescrambler();
 }
 
-static bool android_media_tv_Tuner_add_pid(
+static int android_media_tv_Tuner_add_pid(
         JNIEnv *env, jobject descrambler, jint pidType, jint pid, jobject filter) {
     sp<IDescrambler> descramblerSp = getDescrambler(env, descrambler);
     if (descramblerSp == NULL) {
@@ -793,10 +797,10 @@ static bool android_media_tv_Tuner_add_pid(
     }
     sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     Result result = descramblerSp->addPid(getDemuxPid((int)pidType, (int)pid), filterSp);
-    return result == Result::SUCCESS;
+    return (int)result;
 }
 
-static bool android_media_tv_Tuner_remove_pid(
+static int android_media_tv_Tuner_remove_pid(
         JNIEnv *env, jobject descrambler, jint pidType, jint pid, jobject filter) {
     sp<IDescrambler> descramblerSp = getDescrambler(env, descrambler);
     if (descramblerSp == NULL) {
@@ -804,7 +808,15 @@ static bool android_media_tv_Tuner_remove_pid(
     }
     sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     Result result = descramblerSp->removePid(getDemuxPid((int)pidType, (int)pid), filterSp);
-    return result == Result::SUCCESS;
+    return (int)result;
+}
+
+static int android_media_tv_Tuner_set_key_token(JNIEnv, jobject, jbyteArray) {
+    return 0;
+}
+
+static int android_media_tv_Tuner_close_descrambler(JNIEnv, jobject) {
+    return 0;
 }
 
 static jobject android_media_tv_Tuner_open_dvr(JNIEnv *env, jobject thiz, jint type, jint bufferSize) {
@@ -883,6 +895,8 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_scan },
     { "nativeSetLnb", "(I)I", (void *)android_media_tv_Tuner_set_lnb },
     { "nativeSetLna", "(Z)I", (void *)android_media_tv_Tuner_set_lna },
+    { "nativeGetFrontendStatus", "([I)[Landroid/media/tv/tuner/FrontendStatus;",
+            (void *)android_media_tv_Tuner_get_frontend_status },
     { "nativeOpenFilter", "(III)Landroid/media/tv/tuner/Tuner$Filter;",
             (void *)android_media_tv_Tuner_open_filter },
     { "nativeGetLnbIds", "()Ljava/util/List;",
@@ -905,10 +919,12 @@ static const JNINativeMethod gFilterMethods[] = {
 };
 
 static const JNINativeMethod gDescramblerMethods[] = {
-    { "nativeAddPid", "(IILandroid/media/tv/tuner/Tuner$Filter;)Z",
+    { "nativeAddPid", "(IILandroid/media/tv/tuner/Tuner$Filter;)I",
             (void *)android_media_tv_Tuner_add_pid },
-    { "nativeRemovePid", "(IILandroid/media/tv/tuner/Tuner$Filter;)Z",
+    { "nativeRemovePid", "(IILandroid/media/tv/tuner/Tuner$Filter;)I",
             (void *)android_media_tv_Tuner_remove_pid },
+    { "nativeSetKeyToken", "([B)I", (void *)android_media_tv_Tuner_set_key_token },
+    { "nativeClose", "()V", (void *)android_media_tv_Tuner_close_descrambler },
 };
 
 static const JNINativeMethod gDvrMethods[] = {
