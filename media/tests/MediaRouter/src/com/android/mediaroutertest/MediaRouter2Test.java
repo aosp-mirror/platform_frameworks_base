@@ -43,8 +43,8 @@ import static org.testng.Assert.assertThrows;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2;
-import android.media.MediaRouter2.SessionCreationCallback;
-import android.media.RouteSessionController;
+import android.media.MediaRouter2.RouteSessionController;
+import android.media.MediaRouter2.SessionCallback;
 import android.net.Uri;
 import android.os.Parcel;
 import android.support.test.InstrumentationRegistry;
@@ -209,7 +209,7 @@ public class MediaRouter2Test {
         MediaRoute2Info route = new MediaRoute2Info.Builder("id", "name").build();
         String controlCategory = "controlCategory";
         Executor executor = mExecutor;
-        MediaRouter2.SessionCreationCallback callback = new MediaRouter2.SessionCreationCallback();
+        SessionCallback callback = new SessionCallback();
 
         // Tests null route
         assertThrows(NullPointerException.class,
@@ -243,12 +243,12 @@ public class MediaRouter2Test {
         final CountDownLatch failureLatch = new CountDownLatch(1);
 
         // Create session with this route
-        SessionCreationCallback callback = new SessionCreationCallback() {
+        SessionCallback callback = new SessionCallback() {
             @Override
             public void onSessionCreated(RouteSessionController controller) {
                 assertNotNull(controller);
                 assertTrue(controller.getSelectedRoutes().contains(ROUTE_ID1));
-                assertTrue(TextUtils.equals(CATEGORY_SAMPLE, controller.getCategory()));
+                assertTrue(TextUtils.equals(CATEGORY_SAMPLE, controller.getControlCategory()));
                 successLatch.countDown();
             }
 
@@ -281,7 +281,7 @@ public class MediaRouter2Test {
         final CountDownLatch failureLatch = new CountDownLatch(1);
 
         // Create session with this route
-        SessionCreationCallback callback = new SessionCreationCallback() {
+        SessionCallback callback = new SessionCallback() {
             @Override
             public void onSessionCreated(RouteSessionController controller) {
                 successLatch.countDown();

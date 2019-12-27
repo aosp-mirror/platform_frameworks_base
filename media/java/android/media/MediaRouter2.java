@@ -291,13 +291,15 @@ public class MediaRouter2 {
      * @param executor the executor to get the result of the session creation
      * @param callback the callback to get the result of the session creation
      *
-     * @see SessionCreationCallback#onSessionCreated(RouteSessionController, Bundle)
-     * @see SessionCreationCallback#onSessionCreationFailed()
+     * @see SessionCallback#onSessionCreated(RouteSessionController, Bundle)
+     * @see SessionCallback#onSessionCreationFailed()
+     *
+     * TODO: Separate callback registeration from creating session request.
      */
     @NonNull
     public void requestCreateSession(@NonNull MediaRoute2Info route,
             @NonNull String controlCategory,
-            @CallbackExecutor Executor executor, @NonNull SessionCreationCallback callback) {
+            @CallbackExecutor Executor executor, @NonNull SessionCallback callback) {
         Objects.requireNonNull(route, "route must not be null");
         if (TextUtils.isEmpty(controlCategory)) {
             throw new IllegalArgumentException("controlCategory must not be empty");
@@ -488,9 +490,9 @@ public class MediaRouter2 {
     }
 
     /**
-     * Creates a controller and calls the {@link SessionCreationCallback#onSessionCreated}.
+     * Creates a controller and calls the {@link SessionCallback#onSessionCreated}.
      * If session creation has failed, then it calls
-     * {@link SessionCreationCallback#onSessionCreationFailed()}.
+     * {@link SessionCallback#onSessionCreationFailed()}.
      * <p>
      * Pass {@code null} to sessionInfo for the failure case.
      */
@@ -512,7 +514,7 @@ public class MediaRouter2 {
         mSessionCreationRequests.remove(matchingRequest);
 
         final Executor executor = matchingRequest.mExecutor;
-        final SessionCreationCallback callback = matchingRequest.mSessionCreationCallback;
+        final SessionCallback callback = matchingRequest.mSessionCallback;
 
         if (sessionInfo == null) {
             // TODO: We may need to distinguish between failure and rejection.
@@ -580,9 +582,9 @@ public class MediaRouter2 {
     }
 
     /**
-     * Callback for receiving a result of session creation.
+     * Callback for receiving a result of session creation and session updates.
      */
-    public static class SessionCreationCallback {
+    public static class SessionCallback {
         /**
          * Called when the route session is created by the route provider.
          *
@@ -594,6 +596,166 @@ public class MediaRouter2 {
          * Called when the session creation request failed.
          */
         public void onSessionCreationFailed() {}
+
+        /**
+         * Called when the session info has changed.
+         */
+        void onSessionInfoChanged(RouteSessionController controller, RouteSessionInfo newInfo,
+                RouteSessionInfo oldInfo) {}
+
+        /**
+         * Called when the session is released. Session can be released by the controller using
+         * {@link RouteSessionController#release(boolean)}, or by the
+         * {@link MediaRoute2ProviderService} itself. One can do clean-ups here.
+         *
+         * TODO: When Provider#notifySessionDestroyed is introduced, add @see for the method.
+         */
+        void onSessionReleased(RouteSessionController controller, int reason, boolean shouldStop) {}
+    }
+
+    /**
+     * A class to control media route session in media route provider.
+     * For example, adding/removing/transferring routes to session can be done through this class.
+     * Instances are created by {@link MediaRouter2}.
+     *
+     * @hide
+     */
+    public final class RouteSessionController {
+        private final Object mLock = new Object();
+
+        @GuardedBy("mLock")
+        private RouteSessionInfo mSessionInfo;
+
+        @GuardedBy("mLock")
+        private volatile boolean mIsReleased;
+
+        RouteSessionController(@NonNull RouteSessionInfo sessionInfo) {
+            mSessionInfo = sessionInfo;
+        }
+
+        /**
+         * @return the ID of this controller
+         */
+        public int getSessionId() {
+            synchronized (mLock) {
+                return mSessionInfo.getSessionId();
+            }
+        }
+
+        /**
+         * @return the category of routes that the session includes.
+         */
+        @NonNull
+        public String getControlCategory() {
+            synchronized (mLock) {
+                return mSessionInfo.getControlCategory();
+            }
+        }
+
+        /**
+         * @return the control hints used to control route session if available.
+         */
+        @Nullable
+        public Bundle getControlHints() {
+            synchronized (mLock) {
+                return mSessionInfo.getControlHints();
+            }
+        }
+
+        /**
+         * @return the unmodifiable list of IDs of currently selected routes
+         */
+        @NonNull
+        public List<String> getSelectedRoutes() {
+            synchronized (mLock) {
+                return Collections.unmodifiableList(mSessionInfo.getSelectedRoutes());
+            }
+        }
+
+        /**
+         * @return the unmodifiable list of IDs of deselectable routes for the session.
+         */
+        @NonNull
+        public List<String> getDeselectableRoutes() {
+            synchronized (mLock) {
+                return Collections.unmodifiableList(mSessionInfo.getDeselectableRoutes());
+            }
+        }
+
+        /**
+         * @return the unmodifiable list of IDs of groupable routes for the session.
+         */
+        @NonNull
+        public List<String> getGroupableRoutes() {
+            synchronized (mLock) {
+                return Collections.unmodifiableList(mSessionInfo.getGroupableRoutes());
+            }
+        }
+
+        /**
+         * @return the unmodifiable list of IDs of transferrable routes for the session.
+         */
+        @NonNull
+        public List<String> getTransferrableRoutes() {
+            synchronized (mLock) {
+                return Collections.unmodifiableList(mSessionInfo.getTransferrableRoutes());
+            }
+        }
+
+        /**
+         * Returns true if the session is released, false otherwise.
+         * If it is released, then all other getters from this instance may return invalid values.
+         * Also, any operations to this instance will be ignored once released.
+         *
+         * @see #release
+         * @see SessionCallback#onSessionReleased
+         */
+        public boolean isReleased() {
+            synchronized (mLock) {
+                return mIsReleased;
+            }
+        }
+
+        /**
+         * Add routes to the remote session. Route add requests that are currently in
+         * {@link #getSelectedRoutes()} will be ignored.
+         *
+         * @see #getSelectedRoutes()
+         * @see SessionCallback#onSessionInfoChanged
+         */
+        public void addRoute(MediaRoute2Info route) {
+            // TODO: Implement this when the actual connection logic is implemented.
+        }
+
+        /**
+         * Remove routes from this session. Media may be stopped on those devices.
+         * Route removal requests that are not currently in {@link #getSelectedRoutes()} will be
+         * ignored.
+         *
+         * @see #getSelectedRoutes()
+         * @see SessionCallback#onSessionInfoChanged
+         */
+        public void removeRoute(MediaRoute2Info route) {
+            // TODO: Implement this when the actual connection logic is implemented.
+        }
+
+        /**
+         * Release this session.
+         * Any operation on this session after calling this method will be ignored.
+         *
+         * @param stopMedia Should the media that is playing on the device be stopped after this
+         *                  session is released.
+         * @see SessionCallback#onSessionReleased
+         */
+        public void release(boolean stopMedia) {
+            synchronized (mLock) {
+                if (mIsReleased) {
+                    return;
+                }
+                mIsReleased = true;
+            }
+            // TODO: Use stopMedia variable when the actual connection logic is implemented.
+        }
     }
 
     final class RouteCallbackRecord {
@@ -616,8 +778,7 @@ public class MediaRouter2 {
             if (!(obj instanceof RouteCallbackRecord)) {
                 return false;
             }
-            return mRouteCallback
-                    == ((RouteCallbackRecord) obj).mRouteCallback;
+            return mRouteCallback == ((RouteCallbackRecord) obj).mRouteCallback;
         }
 
         @Override
@@ -630,17 +791,17 @@ public class MediaRouter2 {
         public final MediaRoute2Info mRoute;
         public final String mControlCategory;
         public final Executor mExecutor;
-        public final SessionCreationCallback mSessionCreationCallback;
+        public final SessionCallback mSessionCallback;
         public final int mRequestId;
 
         SessionCreationRequest(int requestId, @NonNull MediaRoute2Info route,
                 @NonNull String controlCategory,
                 @Nullable Executor executor,
-                @NonNull SessionCreationCallback sessionCreationCallback) {
+                @NonNull SessionCallback sessionCallback) {
             mRoute = route;
             mControlCategory = controlCategory;
             mExecutor = executor;
-            mSessionCreationCallback = sessionCreationCallback;
+            mSessionCallback = sessionCallback;
             mRequestId = requestId;
         }
     }
