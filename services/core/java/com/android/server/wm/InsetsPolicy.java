@@ -66,10 +66,11 @@ class InsetsPolicy {
         }
         mStatusBar.setVisible(focusedWin == null
                 || focusedWin != getStatusControlTarget(focusedWin)
-                || focusedWin.getClientInsetsState().getSource(ITYPE_STATUS_BAR).isVisible());
+                || focusedWin.getRequestedInsetsState().getSource(ITYPE_STATUS_BAR).isVisible());
         mNavBar.setVisible(focusedWin == null
                 || focusedWin != getNavControlTarget(focusedWin)
-                || focusedWin.getClientInsetsState().getSource(ITYPE_NAVIGATION_BAR).isVisible());
+                || focusedWin.getRequestedInsetsState().getSource(ITYPE_NAVIGATION_BAR)
+                        .isVisible());
     }
 
     boolean isHidden(@InternalInsetsType int type) {

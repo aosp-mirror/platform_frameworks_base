@@ -421,8 +421,10 @@ public class WindowStateTests extends WindowTestsBase {
                 .setWindow(statusBar, null /* frameProvider */);
         mDisplayContent.getInsetsStateController().onBarControlTargetChanged(
                 app, null /* fakeTopControlling */, app, null /* fakeNavControlling */);
+        final InsetsSource source = new InsetsSource(ITYPE_STATUS_BAR);
+        source.setVisible(false);
         mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR)
-                .onInsetsModified(app, new InsetsSource(ITYPE_STATUS_BAR));
+                .onInsetsModified(app, source);
         waitUntilHandlersIdle();
         assertFalse(statusBar.isVisible());
     }
