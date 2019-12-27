@@ -396,16 +396,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Umožňuje aplikaci odesílat trvalá vysílání, která přetrvávají i po skončení vysílání. Nadměrné používání může televizi zpomalit či způsobit její nestabilitu, protože bude používat příliš mnoho paměti."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Umožňuje aplikaci odesílat trvalá vysílání, která přetrvávají i po skončení vysílání. Nadměrné používání může telefon zpomalit či způsobit jeho nestabilitu, protože bude používat příliš mnoho paměti."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"čtení kontaktů"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Umožňuje aplikaci číst údaje o kontaktech uložené v tabletu. Toto oprávnění aplikacím umožňuje ukládat údaje o kontaktech. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Umožňuje aplikaci číst údaje o kontaktech uložené v televizoru. Toto oprávnění aplikacím umožňuje ukládat údaje o kontaktech. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Umožňuje aplikaci číst údaje o kontaktech uložené v telefonu. Toto oprávnění aplikacím umožňuje ukládat údaje o kontaktech. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"úprava kontaktů"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Umožňuje aplikaci upravovat údaje o kontaktech uložené v tabletu. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Umožňuje aplikaci upravovat údaje o kontaktech uložené v televizoru. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Umožňuje aplikaci upravovat údaje o kontaktech uložení v telefonu. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"čtení seznamu hovorů"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Tato aplikace může číst historii volání."</string>

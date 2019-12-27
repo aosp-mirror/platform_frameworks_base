@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"ऐप को स्‍िटकी प्रसारण भेजने देती है, जो प्रसारण बंद होने के बाद भी बने रहते हैं. अत्‍यधिक उपयोग से टीवी धीमा या अस्‍थिर हो सकता है जिससे वह बहुत सारी मेमोरी का उपयोग कर सकता है."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण खत्म होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, फ़ोन की बहुत ज़्यादा मेमोरी का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"अपने संपर्क पढ़ें"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"यह ऐप्लिकेशन को आपके टैबलेट पर मौजूद संपर्कों का डेटा देखने की अनुमति देता है. इस अनुमति के बाद, ऐप्लिकेशन आपके संपर्कों का डेटा सेव कर सकते हैं. हालांकि, नुकसान पहुंचाने वाले ऐप्लिकेशन, आपको बताए बिना ही संपर्कों का डेटा शेयर कर सकते हैं."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"यह ऐप्लिकेशन को आपके टीवी पर मौजूद संपर्कों का डेटा देखने की अनुमति देता है. इस अनुमति के बाद, ऐप्लिकेशन आपके संपर्कों का डेटा सेव कर सकते हैं. हालांकि, नुकसान पहुंचाने वाले ऐप्लिकेशन, आपको बताए बिना ही संपर्कों का डेटा शेयर कर सकते हैं."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"यह ऐप्लिकेशन को आपके फ़ोन पर मौजूद संपर्कों का डेटा देखने की अनुमति देता है. इस अनुमति के बाद, ऐप्लिकेशन आपके संपर्कों का डेटा सेव कर सकते हैं. हालांकि, नुकसान पहुंचाने वाले ऐप्लिकेशन, आपको बताए बिना ही संपर्कों का डेटा शेयर कर सकते हैं."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"अपने संपर्क बदलें"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"यह ऐप्लिकेशन को आपके टैबलेट पर सेव किए संपर्कों के डेटा में बदलाव करने की अनुमति देता है. इस अनुमति के बाद, ऐप्लिकेशन आपके संपर्कों का डेटा मिटा सकते हैं."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"यह ऐप्लिकेशन को आपके टीवी पर सेव संपर्कों के डेटा में बदलाव करने की अनुमति देता है. इस अनुमति के बाद, ऐप्लिकेशन आपके संपर्कों का डेटा मिटा सकते हैं."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"यह ऐप्लिकेशन को आपके फ़ोन पर सेव किए संपर्कों के डेटा में बदलाव करने की अनुमति देता है. इस अनुमति के बाद, ऐप्लिकेशन आपके संपर्कों का डेटा मिटा सकते हैं."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"कॉल लॉग पढ़ें"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"यह ऐप्लिकेशन आपका कॉल इतिहास पढ़ सकता है."</string>
@@ -913,11 +909,11 @@
     <string name="factorytest_reboot" msgid="2050147445567257365">"रीबूट करें"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"\'<xliff:g id="TITLE">%s</xliff:g>\' पर यह पेज दर्शाता है:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
-    <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"मार्गदर्शक की दुबारा पूछें"</string>
+    <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"नेविगेशन की पुष्टि करें"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"इस पेज से आगे बढ़ें"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"इस पेज पर बने रहें"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nक्या आप वाकई इस पेज से दूर नेविगेट करना चाहते हैं?"</string>
-    <string name="save_password_label" msgid="9161712335355510035">"दुबारा पूछें"</string>
+    <string name="save_password_label" msgid="9161712335355510035">"पुष्टि करें"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"सलाह: ज़ूम इन और आउट करने के लिए दो बार छूएं."</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"अपने आप भरने की सुविधा"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"अपने आप भरें जाना सेट करें"</string>
@@ -1643,7 +1639,7 @@
     <string name="kg_password_instructions" msgid="7179782578809398050">"पासवर्ड डालें"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"सिम अब अक्षम हो गई है. जारी रखने के लिए PUK कोड डालें. विवरण के लिए कैरियर से संपर्क करें."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"इच्छित पिन कोड डालें"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"इच्छित पिन कोड की दुबारा पूछें"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"पिन कोड की पुष्टि करें"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"सिम कार्ड अनलॉक कर रहा है…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"गलत PIN कोड."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"ऐसा PIN लिखें, जो 4 से 8 अंकों का हो."</string>
@@ -1791,7 +1787,7 @@
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"गलत"</string>
     <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"वर्तमान पिन"</string>
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"नया पिन"</string>
-    <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"नए पिन की दुबारा पूछें"</string>
+    <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"नए पिन की पुष्टि करें"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"प्रतिबंधों को बदलने के लिए PIN बनाएं"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN मेल नहीं खाते हैं. फिर से कोशिश करें."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN बहुत छोटा है. कम से कम 4 अंकों का होना चाहिए."</string>

@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Allows the app to send sticky broadcasts, which remain after the broadcast ends. Excessive use may make the TV slow or unstable by causing it to use too much memory."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Allows the app to send sticky broadcasts, which remain after the broadcast ends. Excessive use may make the phone slow or unstable by causing it to use too much memory."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"read your contacts"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Allows the app to read data about your contacts stored on your tablet. This permission allows any apps to save your contact data, and malicious apps may share contact data without your knowledge."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Allows the app to read data about your contacts stored on your TV. This permission allows any apps to save your contact data, and malicious apps may share contact data without your knowledge."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Allows the app to read data about your contacts stored on your phone. This permission allows any apps to save your contact data, and malicious apps may share contact data without your knowledge."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"modify your contacts"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Allows the app to modify the data about your contacts stored on your tablet. This permission allows apps to delete contact data."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Allows the app to modify the data about your contacts stored on your TV. This permission allows apps to delete contact data."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Allows the app to modify the data about your contacts stored on your phone. This permission allows apps to delete contact data."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"read call log"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"This app can read your call history."</string>

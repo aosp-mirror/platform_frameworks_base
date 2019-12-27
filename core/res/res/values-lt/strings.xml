@@ -396,16 +396,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Programai leidžiama siųsti fiksuojamąsias transliacijas, kurios išlieka pasiekiamos pasibaigus transliacijai. Dėl per didelio naudojimo TV gali veikti lėtai arba nestabiliai, nes naudojama per daug atminties."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Leidžiama programai siųsti užsifiksuojančias transliacijas, kurios išlieka pasibaigus transliacijai. Per dažnas jų naudojimas gali sulėtinti telefono veikimą ar padaryti jį nestabilų verčiant naudoti per daug atminties."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"skaityti kontaktus"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Programai leidžiama skaityti duomenis apie planšetiniame kompiuteryje saugomus kontaktus. Šis leidimas suteikia teisę programoms saugoti kontaktinius duomenis, o kenkėjiškos programos gali bendrinti kontaktinius duomenis be jūsų žinios."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Programai leidžiama skaityti duomenis apie televizoriuje saugomus kontaktus. Šis leidimas suteikia teisę programoms saugoti kontaktinius duomenis, o kenkėjiškos programos gali bendrinti kontaktinius duomenis be jūsų žinios."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Programai leidžiama skaityti duomenis apie telefone saugomus kontaktus. Šis leidimas suteikia teisę programoms saugoti kontaktinius duomenis, o kenkėjiškos programos gali bendrinti kontaktinius duomenis be jūsų žinios."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"keisti kontaktus"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Programai leidžiama keisti duomenis apie planšetiniame kompiuteryje saugomus kontaktus. Su šiuo leidimu programos gali ištrinti kontaktinius duomenis."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Programai leidžiama keisti duomenis apie televizoriuje saugomus kontaktus. Su šiuo leidimu programos gali ištrinti kontaktinius duomenis."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Programai leidžiama keisti duomenis apie telefone saugomus kontaktus. Su šiuo leidimu programos gali ištrinti kontaktinius duomenis."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"skaityti skambučių žurnalą"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Ši programa gali nuskaityti skambučių istoriją."</string>

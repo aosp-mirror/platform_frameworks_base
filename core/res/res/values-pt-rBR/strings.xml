@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Permite que o app envie transmissões aderentes, que permanecem depois que a transmissão termina. O uso excessivo pode fazer com que a TV fique lenta ou instável ao fazer com que ela use muita memória."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Permite que o app envie transmissões fixas, que permanecem depois que a transmissão termina. O uso excessivo pode deixar o telefone lento ou instável, fazendo com que ele use muita memória."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"ler seus contatos"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Permite que o app leia dados sobre seus contatos armazenados no tablet. Essa permissão autoriza os apps a salvarem os dados dos seus contatos, e apps maliciosos podem compartilhar esses dados sem seu conhecimento."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Permite que o app leia dados sobre seus contatos armazenados na TV. Essa permissão autoriza os apps a salvarem os dados dos seus contatos, e apps maliciosos podem compartilhar esses dados sem seu conhecimento."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Permite que o app leia dados sobre seus contatos armazenados no smartphone. Essa permissão autoriza os apps a salvarem os dados dos seus contatos, e apps maliciosos podem compartilhar esses dados sem seu conhecimento."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"modificar seus contatos"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Permite que o app modifique os dados sobre os contatos armazenados no tablet. Essa permissão autoriza os apps a excluírem dados de contato."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Permite que o app modifique os dados sobre os contatos armazenados na TV. Essa permissão autoriza os apps a excluírem dados de contato."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Permite que o app modifique os dados sobre os contatos armazenados no smartphone. Essa permissão autoriza os apps a excluírem dados de contato."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"ler registro de chamadas"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Este app pode ler seu histórico de chamadas."</string>

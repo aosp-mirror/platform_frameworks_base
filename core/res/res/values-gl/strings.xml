@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Permite que a aplicación envíe emisións atractivas, que permanecen unha vez finalizada a emisión. O uso excesivo pode volver a televisión máis lenta ou inestable, facendo que utilice moita memoria."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Permite á aplicación enviar difusións permanentes que continúan unha vez finalizada a difusión. Un uso excesivo pode provocar que o teléfono funcione con lentitude ou de forma inestable debido á necesidade de utilizar demasiada memoria."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"ler os teus contactos"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Permite que a aplicación lea os datos sobre os contactos almacenados na túa tableta. Con este permiso, as aplicacións poden gardar os datos sobre os teus contactos. Ademais, as aplicacións maliciosas poden compartir eses datos sen o teu coñecemento."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Permite que a aplicación lea os datos sobre os contactos almacenados na túa televisión. Con este permiso, as aplicacións poden gardar os datos sobre os teus contactos. Ademais, as aplicacións maliciosas poden compartir eses datos sen o teu coñecemento."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Permite que a aplicación lea os datos sobre os contactos almacenados no teu teléfono. Con este permiso, as aplicacións poden gardar os datos sobre os teus contactos. Ademais, as aplicacións maliciosas poden compartir eses datos sen o teu coñecemento."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"modificar os teus contactos"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Permite que a aplicación modifique datos sobre os contactos almacenados na túa tableta. Con este permiso as aplicacións poden eliminar datos de contactos."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Permite que a aplicación modifique os datos sobre os contactos almacenados na túa televisión. Con este permiso, as aplicacións poden eliminar os datos sobre os contactos."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Permite que a aplicación modifique datos sobre os contactos almacenados no teu teléfono. Con este permiso as aplicacións poden eliminar datos de contactos."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"ler rexistro de chamadas"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Esta aplicación pode ler o teu historial de chamadas."</string>
@@ -1823,8 +1819,8 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para aumentar a duración da batería, a función Aforro de batería fai o seguinte:\n·Activa o tema escuro\n·Desactiva ou restrinxe a actividade en segundo plano, algúns efectos visuais e outras funcións, como \"Ok Google\"\n\n"<annotation id="url">"Máis información"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Para aumentar a duración da batería, a función Aforro de batería fai o seguinte:\n·Activa o tema escuro\n·Desactiva ou restrinxe a actividade en segundo plano, algúns efectos visuais e outras funcións, como \"Ok Google\""</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Para contribuír a reducir o uso de datos, o Economizador de datos impide que algunhas aplicacións envíen ou reciban datos en segundo plano. Cando esteas utilizando unha aplicación, esta poderá acceder aos datos, pero é posible que o faga con menos frecuencia. Por exemplo, é posible que as imaxes non se mostren ata que as toques."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Queres activar o economizador de datos?"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Para contribuír a reducir o uso de datos, o aforro de datos impide que algunhas aplicacións envíen ou reciban datos en segundo plano. Cando esteas utilizando unha aplicación, esta poderá acceder aos datos, pero é posible que o faga con menos frecuencia. Por exemplo, é posible que as imaxes non se mostren ata que as toques."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Queres activar o aforro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">Durante %1$d minutos (ata as <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Uygulamaya, yayın sona erdikten sonra da kalan, ziyaretçi çeken yayınlar gönderme izni verir. Aşırı kullanım çok fazla bellek kullanılmasına yol açarak TV\'yi yavaşlatabilir ya da kararsız hale getirebilir."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Uygulamaya, yayın bittikten sonra da kalan sabit yayınlar gönderme izni verir. Aşırı kullanılması çok fazla bellek harcanmasına neden olarak telefonunu yavaşlatabilir veya dengesiz hale getirebilir."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"kişilerinizi okuma"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Uygulamaya, tabletinizde kayıtlı kişileriniz ile ilgili verileri okuma izni verir. Bu izin, uygulamanın kişi verilerinizi kaydetmesine olanak sağlar ve kötü amaçlı uygulamalar kişi verilerini sizden habersiz paylaşabilir."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Uygulamaya, TV\'nizde kayıtlı kişileriniz ile ilgili verileri okuma izni verir. Bu izin, uygulamanın kişi verilerinizi kaydetmesine olanak sağlar ve kötü amaçlı uygulamalar kişi verilerini sizden habersiz paylaşabilir."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Uygulamaya, telefonunuzda depolanan kişilerinizle ilgili verileri okuma izni verir. Bu izin, uygulamanın kişi verilerinizi kaydetmesine olanak sağlar ve kötü amaçlı uygulamalar kişi verilerini sizden habersiz paylaşabilir."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"kişilerinizi değiştirme"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Uygulamaya tabletinizde kayıtlı kişileriniz ile ilgili verileri değiştirme izni verir. Bu izin, uygulamanın kişi verilerinizi silmesine olanak sağlar."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Uygulamaya, TV\'nizde kayıtlı kişileriniz ile ilgili verileri değiştirme izni verir. Bu izin, uygulamanın kişi verilerinizi silmesine olanak sağlar."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Uygulamaya telefonunuzda kayıtlı kişileriniz ile ilgili verileri değiştirme izni verir. Bu izin, uygulamanın kişi verilerinizi silmesine olanak sağlar."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"çağrı günlüğünü oku"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Bu uygulama, çağrı geçmişinizi okuyabilir."</string>

@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Hiermee kan de app sticky broadcasts verzenden die achterblijven nadat de uitzending is afgelopen. Overmatig gebruik kan de tv traag instabiel maken doordat er te veel geheugen wordt gebruikt."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Hiermee kan de app sticky broadcasts verzenden die behouden blijven nadat de broadcast is beëindigd. Bij overmatig gebruik kan de telefoon traag of instabiel worden omdat er te veel geheugenruimte wordt gebruikt."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"je contacten lezen"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je tablet. Met dit recht kunnen apps je contactgegevens opslaan en kunnen schadelijke apps zonder je medeweten contactgegevens delen."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je tv. Met dit recht kunnen apps je contactgegevens opslaan en kunnen schadelijke apps zonder je medeweten contactgegevens delen."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op je telefoon. Met dit recht kunnen apps je contactgegevens opslaan en kunnen schadelijke apps zonder je medeweten contactgegevens delen."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"je contacten aanpassen"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tablet. Met dit recht kunnen apps contactgegevens verwijderen."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tv. Met dit recht kunnen apps contactgegevens verwijderen."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je telefoon. Met dit recht kunnen apps contactgegevens verwijderen."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"gesprekslijst lezen"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Deze app kan je gespreksgeschiedenis lezen."</string>
@@ -1167,7 +1163,7 @@
     <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> stopt steeds"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> stopt steeds"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"App opnieuw openen"</string>
-    <string name="aerr_report" msgid="3095644466849299308">"Feedback verzenden"</string>
+    <string name="aerr_report" msgid="3095644466849299308">"Feedback sturen"</string>
     <string name="aerr_close" msgid="3398336821267021852">"Sluiten"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"Verbergen tot apparaat opnieuw wordt opgestart"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"Wachten"</string>

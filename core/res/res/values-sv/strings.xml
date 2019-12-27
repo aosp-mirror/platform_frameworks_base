@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Tillåter att appen skickar sticky broadcasts som finns kvar när sändningen är slut. Överdriven användning kan göra TV:n seg eller instabil eftersom den använder för mycket minne."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Tillåter att appen skickar sticky broadcast, som finns kvar när sändningen är slut. Vid intensiv användning kan mobilen bli långsam eller instabil eftersom minnet överbelastas."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"läsa dina kontakter"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Tillåter att appen läser kontaktuppgifter som sparats på surfplattan. Med den här behörigheten tillåts appen att spara kontaktuppgifter. Skadliga appar kan dela uppgifterna med andra utan din vetskap."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Tillåter att appen läser kontaktuppgifter som sparats på tv:n. Med den här behörigheten tillåts appen att spara kontaktuppgifter. Skadliga appar kan dela uppgifterna med andra utan din vetskap."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Tillåter att appen läser kontaktuppgifter som sparats på telefonen. Med den här behörigheten tillåts appen att spara kontaktuppgifter. Skadliga appar kan dela uppgifterna med andra utan din vetskap."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"ändra kontakterna"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Tillåter att appen ändrar kontaktuppgifter som sparats på surfplattan. Med den här behörigheten får appar även radera kontaktuppgifter."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Tillåter att appen ändrar kontaktuppgifter som sparats på tv:n. Med den här behörigheten får appar även radera kontaktuppgifter."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Tillåter att appen ändrar kontaktuppgifter som sparats på telefonen. Med den här behörigheten får appar även radera kontaktuppgifter."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"läs samtalslogg"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Appen kan läsa din samtalshistorik."</string>
