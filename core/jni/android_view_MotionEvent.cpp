@@ -18,7 +18,7 @@
 
 #include <nativehelper/JNIHelp.h>
 
-#include <SkMatrix.h>
+#include <android/graphics/matrix.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <utils/Log.h>
@@ -571,6 +571,15 @@ static jfloat android_view_MotionEvent_nativeGetAxisValue(JNIEnv* env, jclass cl
     }
 }
 
+static void android_view_MotionEvent_nativeTransform(JNIEnv* env, jclass clazz,
+        jlong nativePtr, jobject matrixObj) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+
+    float m[9];
+    AMatrix_getContents(env, matrixObj, m);
+    event->transform(m);
+}
+
 // ----------------- @CriticalNative ------------------------------
 
 static jlong android_view_MotionEvent_nativeCopy(jlong destNativePtr, jlong sourceNativePtr,
@@ -745,24 +754,6 @@ static void android_view_MotionEvent_nativeScale(jlong nativePtr, jfloat scale) 
     event->scale(scale);
 }
 
-static void android_view_MotionEvent_nativeTransform(jlong nativePtr, jlong matrixPtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
-
-    static_assert(SkMatrix::kMScaleX == 0, "SkMatrix unexpected index");
-    static_assert(SkMatrix::kMSkewX == 1, "SkMatrix unexpected index");
-    static_assert(SkMatrix::kMTransX == 2, "SkMatrix unexpected index");
-    static_assert(SkMatrix::kMSkewY == 3, "SkMatrix unexpected index");
-    static_assert(SkMatrix::kMScaleY == 4, "SkMatrix unexpected index");
-    static_assert(SkMatrix::kMTransY == 5, "SkMatrix unexpected index");
-    static_assert(SkMatrix::kMPersp0 == 6, "SkMatrix unexpected index");
-    static_assert(SkMatrix::kMPersp1 == 7, "SkMatrix unexpected index");
-    static_assert(SkMatrix::kMPersp2 == 8, "SkMatrix unexpected index");
-    float m[9];
-    matrix->get9(m);
-    event->transform(m);
-}
-
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMotionEventMethods[] = {
@@ -810,6 +801,9 @@ static const JNINativeMethod gMotionEventMethods[] = {
     { "nativeGetAxisValue",
             "(JIII)F",
             (void*)android_view_MotionEvent_nativeGetAxisValue },
+    { "nativeTransform",
+            "(JLandroid/graphics/Matrix;)V",
+            (void*)android_view_MotionEvent_nativeTransform },
 
     // --------------- @CriticalNative ------------------
 
@@ -912,9 +906,6 @@ static const JNINativeMethod gMotionEventMethods[] = {
     { "nativeScale",
             "(JF)V",
             (void*)android_view_MotionEvent_nativeScale },
-    { "nativeTransform",
-            "(JJ)V",
-            (void*)android_view_MotionEvent_nativeTransform },
 };
 
 int register_android_view_MotionEvent(JNIEnv* env) {
