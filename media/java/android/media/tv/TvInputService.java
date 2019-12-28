@@ -17,6 +17,7 @@
 package android.media.tv;
 
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -58,6 +59,8 @@ import android.widget.FrameLayout;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,6 +97,53 @@ public abstract class TvInputService extends Service {
      * tag.
      */
     public static final String SERVICE_META_DATA = "android.media.tv.input";
+
+    /**
+     * Prioirity hint from use case types.
+     *
+     * @hide
+     */
+    @IntDef(prefix = "PRIORITY_HINT_USE_CASE_TYPE_",
+        value = {PRIORITY_HINT_USE_CASE_TYPE_BACKGROUND, PRIORITY_HINT_USE_CASE_TYPE_SCAN,
+            PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK, PRIORITY_HINT_USE_CASE_TYPE_LIVE,
+            PRIORITY_HINT_USE_CASE_TYPE_RECORD})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PriorityHintUseCaseType {}
+
+    /**
+     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(int, String , int)}:
+     * Background.
+     * TODO Link: Tuner#Tuner(Context, string, int).
+     */
+    public static final int PRIORITY_HINT_USE_CASE_TYPE_BACKGROUND = 100;
+
+    /**
+     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(int, String , int)}:
+     * Scan.
+     * TODO Link: Tuner#Tuner(Context, string, int).
+     */
+    public static final int PRIORITY_HINT_USE_CASE_TYPE_SCAN = 200;
+
+    /**
+     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(int, String , int)}:
+     * Playback.
+     * TODO Link: Tuner#Tuner(Context, string, int).
+     */
+    public static final int PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK = 300;
+
+    /**
+     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(int, String , int)}:
+     * Live.
+     * TODO Link: Tuner#Tuner(Context, string, int).
+     */
+    public static final int PRIORITY_HINT_USE_CASE_TYPE_LIVE = 400;
+
+    /**
+     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(int, String , int)}:
+     * Record.
+     * TODO Link: Tuner#Tuner(Context, string, int).
+     */
+    public static final int PRIORITY_HINT_USE_CASE_TYPE_RECORD = 500;
 
     /**
      * Handler instance to handle request from TV Input Manager Service. Should be run in the main

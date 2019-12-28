@@ -110,12 +110,20 @@ public final class TvInputManager {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({VIDEO_UNAVAILABLE_REASON_UNKNOWN, VIDEO_UNAVAILABLE_REASON_TUNING,
-            VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL, VIDEO_UNAVAILABLE_REASON_BUFFERING,
-            VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY})
+        VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL, VIDEO_UNAVAILABLE_REASON_BUFFERING,
+        VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY, VIDEO_UNAVAILABLE_REASON_INSUFFICIENT_RESOURCE,
+        VIDEO_UNAVAILABLE_REASON_CAS_INSUFFICIENT_OUTPUT_PROTECTION,
+        VIDEO_UNAVAILABLE_REASON_CAS_PVR_RECORDING_NOT_ALLOWED,
+        VIDEO_UNAVAILABLE_REASON_CAS_PVR_RECORDING_NOT_ALLOWED,
+        VIDEO_UNAVAILABLE_REASON_CAS_NO_LICENSE, VIDEO_UNAVAILABLE_REASON_CAS_LICENSE_EXPIRED,
+        VIDEO_UNAVAILABLE_REASON_CAS_NEED_ACTIVATION, VIDEO_UNAVAILABLE_REASON_CAS_NEED_PAIRING,
+        VIDEO_UNAVAILABLE_REASON_CAS_NO_CARD, VIDEO_UNAVAILABLE_REASON_CAS_CARD_MUTE,
+        VIDEO_UNAVAILABLE_REASON_CAS_CARD_INVALID, VIDEO_UNAVAILABLE_REASON_CAS_BLACKOUT,
+        VIDEO_UNAVAILABLE_REASON_CAS_REBOOTING, VIDEO_UNAVAILABLE_REASON_CAS_UNKNOWN})
     public @interface VideoUnavailableReason {}
 
     static final int VIDEO_UNAVAILABLE_REASON_START = 0;
-    static final int VIDEO_UNAVAILABLE_REASON_END = 5;
+    static final int VIDEO_UNAVAILABLE_REASON_END = 18;
 
     /**
      * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
@@ -151,9 +159,88 @@ public final class TvInputManager {
      * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
      * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
      * the source is not physically connected, for example the HDMI cable is not connected.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_NOT_CONNECTED = 5;
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * the resource is not enough to meet requirement.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_INSUFFICIENT_RESOURCE = 6;
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * the output protection level enabled on the device is not sufficient to meet the requirements
+     * in the license policy.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_CAS_INSUFFICIENT_OUTPUT_PROTECTION = 7;
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * the PVR record is not allowed by the license policy.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_CAS_PVR_RECORDING_NOT_ALLOWED = 8;
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * no license keys have been provided.
      * @hide
      */
-    public static final int VIDEO_UNAVAILABLE_REASON_NOT_CONNECTED = VIDEO_UNAVAILABLE_REASON_END;
+    public static final int VIDEO_UNAVAILABLE_REASON_CAS_NO_LICENSE = 9;
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * Using a license in whhich the keys have expired.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_CAS_LICENSE_EXPIRED = 10;
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * the device need be activated.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_CAS_NEED_ACTIVATION = 11;
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * the device need be paired.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_CAS_NEED_PAIRING = 12;
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * smart card is missed.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_CAS_NO_CARD = 13;
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * smart card is muted.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_CAS_CARD_MUTE = 14;
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * smart card is invalid.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_CAS_CARD_INVALID = 15;
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * of a geographical blackout.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_CAS_BLACKOUT = 16;
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * CAS system is rebooting.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_CAS_REBOOTING = 17;
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * of unknown CAS error.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_CAS_UNKNOWN = VIDEO_UNAVAILABLE_REASON_END;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
