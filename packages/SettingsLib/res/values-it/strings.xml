@@ -204,7 +204,7 @@
     <string name="enable_adb" msgid="8072776357237289039">"Debug USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Modalità debug quando è connesso tramite USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Revoca autorizzazioni debug USB"</string>
-    <string name="bugreport_in_power" msgid="8664089072534638709">"Scorciatoria segnalazione bug"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"Scorciatoia segnalazione bug"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Mostra un pulsante per segnalare i bug nel menu di accensione"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Rimani attivo"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Lo schermo non va mai in stand-by se sotto carica"</string>
@@ -240,7 +240,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS privato"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Seleziona modalità DNS privato"</string>
-    <string name="private_dns_mode_off" msgid="7065962499349997041">"Off"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"OFF"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatico"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Nome host del provider DNS privato"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Inserisci il nome host del provider DNS"</string>
