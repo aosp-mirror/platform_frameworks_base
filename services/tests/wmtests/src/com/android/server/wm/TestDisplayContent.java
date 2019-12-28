@@ -68,20 +68,6 @@ class TestDisplayContent extends DisplayContent {
         doNothing().when(inputMonitor).resumeDispatchingLw(any());
     }
 
-    @SuppressWarnings("TypeParameterUnusedInFormals")
-    @Override
-    ActivityStack createStackUnchecked(int windowingMode, int activityType,
-            int stackId, boolean onTop) {
-        return new ActivityTestsBase.StackBuilder(mSupervisor.mRootActivityContainer)
-                .setDisplay(this)
-                .setWindowingMode(windowingMode)
-                .setActivityType(activityType)
-                .setStackId(stackId)
-                .setOnTop(onTop)
-                .setCreateActivity(false)
-                .build();
-    }
-
     public static class Builder {
         private final DisplayInfo mInfo;
         private boolean mCanRotate = true;
@@ -147,7 +133,6 @@ class TestDisplayContent extends DisplayContent {
             final TestDisplayContent newDisplay;
             synchronized (mService.mGlobalLock) {
                 newDisplay = new TestDisplayContent(mService.mStackSupervisor, display);
-                mService.mRootActivityContainer.addChild(newDisplay, mPosition);
             }
             // disable the normal system decorations
             final DisplayPolicy displayPolicy = newDisplay.mDisplayContent.getDisplayPolicy();

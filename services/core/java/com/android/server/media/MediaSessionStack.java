@@ -16,7 +16,6 @@
 
 package com.android.server.media;
 
-import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Debug;
@@ -144,7 +143,7 @@ class MediaSessionStack {
      */
     public MediaSessionRecord getMediaSessionRecord(MediaSession.Token sessionToken) {
         for (MediaSessionRecord record : mSessions) {
-            if (Objects.equals(record.getControllerBinder(), sessionToken.getBinder())) {
+            if (Objects.equals(record.getSessionToken(), sessionToken)) {
                 return record;
             }
         }
@@ -230,8 +229,8 @@ class MediaSessionStack {
         MediaSessionRecord mediaButtonSession = null;
         for (MediaSessionRecord session : mSessions) {
             if (uid == session.getUid()) {
-                if (session.getPlaybackState() != null && session.isPlaybackActive() ==
-                        mAudioPlayerStateMonitor.isPlaybackActive(session.getUid())) {
+                if (session.checkPlaybackActiveState(
+                        mAudioPlayerStateMonitor.isPlaybackActive(session.getUid()))) {
                     // If there's a media session whose PlaybackState matches
                     // the audio playback state, return it immediately.
                     return session;
@@ -287,7 +286,7 @@ class MediaSessionStack {
         int size = records.size();
         for (int i = 0; i < size; i++) {
             MediaSessionRecord record = records.get(i);
-            if (record.isPlaybackActive()) {
+            if (record.checkPlaybackActiveState(true)) {
                 mCachedVolumeDefault = record;
                 return record;
             }
@@ -301,7 +300,7 @@ class MediaSessionStack {
         int size = records.size();
         for (int i = 0; i < size; i++) {
             MediaSessionRecord record = records.get(i);
-            if (record.getPlaybackType() == PlaybackInfo.PLAYBACK_TYPE_REMOTE) {
+            if (!record.isPlaybackLocal()) {
                 return record;
             }
         }
@@ -359,7 +358,7 @@ class MediaSessionStack {
                 continue;
             }
 
-            if (session.isPlaybackActive()) {
+            if (session.checkPlaybackActiveState(true)) {
                 result.add(lastPlaybackActiveIndex++, session);
                 lastActiveIndex++;
             } else {

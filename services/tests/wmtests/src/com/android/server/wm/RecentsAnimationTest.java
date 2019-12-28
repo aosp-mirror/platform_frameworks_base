@@ -101,7 +101,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
         doCallRealMethod().when(mRootActivityContainer).ensureActivitiesVisible(
                 any() /* starting */, anyInt() /* configChanges */,
-                anyBoolean() /* preserveWindows */);
+                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
 
         RecentsAnimationCallbacks recentsAnimation = startRecentsActivity(
                 mRecentsComponent, true /* getRecentsAnimation */);
@@ -161,7 +161,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         assertFalse(recentsActivity.mVisibleRequested);
 
         // Assume it is stopped to test next use case.
-        recentsActivity.activityStoppedLocked(null /* newIcicle */, null /* newPersistentState */,
+        recentsActivity.activityStopped(null /* newIcicle */, null /* newPersistentState */,
                 null /* description */);
         mSupervisor.mStoppingActivities.remove(recentsActivity);
 
@@ -192,7 +192,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
         doCallRealMethod().when(mRootActivityContainer).ensureActivitiesVisible(
                 any() /* starting */, anyInt() /* configChanges */,
-                anyBoolean() /* preserveWindows */);
+                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
         doReturn(app).when(mService).getProcessController(eq(recentActivity.processName), anyInt());
         ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
         doNothing().when(lifecycleManager).scheduleTransaction(any());
@@ -355,7 +355,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         doReturn(TEST_USER_ID).when(mService).getCurrentUserId();
         doCallRealMethod().when(mRootActivityContainer).ensureActivitiesVisible(
                 any() /* starting */, anyInt() /* configChanges */,
-                anyBoolean() /* preserveWindows */);
+                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
 
         startRecentsActivity(otherUserHomeActivity.getTask().getBaseIntent().getComponent(),
                 true);

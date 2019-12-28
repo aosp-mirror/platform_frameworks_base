@@ -497,10 +497,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"‏מאפשר לאפליקציה להציג את תצורת ה-Bluetooth בטאבלט, וכן ליצור ולקבל חיבורים עם מכשירים מותאמים."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"‏מאפשרת לאפליקציה להציג את הגדרת ה-Bluetooth במכשיר ה-Android TV, וליצור ולקבל חיבורים עם מכשירים מותאמים."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"‏מאפשר לאפליקציה להציג את תצורת ה-Bluetooth בטלפון, וכן ליצור ולקבל חיבורים עם מכשירים מותאמים."</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏פרטים על שירות תשלום מועדף ב-NFC"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏מאפשרת לאפליקציה לקבל פרטים על שירות תשלום מועדף ב-NFC, כמו עזרים רשומים ויעד של נתיב."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"‏שלוט ב-Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"מאפשר לאפליקציה נהל תקשורת עם תגים, כרטיסים וקוראים מסוג \'תקשורת מטווח קצר\'."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ביטול נעילת המסך שלך"</string>
@@ -1663,12 +1661,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> הופעל על-ידי קיצור הדרך לנגישות"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> הושבת על-ידי קיצור הדרך לנגישות"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"יש ללחוץ לחיצה ארוכה על שני לחצני עוצמת הקול למשך שלוש שניות כדי להשתמש בשירות <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"יש לבחור שירות שיופעל באמצעות הקשה על לחצן הנגישות:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"יש לבחור שירות שיופעל באמצעות תנועת הנגישות (החלקה למעלה מתחתית המסך בעזרת שתי אצבעות):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"יש לבחור שירות שיופעל באמצעות תנועת הנגישות (החלקה למעלה מתחתית המסך בעזרת שלוש אצבעות):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"כדי לעבור בין שירותים, יש ללחוץ לחיצה ארוכה על לחצן הנגישות."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"כדי לעבור בין שירותים, יש להחליק כלפי מעלה בעזרת שתי אצבעות ולהחזיק."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"כדי לעבור בין שירותים, יש להחליק כלפי מעלה בעזרת שלוש אצבעות ולהחזיק."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"הגדלה"</string>
     <string name="user_switched" msgid="7249833311585228097">"המשתמש הנוכחי <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"עובר אל <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1927,11 +1919,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"מחובר אל <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"הקש כדי להציג קבצים"</string>
     <string name="pin_target" msgid="8036028973110156895">"הצמד"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"הצמדה של‏ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"בטל הצמדה"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"ביטול ההצמדה של <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"פרטי אפליקציה"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"מתחיל בהדגמה…"</string>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.service.controls;
+package android.service.controls.templates;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
@@ -22,6 +22,9 @@ import android.annotation.NonNull;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.controls.Control;
+import android.service.controls.ControlState;
+import android.service.controls.actions.ControlAction;
 
 import com.android.internal.util.Preconditions;
 
@@ -64,7 +67,10 @@ public abstract class ControlTemplate implements Parcelable {
             TYPE_RANGE,
             TYPE_THUMBNAIL,
             TYPE_DISCRETE_TOGGLE,
-            TYPE_COORD_RANGE
+            TYPE_COORD_RANGE,
+            TYPE_TOGGLE_RANGE,
+            TYPE_TEMPERATURE,
+            TYPE_STATELESS
     })
     public @interface TemplateType {}
 
@@ -97,6 +103,12 @@ public abstract class ControlTemplate implements Parcelable {
      * @hide
      */
     public static final int TYPE_COORD_RANGE = 5;
+
+    public static final int TYPE_TOGGLE_RANGE = 6;
+
+    public static final int TYPE_TEMPERATURE = 7;
+
+    public static final int TYPE_STATELESS = 8;
 
     private @NonNull final String mTemplateId;
 
@@ -167,17 +179,31 @@ public abstract class ControlTemplate implements Parcelable {
     private static ControlTemplate createTemplateFromType(@TemplateType int type, Parcel source) {
         switch(type) {
             case TYPE_TOGGLE:
-                return ToggleTemplate.CREATOR.createFromParcel(source);
+                return new ToggleTemplate(source.readBundle());
             case TYPE_RANGE:
-                return RangeTemplate.CREATOR.createFromParcel(source);
+                return new RangeTemplate(source.readBundle());
             case TYPE_THUMBNAIL:
-                return ThumbnailTemplate.CREATOR.createFromParcel(source);
+                return new ThumbnailTemplate(source.readBundle());
             case TYPE_DISCRETE_TOGGLE:
-                return DiscreteToggleTemplate.CREATOR.createFromParcel(source);
+                return new DiscreteToggleTemplate(source.readBundle());
+            case TYPE_COORD_RANGE:
+                return new CoordinatedRangeTemplate(source.readBundle());
+            case TYPE_TOGGLE_RANGE:
+                return new ToggleRangeTemplate(source.readBundle());
+            case TYPE_TEMPERATURE:
+                return new TemperatureControlTemplate(source.readBundle());
+            case TYPE_STATELESS:
+                return new StatelessTemplate(source.readBundle());
             case TYPE_NONE:
             default:
                 source.readBundle();
                 return NO_TEMPLATE;
+        }
+    }
+
+    protected static void verifyType(@TemplateType int type, @TemplateType int thisType) {
+        if (type != thisType) {
+            throw new IllegalStateException("The type " + type + "does not match " + thisType);
         }
     }
 }

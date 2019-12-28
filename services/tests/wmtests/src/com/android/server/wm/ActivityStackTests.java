@@ -901,7 +901,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         assertEquals(2, mTask.getChildCount());
 
-        mStack.handleAppDiedLocked(secondActivity.app);
+        mRootActivityContainer.handleAppDied(secondActivity.app);
 
         assertFalse(mTask.hasChild());
         assertFalse(mStack.hasChild());
@@ -915,7 +915,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         activity.launchCount = 1;
         activity.setSavedState(null /* savedState */);
 
-        mStack.handleAppDiedLocked(activity.app);
+        mRootActivityContainer.handleAppDied(activity.app);
 
         assertEquals(1, mTask.getChildCount());
         assertEquals(1, mStack.getChildCount());
@@ -929,7 +929,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         activity.launchCount = 3;
         activity.setSavedState(null /* savedState */);
 
-        mStack.handleAppDiedLocked(activity.app);
+        mRootActivityContainer.handleAppDied(activity.app);
 
         assertFalse(mTask.hasChild());
         assertFalse(mStack.hasChild());
@@ -943,7 +943,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         activity.launchCount = 1;
         activity.setSavedState(null /* savedState */);
 
-        mStack.handleAppDiedLocked(activity.app);
+        mRootActivityContainer.handleAppDied(activity.app);
 
         assertEquals(1, mTask.getChildCount());
         assertEquals(1, mStack.getChildCount());
@@ -957,7 +957,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         activity.launchCount = 3;
         activity.setSavedState(null /* savedState */);
 
-        mStack.handleAppDiedLocked(activity.app);
+        mRootActivityContainer.handleAppDied(activity.app);
 
         assertFalse(mTask.hasChild());
         assertFalse(mStack.hasChild());

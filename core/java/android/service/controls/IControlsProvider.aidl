@@ -16,7 +16,7 @@
 
 package android.service.controls;
 
-import android.service.controls.ControlAction;
+import android.service.controls.actions.ControlAction;
 
 /** @hide */
 oneway interface IControlsProvider {

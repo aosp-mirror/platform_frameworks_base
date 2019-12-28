@@ -227,6 +227,7 @@
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Kuongeza kasi kwa kutumia maunzi ili kusambaza mtandao"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Onyesha vifaa vya Bluetooth visivyo na majina"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Zima sauti kamili"</string>
+    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Washa Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Toleo la Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Chagua Toleo la Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Kodeki ya Sauti ya Bluetooth"</string>
@@ -275,6 +276,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Kagua iwapo programu zilizosakinishwa kupitia ADB/ADT zina tabia ya kudhuru."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Itaonyesha vifaa vya Bluetooth bila majina (anwani za MAC pekee)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Huzima kipengele cha Bluetooth cha sauti kamili kunapotokea matatizo ya sauti katika vifaa vya mbali kama vile sauti ya juu mno au inaposhindikana kuidhibiti."</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"Huwasha rafu ya kipengele cha Bluetooth Gabeldorche."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Kituo cha karibu"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Washa programu ya mwisho inayotoa ufikiaji mkuu wa karibu"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Inakagua HDCP"</string>
@@ -379,7 +381,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (nyekundu-kijani)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (samawati-manjano)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Usahihishaji wa rangi"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"Kipengele hiki ni cha majaribio na huenda kikaathiri utendaji wa kifaa chako."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"Urekebishaji wa rangi huwasaidia watu wenye matatizo ya kutofautisha rangi ili waone rangi nyingi sahihi"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Imetanguliwa na <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Zimesalia takribani <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>

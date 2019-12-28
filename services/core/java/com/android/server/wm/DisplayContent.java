@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
@@ -1038,7 +1039,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         onDisplayChanged(this);
 
         // Add itself as a child to the root container.
-        mWmService.mRoot.addChild(this, null);
+        mWmService.mRoot.addChild(this, POSITION_BOTTOM);
 
         // TODO(b/62541591): evaluate whether this is the best spot to declare the
         // {@link DisplayContent} ready for use.
@@ -1089,7 +1090,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return token.asActivityRecord();
     }
 
-    private void addWindowToken(IBinder binder, WindowToken token) {
+    void addWindowToken(IBinder binder, WindowToken token) {
         final DisplayContent dc = mWmService.mRoot.getWindowTokenDisplay(token);
         if (dc != null) {
             // We currently don't support adding a window token to the display if the display
@@ -1111,6 +1112,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mTokenMap.put(binder, token);
 
         if (token.asActivityRecord() == null) {
+            // Set displayContent for non-app token to prevent same token will add twice after
+            // onDisplayChanged.
+            // TODO: Check if it's fine that super.onDisplayChanged of WindowToken
+            //  (WindowsContainer#onDisplayChanged) may skipped when token.mDisplayContent assigned.
+            token.mDisplayContent = this;
             // Add non-app token to container hierarchy on the display. App tokens are added through
             // the parent container managing them (e.g. Tasks).
             switch (token.windowType) {
@@ -2494,10 +2500,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @param inOutRegion The region to be amended.
      */
     private void amendWindowTapExcludeRegion(Region inOutRegion) {
+        final Region region = Region.obtain();
         for (int i = mTapExcludeProvidingWindows.size() - 1; i >= 0; i--) {
             final WindowState win = mTapExcludeProvidingWindows.valueAt(i);
-            win.amendTapExcludeRegion(inOutRegion);
+            win.getTapExcludeRegion(region);
+            inOutRegion.op(region, Op.UNION);
         }
+        region.recycle();
     }
 
     @Override
@@ -4286,7 +4295,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // The reparenting case is handled in WindowContainer.
             if (!stack.mReparenting) {
                 setLayoutNeeded();
-                stack.onDisplayChanged(DisplayContent.this);
             }
         }
 
@@ -5744,8 +5752,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             throw new IllegalArgumentException("Stack with windowing mode cannot with non standard "
                     + "activity type.");
         }
-        return new ActivityStack(this, stackId, mRootActivityContainer.mStackSupervisor,
-                windowingMode, activityType, onTop);
+        final ActivityStack stack = new ActivityStack(this, stackId,
+                mRootActivityContainer.mStackSupervisor, activityType);
+        addStack(stack, onTop ? POSITION_TOP : POSITION_BOTTOM);
+        stack.setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
+                false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,
+                true /* creating */);
+
+        return stack;
     }
 
     /**
@@ -6032,6 +6046,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         if (!supportsMultiWindow) {
             return false;
+        }
+
+        if (windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
+            return true;
         }
 
         final int displayWindowingMode = getWindowingMode();
@@ -6410,7 +6428,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             stack.removeIfPossible();
         } else if (getTopStack() == null) {
             removeIfPossible();
-            mRootActivityContainer.removeChild(this);
             mRootActivityContainer.mStackSupervisor
                     .getKeyguardController().onDisplayRemoved(mDisplayId);
         }

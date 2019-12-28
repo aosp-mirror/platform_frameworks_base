@@ -73,6 +73,8 @@ public class WindowManagerWrapper {
     public static final int WINDOWING_MODE_UNDEFINED = WindowConfiguration.WINDOWING_MODE_UNDEFINED;
     public static final int WINDOWING_MODE_FULLSCREEN =
             WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+    public static final int WINDOWING_MODE_MULTI_WINDOW =
+            WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
     public static final int WINDOWING_MODE_PINNED = WindowConfiguration.WINDOWING_MODE_PINNED;
     public static final int WINDOWING_MODE_SPLIT_SCREEN_PRIMARY =
             WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;

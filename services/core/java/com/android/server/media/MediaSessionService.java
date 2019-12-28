@@ -25,7 +25,6 @@ import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -134,9 +133,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             new ArrayList<>();
 
     private KeyguardManager mKeyguardManager;
-    private IAudioService mAudioService;
     private AudioManagerInternal mAudioManagerInternal;
-    private ActivityManager mActivityManager;
     private ContentResolver mContentResolver;
     private SettingsObserver mSettingsObserver;
     private boolean mHasFeatureLeanback;
@@ -168,10 +165,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         publishBinderService(Context.MEDIA_SESSION_SERVICE, mSessionManagerImpl);
         Watchdog.getInstance().addMonitor(this);
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-        mAudioService = getAudioService();
         mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
-        mActivityManager =
-                (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance(mContext);
         mAudioPlayerStateMonitor.registerListener(
                 (config, isRemoved) -> {
@@ -211,7 +205,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 Log.w(TAG, "Unknown session updated. Ignoring.");
                 return;
             }
-            if ((record.getFlags() & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
+            if (record.isSystemPriority()) {
                 if (DEBUG_KEY_EVENT) {
                     Log.d(TAG, "Global priority session is updated, active=" + record.isActive());
                 }
@@ -466,12 +460,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
 
-        try {
-            session.getCallback().asBinder().unlinkToDeath(session, 0);
-        } catch (Exception e) {
-            // ignore exceptions while destroying a session.
-        }
-        session.onDestroy();
+        session.close();
         mHandler.postSessionsChanged(session.getUserId());
     }
 
@@ -576,10 +565,10 @@ public class MediaSessionService extends SystemService implements Monitor {
             throw new RuntimeException("Session request from invalid user.");
         }
 
-        final MediaSessionRecord session = new MediaSessionRecord(callerPid, callerUid, userId,
-                callerPackageName, cb, tag, sessionInfo, this, mHandler.getLooper());
+        final MediaSessionRecord session;
         try {
-            cb.asBinder().linkToDeath(session, 0);
+            session = new MediaSessionRecord(callerPid, callerUid, userId,
+                    callerPackageName, cb, tag, sessionInfo, this, mHandler.getLooper());
         } catch (RemoteException e) {
             throw new RuntimeException("Media Session owner died prematurely.", e);
         }
@@ -1842,7 +1831,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                                     break;
                             }
                             record.adjustVolume(packageName, opPackageName, pid, uid,
-                                    null /* caller */, true /* asSystemService */, direction,
+                                    true /* asSystemService */, direction,
                                     AudioManager.FLAG_SHOW_UI, false /* useSuggested */);
                             break;
                         }
@@ -1852,8 +1841,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                                     AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE
                                             | AudioManager.FLAG_FROM_KEY;
                             record.adjustVolume(packageName, opPackageName, pid, uid,
-                                    null /* caller */, true /* asSystemService */, 0,
-                                    flags, false /* useSuggested */);
+                                    true /* asSystemService */, 0, flags, false /* useSuggested */);
                         }
                     }
                 }
@@ -2087,7 +2075,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                             + flags + ", suggestedStream=" + suggestedStream
                             + ", preferSuggestedStream=" + preferSuggestedStream);
                 }
-                session.adjustVolume(packageName, opPackageName, pid, uid, null, asSystemService,
+                session.adjustVolume(packageName, opPackageName, pid, uid, asSystemService,
                         direction, flags, true);
             }
         }
@@ -2396,25 +2384,6 @@ public class MediaSessionService extends SystemService implements Monitor {
             public void onSendFinished(PendingIntent pendingIntent, Intent intent, int resultCode,
                     String resultData, Bundle resultExtras) {
                 onReceiveResult(resultCode, null);
-            }
-        };
-
-        BroadcastReceiver mKeyEventDone = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent == null) {
-                    return;
-                }
-                Bundle extras = intent.getExtras();
-                if (extras == null) {
-                    return;
-                }
-                synchronized (mLock) {
-                    if (extras.containsKey(EXTRA_WAKELOCK_ACQUIRED)
-                            && mMediaEventWakeLock.isHeld()) {
-                        mMediaEventWakeLock.release();
-                    }
-                }
             }
         };
     }

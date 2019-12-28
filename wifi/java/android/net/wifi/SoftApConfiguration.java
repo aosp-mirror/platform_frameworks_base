@@ -523,9 +523,16 @@ public final class SoftApConfiguration implements Parcelable {
          * Specifies the channel and associated band for the AP.
          *
          * The channel which AP resides on. Valid channels are country dependent.
+         * <p>
          * The default for the channel is a the special value 0 to have the framework
          * auto-select a valid channel from the band configured with
          * {@link #setBand(@BandType int)}.
+         *
+         * The channel auto selection will offload to driver when
+         * {@link SoftApCapability#isFeatureSupported(SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD)}
+         * return true. Driver will auto select best channel which based on environment
+         * interference to get best performance. Check {@link SoftApCapability} to get more detail.
+         *
          * Note, since 6GHz band use the same channel numbering of 2.4GHz and 5GHZ bands,
          * the caller needs to pass the band containing the selected channel.
          *
@@ -564,6 +571,12 @@ public final class SoftApConfiguration implements Parcelable {
          * non-zero {@code maxNumberOfClients} value then
          * {@link WifiManager#startTetheredHotspot} will report error code
          * {@link WifiManager#SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION}.
+         *
+         * <p>
+         * Use {@link WifiManager.SoftApCallback#onCapabilityChanged(SoftApCapability)} and
+         * {@link SoftApCapability#isFeatureSupported(int)}
+         * with {@link SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT} to determine whether
+         * or not this feature is supported.
          *
          * @param maxNumberOfClients maximum client number of the AP.
          * @return Builder for chaining.

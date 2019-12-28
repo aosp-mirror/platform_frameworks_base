@@ -883,7 +883,7 @@ public class WifiManagerTest {
      */
     @Test
     public void softApCallbackProxyCallsOnCapabilityChanged() throws Exception {
-        SoftApCapability testSoftApCapability = new SoftApCapability();
+        SoftApCapability testSoftApCapability = new SoftApCapability(0);
         testSoftApCapability.setMaxSupportedClients(10);
         ArgumentCaptor<ISoftApCallback.Stub> callbackCaptor =
                 ArgumentCaptor.forClass(ISoftApCallback.Stub.class);
@@ -904,7 +904,7 @@ public class WifiManagerTest {
         SoftApInfo testSoftApInfo = new SoftApInfo();
         testSoftApInfo.setFrequency(TEST_AP_FREQUENCY);
         testSoftApInfo.setBandwidth(TEST_AP_BANDWIDTH);
-        SoftApCapability testSoftApCapability = new SoftApCapability();
+        SoftApCapability testSoftApCapability = new SoftApCapability(0);
         testSoftApCapability.setMaxSupportedClients(10);
         ArgumentCaptor<ISoftApCallback.Stub> callbackCaptor =
                 ArgumentCaptor.forClass(ISoftApCallback.Stub.class);

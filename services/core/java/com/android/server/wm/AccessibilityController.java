@@ -1309,7 +1309,7 @@ final class AccessibilityController {
                         // If a window has tap exclude region, we need to account it.
                         final Region displayRegion = new Region(windowState.getDisplayFrameLw());
                         final Region tapExcludeRegion = new Region();
-                        windowState.amendTapExcludeRegion(tapExcludeRegion);
+                        windowState.getTapExcludeRegion(tapExcludeRegion);
                         displayRegion.op(tapExcludeRegion, displayRegion,
                                 Region.Op.REVERSE_DIFFERENCE);
                         unaccountedSpace.op(displayRegion, unaccountedSpace,

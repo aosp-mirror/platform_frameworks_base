@@ -24,6 +24,16 @@ import static org.junit.Assert.assertNotNull;
 import android.annotation.DrawableRes;
 import android.graphics.drawable.Icon;
 import android.os.Parcel;
+import android.service.controls.templates.ControlButton;
+import android.service.controls.templates.ControlTemplate;
+import android.service.controls.templates.CoordinatedRangeTemplate;
+import android.service.controls.templates.DiscreteToggleTemplate;
+import android.service.controls.templates.RangeTemplate;
+import android.service.controls.templates.StatelessTemplate;
+import android.service.controls.templates.TemperatureControlTemplate;
+import android.service.controls.templates.ThumbnailTemplate;
+import android.service.controls.templates.ToggleRangeTemplate;
+import android.service.controls.templates.ToggleTemplate;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -35,8 +45,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 
-import java.security.InvalidParameterException;
-
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ControlTemplateTest {
@@ -44,7 +52,7 @@ public class ControlTemplateTest {
     private static final String PACKAGE_NAME = "com.android.frameworks.coretests";
     private static final @DrawableRes int TEST_ICON_ID = R.drawable.box;
     private static final String TEST_ID = "TEST_ID";
-    private static final CharSequence TEST_CONTENT_DESCRIPTION = "TEST_CONTENT_DESCRIPTION";
+    private static final CharSequence TEST_ACTION_DESCRIPTION = "TEST_ACTION_DESCRIPTION";
     private Icon mIcon;
     private ControlButton mControlButton;
 
@@ -52,12 +60,13 @@ public class ControlTemplateTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mIcon = Icon.createWithResource(PACKAGE_NAME, TEST_ICON_ID);
-        mControlButton = new ControlButton(true, mIcon, TEST_CONTENT_DESCRIPTION);
+        mControlButton = new ControlButton(true, TEST_ACTION_DESCRIPTION);
     }
 
     @Test
     public void testUnparcelingCorrectClass_none() {
-        ControlTemplate toParcel = ControlTemplate.NO_TEMPLATE;
+        ControlTemplate
+                toParcel = ControlTemplate.NO_TEMPLATE;
 
         ControlTemplate fromParcel = parcelAndUnparcel(toParcel);
 
@@ -66,7 +75,8 @@ public class ControlTemplateTest {
 
     @Test
     public void testUnparcelingCorrectClass_toggle() {
-        ControlTemplate toParcel = new ToggleTemplate(TEST_ID, mControlButton);
+        ControlTemplate
+                toParcel = new android.service.controls.templates.ToggleTemplate(TEST_ID, mControlButton);
 
         ControlTemplate fromParcel = parcelAndUnparcel(toParcel);
 
@@ -76,7 +86,8 @@ public class ControlTemplateTest {
 
     @Test
     public void testUnparcelingCorrectClass_range() {
-        ControlTemplate toParcel = new RangeTemplate(TEST_ID, 0, 2, 1, 1, "%f");
+        ControlTemplate
+                toParcel = new RangeTemplate(TEST_ID, 0, 2, 1, 1, "%f");
 
         ControlTemplate fromParcel = parcelAndUnparcel(toParcel);
 
@@ -84,29 +95,30 @@ public class ControlTemplateTest {
         assertTrue(fromParcel instanceof RangeTemplate);
     }
 
-    @Test(expected = InvalidParameterException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testRangeParameters_minMax() {
-        RangeTemplate range = new RangeTemplate(TEST_ID, 2, 0, 1, 1, "%f");
+        new RangeTemplate(TEST_ID, 2, 0, 1, 1, "%f");
     }
 
-    @Test(expected = InvalidParameterException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testRangeParameters_minCurrent() {
-        RangeTemplate range = new RangeTemplate(TEST_ID, 0, 2, -1, 1, "%f");
+        new RangeTemplate(TEST_ID, 0, 2, -1, 1, "%f");
     }
 
-    @Test(expected = InvalidParameterException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testRangeParameters_maxCurrent() {
-        RangeTemplate range = new RangeTemplate(TEST_ID, 0, 2, 3, 1, "%f");
+        new RangeTemplate(TEST_ID, 0, 2, 3, 1, "%f");
     }
 
-    @Test(expected = InvalidParameterException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testRangeParameters_negativeStep() {
-        RangeTemplate range = new RangeTemplate(TEST_ID, 0, 2, 1, -1, "%f");
+        new RangeTemplate(TEST_ID, 0, 2, 1, -1, "%f");
     }
 
     @Test
     public void testUnparcelingCorrectClass_thumbnail() {
-        ControlTemplate toParcel = new ThumbnailTemplate(TEST_ID, mIcon, TEST_CONTENT_DESCRIPTION);
+        ControlTemplate
+                toParcel = new ThumbnailTemplate(TEST_ID, mIcon, TEST_ACTION_DESCRIPTION);
 
         ControlTemplate fromParcel = parcelAndUnparcel(toParcel);
 
@@ -125,7 +137,115 @@ public class ControlTemplateTest {
         assertTrue(fromParcel instanceof DiscreteToggleTemplate);
     }
 
-    private ControlTemplate parcelAndUnparcel(ControlTemplate toParcel) {
+    @Test
+    public void testUnparcelingCorrectClass_coordRange() {
+        ControlTemplate toParcel =
+                new CoordinatedRangeTemplate(TEST_ID,0.1f,  0, 1, 0.5f, 1, 2, 1.5f, 0.1f, "%f");
+        ControlTemplate fromParcel = parcelAndUnparcel(toParcel);
+        assertEquals(ControlTemplate.TYPE_COORD_RANGE, fromParcel.getTemplateType());
+        assertTrue(fromParcel instanceof CoordinatedRangeTemplate);
+    }
+
+    @Test
+    public void testCoordRangeParameters_negativeMinGap() {
+        CoordinatedRangeTemplate template =
+                new CoordinatedRangeTemplate(TEST_ID,-0.1f,  0, 1, 0.5f, 1, 2, 1.5f, 0.1f, "%f");
+        assertEquals(0, template.getMinGap(), 0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCoordRangeParameters_differentStep() {
+        RangeTemplate rangeLow = new RangeTemplate(TEST_ID, 0, 1, 0.5f, 0.1f, "%f");
+        RangeTemplate rangeHigh = new RangeTemplate(TEST_ID, 0, 1, 0.75f, 0.2f, "%f");
+        new CoordinatedRangeTemplate(TEST_ID, 0.1f, rangeLow, rangeHigh);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCoordRangeParameters_differentFormat() {
+        RangeTemplate rangeLow = new RangeTemplate(TEST_ID, 0, 1, 0.5f, 0.1f, "%f");
+        RangeTemplate rangeHigh = new RangeTemplate(TEST_ID, 0, 1, 0.75f, 0.1f, "%.1f");
+        new CoordinatedRangeTemplate(TEST_ID, 0.1f, rangeLow, rangeHigh);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCoordRangeParameters_LargeMinGap() {
+        RangeTemplate rangeLow = new RangeTemplate(TEST_ID, 0, 1, 0.5f, 0.1f, "%f");
+        RangeTemplate rangeHigh = new RangeTemplate(TEST_ID, 0, 1, 0.75f, 0.1f, "%f");
+        new CoordinatedRangeTemplate(TEST_ID, 0.5f, rangeLow, rangeHigh);
+    }
+
+    @Test
+    public void testUnparcelingCorrectClass_toggleRange() {
+        ControlTemplate toParcel =
+                new ToggleRangeTemplate(TEST_ID, mControlButton,
+                        new RangeTemplate(TEST_ID, 0, 2, 1, 1, "%f"));
+
+        ControlTemplate fromParcel = parcelAndUnparcel(toParcel);
+
+        assertEquals(ControlTemplate.TYPE_TOGGLE_RANGE, fromParcel.getTemplateType());
+        assertTrue(fromParcel instanceof ToggleRangeTemplate);
+    }
+
+    @Test
+    public void testUnparcelingCorrectClass_stateless() {
+        ControlTemplate toParcel = new StatelessTemplate(TEST_ID);
+
+        ControlTemplate fromParcel = parcelAndUnparcel(toParcel);
+
+        assertEquals(ControlTemplate.TYPE_STATELESS, fromParcel.getTemplateType());
+        assertTrue(fromParcel instanceof StatelessTemplate);
+    }
+
+    @Test
+    public void testUnparcelingCorrectClass_thermostat() {
+        ControlTemplate toParcel = new TemperatureControlTemplate(TEST_ID,
+            new ToggleTemplate("", mControlButton),
+            TemperatureControlTemplate.MODE_OFF,
+            TemperatureControlTemplate.MODE_OFF,
+            TemperatureControlTemplate.FLAG_MODE_OFF);
+
+        ControlTemplate fromParcel = parcelAndUnparcel(toParcel);
+
+        assertEquals(ControlTemplate.TYPE_TEMPERATURE, fromParcel.getTemplateType());
+        assertTrue(fromParcel instanceof TemperatureControlTemplate);
+    }
+
+    @Test
+    public void testThermostatParams_wrongMode() {
+        TemperatureControlTemplate thermostat = new TemperatureControlTemplate(TEST_ID, ControlTemplate.NO_TEMPLATE, -1,
+                TemperatureControlTemplate.MODE_OFF, TemperatureControlTemplate.FLAG_MODE_OFF);
+        assertEquals(TemperatureControlTemplate.MODE_UNKNOWN, thermostat.getCurrentMode());
+
+        thermostat = new TemperatureControlTemplate(TEST_ID, ControlTemplate.NO_TEMPLATE, 100,
+                TemperatureControlTemplate.MODE_OFF, TemperatureControlTemplate.FLAG_MODE_OFF);
+        assertEquals(TemperatureControlTemplate.MODE_UNKNOWN, thermostat.getCurrentMode());
+    }
+
+    @Test
+    public void testThermostatParams_wrongActiveMode() {
+        TemperatureControlTemplate thermostat = new TemperatureControlTemplate(TEST_ID, ControlTemplate.NO_TEMPLATE,
+                TemperatureControlTemplate.MODE_OFF,-1, TemperatureControlTemplate.FLAG_MODE_OFF);
+        assertEquals(TemperatureControlTemplate.MODE_UNKNOWN, thermostat.getCurrentActiveMode());
+
+        thermostat = new TemperatureControlTemplate(TEST_ID, ControlTemplate.NO_TEMPLATE,
+                TemperatureControlTemplate.MODE_OFF,100, TemperatureControlTemplate.FLAG_MODE_OFF);
+        assertEquals(TemperatureControlTemplate.MODE_UNKNOWN, thermostat.getCurrentActiveMode());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testThermostatParams_wrongFlags_currentMode() {
+        new TemperatureControlTemplate(TEST_ID, ControlTemplate.NO_TEMPLATE, TemperatureControlTemplate.MODE_HEAT,
+                TemperatureControlTemplate.MODE_OFF, TemperatureControlTemplate.FLAG_MODE_OFF);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testThermostatParams_wrongFlags_currentActiveMode() {
+        new TemperatureControlTemplate(TEST_ID, ControlTemplate.NO_TEMPLATE, TemperatureControlTemplate.MODE_HEAT,
+                TemperatureControlTemplate.MODE_OFF, TemperatureControlTemplate.FLAG_MODE_HEAT);
+    }
+
+    private ControlTemplate parcelAndUnparcel(
+            ControlTemplate toParcel) {
         Parcel parcel = Parcel.obtain();
 
         assertNotNull(parcel);

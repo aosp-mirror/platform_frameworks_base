@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Қолданбаға планшеттегі Bluetooth конфигурациясын көру және жұпталған құрылғымен байланыс орнату немесе қабылдау мүмкіндігін береді."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Қолданба Android TV құрылғыңыздағы Bluetooth конфигурациясын көре алады және жұпталған құрылғылармен байланыс орнатып, оларды қабылдай алатын болады."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Қолданбаға телефондағы Bluetooth конфигурациясын көру және жұпталған құрылғымен байланыс орнату немесе қабылдау мүмкіндігін береді"</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Таңдаулы NFC төлеу қызметі туралы ақпарат"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Қолданба тіркелген көмектер және баратын жер маршруты сияқты таңдаулы NFC төлеу қызметі туралы ақпаратты ала алатын болады."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC функциясын басқару"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Қолданбаға NFC белгілерімен, карталармен және оқу құралдарымен байланысуға рұқсат береді."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"экран бекітпесін істен шығару"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"Арнайы мүмкіндіктер таңбашасы <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін қосты"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"Арнайы мүмкіндіктер таңбашасы <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін өшірді"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін пайдалану үшін дыбыс деңгейін реттейтін екі түймені де 3 секунд басып тұрыңыз"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"\"Арнайы мүмкіндіктер\" түймесін түрткенде пайдаланатын қызметті таңдаңыз:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Арнайы мүмкіндіктер қимылымен пайдаланатын қызметті таңдаңыз (екі саусақпен экранның төменгі жағынан жоғары қарай сырғытыңыз):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Арнайы мүмкіндіктер қимылымен пайдаланатын қызметті таңдаңыз (үш саусақпен экранның төменгі жағынан жоғары қарай сырғытыңыз):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"Бір қызметтен екінші қызметке ауысу үшін арнайы мүмкіндіктер түймесін түртіп, оны ұстап тұрыңыз."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"Бір қызметтен екінші қызметке ауысу үшін екі саусақпен жоғары қарай сырғытып, ұстап тұрыңыз."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"Бір қызметтен екінші қызметке ауысу үшін үш саусақпен жоғары қарай сырғытып, ұстап тұрыңыз."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ұлғайту"</string>
     <string name="user_switched" msgid="7249833311585228097">"Ағымдағы пайдаланушы <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> ауысу орындалуда…"</string>
@@ -1863,11 +1855,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> қосылу орындалды"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Файлдарды көру үшін түртіңіз"</string>
     <string name="pin_target" msgid="8036028973110156895">"PIN коды"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g> бекіту"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Босату"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g> босату"</string>
     <string name="app_info" msgid="6113278084877079851">"Қолданба ақпараты"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Демо нұсқасы іске қосылуда..."</string>

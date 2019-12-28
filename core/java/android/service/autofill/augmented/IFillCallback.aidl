@@ -18,6 +18,8 @@ package android.service.autofill.augmented;
 
 import android.os.ICancellationSignal;
 
+import android.service.autofill.Dataset;
+
 /**
  * Interface to receive the result of an autofill request.
  *
@@ -25,7 +27,7 @@ import android.os.ICancellationSignal;
  */
 interface IFillCallback {
     void onCancellable(in ICancellationSignal cancellation);
-    void onSuccess();
+    void onSuccess(in @nullable Dataset[] mInlineSuggestionsData);
     boolean isCompleted();
     void cancel();
 }

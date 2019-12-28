@@ -227,6 +227,7 @@
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ເປີດໃຊ້ການເລັ່ງຄວາມໄວດ້ວຍຮາດແວ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"ສະແດງອຸປະກອນ Bluetooth ທີ່ບໍ່ມີຊື່"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ປິດໃຊ້ລະດັບສຽງສົມບູນ"</string>
+    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"ເປີດໃຊ້ Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ເວີຊັນ Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ເລືອກເວີຊັນ Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Bluetooth Audio Codec"</string>
@@ -275,6 +276,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ກວດສອບແອັບທີ່ຕິດຕັ້ງແລ້ວຜ່ານທາງ ADB/ADT ເພື່ອກວດຫາພຶດຕິກຳທີ່ເປັນອັນຕະລາຍ."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"ຈະສະແດງອຸປະກອນ Bluetooth ທີ່ບໍ່ມີຊື່ (ທີ່ຢູ່ MAC ເທົ່ານັ້ນ)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ປິດໃຊ້ຄຸນສົມບັດລະດັບສຽງສົມບູນຂອງ Bluetooth ໃນກໍລະນີເກີດບັນຫາລະດັບສຽງສົມບູນກັບອຸປະກອນທາງໄກ ເຊັ່ນວ່າ ລະດັບສຽງດັງເກີນຍອມຮັບໄດ້ ຫຼື ຄວບຄຸມບໍ່ໄດ້."</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"ເປີດໃຊ້ການວາງຊ້ອນຄຸນສົມບັດ Bluetooth Gabeldorche."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal ໃນໂຕເຄື່ອງ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"ເປີດນຳໃຊ້ແອັບຯ Terminal ທີ່ໃຫ້ການເຂົ້າເຖິງ shell ໃນໂຕເຄື່ອງໄດ້"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"ການກວດສອບ HDCP"</string>
@@ -379,7 +381,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (ສີ​ແດງ​-ສີ​ຂຽວ​)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (ສີ​ຟ້າ​-ສີ​ເຫຼືອງ​)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ການ​ປັບ​ແຕ່ງ​ສີ"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"​ຄຸນ​ສົມ​ບັດ​ນີ້​ກຳ​ລັງ​ຢູ່​ໃນ​ການ​ທົດ​ລອງ​ແລະ​ອາດ​ມີ​ຜົນ​ຕໍ່​ປະ​ສິດ​ທິ​ພາບ."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"ການແກ້ໄຂສີຈະຊ່ວຍໃຫ້ຄົນທີ່ຕາບອດສີເຫັນສີຕ່າງໆໄດ້ຖືກຕ້ອງຍິ່ງຂຶ້ນ"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"ຖືກແທນໂດຍ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"ເຫຼືອອີກປະມານ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>

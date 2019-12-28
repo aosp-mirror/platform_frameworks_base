@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"タブレットのBluetooth設定を表示すること、ペアのデバイスに接続すること/ペアのデバイスからの接続を受け入れることをアプリに許可します。"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Android TV デバイスの Bluetooth 設定の表示と、ペア設定されたデバイスへの接続の確立、またはペア設定されたデバイスからの接続の受け入れをアプリに許可します。"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"モバイルデバイスのBluetooth設定を表示すること、ペアのデバイスに接続すること/ペアのデバイスからの接続を受け入れることをアプリに許可します。"</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"優先される NFC お支払いサービスの情報"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"登録されている支援やルートの目的地など、優先される NFC お支払いサービスの情報を取得することをアプリに許可します。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFCの管理"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"NFCタグ、カード、リーダーとの通信をアプリに許可します。"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"画面ロックの無効化"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"ユーザー補助機能のショートカットにより <xliff:g id="SERVICE_NAME">%1$s</xliff:g> は ON になっています"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"ユーザー補助機能のショートカットにより <xliff:g id="SERVICE_NAME">%1$s</xliff:g> は OFF になっています"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> を使用するには、音量大と音量小の両方のボタンを 3 秒間長押ししてください"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"ユーザー補助機能ボタンをタップした場合に使用するサービスを選択してください。"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"ユーザー補助操作（2 本の指で画面の下から上にスワイプ）で使用するサービスを選択してください。"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"ユーザー補助操作（3 本の指で画面の下から上にスワイプ）で使用するサービスを選択してください。"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"サービスを切り替えるには、ユーザー補助機能ボタンを長押しします。"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"サービスを切り替えるには、2 本の指で上にスワイプしたまま長押しします。"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"サービスを切り替えるには、3 本の指で上にスワイプしたまま長押しします。"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"拡大"</string>
     <string name="user_switched" msgid="7249833311585228097">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>に切り替えています…"</string>
@@ -1863,11 +1855,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> に接続しました"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"タップしてファイルを表示"</string>
     <string name="pin_target" msgid="8036028973110156895">"固定"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g> を固定"</string>
     <string name="unpin_target" msgid="3963318576590204447">"固定を解除"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g> の固定を解除"</string>
     <string name="app_info" msgid="6113278084877079851">"アプリ情報"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"デモを開始しています…"</string>

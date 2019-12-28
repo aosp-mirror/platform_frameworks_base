@@ -88,6 +88,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
@@ -126,10 +127,12 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
+import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -246,6 +249,10 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private StatusBarNotificationActivityStarter.Builder
             mStatusBarNotificationActivityStarterBuilder;
     @Mock private DarkIconDispatcher mDarkIconDispatcher;
+    @Mock private PluginDependencyProvider mPluginDependencyProvider;
+    @Mock private KeyguardDismissUtil mKeyguardDismissUtil;
+    @Mock private ExtensionController mExtensionController;
+    @Mock private UserInfoControllerImpl mUserInfoControllerImpl;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InitController mInitController = new InitController();
@@ -254,7 +261,6 @@ public class StatusBarTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         mDependency.injectTestDependency(NotificationFilter.class, mNotificationFilter);
-        mDependency.injectMockDependency(KeyguardDismissUtil.class);
 
         IPowerManager powerManagerService = mock(IPowerManager.class);
         mPowerManager = new PowerManager(mContext, powerManagerService,
@@ -400,6 +406,10 @@ public class StatusBarTest extends SysuiTestCase {
                 mInitController,
                 mDarkIconDispatcher,
                 new Handler(TestableLooper.get(this).getLooper()),
+                mPluginDependencyProvider,
+                mKeyguardDismissUtil,
+                mExtensionController,
+                mUserInfoControllerImpl,
                 mDismissCallbackRegistry);
 
         when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(

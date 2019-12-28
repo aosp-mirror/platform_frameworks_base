@@ -25,6 +25,10 @@ import android.media.tv.tuner.TunerConstants.DemuxPidType;
 import android.media.tv.tuner.TunerConstants.FilterSubtype;
 import android.media.tv.tuner.TunerConstants.FilterType;
 import android.media.tv.tuner.TunerConstants.FrontendScanType;
+import android.media.tv.tuner.TunerConstants.LnbPosition;
+import android.media.tv.tuner.TunerConstants.LnbTone;
+import android.media.tv.tuner.TunerConstants.LnbVoltage;
+import android.media.tv.tuner.TunerConstants.Result;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -102,6 +106,7 @@ public final class Tuner implements AutoCloseable  {
     private native int nativeTune(int type, FrontendSettings settings);
     private native int nativeStopTune();
     private native int nativeScan(int settingsType, FrontendSettings settings, int scanType);
+    private native int nativeStopScan();
     private native int nativeSetLnb(int lnbId);
     private native int nativeSetLna(boolean enable);
     private native FrontendStatus[] nativeGetFrontendStatus(int[] statusTypes);
@@ -143,6 +148,15 @@ public final class Tuner implements AutoCloseable  {
          * Invoked when there is a LNB event.
          */
         void onEvent(int lnbEventType);
+
+        /**
+         * Invoked when there is a new DiSEqC message.
+         *
+         * @param diseqcMessage a byte array of data for DiSEqC (Digital Satellite
+         * Equipment Control) message which is specified by EUTELSAT Bus Functional
+         * Specification Version 4.2.
+         */
+        void onDiseqcMessage(byte[] diseqcMessage);
     }
 
     /**
@@ -286,6 +300,16 @@ public final class Tuner implements AutoCloseable  {
     }
 
     /**
+     * Stops a previous scanning.
+     *
+     * If the method completes successfully, the frontend stop previous scanning.
+     * @hide
+     */
+    public int stopScan() {
+        return nativeStopScan();
+    }
+
+    /**
      * Sets Low-Noise Block downconverter (LNB) for satellite frontend.
      *
      * This assigns a hardware LNB resource to the satellite tuner. It can be
@@ -356,10 +380,13 @@ public final class Tuner implements AutoCloseable  {
         int mId;
 
         private native int nativeConfigureFilter(int type, int subType, FilterSettings settings);
-        private native boolean nativeStartFilter();
-        private native boolean nativeStopFilter();
-        private native boolean nativeFlushFilter();
+        private native int nativeGetId();
+        private native int nativeSetDataSource(Filter source);
+        private native int nativeStartFilter();
+        private native int nativeStopFilter();
+        private native int nativeFlushFilter();
         private native int nativeRead(byte[] buffer, int offset, int size);
+        private native int nativeClose();
 
         private Filter(int id) {
             mId = id;
@@ -372,6 +399,12 @@ public final class Tuner implements AutoCloseable  {
             }
         }
 
+        /**
+         * Configures the filter.
+         *
+         * @param settings the settings of the filter.
+         * @return result status of the operation.
+         */
         public int configure(FilterSettings settings) {
             int subType = -1;
             if (settings.mSettings != null) {
@@ -380,21 +413,71 @@ public final class Tuner implements AutoCloseable  {
             return nativeConfigureFilter(settings.getType(), subType, settings);
         }
 
-        public boolean start() {
+        /**
+         * Gets the filter Id.
+         *
+         * @return the hardware resource Id for the filter.
+         */
+        public int getId() {
+            return nativeGetId();
+        }
+
+        /**
+         * Sets the filter's data source.
+         *
+         * A filter uses demux as data source by default. If the data was packetized
+         * by multiple protocols, multiple filters may need to work together to
+         * extract all protocols' header. Then a filter's data source can be output
+         * from another filter.
+         *
+         * @param source the filter instance which provides data input. Switch to
+         * use demux as data source if the filter instance is NULL.
+         * @return result status of the operation.
+         */
+        public int setDataSource(@Nullable Filter source) {
+            return nativeSetDataSource(source);
+        }
+
+        /**
+         * Starts the filter.
+         *
+         * @return result status of the operation.
+         */
+        public int start() {
             return nativeStartFilter();
         }
 
-        public boolean stop() {
+
+        /**
+         * Stops the filter.
+         *
+         * @return result status of the operation.
+         */
+        public int stop() {
             return nativeStopFilter();
         }
 
-        public boolean flush() {
+        /**
+         * Flushes the filter.
+         *
+         * @return result status of the operation.
+         */
+        public int flush() {
             return nativeFlushFilter();
         }
 
         public int read(@NonNull byte[] buffer, int offset, int size) {
             size = Math.min(size, buffer.length - offset);
             return nativeRead(buffer, offset, size);
+        }
+
+        /**
+         * Release the Filter instance.
+         *
+         * @return result status of the operation.
+         */
+        public int close() {
+            return nativeClose();
         }
     }
 
@@ -416,6 +499,12 @@ public final class Tuner implements AutoCloseable  {
         private int mId;
         private LnbCallback mCallback;
 
+        private native int nativeSetVoltage(int voltage);
+        private native int nativeSetTone(int tone);
+        private native int nativeSetSatellitePosition(int position);
+        private native int nativeSendDiseqcMessage(byte[] message);
+        private native int nativeClose();
+
         private Lnb(int id) {
             mId = id;
         }
@@ -428,6 +517,64 @@ public final class Tuner implements AutoCloseable  {
             if (mHandler == null) {
                 mHandler = createEventHandler();
             }
+        }
+
+        /**
+         * Sets the LNB's power voltage.
+         *
+         * @param voltage the power voltage the Lnb to use.
+         * @return result status of the operation.
+         */
+        @Result
+        public int setVoltage(@LnbVoltage int voltage) {
+            return nativeSetVoltage(voltage);
+        }
+
+        /**
+         * Sets the LNB's tone mode.
+         *
+         * @param tone the tone mode the Lnb to use.
+         * @return result status of the operation.
+         */
+        @Result
+        public int setTone(@LnbTone int tone) {
+            return nativeSetTone(tone);
+        }
+
+        /**
+         * Selects the LNB's position.
+         *
+         * @param position the position the Lnb to use.
+         * @return result status of the operation.
+         */
+        @Result
+        public int setSatellitePosition(@LnbPosition int position) {
+            return nativeSetSatellitePosition(position);
+        }
+
+        /**
+         * Sends DiSEqC (Digital Satellite Equipment Control) message.
+         *
+         * The response message from the device comes back through callback onDiseqcMessage.
+         *
+         * @param message a byte array of data for DiSEqC message which is specified by EUTELSAT Bus
+         *         Functional Specification Version 4.2.
+         *
+         * @return result status of the operation.
+         */
+        @Result
+        public int sendDiseqcMessage(byte[] message) {
+            return nativeSendDiseqcMessage(message);
+        }
+
+        /**
+         * Releases the LNB instance
+         *
+         * @return result status of the operation.
+         */
+        @Result
+        public int close() {
+            return nativeClose();
         }
     }
 
@@ -554,32 +701,84 @@ public final class Tuner implements AutoCloseable  {
         private long mNativeContext;
         private DvrCallback mCallback;
 
-        private native boolean nativeAttachFilter(Filter filter);
-        private native boolean nativeDetachFilter(Filter filter);
+        private native int nativeAttachFilter(Filter filter);
+        private native int nativeDetachFilter(Filter filter);
         private native int nativeConfigureDvr(DvrSettings settings);
-        private native boolean nativeStartDvr();
-        private native boolean nativeStopDvr();
-        private native boolean nativeFlushDvr();
+        private native int nativeStartDvr();
+        private native int nativeStopDvr();
+        private native int nativeFlushDvr();
+        private native int nativeClose();
 
         private Dvr() {}
 
-        public boolean attachFilter(Filter filter) {
+        /**
+         * Attaches a filter to DVR interface for recording.
+         *
+         * @param filter the filter to be attached.
+         * @return result status of the operation.
+         */
+        public int attachFilter(Filter filter) {
             return nativeAttachFilter(filter);
         }
-        public boolean detachFilter(Filter filter) {
+
+        /**
+         * Detaches a filter from DVR interface.
+         *
+         * @param filter the filter to be detached.
+         * @return result status of the operation.
+         */
+        public int detachFilter(Filter filter) {
             return nativeDetachFilter(filter);
         }
+
+        /**
+         * Configures the DVR.
+         *
+         * @param settings the settings of the DVR interface.
+         * @return result status of the operation.
+         */
         public int configure(DvrSettings settings) {
             return nativeConfigureDvr(settings);
         }
-        public boolean start() {
+
+        /**
+         * Starts DVR.
+         *
+         * Starts consuming playback data or producing data for recording.
+         *
+         * @return result status of the operation.
+         */
+        public int start() {
             return nativeStartDvr();
         }
-        public boolean stop() {
+
+        /**
+         * Stops DVR.
+         *
+         * Stops consuming playback data or producing data for recording.
+         *
+         * @return result status of the operation.
+         */
+        public int stop() {
             return nativeStopDvr();
         }
-        public boolean flush() {
+
+        /**
+         * Flushed DVR data.
+         *
+         * @return result status of the operation.
+         */
+        public int flush() {
             return nativeFlushDvr();
+        }
+
+        /**
+         * closes the DVR instance to release resources.
+         *
+         * @return result status of the operation.
+         */
+        public int close() {
+            return nativeClose();
         }
     }
 

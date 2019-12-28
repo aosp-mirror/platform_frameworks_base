@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.service.controls;
+package android.service.controls.actions;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
@@ -23,6 +23,8 @@ import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.controls.templates.ControlTemplate;
+import android.service.controls.IControlsProviderCallback;
 
 import com.android.internal.util.Preconditions;
 
@@ -41,13 +43,6 @@ public abstract class ControlAction implements Parcelable {
     private static final String KEY_TEMPLATE_ID = "key_template_id";
     private static final String KEY_CHALLENGE_VALUE = "key_challenge_value";
 
-    public static final ControlAction UNKNOWN_ACTION = new ControlAction() {
-
-        @Override
-        public int getActionType() {
-            return TYPE_UNKNOWN;
-        }
-    };
 
     /**
      * @hide
@@ -56,9 +51,19 @@ public abstract class ControlAction implements Parcelable {
     @IntDef({
             TYPE_UNKNOWN,
             TYPE_BOOLEAN,
-            TYPE_FLOAT
+            TYPE_FLOAT,
+            TYPE_MULTI_FLOAT,
+            TYPE_MODE,
+            TYPE_COMMAND
     })
     public @interface ActionType {};
+    public static final ControlAction UNKNOWN_ACTION = new ControlAction() {
+
+        @Override
+        public int getActionType() {
+            return TYPE_UNKNOWN;
+        }
+    };
 
     public static final @ActionType int TYPE_UNKNOWN = 0;
     /**
@@ -70,6 +75,12 @@ public abstract class ControlAction implements Parcelable {
      * The identifier of {@link FloatAction}.
      */
     public static final @ActionType int TYPE_FLOAT = 2;
+
+    public static final @ActionType int TYPE_MULTI_FLOAT = 3;
+
+    public static final @ActionType int TYPE_MODE = 4;
+
+    public static final @ActionType int TYPE_COMMAND = 5;
 
     /**
      * @hide
@@ -199,12 +210,24 @@ public abstract class ControlAction implements Parcelable {
     private static ControlAction createActionFromType(@ActionType int type, Parcel source) {
         switch(type) {
             case TYPE_BOOLEAN:
-                return BooleanAction.CREATOR.createFromParcel(source);
+                return new BooleanAction(source.readBundle());
             case TYPE_FLOAT:
-                return FloatAction.CREATOR.createFromParcel(source);
+                return new FloatAction(source.readBundle());
+            case TYPE_MULTI_FLOAT:
+                return new MultiFloatAction(source.readBundle());
+            case TYPE_MODE:
+                return new ModeAction(source.readBundle());
+            case TYPE_COMMAND:
+                return new CommandAction(source.readBundle());
             default:
                 source.readBundle();
                 return UNKNOWN_ACTION;
+        }
+    }
+
+    protected static void verifyType(@ActionType int type, @ActionType int thisType) {
+        if (type != thisType) {
+            throw new IllegalStateException("The type " + type + "does not match " + thisType);
         }
     }
 

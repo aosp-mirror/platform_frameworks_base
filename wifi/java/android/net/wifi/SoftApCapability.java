@@ -16,12 +16,15 @@
 
 package android.net.wifi;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -32,6 +35,41 @@ import java.util.Objects;
  */
 @SystemApi
 public final class SoftApCapability implements Parcelable {
+
+    /**
+     * Support for automatic channel selection in driver (ACS).
+     * Driver will auto select best channel based on interference to optimize performance.
+     *
+     * flag when {@link R.bool.config_wifi_softap_acs_supported)} is true.
+     *
+     * <p>
+     * Use {@link WifiManager.SoftApCallback#onInfoChanged(SoftApInfo)} and
+     * {@link SoftApInfo#getFrequency} and {@link SoftApInfo#getBandwidth} to get
+     * driver channel selection result.
+     */
+    public static final int SOFTAP_FEATURE_ACS_OFFLOAD = 1 << 0;
+
+    /**
+     * Support for client force disconnect.
+     * flag when {@link R.bool.config_wifi_sofap_client_force_disconnect_supported)} is true
+     *
+     * <p>
+     * Several Soft AP client control features, e.g. specifying the maximum number of
+     * Soft AP clients, only work when this feature support is present.
+     * Check feature support before invoking
+     * {@link SoftApConfiguration.Builder#setMaxNumberOfClients(int)}
+     */
+    public static final int SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT = 1 << 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "SOFTAP_FEATURE_" }, value = {
+            SOFTAP_FEATURE_ACS_OFFLOAD,
+            SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT,
+    })
+    public @interface HotspotFeatures {}
+
+    private @HotspotFeatures int mSupportedFeatures = 0;
 
     private int mMaximumSupportedClientNumber;
 
@@ -44,6 +82,8 @@ public final class SoftApCapability implements Parcelable {
 
     /**
      * Set the maximum supported client numbers which AP resides on.
+     *
+     * @param maxClient maximum supported client numbers for the softap.
      * @hide
      */
     public void setMaxSupportedClients(int maxClient) {
@@ -51,18 +91,33 @@ public final class SoftApCapability implements Parcelable {
     }
 
     /**
-     * @hide
+     * Returns true when feature supported, otherwise false.
+     *
+     * @param feature one of feature from {@link HotspotFeatures}
      */
-    public SoftApCapability(@Nullable SoftApCapability source) {
-        if (source != null) {
-            mMaximumSupportedClientNumber = source.mMaximumSupportedClientNumber;
-        }
+    public boolean isFeatureSupported(@HotspotFeatures int feature) {
+        return (mSupportedFeatures & feature) == feature;
     }
 
     /**
      * @hide
      */
-    public SoftApCapability() {
+    public SoftApCapability(@Nullable SoftApCapability source) {
+        if (source != null) {
+            mSupportedFeatures = source.mSupportedFeatures;
+            mMaximumSupportedClientNumber = source.mMaximumSupportedClientNumber;
+        }
+    }
+
+    /**
+     * Constructor with combination of the feature.
+     * Zero to no supported feature.
+     *
+     * @param features One or combination of the feature from {@link @HotspotFeatures}.
+     * @hide
+     */
+    public SoftApCapability(@HotspotFeatures int features) {
+        mSupportedFeatures = features;
     }
 
     @Override
@@ -74,6 +129,7 @@ public final class SoftApCapability implements Parcelable {
     @Override
     /** Implement the Parcelable interface */
     public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(mSupportedFeatures);
         dest.writeInt(mMaximumSupportedClientNumber);
     }
 
@@ -81,7 +137,8 @@ public final class SoftApCapability implements Parcelable {
     /** Implement the Parcelable interface */
     public static final Creator<SoftApCapability> CREATOR = new Creator<SoftApCapability>() {
         public SoftApCapability createFromParcel(Parcel in) {
-            SoftApCapability capability = new SoftApCapability();
+            int supportedFeatures = in.readInt();
+            SoftApCapability capability = new SoftApCapability(supportedFeatures);
             capability.mMaximumSupportedClientNumber = in.readInt();
             return capability;
         }
@@ -95,6 +152,7 @@ public final class SoftApCapability implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
+        sbuf.append("SupportedFeatures=").append(mSupportedFeatures);
         sbuf.append("MaximumSupportedClientNumber=").append(mMaximumSupportedClientNumber);
         return sbuf.toString();
     }
@@ -104,11 +162,12 @@ public final class SoftApCapability implements Parcelable {
         if (this == o) return true;
         if (!(o instanceof SoftApCapability)) return false;
         SoftApCapability capability = (SoftApCapability) o;
-        return mMaximumSupportedClientNumber == capability.mMaximumSupportedClientNumber;
+        return mSupportedFeatures == capability.mSupportedFeatures
+                && mMaximumSupportedClientNumber == capability.mMaximumSupportedClientNumber;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mMaximumSupportedClientNumber);
+        return Objects.hash(mSupportedFeatures, mMaximumSupportedClientNumber);
     }
 }

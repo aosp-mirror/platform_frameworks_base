@@ -1116,7 +1116,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplayWindowSettings = new DisplayWindowSettings(this);
         mPolicy = policy;
         mAnimator = new WindowAnimator(this);
-        mRoot = new RootWindowContainer(this);
+        mRoot = new RootActivityContainer(mAtmService, this);
 
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mTaskSnapshotController = new TaskSnapshotController(this);
@@ -5787,7 +5787,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     void dumpDebugLocked(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
         mPolicy.dumpDebug(proto, POLICY);
-        mRoot.dumpDebug(proto, ROOT_WINDOW_CONTAINER, logLevel);
+        mRoot.dumpDebugInner(proto, ROOT_WINDOW_CONTAINER, logLevel);
         final DisplayContent topFocusedDisplayContent = mRoot.getTopFocusedDisplayContent();
         if (topFocusedDisplayContent.mCurrentFocus != null) {
             topFocusedDisplayContent.mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);
@@ -6650,14 +6650,14 @@ public class WindowManagerService extends IWindowManager.Stub
      * </ol>
      * Passing an invalid region will remove the area from the exclude region of this window.
      */
-    void updateTapExcludeRegion(IWindow client, int regionId, Region region) {
+    void updateTapExcludeRegion(IWindow client, Region region) {
         synchronized (mGlobalLock) {
             final WindowState callingWin = windowForClientLocked(null, client, false);
             if (callingWin == null) {
                 ProtoLog.w(WM_ERROR, "Bad requesting window %s", client);
                 return;
             }
-            callingWin.updateTapExcludeRegion(regionId, region);
+            callingWin.updateTapExcludeRegion(region);
         }
     }
 
@@ -6874,21 +6874,12 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "shouldShowIme()")) {
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
-
+        boolean show;
         synchronized (mGlobalLock) {
-            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            if (displayContent == null) {
-                ProtoLog.w(WM_ERROR,
-                        "Attempted to get IME flag of a display that does not exist: %d",
-                        displayId);
-                return false;
-            }
-            if (displayContent.isUntrustedVirtualDisplay()) {
-                return false;
-            }
-            return mDisplayWindowSettings.shouldShowImeLocked(displayContent)
-                    || mForceDesktopModeOnExternalDisplays;
+            show = shouldShowImeSystemWindowUncheckedLocked(displayId);
         }
+
+        return show;
     }
 
     @Override
@@ -7311,18 +7302,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (imeTarget == null) {
                     return;
                 }
-                final DisplayContent displayContent = imeTarget.getDisplayContent();
-                if (displayContent == null) {
-                    Slog.w(TAG_WM, "Attempted to show IME on an IME target that does not exist: "
-                            + imeTarget.getName());
+                final int displayId = imeTarget.getDisplayId();
+                if (!shouldShowImeSystemWindowUncheckedLocked(displayId)) {
                     return;
                 }
-                if (displayContent.isUntrustedVirtualDisplay()) {
-                    throw new SecurityException("Attempted to show IME on an untrusted "
-                            + "virtual display: " + displayContent.getDisplayId());
-                }
 
-                displayContent.getInsetsStateController().getImeSourceProvider()
+                mRoot.getDisplayContent(displayId).getInsetsStateController().getImeSourceProvider()
                         .scheduleShowImePostLayout(imeTarget);
             }
         }
@@ -7841,5 +7826,20 @@ public class WindowManagerService extends IWindowManager.Stub
         outSurfaceControl.copyFrom(mirror);
 
         return true;
+    }
+
+    private boolean shouldShowImeSystemWindowUncheckedLocked(final int displayId) {
+        final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+        if (displayContent == null) {
+            ProtoLog.w(WM_ERROR,
+                    "Attempted to get IME flag of a display that does not exist: %d",
+                    displayId);
+            return false;
+        }
+        if (displayContent.isUntrustedVirtualDisplay()) {
+            return false;
+        }
+        return mDisplayWindowSettings.shouldShowImeLocked(displayContent)
+                || mForceDesktopModeOnExternalDisplays;
     }
 }

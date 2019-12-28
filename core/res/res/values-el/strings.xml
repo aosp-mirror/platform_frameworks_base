@@ -491,10 +491,8 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Επιτρέπει στην εφαρμογή να προβάλλει τη διαμόρφωση του Bluetooth στο tablet, καθώς και να πραγματοποιεί και να αποδέχεται συνδέσεις με συνδεδεμένες συσκευές."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Επιτρέπει στην εφαρμογή να βλέπει τη διαμόρφωση του Bluetooth στη συσκευή Android TV και να κάνει και να αποδέχεται συνδέσεις με συζευγμένες συσκευές."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Επιτρέπει στην εφαρμογή να προβάλλει τη διαμόρφωση του Bluetooth στο τηλέφωνο, καθώς και να πραγματοποιεί και να αποδέχεται συνδέσεις με συνδεδεμένες συσκευές."</string>
-    <!-- no translation found for permlab_preferredPaymentInfo (5274423844767445054) -->
-    <skip />
-    <!-- no translation found for permdesc_preferredPaymentInfo (8583552469807294967) -->
-    <skip />
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Πληροφορίες προτιμώμενης υπηρεσίας πληρωμών NFC"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Επιτρέπει στην εφαρμογή να λαμβάνει πληροφορίες προτιμώμενης υπηρεσίας πληρωμής NFC, όπως καταχωρημένα βοηθήματα και προορισμό διαδρομής."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ελέγχει την Επικοινωνία κοντινού πεδίου (FNC)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Επιτρέπει στην εφαρμογή την επικοινωνία με ετικέτες, κάρτες και αναγνώστες της Επικοινωνίας κοντινού πεδίου (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"απενεργοποιεί το κλείδωμα οθόνης"</string>
@@ -1619,12 +1617,6 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"Η συντόμευση προσβασιμότητας ενεργοποίησε την υπηρεσία <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"Η συντόμευση προσβασιμότητας απενεργοποίησε την υπηρεσία <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Πατήστε παρατεταμένα και τα δύο κουμπιά έντασης ήχου για τρία δευτερόλεπτα, ώστε να χρησιμοποιήσετε την υπηρεσία <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"Επιλέξτε μια υπηρεσία που θα χρησιμοποιείται κατά το πάτημα του κουμπιού προσβασιμότητας:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Επιλέξτε μια υπηρεσία που θα χρησιμοποιείται με την κίνηση προσβασιμότητας (σύρετε με δύο δάχτυλα προς τα επάνω από το κάτω μέρος της οθόνης):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Επιλέξτε μια υπηρεσία που θα χρησιμοποιείται με την κίνηση προσβασιμότητας (σύρετε με τρία δάχτυλα προς τα επάνω από το κάτω μέρος της οθόνης):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"Για εναλλαγή μεταξύ υπηρεσιών, αγγίξτε παρατεταμένα το κουμπί προσβασιμότητας."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"Για εναλλαγή μεταξύ υπηρεσιών, σύρετε παρατεταμένα με δύο δάχτυλα προς τα επάνω και μην τα απομακρύνετε από την οθόνη."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"Για εναλλαγή μεταξύ υπηρεσιών, σύρετε παρατεταμένα με τρία δάχτυλα προς τα επάνω."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Μεγιστοποίηση"</string>
     <string name="user_switched" msgid="7249833311585228097">"Τρέχων χρήστης <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Εναλλαγή σε <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1863,11 +1855,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Συνδέθηκε με το <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Πατήστε για να δείτε τα αρχεία"</string>
     <string name="pin_target" msgid="8036028973110156895">"Καρφίτσωμα"</string>
-    <!-- no translation found for pin_specific_target (7824671240625957415) -->
-    <skip />
+    <string name="pin_specific_target" msgid="7824671240625957415">"Καρφίτσωμα <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Ξεκαρφίτσωμα"</string>
-    <!-- no translation found for unpin_specific_target (3859828252160908146) -->
-    <skip />
+    <string name="unpin_specific_target" msgid="3859828252160908146">"Ξεκαρφίτσωμα <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Πληροφορίες εφαρμογής"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Έναρξη επίδειξης…"</string>

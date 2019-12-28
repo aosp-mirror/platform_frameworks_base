@@ -306,7 +306,7 @@ import java.util.Set;
 public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityTaskManagerService" : TAG_ATM;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
-    private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
+    static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_IMMERSIVE = TAG + POSTFIX_IMMERSIVE;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
@@ -825,13 +825,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mAppWarnings = createAppWarnings(mUiContext, mH, mUiHandler, systemDir);
         mCompatModePackages = new CompatModePackages(this, systemDir, mH);
         mPendingIntentController = intentController;
-
-        mTempConfig.setToDefaults();
-        mTempConfig.setLocales(LocaleList.getDefault());
-        mConfigurationSeq = mTempConfig.seq = 1;
         mStackSupervisor = createStackSupervisor();
-        mRootActivityContainer = new RootActivityContainer(this);
-        mRootActivityContainer.onConfigurationChanged(mTempConfig);
 
         mTaskChangeNotificationController =
                 new TaskChangeNotificationController(mGlobalLock, mStackSupervisor, mH);
@@ -868,6 +862,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void setWindowManager(WindowManagerService wm) {
         synchronized (mGlobalLock) {
             mWindowManager = wm;
+            // TODO(merge-root): Remove cast
+            mRootActivityContainer = (RootActivityContainer) wm.mRoot;
+            mTempConfig.setToDefaults();
+            mTempConfig.setLocales(LocaleList.getDefault());
+            mConfigurationSeq = mTempConfig.seq = 1;
+            mRootActivityContainer.onConfigurationChanged(mTempConfig);
             mLockTaskController.setWindowManager(wm);
             mStackSupervisor.setWindowManager(wm);
             mRootActivityContainer.setWindowManager(wm);
@@ -1730,9 +1730,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "activityPaused");
-            ActivityStack stack = ActivityRecord.getStackLocked(token);
-            if (stack != null) {
-                stack.activityPausedLocked(token, false);
+            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+            if (r != null) {
+                r.activityPaused(false);
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -1765,7 +1765,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     restartingName = r.app.mName;
                     restartingUid = r.app.mUid;
                 }
-                r.activityStoppedLocked(icicle, persistentState, description);
+                r.activityStopped(icicle, persistentState, description);
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -5216,7 +5216,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * also corresponds to the merged configuration of the default display.
      */
     Configuration getGlobalConfiguration() {
-        return mRootActivityContainer.getConfiguration();
+        // Return default configuration before mRootActivityContainer initialized, which happens
+        // while initializing process record for system, see {@link
+        // ActivityManagerService#setSystemProcess}.
+        return mRootActivityContainer != null ? mRootActivityContainer.getConfiguration()
+                : new Configuration();
     }
 
     boolean updateConfigurationLocked(Configuration values, ActivityRecord starting,
@@ -7277,6 +7281,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public WindowProcessController getTopApp() {
             synchronized (mGlobalLockWithoutBoost) {
+                if (mRootActivityContainer == null) {
+                    // Return null if mRootActivityContainer not yet initialize, while update
+                    // oomadj after AMS created.
+                    return null;
+                }
                 final ActivityRecord top = mRootActivityContainer.getTopResumedActivity();
                 return top != null ? top.app : null;
             }
@@ -7295,7 +7304,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void scheduleDestroyAllActivities(String reason) {
             synchronized (mGlobalLock) {
-                mRootActivityContainer.scheduleDestroyAllActivities(null, reason);
+                mRootActivityContainer.scheduleDestroyAllActivities(reason);
             }
         }
 

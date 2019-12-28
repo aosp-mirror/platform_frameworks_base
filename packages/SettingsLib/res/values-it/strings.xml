@@ -206,7 +206,7 @@
     <string name="enable_adb" msgid="8072776357237289039">"Debug USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Modalità debug quando è connesso tramite USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Revoca autorizzazioni debug USB"</string>
-    <string name="bugreport_in_power" msgid="8664089072534638709">"Scorciatoria segnalazione bug"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"Scorciatoia segnalazione bug"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Mostra un pulsante per segnalare i bug nel menu di accensione"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Rimani attivo"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Lo schermo non va mai in stand-by se sotto carica"</string>
@@ -227,6 +227,7 @@
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tethering accelerazione hardware"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostra dispositivi Bluetooth senza nome"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Disattiva volume assoluto"</string>
+    <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Attiva Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Versione Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Seleziona versione Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Codec audio Bluetooth"</string>
@@ -243,7 +244,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS privato"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Seleziona modalità DNS privato"</string>
-    <string name="private_dns_mode_off" msgid="7065962499349997041">"Off"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"OFF"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatico"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Nome host del provider DNS privato"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Inserisci il nome host del provider DNS"</string>
@@ -275,6 +276,7 @@
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Controlla che le app installate tramite ADB/ADT non abbiano un comportamento dannoso"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Verranno mostrati solo dispositivi Bluetooth senza nome (solo indirizzo MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Disattiva la funzione del volume assoluto Bluetooth in caso di problemi con il volume dei dispositivi remoti, ad esempio un volume troppo alto o la mancanza di controllo"</string>
+    <string name="bluetooth_enable_gabeldorsche_summary" msgid="8472344901097607030">"Consente di attivare lo stack delle funzionalità Bluetooth Gabeldorche."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminale locale"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Abilita l\'app Terminale che offre l\'accesso alla shell locale"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Verifica HDCP"</string>
@@ -379,7 +381,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalìa (rosso-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalìa (blu-giallo)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Correzione del colore"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"Questa funzione è sperimentale e potrebbe influire sulle prestazioni."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"La correzione del colore consente alle persone daltoniche di vedere colori più accurati"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Valore sostituito da <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Tempo rimanente: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> circa"</string>

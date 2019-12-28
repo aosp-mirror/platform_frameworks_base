@@ -20,10 +20,10 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
-import android.content.res.ColorStateList;
-import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.controls.templates.ControlTemplate;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
@@ -36,12 +36,14 @@ import java.lang.annotation.RetentionPolicy;
  * Collects information to render the current state of a {@link Control} as well as possible action
  * that can be performed on it.
  * <p>
- * Additionally, this object is used to modify elements from the {@link Control} such as icons,
- * colors, names and intents. This information will last until it is again modified by a
+ * Additionally, this object is used to modify elements from the {@link Control} such as device
+ * type, and intents. This information will last until it is again modified by a
  * {@link ControlState}.
  * @hide
  */
 public final class ControlState implements Parcelable {
+
+    private static final String TAG = "ControlState";
 
     /**
      * @hide
@@ -76,80 +78,59 @@ public final class ControlState implements Parcelable {
     public static final int STATUS_DISABLED = 3;
 
     private final @NonNull String mControlId;
+    private final @DeviceTypes.DeviceType int mDeviceType;
     private final @Status int mStatus;
     private final @NonNull ControlTemplate mControlTemplate;
     private final @NonNull CharSequence mStatusText;
-    private final @Nullable CharSequence mTitle;
     private final @Nullable PendingIntent mAppIntent;
-    private final @Nullable Icon mIcon;
-    private final @Nullable ColorStateList mTint;
 
     /**
      * @param controlId the identifier of the {@link Control} this object refers to.
      * @param status the current status of the {@link Control}.
+     * @param deviceType the {@link DeviceTypes.DeviceType} to replace the one set in the
+     *                   {@link Control} or set in the last {@link ControlState}. In order to keep
+     *                   the current device type for this {@link Control}, the old value must be
+     *                   passed.
      * @param controlTemplate the template to be used to render the {@link Control}. This can be
-     *                        of a different
-     *                        {@link android.service.controls.ControlTemplate.TemplateType} than the
+     *                        of a different {@link ControlTemplate.TemplateType} than the
      *                        one defined in {@link Control#getPrimaryType}
      * @param statusText the user facing text describing the current status.
-     * @param title the title to replace the one set in the {@link Control} or set in the
-     *              last {@link ControlState}. Pass {@code null} to use the last value set for this
-     *              {@link Control}
      * @param appIntent the {@link PendingIntent} to replace the one set in the {@link Control} or
      *                  set in the last {@link ControlState}. Pass {@code null} to use the last
      *                  value set for this {@link Control}.
-     * @param icon the icon to replace the one set in the {@link Control} or set in the last
-     *             {@link ControlState}. Pass {@code null} to use the last value set for this
-     *             {@link Control}.
-     * @param tint the colors to replace those set in the {@link Control} or set in the last
-     *             {@link ControlState}. Pass {@code null} to use the last value set for this
-     *             {@link Control}.
      */
     public ControlState(@NonNull String controlId,
-            int status,
+            @DeviceTypes.DeviceType int deviceType,
+            @Status int status,
             @NonNull ControlTemplate controlTemplate,
             @NonNull CharSequence statusText,
-            @Nullable CharSequence title,
-            @Nullable PendingIntent appIntent,
-            @Nullable Icon icon,
-            @Nullable ColorStateList tint) {
+            @Nullable PendingIntent appIntent) {
         Preconditions.checkNotNull(controlId);
         Preconditions.checkNotNull(controlTemplate);
         Preconditions.checkNotNull(statusText);
         mControlId = controlId;
+        if (!DeviceTypes.validDeviceType(deviceType)) {
+            Log.e(TAG, "Invalid device type:" + deviceType);
+            mDeviceType = DeviceTypes.TYPE_UNKNOWN;
+        } else {
+            mDeviceType = deviceType;
+        }
         mStatus = status;
         mControlTemplate = controlTemplate;
         mStatusText = statusText;
-        mTitle = title;
         mAppIntent = appIntent;
-        mIcon = icon;
-        mTint = tint;
     }
 
     ControlState(Parcel in) {
         mControlId = in.readString();
+        mDeviceType = in.readInt();
         mStatus = in.readInt();
         mControlTemplate = ControlTemplate.CREATOR.createFromParcel(in);
         mStatusText = in.readCharSequence();
         if (in.readByte() == 1) {
-            mTitle = in.readCharSequence();
-        } else {
-            mTitle = null;
-        }
-        if (in.readByte() == 1) {
             mAppIntent = PendingIntent.CREATOR.createFromParcel(in);
         } else {
             mAppIntent = null;
-        }
-        if (in.readByte() == 1) {
-            mIcon = Icon.CREATOR.createFromParcel(in);
-        } else {
-            mIcon = null;
-        }
-        if (in.readByte() == 1) {
-            mTint = ColorStateList.CREATOR.createFromParcel(in);
-        } else {
-            mTint = null;
         }
     }
 
@@ -163,9 +144,9 @@ public final class ControlState implements Parcelable {
         return mControlId;
     }
 
-    @Nullable
-    public CharSequence getTitle() {
-        return mTitle;
+    @DeviceTypes.DeviceType
+    public int getDeviceType() {
+        return mDeviceType;
     }
 
     @Nullable
@@ -183,48 +164,21 @@ public final class ControlState implements Parcelable {
         return mControlTemplate;
     }
 
-    @Nullable
-    public Icon getIcon() {
-        return mIcon;
-    }
-
     @NonNull
     public CharSequence getStatusText() {
         return mStatusText;
     }
 
-    @Nullable
-    public ColorStateList getTint() {
-        return mTint;
-    }
-
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mControlId);
+        dest.writeInt(mDeviceType);
         dest.writeInt(mStatus);
         mControlTemplate.writeToParcel(dest, flags);
         dest.writeCharSequence(mStatusText);
-        if (mTitle != null) {
-            dest.writeByte((byte) 1);
-            dest.writeCharSequence(mTitle);
-        } else {
-            dest.writeByte((byte) 0);
-        }
         if (mAppIntent != null) {
             dest.writeByte((byte) 1);
             mAppIntent.writeToParcel(dest, flags);
-        } else {
-            dest.writeByte((byte) 0);
-        }
-        if (mIcon != null) {
-            dest.writeByte((byte) 1);
-            mIcon.writeToParcel(dest, flags);
-        } else {
-            dest.writeByte((byte) 0);
-        }
-        if (mTint != null) {
-            dest.writeByte((byte) 1);
-            mTint.writeToParcel(dest, flags);
         } else {
             dest.writeByte((byte) 0);
         }
@@ -248,20 +202,22 @@ public final class ControlState implements Parcelable {
      * This class facilitates the creation of {@link ControlState}. It provides the following
      * defaults for non-optional parameters:
      * <ul>
+     *     <li> Device type: {@link DeviceTypes#TYPE_UNKNOWN}
      *     <li> Status: {@link ControlState#STATUS_OK}
      *     <li> Control template: {@link ControlTemplate#NO_TEMPLATE}
      *     <li> Status text: {@code ""}
      * </ul>
      */
     public static class Builder {
+        private static final String TAG = "ControlState.Builder";
+
         private @NonNull String mControlId;
+        private @DeviceTypes.DeviceType
+        int mDeviceType = DeviceTypes.TYPE_UNKNOWN;
         private @Status int mStatus = STATUS_OK;
         private @NonNull ControlTemplate mControlTemplate = ControlTemplate.NO_TEMPLATE;
         private @NonNull CharSequence mStatusText = "";
-        private @Nullable CharSequence mTitle;
         private @Nullable PendingIntent mAppIntent;
-        private @Nullable Icon mIcon;
-        private @Nullable ColorStateList mTint;
 
         /**
          * @param controlId the identifier of the {@link Control} that the resulting
@@ -279,13 +235,11 @@ public final class ControlState implements Parcelable {
         public Builder(@NonNull ControlState controlState) {
             Preconditions.checkNotNull(controlState);
             mControlId = controlState.mControlId;
+            mDeviceType = controlState.mDeviceType;
             mStatus = controlState.mStatus;
             mControlTemplate = controlState.mControlTemplate;
             mStatusText = controlState.mStatusText;
-            mTitle = controlState.mTitle;
             mAppIntent = controlState.mAppIntent;
-            mIcon = controlState.mIcon;
-            mTint = controlState.mTint;
         }
 
 
@@ -296,6 +250,21 @@ public final class ControlState implements Parcelable {
         @NonNull
         public Builder setControlId(@NonNull String controlId) {
             mControlId = controlId;
+            return this;
+        }
+
+        /**
+         * @param deviceType the device type of the {@link Control}.
+         * @return {@code this}
+         */
+        @NonNull
+        public Builder setDeviceType(@DeviceTypes.DeviceType int deviceType) {
+            if (!DeviceTypes.validDeviceType(deviceType)) {
+                Log.e(TAG, "Invalid device type:" + deviceType);
+                mDeviceType = DeviceTypes.TYPE_UNKNOWN;
+            } else {
+                mDeviceType = deviceType;
+            }
             return this;
         }
 
@@ -332,18 +301,6 @@ public final class ControlState implements Parcelable {
         }
 
         /**
-         * @param title the title to replace the one defined in the corresponding {@link Control} or
-         *              set by the last {@link ControlState}. Pass {@code null} to keep the last
-         *              value.
-         * @return {@code this}
-         */
-        @NonNull
-        public Builder setTitle(@Nullable CharSequence title) {
-            mTitle = title;
-            return this;
-        }
-
-        /**
          * @param appIntent the Pending Intent to replace the one defined in the corresponding
          *                  {@link Control} or set by the last {@link ControlState}. Pass
          *                  {@code null} to keep the last value.
@@ -356,35 +313,22 @@ public final class ControlState implements Parcelable {
         }
 
         /**
-         * @param icon the title to replace the one defined in the corresponding {@link Control} or
-         *             set by the last {@link ControlState}. Pass {@code null} to keep the last
-         *             value.
-         * @return {@code this}
-         */
-        @NonNull
-        public Builder setIcon(@Nullable Icon icon) {
-            mIcon = icon;
-            return this;
-        }
-
-        /**
-         * @param tint the title to replace the one defined in the corresponding {@link Control} or
-         *             set by the last {@link ControlState}. Pass {@code null} to keep the last
-         *             value.
-         * @return {@code this}
-         */
-        @NonNull
-        public Builder setTint(@Nullable ColorStateList tint) {
-            mTint = tint;
-            return this;
-        }
-
-        /**
          * @return a new {@link ControlState}
          */
         public ControlState build() {
-            return new ControlState(mControlId, mStatus, mControlTemplate, mStatusText,
-                    mTitle, mAppIntent, mIcon, mTint);
+            return new ControlState(mControlId, mDeviceType, mStatus, mControlTemplate, mStatusText,
+                    mAppIntent);
+        }
+
+        /**
+         * Creates a new {@link ControlState.Builder} for the given {@link Control}.
+         *
+         * This will set the corresponding identifier as well as the device type.
+         * @param control the {@link Control} to create a state for.
+         * @return a {@link ControlState.Builder} for a {@link Control}
+         */
+        public static Builder createForControl(Control control) {
+            return new Builder(control.getControlId()).setDeviceType(control.getDeviceType());
         }
     }
 }
