@@ -1452,6 +1452,11 @@ public class BackupManagerService extends IBackupManager.Stub {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) {
             return;
         }
+        dumpWithoutCheckingPermission(fd, pw, args);
+    }
+
+    @VisibleForTesting
+    void dumpWithoutCheckingPermission(FileDescriptor fd, PrintWriter pw, String[] args) {
         int userId = binderGetCallingUserId();
         if (!isUserReadyForBackup(userId)) {
             pw.println("Inactive");
@@ -1460,7 +1465,16 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         if (args != null) {
             for (String arg : args) {
-                if ("users".equals(arg.toLowerCase())) {
+                if ("-h".equals(arg)) {
+                    pw.println("'dumpsys backup' optional arguments:");
+                    pw.println("  -h       : this help text");
+                    pw.println("  a[gents] : dump information about defined backup agents");
+                    pw.println("  transportclients : dump information about transport clients");
+                    pw.println("  transportstats : dump transport statts");
+                    pw.println("  users    : dump the list of users for which backup service "
+                            + "is running");
+                    return;
+                } else if ("users".equals(arg.toLowerCase())) {
                     pw.print(DUMP_RUNNING_USERS_MESSAGE);
                     for (int i = 0; i < mUserServices.size(); i++) {
                         pw.print(" " + mUserServices.keyAt(i));
@@ -1471,11 +1485,12 @@ public class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(UserHandle.USER_SYSTEM, "dump()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.dump(fd, pw, args);
+        for (int i = 0; i < mUserServices.size(); i++) {
+            UserBackupManagerService userBackupManagerService =
+                    getServiceForUserIfCallerHasPermission(mUserServices.keyAt(i), "dump()");
+            if (userBackupManagerService != null) {
+                userBackupManagerService.dump(fd, pw, args);
+            }
         }
     }
 
