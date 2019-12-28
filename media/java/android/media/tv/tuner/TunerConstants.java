@@ -18,14 +18,18 @@ package android.media.tv.tuner;
 
 import android.annotation.IntDef;
 import android.annotation.LongDef;
+import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * Constants for tuner framework.
+ *
  * @hide
  */
+@SystemApi
 public final class TunerConstants {
     /** @hide */
     public static final int INVALID_TS_PID = Constants.Constant.INVALID_TS_PID;
@@ -180,6 +184,37 @@ public final class TunerConstants {
     public static final int FILTER_SUBTYPE_TLV = 15;
     /** @hide */
     public static final int FILTER_SUBTYPE_PTP = 16;
+
+    /** @hide */
+    @IntDef({FILTER_STATUS_DATA_READY, FILTER_STATUS_LOW_WATER, FILTER_STATUS_HIGH_WATER,
+            FILTER_STATUS_OVERFLOW})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FilterStatus {}
+
+    /**
+     * The status of a filter that the data in the filter buffer is ready to be read.
+     */
+    public static final int FILTER_STATUS_DATA_READY = Constants.DemuxFilterStatus.DATA_READY;
+    /**
+     * The status of a filter that the amount of available data in the filter buffer is at low
+     * level.
+     *
+     * The value is set to 25 percent of the buffer size by default. It can be changed when
+     * configuring the filter.
+     */
+    public static final int FILTER_STATUS_LOW_WATER = Constants.DemuxFilterStatus.LOW_WATER;
+    /**
+     * The status of a filter that the amount of available data in the filter buffer is at high
+     * level.
+     * The value is set to 75 percent of the buffer size by default. It can be changed when
+     * configuring the filter.
+     */
+    public static final int FILTER_STATUS_HIGH_WATER = Constants.DemuxFilterStatus.HIGH_WATER;
+    /**
+     * The status of a filter that the filter buffer is full and newly filtered data is being
+     * discarded.
+     */
+    public static final int FILTER_STATUS_OVERFLOW = Constants.DemuxFilterStatus.OVERFLOW;
 
     /** @hide */
     @IntDef({FRONTEND_SCAN_UNDEFINED, FRONTEND_SCAN_AUTO, FRONTEND_SCAN_BLIND})

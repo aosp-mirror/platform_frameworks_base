@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.tuner.FilterSettings.Settings;
 import android.media.tv.tuner.TunerConstants.DemuxPidType;
+import android.media.tv.tuner.TunerConstants.FilterStatus;
 import android.media.tv.tuner.TunerConstants.FilterSubtype;
 import android.media.tv.tuner.TunerConstants.FilterType;
 import android.media.tv.tuner.TunerConstants.FrontendScanType;
@@ -168,19 +169,23 @@ public final class Tuner implements AutoCloseable  {
     }
 
     /**
-     * Frontend Callback.
-     *
-     * @hide
+     * Callback interface for receiving information from the corresponding filters.
      */
     public interface FilterCallback {
         /**
          * Invoked when there are filter events.
+         *
+         * @param filter the corresponding filter which sent the events.
+         * @param events the filter events sent from the filter.
          */
-        void onFilterEvent(FilterEvent[] events);
+        void onFilterEvent(@NonNull Filter filter, @NonNull FilterEvent[] events);
         /**
          * Invoked when filter status changed.
+         *
+         * @param filter the corresponding filter whose status is changed.
+         * @param status the new status of the filter.
          */
-        void onFilterStatus(int status);
+        void onFilterStatusChanged(@NonNull Filter filter, @FilterStatus int status);
     }
 
     /**
@@ -226,7 +231,7 @@ public final class Tuner implements AutoCloseable  {
                 case MSG_ON_FILTER_STATUS: {
                     Filter filter = (Filter) msg.obj;
                     if (filter.mCallback != null) {
-                        filter.mCallback.onFilterStatus(msg.arg1);
+                        filter.mCallback.onFilterStatusChanged(filter, msg.arg1);
                     }
                     break;
                 }
@@ -456,7 +461,11 @@ public final class Tuner implements AutoCloseable  {
         }
     }
 
-    /** @hide */
+    /**
+     * Tuner data filter.
+     *
+     * <p> This class is used to filter wanted data according to the filter's configuration.
+     */
     public class Filter {
         private long mNativeContext;
         private FilterCallback mCallback;
@@ -487,6 +496,7 @@ public final class Tuner implements AutoCloseable  {
          *
          * @param settings the settings of the filter.
          * @return result status of the operation.
+         * @hide
          */
         public int configure(FilterSettings settings) {
             int subType = -1;
@@ -501,6 +511,7 @@ public final class Tuner implements AutoCloseable  {
          * Gets the filter Id.
          *
          * @return the hardware resource Id for the filter.
+         * @hide
          */
         public int getId() {
             return nativeGetId();
@@ -517,6 +528,7 @@ public final class Tuner implements AutoCloseable  {
          * @param source the filter instance which provides data input. Switch to
          * use demux as data source if the filter instance is NULL.
          * @return result status of the operation.
+         * @hide
          */
         public int setDataSource(@Nullable Filter source) {
             return nativeSetDataSource(source);
@@ -526,6 +538,7 @@ public final class Tuner implements AutoCloseable  {
          * Starts the filter.
          *
          * @return result status of the operation.
+         * @hide
          */
         public int start() {
             return nativeStartFilter();
@@ -536,6 +549,7 @@ public final class Tuner implements AutoCloseable  {
          * Stops the filter.
          *
          * @return result status of the operation.
+         * @hide
          */
         public int stop() {
             return nativeStopFilter();
@@ -545,11 +559,13 @@ public final class Tuner implements AutoCloseable  {
          * Flushes the filter.
          *
          * @return result status of the operation.
+         * @hide
          */
         public int flush() {
             return nativeFlushFilter();
         }
 
+        /** @hide */
         public int read(@NonNull byte[] buffer, int offset, int size) {
             size = Math.min(size, buffer.length - offset);
             return nativeRead(buffer, offset, size);
@@ -559,6 +575,7 @@ public final class Tuner implements AutoCloseable  {
          * Release the Filter instance.
          *
          * @return result status of the operation.
+         * @hide
          */
         public int close() {
             return nativeClose();

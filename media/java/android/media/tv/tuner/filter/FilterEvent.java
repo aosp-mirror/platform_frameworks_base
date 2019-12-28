@@ -16,10 +16,13 @@
 
 package android.media.tv.tuner.filter;
 
+import android.annotation.SystemApi;
+
 /**
- * Demux filter event.
+ * An entity class that is passed to the filter callbacks.
  *
  * @hide
  */
+@SystemApi
 public abstract class FilterEvent {
 }
