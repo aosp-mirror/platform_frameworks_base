@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Antaa sovelluksen lähettää lähetyksiä, jotka jäävät voimaan lähetyksen päätyttyä. Ominaisuuden liiallinen käyttö voi saada television toimimaan hitaammin tai epävakaammin liiallisen muistinkäytön myötä."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Antaa sovelluksen lähettää pysyviä lähetyksiä, jotka säilyvät lähetyksen päätyttyä. Liiallinen käyttö voi tehdä puhelimesta hitaan tai epävakaan kasvattamalla sen muistinkäyttöä liikaa."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"lue yhteystietoja"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Antaa sovelluksen lukea tabletille tallennettujen kontaktien tietoja. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Antaa sovelluksen lukea televisioon tallennettujen kontaktien tietoja. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Antaa sovelluksen lukea puhelimelle tallennettujen kontaktien tietoja. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"muokkaa yhteystietoja"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Antaa sovelluksen muokata tabletille tallennettujen kontaktien tietoja. Käyttöluvan saaneet sovellukset voivat myös poistaa kontaktitietoja."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Antaa sovelluksen muokata televisioon tallennettujen kontaktien tietoja. Käyttöluvan saaneet sovellukset voivat myös poistaa kontaktitietoja."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Antaa sovelluksen muokata puhelimelle tallennettujen kontaktien tietoja. Käyttöluvan saaneet sovellukset voivat myös poistaa kontaktitietoja."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"lue puhelulokia"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Tämä sovellus voi lukea puheluhistoriaasi."</string>

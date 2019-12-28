@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Giver appen lov til at sende klæbende udsendelser, som ikke forsvinder, når udsendelsen er slut. Overdreven brug kan gøre fjernsynet langsomt eller ustabilt ved at få det til at bruge for meget hukommelse."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Tillader, at appen kan sende klæbende udsendelser, der forbliver tilbage, når udsendelsen er slut. Overdreven brug kan gøre din telefon langsom eller ustabil ved at tvinge den til at bruge for meget hukommelse."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"læse dine kontakter"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Tillader, at appen kan læse data om de kontakter, der er gemt på din tablet. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Tillader, at appen kan læse data om de kontakter, der er gemt på dit fjernsyn. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Tillader, at appen læser data om de kontakter, der er gemt på din telefon. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"ændre dine kontakter"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din tablet. Denne tilladelse giver apps mulighed for at slette kontaktdata."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Tillader, at appen kan ændre data om de kontakter, der er gemt på dit fjernsyn. Denne tilladelse giver apps mulighed for at slette kontaktdata."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din telefon. Denne tilladelse giver apps mulighed for at slette kontaktdata."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"læse opkaldsliste"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Denne app kan læse din opkaldshistorik."</string>

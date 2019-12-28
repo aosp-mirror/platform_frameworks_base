@@ -393,16 +393,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Permite aplicației să trimită mesaje difuzate persistente, care se păstrează după terminarea difuzării mesajului. Utilizarea excesivă a acestei funcții poate să încetinească sau să destabilizeze televizorul, determinându-l să utilizeze prea multă memorie."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Permite aplicației să trimită mesaje difuzate persistente, care se păstrează după terminarea difuzării mesajului. Utilizarea excesivă a acestei funcții poate să încetinească sau să destabilizeze telefonul, determinându-l să utilizeze prea multă memorie."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"citește agenda"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Permite aplicației să citească datele despre persoanele de contact salvate pe tabletă. Cu această permisiune, aplicațiile pot salva datele de contact, iar aplicațiile rău-intenționate pot permite accesul la datele de contact fără cunoștința dvs."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Permite aplicației să citească datele despre persoanele de contact salvate pe televizor. Cu această permisiune, aplicațiile pot salva datele de contact, iar aplicațiile rău-intenționate pot permite accesul la datele de contact fără cunoștința dvs."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Permite aplicației să citească datele despre persoanele de contact salvate pe telefon. Cu această permisiune, aplicațiile pot salva datele de contact, iar aplicațiile rău-intenționate pot permite accesul la datele de contact fără cunoștința dvs."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"modifică agenda"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Permite aplicației să modifice datele despre persoanele din agenda stocată pe tabletă. Cu această permisiune, aplicația poate șterge datele de contact."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Permite aplicației să modifice datele despre persoanele de contact salvate pe telefon. Cu această permisiune, aplicația poate șterge datele de contact."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Permite aplicației să modifice datele despre persoanele din agenda stocată pe telefon. Cu această permisiune, aplicația poate șterge datele de contact."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"citește jurnalul de apeluri"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Această aplicație poate citi istoricul apelurilor."</string>

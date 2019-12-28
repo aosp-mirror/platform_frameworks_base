@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Lejon aplikacionin të dërgojë transmetime ngjitëse të cilat ngelen pas mbarimit të transmetimit. Përdorimi i tepërt mund ta bëjë televizorin të ngadaltë ose të paqëndrueshëm, duke e detyruar atë të përdorë më shumë kujtesë."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Lejon aplikacionin të dërgojë transmetime ngjitëse që qëndrojnë derisa të përfundojë transmetimi. Përdorimi i tepruar mund ta bëjë telefonin të ngadaltë ose të paqëndrueshëm duke e detyruar atë të përdorë shumë kujtesë."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"lexo kontaktet e tua"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Lejon aplikacionin të lexojë të dhëna për kontaktet e ruajtura në tabletin tënd. Kjo leje lejon që aplikacionet të ruajnë të dhënat e tua të kontakteve dhe aplikacionet keqdashëse mund të ndajnë të dhëna të kontakteve pa dijeninë tënde."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Lejon aplikacionin të lexojë të dhëna për kontaktet e ruajtura në televizorin tënd. Kjo leje lejon që aplikacionet të ruajnë të dhënat e tua të kontakteve dhe aplikacionet keqdashëse mund të ndajnë të dhëna të kontakteve pa dijeninë tënde."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Lejon aplikacionin të lexojë të dhëna për kontaktet e ruajtura në telefonin tënd. Kjo leje lejon që aplikacionet të ruajnë të dhënat e tua të kontakteve dhe aplikacionet keqdashëse mund të ndajnë të dhëna të kontakteve pa dijeninë tënde."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"modifiko kontaktet"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Lejon aplikacionin të modifikojë të dhënat rreth kontakteve të tua të ruajtura në tabletin tënd. Kjo leje lejon që aplikacionet të fshijnë të dhënat e kontakteve."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Lejon aplikacionin të modifikojë të dhënat rreth kontakteve të tua të ruajtura në televizorin tënd. Kjo leje lejon që aplikacionet të fshijnë të dhënat e kontakteve."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Lejon aplikacionin të modifikojë të dhënat rreth kontakteve të tua të ruajtura në telefonin tënd. Kjo leje lejon që aplikacionet të fshijnë të dhënat e kontakteve."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"lexo ditarin e telefonatave"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Ky aplikacion mund të lexojë të gjithë historikun e telefonatave."</string>

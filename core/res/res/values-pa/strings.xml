@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"ਐਪ ਨੂੰ ਸਟਿਕੀ ਪ੍ਰਸਾਰਨ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਜੋ ਪ੍ਰਸਾਰਨ ਦੇ ਖ਼ਤਮ ਹੋਣ ਤੋਂ ਬਾਅਦ ਰਹਿੰਦੇ ਹਨ। ਵਾਧੂ ਵਰਤੋਂ TV ਨੂੰ ਹੌਲੀ ਜਾਂ ਬਹੁਤ ਜ਼ਿਆਦਾ ਮੈਮਰੀ ਵਰਤ ਕੇ ਇਸਨੂੰ ਅਸਥਿਰ ਬਣਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"ਐਪ ਨੂੰ ਸਟਿਕੀ ਪ੍ਰਸਾਰਨ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਜੋ ਪ੍ਰਸਾਰਨ ਦੇ ਖਤਮ ਹੋਣ ਤੋਂ ਬਾਅਦ ਰਹਿੰਦੇ ਹਨ। ਵਾਧੂ ਵਰਤੋਂ ਫ਼ੋਨ ਨੂੰ ਹੌਲੀ ਜਾਂ ਬਹੁਤ ਜ਼ਿਆਦਾ ਮੈਮਰੀ ਵਰਤ ਕੇ ਇਸਨੂੰ ਅਸਥਿਰ ਬਣਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"ਆਪਣੇ ਸੰਪਰਕ ਪੜ੍ਹੋ"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡਾਟਾ ਪੜ੍ਹਨ ਦਿੰਦੀ ਹੈ। ਇਹ ਇਜਾਜ਼ਤ ਐਪਾਂ ਨੂੰ ਤੁਹਾਡਾ ਸੰਪਰਕ ਡਾਟਾ ਰੱਖਿਅਤ ਕਰਨ ਦਿੰਦੀ ਹੈ ਅਤੇ ਨੁਕਸਾਨਦੇਹ ਐਪਾਂ ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ ਤੋਂ ਬਿਨਾਂ ਸੰਪਰਕ ਡਾਟਾ ਸਾਂਝਾ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ TV \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡਾਟਾ ਪੜ੍ਹਨ ਦਿੰਦੀ ਹੈ। ਇਹ ਇਜਾਜ਼ਤ ਐਪਾਂ ਨੂੰ ਤੁਹਾਡਾ ਸੰਪਰਕ ਡਾਟਾ ਰੱਖਿਅਤ ਕਰਨ ਦਿੰਦੀ ਹੈ ਅਤੇ ਨੁਕਸਾਨਦੇਹ ਐਪਾਂ ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ ਤੋਂ ਬਿਨਾਂ ਸੰਪਰਕ ਡਾਟਾ ਸਾਂਝਾ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡਾਟਾ ਪੜ੍ਹਨ ਦਿੰਦੀ ਹੈ। ਇਹ ਇਜਾਜ਼ਤ ਐਪਾਂ ਨੂੰ ਤੁਹਾਡਾ ਸੰਪਰਕ ਡਾਟਾ ਰੱਖਿਅਤ ਕਰਨ ਦਿੰਦੀ ਹੈ ਅਤੇ ਨੁਕਸਾਨਦੇਹ ਐਪਾਂ ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ ਤੋਂ ਬਿਨਾਂ ਸੰਪਰਕ ਡਾਟਾ ਸਾਂਝਾ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"ਆਪਣੇ ਸੰਪਰਕ ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡਾਟਾ ਸੋਧਣ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ। ਇਹ ਇਜਾਜ਼ਤ ਐਪਾਂ ਨੂੰ ਸੰਪਰਕ ਡਾਟਾ ਮਿਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ TV \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡਾਟਾ ਸੋਧਣ ਦਿੰਦੀ ਹੈ। ਇਹ ਇਜਾਜ਼ਤ ਐਪਾਂ ਨੂੰ ਸੰਪਰਕ ਡਾਟਾ ਮਿਟਾਉਣ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡਾਟਾ ਸੋਧਣ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ। ਇਹ ਇਜਾਜ਼ਤ ਐਪਾਂ ਨੂੰ ਸੰਪਰਕ ਡਾਟਾ ਮਿਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"ਕਾਲ ਲੌਗ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"ਇਹ ਐਪ ਤੁਹਾਡਾ ਕਾਲ ਇਤਿਹਾਸ ਪੜ੍ਹ ਸਕਦੀ ਹੈ।"</string>

@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Nagbibigay-daan sa app na magpadala ng mga sticky broadcast, na nananatili pagkatapos ng broadcast. Ang labis na paggamit nito ay maaaring magsanhi sa TV na maging mabagal o hindi matatag sa pamamagitan ng paggamit nito ng masyadong maraming memory."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Pinapayagan ang app na magpadala ng mga sticky na pag-broadcast, na nananatili pagkatapos ng pag-broadcast. Maaaring pabagalin o gawing hindi matatag ng labis na paggamit ang telepono sa pamamagitan ng pagdulot dito na gumamit ng masyadong maraming memory."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"basahin ang iyong mga contact"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Nagbibigay-daan sa app na magbasa ng data tungkol sa iyong mga contact na naka-store sa tablet mo. Nagbibigay-daan ang pahintulot na ito sa mga app na i-save ang iyong data ng contact, at puwedeng magbahagi ng data ng contact ang mga nakakahamak na app nang hindi mo alam."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Nagbibigay-daan sa app na magbasa ng data tungkol sa iyong mga contact na naka-store sa TV mo. Nagbibigay-daan ang pahintulot na ito sa mga app na i-save ang iyong data ng contact, at puwedeng magbahagi ng data ng contact ang mga nakakahamak na app nang hindi mo alam."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Nagbibigay-daan sa app na magbasa ng data tungkol sa iyong mga contact na naka-store sa telepono mo. Nagbibigay-daan ang pahintulot na ito sa mga app na i-save ang iyong data ng contact, at puwedeng magbahagi ng data ng contact ang mga nakakahamak na app nang hindi mo alam."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"baguhin ang iyong mga contact"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Nagbibigay-daan sa app na baguhin ang data tungkol sa iyong mga contact na naka-store sa tablet mo. Nagbibigay-daan ang pahintulot na ito sa mga app na mag-delete ng data ng contact."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Nagbibigay-daan sa app na baguhin ang data tungkol sa iyong mga contact na naka-store sa TV mo. Nagbibigay-daan ang pahintulot na ito sa mga app na mag-delete ng data ng contact."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Nagbibigay-daan sa app na baguhin ang data tungkol sa iyong mga contact na naka-store sa telepono mo. Nagbibigay-daan ang pahintulot na ito sa mga app na mag-delete ng data ng contact."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"basahin ang log ng tawag"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Mababasa ng app na ito ang iyong history ng tawag."</string>

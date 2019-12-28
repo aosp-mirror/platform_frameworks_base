@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Ivumela uhlelo lokusebenza ukuthi lithumele ukusakaza okunamathelayo, okuhlalayo ngemuva kokuphela kokusakaza. Ukusetshenziswa okungaphezulu kungenza i-TV ihambe kancane noma ingazinzi ngokuyenza ukuthi isebenzise imemori enkulu kakhulu."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Ivumela uhlelo lokusebenza ukuthumela ukusakaza okunamathelayo, okusalayo emva kokuba ukusakazwa sekuphelile. Ukusebenzisa kakhulu kuhle kwenze ifoni ukuthi ingasheshi noma ingahlali kahle ngokuyibangela ukusebenzisa imemori eningi."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"funda oxhumana nabo"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Ivumela uhlelo lokusebenza ukufunda idatha mayelana noxhumana nabo abalondolozwe kuthebhulethi yakho. Le mvume ivumela izinhlelo zokusebenza ukuthi zilondoloze idatha yoxhumana nabo, kanye nezinhlelo zokusebenza ezinobungozi zingabelana ngedatha yoxhumana nabo ngaphandle kolwazi lwakho."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Ivumela uhlelo lokusebenza ukufunda idatha mayelana noxhumana nabo abalondolozwe ku-TV yakho. Le mvume ivumela izinhlelo zokusebenza ukuthi zilondoloze idatha yoxhumana nabo, kanye nezinhlelo zokusebenza ezinobungozi zingabelana ngedatha yoxhumana nabo ngaphandle kolwazi lwakho."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Ivumela uhlelo lokusebenza ukufunda idatha mayelana noxhumana nabo abalondolozwe efonini yakho. Le mvume ivumela izinhlelo zokusebenza ukuthi zilondoloze idatha yoxhumana nabo, kanye nezinhlelo zokusebenza ezinobungozi zingabelana ngedatha yoxhumana nabo ngaphandle kolwazi lwakho."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"shintsha oxhumana nabo"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Ivumela uhlelo lokusebenza ukushintsha idatha mayelana noxhumana nabo abalondolozwe kuthebhulethi yakho. Le mvume ivumela izinhlelo zokusebenza ukususa idatha yoxhumana nabo."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Ivumela uhlelo lokusebenza ukushintsha idatha mayelana noxhumana nabo abalondolozwe ku-TV yakho. Le mvume ivumela izinhlelo zokusebenza ukususa idatha yoxhumana nabo."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Ivumela uhlelo lokusebenza ukushintsha idatha mayelana noxhumana nabo abalondolozwe efonini yakho. Le mvume ivumela izinhlelo zokusebenza ukususa idatha yoxhumana nabo."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"funda irekhodi lamakholi"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Lolu hlelo lokusebenza lungafunda umlando wakho wekholi."</string>

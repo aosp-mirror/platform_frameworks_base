@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Cho phép ứng dụng gửi nội dung truyền phát hấp dẫn người xem. Nội dung này sẽ vẫn còn sau khi quá trình truyền phát kết thúc. Việc sử dụng quá mức có thể làm cho TV bị chậm hoặc không ổn định do khiến TV sử dụng quá nhiều bộ nhớ."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Cho phép ứng dụng gửi nội dung truyền phát hấp dẫn người xem. Nội dung này sẽ vẫn còn sau khi quá trình truyền phát kết thúc. Việc sử dụng quá mức có thể làm cho điện thoại bị chậm hoặc không ổn định do khiến điện thoại sử dụng quá nhiều bộ nhớ."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"đọc danh sách liên hệ của bạn"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Cho phép ứng dụng đọc dữ liệu về người liên hệ mà bạn lưu trữ trên máy tính bảng của mình. Quyền này cho phép ứng dụng lưu dữ liệu về người liên hệ của bạn và các ứng dụng độc hại có thể lén lút chia sẻ dữ liệu này."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Cho phép ứng dụng đọc dữ liệu về người liên hệ mà bạn lưu trữ trên TV của mình. Quyền này cho phép ứng dụng lưu dữ liệu về người liên hệ của bạn và các ứng dụng độc hại có thể lén lút chia sẻ dữ liệu này."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Cho phép ứng dụng đọc dữ liệu về người liên hệ mà bạn lưu trữ trên điện thoại. Quyền này cho phép ứng dụng lưu dữ liệu về người liên hệ của bạn và các ứng dụng độc hại có thể lén lút chia sẻ dữ liệu này."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"sửa đổi danh sách liên hệ của bạn"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Cho phép ứng dụng sửa đổi dữ liệu về người liên hệ mà bạn lưu trữ trên máy tính bảng của mình. Quyền này cho phép ứng dụng xóa dữ liệu về người liên hệ."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Cho phép ứng dụng sửa đổi dữ liệu về người liên hệ mà bạn lưu trữ trên TV của mình. Quyền này cho phép ứng dụng xóa dữ liệu về người liên hệ."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Cho phép ứng dụng sửa đổi dữ liệu về người liên hệ mà bạn lưu trữ trên điện thoại của mình. Quyền này cho phép ứng dụng xóa dữ liệu về người liên hệ."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"đọc nhật ký cuộc gọi"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Ứng dụng này có thể đọc nhật ký cuộc gọi của bạn."</string>

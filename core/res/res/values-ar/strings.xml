@@ -261,7 +261,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"الإعدادات"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"مساعدة"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"المساعد الصوتي"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"التأمين"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"إلغاء التأمين"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"إشعار جديد"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"لوحة المفاتيح الافتراضية"</string>
@@ -402,16 +402,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"يتيح للتطبيق إرسال عمليات بث طويلة تظل بعد انتهاء البث. وقد يؤدي الاستخدام المفرط إلى بطء أو عدم استقرار في التلفزيون حيث يتم استخدام قدر كبير من الذاكرة."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"للسماح للتطبيق بإرسال مجموعات بث مستمرة، والتي تظل بعد انتهاء البث. قد يؤدي الاستخدام بكثرة إلى حدوث بطء أو عدم استقرار في الهاتف من خلال التسبب في استخدام الهاتف لمساحة كبيرة للغاية من الذاكرة."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"قراءة جهات الاتصال"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"يسمح هذا الإذن للتطبيق بقراءة بيانات حول جهات الاتصال المخزّنة على جهازك اللوحي. ويتيح هذا الإذن للتطبيقات حفظ بيانات جهة الاتصال، وقد تشارك التطبيقات الضارة بيانات جهة الاتصال بدون علمك."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"يسمح هذا الإذن للتطبيق بقراءة بيانات حول جهات الاتصال المخزّنة على تلفزيونك. ويتيح هذا الإذن للتطبيقات حفظ بيانات جهة الاتصال، وقد تشارك التطبيقات الضارة بيانات جهة الاتصال بدون علمك."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"يسمح هذا الإذن للتطبيق بقراءة بيانات حول جهات الاتصال المخزّنة على هاتفك. ويتيح هذا الإذن للتطبيقات حفظ بيانات جهة الاتصال، وقد تشارك التطبيقات الضارة بيانات جهة الاتصال بدون علمك."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"تعديل جهات الاتصال"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"يسمح هذا الإذن للتطبيق بتعديل البيانات حول جهات الاتصال المخزّنة على جهازك اللوحي. ويسمح هذا الإذن للتطبيقات بحذف بيانات جهات الاتصال."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"يسمح هذا الإذن للتطبيق بتعديل البيانات حول جهات الاتصال المخزّنة على تلفزيونك. ويسمح هذا الإذن للتطبيقات بحذف بيانات جهات الاتصال."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"يسمح هذا الإذن للتطبيق بتعديل البيانات حول جهات الاتصال المخزّنة على هاتفك. ويسمح هذا الإذن للتطبيقات بحذف بيانات جهات الاتصال."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"قراءة سجل المكالمات"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"يمكن لهذا التطبيق قراءة سجل المكالمات."</string>
