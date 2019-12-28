@@ -52,7 +52,7 @@ abstract class MediaRoute2Provider {
 
     public abstract void selectRoute(int sessionId, MediaRoute2Info route);
     public abstract void deselectRoute(int sessionId, MediaRoute2Info route);
-    public abstract void transferRoute(int sessionId, MediaRoute2Info route);
+    public abstract void transferToRoute(int sessionId, MediaRoute2Info route);
 
     public abstract void sendControlRequest(MediaRoute2Info route, Intent request);
     public abstract void requestSetVolume(MediaRoute2Info route, int volume);
@@ -105,5 +105,8 @@ abstract class MediaRoute2Provider {
         void onProviderStateChanged(@Nullable MediaRoute2Provider provider);
         void onSessionCreated(@NonNull MediaRoute2Provider provider,
                 @Nullable RouteSessionInfo sessionInfo, long requestId);
+        // TODO: Remove this when MediaRouter2ServiceImpl notifies clients of session changes.
+        void onSessionInfoChanged(@NonNull MediaRoute2Provider provider,
+                @NonNull RouteSessionInfo sessionInfo);
     }
 }

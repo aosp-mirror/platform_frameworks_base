@@ -105,6 +105,13 @@ public class RouteSessionInfo implements Parcelable {
     }
 
     /**
+     * Gets non-unique session id (int) from unique session id (string).
+     */
+    public static int getSessionId(@NonNull String uniqueSessionId, @NonNull String providerId) {
+        return Integer.parseInt(uniqueSessionId.substring(providerId.length() + 1));
+    }
+
+    /**
      * Returns whether the session info is valid or not
      */
     public boolean isValid() {
@@ -145,6 +152,19 @@ public class RouteSessionInfo implements Parcelable {
     @Nullable
     public String getProviderId() {
         return mProviderId;
+    }
+
+    /**
+     * Gets the unique id of the session.
+     * @hide
+     */
+    @NonNull
+    public String getUniqueSessionId() {
+        StringBuilder sessionIdBuilder = new StringBuilder()
+                .append(mProviderId)
+                .append("/")
+                .append(mSessionId);
+        return sessionIdBuilder.toString();
     }
 
     /**

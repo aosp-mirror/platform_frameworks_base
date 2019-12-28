@@ -134,7 +134,6 @@ public abstract class MediaRoute2ProviderService extends Service {
      */
     public final void updateSessionInfo(@NonNull RouteSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
-
         int sessionId = sessionInfo.getSessionId();
         if (sessionInfo.getSelectedRoutes().isEmpty()) {
             releaseSession(sessionId);
@@ -153,6 +152,35 @@ public abstract class MediaRoute2ProviderService extends Service {
     }
 
     /**
+     * Notifies the session is changed.
+     *
+     * TODO: This method is temporary, only created for tests. Remove when the alternative is ready.
+     * @hide
+     */
+    public final void notifySessionInfoChanged(@NonNull RouteSessionInfo sessionInfo) {
+        Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
+
+        int sessionId = sessionInfo.getSessionId();
+        synchronized (mSessionLock) {
+            if (mSessionInfo.containsKey(sessionId)) {
+                mSessionInfo.put(sessionId, sessionInfo);
+            } else {
+                Log.w(TAG, "Ignoring unknown session info.");
+                return;
+            }
+        }
+
+        if (mClient == null) {
+            return;
+        }
+        try {
+            mClient.notifySessionInfoChanged(sessionInfo);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Failed to notify session info changed.");
+        }
+    }
+
+    /**
      * Notifies clients of that the session is created and ready for use. If the session can be
      * controlled, pass a {@link Bundle} that contains how to control it.
      *
@@ -162,7 +190,8 @@ public abstract class MediaRoute2ProviderService extends Service {
      *                    session creation is failed.
      * @param requestId id of the previous request to create this session
      */
-    //TODO: fail reason?
+    // TODO: fail reason?
+    // TODO: Maybe better to create notifySessionCreationFailed?
     public final void notifySessionCreated(@Nullable RouteSessionInfo sessionInfo, long requestId) {
         if (sessionInfo != null) {
             int sessionId = sessionInfo.getSessionId();
@@ -269,7 +298,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param sessionId id of the session
      * @param routeId id of the route
      */
-    public abstract void onTransferRoute(int sessionId, @NonNull String routeId);
+    public abstract void onTransferToRoute(int sessionId, @NonNull String routeId);
 
     /**
      * Updates provider info and publishes routes and session info.
@@ -364,11 +393,11 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void transferRoute(int sessionId, String routeId) {
+        public void transferToRoute(int sessionId, String routeId) {
             if (!checkCallerisSystem()) {
                 return;
             }
-            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onTransferRoute,
+            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onTransferToRoute,
                     MediaRoute2ProviderService.this, sessionId, routeId));
         }
 
