@@ -114,6 +114,7 @@ public final class Tuner implements AutoCloseable  {
     private native long nativeGetAvSyncTime(int avSyncId);
     private native int nativeConnectCiCam(int ciCamId);
     private native int nativeDisconnectCiCam();
+    private native FrontendInfo nativeGetFrontendInfo(int id);
     private native Filter nativeOpenFilter(int type, int subType, int bufferSize);
 
     private native List<Integer> nativeGetLnbIds();
@@ -406,6 +407,28 @@ public final class Tuner implements AutoCloseable  {
     @Result
     public int disconnectCiCam() {
         return nativeDisconnectCiCam();
+    }
+
+    /**
+     * Retrieve the frontend information.
+     * @hide
+     */
+    public FrontendInfo getFrontendInfo() {
+        if (mFrontend == null) {
+            throw new IllegalStateException("frontend is not initialized");
+        }
+        return nativeGetFrontendInfo(mFrontend.mId);
+    }
+
+    /**
+     * Gets frontend ID.
+     * @hide
+     */
+    public int getFrontendId() {
+        if (mFrontend == null) {
+            throw new IllegalStateException("frontend is not initialized");
+        }
+        return mFrontend.mId;
     }
 
     private List<Integer> getFrontendIds() {

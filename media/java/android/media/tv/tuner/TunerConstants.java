@@ -559,6 +559,380 @@ final class TunerConstants {
     public static final int HIERARCHY_4_INDEPTH =
             Constants.FrontendDvbtHierarchy.HIERARCHY_4_INDEPTH;
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_ANALOG_TYPE_UNDEFINED, FRONTEND_ANALOG_TYPE_PAL, FRONTEND_ANALOG_TYPE_SECAM,
+            FRONTEND_ANALOG_TYPE_NTSC})
+    public @interface FrontendAnalogType {}
+
+    public static final int FRONTEND_ANALOG_TYPE_UNDEFINED = Constants.FrontendAnalogType.UNDEFINED;
+    public static final int FRONTEND_ANALOG_TYPE_PAL = Constants.FrontendAnalogType.PAL;
+    public static final int FRONTEND_ANALOG_TYPE_SECAM = Constants.FrontendAnalogType.SECAM;
+    public static final int FRONTEND_ANALOG_TYPE_NTSC = Constants.FrontendAnalogType.NTSC;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_ANALOG_SIF_UNDEFINED, FRONTEND_ANALOG_SIF_BG, FRONTEND_ANALOG_SIF_BG_A2,
+            FRONTEND_ANALOG_SIF_BG_NICAM, FRONTEND_ANALOG_SIF_I, FRONTEND_ANALOG_SIF_DK,
+            FRONTEND_ANALOG_SIF_DK1, FRONTEND_ANALOG_SIF_DK2, FRONTEND_ANALOG_SIF_DK3,
+            FRONTEND_ANALOG_SIF_DK_NICAM, FRONTEND_ANALOG_SIF_L, FRONTEND_ANALOG_SIF_M,
+            FRONTEND_ANALOG_SIF_M_BTSC, FRONTEND_ANALOG_SIF_M_A2, FRONTEND_ANALOG_SIF_M_EIA_J,
+            FRONTEND_ANALOG_SIF_I_NICAM, FRONTEND_ANALOG_SIF_L_NICAM, FRONTEND_ANALOG_SIF_L_PRIME})
+    public @interface FrontendAnalogSifStandard {}
+
+    public static final int FRONTEND_ANALOG_SIF_UNDEFINED =
+            Constants.FrontendAnalogSifStandard.UNDEFINED;
+    public static final int FRONTEND_ANALOG_SIF_BG = Constants.FrontendAnalogSifStandard.BG;
+    public static final int FRONTEND_ANALOG_SIF_BG_A2 = Constants.FrontendAnalogSifStandard.BG_A2;
+    public static final int FRONTEND_ANALOG_SIF_BG_NICAM =
+            Constants.FrontendAnalogSifStandard.BG_NICAM;
+    public static final int FRONTEND_ANALOG_SIF_I = Constants.FrontendAnalogSifStandard.I;
+    public static final int FRONTEND_ANALOG_SIF_DK = Constants.FrontendAnalogSifStandard.DK;
+    public static final int FRONTEND_ANALOG_SIF_DK1 = Constants.FrontendAnalogSifStandard.DK1;
+    public static final int FRONTEND_ANALOG_SIF_DK2 = Constants.FrontendAnalogSifStandard.DK2;
+    public static final int FRONTEND_ANALOG_SIF_DK3 = Constants.FrontendAnalogSifStandard.DK3;
+    public static final int FRONTEND_ANALOG_SIF_DK_NICAM =
+            Constants.FrontendAnalogSifStandard.DK_NICAM;
+    public static final int FRONTEND_ANALOG_SIF_L = Constants.FrontendAnalogSifStandard.L;
+    public static final int FRONTEND_ANALOG_SIF_M = Constants.FrontendAnalogSifStandard.M;
+    public static final int FRONTEND_ANALOG_SIF_M_BTSC = Constants.FrontendAnalogSifStandard.M_BTSC;
+    public static final int FRONTEND_ANALOG_SIF_M_A2 = Constants.FrontendAnalogSifStandard.M_A2;
+    public static final int FRONTEND_ANALOG_SIF_M_EIA_J =
+            Constants.FrontendAnalogSifStandard.M_EIA_J;
+    public static final int FRONTEND_ANALOG_SIF_I_NICAM =
+            Constants.FrontendAnalogSifStandard.I_NICAM;
+    public static final int FRONTEND_ANALOG_SIF_L_NICAM =
+            Constants.FrontendAnalogSifStandard.L_NICAM;
+    public static final int FRONTEND_ANALOG_SIF_L_PRIME =
+            Constants.FrontendAnalogSifStandard.L_PRIME;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_ATSC_MODULATION_UNDEFINED, FRONTEND_ATSC_MODULATION_AUTO,
+            FRONTEND_ATSC_MODULATION_MOD_8VSB, FRONTEND_ATSC_MODULATION_MOD_16VSB})
+    public @interface FrontendAtscModulation {}
+
+    public static final int FRONTEND_ATSC_MODULATION_UNDEFINED =
+            Constants.FrontendAtscModulation.UNDEFINED;
+    public static final int FRONTEND_ATSC_MODULATION_AUTO = Constants.FrontendAtscModulation.AUTO;
+    public static final int FRONTEND_ATSC_MODULATION_MOD_8VSB =
+            Constants.FrontendAtscModulation.MOD_8VSB;
+    public static final int FRONTEND_ATSC_MODULATION_MOD_16VSB =
+            Constants.FrontendAtscModulation.MOD_16VSB;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_ATSC3_BANDWIDTH_UNDEFINED, FRONTEND_ATSC3_BANDWIDTH_AUTO,
+            FRONTEND_ATSC3_BANDWIDTH_BANDWIDTH_6MHZ, FRONTEND_ATSC3_BANDWIDTH_BANDWIDTH_7MHZ,
+            FRONTEND_ATSC3_BANDWIDTH_BANDWIDTH_8MHZ})
+    public @interface FrontendAtsc3Bandwidth {}
+
+    public static final int FRONTEND_ATSC3_BANDWIDTH_UNDEFINED =
+            Constants.FrontendAtsc3Bandwidth.UNDEFINED;
+    public static final int FRONTEND_ATSC3_BANDWIDTH_AUTO = Constants.FrontendAtsc3Bandwidth.AUTO;
+    public static final int FRONTEND_ATSC3_BANDWIDTH_BANDWIDTH_6MHZ =
+            Constants.FrontendAtsc3Bandwidth.BANDWIDTH_6MHZ;
+    public static final int FRONTEND_ATSC3_BANDWIDTH_BANDWIDTH_7MHZ =
+            Constants.FrontendAtsc3Bandwidth.BANDWIDTH_7MHZ;
+    public static final int FRONTEND_ATSC3_BANDWIDTH_BANDWIDTH_8MHZ =
+            Constants.FrontendAtsc3Bandwidth.BANDWIDTH_8MHZ;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_ATSC3_MODULATION_UNDEFINED, FRONTEND_ATSC3_MODULATION_AUTO,
+            FRONTEND_ATSC3_MODULATION_MOD_QPSK, FRONTEND_ATSC3_MODULATION_MOD_16QAM,
+            FRONTEND_ATSC3_MODULATION_MOD_64QAM, FRONTEND_ATSC3_MODULATION_MOD_256QAM,
+            FRONTEND_ATSC3_MODULATION_MOD_1024QAM, FRONTEND_ATSC3_MODULATION_MOD_4096QAM})
+    public @interface FrontendAtsc3Modulation {}
+
+    public static final int FRONTEND_ATSC3_MODULATION_UNDEFINED =
+            Constants.FrontendAtsc3Modulation.UNDEFINED;
+    public static final int FRONTEND_ATSC3_MODULATION_AUTO = Constants.FrontendAtsc3Modulation.AUTO;
+    public static final int FRONTEND_ATSC3_MODULATION_MOD_QPSK =
+            Constants.FrontendAtsc3Modulation.MOD_QPSK;
+    public static final int FRONTEND_ATSC3_MODULATION_MOD_16QAM =
+            Constants.FrontendAtsc3Modulation.MOD_16QAM;
+    public static final int FRONTEND_ATSC3_MODULATION_MOD_64QAM =
+            Constants.FrontendAtsc3Modulation.MOD_64QAM;
+    public static final int FRONTEND_ATSC3_MODULATION_MOD_256QAM =
+            Constants.FrontendAtsc3Modulation.MOD_256QAM;
+    public static final int FRONTEND_ATSC3_MODULATION_MOD_1024QAM =
+            Constants.FrontendAtsc3Modulation.MOD_1024QAM;
+    public static final int FRONTEND_ATSC3_MODULATION_MOD_4096QAM =
+            Constants.FrontendAtsc3Modulation.MOD_4096QAM;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_UNDEFINED,
+            FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_AUTO, FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_CTI,
+            FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_HTI})
+    public @interface FrontendAtsc3TimeInterleaveMode {}
+
+    public static final int FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_UNDEFINED =
+            Constants.FrontendAtsc3TimeInterleaveMode.UNDEFINED;
+    public static final int FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_AUTO =
+            Constants.FrontendAtsc3TimeInterleaveMode.AUTO;
+    public static final int FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_CTI =
+            Constants.FrontendAtsc3TimeInterleaveMode.CTI;
+    public static final int FRONTEND_ATSC3_TIME_INTERLEAVE_MODE_HTI =
+            Constants.FrontendAtsc3TimeInterleaveMode.HTI;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_ATSC3_CODERATE_UNDEFINED, FRONTEND_ATSC3_CODERATE_AUTO,
+            FRONTEND_ATSC3_CODERATE_2_15, FRONTEND_ATSC3_CODERATE_3_15,
+            FRONTEND_ATSC3_CODERATE_4_15, FRONTEND_ATSC3_CODERATE_5_15,
+            FRONTEND_ATSC3_CODERATE_6_15, FRONTEND_ATSC3_CODERATE_7_15,
+            FRONTEND_ATSC3_CODERATE_8_15, FRONTEND_ATSC3_CODERATE_9_15,
+            FRONTEND_ATSC3_CODERATE_10_15, FRONTEND_ATSC3_CODERATE_11_15,
+            FRONTEND_ATSC3_CODERATE_12_15, FRONTEND_ATSC3_CODERATE_13_15})
+    public @interface FrontendAtsc3CodeRate {}
+
+    public static final int FRONTEND_ATSC3_CODERATE_UNDEFINED =
+            Constants.FrontendAtsc3CodeRate.UNDEFINED;
+    public static final int FRONTEND_ATSC3_CODERATE_AUTO = Constants.FrontendAtsc3CodeRate.AUTO;
+    public static final int FRONTEND_ATSC3_CODERATE_2_15 =
+            Constants.FrontendAtsc3CodeRate.CODERATE_2_15;
+    public static final int FRONTEND_ATSC3_CODERATE_3_15 =
+            Constants.FrontendAtsc3CodeRate.CODERATE_3_15;
+    public static final int FRONTEND_ATSC3_CODERATE_4_15 =
+            Constants.FrontendAtsc3CodeRate.CODERATE_4_15;
+    public static final int FRONTEND_ATSC3_CODERATE_5_15 =
+            Constants.FrontendAtsc3CodeRate.CODERATE_5_15;
+    public static final int FRONTEND_ATSC3_CODERATE_6_15 =
+            Constants.FrontendAtsc3CodeRate.CODERATE_6_15;
+    public static final int FRONTEND_ATSC3_CODERATE_7_15 =
+            Constants.FrontendAtsc3CodeRate.CODERATE_7_15;
+    public static final int FRONTEND_ATSC3_CODERATE_8_15 =
+            Constants.FrontendAtsc3CodeRate.CODERATE_8_15;
+    public static final int FRONTEND_ATSC3_CODERATE_9_15 =
+            Constants.FrontendAtsc3CodeRate.CODERATE_9_15;
+    public static final int FRONTEND_ATSC3_CODERATE_10_15 =
+            Constants.FrontendAtsc3CodeRate.CODERATE_10_15;
+    public static final int FRONTEND_ATSC3_CODERATE_11_15 =
+            Constants.FrontendAtsc3CodeRate.CODERATE_11_15;
+    public static final int FRONTEND_ATSC3_CODERATE_12_15 =
+            Constants.FrontendAtsc3CodeRate.CODERATE_12_15;
+    public static final int FRONTEND_ATSC3_CODERATE_13_15 =
+            Constants.FrontendAtsc3CodeRate.CODERATE_13_15;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_ATSC3_FEC_UNDEFINED, FRONTEND_ATSC3_FEC_AUTO, FRONTEND_ATSC3_FEC_BCH_LDPC_16K,
+            FRONTEND_ATSC3_FEC_BCH_LDPC_64K, FRONTEND_ATSC3_FEC_CRC_LDPC_16K,
+            FRONTEND_ATSC3_FEC_CRC_LDPC_64K, FRONTEND_ATSC3_FEC_LDPC_16K,
+            FRONTEND_ATSC3_FEC_LDPC_64K})
+    public @interface FrontendAtsc3Fec {}
+
+    public static final int FRONTEND_ATSC3_FEC_UNDEFINED = Constants.FrontendAtsc3Fec.UNDEFINED;
+    public static final int FRONTEND_ATSC3_FEC_AUTO = Constants.FrontendAtsc3Fec.AUTO;
+    public static final int FRONTEND_ATSC3_FEC_BCH_LDPC_16K =
+            Constants.FrontendAtsc3Fec.BCH_LDPC_16K;
+    public static final int FRONTEND_ATSC3_FEC_BCH_LDPC_64K =
+            Constants.FrontendAtsc3Fec.BCH_LDPC_64K;
+    public static final int FRONTEND_ATSC3_FEC_CRC_LDPC_16K =
+            Constants.FrontendAtsc3Fec.CRC_LDPC_16K;
+    public static final int FRONTEND_ATSC3_FEC_CRC_LDPC_64K =
+            Constants.FrontendAtsc3Fec.CRC_LDPC_64K;
+    public static final int FRONTEND_ATSC3_FEC_LDPC_16K = Constants.FrontendAtsc3Fec.LDPC_16K;
+    public static final int FRONTEND_ATSC3_FEC_LDPC_64K = Constants.FrontendAtsc3Fec.LDPC_64K;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_ATSC3_DEMOD_OUTPUT_FORMAT_UNDEFINED,
+            FRONTEND_ATSC3_DEMOD_OUTPUT_FORMAT_ATSC3_LINKLAYER_PACKET,
+            FRONTEND_ATSC3_DEMOD_OUTPUT_FORMAT_BASEBAND_PACKET})
+    public @interface FrontendAtsc3DemodOutputFormat {}
+
+    public static final int FRONTEND_ATSC3_DEMOD_OUTPUT_FORMAT_UNDEFINED =
+            Constants.FrontendAtsc3DemodOutputFormat.UNDEFINED;
+    public static final int FRONTEND_ATSC3_DEMOD_OUTPUT_FORMAT_ATSC3_LINKLAYER_PACKET =
+            Constants.FrontendAtsc3DemodOutputFormat.ATSC3_LINKLAYER_PACKET;
+    public static final int FRONTEND_ATSC3_DEMOD_OUTPUT_FORMAT_BASEBAND_PACKET =
+            Constants.FrontendAtsc3DemodOutputFormat.BASEBAND_PACKET;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_DVBS_STANDARD_AUTO, FRONTEND_DVBS_STANDARD_S, FRONTEND_DVBS_STANDARD_S2,
+            FRONTEND_DVBS_STANDARD_S2X})
+    public @interface FrontendDvbsStandard {}
+
+    public static final int FRONTEND_DVBS_STANDARD_AUTO = Constants.FrontendDvbsStandard.AUTO;
+    public static final int FRONTEND_DVBS_STANDARD_S = Constants.FrontendDvbsStandard.S;
+    public static final int FRONTEND_DVBS_STANDARD_S2 = Constants.FrontendDvbsStandard.S2;
+    public static final int FRONTEND_DVBS_STANDARD_S2X = Constants.FrontendDvbsStandard.S2X;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_DVBC_ANNEX_UNDEFINED, FRONTEND_DVBC_ANNEX_A, FRONTEND_DVBC_ANNEX_B,
+            FRONTEND_DVBC_ANNEX_C})
+    public @interface FrontendDvbcAnnex {}
+
+    public static final int FRONTEND_DVBC_ANNEX_UNDEFINED = Constants.FrontendDvbcAnnex.UNDEFINED;
+    public static final int FRONTEND_DVBC_ANNEX_A = Constants.FrontendDvbcAnnex.A;
+    public static final int FRONTEND_DVBC_ANNEX_B = Constants.FrontendDvbcAnnex.B;
+    public static final int FRONTEND_DVBC_ANNEX_C = Constants.FrontendDvbcAnnex.C;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_DVBT_TRANSMISSION_MODE_UNDEFINED, FRONTEND_DVBT_TRANSMISSION_MODE_AUTO,
+            FRONTEND_DVBT_TRANSMISSION_MODE_2K, FRONTEND_DVBT_TRANSMISSION_MODE_8K,
+            FRONTEND_DVBT_TRANSMISSION_MODE_4K, FRONTEND_DVBT_TRANSMISSION_MODE_1K,
+            FRONTEND_DVBT_TRANSMISSION_MODE_16K, FRONTEND_DVBT_TRANSMISSION_MODE_32K})
+    public @interface FrontendDvbtTransmissionMode {}
+
+    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_UNDEFINED =
+            Constants.FrontendDvbtTransmissionMode.UNDEFINED;
+    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_AUTO =
+            Constants.FrontendDvbtTransmissionMode.AUTO;
+    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_2K =
+            Constants.FrontendDvbtTransmissionMode.MODE_2K;
+    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_8K =
+            Constants.FrontendDvbtTransmissionMode.MODE_8K;
+    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_4K =
+            Constants.FrontendDvbtTransmissionMode.MODE_4K;
+    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_1K =
+            Constants.FrontendDvbtTransmissionMode.MODE_1K;
+    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_16K =
+            Constants.FrontendDvbtTransmissionMode.MODE_16K;
+    public static final int FRONTEND_DVBT_TRANSMISSION_MODE_32K =
+            Constants.FrontendDvbtTransmissionMode.MODE_32K;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_DVBT_BANDWIDTH_UNDEFINED, FRONTEND_DVBT_BANDWIDTH_AUTO,
+            FRONTEND_DVBT_BANDWIDTH_8MHZ, FRONTEND_DVBT_BANDWIDTH_7MHZ,
+            FRONTEND_DVBT_BANDWIDTH_6MHZ, FRONTEND_DVBT_BANDWIDTH_5MHZ,
+            FRONTEND_DVBT_BANDWIDTH_1_7MHZ, FRONTEND_DVBT_BANDWIDTH_10MHZ})
+    public @interface FrontendDvbtBandwidth {}
+
+    public static final int FRONTEND_DVBT_BANDWIDTH_UNDEFINED =
+            Constants.FrontendDvbtBandwidth.UNDEFINED;
+    public static final int FRONTEND_DVBT_BANDWIDTH_AUTO = Constants.FrontendDvbtBandwidth.AUTO;
+    public static final int FRONTEND_DVBT_BANDWIDTH_8MHZ =
+            Constants.FrontendDvbtBandwidth.BANDWIDTH_8MHZ;
+    public static final int FRONTEND_DVBT_BANDWIDTH_7MHZ =
+            Constants.FrontendDvbtBandwidth.BANDWIDTH_7MHZ;
+    public static final int FRONTEND_DVBT_BANDWIDTH_6MHZ =
+            Constants.FrontendDvbtBandwidth.BANDWIDTH_6MHZ;
+    public static final int FRONTEND_DVBT_BANDWIDTH_5MHZ =
+            Constants.FrontendDvbtBandwidth.BANDWIDTH_5MHZ;
+    public static final int FRONTEND_DVBT_BANDWIDTH_1_7MHZ =
+            Constants.FrontendDvbtBandwidth.BANDWIDTH_1_7MHZ;
+    public static final int FRONTEND_DVBT_BANDWIDTH_10MHZ =
+            Constants.FrontendDvbtBandwidth.BANDWIDTH_10MHZ;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_DVBT_CONSTELLATION_UNDEFINED, FRONTEND_DVBT_CONSTELLATION_AUTO,
+            FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_QPSK,
+            FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_16QAM,
+            FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_64QAM,
+            FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_256QAM})
+    public @interface FrontendDvbtConstellation {}
+
+    public static final int FRONTEND_DVBT_CONSTELLATION_UNDEFINED =
+            Constants.FrontendDvbtConstellation.UNDEFINED;
+    public static final int FRONTEND_DVBT_CONSTELLATION_AUTO =
+            Constants.FrontendDvbtConstellation.AUTO;
+    public static final int FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_QPSK =
+            Constants.FrontendDvbtConstellation.CONSTELLATION_QPSK;
+    public static final int FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_16QAM =
+            Constants.FrontendDvbtConstellation.CONSTELLATION_16QAM;
+    public static final int FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_64QAM =
+            Constants.FrontendDvbtConstellation.CONSTELLATION_64QAM;
+    public static final int FRONTEND_DVBT_CONSTELLATION_CONSTELLATION_256QAM =
+            Constants.FrontendDvbtConstellation.CONSTELLATION_256QAM;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_DVBT_CODERATE_UNDEFINED, FRONTEND_DVBT_CODERATE_AUTO,
+            FRONTEND_DVBT_CODERATE_1_2, FRONTEND_DVBT_CODERATE_2_3, FRONTEND_DVBT_CODERATE_3_4,
+            FRONTEND_DVBT_CODERATE_5_6, FRONTEND_DVBT_CODERATE_7_8, FRONTEND_DVBT_CODERATE_3_5,
+            FRONTEND_DVBT_CODERATE_4_5, FRONTEND_DVBT_CODERATE_6_7, FRONTEND_DVBT_CODERATE_8_9})
+    public @interface FrontendDvbtCoderate {}
+
+    public static final int FRONTEND_DVBT_CODERATE_UNDEFINED =
+            Constants.FrontendDvbtCoderate.UNDEFINED;
+    public static final int FRONTEND_DVBT_CODERATE_AUTO = Constants.FrontendDvbtCoderate.AUTO;
+    public static final int FRONTEND_DVBT_CODERATE_1_2 =
+            Constants.FrontendDvbtCoderate.CODERATE_1_2;
+    public static final int FRONTEND_DVBT_CODERATE_2_3 =
+            Constants.FrontendDvbtCoderate.CODERATE_2_3;
+    public static final int FRONTEND_DVBT_CODERATE_3_4 =
+            Constants.FrontendDvbtCoderate.CODERATE_3_4;
+    public static final int FRONTEND_DVBT_CODERATE_5_6 =
+            Constants.FrontendDvbtCoderate.CODERATE_5_6;
+    public static final int FRONTEND_DVBT_CODERATE_7_8 =
+            Constants.FrontendDvbtCoderate.CODERATE_7_8;
+    public static final int FRONTEND_DVBT_CODERATE_3_5 =
+            Constants.FrontendDvbtCoderate.CODERATE_3_5;
+    public static final int FRONTEND_DVBT_CODERATE_4_5 =
+            Constants.FrontendDvbtCoderate.CODERATE_4_5;
+    public static final int FRONTEND_DVBT_CODERATE_6_7 =
+            Constants.FrontendDvbtCoderate.CODERATE_6_7;
+    public static final int FRONTEND_DVBT_CODERATE_8_9 =
+            Constants.FrontendDvbtCoderate.CODERATE_8_9;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_DVBT_GUARD_INTERVAL_UNDEFINED, FRONTEND_DVBT_GUARD_INTERVAL_AUTO,
+            FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_32, FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_16,
+            FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_8, FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_4,
+            FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_128,
+            FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_19_128,
+            FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_19_256})
+    public @interface FrontendDvbtGuardInterval {}
+
+    public static final int FRONTEND_DVBT_GUARD_INTERVAL_UNDEFINED =
+            Constants.FrontendDvbtGuardInterval.UNDEFINED;
+    public static final int FRONTEND_DVBT_GUARD_INTERVAL_AUTO =
+            Constants.FrontendDvbtGuardInterval.AUTO;
+    public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_32 =
+            Constants.FrontendDvbtGuardInterval.INTERVAL_1_32;
+    public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_16 =
+            Constants.FrontendDvbtGuardInterval.INTERVAL_1_16;
+    public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_8 =
+            Constants.FrontendDvbtGuardInterval.INTERVAL_1_8;
+    public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_4 =
+            Constants.FrontendDvbtGuardInterval.INTERVAL_1_4;
+    public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_1_128 =
+            Constants.FrontendDvbtGuardInterval.INTERVAL_1_128;
+    public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_19_128 =
+            Constants.FrontendDvbtGuardInterval.INTERVAL_19_128;
+    public static final int FRONTEND_DVBT_GUARD_INTERVAL_INTERVAL_19_256 =
+            Constants.FrontendDvbtGuardInterval.INTERVAL_19_256;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_ISDBS_CODERATE_UNDEFINED, FRONTEND_ISDBS_CODERATE_AUTO,
+            FRONTEND_ISDBS_CODERATE_1_2, FRONTEND_ISDBS_CODERATE_2_3, FRONTEND_ISDBS_CODERATE_3_4,
+            FRONTEND_ISDBS_CODERATE_5_6, FRONTEND_ISDBS_CODERATE_7_8})
+    public @interface FrontendIsdbsCoderate {}
+
+    public static final int FRONTEND_ISDBS_CODERATE_UNDEFINED =
+            Constants.FrontendIsdbsCoderate.UNDEFINED;
+    public static final int FRONTEND_ISDBS_CODERATE_AUTO = Constants.FrontendIsdbsCoderate.AUTO;
+    public static final int FRONTEND_ISDBS_CODERATE_1_2 =
+            Constants.FrontendIsdbsCoderate.CODERATE_1_2;
+    public static final int FRONTEND_ISDBS_CODERATE_2_3 =
+            Constants.FrontendIsdbsCoderate.CODERATE_2_3;
+    public static final int FRONTEND_ISDBS_CODERATE_3_4 =
+            Constants.FrontendIsdbsCoderate.CODERATE_3_4;
+    public static final int FRONTEND_ISDBS_CODERATE_5_6 =
+            Constants.FrontendIsdbsCoderate.CODERATE_5_6;
+    public static final int FRONTEND_ISDBS_CODERATE_7_8 =
+            Constants.FrontendIsdbsCoderate.CODERATE_7_8;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_ISDBT_MODE_UNDEFINED, FRONTEND_ISDBT_MODE_AUTO, FRONTEND_ISDBT_MODE_1,
+            FRONTEND_ISDBT_MODE_2, FRONTEND_ISDBT_MODE_3})
+    public @interface FrontendIsdbtMode {}
+
+    public static final int FRONTEND_ISDBT_MODE_UNDEFINED = Constants.FrontendIsdbtMode.UNDEFINED;
+    public static final int FRONTEND_ISDBT_MODE_AUTO = Constants.FrontendIsdbtMode.AUTO;
+    public static final int FRONTEND_ISDBT_MODE_1 = Constants.FrontendIsdbtMode.MODE_1;
+    public static final int FRONTEND_ISDBT_MODE_2 = Constants.FrontendIsdbtMode.MODE_2;
+    public static final int FRONTEND_ISDBT_MODE_3 = Constants.FrontendIsdbtMode.MODE_3;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FRONTEND_ISDBT_BANDWIDTH_UNDEFINED, FRONTEND_ISDBT_BANDWIDTH_AUTO,
+            FRONTEND_ISDBT_BANDWIDTH_8MHZ, FRONTEND_ISDBT_BANDWIDTH_7MHZ,
+            FRONTEND_ISDBT_BANDWIDTH_6MHZ})
+    public @interface FrontendIsdbtBandwidth {}
+
+    public static final int FRONTEND_ISDBT_BANDWIDTH_UNDEFINED =
+            Constants.FrontendIsdbtBandwidth.UNDEFINED;
+    public static final int FRONTEND_ISDBT_BANDWIDTH_AUTO = Constants.FrontendIsdbtBandwidth.AUTO;
+    public static final int FRONTEND_ISDBT_BANDWIDTH_8MHZ =
+            Constants.FrontendIsdbtBandwidth.BANDWIDTH_8MHZ;
+    public static final int FRONTEND_ISDBT_BANDWIDTH_7MHZ =
+            Constants.FrontendIsdbtBandwidth.BANDWIDTH_7MHZ;
+    public static final int FRONTEND_ISDBT_BANDWIDTH_6MHZ =
+            Constants.FrontendIsdbtBandwidth.BANDWIDTH_6MHZ;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({FILTER_SETTINGS_TS, FILTER_SETTINGS_MMTP, FILTER_SETTINGS_IP, FILTER_SETTINGS_TLV,
