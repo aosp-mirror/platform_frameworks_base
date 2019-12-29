@@ -186,6 +186,7 @@ import android.view.autofill.AutofillManagerInternal;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.os.RoSystemProperties;
@@ -1105,7 +1106,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                     LocalServices.getService(InputMethodManagerInternal.class);
                         }
                         if (mInputMethodManagerInternal != null) {
-                            mInputMethodManagerInternal.hideCurrentInputMethod();
+                            mInputMethodManagerInternal.hideCurrentInputMethod(
+                                    SoftInputShowHideReason.HIDE_POWER_BUTTON_GO_HOME);
                         }
                     } else {
                         shortPressPowerGoHome();
