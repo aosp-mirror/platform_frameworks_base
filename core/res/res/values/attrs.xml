@@ -2217,6 +2217,16 @@
             Corresponds to <code>LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER</code>.
             -->
             <enum name="never" value="2" />
+            <!-- <p>
+            The window is always allowed to extend into the <code>DisplayCutout</code> areas on the
+            all edges of the screen.
+            <p>
+            The window must make sure that no important content overlaps with the
+            <code>DisplayCutout</code>.
+            <p>
+            Corresponds to <code>LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS</code>.
+            -->
+            <enum name="always" value="3" />
         </attr>
     </declare-styleable>
 
