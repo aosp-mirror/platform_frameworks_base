@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"앱이 브로드캐스트가 끝난 후에도 흥미로운 브로드캐스트를 보낼 수 있도록 허용합니다. 이 기능을 과도하게 사용하면 메모리 사용량이 많아져 TV 속도가 저하되거나 성능이 불안정해질 수 있습니다."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"앱이 브로드캐스트가 끝난 후에 남은 브로드캐스트를 보낼 수 있도록 허용합니다. 앱을 지나치게 사용하면 휴대전화에서 메모리를 너무 많이 사용하도록 하여 속도를 저하시키거나 불안정하게 만들 수 있습니다."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"연락처 읽기"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"태블릿에 저장된 연락처에 관한 데이터를 앱이 읽도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 저장할 수 있으며, 악성 앱이 사용자가 모르게 연락처 데이터를 공유할 수도 있습니다."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"TV에 저장된 연락처에 관한 데이터를 앱이 읽도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 저장할 수 있으며, 악성 앱이 사용자가 모르게 연락처 데이터를 공유할 수도 있습니다."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"휴대전화에 저장된 연락처에 관한 데이터를 앱이 읽도록 허용합니다. 이 권한을 사용하면 앱이 연락처 데이터를 저장할 수 있으며, 악성 앱이 사용자가 모르게 연락처 데이터를 공유할 수도 있습니다."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"연락처 수정"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"태블릿에 저장된 연락처에 관한 데이터를 앱이 수정하도록 허용합니다. 이 권한을 사용하면 앱에서 연락처 데이터를 삭제할 수 있습니다."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"TV에 저장된 연락처에 관한 데이터를 앱이 수정하도록 허용합니다. 이 권한을 사용하면 앱에서 연락처 데이터를 삭제할 수 있습니다."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"휴대전화에 저장된 연락처에 관한 데이터를 앱이 수정하도록 허용합니다. 이 권한을 사용하면 앱에서 연락처 데이터를 삭제할 수 있습니다."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"통화 기록 읽기"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"이 앱은 통화 기록을 읽을 수 있습니다."</string>

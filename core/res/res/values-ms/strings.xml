@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Membenarkan apl menghantar siaran lekit, yang kekal selepas siaran tamat. Penggunaan yang berlebihan boleh menjadikan TV perlahan atau tidak stabil akibat penggunaan terlalu banyak memori."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Membenarkan apl untuk menghantar siaran melekit, yang kekal selepas siaran berakhir. Penggunaan berlebihan boleh membuat telefon perlahan atau tidak stabil dengan menyebabkannya menggunakan memori yang terlalu banyak."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"baca kenalan anda"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Membenarkan apl membaca data tentang kenalan anda yang tersimpan pada tablet anda. Kebenaran ini membolehkan apl menyimpan data kenalan anda dan apl hasad mungkin berkongsi data kenalan tanpa pengetahuan anda."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Membenarkan apl membaca data tentang kenalan anda yang tersimpan pada TV anda. Kebenaran ini membolehkan apl menyimpan data kenalan anda dan apl hasad mungkin berkongsi data kenalan tanpa pengetahuan anda."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Membenarkan apl membaca data tentang kenalan anda yang tersimpan pada telefon anda. Kebenaran ini membolehkan apl menyimpan data kenalan anda dan apl hasad mungkin berkongsi data kenalan tanpa pengetahuan anda."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"ubah suai kenalan anda"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Membenarkan apl mengubah suai data tentang kenalan anda yang tersimpan pada tablet anda. Kebenaran ini membenarkan apl memadamkan data kenalan."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Membenarkan apl mengubah suai data tentang kenalan anda yang tersimpan pada TV anda. Kebenaran ini membenarkan apl memadamkan data kenalan."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Membenarkan apl mengubah suai data tentang kenalan anda yang tersimpan pada telefon anda. Kebenaran ini membenarkan apl memadamkan data kenalan."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"baca log panggilan"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Apl ini boleh membaca sejarah panggilan anda."</string>

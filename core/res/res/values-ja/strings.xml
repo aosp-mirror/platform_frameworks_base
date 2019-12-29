@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えてテレビの動作が遅くなったり不安定になったりする恐れがあります。"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えてモバイル デバイスの動作が遅くなったり不安定になったりする恐れがあります。"</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"連絡先の読み取り"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"タブレットに保存されている連絡先に関するデータの読み取りをアプリに許可します。これにより、連絡先データの保存をアプリに許可することになり、知らないうちに悪意のあるアプリによって連絡先データが共有される恐れがあります。"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"テレビに保存されている連絡先に関するデータの読み取りをアプリに許可します。これにより、連絡先データの保存をアプリに許可することになり、知らないうちに悪意のあるアプリによって連絡先データが共有される恐れがあります。"</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"スマートフォンに保存されている連絡先に関するデータの読み取りをアプリに許可します。これにより、連絡先データの保存をアプリに許可することになり、知らないうちに悪意のあるアプリによって連絡先データが共有される恐れがあります。"</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"連絡先の変更"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"タブレットに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"テレビに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"スマートフォンに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"通話履歴の読み取り"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"このアプリは通話履歴を読み取ることができます。"</string>

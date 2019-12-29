@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Laat die program toe om taai uitsendings te stuur wat bly nadat die uitsending verby is. Buitensporige gebruik sal die TV dalk stadig of onbestendig maak deur te veroorsaak dat dit te veel berging gebruik."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Laat die program toe om taai uitsendings te stuur, wat agterbly nadat die uitsending klaar is. Oormatige gebruik kan die foon stadig of onstabiel maak deurdat dit te veel geheue gebruik."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"lees jou kontakte"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Laat die program toe om data te lees oor jou kontakte wat op jou tablet geberg is. Hierdie toestemming laat programme toe om jou kontakdata te stoor, en kwaadwillige programme kan kontakdata deel sonder dat jy dit weet."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Laat die program toe om data te lees oor jou kontakte wat op jou TV geberg is. Hierdie toestemming laat programme toe om jou kontakdata te stoor, en kwaadwillige programme kan kontakdata deel sonder dat jy dit weet."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Laat die program toe om data te lees oor jou kontakte wat op jou foon geberg is. Hierdie toestemming laat programme toe om jou kontakdata te stoor, en kwaadwillige programme kan kontakdata deel sonder dat jy dit weet."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"verander jou kontakte"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Laat die program toe om die data te wysig oor jou kontakte wat op jou tablet geberg is. Hierdie toestemming laat programme toe om kontakdata uit te vee."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Laat die program toe om die data te wysig oor jou kontakte wat op jou TV geberg is. Hierdie toestemming laat programme toe om kontakdata uit te vee."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Laat die program toe om die data te wysig oor jou kontakte wat op jou foon geberg is. Hierdie toestemming laat programme toe om kontakdata uit te vee."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"lees oproeprekord"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Hierdie program kan jou oproepgeskiedenis lees."</string>

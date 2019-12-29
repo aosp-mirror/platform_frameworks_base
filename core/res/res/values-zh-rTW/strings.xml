@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"允許應用程式傳送記憶廣播，這類廣播在廣播動作結束後仍繼續存在。如果過度使用，可能會使電視佔用過多記憶體，造成運作速度變慢或穩定性降低。"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"允許應用程式傳送記憶廣播，這類廣播在廣播動作結束後仍繼續存在。請注意，過度使用此功能可能導致手機使用過多的記憶體，導致手機的執行速度變慢或不穩定。"</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"讀取你的聯絡人"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"允許應用程式讀取平板電腦上儲存的聯絡人資料。這項權限可讓應用程式儲存你的聯絡人資料，惡意應用程式也可能在你不知情的情況下洩露你的聯絡人資料。"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"允許應用程式讀取電視上儲存的聯絡人資料。這項權限可讓應用程式儲存你的聯絡人資料，惡意應用程式也可能在你不知情的情況下洩露你的聯絡人資料。"</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"允許應用程式讀取手機上儲存的聯絡人資料。這項權限可讓應用程式儲存你的聯絡人資料，惡意應用程式也可能在你不知情的情況下洩露你的聯絡人資料。"</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"修改你的聯絡人"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"允許應用程式修改平板電腦上儲存的聯絡人資料。這項權限可讓應用程式刪除聯絡人資料。"</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"允許應用程式修改電視上儲存的聯絡人資料。這項權限可讓應用程式刪除聯絡人資料。"</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"允許應用程式修改手機上儲存的聯絡人資料。這項權限可讓應用程式刪除聯絡人資料。"</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"讀取通話記錄"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"這個應用程式可讀取通話記錄。"</string>

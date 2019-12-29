@@ -393,16 +393,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Aplikaciji omogućuje slanje emitiranja koja se zadržavaju nakon završetka. Pretjerana upotreba može usporiti televizor ili mu poremetiti stabilnost zbog pretjerane potrošnje memorije."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Aplikaciji omogućuje slanje \"ljepljivih\" emitiranja koja se zadržavaju nakon završetka emitiranja. Prekomjerna upotreba može usporiti telefon ili ga učiniti nestabilnim uzrokujući pretjeranu upotrebu memorije."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"čitanje kontakata"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Aplikaciji omogućuje čitanje podataka o vašim kontaktima pohranjenim na vašem tabletu. To dopuštenje omogućuje aplikacijama spremanje podataka o kontaktima, a zlonamjerne aplikacije mogu dijeliti podatke o kontaktima bez vašeg znanja."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Aplikaciji omogućuje čitanje podataka o vašim kontaktima pohranjenim na vašem TV-u. To dopuštenje omogućuje aplikacijama spremanje podataka o kontaktima, a zlonamjerne aplikacije mogu dijeliti podatke o kontaktima bez vašeg znanja."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Aplikaciji omogućuje čitanje podataka o vašim kontaktima pohranjenim na vašem telefonu. To dopuštenje omogućuje aplikacijama spremanje podataka o kontaktima, a zlonamjerne aplikacije mogu dijeliti podatke o kontaktima bez vašeg znanja."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"izmjena kontakata"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Aplikaciji omogućuje izmjenu podataka o vašim kontaktima pohranjenim na vašem tabletu. To dopuštenje aplikacijama omogućuje da brišu podatke o kontaktima."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Aplikaciji omogućuje izmjenu podataka o vašim kontaktima pohranjenim na vašem TV-u. To dopuštenje aplikacijama omogućuje da brišu podatke o kontaktima."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Aplikaciji omogućuje izmjenu podataka o vašim kontaktima pohranjenim na vašem telefonu. To dopuštenje aplikacijama omogućuje da brišu podatke o kontaktima."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"čitanje dnevnika poziva"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Aplikacija može čitati vašu povijest poziva."</string>

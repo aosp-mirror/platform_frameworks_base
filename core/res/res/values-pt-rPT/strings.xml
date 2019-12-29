@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Permite à aplicação enviar transmissões duradouras, que se mantêm após a transmissão terminar. A utilização excessiva pode tornar a TV lenta ou instável devido à utilização de demasiada memória."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Permite que a aplicação envie difusões fixas, que permanecem após o fim da difusão. Uma utilização excessiva pode tornar o telemóvel lento ou instável, fazendo com que utilize demasiada memória."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"ler os contactos"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Permite à aplicação ler dados acerca dos contactos armazenados no seu tablet. Esta autorização permite às aplicações guardarem dados de contactos e as aplicações maliciosas podem partilhá-los sem o seu conhecimento."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Permite à aplicação ler dados acerca dos contactos armazenados na sua TV. Esta autorização permite às aplicações guardarem dados de contactos e as aplicações maliciosas podem partilhá-los sem o seu conhecimento."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Permite à aplicação ler dados acerca dos contactos armazenados no seu telemóvel. Esta autorização permite às aplicações guardarem dados de contactos e as aplicações maliciosas podem partilhá-los sem o seu conhecimento."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"modificar os contactos"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Permite que a aplicação modifique dados acerca dos contactos armazenados no tablet. Esta autorização permite que as aplicações eliminem dados de contactos."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Permite à aplicação modificar os dados acerca dos contactos armazenados na sua TV. Esta autorização permite que as aplicações eliminem dados de contactos."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Permite que a aplicação modifique dados acerca dos contactos guardados no telemóvel. Esta autorização permite que as aplicações eliminem dados de contactos."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"ler registo de chamadas"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Esta aplicação pode ler o seu histórico de chamadas."</string>

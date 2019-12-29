@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Lehetővé teszi az alkalmazás számára a „ragadós” közvetítések küldését, amelyek a közvetítés befejeztével is megmaradnak. Túlzott használatával lelassulhat vagy instabillá válhat a tévé a jelentős memóriahasználat miatt."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Lehetővé teszi az alkalmazás számára ragadós üzenetek küldését, amelyek a sugárzás után is megmaradnak. A túlzott használat lelassíthatja vagy instabillá teheti a telefont a nagymértékű memóriahasználattal."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"saját névjegyek olvasása"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Lehetővé teszi az alkalmazás számára a táblagépen tárolt névjegyekre vonatkozó adatok olvasását. Ez az engedély lehetővé teszi az alkalmazások számára a névjegyadatok mentését, így a rosszindulatú alkalmazások az Ön tudta nélkül megoszthatják őket."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Lehetővé teszi az alkalmazás számára a tévén tárolt névjegyekre vonatkozó adatok olvasását. Ez az engedély lehetővé teszi az alkalmazások számára a névjegyadatok mentését, így a rosszindulatú alkalmazások az Ön tudta nélkül megoszthatják őket."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Lehetővé teszi az alkalmazás számára a telefonon tárolt névjegyekre vonatkozó adatok olvasását. Ez az engedély lehetővé teszi az alkalmazások számára a névjegyadatok mentését, így a rosszindulatú alkalmazások az Ön tudta nélkül megoszthatják őket."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"kapcsolatok módosítása"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Lehetővé teszi az alkalmazás számára a táblagépen tárolt névjegyekre vonatkozó adatok módosítását. Ezzel az engedéllyel az alkalmazások törölhetik a névjegyadatokat."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Lehetővé teszi az alkalmazás számára a tévén tárolt névjegyekre vonatkozó adatok módosítását. Ezzel az engedéllyel az alkalmazások törölhetik a névjegyadatokat."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Lehetővé teszi az alkalmazás számára a telefonon tárolt névjegyekre vonatkozó adatok módosítását. Ezzel az engedéllyel az alkalmazások törölhetik a névjegyadatokat."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"Híváslista beolvasása"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Az alkalmazás olvashatja az Ön híváslistáját."</string>

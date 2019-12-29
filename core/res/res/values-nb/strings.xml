@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Gjør at appen kan sende varige kringkastinger som blir værende etter at kringkastingen er ferdig. Overdreven bruk av dette kan gjøre TV-en treg eller ustabil fordi for mye minne blir brukt."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Lar appen sende faste kringkastinger («sticky broadcasts») som blir værende etter at kringkastingen er over. Overdreven bruk kan gjøre telefonen treg eller ustabil ved å bruke for mye minne."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"lese kontaktene dine"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Lar appen lese data om kontaktene dine som er lagret på nettbrettet ditt. Denne tillatelsen lar apper lagre kontaktdataene dine. Vær oppmerksom på at skadelige apper kan dele disse dataene uten at du vet om det."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Lar appen lese data om kontaktene dine som er lagret på TV-en din. Denne tillatelsen lar apper lagre kontaktdataene dine. Vær oppmerksom på at skadelige apper kan dele disse dataene uten at du vet om det."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Lar appen lese data om kontaktene dine som er lagret på telefonen din. Denne tillatelsen lar apper lagre kontaktdataene dine. Vær oppmerksom på at skadelige apper kan dele disse dataene uten at du vet om det."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"endre kontaktene dine"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Lar appen endre informasjon om kontaktene som er lagret på nettbrettet ditt. Denne tillatelsen lar apper slette kontaktdata."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Lar appen endre informasjon om kontaktene som er lagret på TV-en din. Denne tillatelsen lar apper slette kontaktdata."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Lar appen endre informasjon om kontaktene som er lagret på telefonen din. Denne tillatelsen lar apper slette kontaktdata."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"lese anropsloggen"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Denne appen kan lese anropsloggen din."</string>

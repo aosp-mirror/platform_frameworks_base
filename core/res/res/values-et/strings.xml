@@ -390,16 +390,12 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Lubab rakendusel saata püsiülekandeid, mis jäävad alles pärast ülekande lõppemist. Liigne kasutamine võib muuta teleri aeglaseks või ebastabiilseks, sest teler kasutab selleks liigselt mälu."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Võimaldab rakendusel saata püsivaid edastusi, mis jäävad pärast saate lõppemist alles. Ülemäärane kasutamine võib muuta telefoni aeglaseks või ebastabiilseks, põhjustades selle liiga suure mälukasutuse."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"Kontaktide lugemine"</string>
-    <!-- no translation found for permdesc_readContacts (80783131858366692) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (4930202526885367788) -->
-    <skip />
-    <!-- no translation found for permdesc_readContacts (6808717801527690363) -->
-    <skip />
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Lubab rakendusel lugeda tahvelarvutisse salvestatud kontaktide andmeid. See luba võimaldab rakendustel salvestada teie kontaktandmeid ja pahatahtlikud rakendused võivad teie teadmata kontaktandmeid jagada."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Lubab rakendusel lugeda telerisse salvestatud kontaktide andmeid. See luba võimaldab rakendustel salvestada teie kontaktandmeid ja pahatahtlikud rakendused võivad teie teadmata kontaktandmeid jagada."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Lubab rakendusel lugeda telefoni salvestatud kontaktide andmeid. See luba võimaldab rakendustel salvestada teie kontaktandmeid ja pahatahtlikud rakendused võivad teie teadmata kontaktandmeid jagada."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"muutke oma kontakte"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Lubab rakendusel muuta tahvelarvutisse salvestatud kontaktide andmeid. See luba võimaldab rakendustel kontaktandmeid kustutada."</string>
-    <!-- no translation found for permdesc_writeContacts (7554829984159606156) -->
-    <skip />
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Lubab rakendusel muuta telerisse salvestatud kontaktide andmeid. See luba võimaldab rakendustel kontaktandmeid kustutada."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Lubab rakendusel muuta telefoni salvestatud kontaktide andmeid. See luba võimaldab rakendustel kontaktandmeid kustutada."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"kõnelogi lugemine"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"See rakendus saab teie kõneajalugu lugeda."</string>
