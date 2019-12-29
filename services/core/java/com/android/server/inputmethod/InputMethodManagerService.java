@@ -132,6 +132,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodDebug;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
@@ -767,6 +768,75 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("mMethodMap")
     private final WeakHashMap<IBinder, IBinder> mImeTargetWindowMap = new WeakHashMap<>();
 
+    private static final class SoftInputShowHideHistory {
+        private Entry[] mEntries = new Entry[16];
+        private int mNextIndex = 0;
+        private static final AtomicInteger sSequenceNumber = new AtomicInteger(0);
+
+        // TODO(b/141738570): add requestWindowToken to track who request show / hide softInput.
+        private static final class Entry {
+            ClientState mClientState;
+            String mFocusedWindowString;
+            @SoftInputModeFlags
+            int mFocusedWindowSoftInputMode;
+            @SoftInputShowHideReason
+            int mReason;
+            boolean mRequestShowKeyboard;
+            // The timing of handling MSG_SHOW_SOFT_INPUT or MSG_HIDE_SOFT_INPUT.
+            long mTimestamp;
+            long mWallTime;
+            int mTargetDisplayId;
+
+            Entry(ClientState client, String focusedWindow, @SoftInputModeFlags int softInputMode,
+                    @SoftInputShowHideReason int reason, boolean show) {
+                mClientState = client;
+                mFocusedWindowString = focusedWindow;
+                mFocusedWindowSoftInputMode = softInputMode;
+                mReason = reason;
+                mRequestShowKeyboard = show;
+                mTimestamp = SystemClock.uptimeMillis();
+                mWallTime = System.currentTimeMillis();
+            }
+        }
+
+        void addEntry(@NonNull Entry entry) {
+            final int index = mNextIndex;
+            mEntries[index] = entry;
+            mNextIndex = (mNextIndex + 1) % mEntries.length;
+        }
+
+        void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+            final SimpleDateFormat dataFormat =
+                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
+
+            for (int i = 0; i < mEntries.length; ++i) {
+                final Entry entry = mEntries[(i + mNextIndex) % mEntries.length];
+                if (entry == null) {
+                    continue;
+                }
+                pw.print(prefix);
+                pw.println("SoftInputShowHideHistory #" + sSequenceNumber.getAndIncrement() + ":");
+
+                pw.print(prefix);
+                pw.println(" time=" + dataFormat.format(new Date(entry.mWallTime))
+                        + " (timestamp=" + entry.mTimestamp + ")");
+
+                pw.print(prefix);
+                pw.print(" requestShowKeyboard=" + entry.mRequestShowKeyboard);
+                pw.print(" targetDisplayId=" + entry.mTargetDisplayId);
+                pw.println(" reason=" + entry.mReason);
+
+                pw.print(prefix);
+                pw.print(" requestClient=" + entry.mClientState);
+                pw.println(" focusedWindow=" + entry.mFocusedWindowString);
+
+                pw.print(prefix);
+                pw.println(" focusedWindowSoftInputMode=" + InputMethodDebug.softInputModeToString(
+                        entry.mFocusedWindowSoftInputMode));
+            }
+        }
+    }
+
     /**
      * Map of generated token to windowToken that is requesting
      * {@link InputMethodManager#showSoftInput(View, int)}.
@@ -933,6 +1003,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     private final StartInputHistory mStartInputHistory = new StartInputHistory();
 
+    @GuardedBy("mMethodMap")
+    @NonNull
+    private final SoftInputShowHideHistory mSoftInputShowHideHistory =
+            new SoftInputShowHideHistory();
+
     class SettingsObserver extends ContentObserver {
         int mUserId;
         boolean mRegistered = false;
@@ -989,11 +1064,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                     == AccessibilityService.SHOW_MODE_HIDDEN;
                     if (mAccessibilityRequestingNoSoftKeyboard) {
                         final boolean showRequested = mShowRequested;
-                        hideCurrentInputLocked(0, null);
+                        hideCurrentInputLocked(0, null,
+                                SoftInputShowHideReason.HIDE_SETTINGS_ON_CHANGE);
                         mShowRequested = showRequested;
                     } else if (mShowRequested) {
-                        showCurrentInputLocked(
-                                mCurFocusedWindow, InputMethodManager.SHOW_IMPLICIT, null);
+                        showCurrentInputLocked(mCurFocusedWindow,
+                                InputMethodManager.SHOW_IMPLICIT, null,
+                                SoftInputShowHideReason.SHOW_SETTINGS_ON_CHANGE);
                     }
                 } else {
                     boolean enabledChanged = false;
@@ -1568,7 +1645,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         // TODO: Is it really possible that switchUserLocked() happens before system ready?
         if (mSystemReady) {
-            hideCurrentInputLocked(0, null);
+            hideCurrentInputLocked(0, null, SoftInputShowHideReason.HIDE_SWITCH_USER);
             resetCurrentMethodAndClient(UnbindReason.SWITCH_USER);
             buildInputMethodListLocked(initialUserSwitch);
             if (TextUtils.isEmpty(mSettings.getSelectedInputMethod())) {
@@ -2094,7 +2171,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 startInputToken, session, mCurInputContext, mCurAttribute));
         if (mShowRequested) {
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
-            showCurrentInputLocked(mCurFocusedWindow, getAppShowFlags(), null);
+            showCurrentInputLocked(mCurFocusedWindow, getAppShowFlags(), null,
+                    SoftInputShowHideReason.ATTACH_NEW_INPUT);
         }
         return new InputBindResult(InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,
                 session.session, (session.channel != null ? session.channel.dup() : null),
@@ -2833,7 +2911,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }
                 if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
-                return showCurrentInputLocked(windowToken, flags, resultReceiver);
+                return showCurrentInputLocked(windowToken, flags, resultReceiver,
+                        SoftInputShowHideReason.SHOW_SOFT_INPUT);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2841,7 +2920,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("mMethodMap")
-    boolean showCurrentInputLocked(IBinder windowToken, int flags, ResultReceiver resultReceiver) {
+    boolean showCurrentInputLocked(IBinder windowToken, int flags, ResultReceiver resultReceiver,
+            @SoftInputShowHideReason int reason) {
         mShowRequested = true;
         if (mAccessibilityRequestingNoSoftKeyboard) {
             return false;
@@ -2864,9 +2944,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // create a dummy token for IMS so that IMS cannot inject windows into client app.
             Binder showInputToken = new Binder();
             mShowRequestWindowMap.put(showInputToken, windowToken);
-            executeOrSendMessage(mCurMethod, mCaller.obtainMessageIOOO(
-                    MSG_SHOW_SOFT_INPUT, getImeShowFlags(), mCurMethod,
-                    resultReceiver, showInputToken));
+            executeOrSendMessage(mCurMethod, mCaller.obtainMessageIIOOO(
+                    MSG_SHOW_SOFT_INPUT, getImeShowFlags(), reason, mCurMethod, resultReceiver,
+                    showInputToken));
             mInputShown = true;
             if (mHaveConnection && !mVisibleBound) {
                 bindCurrentInputMethodServiceLocked(
@@ -2924,14 +3004,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
 
                 if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
-                return hideCurrentInputLocked(flags, resultReceiver);
+                return hideCurrentInputLocked(flags, resultReceiver,
+                        SoftInputShowHideReason.HIDE_SOFT_INPUT);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
     }
 
-    boolean hideCurrentInputLocked(int flags, ResultReceiver resultReceiver) {
+    boolean hideCurrentInputLocked(int flags, ResultReceiver resultReceiver,
+            @SoftInputShowHideReason int reason) {
         if ((flags&InputMethodManager.HIDE_IMPLICIT_ONLY) != 0
                 && (mShowExplicitlyRequested || mShowForced)) {
             if (DEBUG) Slog.v(TAG, "Not hiding: explicit show not cancelled by non-explicit hide");
@@ -2958,8 +3040,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // delivered to the IME process as an IPC.  Hence the inconsistency between
             // IMMS#mInputShown and IMMS#mImeWindowVis should be resolved spontaneously in
             // the final state.
-            executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
-                    MSG_HIDE_SOFT_INPUT, mCurMethod, resultReceiver));
+            executeOrSendMessage(mCurMethod, mCaller.obtainMessageIOO(MSG_HIDE_SOFT_INPUT,
+                    reason, mCurMethod, resultReceiver));
             res = true;
         } else {
             res = false;
@@ -3080,7 +3162,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.w(TAG, "If you need to impersonate a foreground user/profile from"
                     + " a background user, use EditorInfo.targetInputMethodUser with"
                     + " INTERACT_ACROSS_USERS_FULL permission.");
-            hideCurrentInputLocked(0, null);
+            hideCurrentInputLocked(0, null, SoftInputShowHideReason.HIDE_INVALID_USER);
             return InputBindResult.INVALID_USER;
         }
 
@@ -3141,7 +3223,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         // be behind any soft input window, so hide the
                         // soft input window if it is shown.
                         if (DEBUG) Slog.v(TAG, "Unspecified window will hide input");
-                        hideCurrentInputLocked(InputMethodManager.HIDE_NOT_ALWAYS, null);
+                        hideCurrentInputLocked(InputMethodManager.HIDE_NOT_ALWAYS, null,
+                                SoftInputShowHideReason.HIDE_UNSPECIFIED_WINDOW);
 
                         // If focused display changed, we should unbind current method
                         // to make app window in previous display relayout after Ime
@@ -3167,7 +3250,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 attribute, startInputFlags, startInputReason);
                         didStart = true;
                     }
-                    showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null);
+                    showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
+                            SoftInputShowHideReason.SHOW_AUTO_EDITOR_FORWARD_NAV);
                 }
                 break;
             case LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
@@ -3176,12 +3260,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case LayoutParams.SOFT_INPUT_STATE_HIDDEN:
                 if ((softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
                     if (DEBUG) Slog.v(TAG, "Window asks to hide input going forward");
-                    hideCurrentInputLocked(0, null);
+                    hideCurrentInputLocked(0, null,
+                            SoftInputShowHideReason.HIDE_STATE_HIDDEN_FORWARD_NAV);
                 }
                 break;
             case LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
                 if (DEBUG) Slog.v(TAG, "Window asks to hide input");
-                hideCurrentInputLocked(0, null);
+                hideCurrentInputLocked(0, null,
+                        SoftInputShowHideReason.HIDE_ALWAYS_HIDDEN_STATE);
                 break;
             case LayoutParams.SOFT_INPUT_STATE_VISIBLE:
                 if ((softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
@@ -3193,7 +3279,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                     attribute, startInputFlags, startInputReason);
                             didStart = true;
                         }
-                        showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null);
+                        showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
+                                SoftInputShowHideReason.SHOW_STATE_VISIBLE_FORWARD_NAV);
                     } else {
                         Slog.e(TAG, "SOFT_INPUT_STATE_VISIBLE is ignored because"
                                 + " there is no focused view that also returns true from"
@@ -3210,7 +3297,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 attribute, startInputFlags, startInputReason);
                         didStart = true;
                     }
-                    showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null);
+                    showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
+                            SoftInputShowHideReason.SHOW_STATE_ALWAYS_VISIBLE);
                 } else {
                     Slog.e(TAG, "SOFT_INPUT_STATE_ALWAYS_VISIBLE is ignored because"
                             + " there is no focused view that also returns true from"
@@ -3702,7 +3790,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             long ident = Binder.clearCallingIdentity();
             try {
-                hideCurrentInputLocked(flags, null);
+                hideCurrentInputLocked(flags, null, SoftInputShowHideReason.HIDE_MY_SOFT_INPUT);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -3717,7 +3805,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             long ident = Binder.clearCallingIdentity();
             try {
-                showCurrentInputLocked(mLastImeTargetWindow, flags, null);
+                showCurrentInputLocked(mLastImeTargetWindow, flags, null,
+                        SoftInputShowHideReason.SHOW_MY_SOFT_INPUT);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -3800,10 +3889,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_SHOW_SOFT_INPUT:
                 args = (SomeArgs)msg.obj;
                 try {
+                    final @SoftInputShowHideReason int reason = msg.arg2;
                     if (DEBUG) Slog.v(TAG, "Calling " + args.arg1 + ".showSoftInput("
-                            + msg.arg1 + ", " + args.arg2 + ")");
+                            + msg.arg1 + ", " + args.arg2 + ") for reason: "
+                            + InputMethodDebug.softInputDisplayReasonToString(reason));
                     ((IInputMethod) args.arg1).showSoftInput(
                             (IBinder) args.arg3, msg.arg1, (ResultReceiver) args.arg2);
+                    mSoftInputShowHideHistory.addEntry(
+                            new SoftInputShowHideHistory.Entry(mCurClient,
+                                    InputMethodDebug.objToString(mCurFocusedWindow),
+                                    mCurFocusedWindowSoftInputMode, reason, true /* show */));
                 } catch (RemoteException e) {
                 }
                 args.recycle();
@@ -3811,16 +3906,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_HIDE_SOFT_INPUT:
                 args = (SomeArgs)msg.obj;
                 try {
+                    final @SoftInputShowHideReason int reason = msg.arg1;
                     if (DEBUG) Slog.v(TAG, "Calling " + args.arg1 + ".hideSoftInput(0, "
-                            + args.arg2 + ")");
+                            + args.arg2 + ") for reason: "
+                            + InputMethodDebug.softInputDisplayReasonToString(reason));
                     ((IInputMethod)args.arg1).hideSoftInput(0, (ResultReceiver)args.arg2);
+                    mSoftInputShowHideHistory.addEntry(
+                            new SoftInputShowHideHistory.Entry(mCurClient,
+                                    InputMethodDebug.objToString(mCurFocusedWindow),
+                                    mCurFocusedWindowSoftInputMode, reason, false /* show */));
                 } catch (RemoteException e) {
                 }
                 args.recycle();
                 return true;
             case MSG_HIDE_CURRENT_INPUT_METHOD:
                 synchronized (mMethodMap) {
-                    hideCurrentInputLocked(0, null);
+                    final @SoftInputShowHideReason int reason = (int) msg.obj;
+                    hideCurrentInputLocked(0, null, reason);
                 }
                 return true;
             case MSG_INITIALIZE_IME:
@@ -4604,9 +4706,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void hideCurrentInputMethod() {
+        public void hideCurrentInputMethod(@SoftInputShowHideReason int reason) {
             mService.mHandler.removeMessages(MSG_HIDE_CURRENT_INPUT_METHOD);
-            mService.mHandler.sendEmptyMessage(MSG_HIDE_CURRENT_INPUT_METHOD);
+            mService.mHandler.obtainMessage(MSG_HIDE_CURRENT_INPUT_METHOD, reason).sendToTarget();
         }
 
         @Override
@@ -4763,6 +4865,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             p.println("  mStartInputHistory:");
             mStartInputHistory.dump(pw, "   ");
+
+            p.println("  mSoftInputShowHideHistory:");
+            mSoftInputShowHideHistory.dump(pw, "   ");
         }
 
         p.println(" ");
@@ -5222,7 +5327,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 final String nextIme;
                 final List<InputMethodInfo> nextEnabledImes;
                 if (userId == mSettings.getCurrentUserId()) {
-                    hideCurrentInputLocked(0, null);
+                    hideCurrentInputLocked(0, null,
+                            SoftInputShowHideReason.HIDE_RESET_SHELL_COMMAND);
                     unbindCurrentMethodLocked();
                     // Reset the current IME
                     resetSelectedInputMethodAndSubtypeLocked(null);

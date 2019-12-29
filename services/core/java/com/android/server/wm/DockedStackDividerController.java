@@ -53,6 +53,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.server.LocalServices;
@@ -517,7 +518,8 @@ public class DockedStackDividerController {
 
                 // Hide the current IME to avoid problems with animations from IME adjustment when
                 // attaching the docked stack.
-                inputMethodManagerInternal.hideCurrentInputMethod();
+                inputMethodManagerInternal.hideCurrentInputMethod(
+                        SoftInputShowHideReason.HIDE_DOCKED_STACK_ATTACHED);
                 mImeHideRequested = true;
             }
 

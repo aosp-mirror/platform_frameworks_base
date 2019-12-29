@@ -23,6 +23,7 @@ import android.view.autofill.AutofillId;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
 
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.server.LocalServices;
 
@@ -52,7 +53,7 @@ public abstract class InputMethodManagerInternal {
     /**
      * Hides the current input method, if visible.
      */
-    public abstract void hideCurrentInputMethod();
+    public abstract void hideCurrentInputMethod(@SoftInputShowHideReason int reason);
 
     /**
      * Returns the list of installed input methods for the specified user.
@@ -109,7 +110,7 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public void hideCurrentInputMethod() {
+                public void hideCurrentInputMethod(@SoftInputShowHideReason int reason) {
                 }
 
                 @Override

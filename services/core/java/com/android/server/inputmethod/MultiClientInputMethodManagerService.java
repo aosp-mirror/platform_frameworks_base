@@ -74,6 +74,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IMultiClientInputMethod;
 import com.android.internal.inputmethod.IMultiClientInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IMultiClientInputMethodSession;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
@@ -174,7 +175,7 @@ public final class MultiClientInputMethodManagerService {
                         }
 
                         @Override
-                        public void hideCurrentInputMethod() {
+                        public void hideCurrentInputMethod(@SoftInputShowHideReason int reason) {
                             reportNotSupported();
                         }
 
