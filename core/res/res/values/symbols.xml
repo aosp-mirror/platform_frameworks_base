@@ -3207,9 +3207,18 @@
   <java-symbol type="layout" name="accessibility_button_chooser_item" />
   <java-symbol type="id" name="accessibility_button_target_icon" />
   <java-symbol type="id" name="accessibility_button_target_label" />
+  <java-symbol type="id" name="accessibility_button_target_item_container" />
+  <java-symbol type="id" name="accessibility_button_target_view_item" />
+  <java-symbol type="id" name="accessibility_button_target_switch_item" />
   <java-symbol type="string" name="accessibility_magnification_chooser_text" />
+  <java-symbol type="string" name="edit_accessibility_shortcut_menu_button" />
+  <java-symbol type="string" name="save_accessibility_shortcut_menu_button" />
+  <java-symbol type="string" name="cancel_accessibility_shortcut_menu_button" />
 
   <java-symbol type="drawable" name="ic_accessibility_magnification" />
+
+  <java-symbol type="drawable" name="ic_delete_item" />
+  <java-symbol type="drawable" name="ic_open_in_new" />
 
   <!-- com.android.internal.widget.RecyclerView -->
   <java-symbol type="id" name="item_touch_helper_previous_elevation"/>
