@@ -7723,6 +7723,9 @@ package android.provider {
   }
 
   public static final class Telephony.CellBroadcasts implements android.provider.BaseColumns {
+    field @NonNull public static final String AUTHORITY_LEGACY = "cellbroadcast-legacy";
+    field @NonNull public static final android.net.Uri AUTHORITY_LEGACY_URI;
+    field @NonNull public static final String CALL_METHOD_GET_PREFERENCE = "get_preference";
     field public static final String CID = "cid";
     field public static final String CMAS_CATEGORY = "cmas_category";
     field public static final String CMAS_CERTAINTY = "cmas_certainty";
@@ -7751,6 +7754,21 @@ package android.provider {
     field public static final String SERVICE_CATEGORY = "service_category";
     field public static final String SLOT_INDEX = "slot_index";
     field public static final String SUB_ID = "sub_id";
+  }
+
+  public static final class Telephony.CellBroadcasts.Preference {
+    field @NonNull public static final String ENABLE_ALERT_VIBRATION_PREF = "enable_alert_vibrate";
+    field @NonNull public static final String ENABLE_AREA_UPDATE_INFO_PREF = "enable_area_update_info_alerts";
+    field @NonNull public static final String ENABLE_CMAS_AMBER_PREF = "enable_cmas_amber_alerts";
+    field @NonNull public static final String ENABLE_CMAS_EXTREME_THREAT_PREF = "enable_cmas_extreme_threat_alerts";
+    field @NonNull public static final String ENABLE_CMAS_IN_SECOND_LANGUAGE_PREF = "receive_cmas_in_second_language";
+    field @NonNull public static final String ENABLE_CMAS_PRESIDENTIAL_PREF = "enable_cmas_presidential_alerts";
+    field @NonNull public static final String ENABLE_CMAS_SEVERE_THREAT_PREF = "enable_cmas_severe_threat_alerts";
+    field @NonNull public static final String ENABLE_EMERGENCY_PERF = "enable_emergency_alerts";
+    field @NonNull public static final String ENABLE_FULL_VOLUME_PREF = "use_full_volume";
+    field @NonNull public static final String ENABLE_PUBLIC_SAFETY_PREF = "enable_public_safety_messages";
+    field @NonNull public static final String ENABLE_STATE_LOCAL_TEST_PREF = "enable_state_local_test_alerts";
+    field @NonNull public static final String ENABLE_TEST_ALERT_PREF = "enable_test_alerts";
   }
 
   public static final class Telephony.SimInfo {
