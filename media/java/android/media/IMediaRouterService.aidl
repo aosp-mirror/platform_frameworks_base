@@ -55,15 +55,9 @@ interface IMediaRouterService {
 
     void registerManager(IMediaRouter2Manager manager, String packageName);
     void unregisterManager(IMediaRouter2Manager manager);
-    /**
-     * Changes the selected route of an application.
-     *
-     * @param manager the manager that calls the method
-     * @param packageName the package name of the client that will change the selected route
-     * @param route the route to be selected
-     */
-    void selectClientRoute2(IMediaRouter2Manager manager, String packageName,
-            in @nullable MediaRoute2Info route);
+
+    void requestCreateClientSession(IMediaRouter2Manager manager, String packageName,
+        in @nullable MediaRoute2Info route, int requestId);
 
     void requestSetVolume2Manager(IMediaRouter2Manager manager,
             in MediaRoute2Info route, int volume);

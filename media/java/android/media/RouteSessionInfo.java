@@ -49,10 +49,13 @@ public class RouteSessionInfo implements Parcelable {
     final int mSessionId;
     final String mPackageName;
     final String mControlCategory;
+    @Nullable
+    final String mProviderId;
     final List<String> mSelectedRoutes;
     final List<String> mDeselectableRoutes;
     final List<String> mGroupableRoutes;
     final List<String> mTransferrableRoutes;
+    @Nullable
     final Bundle mControlHints;
 
     RouteSessionInfo(@NonNull Builder builder) {
@@ -61,6 +64,7 @@ public class RouteSessionInfo implements Parcelable {
         mSessionId = builder.mSessionId;
         mPackageName = builder.mPackageName;
         mControlCategory = builder.mControlCategory;
+        mProviderId = builder.mProviderId;
 
         mSelectedRoutes = Collections.unmodifiableList(builder.mSelectedRoutes);
         mDeselectableRoutes = Collections.unmodifiableList(builder.mDeselectableRoutes);
@@ -76,6 +80,7 @@ public class RouteSessionInfo implements Parcelable {
         mSessionId = src.readInt();
         mPackageName = ensureString(src.readString());
         mControlCategory = ensureString(src.readString());
+        mProviderId = src.readString();
 
         mSelectedRoutes = ensureList(src.createStringArrayList());
         mDeselectableRoutes = ensureList(src.createStringArrayList());
@@ -117,12 +122,29 @@ public class RouteSessionInfo implements Parcelable {
     }
 
     /**
+     * Gets the client package name of the session
+     */
+    @NonNull
+    public String getPackageName() {
+        return mPackageName;
+    }
+
+    /**
      * Gets the control category of the session.
      * Routes that don't support the category can't be added to the session.
      */
     @NonNull
     public String getControlCategory() {
         return mControlCategory;
+    }
+
+    /**
+     * Gets the provider id of the session.
+     * @hide
+     */
+    @Nullable
+    public String getProviderId() {
+        return mProviderId;
     }
 
     /**
@@ -175,6 +197,7 @@ public class RouteSessionInfo implements Parcelable {
         dest.writeInt(mSessionId);
         dest.writeString(mPackageName);
         dest.writeString(mControlCategory);
+        dest.writeString(mProviderId);
         dest.writeStringList(mSelectedRoutes);
         dest.writeStringList(mDeselectableRoutes);
         dest.writeStringList(mGroupableRoutes);
@@ -187,13 +210,20 @@ public class RouteSessionInfo implements Parcelable {
         StringBuilder result = new StringBuilder()
                 .append("RouteSessionInfo{ ")
                 .append("sessionId=").append(mSessionId)
-                .append(", selectedRoutes={");
-        for (int i = 0; i < mSelectedRoutes.size(); i++) {
-            if (i > 0) result.append(", ");
-            result.append(mSelectedRoutes.get(i));
-        }
-        result.append("}");
-        result.append(" }");
+                .append(", controlCategory=").append(mControlCategory)
+                .append(", selectedRoutes={")
+                .append(String.join(",", mSelectedRoutes))
+                .append("}")
+                .append(", deselectableRoutes={")
+                .append(String.join(",", mDeselectableRoutes))
+                .append("}")
+                .append(", groupableRoutes={")
+                .append(String.join(",", mGroupableRoutes))
+                .append("}")
+                .append(", transferrableRoutes={")
+                .append(String.join(",", mTransferrableRoutes))
+                .append("}")
+                .append(" }");
         return result.toString();
     }
 
@@ -204,6 +234,7 @@ public class RouteSessionInfo implements Parcelable {
         final String mPackageName;
         final int mSessionId;
         final String mControlCategory;
+        String mProviderId;
         final List<String> mSelectedRoutes;
         final List<String> mDeselectableRoutes;
         final List<String> mGroupableRoutes;
@@ -227,6 +258,7 @@ public class RouteSessionInfo implements Parcelable {
             mSessionId = sessionInfo.mSessionId;
             mPackageName = sessionInfo.mPackageName;
             mControlCategory = sessionInfo.mControlCategory;
+            mProviderId = sessionInfo.mProviderId;
 
             mSelectedRoutes = new ArrayList<>(sessionInfo.mSelectedRoutes);
             mDeselectableRoutes = new ArrayList<>(sessionInfo.mDeselectableRoutes);
@@ -234,6 +266,15 @@ public class RouteSessionInfo implements Parcelable {
             mTransferrableRoutes = new ArrayList<>(sessionInfo.mTransferrableRoutes);
 
             mControlHints = sessionInfo.mControlHints;
+        }
+
+        /**
+         * Sets the provider id of the session.
+         */
+        @NonNull
+        public Builder setProviderId(String providerId) {
+            mProviderId = providerId;
+            return this;
         }
 
         /**
