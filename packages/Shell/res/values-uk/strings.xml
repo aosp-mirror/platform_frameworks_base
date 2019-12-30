@@ -20,7 +20,7 @@
     <string name="bugreport_notification_channel" msgid="2574150205913861141">"Звіти про помилки"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Створюється звіт про помилку <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Звіт про помилку <xliff:g id="ID">#%d</xliff:g> створено"</string>
-    <string name="bugreport_updating_title" msgid="4423539949559634214">"Додаються деталі до повідомлення про помилку"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"У звіт про помилку додаються деталі"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Зачекайте…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Звіт про помилку невдовзі з’явиться на телефоні"</string>
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Виберіть, щоб надіслати звіт про помилку"</string>
