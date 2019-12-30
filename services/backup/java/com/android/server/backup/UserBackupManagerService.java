@@ -2431,7 +2431,6 @@ public class UserBackupManagerService {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
                 "setAncestralSerialNumber");
         Slog.v(TAG, "Setting ancestral work profile id to " + ancestralSerialNumber);
-        // TODO (b/124359804)
         try (RandomAccessFile af = getAncestralSerialNumberFile()) {
             af.writeLong(ancestralSerialNumber);
         } catch (IOException e) {
@@ -2444,7 +2443,6 @@ public class UserBackupManagerService {
      * {@link #setAncestralSerialNumber(long)}. Will return {@code -1} if not set.
      */
     public long getAncestralSerialNumber() {
-        // TODO (b/124359804)
         try (RandomAccessFile af = getAncestralSerialNumberFile()) {
             return af.readLong();
         } catch (IOException e) {
@@ -2570,7 +2568,6 @@ public class UserBackupManagerService {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "adbBackup");
 
         final int callingUserHandle = UserHandle.getCallingUserId();
-        // TODO: http://b/22388012
         if (callingUserHandle != UserHandle.USER_SYSTEM) {
             throw new IllegalStateException("Backup supported only for the device owner");
         }
@@ -2708,7 +2705,6 @@ public class UserBackupManagerService {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "adbRestore");
 
         final int callingUserHandle = UserHandle.getCallingUserId();
-        // TODO: http://b/22388012
         if (callingUserHandle != UserHandle.USER_SYSTEM) {
             throw new IllegalStateException("Restore supported only for the device owner");
         }
