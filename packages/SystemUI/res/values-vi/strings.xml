@@ -300,7 +300,7 @@
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"Chạm và giữ các biểu tượng để xem thêm tùy chọn khác"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Không làm phiền"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"Chỉ ưu tiên"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"Chỉ cho các mục ưu tiên"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"Chỉ chuông báo"</string>
     <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"Hoàn toàn tắt tiếng"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
@@ -413,7 +413,7 @@
     <string name="camera_hint" msgid="4519495795000658637">"Vuốt từ biểu tượng để mở máy ảnh"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"Tắt tiếng hoàn toàn. Cài đặt này cũng sẽ tắt tiếng trình đọc màn hình."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"Hoàn toàn tắt tiếng"</string>
-    <string name="interruption_level_priority" msgid="661294280016622209">"Chỉ ưu tiên"</string>
+    <string name="interruption_level_priority" msgid="661294280016622209">"Chỉ cho các mục ưu tiên"</string>
     <string name="interruption_level_alarms" msgid="2457850481335846959">"Chỉ chuông báo"</string>
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Hoàn toàn\ntắt tiếng"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Chỉ\nưu tiên"</string>
