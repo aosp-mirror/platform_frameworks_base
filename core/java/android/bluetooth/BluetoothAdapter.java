@@ -1970,6 +1970,38 @@ public final class BluetoothAdapter {
         }
     }
 
+    private static final String BLUETOOTH_FILTERING_CACHE_PROPERTY =
+            "cache_key.bluetooth.is_offloaded_filtering_supported";
+    private final PropertyInvalidatedCache<Void, Boolean> mBluetoothFilteringCache =
+            new PropertyInvalidatedCache<Void, Boolean>(
+                8, BLUETOOTH_FILTERING_CACHE_PROPERTY) {
+                @Override
+                protected Boolean recompute(Void query) {
+                    try {
+                        mServiceLock.readLock().lock();
+                        if (mService != null) {
+                            return mService.isOffloadedFilteringSupported();
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "failed to get isOffloadedFilteringSupported, error: ", e);
+                    } finally {
+                        mServiceLock.readLock().unlock();
+                    }
+                    return false;
+
+                }
+            };
+
+    /** @hide */
+    public void disableIsOffloadedFilteringSupportedCache() {
+        mBluetoothFilteringCache.disableLocal();
+    }
+
+    /** @hide */
+    public static void invalidateIsOffloadedFilteringSupportedCache() {
+        PropertyInvalidatedCache.invalidateCache(BLUETOOTH_FILTERING_CACHE_PROPERTY);
+    }
+
     /**
      * Return true if offloaded filters are supported
      *
@@ -1979,17 +2011,7 @@ public final class BluetoothAdapter {
         if (!getLeAccess()) {
             return false;
         }
-        try {
-            mServiceLock.readLock().lock();
-            if (mService != null) {
-                return mService.isOffloadedFilteringSupported();
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "failed to get isOffloadedFilteringSupported, error: ", e);
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
-        return false;
+        return mBluetoothFilteringCache.query(null);
     }
 
     /**
@@ -2361,6 +2383,43 @@ public final class BluetoothAdapter {
         return BluetoothAdapter.STATE_DISCONNECTED;
     }
 
+    private static final String BLUETOOTH_PROFILE_CACHE_PROPERTY =
+            "cache_key.bluetooth.get_profile_connection_state";
+    private final PropertyInvalidatedCache<Integer, Integer>
+            mGetProfileConnectionStateCache =
+            new PropertyInvalidatedCache<Integer, Integer>(
+                8, BLUETOOTH_PROFILE_CACHE_PROPERTY) {
+                @Override
+                protected Integer recompute(Integer query) {
+                    try {
+                        mServiceLock.readLock().lock();
+                        if (mService != null) {
+                            return mService.getProfileConnectionState(query);
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "getProfileConnectionState:", e);
+                    } finally {
+                        mServiceLock.readLock().unlock();
+                    }
+                    return BluetoothProfile.STATE_DISCONNECTED;
+                }
+                @Override
+                public String queryToString(Integer query) {
+                    return String.format("getProfileConnectionState(profile=\"%d\")",
+                                         query);
+                }
+            };
+
+    /** @hide */
+    public void disableGetProfileConnectionStateCache() {
+        mGetProfileConnectionStateCache.disableLocal();
+    }
+
+    /** @hide */
+    public static void invalidateGetProfileConnectionStateCache() {
+        PropertyInvalidatedCache.invalidateCache(BLUETOOTH_PROFILE_CACHE_PROPERTY);
+    }
+
     /**
      * Get the current connection state of a profile.
      * This function can be used to check whether the local Bluetooth adapter
@@ -2378,17 +2437,7 @@ public final class BluetoothAdapter {
         if (getState() != STATE_ON) {
             return BluetoothProfile.STATE_DISCONNECTED;
         }
-        try {
-            mServiceLock.readLock().lock();
-            if (mService != null) {
-                return mService.getProfileConnectionState(profile);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "getProfileConnectionState:", e);
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
-        return BluetoothProfile.STATE_DISCONNECTED;
+        return mGetProfileConnectionStateCache.query(new Integer(profile));
     }
 
     /**
