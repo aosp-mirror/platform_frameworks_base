@@ -45,7 +45,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -117,7 +116,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void setUp() throws Exception {
         mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
         spyOn(mTaskPersister);
-        mDisplay = mRootActivityContainer.getDisplayContent(DEFAULT_DISPLAY);
+        mDisplay = mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY);
 
         // Set the recent tasks we should use for testing in this class.
         mRecentTasks = new TestRecentTasks(mService, mTaskPersister);
@@ -773,7 +772,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         ActivityStack stack = mTasks.get(2).getStack();
         stack.moveToFront("", mTasks.get(2));
-        doReturn(stack).when(mService.mRootActivityContainer).getTopDisplayFocusedStack();
+        doReturn(stack).when(mService.mRootWindowContainer).getTopDisplayFocusedStack();
 
         // Simulate the reset from the timeout
         mRecentTasks.resetFreezeTaskListReorderingOnTimeout();
@@ -1327,7 +1326,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         @Override
         void getTasks(int maxNum, List<RunningTaskInfo> list, int ignoreActivityType,
-                int ignoreWindowingMode, RootActivityContainer root,
+                int ignoreWindowingMode, RootWindowContainer root,
                 int callingUid, boolean allowed, boolean crossUser, ArraySet<Integer> profileIds) {
             mLastAllowed = allowed;
             super.getTasks(maxNum, list, ignoreActivityType, ignoreWindowingMode, root,

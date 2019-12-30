@@ -134,7 +134,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
     public void testUpdateLaunchBounds() {
         // When in a non-resizeable stack, the task bounds should be updated.
         final Task task = new TaskBuilder(mService.mStackSupervisor)
-                .setStack(mService.mRootActivityContainer.getDefaultDisplay().createStack(
+                .setStack(mService.mRootWindowContainer.getDefaultDisplay().createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */))
                 .build();
         final Rect bounds = new Rect(10, 10, 100, 100);
@@ -145,7 +145,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // When in a resizeable stack, the stack bounds should be updated as well.
         final Task task2 = new TaskBuilder(mService.mStackSupervisor)
-                .setStack(mService.mRootActivityContainer.getDefaultDisplay().createStack(
+                .setStack(mService.mRootWindowContainer.getDefaultDisplay().createStack(
                         WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */))
                 .build();
         assertThat((Object) task2.getStack()).isInstanceOf(ActivityStack.class);
@@ -336,7 +336,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
      * Creates a {@link ActivityStarter} with default parameters and necessary mocks.
      *
      * @param launchFlags The intent flags to launch activity.
-     * @param mockGetLaunchStack Whether to mock {@link RootActivityContainer#getLaunchStack} for
+     * @param mockGetLaunchStack Whether to mock {@link RootWindowContainer#getLaunchStack} for
      *                           always launching to the testing stack. Set to false when allowing
      *                           the activity can be launched to any stack that is decided by real
      *                           implementation.
@@ -351,13 +351,13 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         if (mockGetLaunchStack) {
             // Instrument the stack and task used.
-            final ActivityStack stack = mRootActivityContainer.getDefaultDisplay().createStack(
+            final ActivityStack stack = mRootWindowContainer.getDefaultDisplay().createStack(
                     WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
             // Direct starter to use spy stack.
-            doReturn(stack).when(mRootActivityContainer)
+            doReturn(stack).when(mRootWindowContainer)
                     .getLaunchStack(any(), any(), any(), anyBoolean());
-            doReturn(stack).when(mRootActivityContainer)
+            doReturn(stack).when(mRootWindowContainer)
                     .getLaunchStack(any(), any(), any(), anyBoolean(), any(), anyInt(), anyInt());
         }
 
@@ -457,7 +457,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final ActivityStack focusStack = focusActivity.getActivityStack();
         focusStack.moveToFront("testSplitScreenDeliverToTop");
 
-        doReturn(reusableActivity).when(mRootActivityContainer).findTask(any(), anyInt());
+        doReturn(reusableActivity).when(mRootWindowContainer).findTask(any(), anyInt());
 
         final int result = starter.setReason("testSplitScreenDeliverToTop").execute();
 
@@ -489,7 +489,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // Enter split-screen. Primary stack should have focus.
         focusActivity.getActivityStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
 
-        doReturn(reusableActivity).when(mRootActivityContainer).findTask(any(), anyInt());
+        doReturn(reusableActivity).when(mRootWindowContainer).findTask(any(), anyInt());
 
         final int result = starter.setReason("testSplitScreenMoveToFront").execute();
 
@@ -502,7 +502,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
      */
     @Test
     public void testTaskModeViolation() {
-        final DisplayContent display = mService.mRootActivityContainer.getDefaultDisplay();
+        final DisplayContent display = mService.mRootWindowContainer.getDefaultDisplay();
         display.removeAllTasks();
         assertNoTasks(display);
 
@@ -738,7 +738,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 .setCreateTask(true).build();
         finishingTopActivity.getActivityStack().moveToFront("finishingTopActivity");
 
-        assertEquals(finishingTopActivity, mRootActivityContainer.topRunningActivity());
+        assertEquals(finishingTopActivity, mRootWindowContainer.topRunningActivity());
         finishingTopActivity.finishing = true;
 
         // Launch the bottom task of the target stack.
@@ -747,7 +747,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 .setIntent(activity.intent)
                 .execute();
         // The hierarchies of the activity should move to front.
-        assertEquals(activity, mRootActivityContainer.topRunningActivity());
+        assertEquals(activity, mRootWindowContainer.topRunningActivity());
     }
 
     /**
@@ -802,7 +802,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // Create a secondary display with an activity.
         final TestDisplayContent secondaryDisplay =
                 new TestDisplayContent.Builder(mService, 1000, 1500).build();
-        mRootActivityContainer.positionChildAt(POSITION_TOP, secondaryDisplay,
+        mRootWindowContainer.positionChildAt(POSITION_TOP, secondaryDisplay,
                 false /* includingParents */);
         final ActivityRecord singleTaskActivity = createSingleTaskActivityOn(
                 secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
@@ -970,7 +970,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final ActivityStarter starter = prepareStarter(0 /* flags */);
         starter.mStartActivity = new ActivityBuilder(mService).build();
         final Task task = new TaskBuilder(mService.mStackSupervisor)
-                .setStack(mService.mRootActivityContainer.getDefaultDisplay().createStack(
+                .setStack(mService.mRootWindowContainer.getDefaultDisplay().createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */))
                 .setUserId(10)
                 .build();

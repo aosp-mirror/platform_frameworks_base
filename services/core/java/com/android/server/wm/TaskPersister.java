@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.RootActivityContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
+import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
 
 import android.annotation.NonNull;
 import android.graphics.Bitmap;
@@ -39,7 +39,6 @@ import com.android.internal.util.XmlUtils;
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedReader;
@@ -330,7 +329,7 @@ public class TaskPersister implements PersisterQueue.Listener {
                                 // mWriteQueue.add(new TaskWriteQueueItem(task));
 
                                 final int taskId = task.mTaskId;
-                                if (mService.mRootActivityContainer.anyTaskForId(taskId,
+                                if (mService.mRootWindowContainer.anyTaskForId(taskId,
                                         MATCH_TASK_IN_STACKS_OR_RECENT_TASKS) != null) {
                                     // Should not happen.
                                     Slog.wtf(TAG, "Existing task with taskId " + taskId + "found");

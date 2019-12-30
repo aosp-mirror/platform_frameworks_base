@@ -384,7 +384,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
 
     /** Run all ActivityStacks through this */
     protected final ActivityStackSupervisor mStackSupervisor;
-    protected final RootActivityContainer mRootActivityContainer;
+    protected final RootWindowContainer mRootWindowContainer;
 
     private boolean mTopActivityOccludesKeyguard;
     private ActivityRecord mTopDismissingKeyguardActivity;
@@ -443,7 +443,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             if (mUpdateConfig) {
                 // Ensure the resumed state of the focus activity if we updated the configuration of
                 // any activity.
-                mRootActivityContainer.resumeFocusedStacksTopActivities();
+                mRootWindowContainer.resumeFocusedStacksTopActivities();
             }
         }
 
@@ -646,7 +646,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         EventLogTags.writeWmStackCreated(stackId);
         mStackSupervisor = supervisor;
         mAtmService = supervisor.mService;
-        mRootActivityContainer = mAtmService.mRootActivityContainer;
+        mRootWindowContainer = mAtmService.mRootWindowContainer;
         mHandler = new ActivityStackHandler(supervisor.mLooper);
         mRemoteToken = new RemoteToken(this);
         mCurrentUser = mAtmService.mAmInternal.getCurrentUserId();
@@ -673,7 +673,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             if (DEBUG_STACK) Slog.v(TAG_STACK, "set resumed activity to:" + record + " reason:"
                     + reason);
             setResumedActivity(record, reason + " - onActivityStateChanged");
-            if (record == mRootActivityContainer.getTopResumedActivity()) {
+            if (record == mRootWindowContainer.getTopResumedActivity()) {
                 mAtmService.setResumedActivityUncheckLocked(record, reason);
             }
             mStackSupervisor.mRecentTasks.add(record.getTask());
@@ -983,8 +983,8 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         }
 
         if (!deferEnsuringVisibility) {
-            mRootActivityContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
-            mRootActivityContainer.resumeFocusedStacksTopActivities();
+            mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+            mRootWindowContainer.resumeFocusedStacksTopActivities();
         }
     }
 
@@ -1002,10 +1002,10 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     /** Resume next focusable stack after reparenting to another display. */
     void postReparent() {
         adjustFocusToNextFocusableStack("reparent", true /* allowFocusSelf */);
-        mRootActivityContainer.resumeFocusedStacksTopActivities();
+        mRootWindowContainer.resumeFocusedStacksTopActivities();
         // Update visibility of activities before notifying WM. This way it won't try to resize
         // windows that are no longer visible.
-        mRootActivityContainer.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+        mRootWindowContainer.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
                 !PRESERVE_WINDOWS);
     }
 
@@ -1230,7 +1230,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
 
     boolean isFocusable() {
         final ActivityRecord r = topRunningActivity();
-        return mRootActivityContainer.isFocusable(this, r != null && r.isFocusable());
+        return mRootWindowContainer.isFocusable(this, r != null && r.isFocusable());
     }
 
     boolean isFocusableAndVisible() {
@@ -1395,7 +1395,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         if (prev == null) {
             if (resuming == null) {
                 Slog.wtf(TAG, "Trying to pause when nothing is resumed");
-                mRootActivityContainer.resumeFocusedStacksTopActivities();
+                mRootWindowContainer.resumeFocusedStacksTopActivities();
             }
             return false;
         }
@@ -1485,7 +1485,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             // pause, so just treat it as being paused now.
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Activity not running, resuming next.");
             if (resuming == null) {
-                mRootActivityContainer.resumeFocusedStacksTopActivities();
+                mRootWindowContainer.resumeFocusedStacksTopActivities();
             }
             return false;
         }
@@ -1538,9 +1538,9 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         }
 
         if (resumeNext) {
-            final ActivityStack topStack = mRootActivityContainer.getTopDisplayFocusedStack();
+            final ActivityStack topStack = mRootWindowContainer.getTopDisplayFocusedStack();
             if (!topStack.shouldSleepOrShutDownActivities()) {
-                mRootActivityContainer.resumeFocusedStacksTopActivities(topStack, prev, null);
+                mRootWindowContainer.resumeFocusedStacksTopActivities(topStack, prev, null);
             } else {
                 checkReadyForSleep();
                 ActivityRecord top = topStack.topRunningActivity();
@@ -1549,7 +1549,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                     // something. Also if the top activity on the stack is not the just paused
                     // activity, we need to go ahead and resume it to ensure we complete an
                     // in-flight app switch.
-                    mRootActivityContainer.resumeFocusedStacksTopActivities();
+                    mRootWindowContainer.resumeFocusedStacksTopActivities();
                 }
             }
         }
@@ -1580,7 +1580,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = false;
         }
 
-        mRootActivityContainer.ensureActivitiesVisible(resuming, 0, !PRESERVE_WINDOWS);
+        mRootWindowContainer.ensureActivitiesVisible(resuming, 0, !PRESERVE_WINDOWS);
     }
 
     /**
@@ -1786,7 +1786,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
     /**
      * Ensure visibility with an option to also update the configuration of visible activities.
      * @see #ensureActivitiesVisible(ActivityRecord, int, boolean)
-     * @see RootActivityContainer#ensureActivitiesVisible(ActivityRecord, int, boolean)
+     * @see RootWindowContainer#ensureActivitiesVisible(ActivityRecord, int, boolean)
      */
     // TODO: Should be re-worked based on the fact that each task as a stack in most cases.
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
@@ -1988,7 +1988,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
      *
      * NOTE: It is not safe to call this method directly as it can cause an activity in a
      *       non-focused stack to be resumed.
-     *       Use {@link RootActivityContainer#resumeFocusedStacksTopActivities} to resume the
+     *       Use {@link RootWindowContainer#resumeFocusedStacksTopActivities} to resume the
      *       right activity for the current system state.
      */
     @GuardedBy("mService")
@@ -2059,7 +2059,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             return false;
         }
 
-        mRootActivityContainer.cancelInitializingActivities();
+        mRootWindowContainer.cancelInitializingActivities();
 
         // Remember how we'll process this pause/resume situation, and ensure
         // that the state is reset however we wind up proceeding.
@@ -2093,7 +2093,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         // activity is paused, well that is the state we want.
         if (shouldSleepOrShutDownActivities()
                 && mLastPausedActivity == next
-                && mRootActivityContainer.allPausedActivitiesComplete()) {
+                && mRootWindowContainer.allPausedActivitiesComplete()) {
             // If the current top activity may be able to occlude keyguard but the occluded state
             // has not been set, update visibility and check again if we should continue to resume.
             boolean nothingToResume = true;
@@ -2137,7 +2137,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resuming " + next);
 
         // If we are currently pausing an activity, then don't do anything until that is done.
-        if (!mRootActivityContainer.allPausedActivitiesComplete()) {
+        if (!mRootWindowContainer.allPausedActivitiesComplete()) {
             if (DEBUG_SWITCH || DEBUG_PAUSE || DEBUG_STATES) Slog.v(TAG_PAUSE,
                     "resumeTopActivityLocked: Skip resume: some activity pausing.");
 
@@ -2350,7 +2350,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 // result of invisible window resize.
                 // TODO: Remove this once visibilities are set correctly immediately when
                 // starting an activity.
-                notUpdated = !mRootActivityContainer.ensureVisibilityAndConfig(next, mDisplayId,
+                notUpdated = !mRootWindowContainer.ensureVisibilityAndConfig(next, mDisplayId,
                         true /* markFrozenIfConfigChanged */, false /* deferResume */);
             }
 
@@ -2481,7 +2481,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 // Try to move focus to the next visible stack with a running activity if this
                 // stack is not covering the entire screen or is on a secondary display with no home
                 // stack.
-                return mRootActivityContainer.resumeFocusedStacksTopActivities(nextFocusedStack,
+                return mRootWindowContainer.resumeFocusedStacksTopActivities(nextFocusedStack,
                         prev, null /* targetOptions */);
             }
         }
@@ -2491,7 +2491,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         ActivityOptions.abort(options);
         if (DEBUG_STATES) Slog.d(TAG_STATES,
                 "resumeNextFocusableActivityWhenStackIsEmpty: " + reason + ", go home");
-        return mRootActivityContainer.resumeHomeActivity(prev, reason, mDisplayId);
+        return mRootWindowContainer.resumeHomeActivity(prev, reason, mDisplayId);
     }
 
     void startActivityLocked(ActivityRecord r, ActivityRecord focusedTopActivity,
@@ -2698,7 +2698,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
      */
     private ActivityStack adjustFocusToNextFocusableStack(String reason, boolean allowFocusSelf) {
         final ActivityStack stack =
-                mRootActivityContainer.getNextFocusableStack(this, !allowFocusSelf);
+                mRootWindowContainer.getNextFocusableStack(this, !allowFocusSelf);
         final String myReason = reason + " adjustFocusToNextFocusableStack";
         if (stack == null) {
             return null;
@@ -3070,7 +3070,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 topActivity.supportsEnterPipOnTaskSwitch = true;
             }
 
-            mRootActivityContainer.resumeFocusedStacksTopActivities();
+            mRootWindowContainer.resumeFocusedStacksTopActivities();
             EventLogTags.writeWmTaskToFront(tr.mUserId, tr.mTaskId);
             mAtmService.getTaskChangeNotificationController().notifyTaskMovedToFront(tr.getTaskInfo());
         } finally {
@@ -3138,12 +3138,12 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             // The new top activity is already resumed, so there's a good chance that nothing will
             // get resumed below. So, update visibility now in case the transition is closed
             // prematurely.
-            mRootActivityContainer.ensureVisibilityAndConfig(null /* starting */,
+            mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
                     getDisplay().mDisplayId, false /* markFrozenIfConfigChanged */,
                     false /* deferResume */);
         }
 
-        mRootActivityContainer.resumeFocusedStacksTopActivities();
+        mRootWindowContainer.resumeFocusedStacksTopActivities();
         return true;
     }
 
@@ -3505,7 +3505,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         // The task might have already been running and its visibility needs to be synchronized with
         // the visibility of the stack / windows.
         ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-        mRootActivityContainer.resumeFocusedStacksTopActivities();
+        mRootWindowContainer.resumeFocusedStacksTopActivities();
     }
 
     public void setAlwaysOnTop(boolean alwaysOnTop) {
@@ -3545,7 +3545,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         moveToFront(reason);
         // If the original state is resumed, there is no state change to update focused app.
         // So here makes sure the activity focus is set if it is the top.
-        if (origState == RESUMED && r == mRootActivityContainer.getTopResumedActivity()) {
+        if (origState == RESUMED && r == mRootWindowContainer.getTopResumedActivity()) {
             mAtmService.setResumedActivityUncheckLocked(r, reason);
         }
     }
@@ -4090,7 +4090,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
             mStackSupervisor.resizeDockedStackLocked(getRequestedOverrideBounds(), mTmpRect,
                     mTmpRect2, null, null, PRESERVE_WINDOWS);
         }
-        mRootActivityContainer.updateUIDsPresentOnDisplay();
+        mRootWindowContainer.updateUIDsPresentOnDisplay();
 
         // Resume next focusable stack after reparenting to another display if we aren't removing
         // the prevous display.

@@ -224,7 +224,7 @@ class LaunchParamsPersister {
         final ActivityStack stack = task.getStack();
         final int displayId = stack.mDisplayId;
         final DisplayContent display =
-                mSupervisor.mRootActivityContainer.getDisplayContent(displayId);
+                mSupervisor.mRootWindowContainer.getDisplayContent(displayId);
         final DisplayInfo info = new DisplayInfo();
         display.mDisplay.getDisplayInfo(info);
 
@@ -260,7 +260,7 @@ class LaunchParamsPersister {
             return;
         }
 
-        final DisplayContent display = mSupervisor.mRootActivityContainer.getDisplayContent(
+        final DisplayContent display = mSupervisor.mRootWindowContainer.getDisplayContent(
                 persistableParams.mDisplayUniqueId);
         if (display != null) {
             outParams.mPreferredDisplayId =  display.mDisplayId;

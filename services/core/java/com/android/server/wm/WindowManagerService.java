@@ -1116,7 +1116,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplayWindowSettings = new DisplayWindowSettings(this);
         mPolicy = policy;
         mAnimator = new WindowAnimator(this);
-        mRoot = new RootActivityContainer(mAtmService, this);
+        mRoot = new RootWindowContainer(this);
 
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mTaskSnapshotController = new TaskSnapshotController(this);
@@ -1722,7 +1722,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        return mAtmService.mRootActivityContainer.getDisplayContentOrCreate(displayId);
+        return mRoot.getDisplayContentOrCreate(displayId);
     }
 
     private boolean doesAddToastWindowRequireToken(String packageName, int callingUid,

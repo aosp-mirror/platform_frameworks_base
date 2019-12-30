@@ -105,7 +105,6 @@ public class LockTaskControllerTest {
             new DexmakerShareClassLoaderRule();
 
     @Mock private ActivityStackSupervisor mSupervisor;
-    @Mock private RootActivityContainer mRootActivityContainer;
     @Mock private RootWindowContainer mRootWindowContainer;
     @Mock private IDevicePolicyManager mDevicePolicyManager;
     @Mock private IStatusBarService mStatusBarService;
@@ -134,7 +133,7 @@ public class LockTaskControllerTest {
         }
 
         mSupervisor.mRecentTasks = mRecentTasks;
-        mSupervisor.mRootActivityContainer = mRootActivityContainer;
+        mSupervisor.mRootWindowContainer = mRootWindowContainer;
 
         mLockTaskController = new LockTaskController(mContext, mSupervisor,
                 new ImmediatelyExecuteHandler());

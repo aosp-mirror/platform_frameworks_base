@@ -548,8 +548,8 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
         mResizeMode = resizeMode;
-        mAtmService.mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-        mAtmService.mRootActivityContainer.resumeFocusedStacksTopActivities();
+        mAtmService.mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+        mAtmService.mRootWindowContainer.resumeFocusedStacksTopActivities();
         updateTaskDescription();
     }
 
@@ -602,10 +602,10 @@ class Task extends WindowContainer<WindowContainer> {
                     // this won't cause tons of irrelevant windows being preserved because only
                     // activities in this task may experience a bounds change. Configs for other
                     // activities stay the same.
-                    mAtmService.mRootActivityContainer.ensureActivitiesVisible(r, 0,
+                    mAtmService.mRootWindowContainer.ensureActivitiesVisible(r, 0,
                             preserveWindow);
                     if (!kept) {
-                        mAtmService.mRootActivityContainer.resumeFocusedStacksTopActivities();
+                        mAtmService.mRootWindowContainer.resumeFocusedStacksTopActivities();
                     }
                 }
             }
@@ -670,7 +670,7 @@ class Task extends WindowContainer<WindowContainer> {
             @ReparentMoveStackMode int moveStackMode, boolean animate, boolean deferResume,
             boolean schedulePictureInPictureModeChange, String reason) {
         final ActivityStackSupervisor supervisor = mAtmService.mStackSupervisor;
-        final RootActivityContainer root = mAtmService.mRootActivityContainer;
+        final RootWindowContainer root = mAtmService.mRootWindowContainer;
         final WindowManagerService windowManager = mAtmService.mWindowManager;
         final ActivityStack sourceStack = getStack();
         final ActivityStack toStack = supervisor.getReparentTargetStack(this, preferredStack,
@@ -1028,7 +1028,7 @@ class Task extends WindowContainer<WindowContainer> {
             forceWindowsScaleable(false /* force */);
         }
 
-        mAtmService.mRootActivityContainer.updateUIDsPresentOnDisplay();
+        mAtmService.mRootWindowContainer.updateUIDsPresentOnDisplay();
     }
 
     void updateTaskMovement(boolean toFront) {
@@ -1041,7 +1041,7 @@ class Task extends WindowContainer<WindowContainer> {
                 mLastTimeMoved *= -1;
             }
         }
-        mAtmService.mRootActivityContainer.invalidateTaskLayers();
+        mAtmService.mRootWindowContainer.invalidateTaskLayers();
     }
 
     /**
@@ -1218,7 +1218,7 @@ class Task extends WindowContainer<WindowContainer> {
 
         // Make sure the list of display UID whitelists is updated
         // now that this record is in a new task.
-        mAtmService.mRootActivityContainer.updateUIDsPresentOnDisplay();
+        mAtmService.mRootWindowContainer.updateUIDsPresentOnDisplay();
     }
 
     void addChild(ActivityRecord r) {
@@ -1581,9 +1581,9 @@ class Task extends WindowContainer<WindowContainer> {
         // to do this for the pinned stack as the bounds are controlled by the system.
         if (!inPinnedWindowingMode() && mStack != null) {
             final int defaultMinSizeDp =
-                    mAtmService.mRootActivityContainer.mDefaultMinSizeOfResizeableTaskDp;
+                    mAtmService.mRootWindowContainer.mDefaultMinSizeOfResizeableTaskDp;
             final DisplayContent display =
-                    mAtmService.mRootActivityContainer.getDisplayContent(mStack.mDisplayId);
+                    mAtmService.mRootWindowContainer.getDisplayContent(mStack.mDisplayId);
             final float density =
                     (float) display.getConfiguration().densityDpi / DisplayMetrics.DENSITY_DEFAULT;
             final int defaultMinSize = (int) (defaultMinSizeDp * density);

@@ -713,13 +713,13 @@ public class DisplayContentTests extends WindowTestsBase {
                 IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
 
         final ActivityStack stack =
-                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
+                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
                         .setDisplay(dc)
                         .build();
         doReturn(true).when(stack).isVisible();
 
         final ActivityStack freeformStack =
-                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
+                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
                         .setDisplay(dc)
                         .setWindowingMode(WINDOWING_MODE_FREEFORM)
                         .build();
@@ -747,7 +747,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 : SCREEN_ORIENTATION_LANDSCAPE;
 
         final ActivityStack stack =
-                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
+                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
                         .setDisplay(dc).build();
         final ActivityRecord activity = stack.getTopMostTask().getTopNonFinishingActivity();
 
@@ -769,7 +769,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 : SCREEN_ORIENTATION_LANDSCAPE;
 
         final ActivityStack stack =
-                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
+                new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
                         .setDisplay(dc).build();
         final ActivityRecord activity = stack.getTopMostTask().getTopNonFinishingActivity();
 

@@ -79,7 +79,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
     /** Verify that activity is finished correctly upon request. */
     @Test
     public void testActivityFinish() {
-        final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
+        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
         assertTrue("Activity must be finished", mService.finishActivity(activity.appToken,
                 0 /* resultCode */, null /* resultData */,
@@ -93,7 +93,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
 
     @Test
     public void testOnPictureInPictureRequested() throws RemoteException {
-        final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
+        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
         ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
         doNothing().when(lifecycleManager).scheduleTransaction(any());
@@ -112,7 +112,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
 
     @Test(expected = IllegalStateException.class)
     public void testOnPictureInPictureRequested_cannotEnterPip() throws RemoteException {
-        final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
+        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
         ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
         doNothing().when(lifecycleManager).scheduleTransaction(any());
@@ -127,7 +127,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
     @Test
     public void testTaskTransaction() {
         removeGlobalMinSizeRestriction();
-        final ActivityStack stack = new StackBuilder(mRootActivityContainer)
+        final ActivityStack stack = new StackBuilder(mRootWindowContainer)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         final Task task = stack.getTopMostTask();
         WindowContainerTransaction t = new WindowContainerTransaction();
@@ -140,7 +140,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
     @Test
     public void testStackTransaction() {
         removeGlobalMinSizeRestriction();
-        final ActivityStack stack = new StackBuilder(mRootActivityContainer)
+        final ActivityStack stack = new StackBuilder(mRootWindowContainer)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         ActivityManager.StackInfo info =
                 mService.getStackInfo(WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
@@ -189,7 +189,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
         Configuration c = new Configuration(newDisp1.getRequestedOverrideConfiguration());
         c.windowConfiguration.setBounds(new Rect(0, 0, 1000, 1300));
         newDisp1.onRequestedOverrideConfigurationChanged(c);
-        mService.mRootActivityContainer.ensureVisibilityAndConfig(null /* starting */,
+        mService.mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
                 newDisp1.mDisplayId, false /* markFrozenIfConfigChanged */,
                 false /* deferResume */);
         assertEquals(0, added.size());

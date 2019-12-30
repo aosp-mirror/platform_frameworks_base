@@ -56,7 +56,7 @@ class RunningTasks {
     private ActivityStack mTopDisplayFocusStack;
 
     void getTasks(int maxNum, List<RunningTaskInfo> list, @ActivityType int ignoreActivityType,
-            @WindowingMode int ignoreWindowingMode, RootActivityContainer root,
+            @WindowingMode int ignoreWindowingMode, RootWindowContainer root,
             int callingUid, boolean allowed, boolean crossUser, ArraySet<Integer> profileIds) {
         // Return early if there are no tasks to fetch
         if (maxNum <= 0) {

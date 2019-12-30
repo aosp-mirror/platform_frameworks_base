@@ -59,7 +59,7 @@ class EnsureActivitiesVisibleHelper {
     /**
      * Ensure visibility with an option to also update the configuration of visible activities.
      * @see ActivityStack#ensureActivitiesVisible(ActivityRecord, int, boolean)
-     * @see RootActivityContainer#ensureActivitiesVisible(ActivityRecord, int, boolean)
+     * @see RootWindowContainer#ensureActivitiesVisible(ActivityRecord, int, boolean)
      */
     void process(ActivityRecord starting, int configChanges, boolean preserveWindows,
             boolean notifyClients) {
