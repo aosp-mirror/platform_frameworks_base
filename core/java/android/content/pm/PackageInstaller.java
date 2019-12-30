@@ -56,7 +56,6 @@ import android.util.ArraySet;
 import android.util.ExceptionUtils;
 
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.Closeable;
@@ -70,6 +69,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -634,7 +634,7 @@ public class PackageInstaller {
             Manifest.permission.REQUEST_DELETE_PACKAGES})
     public void uninstall(@NonNull VersionedPackage versionedPackage, @DeleteFlags int flags,
             @NonNull IntentSender statusReceiver) {
-        Preconditions.checkNotNull(versionedPackage, "versionedPackage cannot be null");
+        Objects.requireNonNull(versionedPackage, "versionedPackage cannot be null");
         try {
             mInstaller.uninstall(versionedPackage, mInstallerPackageName,
                     flags, statusReceiver, mUserId);
@@ -661,7 +661,7 @@ public class PackageInstaller {
     public void installExistingPackage(@NonNull String packageName,
             @InstallReason int installReason,
             @Nullable IntentSender statusReceiver) {
-        Preconditions.checkNotNull(packageName, "packageName cannot be null");
+        Objects.requireNonNull(packageName, "packageName cannot be null");
         try {
             mInstaller.installExistingPackage(packageName,
                     PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS, installReason,
@@ -1202,8 +1202,8 @@ public class PackageInstaller {
          */
         public void transfer(@NonNull String packageName, @NonNull IntentSender statusReceiver)
                 throws PackageManager.NameNotFoundException {
-            Preconditions.checkNotNull(statusReceiver);
-            Preconditions.checkNotNull(packageName);
+            Objects.requireNonNull(statusReceiver);
+            Objects.requireNonNull(packageName);
 
             try {
                 mSession.transfer(packageName, statusReceiver);
@@ -1231,7 +1231,7 @@ public class PackageInstaller {
          */
         public void transfer(@NonNull String packageName)
                 throws PackageManager.NameNotFoundException {
-            Preconditions.checkNotNull(packageName);
+            Objects.requireNonNull(packageName);
 
             CompletableFuture<Intent> intentFuture = new CompletableFuture<Intent>();
             try {

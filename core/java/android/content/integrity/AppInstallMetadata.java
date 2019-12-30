@@ -16,14 +16,13 @@
 
 package android.content.integrity;
 
-import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Objects;
 
 /**
  * The app install metadata.
@@ -115,7 +114,7 @@ public final class AppInstallMetadata {
          */
         @NonNull
         public Builder setPackageName(@NonNull String packageName) {
-            this.mPackageName = checkNotNull(packageName);
+            this.mPackageName = Objects.requireNonNull(packageName);
             return this;
         }
 
@@ -129,7 +128,7 @@ public final class AppInstallMetadata {
          */
         @NonNull
         public Builder setAppCertificate(@NonNull String appCertificate) {
-            this.mAppCertificate = checkNotNull(appCertificate);
+            this.mAppCertificate = Objects.requireNonNull(appCertificate);
             return this;
         }
 
@@ -140,7 +139,7 @@ public final class AppInstallMetadata {
          */
         @NonNull
         public Builder setInstallerName(@NonNull String installerName) {
-            this.mInstallerName = checkNotNull(installerName);
+            this.mInstallerName = Objects.requireNonNull(installerName);
             return this;
         }
 
@@ -154,7 +153,7 @@ public final class AppInstallMetadata {
          */
         @NonNull
         public Builder setInstallerCertificate(@NonNull String installerCertificate) {
-            this.mInstallerCertificate = checkNotNull(installerCertificate);
+            this.mInstallerCertificate = Objects.requireNonNull(installerCertificate);
             return this;
         }
 
@@ -187,8 +186,8 @@ public final class AppInstallMetadata {
          */
         @NonNull
         public AppInstallMetadata build() {
-            checkArgument(mPackageName != null);
-            checkArgument(mAppCertificate != null);
+            Objects.requireNonNull(mPackageName);
+            Objects.requireNonNull(mAppCertificate);
             return new AppInstallMetadata(this);
         }
     }

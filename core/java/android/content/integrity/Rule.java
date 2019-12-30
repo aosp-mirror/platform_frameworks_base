@@ -17,7 +17,6 @@
 package android.content.integrity;
 
 import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -65,7 +64,7 @@ public final class Rule implements Parcelable {
 
     public Rule(@NonNull Formula formula, @Effect int effect) {
         checkArgument(isValidEffect(effect), String.format("Unknown effect: %d", effect));
-        this.mFormula = checkNotNull(formula);
+        this.mFormula = Objects.requireNonNull(formula);
         this.mEffect = effect;
     }
 

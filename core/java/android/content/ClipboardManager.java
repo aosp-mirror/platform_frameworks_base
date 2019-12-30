@@ -25,9 +25,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Interface to the clipboard service, for placing and retrieving text in
@@ -101,7 +100,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public void setPrimaryClip(@NonNull ClipData clip) {
         try {
-            Preconditions.checkNotNull(clip);
+            Objects.requireNonNull(clip);
             clip.prepareToLeaveProcess(true);
             mService.setPrimaryClip(clip, mContext.getOpPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
