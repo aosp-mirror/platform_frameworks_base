@@ -541,7 +541,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Nastavitve zvoka"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Razširi"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Strni"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Samod. napisi predstavnosti"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Sam. podnapisi predstavnosti"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Zapiranje namiga za podnapise"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Prekrivni podnapisi"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"omogoči"</string>

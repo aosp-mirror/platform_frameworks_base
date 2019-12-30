@@ -264,8 +264,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Modo de traballo activado."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Desactivouse o modo de traballo."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Activouse o modo de traballo."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Desactivouse o Economizador de datos."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Activouse o Economizador de datos."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Desactivouse o aforro de datos."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Activouse o aforro de datos."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"Desactivouse a privacidade dos sensores."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"Activouse a privacidade dos sensores."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Brillo de pantalla"</string>
@@ -750,9 +750,9 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Abre a configuración"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Conectáronse os auriculares"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Conectáronse os auriculares"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Economizador de datos"</string>
-    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"O economizador de datos está activado"</string>
-    <string name="accessibility_data_saver_off" msgid="58339669022107171">"O economizador de datos está desactivado"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Aforro de datos"</string>
+    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"O aforro de datos está activado"</string>
+    <string name="accessibility_data_saver_off" msgid="58339669022107171">"O aforro de datos está desactivado"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Activar"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Desactivar"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Barra de navegación"</string>
