@@ -2409,7 +2409,7 @@ public class UserBackupManagerService {
 
     /** Run an initialize operation for the given transport. */
     public void initializeTransports(String[] transportNames, IBackupObserver observer) {
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "initializeTransport");
         Slog.v(TAG, "initializeTransport(): " + Arrays.asList(transportNames));
 
