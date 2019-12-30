@@ -679,8 +679,8 @@ public class MediaRouter2 {
 
     /**
      * A class to control media route session in media route provider.
-     * For example, adding/removing/transferring routes to session can be done through this class.
-     * Instances are created by {@link MediaRouter2}.
+     * For example, selecting/deselcting/transferring routes to session can be done through this
+     * class. Instances are created by {@link MediaRouter2}.
      *
      * @hide
      */
@@ -737,22 +737,22 @@ public class MediaRouter2 {
         }
 
         /**
+         * @return the unmodifiable list of IDs of selectable routes for the session.
+         */
+        @NonNull
+        public List<String> getSelectableRoutes() {
+            synchronized (mLock) {
+                return Collections.unmodifiableList(mSessionInfo.getSelectableRoutes());
+            }
+        }
+
+        /**
          * @return the unmodifiable list of IDs of deselectable routes for the session.
          */
         @NonNull
         public List<String> getDeselectableRoutes() {
             synchronized (mLock) {
                 return Collections.unmodifiableList(mSessionInfo.getDeselectableRoutes());
-            }
-        }
-
-        /**
-         * @return the unmodifiable list of IDs of groupable routes for the session.
-         */
-        @NonNull
-        public List<String> getGroupableRoutes() {
-            synchronized (mLock) {
-                return Collections.unmodifiableList(mSessionInfo.getGroupableRoutes());
             }
         }
 
@@ -781,25 +781,25 @@ public class MediaRouter2 {
         }
 
         /**
-         * Add routes to the remote session. Route add requests that are currently in
+         * Selects a route for the remote session. Route add requests that are currently in
          * {@link #getSelectedRoutes()} will be ignored.
          *
          * @see #getSelectedRoutes()
          * @see SessionCallback#onSessionInfoChanged
          */
-        public void addRoute(MediaRoute2Info route) {
+        public void selectRoute(MediaRoute2Info route) {
             // TODO: Implement this when the actual connection logic is implemented.
         }
 
         /**
-         * Remove routes from this session. Media may be stopped on those devices.
+         * Deselects a route from the remote session. Media may be stopped on those devices.
          * Route removal requests that are not currently in {@link #getSelectedRoutes()} will be
          * ignored.
          *
          * @see #getSelectedRoutes()
          * @see SessionCallback#onSessionInfoChanged
          */
-        public void removeRoute(MediaRoute2Info route) {
+        public void deselectRoute(MediaRoute2Info route) {
             // TODO: Implement this when the actual connection logic is implemented.
         }
 

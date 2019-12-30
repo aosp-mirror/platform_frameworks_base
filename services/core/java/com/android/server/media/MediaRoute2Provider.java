@@ -46,8 +46,8 @@ abstract class MediaRoute2Provider {
             String controlCategory, int requestId);
     public abstract void releaseSession(int sessionId);
 
-    public abstract void addRoute(int sessionId, MediaRoute2Info route);
-    public abstract void removeRoute(int sessionId, MediaRoute2Info route);
+    public abstract void selectRoute(int sessionId, MediaRoute2Info route);
+    public abstract void deselectRoute(int sessionId, MediaRoute2Info route);
     public abstract void transferRoute(int sessionId, MediaRoute2Info route);
 
     public abstract void sendControlRequest(MediaRoute2Info route, Intent request);

@@ -28,8 +28,8 @@ oneway interface IMediaRoute2Provider {
             String controlCategory, int requestId);
     void releaseSession(int sessionId);
 
-    void addRoute(int sessionId, String routeId);
-    void removeRoute(int sessionId, String routeId);
+    void selectRoute(int sessionId, String routeId);
+    void deselectRoute(int sessionId, String routeId);
     void transferRoute(int sessionId, String routeId);
 
     void notifyControlRequestSent(String id, in Intent request);

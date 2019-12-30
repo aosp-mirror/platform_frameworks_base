@@ -160,7 +160,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
             notifySessionCreated(/* sessionInfo= */ null, requestId);
             return;
         }
-        maybeRemoveRoute(routeId);
+        maybeDeselectRoute(routeId);
 
         final int sessionId = mNextSessionId;
         mNextSessionId++;
@@ -192,13 +192,13 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onAddRoute(int sessionId, String routeId) {
+    public void onSelectRoute(int sessionId, String routeId) {
         RouteSessionInfo sessionInfo = getSessionInfo(sessionId);
         MediaRoute2Info route = mRoutes.get(routeId);
         if (route == null || sessionInfo == null) {
             return;
         }
-        maybeRemoveRoute(routeId);
+        maybeDeselectRoute(routeId);
 
         mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
                 .setClientPackageName(sessionInfo.getPackageName())
@@ -213,7 +213,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onRemoveRoute(int sessionId, String routeId) {
+    public void onDeselectRoute(int sessionId, String routeId) {
         RouteSessionInfo sessionInfo = getSessionInfo(sessionId);
         MediaRoute2Info route = mRoutes.get(routeId);
 
@@ -243,13 +243,13 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         publishRoutes();
     }
 
-    void maybeRemoveRoute(String routeId) {
+    void maybeDeselectRoute(String routeId) {
         if (!mRouteSessionMap.containsKey(routeId)) {
             return;
         }
 
         int sessionId = mRouteSessionMap.get(routeId);
-        onRemoveRoute(sessionId, routeId);
+        onDeselectRoute(sessionId, routeId);
     }
 
     void publishRoutes() {

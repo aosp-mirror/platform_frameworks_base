@@ -230,8 +230,8 @@ public abstract class MediaRoute2ProviderService extends Service {
 
     //TODO: make a way to reject the request
     /**
-     * Called when a client requests adding a route to a session.
-     * After the route is added, call {@link #updateSessionInfo(RouteSessionInfo)} to update
+     * Called when a client requests selecting a route for the session.
+     * After the route is selected, call {@link #updateSessionInfo(RouteSessionInfo)} to update
      * session info and call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify
      * clients of updated session info.
      *
@@ -239,19 +239,19 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param routeId id of the route
      * @see #updateSessionInfo(RouteSessionInfo)
      */
-    public abstract void onAddRoute(int sessionId, @NonNull String routeId);
+    public abstract void onSelectRoute(int sessionId, @NonNull String routeId);
 
     //TODO: make a way to reject the request
     /**
-     * Called when a client requests removing a route from a session.
-     * After the route is removed, call {@link #updateSessionInfo(RouteSessionInfo)} to update
+     * Called when a client requests deselecting a route from the session.
+     * After the route is deselected, call {@link #updateSessionInfo(RouteSessionInfo)} to update
      * session info and call {@link #updateProviderInfo(MediaRoute2ProviderInfo)} to notify
      * clients of updated session info.
      *
      * @param sessionId id of the session
      * @param routeId id of the route
      */
-    public abstract void onRemoveRoute(int sessionId, @NonNull String routeId);
+    public abstract void onDeselectRoute(int sessionId, @NonNull String routeId);
 
     //TODO: make a way to reject the request
     /**
@@ -326,20 +326,20 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void addRoute(int sessionId, String routeId) {
+        public void selectRoute(int sessionId, String routeId) {
             if (!checkCallerisSystem()) {
                 return;
             }
-            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onAddRoute,
+            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSelectRoute,
                     MediaRoute2ProviderService.this, sessionId, routeId));
         }
 
         @Override
-        public void removeRoute(int sessionId, String routeId) {
+        public void deselectRoute(int sessionId, String routeId) {
             if (!checkCallerisSystem()) {
                 return;
             }
-            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onRemoveRoute,
+            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onDeselectRoute,
                     MediaRoute2ProviderService.this, sessionId, routeId));
         }
 

@@ -93,16 +93,16 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     @Override
-    public void addRoute(int sessionId, MediaRoute2Info route) {
+    public void selectRoute(int sessionId, MediaRoute2Info route) {
         if (mConnectionReady) {
-            mActiveConnection.addRoute(sessionId, route.getId());
+            mActiveConnection.selectRoute(sessionId, route.getId());
         }
     }
 
     @Override
-    public void removeRoute(int sessionId, MediaRoute2Info route) {
+    public void deselectRoute(int sessionId, MediaRoute2Info route) {
         if (mConnectionReady) {
-            mActiveConnection.removeRoute(sessionId, route.getId());
+            mActiveConnection.deselectRoute(sessionId, route.getId());
         }
     }
 
@@ -344,19 +344,19 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             }
         }
 
-        public void addRoute(int sessionId, String routeId) {
+        public void selectRoute(int sessionId, String routeId) {
             try {
-                mProvider.addRoute(sessionId, routeId);
+                mProvider.selectRoute(sessionId, routeId);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to deliver request to add a route to a session.", ex);
+                Slog.e(TAG, "Failed to deliver request to select a route for a session.", ex);
             }
         }
 
-        public void removeRoute(int sessionId, String routeId) {
+        public void deselectRoute(int sessionId, String routeId) {
             try {
-                mProvider.removeRoute(sessionId, routeId);
+                mProvider.deselectRoute(sessionId, routeId);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to deliver request to remove a route from a session.", ex);
+                Slog.e(TAG, "Failed to deliver request to deselect a route from a session.", ex);
             }
         }
 

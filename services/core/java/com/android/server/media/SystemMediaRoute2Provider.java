@@ -100,12 +100,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void addRoute(int sessionId, MediaRoute2Info route) {
+    public void selectRoute(int sessionId, MediaRoute2Info route) {
         //TODO: implement method
     }
 
     @Override
-    public void removeRoute(int sessionId, MediaRoute2Info route) {
+    public void deselectRoute(int sessionId, MediaRoute2Info route) {
         //TODO: implement method
     }
 
