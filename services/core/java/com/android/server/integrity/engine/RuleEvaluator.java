@@ -21,9 +21,6 @@ import static android.content.integrity.Rule.FORCE_ALLOW;
 
 import android.annotation.NonNull;
 import android.content.integrity.AppInstallMetadata;
-import android.content.integrity.AtomicFormula;
-import android.content.integrity.CompoundFormula;
-import android.content.integrity.Formula;
 import android.content.integrity.Rule;
 import android.util.Slog;
 
@@ -56,8 +53,7 @@ final class RuleEvaluator {
             List<Rule> rules, AppInstallMetadata appInstallMetadata) {
         List<Rule> matchedRules = new ArrayList<>();
         for (Rule rule : rules) {
-            if (isConjunctionOfFormulas(rule.getFormula())
-                    && rule.getFormula().isSatisfied(appInstallMetadata)) {
+            if (rule.getFormula().isSatisfied(appInstallMetadata)) {
                 matchedRules.add(rule);
             }
         }
@@ -80,26 +76,5 @@ final class RuleEvaluator {
             }
         }
         return denied ? IntegrityCheckResult.deny(denyRule) : IntegrityCheckResult.allow();
-    }
-
-    private static boolean isConjunctionOfFormulas(Formula formula) {
-        if (formula == null) {
-            return false;
-        }
-        if (isAtomicFormula(formula)) {
-            return true;
-        }
-        CompoundFormula compoundFormula = (CompoundFormula) formula;
-        return compoundFormula.getConnector() == CompoundFormula.AND
-                && compoundFormula.getFormulas().stream().allMatch(RuleEvaluator::isAtomicFormula);
-    }
-
-    private static boolean isAtomicFormula(Formula formula) {
-        if (formula instanceof AtomicFormula) {
-            return true;
-        }
-        CompoundFormula compoundFormula = (CompoundFormula) formula;
-        return compoundFormula.getConnector() == CompoundFormula.NOT
-                && compoundFormula.getFormulas().get(0) instanceof AtomicFormula;
     }
 }
