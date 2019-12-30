@@ -4601,6 +4601,12 @@ package android.net {
     field public final android.net.WifiKey wifiKey;
   }
 
+  public class NetworkPolicyManager {
+    method public void setSubscriptionOverride(int, int, int, long, @NonNull String);
+    field public static final int SUBSCRIPTION_OVERRIDE_CONGESTED = 2; // 0x2
+    field public static final int SUBSCRIPTION_OVERRIDE_UNMETERED = 1; // 0x1
+  }
+
   public class NetworkProvider {
     ctor public NetworkProvider(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void declareNetworkRequestUnfulfillable(@NonNull android.net.NetworkRequest);
