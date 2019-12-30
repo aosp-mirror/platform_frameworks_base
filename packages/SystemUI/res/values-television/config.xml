@@ -22,6 +22,7 @@
 <resources>
     <!-- SystemUI Services: The classes of the stuff to start. -->
     <string-array name="config_systemUIServiceComponents" translatable="false">
+        <item>com.android.systemui.util.NotificationChannels</item>
         <item>com.android.systemui.volume.VolumeUI</item>
         <item>com.android.systemui.stackdivider.Divider</item>
         <item>com.android.systemui.statusbar.tv.TvStatusBar</item>
