@@ -34,9 +34,6 @@ import static org.mockito.Mockito.when;
 import android.Manifest;
 import android.annotation.UserIdInt;
 import android.app.backup.BackupManager;
-import android.app.backup.IBackupManagerMonitor;
-import android.app.backup.IBackupObserver;
-import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.ISelectBackupTransportCallback;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
@@ -44,8 +41,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.ConditionVariable;
-import android.os.IBinder;
-import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -77,23 +72,8 @@ import java.util.concurrent.TimeUnit;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class BackupManagerServiceTest {
-    private static final String PACKAGE_NAME = "some.package.name";
-    private static final String TRANSPORT_NAME = "some.transport.name";
-    private static final String CURRENT_PASSWORD = "current_password";
-    private static final String NEW_PASSWORD = "new_password";
-    private static final String ENCRYPTION_PASSWORD = "encryption_password";
-    private static final CharSequence DATA_MANAGEMENT_LABEL = "data_management_label";
-    private static final String DESTINATION_STRING = "destination_string";
-    private static final String[] PACKAGE_NAMES =
-            new String[]{"some.package.name._1", "some.package.name._2"};
-    private static final String[] TRANSPORTS =
-            new String[]{"some.transport.name._1", "some.transport.name._2"};
     private static final ComponentName TRANSPORT_COMPONENT_NAME = new ComponentName("package",
             "class");
-    private static final ComponentName[] TRANSPORT_COMPONENTS = new ComponentName[]{
-            new ComponentName("package1", "class1"),
-            new ComponentName("package2", "class2")
-    };
     private static final int NON_USER_SYSTEM = UserHandle.USER_SYSTEM + 1;
     private static final int UNSTARTED_NON_USER_SYSTEM = UserHandle.USER_SYSTEM + 2;
 
@@ -103,16 +83,6 @@ public class BackupManagerServiceTest {
     private UserBackupManagerService mUserBackupManagerService;
     @Mock
     private Context mContextMock;
-    @Mock
-    private IBinder mAgentMock;
-    @Mock
-    private ParcelFileDescriptor mParcelFileDescriptorMock;
-    @Mock
-    private IFullBackupRestoreObserver mFullBackupRestoreObserverMock;
-    @Mock
-    private IBackupObserver mBackupObserverMock;
-    @Mock
-    private IBackupManagerMonitor mBackupManagerMonitorMock;
     @Mock
     private PrintWriter mPrintWriterMock;
     @Mock
