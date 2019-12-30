@@ -43,5 +43,7 @@ void write_native_stats_write_non_chained_methods_q(FILE* out, const string& met
         const Atoms& atoms, const AtomDecl& attributionDecl, const string& moduleName,
         const string& tryMethodName);
 
+void write_native_get_timestamp_ns_q(FILE* out);
+
 }  // namespace stats_log_api_gen
 }  // namespace android

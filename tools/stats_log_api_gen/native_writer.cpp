@@ -240,6 +240,7 @@ int write_stats_log_cpp(FILE *out, const Atoms &atoms, const AtomDecl &attributi
 
 #if defined(STATS_SCHEMA_LEGACY)
     write_native_stats_log_cpp_globals_q(out);
+    write_native_get_timestamp_ns_q(out);
     write_native_try_stats_write_methods_q(out, atoms, attributionDecl, moduleName);
     write_native_stats_write_methods_q(out, "int stats_write", atoms, attributionDecl, moduleName,
             "try_stats_write");
