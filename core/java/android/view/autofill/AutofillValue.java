@@ -68,7 +68,7 @@ public final class AutofillValue implements Parcelable {
     }
 
     /**
-     * Checks is this is a text value.
+     * Checks if this is a text value.
      *
      * <p>See {@link View#AUTOFILL_TYPE_TEXT} for more info.</p>
      */
@@ -89,7 +89,7 @@ public final class AutofillValue implements Parcelable {
     }
 
     /**
-     * Checks is this is a toggle value.
+     * Checks if this is a toggle value.
      *
      * <p>See {@link View#AUTOFILL_TYPE_TOGGLE} for more info.</p>
      */
@@ -110,7 +110,7 @@ public final class AutofillValue implements Parcelable {
     }
 
     /**
-     * Checks is this is a list value.
+     * Checks if this is a list value.
      *
      * <p>See {@link View#AUTOFILL_TYPE_LIST} for more info.</p>
      */
@@ -131,7 +131,7 @@ public final class AutofillValue implements Parcelable {
     }
 
     /**
-     * Checks is this is a date value.
+     * Checks if this is a date value.
      *
      * <p>See {@link View#AUTOFILL_TYPE_DATE} for more info.</p>
      */
