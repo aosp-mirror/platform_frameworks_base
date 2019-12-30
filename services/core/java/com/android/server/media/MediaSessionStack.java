@@ -300,7 +300,7 @@ class MediaSessionStack {
         int size = records.size();
         for (int i = 0; i < size; i++) {
             MediaSessionRecord record = records.get(i);
-            if (!record.isPlaybackLocal()) {
+            if (!record.isPlaybackTypeLocal()) {
                 return record;
             }
         }

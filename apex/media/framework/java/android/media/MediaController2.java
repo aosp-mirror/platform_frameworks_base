@@ -141,6 +141,9 @@ public class MediaController2 implements AutoCloseable {
                 // Note: unbindService() throws IllegalArgumentException when it's called twice.
                 return;
             }
+            if (DEBUG) {
+                Log.d(TAG, "closing " + this);
+            }
             mClosed = true;
             if (mServiceConnection != null) {
                 // Note: This should be called even when the bindService() has returned false.
