@@ -187,7 +187,7 @@ public class ResolverDrawerLayout extends ViewGroup {
 
     public void setCollapsed(boolean collapsed) {
         if (!isLaidOut()) {
-            mOpenOnLayout = collapsed;
+            mOpenOnLayout = !collapsed;
         } else {
             smoothScrollTo(collapsed ? mCollapsibleHeight : 0, 0);
         }
