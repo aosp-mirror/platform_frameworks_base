@@ -60,6 +60,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.WeakHashMap;
 
 /**
@@ -2691,7 +2692,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
              */
             @NonNull
             public Builder setJournalMode(@NonNull  String journalMode) {
-                Preconditions.checkNotNull(journalMode);
+                Objects.requireNonNull(journalMode);
                 mJournalMode = journalMode;
                 return this;
             }
@@ -2703,7 +2704,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
              */
             @NonNull
             public Builder setSynchronousMode(@NonNull String syncMode) {
-                Preconditions.checkNotNull(syncMode);
+                Objects.requireNonNull(syncMode);
                 mSyncMode = syncMode;
                 return this;
             }
