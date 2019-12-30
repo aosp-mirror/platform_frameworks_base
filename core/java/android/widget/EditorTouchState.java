@@ -31,13 +31,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Helper class used by {@link Editor} to track state for touch events.
+ * Helper class used by {@link Editor} to track state for touch events. Ideally the logic here
+ * should be replaced with {@link android.view.GestureDetector}.
  *
  * @hide
  */
 @VisibleForTesting(visibility = PACKAGE)
 public class EditorTouchState {
     private float mLastDownX, mLastDownY;
+    private long mLastDownMillis;
     private float mLastUpX, mLastUpY;
     private long mLastUpMillis;
 
@@ -106,9 +108,18 @@ public class EditorTouchState {
         final int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
             final boolean isMouse = event.isFromSource(InputDevice.SOURCE_MOUSE);
+
+            // We check both the time between the last up and current down event, as well as the
+            // time between the first down and up events. The latter check is necessary to handle
+            // the case when the user taps, drags/holds for some time, and then lifts up and
+            // quickly taps in the same area. This scenario should not be treated as a double-tap.
+            // This follows the behavior in GestureDetector.
             final long millisSinceLastUp = event.getEventTime() - mLastUpMillis;
+            final long millisBetweenLastDownAndLastUp = mLastUpMillis - mLastDownMillis;
+
             // Detect double tap and triple click.
             if (millisSinceLastUp <= ViewConfiguration.getDoubleTapTimeout()
+                    && millisBetweenLastDownAndLastUp <= ViewConfiguration.getDoubleTapTimeout()
                     && (mMultiTapStatus == MultiTapStatus.FIRST_TAP
                     || (mMultiTapStatus == MultiTapStatus.DOUBLE_TAP && isMouse))) {
                 if (mMultiTapStatus == MultiTapStatus.FIRST_TAP) {
@@ -133,6 +144,7 @@ public class EditorTouchState {
             }
             mLastDownX = event.getX();
             mLastDownY = event.getY();
+            mLastDownMillis = event.getEventTime();
             mMovedEnoughForDrag = false;
             mIsDragCloseToVertical = false;
         } else if (action == MotionEvent.ACTION_UP) {

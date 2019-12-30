@@ -5921,8 +5921,6 @@ public class Editor {
         // The offsets of that last touch down event. Remembered to start selection there.
         private int mMinTouchOffset, mMaxTouchOffset;
 
-        private boolean mGestureStayedInTapRegion;
-
         // Where the user first starts the drag motion.
         private int mStartOffset = -1;
 
@@ -6029,8 +6027,7 @@ public class Editor {
                                 eventX, eventY);
 
                         // Double tap detection
-                        if (mGestureStayedInTapRegion
-                                && mTouchState.isMultiTapInSameArea()
+                        if (mTouchState.isMultiTapInSameArea()
                                 && (isMouse || isPositionOnText(eventX, eventY))) {
                             if (TextView.DEBUG_CURSOR) {
                                 logCursor("SelectionModifierCursorController: onTouchEvent",
@@ -6043,7 +6040,6 @@ public class Editor {
                             }
                             mDiscardNextActionUp = true;
                         }
-                        mGestureStayedInTapRegion = true;
                         mHaventMovedEnoughToStartDrag = true;
                     }
                     break;
@@ -6059,25 +6055,8 @@ public class Editor {
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    final ViewConfiguration viewConfig = ViewConfiguration.get(
-                            mTextView.getContext());
-
-                    if (mGestureStayedInTapRegion || mHaventMovedEnoughToStartDrag) {
-                        final float deltaX = eventX - mTouchState.getLastDownX();
-                        final float deltaY = eventY - mTouchState.getLastDownY();
-                        final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
-
-                        if (mGestureStayedInTapRegion) {
-                            int doubleTapTouchSlop = viewConfig.getScaledDoubleTapTouchSlop();
-                            mGestureStayedInTapRegion =
-                                    distanceSquared <= doubleTapTouchSlop * doubleTapTouchSlop;
-                        }
-                        if (mHaventMovedEnoughToStartDrag) {
-                            // We don't start dragging until the user has moved enough.
-                            int touchSlop = viewConfig.getScaledTouchSlop();
-                            mHaventMovedEnoughToStartDrag =
-                                    distanceSquared <= touchSlop * touchSlop;
-                        }
+                    if (mHaventMovedEnoughToStartDrag) {
+                        mHaventMovedEnoughToStartDrag = !mTouchState.isMovedEnoughForDrag();
                     }
 
                     if (isMouse && !isDragAcceleratorActive()) {
