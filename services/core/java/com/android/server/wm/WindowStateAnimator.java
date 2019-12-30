@@ -888,10 +888,10 @@ class WindowStateAnimator {
 
             int posX = 0;
             int posY = 0;
-            task.getTaskStack().getDimBounds(mTmpStackBounds);
+            task.getStack().getDimBounds(mTmpStackBounds);
 
             boolean allowStretching = false;
-            task.getTaskStack().getFinalAnimationSourceHintBounds(mTmpSourceBounds);
+            task.getStack().getFinalAnimationSourceHintBounds(mTmpSourceBounds);
             // If we don't have source bounds, we can attempt to use the content insets
             // in the following scenario:
             //    1. We have content insets.
@@ -901,8 +901,8 @@ class WindowStateAnimator {
             // because of the force-scale until resize state.
             if (mTmpSourceBounds.isEmpty() && (mWin.mLastRelayoutContentInsets.width() > 0
                     || mWin.mLastRelayoutContentInsets.height() > 0)
-                        && !task.getTaskStack().lastAnimatingBoundsWasToFullscreen()) {
-                mTmpSourceBounds.set(task.getTaskStack().mPreAnimationBounds);
+                        && !task.getStack().lastAnimatingBoundsWasToFullscreen()) {
+                mTmpSourceBounds.set(task.getStack().mPreAnimationBounds);
                 mTmpSourceBounds.inset(mWin.mLastRelayoutContentInsets);
                 allowStretching = true;
             }
@@ -916,7 +916,7 @@ class WindowStateAnimator {
             if (!mTmpSourceBounds.isEmpty()) {
                 // Get the final target stack bounds, if we are not animating, this is just the
                 // current stack bounds
-                task.getTaskStack().getFinalAnimationBounds(mTmpAnimatingBounds);
+                task.getStack().getFinalAnimationBounds(mTmpAnimatingBounds);
 
                 // Calculate the current progress and interpolate the difference between the target
                 // and source bounds
@@ -1495,7 +1495,7 @@ class WindowStateAnimator {
      */
     boolean isForceScaled() {
         final Task task = mWin.getTask();
-        if (task != null && task.getTaskStack().isForceScaled()) {
+        if (task != null && task.getStack().isForceScaled()) {
             return true;
         }
         return mForceScaleUntilResize;

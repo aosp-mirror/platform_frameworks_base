@@ -1382,7 +1382,7 @@ class RecentTasks {
 
         // Ignore tasks from different displays
         // TODO (b/115289124): No Recents on non-default displays.
-        if (stack.mDisplayId != DEFAULT_DISPLAY) {
+        if (stack.getDisplayId() != DEFAULT_DISPLAY) {
             return false;
         }
 

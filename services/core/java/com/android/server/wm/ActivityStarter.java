@@ -1073,7 +1073,8 @@ class ActivityStarter {
                             mRootWindowContainer.getTopDisplayFocusedStack();
                     Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true,
                             true, false) + "} from uid " + callingUid + " on display "
-                            + (focusedStack == null ? DEFAULT_DISPLAY : focusedStack.mDisplayId));
+                            + (focusedStack == null ? DEFAULT_DISPLAY
+                                    : focusedStack.getDisplayId()));
                 }
             }
         }
@@ -1576,7 +1577,7 @@ class ActivityStarter {
             final ActivityRecord topTaskActivity =
                     mStartActivity.getTask().topRunningActivityLocked();
             if (!mTargetStack.isFocusable()
-                    || (topTaskActivity != null && topTaskActivity.mTaskOverlay
+                    || (topTaskActivity != null && topTaskActivity.isTaskOverlay()
                     && mStartActivity != topTaskActivity)) {
                 // If the activity is not focusable, we can't resume it, but still would like to
                 // make sure it becomes visible as it starts (this will also trigger entry
@@ -2044,7 +2045,7 @@ class ActivityStarter {
 
         if (mOptions != null) {
             if (mOptions.getLaunchTaskId() != -1 && mOptions.getTaskOverlay()) {
-                r.mTaskOverlay = true;
+                r.setTaskOverlay(true);
                 if (!mOptions.canTaskOverlayResume()) {
                     final Task task = mRootWindowContainer.anyTaskForId(
                             mOptions.getLaunchTaskId());
@@ -2293,7 +2294,7 @@ class ActivityStarter {
         // the same behavior as if a new instance was being started, which means not bringing it
         // to the front if the caller is not itself in the front.
         final boolean differentTopTask;
-        if (mPreferredDisplayId == mTargetStack.mDisplayId) {
+        if (mPreferredDisplayId == mTargetStack.getDisplayId()) {
             final ActivityStack focusStack = mTargetStack.getDisplay().getFocusedStack();
             final ActivityRecord curTop = (focusStack == null)
                     ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
@@ -2343,7 +2344,7 @@ class ActivityStarter {
                     }
                     mMovedToFront = launchStack != launchStack.getDisplay()
                             .getTopStackInWindowingMode(launchStack.getWindowingMode());
-                } else if (launchStack.mDisplayId != mTargetStack.mDisplayId) {
+                } else if (launchStack.getDisplayId() != mTargetStack.getDisplayId()) {
                     // Target and computed stacks are on different displays and we've
                     // found a matching task - move the existing instance to that display and
                     // move it to front.
@@ -2392,7 +2393,7 @@ class ActivityStarter {
     private void setNewTask(Task taskToAffiliate) {
         final boolean toTop = !mLaunchTaskBehind && !mAvoidMoveToFront;
         final Task task = mTargetStack.createTask(
-                mSupervisor.getNextTaskIdForUserLocked(mStartActivity.mUserId),
+                mSupervisor.getNextTaskIdForUser(mStartActivity.mUserId),
                 mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
                 mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
                 mVoiceInteractor, toTop, mStartActivity, mSourceRecord, mOptions);
@@ -2545,12 +2546,12 @@ class ActivityStarter {
                     // Dynamic stacks behave similarly to the fullscreen stack and can contain any
                     // resizeable task.
                     canUseFocusedStack = !focusedStack.isOnHomeDisplay()
-                            && r.canBeLaunchedOnDisplay(focusedStack.mDisplayId);
+                            && r.canBeLaunchedOnDisplay(focusedStack.getDisplayId());
             }
         }
         return canUseFocusedStack && !newTask
                 // Using the focus stack isn't important enough to override the preferred display.
-                && (mPreferredDisplayId == focusedStack.mDisplayId);
+                && (mPreferredDisplayId == focusedStack.getDisplayId());
     }
 
     private ActivityStack getLaunchStack(ActivityRecord r, int launchFlags, Task task,

@@ -1495,7 +1495,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Fallback to top focused display if the displayId is invalid.
         if (displayId == INVALID_DISPLAY) {
             final ActivityStack stack = getTopDisplayFocusedStack();
-            displayId = stack != null ? stack.mDisplayId : DEFAULT_DISPLAY;
+            displayId = stack != null ? stack.getDisplayId() : DEFAULT_DISPLAY;
         }
 
         Intent homeIntent = null;
@@ -2148,7 +2148,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // ensures that all the necessary work to migrate states in the old and new stacks
                 // is also done.
                 final Task newTask = task.getStack().createTask(
-                        mStackSupervisor.getNextTaskIdForUserLocked(r.mUserId), r.info,
+                        mStackSupervisor.getNextTaskIdForUser(r.mUserId), r.info,
                         r.intent, null, null, true);
                 r.reparent(newTask, MAX_VALUE, "moveActivityToStack");
 
@@ -2405,11 +2405,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     private ActivityManager.StackInfo getStackInfo(ActivityStack stack) {
-        final int displayId = stack.mDisplayId;
-        final DisplayContent display = getDisplayContent(displayId);
+        final DisplayContent display = stack.getDisplayContent();
         ActivityManager.StackInfo info = new ActivityManager.StackInfo();
         stack.getBounds(info.bounds);
-        info.displayId = displayId;
+        info.displayId = display.mDisplayId;
         info.stackId = stack.mStackId;
         info.stackToken = stack.mRemoteToken;
         info.userId = stack.mCurrentUser;
@@ -2571,7 +2570,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     ActivityStack findStackBehind(ActivityStack stack) {
-        final DisplayContent display = getDisplayContent(stack.mDisplayId);
+        final DisplayContent display = getDisplayContent(stack.getDisplayId());
         if (display != null) {
             for (int i = display.getStackCount() - 1; i >= 0; i--) {
                 if (display.getStackAt(i) == stack && i > 0) {

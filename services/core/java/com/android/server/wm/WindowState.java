@@ -1287,7 +1287,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // notify the client of frame changes in this case. Not only is it a lot of churn, but
         // the frame may not correspond to the surface size or the onscreen area at various
         // phases in the animation, and the client will become sad and confused.
-        if (task != null && task.getTaskStack().isAnimatingBounds()) {
+        if (task != null && task.getStack().isAnimatingBounds()) {
             return;
         }
 
@@ -1427,8 +1427,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     ActivityStack getStack() {
         Task task = getTask();
         if (task != null) {
-            if (task.getTaskStack() != null) {
-                return task.getTaskStack();
+            if (task.getStack() != null) {
+                return task.getStack();
             }
         }
         // Some system windows (e.g. "Power off" dialog) don't have a task, but we would still
@@ -1447,7 +1447,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         bounds.setEmpty();
         mTmpRect.setEmpty();
         if (intersectWithStackBounds) {
-            final ActivityStack stack = task.getTaskStack();
+            final ActivityStack stack = task.getStack();
             if (stack != null) {
                 stack.getDimBounds(mTmpRect);
             } else {
@@ -1879,8 +1879,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int top = mWindowFrames.mFrame.top;
         final Task task = getTask();
         final boolean adjustedForMinimizedDockOrIme = task != null
-                && (task.getTaskStack().isAdjustedForMinimizedDockedStack()
-                || task.getTaskStack().isAdjustedForIme());
+                && (task.getStack().isAdjustedForMinimizedDockedStack()
+                || task.getStack().isAdjustedForIme());
         if (mToken.okToAnimate()
                 && (mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
                 && !isDragResizing() && !adjustedForMinimizedDockOrIme
@@ -1916,7 +1916,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean isObscuringDisplay() {
         Task task = getTask();
-        if (task != null && task.getTaskStack() != null && !task.getTaskStack().fillsParent()) {
+        if (task != null && task.getStack() != null && !task.getStack().fillsParent()) {
             return false;
         }
         return isOpaqueDrawn() && fillsDisplay();
@@ -2349,8 +2349,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void applyAdjustForImeIfNeeded() {
         final Task task = getTask();
-        if (task != null && task.getTaskStack() != null && task.getTaskStack().isAdjustedForIme()) {
-            task.getTaskStack().applyAdjustForImeIfNeeded(task);
+        if (task != null && task.getStack() != null && task.getStack().isAdjustedForIme()) {
+            task.getStack().applyAdjustForImeIfNeeded(task);
         }
     }
 
@@ -2694,7 +2694,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        return mActivityRecord.getTask().getTaskStack().shouldIgnoreInput()
+        return mActivityRecord.getTask().getStack().shouldIgnoreInput()
                 || !mActivityRecord.mVisibleRequested
                 || isRecentsAnimationConsumingAppInput();
     }
@@ -3214,7 +3214,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        final ActivityStack stack = task.getTaskStack();
+        final ActivityStack stack = task.getStack();
         if (stack == null) {
             return;
         }
@@ -3228,7 +3228,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        final ActivityStack stack = task.getTaskStack();
+        final ActivityStack stack = task.getStack();
         if (stack == null) {
             return;
         }

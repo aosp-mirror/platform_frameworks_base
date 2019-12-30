@@ -1323,12 +1323,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             if (includeOverlays) {
                 return getActivity((r) -> true);
             }
-            return getActivity((r) -> !r.mTaskOverlay);
+            return getActivity((r) -> !r.isTaskOverlay());
         } else if (includeOverlays) {
             return getActivity((r) -> !r.finishing);
         }
 
-        return getActivity((r) -> !r.finishing && !r.mTaskOverlay);
+        return getActivity((r) -> !r.finishing && !r.isTaskOverlay());
     }
 
     void forAllWallpaperWindows(Consumer<WallpaperWindowToken> callback) {

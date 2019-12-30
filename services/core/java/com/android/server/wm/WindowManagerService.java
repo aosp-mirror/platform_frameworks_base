@@ -4345,7 +4345,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent topFocusedDisplay = mRoot.getTopFocusedDisplayContent();
         final ActivityRecord focusedApp = topFocusedDisplay.mFocusedApp;
         return (focusedApp != null && focusedApp.getTask() != null)
-                ? focusedApp.getTask().getTaskStack() : null;
+                ? focusedApp.getTask().getStack() : null;
     }
 
     public boolean detectSafeMode() {
@@ -7664,7 +7664,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        final ActivityStack stack = task.getTaskStack();
+        final ActivityStack stack = task.getStack();
         // We ignore home stack since we don't want home stack to move to front when touched.
         // Specifically, in freeform we don't want tapping on home to cause the freeform apps to go
         // behind home. See b/117376413
