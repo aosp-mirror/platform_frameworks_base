@@ -26,6 +26,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
+import android.app.PropertyInvalidatedCache;
 import android.bluetooth.BluetoothProfile.ConnectionPolicy;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -994,6 +995,37 @@ public final class BluetoothAdapter {
         return false;
     }
 
+    private static final String BLUETOOTH_GET_STATE_CACHE_PROPERTY = "cache_key.bluetooth.get_state";
+
+    private final PropertyInvalidatedCache<Void, Integer> mBluetoothGetStateCache =
+            new PropertyInvalidatedCache<Void, Integer>(
+                8, BLUETOOTH_GET_STATE_CACHE_PROPERTY) {
+                @Override
+                protected Integer recompute(Void query) {
+                    try {
+                        mServiceLock.readLock().lock();
+                        if (mService != null) {
+                            return mService.getState();
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "", e);
+                    } finally {
+                        mServiceLock.readLock().unlock();
+                    }
+                    return BluetoothAdapter.STATE_OFF;
+                }
+            };
+
+    /** @hide */
+    public void disableBluetoothGetStateCache() {
+        mBluetoothGetStateCache.disableLocal();
+    }
+
+    /** @hide */
+    public static void invalidateBluetoothGetStateCache() {
+        PropertyInvalidatedCache.invalidateCache(BLUETOOTH_GET_STATE_CACHE_PROPERTY);
+    }
+
     /**
      * Get the current state of the local Bluetooth adapter.
      * <p>Possible return values are
@@ -1007,18 +1039,7 @@ public final class BluetoothAdapter {
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     @AdapterState
     public int getState() {
-        int state = BluetoothAdapter.STATE_OFF;
-
-        try {
-            mServiceLock.readLock().lock();
-            if (mService != null) {
-                state = mService.getState();
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
+        int state = mBluetoothGetStateCache.query(null);
 
         // Consider all internal states as OFF
         if (state == BluetoothAdapter.STATE_BLE_ON || state == BluetoothAdapter.STATE_BLE_TURNING_ON
@@ -1056,18 +1077,7 @@ public final class BluetoothAdapter {
     @UnsupportedAppUsage(publicAlternatives = "Use {@link #getState()} instead to determine "
             + "whether you can use BLE & BT classic.")
     public int getLeState() {
-        int state = BluetoothAdapter.STATE_OFF;
-
-        try {
-            mServiceLock.readLock().lock();
-            if (mService != null) {
-                state = mService.getState();
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
+        int state = mBluetoothGetStateCache.query(null);
 
         if (VDBG) {
             Log.d(TAG, "getLeState() returning " + BluetoothAdapter.nameForState(state));
