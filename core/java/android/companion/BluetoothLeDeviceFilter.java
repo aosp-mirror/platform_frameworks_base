@@ -340,7 +340,7 @@ public final class BluetoothLeDeviceFilter implements DeviceFilter<ScanResult> {
         public Builder setRawDataFilter(@NonNull byte[] rawDataFilter,
                 @Nullable byte[] rawDataFilterMask) {
             checkNotUsed();
-            Preconditions.checkNotNull(rawDataFilter);
+            Objects.requireNonNull(rawDataFilter);
             checkArgument(rawDataFilterMask == null ||
                     rawDataFilter.length == rawDataFilterMask.length,
                     "Mask and filter should be the same length");
