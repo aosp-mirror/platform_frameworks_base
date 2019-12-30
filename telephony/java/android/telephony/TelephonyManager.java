@@ -6425,7 +6425,19 @@ public class TelephonyManager {
      * Return an appropriate subscription ID for any situation.
      *
      * If this object has been created with {@link #createForSubscriptionId}, then the provided
-     * subId is returned. Otherwise, the default subId will be returned.
+     * subscription ID is returned. Otherwise, the default subscription ID will be returned.
+     *
+     */
+    public int getSubscriptionId() {
+        return getSubId();
+    }
+
+    /**
+     * Return an appropriate subscription ID for any situation.
+     *
+     * If this object has been created with {@link #createForSubscriptionId}, then the provided
+     * subscription ID is returned. Otherwise, the default subscription ID will be returned.
+     *
      */
     private int getSubId() {
       if (SubscriptionManager.isUsableSubIdValue(mSubId)) {
