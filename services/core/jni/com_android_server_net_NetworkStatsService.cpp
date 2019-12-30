@@ -54,7 +54,7 @@ enum StatsType {
     TCP_TX_PACKETS = 5
 };
 
-static uint64_t getStatsType(struct Stats* stats, StatsType type) {
+static uint64_t getStatsType(Stats* stats, StatsType type) {
     switch (type) {
         case RX_BYTES:
             return stats->rxBytes;
@@ -73,7 +73,7 @@ static uint64_t getStatsType(struct Stats* stats, StatsType type) {
     }
 }
 
-static int parseIfaceStats(const char* iface, struct Stats* stats) {
+static int parseIfaceStats(const char* iface, Stats* stats) {
     FILE *fp = fopen(QTAGUID_IFACE_STATS, "r");
     if (fp == NULL) {
         return -1;
@@ -117,7 +117,7 @@ static int parseIfaceStats(const char* iface, struct Stats* stats) {
     return 0;
 }
 
-static int parseUidStats(const uint32_t uid, struct Stats* stats) {
+static int parseUidStats(const uint32_t uid, Stats* stats) {
     FILE *fp = fopen(QTAGUID_UID_STATS, "r");
     if (fp == NULL) {
         return -1;
@@ -150,7 +150,7 @@ static int parseUidStats(const uint32_t uid, struct Stats* stats) {
 }
 
 static jlong getTotalStat(JNIEnv* env, jclass clazz, jint type, jboolean useBpfStats) {
-    struct Stats stats;
+    Stats stats;
     memset(&stats, 0, sizeof(Stats));
 
     if (useBpfStats) {
@@ -175,7 +175,7 @@ static jlong getIfaceStat(JNIEnv* env, jclass clazz, jstring iface, jint type,
         return UNKNOWN;
     }
 
-    struct Stats stats;
+    Stats stats;
     memset(&stats, 0, sizeof(Stats));
 
     if (useBpfStats) {
@@ -194,7 +194,7 @@ static jlong getIfaceStat(JNIEnv* env, jclass clazz, jstring iface, jint type,
 }
 
 static jlong getUidStat(JNIEnv* env, jclass clazz, jint uid, jint type, jboolean useBpfStats) {
-    struct Stats stats;
+    Stats stats;
     memset(&stats, 0, sizeof(Stats));
 
     if (useBpfStats) {
