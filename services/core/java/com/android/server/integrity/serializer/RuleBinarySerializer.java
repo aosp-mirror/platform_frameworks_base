@@ -36,6 +36,7 @@ import android.content.integrity.CompoundFormula;
 import android.content.integrity.Formula;
 import android.content.integrity.Rule;
 
+import com.android.server.integrity.IntegrityUtils;
 import com.android.server.integrity.model.BitOutputStream;
 
 import java.io.ByteArrayOutputStream;
@@ -93,6 +94,9 @@ public class RuleBinarySerializer implements RuleSerializer {
 
     private void serializeIndexedRules(List<Rule> rules, OutputStream outputStream)
             throws IOException {
+        if (rules == null) {
+            return;
+        }
         BitOutputStream bitOutputStream = new BitOutputStream();
         for (Rule rule : rules) {
             bitOutputStream.clear();
@@ -153,7 +157,7 @@ public class RuleBinarySerializer implements RuleSerializer {
             AtomicFormula.StringAtomicFormula stringAtomicFormula =
                     (AtomicFormula.StringAtomicFormula) atomicFormula;
             bitOutputStream.setNext(OPERATOR_BITS, AtomicFormula.EQ);
-            serializeValue(
+            serializeStringValue(
                     stringAtomicFormula.getValue(),
                     stringAtomicFormula.getIsHashedValue(),
                     bitOutputStream);
@@ -161,32 +165,45 @@ public class RuleBinarySerializer implements RuleSerializer {
             AtomicFormula.IntAtomicFormula intAtomicFormula =
                     (AtomicFormula.IntAtomicFormula) atomicFormula;
             bitOutputStream.setNext(OPERATOR_BITS, intAtomicFormula.getOperator());
-            serializeValue(
-                    String.valueOf(intAtomicFormula.getValue()),
-                    /* isHashedValue= */ false,
-                    bitOutputStream);
+            serializeIntValue(intAtomicFormula.getValue(), bitOutputStream);
         } else if (atomicFormula.getTag() == AtomicFormula.BOOLEAN_ATOMIC_FORMULA_TAG) {
             AtomicFormula.BooleanAtomicFormula booleanAtomicFormula =
                     (AtomicFormula.BooleanAtomicFormula) atomicFormula;
             bitOutputStream.setNext(OPERATOR_BITS, AtomicFormula.EQ);
-            serializeValue(
-                    booleanAtomicFormula.getValue() ? "1" : "0",
-                    /* isHashedValue= */ false,
-                    bitOutputStream);
+            serializeBooleanValue(booleanAtomicFormula.getValue(), bitOutputStream);
         } else {
             throw new IllegalArgumentException(
                     String.format("Invalid atomic formula type: %s", atomicFormula.getClass()));
         }
     }
 
-    private void serializeValue(
+    private void serializeStringValue(
             String value, boolean isHashedValue, BitOutputStream bitOutputStream) {
-        byte[] valueBytes = value.getBytes(StandardCharsets.UTF_8);
+        byte[] valueBytes = getBytesForString(value, isHashedValue);
 
         bitOutputStream.setNext(isHashedValue);
         bitOutputStream.setNext(VALUE_SIZE_BITS, valueBytes.length);
         for (byte valueByte : valueBytes) {
             bitOutputStream.setNext(/* numOfBits= */ 8, valueByte);
         }
+    }
+
+    private void serializeIntValue(int value, BitOutputStream bitOutputStream) {
+        bitOutputStream.setNext(/* numOfBits= */ 32, value);
+    }
+
+    private void serializeBooleanValue(boolean value, BitOutputStream bitOutputStream) {
+        bitOutputStream.setNext(value);
+    }
+
+    // Get the byte array for a value.
+    // If the value is not hashed, use its byte array form directly.
+    // If the value is hashed, get the raw form decoding of the value. All hashed values are
+    // hex-encoded. Serialized values are in raw form.
+    private static byte[] getBytesForString(String value, boolean isHashedValue) {
+        if (!isHashedValue) {
+            return value.getBytes(StandardCharsets.UTF_8);
+        }
+        return IntegrityUtils.getBytesFromHexDigest(value);
     }
 }
