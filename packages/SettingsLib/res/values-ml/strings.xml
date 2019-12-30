@@ -59,7 +59,7 @@
     <string name="speed_label_okay" msgid="1253594383880810424">"ശരി"</string>
     <string name="speed_label_medium" msgid="9078405312828606976">"ഇടത്തരം"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"വേഗത്തിൽ"</string>
-    <string name="speed_label_very_fast" msgid="8215718029533182439">"വളരെ വേഗത്തിൽ"</string>
+    <string name="speed_label_very_fast" msgid="8215718029533182439">"അതിവേഗം"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"വിച്ഛേദിച്ചു"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"വിച്‌ഛേദിക്കുന്നു..."</string>
