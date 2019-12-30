@@ -25,10 +25,12 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
@@ -36,6 +38,7 @@ import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.IActivityTaskManager;
+import android.app.LoadedApk;
 import android.app.servertransaction.PendingTransactionActions;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -345,6 +348,14 @@ public class ActivityThreadClientTest {
             info.applicationInfo = new ApplicationInfo();
             info.applicationInfo.packageName = info.packageName;
             info.applicationInfo.uid = UserHandle.myUserId();
+
+            // mock the function for preventing NPE in emulator environment. The purpose of the
+            // test is for activity client state changes, we don't focus on the updating for the
+            // ApplicationInfo.
+            LoadedApk packageInfo = mThread.peekPackageInfo(info.packageName,
+                    true /* includeCode */);
+            spyOn(packageInfo);
+            doNothing().when(packageInfo).updateApplicationInfo(any(), any());
 
             return new ActivityClientRecord(new Binder(), Intent.makeMainActivity(component),
                     0 /* ident */, info, new Configuration(),
