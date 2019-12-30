@@ -43,7 +43,7 @@ abstract class MediaRoute2Provider {
     }
 
     public abstract void requestCreateSession(String packageName, String routeId,
-            String controlCategory, int requestId);
+            String controlCategory, long requestId);
     public abstract void releaseSession(int sessionId);
 
     public abstract void selectRoute(int sessionId, MediaRoute2Info route);
@@ -86,6 +86,6 @@ abstract class MediaRoute2Provider {
     public interface Callback {
         void onProviderStateChanged(@Nullable MediaRoute2Provider provider);
         void onSessionCreated(@NonNull MediaRoute2Provider provider,
-                @Nullable RouteSessionInfo sessionInfo, int requestId);
+                @Nullable RouteSessionInfo sessionInfo, long requestId);
     }
 }

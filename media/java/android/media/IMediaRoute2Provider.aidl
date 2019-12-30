@@ -25,7 +25,7 @@ import android.media.IMediaRoute2ProviderClient;
 oneway interface IMediaRoute2Provider {
     void setClient(IMediaRoute2ProviderClient client);
     void requestCreateSession(String packageName, String routeId,
-            String controlCategory, int requestId);
+            String controlCategory, long requestId);
     void releaseSession(int sessionId);
 
     void selectRoute(int sessionId, String routeId);
