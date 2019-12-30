@@ -375,7 +375,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
 
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
         ServiceState ss = mock(ServiceState.class);
-        when(ss.getDataRegState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        when(ss.getDataRegistrationState()).thenReturn(ServiceState.STATE_IN_SERVICE);
         mKeyguardUpdateMonitor.mServiceStates.put(TEST_SUBSCRIPTION_NULL.getSubscriptionId(), ss);
 
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
