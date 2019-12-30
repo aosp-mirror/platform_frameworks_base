@@ -63,6 +63,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <sys/un.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -162,6 +163,12 @@ static std::atomic_uint32_t gUsapPoolCount = 0;
  * ZygoteServer.
  */
 static int gUsapPoolEventFD = -1;
+
+/**
+ * The socket file descriptor used to send notifications to the
+ * system_server.
+ */
+static int gSystemServerSocketFd = -1;
 
 /**
  * The maximum value that the gUSAPPoolSizeMax variable may take.  This value
@@ -314,6 +321,26 @@ enum RuntimeFlags : uint32_t {
   PROFILE_FROM_SHELL = 1 << 15,
 };
 
+enum UnsolicitedZygoteMessageTypes : uint32_t {
+    UNSOLICITED_ZYGOTE_MESSAGE_TYPE_RESERVED = 0,
+    UNSOLICITED_ZYGOTE_MESSAGE_TYPE_SIGCHLD = 1,
+};
+
+struct UnsolicitedZygoteMessageSigChld {
+    struct {
+        UnsolicitedZygoteMessageTypes type;
+    } header;
+    struct {
+        pid_t pid;
+        uid_t uid;
+        int status;
+    } payload;
+};
+
+// Keep sync with services/core/java/com/android/server/am/ProcessList.java
+static constexpr struct sockaddr_un kSystemServerSockAddr =
+        {.sun_family = AF_LOCAL, .sun_path = "/data/system/unsolzygotesocket"};
+
 // Forward declaration so we don't have to move the signal handler.
 static bool RemoveUsapTableEntry(pid_t usap_pid);
 
@@ -323,8 +350,37 @@ static void RuntimeAbort(JNIEnv* env, int line, const char* msg) {
   env->FatalError(oss.str().c_str());
 }
 
+// Create the socket which is going to be used to send unsolicited message
+// to system_server, the socket will be closed post forking a child process.
+// It's expected to be called at each zygote's initialization.
+static void initUnsolSocketToSystemServer() {
+    gSystemServerSocketFd = socket(AF_LOCAL, SOCK_DGRAM | SOCK_NONBLOCK, 0);
+    if (gSystemServerSocketFd >= 0) {
+        ALOGV("Zygote:systemServerSocketFD = %d", gSystemServerSocketFd);
+    } else {
+        ALOGE("Unable to create socket file descriptor to connect to system_server");
+    }
+}
+
+static void sendSigChildStatus(const pid_t pid, const uid_t uid, const int status) {
+    int socketFd = gSystemServerSocketFd;
+    if (socketFd >= 0) {
+        // fill the message buffer
+        struct UnsolicitedZygoteMessageSigChld data =
+                {.header = {.type = UNSOLICITED_ZYGOTE_MESSAGE_TYPE_SIGCHLD},
+                 .payload = {.pid = pid, .uid = uid, .status = status}};
+        if (TEMP_FAILURE_RETRY(
+                    sendto(socketFd, &data, sizeof(data), 0,
+                           reinterpret_cast<const struct sockaddr*>(&kSystemServerSockAddr),
+                           sizeof(kSystemServerSockAddr))) == -1) {
+            async_safe_format_log(ANDROID_LOG_ERROR, LOG_TAG,
+                                  "Zygote failed to write to system_server FD: %s",
+                                  strerror(errno));
+        }
+    }
+}
 // This signal handler is for zygote mode, since the zygote must reap its children
-static void SigChldHandler(int /*signal_number*/) {
+static void SigChldHandler(int /*signal_number*/, siginfo_t* info, void* /*ucontext*/) {
   pid_t pid;
   int status;
   int64_t usaps_removed = 0;
@@ -338,6 +394,8 @@ static void SigChldHandler(int /*signal_number*/) {
   int saved_errno = errno;
 
   while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+    // Notify system_server that we received a SIGCHLD
+    sendSigChildStatus(pid, info->si_uid, status);
      // Log process-death status that we care about.
     if (WIFEXITED(status)) {
       async_safe_format_log(ANDROID_LOG_INFO, LOG_TAG,
@@ -411,8 +469,7 @@ static void SigChldHandler(int /*signal_number*/) {
 // This ends up being called repeatedly before each fork(), but there's
 // no real harm in that.
 static void SetSignalHandlers() {
-  struct sigaction sig_chld = {};
-  sig_chld.sa_handler = SigChldHandler;
+  struct sigaction sig_chld = {.sa_flags = SA_SIGINFO, .sa_sigaction = SigChldHandler};
 
   if (sigaction(SIGCHLD, &sig_chld, nullptr) < 0) {
     ALOGW("Error setting SIGCHLD handler: %s", strerror(errno));
@@ -967,6 +1024,9 @@ static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
 
     // Turn fdsan back on.
     android_fdsan_set_error_level(fdsan_error_level);
+
+    // Reset the fd to the unsolicited zygote socket
+    gSystemServerSocketFd = -1;
   } else {
     ALOGD("Forked child process %d", pid);
   }
@@ -1144,6 +1204,10 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
     if (selinux_android_setcon(kSystemServerLabel) != 0) {
       fail_fn(CREATE_ERROR("selinux_android_setcon(%s)", kSystemServerLabel));
     }
+  }
+
+  if (is_child_zygote) {
+      initUnsolSocketToSystemServer();
   }
 
   env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, runtime_flags,
@@ -1391,6 +1455,11 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
       fds_to_ignore.push_back(gUsapPoolEventFD);
     }
 
+    if (gSystemServerSocketFd != -1) {
+        fds_to_close.push_back(gSystemServerSocketFd);
+        fds_to_ignore.push_back(gSystemServerSocketFd);
+    }
+
     pid_t pid = ForkCommon(env, false, fds_to_close, fds_to_ignore, true);
 
     if (pid == 0) {
@@ -1414,6 +1483,11 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
   if (gUsapPoolEventFD != -1) {
     fds_to_close.push_back(gUsapPoolEventFD);
     fds_to_ignore.push_back(gUsapPoolEventFD);
+  }
+
+  if (gSystemServerSocketFd != -1) {
+      fds_to_close.push_back(gSystemServerSocketFd);
+      fds_to_ignore.push_back(gSystemServerSocketFd);
   }
 
   pid_t pid = ForkCommon(env, true,
@@ -1483,6 +1557,9 @@ static jint com_android_internal_os_Zygote_nativeForkUsap(JNIEnv* env,
   fds_to_close.push_back(gZygoteSocketFD);
   fds_to_close.push_back(gUsapPoolEventFD);
   fds_to_close.insert(fds_to_close.end(), session_socket_fds.begin(), session_socket_fds.end());
+  if (gSystemServerSocketFd != -1) {
+      fds_to_close.push_back(gSystemServerSocketFd);
+  }
 
   fds_to_ignore.push_back(gZygoteSocketFD);
   fds_to_ignore.push_back(gUsapPoolSocketFD);
@@ -1490,6 +1567,9 @@ static jint com_android_internal_os_Zygote_nativeForkUsap(JNIEnv* env,
   fds_to_ignore.push_back(read_pipe_fd);
   fds_to_ignore.push_back(write_pipe_fd);
   fds_to_ignore.insert(fds_to_ignore.end(), session_socket_fds.begin(), session_socket_fds.end());
+  if (gSystemServerSocketFd != -1) {
+      fds_to_ignore.push_back(gSystemServerSocketFd);
+  }
 
   pid_t usap_pid = ForkCommon(env, /* is_system_server= */ false, fds_to_close, fds_to_ignore,
                               is_priority_fork == JNI_TRUE);
@@ -1590,6 +1670,7 @@ static void com_android_internal_os_Zygote_nativeInitNativeState(JNIEnv* env, jc
     ALOGE("Unable to fetch USAP pool socket file descriptor");
   }
 
+  initUnsolSocketToSystemServer();
   /*
    * Security Initialization
    */
@@ -1733,6 +1814,44 @@ static void com_android_internal_os_Zygote_nativeBoostUsapPriority(JNIEnv* env, 
   setpriority(PRIO_PROCESS, 0, PROCESS_PRIORITY_MAX);
 }
 
+static jint com_android_internal_os_Zygote_nativeParseSigChld(JNIEnv* env, jclass, jbyteArray in,
+                                                              jint length, jintArray out) {
+    if (length != sizeof(struct UnsolicitedZygoteMessageSigChld)) {
+        // Apparently it's not the message we are expecting.
+        return -1;
+    }
+    if (in == nullptr || out == nullptr) {
+        // Invalid parameter
+        jniThrowException(env, "java/lang/IllegalArgumentException", nullptr);
+        return -1;
+    }
+    ScopedByteArrayRO source(env, in);
+    if (source.size() < length) {
+        // Invalid parameter
+        jniThrowException(env, "java/lang/IllegalArgumentException", nullptr);
+        return -1;
+    }
+    const struct UnsolicitedZygoteMessageSigChld* msg =
+            reinterpret_cast<const struct UnsolicitedZygoteMessageSigChld*>(source.get());
+
+    switch (msg->header.type) {
+        case UNSOLICITED_ZYGOTE_MESSAGE_TYPE_SIGCHLD: {
+            ScopedIntArrayRW buf(env, out);
+            if (buf.size() != 3) {
+                jniThrowException(env, "java/lang/IllegalArgumentException", nullptr);
+                return UNSOLICITED_ZYGOTE_MESSAGE_TYPE_RESERVED;
+            }
+            buf[0] = msg->payload.pid;
+            buf[1] = msg->payload.uid;
+            buf[2] = msg->payload.status;
+            return 3;
+        }
+        default:
+            break;
+    }
+    return -1;
+}
+
 static const JNINativeMethod gMethods[] = {
     { "nativeForkAndSpecialize",
       "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/String;)I",
@@ -1769,7 +1888,9 @@ static const JNINativeMethod gMethods[] = {
     { "nativeUnblockSigTerm", "()V",
       (void* ) com_android_internal_os_Zygote_nativeUnblockSigTerm },
     { "nativeBoostUsapPriority", "()V",
-      (void* ) com_android_internal_os_Zygote_nativeBoostUsapPriority }
+      (void* ) com_android_internal_os_Zygote_nativeBoostUsapPriority },
+    {"nativeParseSigChld", "([BI[I)I",
+      (void* ) com_android_internal_os_Zygote_nativeParseSigChld},
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
