@@ -25,6 +25,8 @@ import android.os.RemoteException;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Objects;
+
 /**
  * A class representing a USB accessory, which is an external hardware component
  * that communicates with an android application over USB.
@@ -79,8 +81,8 @@ public class UsbAccessory implements Parcelable {
     public UsbAccessory(@NonNull String manufacturer, @NonNull String model,
             @Nullable String description, @Nullable String version, @Nullable String uri,
             @NonNull IUsbSerialReader serialNumberReader) {
-        mManufacturer = Preconditions.checkNotNull(manufacturer);
-        mModel = Preconditions.checkNotNull(model);
+        mManufacturer = Objects.requireNonNull(manufacturer);
+        mModel = Objects.requireNonNull(model);
         mDescription = description;
         mVersion = version;
         mUri = uri;

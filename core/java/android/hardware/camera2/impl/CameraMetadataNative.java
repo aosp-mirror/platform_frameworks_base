@@ -73,14 +73,13 @@ import android.util.Log;
 import android.util.Range;
 import android.util.Size;
 
-import com.android.internal.util.Preconditions;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Implementation of camera metadata marshal/unmarshal across Binder to
@@ -406,7 +405,7 @@ public class CameraMetadataNative implements Parcelable {
      * @return the field corresponding to the {@code key}, or {@code null} if no value was set
      */
     public <T> T get(Key<T> key) {
-        Preconditions.checkNotNull(key, "key must not be null");
+        Objects.requireNonNull(key, "key must not be null");
 
         // Check if key has been overridden to use a wrapper class on the java side.
         GetCommand g = sGetCommandMap.get(key);
