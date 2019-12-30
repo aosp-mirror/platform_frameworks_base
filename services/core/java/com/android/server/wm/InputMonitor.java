@@ -264,7 +264,6 @@ final class InputMonitor {
         inputWindowHandle.hasFocus = hasFocus;
         inputWindowHandle.hasWallpaper = hasWallpaper;
         inputWindowHandle.paused = child.mActivityRecord != null ? child.mActivityRecord.paused : false;
-        inputWindowHandle.layer = child.mLayer;
         inputWindowHandle.ownerPid = child.mSession.mPid;
         inputWindowHandle.ownerUid = child.mSession.mUid;
         inputWindowHandle.inputFeatures = child.mAttrs.inputFeatures;
@@ -499,8 +498,7 @@ final class InputMonitor {
                 }
             }
 
-            if (mAddInputConsumerHandle
-                    && inputWindowHandle.layer <= navInputConsumer.mWindowHandle.layer) {
+            if (mAddInputConsumerHandle) {
                 navInputConsumer.show(mInputTransaction, w);
                 mAddInputConsumerHandle = false;
             }

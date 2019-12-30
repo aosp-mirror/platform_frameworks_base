@@ -76,7 +76,6 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         mWindowHandle.name = name;
         mWindowHandle.token = mServerChannel.getToken();
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
-        mWindowHandle.layer = getLayerLw(mWindowHandle.layoutParamsType);
         mWindowHandle.layoutParamsFlags = 0;
         mWindowHandle.dispatchingTimeoutNanos =
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
@@ -148,12 +147,6 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         t.show(mInputSurface);
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
         t.setLayer(mInputSurface, layer);
-    }
-
-    private int getLayerLw(int windowType) {
-        return mService.mPolicy.getWindowLayerFromTypeLw(windowType)
-                * WindowManagerService.TYPE_LAYER_MULTIPLIER
-                + WindowManagerService.TYPE_LAYER_OFFSET;
     }
 
     void disposeChannelsLw() {
