@@ -21,7 +21,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.UnsupportedAppUsage;
+import android.content.LocaleProto;
 import android.icu.util.ULocale;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -138,6 +140,26 @@ public final class LocaleList implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeString(mStringRepresentation);
+    }
+
+    /**
+     * Helper to write LocaleList to a protocol buffer output stream.  Assumes the parent
+     * protobuf has declared the locale as repeated.
+     *
+     * @param protoOutputStream Stream to write the locale to.
+     * @param fieldId Field Id of the Locale as defined in the parent message.
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+        for (int i = 0; i < mList.length; i++) {
+            final Locale locale = mList[i];
+            final long token = protoOutputStream.start(fieldId);
+            protoOutputStream.write(LocaleProto.LANGUAGE, locale.getLanguage());
+            protoOutputStream.write(LocaleProto.COUNTRY, locale.getCountry());
+            protoOutputStream.write(LocaleProto.VARIANT, locale.getVariant());
+            protoOutputStream.write(LocaleProto.SCRIPT, locale.getScript());
+            protoOutputStream.end(token);
+        }
     }
 
     /**
