@@ -59,7 +59,7 @@
     <string name="speed_label_okay" msgid="1253594383880810424">"ठीक है"</string>
     <string name="speed_label_medium" msgid="9078405312828606976">"मध्यम"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"तेज़"</string>
-    <string name="speed_label_very_fast" msgid="8215718029533182439">"अत्‍यधिक तेज़"</string>
+    <string name="speed_label_very_fast" msgid="8215718029533182439">"बहुत ज़्यादा तेज़"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"डिसकनेक्ट किया गया"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"डिस्‍कनेक्‍ट हो रहा है..."</string>
@@ -406,7 +406,7 @@
     <string name="power_charging_duration" msgid="3831988737429146807">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> पूरी तरह से चार्ज होने तक"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हो रही है"</string>
-    <string name="battery_info_status_charging_lower" msgid="8696042568167401574">"चार्ज किया जा रहा है"</string>
+    <string name="battery_info_status_charging_lower" msgid="8696042568167401574">"चार्ज हो रही है"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज नहीं हो रही है"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"प्लग इन है, अभी चार्ज नहीं हो सकती"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"पूरी"</string>

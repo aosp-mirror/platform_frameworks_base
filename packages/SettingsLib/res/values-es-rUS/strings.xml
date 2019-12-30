@@ -145,7 +145,7 @@
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Hotspot portátil"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Conexión Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Compartir conexión"</string>
-    <string name="tether_settings_title_all" msgid="8910259483383010470">"Hotspots y dispositivos portátiles"</string>
+    <string name="tether_settings_title_all" msgid="8910259483383010470">"Conexión móvil y hotspot"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Todas las apps de trabajo"</string>
     <string name="user_guest" msgid="6939192779649870792">"Invitado"</string>
     <string name="unknown" msgid="3544487229740637809">"Desconocido"</string>
@@ -222,7 +222,7 @@
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Habilitar registro detallado de Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limitación de búsqueda de Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Datos móviles siempre activados"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Aceleración de hardware de conexión mediante dispositivo portátil"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Aceleración de hardware de conexión mediante dispositivo móvil"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostrar dispositivos Bluetooth sin nombre"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Inhabilitar volumen absoluto"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Versión de AVRCP del Bluetooth"</string>
@@ -262,7 +262,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Permitir ubicaciones de prueba"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Habilitar inspección de atributos de vista"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mantener siempre los datos móviles activos, incluso cuando esté activada la conexión Wi‑Fi (para cambiar de red de forma rápida)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Usar la aceleración de hardware de conexión mediante dispositivo portátil si está disponible"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Usar la aceleración de hardware de conexión mediante dispositivo móvil si está disponible"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"¿Permitir depuración por USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"La depuración por USB solo está indicada para actividades de programación. Úsala para copiar datos entre tu computadora y el dispositivo, para instalar aplicaciones en el dispositivo sin recibir notificaciones y para leer datos de registro."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"¿Quieres revocar el acceso a la depuración por USB desde todas la computadoras que autorizaste hasta ahora?"</string>

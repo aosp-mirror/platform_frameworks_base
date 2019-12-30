@@ -59,7 +59,7 @@
     <string name="speed_label_okay" msgid="1253594383880810424">"យល់ព្រម"</string>
     <string name="speed_label_medium" msgid="9078405312828606976">"មធ្យម"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"លឿន"</string>
-    <string name="speed_label_very_fast" msgid="8215718029533182439">"លឿន​ណាស់"</string>
+    <string name="speed_label_very_fast" msgid="8215718029533182439">"លឿន​ខ្លាំង"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"បាន​ផ្ដាច់"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"កំពុង​ផ្ដាច់…"</string>
