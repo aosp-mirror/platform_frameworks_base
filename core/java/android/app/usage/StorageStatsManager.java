@@ -63,8 +63,8 @@ public class StorageStatsManager {
 
     /** {@hide} */
     public StorageStatsManager(Context context, IStorageStatsManager service) {
-        mContext = Preconditions.checkNotNull(context);
-        mService = Preconditions.checkNotNull(service);
+        mContext = Objects.requireNonNull(context);
+        mService = Objects.requireNonNull(service);
     }
 
     /** {@hide} */

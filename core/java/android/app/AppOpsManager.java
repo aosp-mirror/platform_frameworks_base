@@ -5517,8 +5517,8 @@ public class AppOpsManager {
     @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
     public void getHistoricalOps(@NonNull HistoricalOpsRequest request,
             @NonNull Executor executor, @NonNull Consumer<HistoricalOps> callback) {
-        Preconditions.checkNotNull(executor, "executor cannot be null");
-        Preconditions.checkNotNull(callback, "callback cannot be null");
+        Objects.requireNonNull(executor, "executor cannot be null");
+        Objects.requireNonNull(callback, "callback cannot be null");
         try {
             mService.getHistoricalOps(request.mUid, request.mPackageName, request.mOpNames,
                     request.mBeginTimeMillis, request.mEndTimeMillis, request.mFlags,
@@ -5556,8 +5556,8 @@ public class AppOpsManager {
     @RequiresPermission(Manifest.permission.MANAGE_APPOPS)
     public void getHistoricalOpsFromDiskRaw(@NonNull HistoricalOpsRequest request,
             @Nullable Executor executor, @NonNull Consumer<HistoricalOps> callback) {
-        Preconditions.checkNotNull(executor, "executor cannot be null");
-        Preconditions.checkNotNull(callback, "callback cannot be null");
+        Objects.requireNonNull(executor, "executor cannot be null");
+        Objects.requireNonNull(callback, "callback cannot be null");
         try {
             mService.getHistoricalOpsFromDiskRaw(request.mUid, request.mPackageName,
                     request.mOpNames, request.mBeginTimeMillis, request.mEndTimeMillis,
@@ -7062,7 +7062,7 @@ public class AppOpsManager {
         private final IAppOpsAsyncNotedCallback mAsyncCb = new IAppOpsAsyncNotedCallback.Stub() {
             @Override
             public void opNoted(AsyncNotedAppOp op) {
-                Preconditions.checkNotNull(op);
+                Objects.requireNonNull(op);
 
                 getAsyncNotedExecutor().execute(() -> onAsyncNoted(op));
             }

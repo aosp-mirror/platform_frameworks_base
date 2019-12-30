@@ -2794,7 +2794,7 @@ class ContextImpl extends Context {
 
         public ApplicationContentResolver(Context context, ActivityThread mainThread) {
             super(context);
-            mMainThread = Preconditions.checkNotNull(mainThread);
+            mMainThread = Objects.requireNonNull(mainThread);
         }
 
         @Override
