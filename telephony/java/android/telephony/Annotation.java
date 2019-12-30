@@ -565,31 +565,6 @@ public class Annotation {
     public @interface PreciseDisconnectCauses {
     }
 
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"RIL_RADIO_TECHNOLOGY_" }, value = {
-            ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN,
-            ServiceState.RIL_RADIO_TECHNOLOGY_GPRS,
-            ServiceState.RIL_RADIO_TECHNOLOGY_EDGE,
-            ServiceState.RIL_RADIO_TECHNOLOGY_UMTS,
-            ServiceState.RIL_RADIO_TECHNOLOGY_IS95A,
-            ServiceState.RIL_RADIO_TECHNOLOGY_IS95B,
-            ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT,
-            ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0,
-            ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A,
-            ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA,
-            ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA,
-            ServiceState.RIL_RADIO_TECHNOLOGY_HSPA,
-            ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B,
-            ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD,
-            ServiceState.RIL_RADIO_TECHNOLOGY_LTE,
-            ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP,
-            ServiceState.RIL_RADIO_TECHNOLOGY_GSM,
-            ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA,
-            ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN,
-            ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA,
-            ServiceState.RIL_RADIO_TECHNOLOGY_NR})
-    public @interface RilRadioTechnology {}
-
     @IntDef({
             Connection.AUDIO_CODEC_NONE,
             Connection.AUDIO_CODEC_AMR,
