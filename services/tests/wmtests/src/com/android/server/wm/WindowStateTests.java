@@ -522,7 +522,8 @@ public class WindowStateTests extends WindowTestsBase {
     public void testVisibilityChangeSwitchUser() {
         final WindowState window = createWindow(null, TYPE_APPLICATION, "app");
         window.mHasSurface = true;
-        window.setShowToOwnerOnlyLocked(true);
+        spyOn(window);
+        doReturn(false).when(window).showForAllUsers();
 
         mWm.mCurrentUserId = 1;
         window.switchUser(mWm.mCurrentUserId);

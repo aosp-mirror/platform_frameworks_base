@@ -255,7 +255,6 @@ import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.LatencyTracker;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.view.WindowManagerPolicyThread;
@@ -1508,7 +1507,6 @@ public class WindowManagerService extends IWindowManager.Stub
             final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
             displayPolicy.adjustWindowParamsLw(win, win.mAttrs, Binder.getCallingPid(),
                     Binder.getCallingUid());
-            win.setShowToOwnerOnlyLocked(mPolicy.checkShowToOwnerOnly(attrs));
 
             res = displayPolicy.validateAddingWindowLw(attrs);
             if (res != WindowManagerGlobal.ADD_OKAY) {
@@ -3175,7 +3173,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /* Called by WindowState */
-    boolean isCurrentProfileLocked(int userId) {
+    boolean isCurrentProfile(int userId) {
         if (userId == mCurrentUserId) return true;
         for (int i = 0; i < mCurrentProfileIds.length; i++) {
             if (mCurrentProfileIds[i] == userId) return true;

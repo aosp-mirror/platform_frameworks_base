@@ -56,19 +56,35 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPL
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
+import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
+import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
+import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
+import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
+import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
+import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED;
@@ -522,9 +538,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final WindowStateAnimator mWinAnimator;
 
     boolean mHasSurface = false;
-
-    /** When true this window can be displayed on screens owther than mOwnerUid's */
-    private boolean mShowToOwnerOnly;
 
     // This window will be replaced due to relaunch. This allows window manager
     // to differentiate between simple removal of a window and replacement. In the latter case it
@@ -2357,12 +2370,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     void switchUser(int userId) {
         super.switchUser(userId);
-        if (isHiddenFromUserLocked()) {
+
+        if (showToCurrentUser()) {
+            setPolicyVisibilityFlag(VISIBLE_FOR_USER);
+        } else {
             if (DEBUG_VISIBILITY) Slog.w(TAG_WM, "user changing, hiding " + this
                     + ", attrs=" + mAttrs.type + ", belonging to " + mOwnerUid);
             clearPolicyVisibilityFlag(VISIBLE_FOR_USER);
-        } else {
-            setPolicyVisibilityFlag(VISIBLE_FOR_USER);
         }
     }
 
@@ -2725,7 +2739,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Already showing.
             return false;
         }
-        if (isHiddenFromUserLocked()) {
+        if (!showToCurrentUser()) {
             return false;
         }
         if (!mAppOpVisibility) {
@@ -3133,11 +3147,55 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return displayContent.isDefaultDisplay;
     }
 
-    void setShowToOwnerOnlyLocked(boolean showToOwnerOnly) {
-        mShowToOwnerOnly = showToOwnerOnly;
+    /** @return {@code true} if this window can be shown to all users. */
+    boolean showForAllUsers() {
+
+        // If this switch statement is modified, modify the comment in the declarations of
+        // the type in {@link WindowManager.LayoutParams} as well.
+        switch (mAttrs.type) {
+            default:
+                // These are the windows that by default are shown only to the user that created
+                // them. If this needs to be overridden, set
+                // {@link WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS} in
+                // {@link WindowManager.LayoutParams}. Note that permission
+                // {@link android.Manifest.permission.INTERNAL_SYSTEM_WINDOW} is required as well.
+                if ((mAttrs.privateFlags & SYSTEM_FLAG_SHOW_FOR_ALL_USERS) == 0) {
+                    return false;
+                }
+                break;
+
+            // These are the windows that by default are shown to all users. However, to
+            // protect against spoofing, check permissions below.
+            case TYPE_APPLICATION_STARTING:
+            case TYPE_BOOT_PROGRESS:
+            case TYPE_DISPLAY_OVERLAY:
+            case TYPE_INPUT_CONSUMER:
+            case TYPE_KEYGUARD_DIALOG:
+            case TYPE_MAGNIFICATION_OVERLAY:
+            case TYPE_NAVIGATION_BAR:
+            case TYPE_NAVIGATION_BAR_PANEL:
+            case TYPE_PHONE:
+            case TYPE_POINTER:
+            case TYPE_PRIORITY_PHONE:
+            case TYPE_SEARCH_BAR:
+            case TYPE_STATUS_BAR:
+            case TYPE_STATUS_BAR_PANEL:
+            case TYPE_STATUS_BAR_SUB_PANEL:
+            case TYPE_SYSTEM_DIALOG:
+            case TYPE_VOLUME_OVERLAY:
+            case TYPE_PRESENTATION:
+            case TYPE_PRIVATE_PRESENTATION:
+            case TYPE_DOCK_DIVIDER:
+                break;
+        }
+
+        // Only the system can show free windows to all users.
+        return mOwnerCanAddInternalSystemWindow;
+
     }
 
-    private boolean isHiddenFromUserLocked() {
+    @Override
+    boolean showToCurrentUser() {
         // Child windows are evaluated based on their parent window.
         final WindowState win = getTopParentWindow();
         if (win.mAttrs.type < FIRST_SYSTEM_WINDOW
@@ -3151,12 +3209,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     && win.getFrameLw().right >= win.getStableFrameLw().right
                     && win.getFrameLw().bottom >= win.getStableFrameLw().bottom) {
                 // Is a fullscreen window, like the clock alarm. Show to everyone.
-                return false;
+                return true;
             }
         }
 
-        return win.mShowToOwnerOnly
-                && !mWmService.isCurrentProfileLocked(UserHandle.getUserId(win.mOwnerUid));
+        return win.showForAllUsers()
+                || mWmService.isCurrentProfile(UserHandle.getUserId(win.mOwnerUid));
     }
 
     private static void applyInsets(Region outRegion, Rect frame, Rect inset) {
@@ -3716,7 +3774,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         pw.println(" mSession=" + mSession
                 + " mClient=" + mClient.asBinder());
         pw.println(prefix + "mOwnerUid=" + mOwnerUid
-                + " mShowToOwnerOnly=" + mShowToOwnerOnly
+                + " showForAllUsers=" + showForAllUsers()
                 + " package=" + mAttrs.packageName
                 + " appop=" + AppOpsManager.opToName(mAppOp));
         pw.println(prefix + "mAttrs=" + mAttrs.toString(prefix));
@@ -4160,7 +4218,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     // This must be called while inside a transaction.
     boolean performShowLocked() {
-        if (isHiddenFromUserLocked()) {
+        if (!showToCurrentUser()) {
             if (DEBUG_VISIBILITY) Slog.w(TAG, "hiding " + this + ", belonging to " + mOwnerUid);
             clearPolicyVisibilityFlag(VISIBLE_FOR_USER);
             return false;
