@@ -212,11 +212,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
         for (RollbackInfo rollback : rollbackManager.getAvailableRollbacks()) {
             for (PackageRollbackInfo packageRollback : rollback.getPackages()) {
-                boolean hasFailedPackage = packageRollback.getPackageName().equals(
-                        failedPackage.getPackageName())
-                        && packageRollback.getVersionRolledBackFrom().getVersionCode()
-                        == failedPackage.getVersionCode();
-                if (hasFailedPackage) {
+                if (packageRollback.getVersionRolledBackFrom().equals(failedPackage)) {
                     return rollback;
                 }
             }
