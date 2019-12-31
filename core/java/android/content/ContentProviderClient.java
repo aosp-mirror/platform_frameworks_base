@@ -41,7 +41,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
 
@@ -49,6 +48,7 @@ import libcore.io.IoUtils;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -184,7 +184,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     public @Nullable Cursor query(@NonNull Uri uri, @Nullable String[] projection,
             Bundle queryArgs, @Nullable CancellationSignal cancellationSignal)
                     throws RemoteException {
-        Preconditions.checkNotNull(uri, "url");
+        Objects.requireNonNull(uri, "url");
 
         beforeRemote();
         try {
@@ -213,7 +213,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     /** See {@link ContentProvider#getType ContentProvider.getType} */
     @Override
     public @Nullable String getType(@NonNull Uri url) throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         beforeRemote();
         try {
@@ -232,8 +232,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     @Override
     public @Nullable String[] getStreamTypes(@NonNull Uri url, @NonNull String mimeTypeFilter)
             throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
-        Preconditions.checkNotNull(mimeTypeFilter, "mimeTypeFilter");
+        Objects.requireNonNull(url, "url");
+        Objects.requireNonNull(mimeTypeFilter, "mimeTypeFilter");
 
         beforeRemote();
         try {
@@ -251,7 +251,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     /** See {@link ContentProvider#canonicalize} */
     @Override
     public final @Nullable Uri canonicalize(@NonNull Uri url) throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         beforeRemote();
         try {
@@ -269,7 +269,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     /** See {@link ContentProvider#uncanonicalize} */
     @Override
     public final @Nullable Uri uncanonicalize(@NonNull Uri url) throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         beforeRemote();
         try {
@@ -288,7 +288,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     @Override
     public boolean refresh(Uri url, @Nullable Bundle extras,
             @Nullable CancellationSignal cancellationSignal) throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         beforeRemote();
         try {
@@ -314,7 +314,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     @Override
     public int checkUriPermission(@NonNull Uri uri, int uid, @Intent.AccessUriMode int modeFlags)
             throws RemoteException {
-        Preconditions.checkNotNull(uri, "uri");
+        Objects.requireNonNull(uri, "uri");
 
         beforeRemote();
         try {
@@ -340,7 +340,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     @Override
     public @Nullable Uri insert(@NonNull Uri url, @Nullable ContentValues initialValues,
             @Nullable Bundle extras) throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         beforeRemote();
         try {
@@ -359,8 +359,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     @Override
     public int bulkInsert(@NonNull Uri url, @NonNull ContentValues[] initialValues)
             throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
-        Preconditions.checkNotNull(initialValues, "initialValues");
+        Objects.requireNonNull(url, "url");
+        Objects.requireNonNull(initialValues, "initialValues");
 
         beforeRemote();
         try {
@@ -384,7 +384,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     /** See {@link ContentProvider#delete ContentProvider.delete} */
     @Override
     public int delete(@NonNull Uri url, @Nullable Bundle extras) throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         beforeRemote();
         try {
@@ -409,7 +409,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     @Override
     public int update(@NonNull Uri url, @Nullable ContentValues values, @Nullable Bundle extras)
             throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         beforeRemote();
         try {
@@ -446,8 +446,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     @Override
     public @Nullable ParcelFileDescriptor openFile(@NonNull Uri url, @NonNull String mode,
             @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException {
-        Preconditions.checkNotNull(url, "url");
-        Preconditions.checkNotNull(mode, "mode");
+        Objects.requireNonNull(url, "url");
+        Objects.requireNonNull(mode, "mode");
 
         beforeRemote();
         try {
@@ -491,8 +491,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     @Override
     public @Nullable AssetFileDescriptor openAssetFile(@NonNull Uri url, @NonNull String mode,
             @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException {
-        Preconditions.checkNotNull(url, "url");
-        Preconditions.checkNotNull(mode, "mode");
+        Objects.requireNonNull(url, "url");
+        Objects.requireNonNull(mode, "mode");
 
         beforeRemote();
         try {
@@ -532,8 +532,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     public final @Nullable AssetFileDescriptor openTypedAssetFile(@NonNull Uri uri,
             @NonNull String mimeTypeFilter, @Nullable Bundle opts,
             @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException {
-        Preconditions.checkNotNull(uri, "uri");
-        Preconditions.checkNotNull(mimeTypeFilter, "mimeTypeFilter");
+        Objects.requireNonNull(uri, "uri");
+        Objects.requireNonNull(mimeTypeFilter, "mimeTypeFilter");
 
         beforeRemote();
         try {
@@ -567,7 +567,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     public @NonNull ContentProviderResult[] applyBatch(@NonNull String authority,
             @NonNull ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException {
-        Preconditions.checkNotNull(operations, "operations");
+        Objects.requireNonNull(operations, "operations");
 
         beforeRemote();
         try {
@@ -592,8 +592,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     @Override
     public @Nullable Bundle call(@NonNull String authority, @NonNull String method,
             @Nullable String arg, @Nullable Bundle extras) throws RemoteException {
-        Preconditions.checkNotNull(authority, "authority");
-        Preconditions.checkNotNull(method, "method");
+        Objects.requireNonNull(authority, "authority");
+        Objects.requireNonNull(method, "method");
 
         beforeRemote();
         try {

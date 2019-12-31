@@ -23,10 +23,10 @@ import android.content.res.loader.ResourcesProvider;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * The loaded, immutable, in-memory representation of an APK.
@@ -193,7 +193,7 @@ public final class ApkAssets {
     private ApkAssets(@NonNull String path, boolean system, boolean forceSharedLib, boolean overlay,
             boolean arscOnly, boolean forLoader) throws IOException {
         mForLoader = forLoader;
-        Preconditions.checkNotNull(path, "path");
+        Objects.requireNonNull(path, "path");
         mNativePtr = arscOnly ? nativeLoadArsc(path, forLoader)
                 : nativeLoad(path, system, forceSharedLib, overlay, forLoader);
         mStringBlock = new StringBlock(nativeGetStringBlock(mNativePtr), true /*useSparse*/);
@@ -202,8 +202,8 @@ public final class ApkAssets {
     private ApkAssets(@NonNull FileDescriptor fd, @NonNull String friendlyName, boolean system,
             boolean forceSharedLib, boolean arscOnly, boolean forLoader) throws IOException {
         mForLoader = forLoader;
-        Preconditions.checkNotNull(fd, "fd");
-        Preconditions.checkNotNull(friendlyName, "friendlyName");
+        Objects.requireNonNull(fd, "fd");
+        Objects.requireNonNull(friendlyName, "friendlyName");
         mNativePtr = arscOnly ? nativeLoadArscFromFd(fd, friendlyName, forLoader)
                 : nativeLoadFromFd(fd, friendlyName, system, forceSharedLib, forLoader);
         mStringBlock = new StringBlock(nativeGetStringBlock(mNativePtr), true /*useSparse*/);
@@ -240,7 +240,7 @@ public final class ApkAssets {
      * @throws IOException if the file was not found or an error occurred retrieving it.
      */
     public @NonNull XmlResourceParser openXml(@NonNull String fileName) throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             long nativeXmlPtr = nativeOpenXml(mNativePtr, fileName);
             try (XmlBlock block = new XmlBlock(null, nativeXmlPtr)) {

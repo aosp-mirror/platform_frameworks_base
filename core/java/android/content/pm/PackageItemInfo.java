@@ -33,10 +33,10 @@ import android.text.TextUtils;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.Preconditions;
 
 import java.text.Collator;
 import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * Base class containing information common to all package items held by
@@ -240,7 +240,7 @@ public class PackageItemInfo {
     @SystemApi
     public @NonNull CharSequence loadSafeLabel(@NonNull PackageManager pm,
             @FloatRange(from = 0) float ellipsizeDip, @TextUtils.SafeStringFlags int flags) {
-        Preconditions.checkNotNull(pm);
+        Objects.requireNonNull(pm);
 
         return makeSafeForPresentation(loadUnsafeLabel(pm).toString(), MAX_SAFE_LABEL_LENGTH,
                 ellipsizeDip, flags);
