@@ -56,12 +56,8 @@ public abstract class PackageChangeReceiver extends BroadcastReceiver {
         Handler handler = (thread == null) ? BackgroundThread.getHandler() : new Handler(thread);
         mRegisteredContext = context;
         if (handler != null) {
-            if (user != null) {
-                context.registerReceiverAsUser(this, user, sPackageIntentFilter, null, handler);
-            } else {
-                context.registerReceiver(this, sPackageIntentFilter,
-                        null, handler);
-            }
+            Context contextForUser = user == null ? context : context.createContextAsUser(user, 0);
+            contextForUser.registerReceiver(this, sPackageIntentFilter, null, handler);
         } else {
             throw new NullPointerException();
         }
