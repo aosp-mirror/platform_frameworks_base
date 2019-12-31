@@ -179,18 +179,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
 
     @Override
     public boolean isInUse() throws RemoteException {
-        boolean gsidWasRunning = "running".equals(SystemProperties.get("init.svc.gsid"));
-        boolean isInUse = false;
-
-        try {
-            isInUse = getGsiService().isGsiRunning();
-        } finally {
-            if (!gsidWasRunning && !isInUse) {
-                mGsiService = null;
-            }
-        }
-
-        return isInUse;
+        return SystemProperties.getBoolean("ro.gsid.image_running", false);
     }
 
     @Override
