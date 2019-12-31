@@ -120,9 +120,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
 
         RollbackInfo rollback = getAvailableRollback(failedPackage);
         if (rollback == null) {
-            Slog.w(TAG, "Expected rollback but no valid rollback found for package: [ "
-                    + failedPackage.getPackageName() + "] with versionCode: ["
-                    + failedPackage.getVersionCode() + "]");
+            Slog.w(TAG, "Expected rollback but no valid rollback found for " + failedPackage);
             return false;
         }
         rollbackPackage(rollback, failedPackage, rollbackReason);
