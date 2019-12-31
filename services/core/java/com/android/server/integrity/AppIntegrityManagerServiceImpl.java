@@ -225,11 +225,13 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             builder.setIsPreInstalled(isSystemApp(packageName));
 
             AppInstallMetadata appInstallMetadata = builder.build();
+            Map<String, String> allowedInstallers = getAllowedInstallers(packageInfo);
 
-            Slog.i(TAG, "To be verified: " + appInstallMetadata);
+            Slog.i(
+                    TAG,
+                    "To be verified: " + appInstallMetadata + " installers " + allowedInstallers);
             IntegrityCheckResult result =
-                    mEvaluationEngine.evaluate(
-                            appInstallMetadata, getAllowedInstallers(packageInfo));
+                    mEvaluationEngine.evaluate(appInstallMetadata, allowedInstallers);
             Slog.i(
                     TAG,
                     "Integrity check result: "
@@ -371,7 +373,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                     String[] packageAndCert =
                             packageCertPair.split(INSTALLER_PACKAGE_CERT_DELIMITER);
                     if (packageAndCert.length == 2) {
-                        String packageName = packageAndCert[0];
+                        String packageName = getPackageNameNormalized(packageAndCert[0]);
                         String cert = packageAndCert[1];
                         packageCertMap.put(packageName, cert);
                     }
@@ -379,19 +381,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             }
         }
 
-        Slog.i("DEBUG", "allowed installers map " + packageCertMap);
         return packageCertMap;
-    }
-
-    private boolean getPreInstalled(String packageName) {
-        try {
-            PackageInfo existingPackageInfo =
-                    mContext.getPackageManager().getPackageInfo(packageName, 0);
-            return existingPackageInfo.applicationInfo != null
-                    && existingPackageInfo.applicationInfo.isSystemApp();
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
-        }
     }
 
     private static Signature getSignature(@NonNull PackageInfo packageInfo) {
@@ -463,7 +453,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         PackageInfo basePackageInfo =
                 mContext.getPackageManager()
                         .getPackageArchiveInfo(
-                                baseFile.getAbsolutePath(), PackageManager.GET_SIGNATURES);
+                                baseFile.getAbsolutePath(),
+                                PackageManager.GET_SIGNATURES | PackageManager.GET_META_DATA);
 
         if (basePackageInfo == null) {
             for (File apkFile : multiApkDirectory.listFiles()) {
@@ -477,7 +468,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                         mContext.getPackageManager()
                                 .getPackageArchiveInfo(
                                         apkFile.getAbsolutePath(),
-                                        PackageManager.GET_SIGNING_CERTIFICATES);
+                                        PackageManager.GET_SIGNING_CERTIFICATES
+                                                | PackageManager.GET_META_DATA);
                 if (basePackageInfo != null) {
                     Slog.i(TAG, "Found package info from " + apkFile);
                     break;

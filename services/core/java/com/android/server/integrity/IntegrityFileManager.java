@@ -24,14 +24,14 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.integrity.model.RuleMetadata;
-import com.android.server.integrity.parser.RuleBinaryParser;
 import com.android.server.integrity.parser.RuleMetadataParser;
 import com.android.server.integrity.parser.RuleParseException;
 import com.android.server.integrity.parser.RuleParser;
-import com.android.server.integrity.serializer.RuleBinarySerializer;
+import com.android.server.integrity.parser.RuleXmlParser;
 import com.android.server.integrity.serializer.RuleMetadataSerializer;
 import com.android.server.integrity.serializer.RuleSerializeException;
 import com.android.server.integrity.serializer.RuleSerializer;
+import com.android.server.integrity.serializer.RuleXmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -75,8 +75,8 @@ public class IntegrityFileManager {
 
     private IntegrityFileManager() {
         this(
-                new RuleBinaryParser(),
-                new RuleBinarySerializer(),
+                new RuleXmlParser(),
+                new RuleXmlSerializer(),
                 Environment.getDataSystemDirectory());
     }
 
