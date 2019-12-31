@@ -29,7 +29,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
@@ -344,9 +343,7 @@ public class MediaRouter2 {
         // TODO: Check the route supports the given controlCategory
 
         final int requestId;
-        // TODO: This does not ensure the uniqueness of the request ID.
-        //       Find the way to ensure it. (e.g. have mapping inside MediaRouterService)
-        requestId = Process.myPid() * 10000 + mSessionCreationRequestCnt.getAndIncrement();
+        requestId = mSessionCreationRequestCnt.getAndIncrement();
 
         SessionCreationRequest request = new SessionCreationRequest(
                 requestId, route, controlCategory);

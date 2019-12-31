@@ -76,7 +76,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
 
     @Override
     public void requestCreateSession(String packageName, String routeId, String controlCategory,
-            int requestId) {
+            long requestId) {
         if (mConnectionReady) {
             mActiveConnection.requestCreateSession(packageName, routeId, controlCategory,
                     requestId);
@@ -279,7 +279,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     private void onSessionCreated(Connection connection, @Nullable RouteSessionInfo sessionInfo,
-            int requestId) {
+            long requestId) {
         if (mActiveConnection != connection) {
             return;
         }
@@ -327,7 +327,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         }
 
         public void requestCreateSession(String packageName, String routeId, String controlCategory,
-                int requestId) {
+                long requestId) {
             try {
                 mProvider.requestCreateSession(packageName, routeId,
                         controlCategory, requestId);
@@ -401,7 +401,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             mHandler.post(() -> onProviderInfoUpdated(Connection.this, info));
         }
 
-        void postSessionCreated(@Nullable RouteSessionInfo sessionInfo, int requestId) {
+        void postSessionCreated(@Nullable RouteSessionInfo sessionInfo, long requestId) {
             mHandler.post(() -> onSessionCreated(Connection.this, sessionInfo,
                     requestId));
         }
@@ -427,7 +427,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         }
 
         @Override
-        public void notifySessionCreated(@Nullable RouteSessionInfo sessionInfo, int requestId) {
+        public void notifySessionCreated(@Nullable RouteSessionInfo sessionInfo, long requestId) {
             Connection connection = mConnectionRef.get();
             if (connection != null) {
                 connection.postSessionCreated(sessionInfo, requestId);

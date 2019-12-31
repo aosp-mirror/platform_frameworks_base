@@ -128,7 +128,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * session info changes.
      *
      * @param sessionInfo new session information
-     * @see #notifySessionCreated(RouteSessionInfo, int)
+     * @see #notifySessionCreated(RouteSessionInfo, long)
      */
     public final void updateSessionInfo(@NonNull RouteSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
@@ -159,7 +159,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param requestId id of the previous request to create this session
      */
     //TODO: fail reason?
-    public final void notifySessionCreated(@Nullable RouteSessionInfo sessionInfo, int requestId) {
+    public final void notifySessionCreated(@Nullable RouteSessionInfo sessionInfo, long requestId) {
         if (sessionInfo != null) {
             int sessionId = sessionInfo.getSessionId();
             synchronized (mSessionLock) {
@@ -203,10 +203,10 @@ public abstract class MediaRoute2ProviderService extends Service {
     /**
      * Called when a session should be created.
      * You should create and maintain your own session and notifies the client of
-     * session info. Call {@link #notifySessionCreated(RouteSessionInfo, int)}
+     * session info. Call {@link #notifySessionCreated(RouteSessionInfo, long)}
      * with the given {@code requestId} to notify the information of a new session.
      * If you can't create the session or want to reject the request, pass {@code null}
-     * as session info in {@link #notifySessionCreated(RouteSessionInfo, int)}
+     * as session info in {@link #notifySessionCreated(RouteSessionInfo, long)}
      * with the given {@code requestId}.
      *
      * @param packageName the package name of the application that selected the route
@@ -215,7 +215,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @param requestId the id of this session creation request
      */
     public abstract void onCreateSession(@NonNull String packageName, @NonNull String routeId,
-            @NonNull String controlCategory, int requestId);
+            @NonNull String controlCategory, long requestId);
 
     /**
      * Called when a session is about to be destroyed.
@@ -308,7 +308,7 @@ public abstract class MediaRoute2ProviderService extends Service {
 
         @Override
         public void requestCreateSession(String packageName, String routeId,
-                String controlCategory, int requestId) {
+                String controlCategory, long requestId) {
             if (!checkCallerisSystem()) {
                 return;
             }
