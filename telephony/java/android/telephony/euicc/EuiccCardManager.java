@@ -21,8 +21,8 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.service.euicc.EuiccProfileInfo;
+import android.telephony.TelephonyFrameworkInitializer;
 import android.util.Log;
 
 import com.android.internal.telephony.euicc.IAuthenticateServerCallback;
@@ -148,7 +148,10 @@ public class EuiccCardManager {
 
     private IEuiccCardController getIEuiccCardController() {
         return IEuiccCardController.Stub.asInterface(
-                ServiceManager.getService("euicc_card_controller"));
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getEuiccCardControllerServiceRegisterer()
+                        .get());
     }
 
     /**

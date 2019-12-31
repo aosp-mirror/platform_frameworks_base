@@ -25,14 +25,13 @@ import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
-import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.ims.aidl.IImsConfigCallback;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.stub.ImsConfigImplBase;
@@ -415,7 +414,11 @@ public class ProvisioningManager {
     }
 
     private static boolean isImsAvailableOnDevice() {
-        IPackageManager pm = IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
+        IPackageManager pm = IPackageManager.Stub.asInterface(
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getPackageManagerServiceRegisterer()
+                        .get());
         if (pm == null) {
             // For some reason package manger is not available.. This will fail internally anyways,
             // so do not throw error and allow.
@@ -432,7 +435,10 @@ public class ProvisioningManager {
 
     private static ITelephony getITelephony() {
         ITelephony binder = ITelephony.Stub.asInterface(
-                ServiceManager.getService(Context.TELEPHONY_SERVICE));
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getTelephonyServiceRegisterer()
+                        .get());
         if (binder == null) {
             throw new RuntimeException("Could not find Telephony Service.");
         }

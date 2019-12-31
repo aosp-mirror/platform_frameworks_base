@@ -26,8 +26,8 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsRcsController;
 import android.telephony.ims.feature.ImsFeature;
@@ -362,7 +362,10 @@ public class ImsRcsManager implements RegistrationManager {
     }
 
     private IImsRcsController getIImsRcsController() {
-        IBinder binder = ServiceManager.getService(Context.TELEPHONY_IMS_SERVICE);
+        IBinder binder = TelephonyFrameworkInitializer
+                .getTelephonyServiceManager()
+                .getTelephonyImsServiceRegisterer()
+                .get();
         return IImsRcsController.Stub.asInterface(binder);
     }
 }

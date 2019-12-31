@@ -6978,7 +6978,22 @@ package android.os {
   }
 
   public class TelephonyServiceManager {
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getCarrierConfigServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getEuiccCardControllerServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getEuiccControllerService();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getIccPhoneBookServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getNetworkPolicyServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getOpportunisticNetworkServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getPackageManagerServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getPermissionManagerServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getPhoneSubServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getSmsServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getSubscriptionServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyImsServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyRcsMessageServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyRegistryServiceRegisterer();
     method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyServiceRegisterer();
+    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getWindowServiceRegisterer();
   }
 
   public static class TelephonyServiceManager.ServiceNotFoundException extends java.lang.Exception {
