@@ -74,13 +74,13 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.ISoundTriggerService;
-import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -429,9 +429,9 @@ public class SoundTriggerService extends SystemService {
         @Override
         public int startRecognitionForService(ParcelUuid soundModelId, Bundle params,
             ComponentName detectionService, SoundTrigger.RecognitionConfig config) {
-            Preconditions.checkNotNull(soundModelId);
-            Preconditions.checkNotNull(detectionService);
-            Preconditions.checkNotNull(config);
+            Objects.requireNonNull(soundModelId);
+            Objects.requireNonNull(detectionService);
+            Objects.requireNonNull(config);
 
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
 
