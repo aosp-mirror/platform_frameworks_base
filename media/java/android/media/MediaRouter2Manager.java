@@ -176,7 +176,18 @@ public class MediaRouter2Manager {
     }
 
     @NonNull
-    public List<RouteSessionInfo> getRouteSessions() {
+    public List<RouteSessionInfo> getActiveSessions() {
+        Client client;
+        synchronized (sLock) {
+            client = mClient;
+        }
+        if (client != null) {
+            try {
+                return mMediaRouterService.getActiveSessions(client);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to get sessions. Service probably died.", ex);
+            }
+        }
         return Collections.emptyList();
     }
 

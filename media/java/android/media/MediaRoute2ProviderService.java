@@ -37,6 +37,7 @@ import com.android.internal.annotations.GuardedBy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @hide
@@ -48,6 +49,7 @@ public abstract class MediaRoute2ProviderService extends Service {
 
     private final Handler mHandler;
     private final Object mSessionLock = new Object();
+    private final AtomicBoolean mStatePublishScheduled = new AtomicBoolean(false);
     private ProviderStub mStub;
     private IMediaRoute2ProviderClient mClient;
     private MediaRoute2ProviderInfo mProviderInfo;
@@ -132,19 +134,21 @@ public abstract class MediaRoute2ProviderService extends Service {
      */
     public final void updateSessionInfo(@NonNull RouteSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
-        int sessionId = sessionInfo.getSessionId();
 
-        //TODO: notify updated session info
+        int sessionId = sessionInfo.getSessionId();
+        if (sessionInfo.getSelectedRoutes().isEmpty()) {
+            releaseSession(sessionId);
+            return;
+        }
 
         synchronized (mSessionLock) {
             if (mSessionInfo.containsKey(sessionId)) {
                 mSessionInfo.put(sessionId, sessionInfo);
+                schedulePublishState();
             } else {
                 Log.w(TAG, "Ignoring unknown session info.");
+                return;
             }
-        }
-        if (sessionInfo.getSelectedRoutes().isEmpty()) {
-            releaseSession(sessionId);
         }
     }
 
@@ -169,6 +173,7 @@ public abstract class MediaRoute2ProviderService extends Service {
                 }
                 mSessionInfo.put(sessionInfo.getSessionId(), sessionInfo);
             }
+            schedulePublishState();
         }
 
         if (mClient == null) {
@@ -192,11 +197,12 @@ public abstract class MediaRoute2ProviderService extends Service {
         //TODO: notify media router service of release.
         RouteSessionInfo sessionInfo;
         synchronized (mSessionLock) {
-            sessionInfo = mSessionInfo.put(sessionId, null);
+            sessionInfo = mSessionInfo.remove(sessionId);
         }
         if (sessionInfo != null) {
             mHandler.sendMessage(obtainMessage(
                     MediaRoute2ProviderService::onDestroySession, this, sessionId, sessionInfo));
+            schedulePublishState();
         }
     }
 
@@ -268,23 +274,37 @@ public abstract class MediaRoute2ProviderService extends Service {
     /**
      * Updates provider info and publishes routes and session info.
      */
-    public final void updateProviderInfo(MediaRoute2ProviderInfo info) {
-        mProviderInfo = info;
-        publishState();
+    public final void updateProviderInfo(@NonNull MediaRoute2ProviderInfo providerInfo) {
+        mProviderInfo = Objects.requireNonNull(providerInfo, "providerInfo must not be null");
+        schedulePublishState();
     }
 
     void setClient(IMediaRoute2ProviderClient client) {
         mClient = client;
-        publishState();
+        schedulePublishState();
     }
 
-    void publishState() {
-        //TODO: sends session info
+    void schedulePublishState() {
+        if (mStatePublishScheduled.compareAndSet(false, true)) {
+            mHandler.post(this::publishState);
+        }
+    }
+
+    private void publishState() {
+        if (!mStatePublishScheduled.compareAndSet(true, false)) {
+            return;
+        }
+
         if (mClient == null) {
             return;
         }
+
+        List<RouteSessionInfo> sessionInfos;
+        synchronized (mSessionLock) {
+            sessionInfos = new ArrayList<>(mSessionInfo.values());
+        }
         try {
-            mClient.updateProviderInfo(mProviderInfo);
+            mClient.updateState(mProviderInfo, sessionInfos);
         } catch (RemoteException ex) {
             Log.w(TAG, "Failed to send onProviderInfoUpdated");
         }
