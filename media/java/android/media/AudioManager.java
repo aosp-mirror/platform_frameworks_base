@@ -3645,7 +3645,8 @@ public class AudioManager {
      * the callback. If <code>null</code>, the {@link Handler} associated with the main
      * {@link Looper} will be used.
      */
-    public void registerAudioPlaybackCallback(@NonNull AudioPlaybackCallback cb, Handler handler)
+    public void registerAudioPlaybackCallback(@NonNull AudioPlaybackCallback cb,
+                                              @Nullable Handler handler)
     {
         if (cb == null) {
             throw new IllegalArgumentException("Illegal null AudioPlaybackCallback argument");
@@ -3834,7 +3835,8 @@ public class AudioManager {
      * the callback. If <code>null</code>, the {@link Handler} associated with the main
      * {@link Looper} will be used.
      */
-    public void registerAudioRecordingCallback(@NonNull AudioRecordingCallback cb, Handler handler)
+    public void registerAudioRecordingCallback(@NonNull AudioRecordingCallback cb,
+                                               @Nullable Handler handler)
     {
         if (cb == null) {
             throw new IllegalArgumentException("Illegal null AudioRecordingCallback argument");
@@ -5172,7 +5174,7 @@ public class AudioManager {
      * {@link Looper} will be used.
      */
     public void registerAudioDeviceCallback(AudioDeviceCallback callback,
-            android.os.Handler handler) {
+            @Nullable Handler handler) {
         synchronized (mDeviceCallbacks) {
             if (callback != null && !mDeviceCallbacks.containsKey(callback)) {
                 if (mDeviceCallbacks.size() == 0) {
