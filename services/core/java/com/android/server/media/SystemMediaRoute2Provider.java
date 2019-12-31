@@ -94,21 +94,24 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         // Do nothing
     }
 
-    //TODO: implement method
     @Override
-    public void requestSelectRoute(@NonNull String packageName, @NonNull String routeId, int seq) {
-        try {
-            mAudioService.setBluetoothA2dpOn(
-                    !TextUtils.equals(routeId, mDefaultRoute.getId()));
-        } catch (RemoteException ex) {
-            Log.e(TAG, "Error changing Bluetooth A2DP route");
-        }
+    public void releaseSession(int sessionId) {
+        // Do nothing
     }
 
-    //TODO: implement method
     @Override
-    public void unselectRoute(@NonNull String packageName, @NonNull String routeId) {
-        // does nothing..?
+    public void selectRoute(int sessionId, MediaRoute2Info route) {
+        //TODO: implement method
+    }
+
+    @Override
+    public void deselectRoute(int sessionId, MediaRoute2Info route) {
+        //TODO: implement method
+    }
+
+    @Override
+    public void transferRoute(int sessionId, MediaRoute2Info route) {
+        //TODO: implement method
     }
 
     //TODO: implement method

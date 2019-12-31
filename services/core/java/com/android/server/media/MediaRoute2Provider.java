@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.RouteSessionInfo;
-import android.os.Bundle;
 
 import java.util.Objects;
 
@@ -45,8 +44,12 @@ abstract class MediaRoute2Provider {
 
     public abstract void requestCreateSession(String packageName, String routeId,
             String controlCategory, int requestId);
-    public abstract void requestSelectRoute(String packageName, String routeId, int seq);
-    public abstract void unselectRoute(String packageName, String routeId);
+    public abstract void releaseSession(int sessionId);
+
+    public abstract void selectRoute(int sessionId, MediaRoute2Info route);
+    public abstract void deselectRoute(int sessionId, MediaRoute2Info route);
+    public abstract void transferRoute(int sessionId, MediaRoute2Info route);
+
     public abstract void sendControlRequest(MediaRoute2Info route, Intent request);
     public abstract void requestSetVolume(MediaRoute2Info route, int volume);
     public abstract void requestUpdateVolume(MediaRoute2Info route, int delta);
@@ -82,9 +85,6 @@ abstract class MediaRoute2Provider {
 
     public interface Callback {
         void onProviderStateChanged(@Nullable MediaRoute2Provider provider);
-        void onRouteSelected(@NonNull MediaRoute2ProviderProxy provider,
-                @NonNull String clientPackageName, @NonNull MediaRoute2Info route,
-                @Nullable Bundle controlHints, int seq);
         void onSessionCreated(@NonNull MediaRoute2Provider provider,
                 @Nullable RouteSessionInfo sessionInfo, int requestId);
     }

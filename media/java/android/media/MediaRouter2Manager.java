@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Handler;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
@@ -40,6 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @hide
@@ -65,6 +67,8 @@ public class MediaRouter2Manager {
     private final Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
     @NonNull
     final ConcurrentMap<String, List<String>> mControlCategoryMap = new ConcurrentHashMap<>();
+
+    private AtomicInteger mNextRequestId = new AtomicInteger(1);
 
     /**
      * Gets an instance of media router manager that controls media route of other applications.
@@ -204,7 +208,7 @@ public class MediaRouter2Manager {
      * Selects media route for the specified package name.
      *
      * @param packageName the package name of the application that should change it's media route
-     * @param route the route to be selected
+     * @param route the route to be selected.
      */
     public void selectRoute(@NonNull String packageName, @NonNull MediaRoute2Info route) {
         Objects.requireNonNull(packageName, "packageName must not be null");
@@ -216,26 +220,10 @@ public class MediaRouter2Manager {
         }
         if (client != null) {
             try {
-                mMediaRouterService.selectClientRoute2(client, packageName, route);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to select media route", ex);
-            }
-        }
-    }
-
-    /**
-     * Unselects media route for the specified package name.
-     *
-     * @param packageName the package name of the application that should stop routing
-     */
-    public void unselectRoute(@NonNull String packageName) {
-        Client client;
-        synchronized (sLock) {
-            client = mClient;
-        }
-        if (client != null) {
-            try {
-                mMediaRouterService.selectClientRoute2(client, packageName, null);
+                //TODO: make request id globally unique
+                int requestId = Process.myPid() * 10000 + mNextRequestId.getAndIncrement();
+                mMediaRouterService.requestCreateClientSession(
+                        client, packageName, route, requestId);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to select media route", ex);
             }

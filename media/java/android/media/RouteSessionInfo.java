@@ -49,10 +49,13 @@ public class RouteSessionInfo implements Parcelable {
     final int mSessionId;
     final String mPackageName;
     final String mControlCategory;
+    @Nullable
+    final String mProviderId;
     final List<String> mSelectedRoutes;
+    final List<String> mSelectableRoutes;
     final List<String> mDeselectableRoutes;
-    final List<String> mGroupableRoutes;
     final List<String> mTransferrableRoutes;
+    @Nullable
     final Bundle mControlHints;
 
     RouteSessionInfo(@NonNull Builder builder) {
@@ -61,10 +64,11 @@ public class RouteSessionInfo implements Parcelable {
         mSessionId = builder.mSessionId;
         mPackageName = builder.mPackageName;
         mControlCategory = builder.mControlCategory;
+        mProviderId = builder.mProviderId;
 
         mSelectedRoutes = Collections.unmodifiableList(builder.mSelectedRoutes);
+        mSelectableRoutes = Collections.unmodifiableList(builder.mSelectableRoutes);
         mDeselectableRoutes = Collections.unmodifiableList(builder.mDeselectableRoutes);
-        mGroupableRoutes = Collections.unmodifiableList(builder.mGroupableRoutes);
         mTransferrableRoutes = Collections.unmodifiableList(builder.mTransferrableRoutes);
 
         mControlHints = builder.mControlHints;
@@ -76,10 +80,11 @@ public class RouteSessionInfo implements Parcelable {
         mSessionId = src.readInt();
         mPackageName = ensureString(src.readString());
         mControlCategory = ensureString(src.readString());
+        mProviderId = src.readString();
 
         mSelectedRoutes = ensureList(src.createStringArrayList());
+        mSelectableRoutes = ensureList(src.createStringArrayList());
         mDeselectableRoutes = ensureList(src.createStringArrayList());
-        mGroupableRoutes = ensureList(src.createStringArrayList());
         mTransferrableRoutes = ensureList(src.createStringArrayList());
 
         mControlHints = src.readBundle();
@@ -117,12 +122,29 @@ public class RouteSessionInfo implements Parcelable {
     }
 
     /**
+     * Gets the client package name of the session
+     */
+    @NonNull
+    public String getPackageName() {
+        return mPackageName;
+    }
+
+    /**
      * Gets the control category of the session.
      * Routes that don't support the category can't be added to the session.
      */
     @NonNull
     public String getControlCategory() {
         return mControlCategory;
+    }
+
+    /**
+     * Gets the provider id of the session.
+     * @hide
+     */
+    @Nullable
+    public String getProviderId() {
+        return mProviderId;
     }
 
     /**
@@ -134,19 +156,19 @@ public class RouteSessionInfo implements Parcelable {
     }
 
     /**
+     * Gets the list of ids of selectable routes for the session.
+     */
+    @NonNull
+    public List<String> getSelectableRoutes() {
+        return mSelectableRoutes;
+    }
+
+    /**
      * Gets the list of ids of deselectable routes for the session.
      */
     @NonNull
     public List<String> getDeselectableRoutes() {
         return mDeselectableRoutes;
-    }
-
-    /**
-     * Gets the list of ids of groupable routes for the session.
-     */
-    @NonNull
-    public List<String> getGroupableRoutes() {
-        return mGroupableRoutes;
     }
 
     /**
@@ -175,9 +197,10 @@ public class RouteSessionInfo implements Parcelable {
         dest.writeInt(mSessionId);
         dest.writeString(mPackageName);
         dest.writeString(mControlCategory);
+        dest.writeString(mProviderId);
         dest.writeStringList(mSelectedRoutes);
+        dest.writeStringList(mSelectableRoutes);
         dest.writeStringList(mDeselectableRoutes);
-        dest.writeStringList(mGroupableRoutes);
         dest.writeStringList(mTransferrableRoutes);
         dest.writeBundle(mControlHints);
     }
@@ -187,13 +210,20 @@ public class RouteSessionInfo implements Parcelable {
         StringBuilder result = new StringBuilder()
                 .append("RouteSessionInfo{ ")
                 .append("sessionId=").append(mSessionId)
-                .append(", selectedRoutes={");
-        for (int i = 0; i < mSelectedRoutes.size(); i++) {
-            if (i > 0) result.append(", ");
-            result.append(mSelectedRoutes.get(i));
-        }
-        result.append("}");
-        result.append(" }");
+                .append(", controlCategory=").append(mControlCategory)
+                .append(", selectedRoutes={")
+                .append(String.join(",", mSelectedRoutes))
+                .append("}")
+                .append(", selectableRoutes={")
+                .append(String.join(",", mSelectableRoutes))
+                .append("}")
+                .append(", deselectableRoutes={")
+                .append(String.join(",", mDeselectableRoutes))
+                .append("}")
+                .append(", transferrableRoutes={")
+                .append(String.join(",", mTransferrableRoutes))
+                .append("}")
+                .append(" }");
         return result.toString();
     }
 
@@ -204,9 +234,10 @@ public class RouteSessionInfo implements Parcelable {
         final String mPackageName;
         final int mSessionId;
         final String mControlCategory;
+        String mProviderId;
         final List<String> mSelectedRoutes;
+        final List<String> mSelectableRoutes;
         final List<String> mDeselectableRoutes;
-        final List<String> mGroupableRoutes;
         final List<String> mTransferrableRoutes;
         Bundle mControlHints;
 
@@ -218,8 +249,8 @@ public class RouteSessionInfo implements Parcelable {
                     "controlCategory must not be null");
 
             mSelectedRoutes = new ArrayList<>();
+            mSelectableRoutes = new ArrayList<>();
             mDeselectableRoutes = new ArrayList<>();
-            mGroupableRoutes = new ArrayList<>();
             mTransferrableRoutes = new ArrayList<>();
         }
 
@@ -227,13 +258,23 @@ public class RouteSessionInfo implements Parcelable {
             mSessionId = sessionInfo.mSessionId;
             mPackageName = sessionInfo.mPackageName;
             mControlCategory = sessionInfo.mControlCategory;
+            mProviderId = sessionInfo.mProviderId;
 
             mSelectedRoutes = new ArrayList<>(sessionInfo.mSelectedRoutes);
+            mSelectableRoutes = new ArrayList<>(sessionInfo.mSelectableRoutes);
             mDeselectableRoutes = new ArrayList<>(sessionInfo.mDeselectableRoutes);
-            mGroupableRoutes = new ArrayList<>(sessionInfo.mGroupableRoutes);
             mTransferrableRoutes = new ArrayList<>(sessionInfo.mTransferrableRoutes);
 
             mControlHints = sessionInfo.mControlHints;
+        }
+
+        /**
+         * Sets the provider id of the session.
+         */
+        @NonNull
+        public Builder setProviderId(String providerId) {
+            mProviderId = providerId;
+            return this;
         }
 
         /**
@@ -264,6 +305,33 @@ public class RouteSessionInfo implements Parcelable {
         }
 
         /**
+         * Clears the selectable routes.
+         */
+        @NonNull
+        public Builder clearSelectableRoutes() {
+            mSelectableRoutes.clear();
+            return this;
+        }
+
+        /**
+         * Adds a route to the selectable routes.
+         */
+        @NonNull
+        public Builder addSelectableRoute(@NonNull String routeId) {
+            mSelectableRoutes.add(Objects.requireNonNull(routeId, "routeId must not be null"));
+            return this;
+        }
+
+        /**
+         * Removes a route from the selectable routes.
+         */
+        @NonNull
+        public Builder removeSelectableRoute(@NonNull String routeId) {
+            mSelectableRoutes.remove(Objects.requireNonNull(routeId, "routeId must not be null"));
+            return this;
+        }
+
+        /**
          * Clears the deselectable routes.
          */
         @NonNull
@@ -287,33 +355,6 @@ public class RouteSessionInfo implements Parcelable {
         @NonNull
         public Builder removeDeselectableRoute(@NonNull String routeId) {
             mDeselectableRoutes.remove(Objects.requireNonNull(routeId, "routeId must not be null"));
-            return this;
-        }
-
-        /**
-         * Clears the groupable routes.
-         */
-        @NonNull
-        public Builder clearGroupableRoutes() {
-            mGroupableRoutes.clear();
-            return this;
-        }
-
-        /**
-         * Adds a route to the groupable routes.
-         */
-        @NonNull
-        public Builder addGroupableRoute(@NonNull String routeId) {
-            mGroupableRoutes.add(Objects.requireNonNull(routeId, "routeId must not be null"));
-            return this;
-        }
-
-        /**
-         * Removes a route from the groupable routes.
-         */
-        @NonNull
-        public Builder removeGroupableRoute(@NonNull String routeId) {
-            mGroupableRoutes.remove(Objects.requireNonNull(routeId, "routeId must not be null"));
             return this;
         }
 

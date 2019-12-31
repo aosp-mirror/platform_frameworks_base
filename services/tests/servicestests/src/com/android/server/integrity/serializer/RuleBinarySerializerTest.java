@@ -42,11 +42,14 @@ import android.content.integrity.Rule;
 
 import androidx.annotation.NonNull;
 
+import com.android.server.integrity.IntegrityUtils;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -81,6 +84,7 @@ public class RuleBinarySerializerTest {
     private static final String EQ = getBits(AtomicFormula.EQ, OPERATOR_BITS);
 
     private static final String IS_NOT_HASHED = "0";
+    private static final String IS_HASHED = "1";
 
     private static final String DENY = getBits(Rule.DENY, EFFECT_BITS);
 
@@ -96,10 +100,9 @@ public class RuleBinarySerializerTest {
 
         assertExpectException(
                 RuleSerializeException.class,
-                /* expectedExceptionMessageRegex= */
-                "Index buckets cannot be created for null rule list.",
-                () ->
-                        binarySerializer.serialize(null, /* formatVersion= */ Optional.empty()));
+                /* expectedExceptionMessageRegex= */ "Index buckets cannot be created for null"
+                        + " rule list.",
+                () -> binarySerializer.serialize(null, /* formatVersion= */ Optional.empty()));
     }
 
     @Test
@@ -330,14 +333,46 @@ public class RuleBinarySerializerTest {
     }
 
     @Test
+    public void testBinaryString_serializeValidAtomicFormula_hashedValue() throws Exception {
+        String appCertificate = "test_cert";
+        Rule rule =
+                new Rule(
+                        new AtomicFormula.StringAtomicFormula(
+                                AtomicFormula.APP_CERTIFICATE,
+                                IntegrityUtils.getHexDigest(
+                                        appCertificate.getBytes(StandardCharsets.UTF_8)),
+                                /* isHashedValue= */ true),
+                        Rule.DENY);
+        RuleSerializer binarySerializer = new RuleBinarySerializer();
+        String expectedBits =
+                START_BIT
+                        + ATOMIC_FORMULA_START_BITS
+                        + APP_CERTIFICATE
+                        + EQ
+                        + IS_HASHED
+                        + getBits(appCertificate.length(), VALUE_SIZE_BITS)
+                        + getValueBits(appCertificate)
+                        + DENY
+                        + END_BIT;
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        byteArrayOutputStream.write(DEFAULT_FORMAT_VERSION_BYTES);
+        byteArrayOutputStream.write(getBytes(expectedBits));
+        byte[] expectedRules = byteArrayOutputStream.toByteArray();
+
+        byte[] actualRules =
+                binarySerializer.serialize(
+                        Collections.singletonList(rule), /* formatVersion= */ Optional.empty());
+
+        assertThat(actualRules).isEqualTo(expectedRules);
+    }
+
+    @Test
     public void testBinaryString_serializeValidAtomicFormula_integerValue() throws Exception {
-        String versionCode = "1";
+        int versionCode = 1;
         Rule rule =
                 new Rule(
                         new AtomicFormula.IntAtomicFormula(
-                                AtomicFormula.VERSION_CODE,
-                                AtomicFormula.EQ,
-                                Integer.parseInt(versionCode)),
+                                AtomicFormula.VERSION_CODE, AtomicFormula.EQ, versionCode),
                         Rule.DENY);
         RuleSerializer binarySerializer = new RuleBinarySerializer();
         String expectedBits =
@@ -345,9 +380,7 @@ public class RuleBinarySerializerTest {
                         + ATOMIC_FORMULA_START_BITS
                         + VERSION_CODE
                         + EQ
-                        + IS_NOT_HASHED
-                        + getBits(versionCode.length(), VALUE_SIZE_BITS)
-                        + getValueBits(versionCode)
+                        + getBits(versionCode, /* numOfBits= */ 32)
                         + DENY
                         + END_BIT;
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -375,9 +408,7 @@ public class RuleBinarySerializerTest {
                         + ATOMIC_FORMULA_START_BITS
                         + PRE_INSTALLED
                         + EQ
-                        + IS_NOT_HASHED
-                        + getBits(preInstalled.length(), VALUE_SIZE_BITS)
-                        + getValueBits(preInstalled)
+                        + preInstalled
                         + DENY
                         + END_BIT;
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -457,29 +488,34 @@ public class RuleBinarySerializerTest {
         byte[] actualRules =
                 binarySerializer.serialize(ruleList, /* formatVersion= */ Optional.empty());
 
-
         // Note that ordering is important here and the test verifies that the rules are written
         // in this sorted order.
         ByteArrayOutputStream expectedArrayOutputStream = new ByteArrayOutputStream();
         expectedArrayOutputStream.write(DEFAULT_FORMAT_VERSION_BYTES);
         expectedArrayOutputStream.write(
-                getBytes(getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(
-                        packageNameA)));
+                getBytes(
+                        getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(
+                                packageNameA)));
         expectedArrayOutputStream.write(
-                getBytes(getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(
-                        packageNameB)));
+                getBytes(
+                        getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(
+                                packageNameB)));
         expectedArrayOutputStream.write(
-                getBytes(getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(
-                        packageNameC)));
+                getBytes(
+                        getSerializedCompoundRuleWithPackageNameAndSampleInstallerName(
+                                packageNameC)));
         expectedArrayOutputStream.write(
-                getBytes(getSerializedCompoundRuleWithCertificateNameAndSampleInstallerName(
-                        appCert1)));
+                getBytes(
+                        getSerializedCompoundRuleWithCertificateNameAndSampleInstallerName(
+                                appCert1)));
         expectedArrayOutputStream.write(
-                getBytes(getSerializedCompoundRuleWithCertificateNameAndSampleInstallerName(
-                        appCert2)));
+                getBytes(
+                        getSerializedCompoundRuleWithCertificateNameAndSampleInstallerName(
+                                appCert2)));
         expectedArrayOutputStream.write(
-                getBytes(getSerializedCompoundRuleWithCertificateNameAndSampleInstallerName(
-                        appCert3)));
+                getBytes(
+                        getSerializedCompoundRuleWithCertificateNameAndSampleInstallerName(
+                                appCert3)));
         String expectedBitsForInstallerRule =
                 START_BIT
                         + COMPOUND_FORMULA_START_BITS

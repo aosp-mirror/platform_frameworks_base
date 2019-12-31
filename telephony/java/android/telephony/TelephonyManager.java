@@ -74,6 +74,7 @@ import android.telephony.Annotation.NetworkType;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
+import android.telephony.data.ApnSetting.MvnoType;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
 import android.telephony.ims.ImsMmTelManager;
@@ -6424,7 +6425,19 @@ public class TelephonyManager {
      * Return an appropriate subscription ID for any situation.
      *
      * If this object has been created with {@link #createForSubscriptionId}, then the provided
-     * subId is returned. Otherwise, the default subId will be returned.
+     * subscription ID is returned. Otherwise, the default subscription ID will be returned.
+     *
+     */
+    public int getSubscriptionId() {
+        return getSubId();
+    }
+
+    /**
+     * Return an appropriate subscription ID for any situation.
+     *
+     * If this object has been created with {@link #createForSubscriptionId}, then the provided
+     * subscription ID is returned. Otherwise, the default subscription ID will be returned.
+     *
      */
     private int getSubId() {
       if (SubscriptionManager.isUsableSubIdValue(mSubId)) {
@@ -11915,6 +11928,37 @@ public class TelephonyManager {
             }
         }
         return true;
+    }
+
+    /**
+     * Verifies whether the input MCC/MNC and MVNO correspond to the current carrier.
+     *
+     * @param mccmnc the carrier's mccmnc that you want to match
+     * @param mvnoType the mvnoType that defined in {@link ApnSetting}
+     * @param mvnoMatchData the MVNO match data
+     * @return {@code true} if input mccmnc and mvno matches with data from sim operator.
+     * {@code false} otherwise.
+     *
+     * {@hide}
+     */
+    @SystemApi
+    public boolean isCurrentSimOperator(@NonNull String mccmnc, @MvnoType int mvnoType,
+            @Nullable String mvnoMatchData) {
+        try {
+            if (!mccmnc.equals(getSimOperator())) {
+                Log.d(TAG, "The mccmnc does not match");
+                return false;
+            }
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isMvnoMatched(getSubId(), mvnoType, mvnoMatchData);
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return false;
     }
 
     /**

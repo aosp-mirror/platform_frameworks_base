@@ -34,15 +34,19 @@ import android.content.integrity.CompoundFormula;
 import android.content.integrity.Formula;
 import android.content.integrity.Rule;
 
+import com.android.server.integrity.IntegrityUtils;
 import com.android.server.integrity.model.BitInputStream;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 /** A helper class to parse rules into the {@link Rule} model from Binary representation. */
 public class RuleBinaryParser implements RuleParser {
+
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
     @Override
     public List<Rule> parse(byte[] ruleBytes) throws RuleParseException {
@@ -122,26 +126,52 @@ public class RuleBinaryParser implements RuleParser {
         int key = bitInputStream.getNext(KEY_BITS);
         int operator = bitInputStream.getNext(OPERATOR_BITS);
 
-        boolean isHashedValue = bitInputStream.getNext(IS_HASHED_BITS) == 1;
-        int valueSize = bitInputStream.getNext(VALUE_SIZE_BITS);
-        StringBuilder value = new StringBuilder();
-        while (valueSize-- > 0) {
-            value.append((char) bitInputStream.getNext(/* numOfBits= */ 8));
-        }
-
         switch (key) {
             case AtomicFormula.PACKAGE_NAME:
             case AtomicFormula.APP_CERTIFICATE:
             case AtomicFormula.INSTALLER_NAME:
             case AtomicFormula.INSTALLER_CERTIFICATE:
-                return new AtomicFormula.StringAtomicFormula(key, value.toString(), isHashedValue);
+                boolean isHashedValue = bitInputStream.getNext(IS_HASHED_BITS) == 1;
+                int valueSize = bitInputStream.getNext(VALUE_SIZE_BITS);
+                String stringValue = getStringValue(bitInputStream, valueSize, isHashedValue);
+                return new AtomicFormula.StringAtomicFormula(key, stringValue, isHashedValue);
             case AtomicFormula.VERSION_CODE:
-                return new AtomicFormula.IntAtomicFormula(
-                        key, operator, Integer.parseInt(value.toString()));
+                int intValue = getIntValue(bitInputStream);
+                return new AtomicFormula.IntAtomicFormula(key, operator, intValue);
             case AtomicFormula.PRE_INSTALLED:
-                return new AtomicFormula.BooleanAtomicFormula(key, value.toString().equals("1"));
+                boolean booleanValue = getBooleanValue(bitInputStream);
+                return new AtomicFormula.BooleanAtomicFormula(key, booleanValue);
             default:
                 throw new IllegalArgumentException(String.format("Unknown key: %d", key));
         }
+    }
+
+    // Get value string from stream.
+    // If the value is not hashed, get its raw form directly.
+    // If the value is hashed, get the hex-encoding of the value. Serialized values are in raw form.
+    // All hashed values are hex-encoded.
+    private static String getStringValue(
+            BitInputStream bitInputStream, int valueSize, boolean isHashedValue)
+            throws IOException {
+        if (!isHashedValue) {
+            StringBuilder value = new StringBuilder();
+            while (valueSize-- > 0) {
+                value.append((char) bitInputStream.getNext(/* numOfBits= */ 8));
+            }
+            return value.toString();
+        }
+        ByteBuffer byteBuffer = ByteBuffer.allocate(valueSize);
+        while (valueSize-- > 0) {
+            byteBuffer.put((byte) (bitInputStream.getNext(/* numOfBits= */ 8) & 0xFF));
+        }
+        return IntegrityUtils.getHexDigest(byteBuffer.array());
+    }
+
+    private static int getIntValue(BitInputStream bitInputStream) throws IOException {
+        return bitInputStream.getNext(/* numOfBits= */ 32);
+    }
+
+    private static boolean getBooleanValue(BitInputStream bitInputStream) throws IOException {
+        return bitInputStream.getNext(/* numOfBits= */ 1) == 1;
     }
 }
