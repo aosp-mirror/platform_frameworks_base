@@ -34,11 +34,10 @@ import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -470,8 +469,8 @@ public final class ContextHubManager {
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @NonNull public ContextHubTransaction<Void> loadNanoApp(
             @NonNull ContextHubInfo hubInfo, @NonNull NanoAppBinary appBinary) {
-        Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
-        Preconditions.checkNotNull(appBinary, "NanoAppBinary cannot be null");
+        Objects.requireNonNull(hubInfo, "ContextHubInfo cannot be null");
+        Objects.requireNonNull(appBinary, "NanoAppBinary cannot be null");
 
         ContextHubTransaction<Void> transaction =
                 new ContextHubTransaction<>(ContextHubTransaction.TYPE_LOAD_NANOAPP);
@@ -499,7 +498,7 @@ public final class ContextHubManager {
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @NonNull public ContextHubTransaction<Void> unloadNanoApp(
             @NonNull ContextHubInfo hubInfo, long nanoAppId) {
-        Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
+        Objects.requireNonNull(hubInfo, "ContextHubInfo cannot be null");
 
         ContextHubTransaction<Void> transaction =
                 new ContextHubTransaction<>(ContextHubTransaction.TYPE_UNLOAD_NANOAPP);
@@ -527,7 +526,7 @@ public final class ContextHubManager {
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @NonNull public ContextHubTransaction<Void> enableNanoApp(
             @NonNull ContextHubInfo hubInfo, long nanoAppId) {
-        Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
+        Objects.requireNonNull(hubInfo, "ContextHubInfo cannot be null");
 
         ContextHubTransaction<Void> transaction =
                 new ContextHubTransaction<>(ContextHubTransaction.TYPE_ENABLE_NANOAPP);
@@ -555,7 +554,7 @@ public final class ContextHubManager {
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @NonNull public ContextHubTransaction<Void> disableNanoApp(
             @NonNull ContextHubInfo hubInfo, long nanoAppId) {
-        Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
+        Objects.requireNonNull(hubInfo, "ContextHubInfo cannot be null");
 
         ContextHubTransaction<Void> transaction =
                 new ContextHubTransaction<>(ContextHubTransaction.TYPE_DISABLE_NANOAPP);
@@ -582,7 +581,7 @@ public final class ContextHubManager {
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @NonNull public ContextHubTransaction<List<NanoAppState>> queryNanoApps(
             @NonNull ContextHubInfo hubInfo) {
-        Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
+        Objects.requireNonNull(hubInfo, "ContextHubInfo cannot be null");
 
         ContextHubTransaction<List<NanoAppState>> transaction =
                 new ContextHubTransaction<>(ContextHubTransaction.TYPE_QUERY_NANOAPPS);
@@ -729,9 +728,9 @@ public final class ContextHubManager {
     @NonNull public ContextHubClient createClient(
             @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback,
             @NonNull @CallbackExecutor Executor executor) {
-        Preconditions.checkNotNull(callback, "Callback cannot be null");
-        Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
-        Preconditions.checkNotNull(executor, "Executor cannot be null");
+        Objects.requireNonNull(callback, "Callback cannot be null");
+        Objects.requireNonNull(hubInfo, "ContextHubInfo cannot be null");
+        Objects.requireNonNull(executor, "Executor cannot be null");
 
         ContextHubClient client = new ContextHubClient(hubInfo, false /* persistent */);
         IContextHubClientCallback clientInterface = createClientCallback(
@@ -808,8 +807,8 @@ public final class ContextHubManager {
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @NonNull public ContextHubClient createClient(
             @NonNull ContextHubInfo hubInfo, @NonNull PendingIntent pendingIntent, long nanoAppId) {
-        Preconditions.checkNotNull(pendingIntent);
-        Preconditions.checkNotNull(hubInfo);
+        Objects.requireNonNull(pendingIntent);
+        Objects.requireNonNull(hubInfo);
 
         ContextHubClient client = new ContextHubClient(hubInfo, true /* persistent */);
 

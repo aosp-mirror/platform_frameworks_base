@@ -23,10 +23,9 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -70,7 +69,7 @@ public class HdmiSwitchClient extends HdmiClient {
      * @hide
      */
     public void selectDevice(int logicalAddress, @NonNull OnSelectListener listener) {
-        Preconditions.checkNotNull(listener);
+        Objects.requireNonNull(listener);
         try {
             mService.deviceSelect(logicalAddress, getCallbackWrapper(listener));
         } catch (RemoteException e) {
@@ -91,7 +90,7 @@ public class HdmiSwitchClient extends HdmiClient {
      */
     @SystemApi
     public void selectPort(int portId, @NonNull OnSelectListener listener) {
-        Preconditions.checkNotNull(listener);
+        Objects.requireNonNull(listener);
         try {
             mService.portSelect(portId, getCallbackWrapper(listener));
         } catch (RemoteException e) {
@@ -114,7 +113,7 @@ public class HdmiSwitchClient extends HdmiClient {
             int logicalAddress,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnSelectListener listener) {
-        Preconditions.checkNotNull(listener);
+        Objects.requireNonNull(listener);
         try {
             mService.deviceSelect(logicalAddress,
                     new IHdmiControlCallback.Stub() {
@@ -146,7 +145,7 @@ public class HdmiSwitchClient extends HdmiClient {
             int portId,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnSelectListener listener) {
-        Preconditions.checkNotNull(listener);
+        Objects.requireNonNull(listener);
         try {
             mService.portSelect(portId,
                     new IHdmiControlCallback.Stub() {
