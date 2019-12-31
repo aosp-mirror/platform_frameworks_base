@@ -305,7 +305,7 @@ public class RuleBinaryParserTest {
 
     @Test
     public void testBinaryString_validAtomicFormula_hashedValue() throws Exception {
-        String appCertificate = "test_cert";
+        String appCertificate = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
         String ruleBits =
                 START_BIT
                         + ATOMIC_FORMULA_START_BITS

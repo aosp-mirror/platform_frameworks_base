@@ -29,7 +29,7 @@ public final class ComponentBitSize {
     public static final int OPERATOR_BITS = 3;
     public static final int CONNECTOR_BITS = 2;
     public static final int SEPARATOR_BITS = 2;
-    public static final int VALUE_SIZE_BITS = 5;
+    public static final int VALUE_SIZE_BITS = 6;
     public static final int IS_HASHED_BITS = 1;
 
     public static final int ATOMIC_FORMULA_START = 0;
