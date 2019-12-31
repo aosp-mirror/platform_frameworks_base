@@ -38,6 +38,7 @@ import android.util.StatsEvent;
 import android.util.StatsEventParcel;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,8 +122,17 @@ public final class StatsManager {
      **/
     public static final int PULL_SKIP = 1;
 
-    private static final long DEFAULT_COOL_DOWN_NS = 1_000_000_000L; // 1 second.
-    private static final long DEFAULT_TIMEOUT_NS = 10_000_000_000L; // 10 seconds.
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final long DEFAULT_COOL_DOWN_NS = 1_000_000_000L; // 1 second.
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final long DEFAULT_TIMEOUT_NS = 10_000_000_000L; // 10 seconds.
 
     /**
      * Constructor for StatsManagerClient.
@@ -676,6 +686,30 @@ public final class StatsManager {
             public PullAtomMetadata build() {
                 return new PullAtomMetadata(mCoolDownNs, mTimeoutNs, mAdditiveFields);
             }
+        }
+
+        /**
+         * @hide
+         */
+        @VisibleForTesting
+        public long getCoolDownNs() {
+            return mCoolDownNs;
+        }
+
+        /**
+         * @hide
+         */
+        @VisibleForTesting
+        public long getTimeoutNs() {
+            return mTimeoutNs;
+        }
+
+        /**
+         * @hide
+         */
+        @VisibleForTesting
+        public int[] getAdditiveFields() {
+            return mAdditiveFields;
         }
     }
 
