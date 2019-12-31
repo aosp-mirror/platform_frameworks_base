@@ -1271,7 +1271,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
         // Make sure that there is no activity waiting for this to launch.
         if (!mStackSupervisor.mWaitingActivityLaunched.isEmpty()) {
             mStackSupervisor.removeIdleTimeoutForActivity(r);
-            mStackSupervisor.scheduleIdleTimeoutLocked(r);
+            mStackSupervisor.scheduleIdleTimeout(r);
         }
     }
 
@@ -1324,7 +1324,7 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Sleep still need to stop "
                         + mStackSupervisor.mStoppingActivities.size() + " activities");
 
-                mStackSupervisor.scheduleIdleLocked();
+                mStackSupervisor.scheduleIdle();
                 shouldSleep = false;
             }
 

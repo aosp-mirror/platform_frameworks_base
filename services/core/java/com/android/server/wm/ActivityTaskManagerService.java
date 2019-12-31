@@ -1684,20 +1684,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public final void activityIdle(IBinder token, Configuration config, boolean stopProfiling) {
         final long origId = Binder.clearCallingIdentity();
         try {
-            WindowProcessController proc = null;
             synchronized (mGlobalLock) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "activityIdle");
-                ActivityStack stack = ActivityRecord.getStackLocked(token);
-                if (stack == null) {
+                final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+                if (r == null) {
                     return;
                 }
-                final ActivityRecord r = mStackSupervisor.activityIdleInternalLocked(token,
-                        false /* fromTimeout */, false /* processPausingActivities */, config);
-                if (r != null) {
-                    proc = r.app;
-                }
-                if (stopProfiling && proc != null) {
-                    proc.clearProfilerIfNeeded();
+                mStackSupervisor.activityIdleInternal(r, false /* fromTimeout */,
+                        false /* processPausingActivities */, config);
+                if (stopProfiling && r.hasProcess()) {
+                    r.app.clearProfilerIfNeeded();
                 }
             }
         } finally {
@@ -6904,7 +6900,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (mRootWindowContainer.finishDisabledPackageActivities(
                         packageName, disabledClasses, true, false, userId) && booted) {
                     mRootWindowContainer.resumeFocusedStacksTopActivities();
-                    mStackSupervisor.scheduleIdleLocked();
+                    mStackSupervisor.scheduleIdle();
                 }
 
                 // Clean-up disabled tasks
@@ -6931,7 +6927,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 mRootWindowContainer.resumeFocusedStacksTopActivities();
                 if (scheduleIdle) {
-                    mStackSupervisor.scheduleIdleLocked();
+                    mStackSupervisor.scheduleIdle();
                 }
             }
         }
