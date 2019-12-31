@@ -185,6 +185,12 @@ public class StagedRollbackTest {
      */
     @Test
     public void testNativeWatchdogTriggersRollback_Phase1() throws Exception {
+        // When multiple staged sessions are installed on a device which doesn't support checkpoint,
+        // only the 1st one will prevail. We have to check no other rollbacks available to ensure
+        // TestApp.A is always the 1st and the only one to commit so rollback can work as intended.
+        // If there are leftover rollbacks from previous tests, this assertion will fail.
+        assertThat(RollbackUtils.getRollbackManager().getAvailableRollbacks()).isEmpty();
+
         Uninstall.packages(TestApp.A);
         Install.single(TestApp.A1).commit();
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
@@ -371,6 +377,11 @@ public class StagedRollbackTest {
     @Test
     public void testRollbackWhitelistedApp_Phase2() throws Exception {
         assertThat(RollbackUtils.getAvailableRollback(getModuleMetadataPackageName())).isNotNull();
+    }
+
+    @Test
+    public void testRollbackWhitelistedApp_cleanUp() throws Exception {
+        RollbackUtils.getRollbackManager().expireRollbackForPackage(getModuleMetadataPackageName());
     }
 
     private static void runShellCommand(String cmd) {
