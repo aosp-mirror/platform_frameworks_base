@@ -784,7 +784,7 @@
     <string name="right_icon" msgid="1103955040645237425">"Icona de la dreta"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén premut i arrossega per afegir mosaics"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén premut i arrossega per reorganitzar els mosaics"</string>
-    <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrossega aquí per suprimir una funció"</string>
+    <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrossega aquí per suprimir"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necessites com a mínim <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> mosaics"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Edita"</string>
     <string name="tuner_time" msgid="2450785840990529997">"Hora"</string>
