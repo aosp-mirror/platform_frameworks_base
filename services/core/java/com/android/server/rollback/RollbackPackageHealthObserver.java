@@ -357,15 +357,6 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         }
     }
 
-    private VersionedPackage getVersionedPackage(String packageName) {
-        try {
-            return new VersionedPackage(packageName, mContext.getPackageManager().getPackageInfo(
-                    packageName, 0 /* flags */).getLongVersionCode());
-        } catch (PackageManager.NameNotFoundException e) {
-            return null;
-        }
-    }
-
     /**
      * Rolls back the session that owns {@code failedPackage}
      *
@@ -428,14 +419,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         List<RollbackInfo> rollbacks = rollbackManager.getAvailableRollbacks();
 
         for (RollbackInfo rollback : rollbacks) {
-            String samplePackageName = rollback.getPackages().get(0).getPackageName();
-            VersionedPackage sampleVersionedPackage = getVersionedPackage(samplePackageName);
-            if (sampleVersionedPackage == null) {
-                Slog.e(TAG, "Failed to rollback " + samplePackageName);
-                continue;
-            }
-            rollbackPackage(rollback, sampleVersionedPackage,
-                    PackageWatchdog.FAILURE_REASON_NATIVE_CRASH);
+            VersionedPackage sample = rollback.getPackages().get(0).getVersionRolledBackFrom();
+            rollbackPackage(rollback, sample, PackageWatchdog.FAILURE_REASON_NATIVE_CRASH);
         }
     }
 
