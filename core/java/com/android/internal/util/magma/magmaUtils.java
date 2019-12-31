@@ -92,14 +92,6 @@ public class magmaUtils {
         }
         return false;
     }
-    public static void takeScreenshot(boolean full) {
-        IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-        try {
-            wm.sendCustomAction(new Intent(full? INTENT_SCREENSHOT : INTENT_REGION_SCREENSHOT));
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
     // Check to see if device is WiFi only
     public static boolean isWifiOnly(Context context) {
         ConnectivityManager cm = (ConnectivityManager)context.getSystemService(
@@ -134,10 +126,6 @@ public class magmaUtils {
     public static boolean hasBluetooth(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH);
     }
-     // Check to see if device supports an alterative ambient display package
-    public static boolean hasAltAmbientDisplay(Context context) {
-        return context.getResources().getBoolean(com.android.internal.R.bool.config_alt_ambient_display);
-    }
      // Check to see if device supports A/B (seamless) system updates
     public static boolean isABdevice(Context context) {
         return SystemProperties.getBoolean("ro.build.ab_update", false);
@@ -166,36 +154,6 @@ public class magmaUtils {
     public static void toggleVolumePanel(Context context) {
         AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         am.adjustVolume(AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);
-    }
-
-    // Method to toggle flashlight
-    public static boolean deviceHasFlashlight(Context ctx) {
-        return ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
-    }
-    public static void toggleCameraFlash() {
-        FireActions.toggleCameraFlash();
-    }
-    private static final class FireActions {
-        private static IStatusBarService mStatusBarService = null;
-        private static IStatusBarService getStatusBarService() {
-            synchronized (FireActions.class) {
-                if (mStatusBarService == null) {
-                    mStatusBarService = IStatusBarService.Stub.asInterface(
-                            ServiceManager.getService("statusbar"));
-                }
-                return mStatusBarService;
-            }
-        }
-        public static void toggleCameraFlash() {
-            IStatusBarService service = getStatusBarService();
-            if (service != null) {
-                try {
-                    service.toggleCameraFlash();
-                } catch (RemoteException e) {
-                    // do nothing.
-                }
-            }
-        }
     }
 
     // Method to check if task is in lock task mode

@@ -42,6 +42,7 @@ public class DateView extends TextView {
     private String mLastText;
     private String mDatePattern;
     private boolean mScreenOn = true;
+    private boolean mVisibleDate;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override

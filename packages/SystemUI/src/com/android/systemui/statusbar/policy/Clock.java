@@ -544,7 +544,8 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
                 if (newValue == null || mQsHeader) {
                     newValue = "0"; // no date
                 }
-                mClockDateDisplay = Integer.parseInt(newValue);
+                mClockDateDisplay = mQsHeader ? CLOCK_DATE_DISPLAY_GONE
+                        : Integer.parseInt(newValue);
                 break;
 
             case (STATUSBAR_CLOCK_DATE_STYLE):
@@ -584,6 +585,6 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     public void setQsHeader() {
         mQsHeader = true;
         mClockVisibleByUser = true;
-        mClockDateDisplay = 0;
+        mClockDateDisplay = CLOCK_DATE_DISPLAY_GONE;
     }
 }
