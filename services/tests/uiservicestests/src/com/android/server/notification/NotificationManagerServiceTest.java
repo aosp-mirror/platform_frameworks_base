@@ -4502,6 +4502,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(0, mService.countLogSmartSuggestionsVisible);
     }
 
+    @Test
     public void testReportSeen_delegated() {
         Notification.Builder nb =
                 new Notification.Builder(mContext, mTestNotificationChannel.getId())
@@ -5767,6 +5768,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mUsageStats, times(5)).registerImageRemoved(PKG);
     }
 
+    @Test
     public void testNotificationBubbles_flagAutoExpandForeground_fails_notForeground()
             throws Exception {
         // Bubbles are allowed!
