@@ -334,7 +334,7 @@ public class RuleBinarySerializerTest {
 
     @Test
     public void testBinaryString_serializeValidAtomicFormula_hashedValue() throws Exception {
-        String appCertificate = "test_cert";
+        String appCertificate = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
         Rule rule =
                 new Rule(
                         new AtomicFormula.StringAtomicFormula(

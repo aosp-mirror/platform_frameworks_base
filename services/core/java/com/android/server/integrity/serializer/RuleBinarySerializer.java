@@ -179,6 +179,9 @@ public class RuleBinarySerializer implements RuleSerializer {
 
     private void serializeStringValue(
             String value, boolean isHashedValue, BitOutputStream bitOutputStream) {
+        if (value == null) {
+            throw new IllegalArgumentException("String value can not be null.");
+        }
         byte[] valueBytes = getBytesForString(value, isHashedValue);
 
         bitOutputStream.setNext(isHashedValue);

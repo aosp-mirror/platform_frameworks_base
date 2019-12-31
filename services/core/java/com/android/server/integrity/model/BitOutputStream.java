@@ -42,7 +42,7 @@ public class BitOutputStream {
         int offset = 1 << (numOfBits - 1);
         while (numOfBits-- > 0) {
             mBitSet.set(mIndex, (value & offset) != 0);
-            offset >>= 1;
+            offset >>>= 1;
             mIndex++;
         }
     }
