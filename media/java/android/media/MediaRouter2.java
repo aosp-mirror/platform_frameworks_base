@@ -110,7 +110,7 @@ public class MediaRouter2 {
 
     private final String mPackageName;
     @GuardedBy("sLock")
-    private final Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
+    final Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
 
     @GuardedBy("sLock")
     private List<String> mControlCategories = Collections.emptyList();
@@ -678,8 +678,6 @@ public class MediaRouter2 {
      * A class to control media route session in media route provider.
      * For example, selecting/deselcting/transferring routes to session can be done through this
      * class. Instances are created by {@link MediaRouter2}.
-     *
-     * @hide
      */
     public final class RouteSessionController {
         private final Object mLock = new Object();
@@ -724,42 +722,42 @@ public class MediaRouter2 {
         }
 
         /**
-         * @return the unmodifiable list of IDs of currently selected routes
+         * @return the unmodifiable list of currently selected routes
          */
         @NonNull
-        public List<String> getSelectedRoutes() {
+        public List<MediaRoute2Info> getSelectedRoutes() {
             synchronized (mLock) {
-                return Collections.unmodifiableList(mSessionInfo.getSelectedRoutes());
+                return getRoutesWithIdsLocked(mSessionInfo.getSelectedRoutes());
             }
         }
 
         /**
-         * @return the unmodifiable list of IDs of selectable routes for the session.
+         * @return the unmodifiable list of selectable routes for the session.
          */
         @NonNull
-        public List<String> getSelectableRoutes() {
+        public List<MediaRoute2Info> getSelectableRoutes() {
             synchronized (mLock) {
-                return Collections.unmodifiableList(mSessionInfo.getSelectableRoutes());
+                return getRoutesWithIdsLocked(mSessionInfo.getSelectableRoutes());
             }
         }
 
         /**
-         * @return the unmodifiable list of IDs of deselectable routes for the session.
+         * @return the unmodifiable list of deselectable routes for the session.
          */
         @NonNull
-        public List<String> getDeselectableRoutes() {
+        public List<MediaRoute2Info> getDeselectableRoutes() {
             synchronized (mLock) {
-                return Collections.unmodifiableList(mSessionInfo.getDeselectableRoutes());
+                return getRoutesWithIdsLocked(mSessionInfo.getDeselectableRoutes());
             }
         }
 
         /**
-         * @return the unmodifiable list of IDs of transferrable routes for the session.
+         * @return the unmodifiable list of transferrable routes for the session.
          */
         @NonNull
-        public List<String> getTransferrableRoutes() {
+        public List<MediaRoute2Info> getTransferrableRoutes() {
             synchronized (mLock) {
-                return Collections.unmodifiableList(mSessionInfo.getTransferrableRoutes());
+                return getRoutesWithIdsLocked(mSessionInfo.getTransferrableRoutes());
             }
         }
 
@@ -784,7 +782,7 @@ public class MediaRouter2 {
          * @see #getSelectedRoutes()
          * @see SessionCallback#onSessionInfoChanged
          */
-        public void selectRoute(MediaRoute2Info route) {
+        public void selectRoute(@NonNull MediaRoute2Info route) {
             // TODO: Implement this when the actual connection logic is implemented.
         }
 
@@ -796,7 +794,7 @@ public class MediaRouter2 {
          * @see #getSelectedRoutes()
          * @see SessionCallback#onSessionInfoChanged
          */
-        public void deselectRoute(MediaRoute2Info route) {
+        public void deselectRoute(@NonNull MediaRoute2Info route) {
             // TODO: Implement this when the actual connection logic is implemented.
         }
 
@@ -816,6 +814,20 @@ public class MediaRouter2 {
                 mIsReleased = true;
             }
             // TODO: Use stopMedia variable when the actual connection logic is implemented.
+        }
+
+        private List<MediaRoute2Info> getRoutesWithIdsLocked(List<String> routeIds) {
+            List<MediaRoute2Info> routes = new ArrayList<>();
+            synchronized (mLock) {
+                for (String routeId : routeIds) {
+                    MediaRoute2Info route = mRoutes.get(
+                            MediaRoute2Info.toUniqueId(mSessionInfo.mProviderId, routeId));
+                    if (route != null) {
+                        routes.add(route);
+                    }
+                }
+            }
+            return Collections.unmodifiableList(routes);
         }
     }
 
