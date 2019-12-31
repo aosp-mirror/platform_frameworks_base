@@ -749,7 +749,7 @@ run(int argc, char const*const* argv)
             javaPackage = "android.util";
         }
         errorCount = android::stats_log_api_gen::write_stats_log_java(
-                out, atoms, attributionDecl, moduleName, javaClass, javaPackage);
+                out, atoms, attributionDecl, moduleName, javaClass, javaPackage, supportQ);
 #endif
 
         fclose(out);
