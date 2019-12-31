@@ -45,7 +45,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
      * {@link #SUBTYPE_COMBINED}.
      */
     // TODO: make this flag configurable through settings. See http://b/146415925
-    public static final boolean COMBINE_SUBTYPE_ENABLED = true;
+    public static final boolean COMBINE_SUBTYPE_ENABLED = false;
 
     public static final int SUBTYPE_COMBINED = -1;
 
