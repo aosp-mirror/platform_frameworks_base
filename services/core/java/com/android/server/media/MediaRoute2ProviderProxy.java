@@ -38,6 +38,8 @@ import android.util.Slog;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -268,14 +270,15 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         }
     }
 
-    private void onProviderInfoUpdated(Connection connection, MediaRoute2ProviderInfo info) {
+    private void onProviderStateUpdated(Connection connection,
+            MediaRoute2ProviderInfo providerInfo, List<RouteSessionInfo> sessionInfos) {
         if (mActiveConnection != connection) {
             return;
         }
         if (DEBUG) {
             Slog.d(TAG, this + ": State changed ");
         }
-        setAndNotifyProviderInfo(info);
+        setAndNotifyProviderState(providerInfo, sessionInfos);
     }
 
     private void onSessionCreated(Connection connection, @Nullable RouteSessionInfo sessionInfo,
@@ -291,7 +294,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             mConnectionReady = false;
             mActiveConnection.dispose();
             mActiveConnection = null;
-            setAndNotifyProviderInfo(null);
+            setAndNotifyProviderState(null, Collections.emptyList());
         }
     }
 
@@ -397,8 +400,10 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             mHandler.post(() -> onConnectionDied(Connection.this));
         }
 
-        void postProviderInfoUpdated(MediaRoute2ProviderInfo info) {
-            mHandler.post(() -> onProviderInfoUpdated(Connection.this, info));
+        void postProviderStateUpdated(MediaRoute2ProviderInfo providerInfo,
+                List<RouteSessionInfo> sessionInfos) {
+            mHandler.post(() -> onProviderStateUpdated(Connection.this,
+                    providerInfo, sessionInfos));
         }
 
         void postSessionCreated(@Nullable RouteSessionInfo sessionInfo, long requestId) {
@@ -419,10 +424,11 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         }
 
         @Override
-        public void updateProviderInfo(MediaRoute2ProviderInfo info) {
+        public void updateState(MediaRoute2ProviderInfo providerInfo,
+                List<RouteSessionInfo> sessionInfos) {
             Connection connection = mConnectionRef.get();
             if (connection != null) {
-                connection.postProviderInfoUpdated(info);
+                connection.postProviderStateUpdated(providerInfo, sessionInfos);
             }
         }
 

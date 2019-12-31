@@ -22,6 +22,7 @@ import android.media.IMediaRouter2Manager;
 import android.media.IMediaRouterClient;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouterClientState;
+import android.media.RouteSessionInfo;
 
 /**
  * {@hide}
@@ -63,4 +64,6 @@ interface IMediaRouterService {
             in MediaRoute2Info route, int volume);
     void requestUpdateVolume2Manager(IMediaRouter2Manager manager,
             in MediaRoute2Info route, int direction);
+
+    List<RouteSessionInfo> getActiveSessions(IMediaRouter2Manager manager);
 }

@@ -288,6 +288,18 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    @NonNull
+    public List<RouteSessionInfo> getActiveSessions(IMediaRouter2Manager manager) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                return getActiveSessionsLocked(manager);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     //TODO: Review this is handling multi-user properly.
     void switchUser() {
         synchronized (mLock) {
@@ -523,6 +535,21 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    private List<RouteSessionInfo> getActiveSessionsLocked(IMediaRouter2Manager manager) {
+        final IBinder binder = manager.asBinder();
+        ManagerRecord managerRecord = mAllManagerRecords.get(binder);
+
+        if (managerRecord == null) {
+            return Collections.emptyList();
+        }
+
+        List<RouteSessionInfo> sessionInfos = new ArrayList<>();
+        for (MediaRoute2Provider provider : managerRecord.mUserRecord.mHandler.mMediaProviders) {
+            sessionInfos.addAll(provider.getSessionInfos());
+        }
+        return sessionInfos;
+    }
+
     private void initializeUserLocked(UserRecord userRecord) {
         if (DEBUG) {
             Slog.d(TAG, userRecord + ": Initialized");
@@ -731,6 +758,7 @@ class MediaRouter2ServiceImpl {
                     this, provider, sessionInfo, requestId));
         }
 
+        //TODO: notify session info updates
         private void updateProvider(MediaRoute2Provider provider) {
             int providerIndex = getProviderInfoIndex(provider.getUniqueId());
             MediaRoute2ProviderInfo providerInfo = provider.getProviderInfo();

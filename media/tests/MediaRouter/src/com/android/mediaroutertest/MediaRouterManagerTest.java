@@ -280,12 +280,12 @@ public class MediaRouterManagerTest {
         });
 
         //TODO: it fails due to not releasing session
-        assertEquals(0, mManager.getActiveRoutes().size());
+        assertEquals(0, mManager.getActiveSessions().size());
 
         mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1));
         latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
 
-        assertEquals(1, mManager.getActiveRoutes().size());
+        assertEquals(1, mManager.getActiveSessions().size());
 
         //TODO: release the session
         /*
