@@ -260,7 +260,7 @@ public class MediaRouter2Test {
             @Override
             public void onSessionCreated(RouteSessionController controller) {
                 assertNotNull(controller);
-                assertTrue(controller.getSelectedRoutes().contains(ROUTE_ID1));
+                assertTrue(createRouteMap(controller.getSelectedRoutes()).containsKey(ROUTE_ID1));
                 assertTrue(TextUtils.equals(CATEGORY_SAMPLE, controller.getControlCategory()));
                 successLatch.countDown();
             }
@@ -384,8 +384,8 @@ public class MediaRouter2Test {
             RouteSessionController controller2 = createdControllers.get(1);
 
             assertNotEquals(controller1.getSessionId(), controller2.getSessionId());
-            assertTrue(controller1.getSelectedRoutes().contains(ROUTE_ID1));
-            assertTrue(controller2.getSelectedRoutes().contains(ROUTE_ID2));
+            assertTrue(createRouteMap(controller1.getSelectedRoutes()).containsKey(ROUTE_ID1));
+            assertTrue(createRouteMap(controller2.getSelectedRoutes()).containsKey(ROUTE_ID2));
             assertTrue(TextUtils.equals(CATEGORY_SAMPLE, controller1.getControlCategory()));
             assertTrue(TextUtils.equals(CATEGORY_SAMPLE, controller2.getControlCategory()));
         } finally {

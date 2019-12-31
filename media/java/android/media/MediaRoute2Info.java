@@ -195,9 +195,13 @@ public final class MediaRoute2Info implements Parcelable {
     private String createUniqueId() {
         String uniqueId = null;
         if (mProviderId != null) {
-            uniqueId = mProviderId + ":" + mId;
+            uniqueId = toUniqueId(mProviderId, mId);
         }
         return uniqueId;
+    }
+
+    static String toUniqueId(String providerId, String routeId) {
+        return providerId + ":" + routeId;
     }
 
     /**
