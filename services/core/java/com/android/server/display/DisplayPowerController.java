@@ -483,8 +483,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         + initialLightSensorRate + ") to be less than or equal to "
                         + "config_autoBrightnessLightSensorRate (" + lightSensorRate + ").");
             }
-            int shortTermModelTimeout = resources.getInteger(
-                    com.android.internal.R.integer.config_autoBrightnessShortTermModelTimeout);
 
             String lightSensorType = resources.getString(
                     com.android.internal.R.string.config_displayLightSensorType);
@@ -498,8 +496,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         mScreenBrightnessRangeMaximum, dozeScaleFactor, lightSensorRate,
                         initialLightSensorRate, brighteningLightDebounce, darkeningLightDebounce,
                         autoBrightnessResetAmbientLuxAfterWarmUp, ambientBrightnessThresholds,
-                        screenBrightnessThresholds, shortTermModelTimeout,
-                        context.getPackageManager());
+                        screenBrightnessThresholds, context.getPackageManager());
             } else {
                 mUseSoftwareAutoBrightnessConfig = false;
             }

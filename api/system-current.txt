@@ -2414,9 +2414,13 @@ package android.hardware.display {
     method @Nullable public android.hardware.display.BrightnessCorrection getCorrectionByCategory(int);
     method @Nullable public android.hardware.display.BrightnessCorrection getCorrectionByPackageName(@NonNull String);
     method public android.util.Pair<float[],float[]> getCurve();
+    method public float getShortTermModelLowerLuxMultiplier();
+    method public long getShortTermModelTimeout();
+    method public float getShortTermModelUpperLuxMultiplier();
     method public boolean shouldCollectColorSamples();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessConfiguration> CREATOR;
+    field public static final long SHORT_TERM_TIMEOUT_UNSET = -1L; // 0xffffffffffffffffL
   }
 
   public static class BrightnessConfiguration.Builder {
@@ -2427,6 +2431,9 @@ package android.hardware.display {
     method public int getMaxCorrectionsByCategory();
     method public int getMaxCorrectionsByPackageName();
     method @NonNull public android.hardware.display.BrightnessConfiguration.Builder setDescription(@Nullable String);
+    method @NonNull public android.hardware.display.BrightnessConfiguration.Builder setShortTermModelLowerLuxMultiplier(@FloatRange(from=0.0f) float);
+    method @NonNull public android.hardware.display.BrightnessConfiguration.Builder setShortTermModelTimeout(long);
+    method @NonNull public android.hardware.display.BrightnessConfiguration.Builder setShortTermModelUpperLuxMultiplier(@FloatRange(from=0.0f) float);
     method @NonNull public android.hardware.display.BrightnessConfiguration.Builder setShouldCollectColorSamples(boolean);
   }
 

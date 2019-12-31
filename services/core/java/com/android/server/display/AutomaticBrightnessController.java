@@ -52,9 +52,6 @@ class AutomaticBrightnessController {
 
     private static final boolean DEBUG_PRETEND_LIGHT_SENSOR_ABSENT = false;
 
-    // If true, enables the use of the screen auto-brightness adjustment setting.
-    private static final boolean USE_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT = true;
-
     // How long the current sensor reading is assumed to be valid beyond the current time.
     // This provides a bit of prediction, as well as ensures that the weight for the last sample is
     // non-zero, which in turn ensures that the total weight is non-zero.
@@ -131,13 +128,6 @@ class AutomaticBrightnessController {
 
     private boolean mLoggingEnabled;
 
-    // Timeout after which we remove the effects any user interactions might've had on the
-    // brightness mapping. This timeout doesn't start until we transition to a non-interactive
-    // display policy so that we don't reset while users are using their devices, but also so that
-    // we don't erroneously keep the short-term model if the device is dozing but the display is
-    // fully on.
-    private long mShortTermModelTimeout;
-
     // Amount of time to delay auto-brightness after screen on while waiting for
     // the light sensor to warm-up in milliseconds.
     // May be 0 if no warm-up is required.
@@ -202,7 +192,6 @@ class AutomaticBrightnessController {
     // we use a relative threshold to determine when to revert to the OEM curve.
     private boolean mShortTermModelValid;
     private float mShortTermModelAnchor;
-    private float SHORT_TERM_MODEL_THRESHOLD_RATIO = 0.6f;
 
     // Context-sensitive brightness configurations require keeping track of the foreground app's
     // package name and category, which is done by registering a TaskStackListener to call back to
@@ -224,14 +213,13 @@ class AutomaticBrightnessController {
             int lightSensorRate, int initialLightSensorRate, long brighteningLightDebounceConfig,
             long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
             HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds, long shortTermModelTimeout,
+            HysteresisLevels screenBrightnessThresholds,
             PackageManager packageManager) {
         this(new Injector(), callbacks, looper, sensorManager, lightSensor, mapper,
                 lightSensorWarmUpTime, brightnessMin, brightnessMax, dozeScaleFactor,
                 lightSensorRate, initialLightSensorRate, brighteningLightDebounceConfig,
                 darkeningLightDebounceConfig, resetAmbientLuxAfterWarmUpConfig,
-                ambientBrightnessThresholds, screenBrightnessThresholds, shortTermModelTimeout,
-                packageManager);
+                ambientBrightnessThresholds, screenBrightnessThresholds, packageManager);
     }
 
     @VisibleForTesting
@@ -241,7 +229,7 @@ class AutomaticBrightnessController {
             int lightSensorRate, int initialLightSensorRate, long brighteningLightDebounceConfig,
             long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
             HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds, long shortTermModelTimeout,
+            HysteresisLevels screenBrightnessThresholds,
             PackageManager packageManager) {
         mInjector = injector;
         mCallbacks = callbacks;
@@ -261,7 +249,6 @@ class AutomaticBrightnessController {
         mWeightingIntercept = AMBIENT_LIGHT_LONG_HORIZON_MILLIS;
         mAmbientBrightnessThresholds = ambientBrightnessThresholds;
         mScreenBrightnessThresholds = screenBrightnessThresholds;
-        mShortTermModelTimeout = shortTermModelTimeout;
         mShortTermModelValid = true;
         mShortTermModelAnchor = -1;
 
@@ -370,7 +357,7 @@ class AutomaticBrightnessController {
         }
         if (!isInteractivePolicy(policy) && isInteractivePolicy(oldPolicy)) {
             mHandler.sendEmptyMessageDelayed(MSG_INVALIDATE_SHORT_TERM_MODEL,
-                    mShortTermModelTimeout);
+                    mBrightnessMapper.getShortTermModelTimeout());
         } else if (isInteractivePolicy(policy) && !isInteractivePolicy(oldPolicy)) {
             mHandler.removeMessages(MSG_INVALIDATE_SHORT_TERM_MODEL);
         }
@@ -452,7 +439,7 @@ class AutomaticBrightnessController {
         pw.println("  mAmbientLightRingBuffer=" + mAmbientLightRingBuffer);
         pw.println("  mScreenAutoBrightness=" + mScreenAutoBrightness);
         pw.println("  mDisplayPolicy=" + DisplayPowerRequest.policyToString(mDisplayPolicy));
-        pw.println("  mShortTermModelTimeout=" + mShortTermModelTimeout);
+        pw.println("  mShortTermModelTimeout=" + mBrightnessMapper.getShortTermModelTimeout());
         pw.println("  mShortTermModelAnchor=" + mShortTermModelAnchor);
         pw.println("  mShortTermModelValid=" + mShortTermModelValid);
         pw.println("  mBrightnessAdjustmentSamplePending=" + mBrightnessAdjustmentSamplePending);
@@ -552,20 +539,10 @@ class AutomaticBrightnessController {
 
         // If the short term model was invalidated and the change is drastic enough, reset it.
         if (!mShortTermModelValid && mShortTermModelAnchor != -1) {
-            final float minAmbientLux =
-                mShortTermModelAnchor - mShortTermModelAnchor * SHORT_TERM_MODEL_THRESHOLD_RATIO;
-            final float maxAmbientLux =
-                mShortTermModelAnchor + mShortTermModelAnchor * SHORT_TERM_MODEL_THRESHOLD_RATIO;
-            if (minAmbientLux < mAmbientLux && mAmbientLux < maxAmbientLux) {
-                if (mLoggingEnabled) {
-                    Slog.d(TAG, "ShortTermModel: re-validate user data, ambient lux is " +
-                            minAmbientLux + " < " + mAmbientLux + " < " + maxAmbientLux);
-                }
-                mShortTermModelValid = true;
-            } else {
-                Slog.d(TAG, "ShortTermModel: reset data, ambient lux is " + mAmbientLux +
-                        "(" + minAmbientLux + ", " + maxAmbientLux + ")");
+            if (mBrightnessMapper.shouldResetShortTermModel(mAmbientLux, mShortTermModelAnchor)) {
                 resetShortTermModel();
+            } else {
+                mShortTermModelValid = true;
             }
         }
     }
