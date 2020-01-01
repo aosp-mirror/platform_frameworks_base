@@ -70,8 +70,7 @@
     <string name="learn_more" msgid="4690632085667273811">"Дознајте повеќе"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"Зумирај да се исполни екранот"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Растегни да се исполни екранот"</string>
-    <!-- no translation found for global_action_screenshot (2760267567509131654) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="2760267567509131654">"Слика од екранот"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Сликата на екранот се зачувува..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Сликата на екранот се зачувува..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Сликата од екранот е зачувана"</string>
@@ -119,8 +118,7 @@
     <string name="phone_label" msgid="5715229948920451352">"отвори телефон"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"отвори гласовна помош"</string>
     <string name="camera_label" msgid="8253821920931143699">"отвори камера"</string>
-    <!-- no translation found for cancel (1089011503403416730) -->
-    <skip />
+    <string name="cancel" msgid="1089011503403416730">"Откажи"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Потврди"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Обиди се повторно"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Допрете за да ја откажете проверката"</string>
@@ -387,7 +385,9 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Ќе се вклучи во <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"До <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Темна тема"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"Темна тема\nШтедач на батерија"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Штедач на батерија"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Вклуч. на зајдисонце"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"До изгрејсонце"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC е оневозможено"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC е овозможено"</string>
@@ -412,10 +412,6 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Допрете повторно за да се отвори"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Повлечете за да отворите"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Повлечете нагоре за да се обидете повторно"</string>
-    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
-    <skip />
-    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
-    <skip />
     <string name="do_disclosure_generic" msgid="2388094207542706440">"Вашата организација управува со уредов"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"Уредов го управува <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Повлечете од иконата за телефонот"</string>
@@ -467,9 +463,11 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Штедачот на батерија е вклучен"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Ја намалува изведбата и податоците во заднина"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Исклучете го штедачот на батерија"</string>
-    <string name="media_projection_dialog_text" msgid="5509958417853154019">"При снимањето или емитувањето, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> може да ги сними чувствителните информации што се прикажани на вашиот екран или пуштени од вашиот уред, вклучувајќи чувствителни информации како што се аудио, лозинки, информации за плаќање, фотографии и пораки."</string>
-    <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"При снимањето или емитувањето, услугата што ја обезбедува функцијава може да ги сними чувствителните информации што се прикажани на вашиот екран или пуштени од вашиот уред, вклучувајќи чувствителни информации како што се аудио, лозинки, информации за плаќање, фотографии и пораки."</string>
-    <string name="media_projection_dialog_title" msgid="6379655487632663290">"Изложување чувствителни информации при емитување/снимање"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ќе има пристап до сите информации што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува информации како, на пример, лозинки, детали на исплатата, фотографии, пораки и аудио што го пуштате."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услугата што ја обезбедува функцијава ќе има пристап до сите информации што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува информации како, на пример, лозинки, детали на исплатата, фотографии, пораки и аудио што го пуштате."</string>
+    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
+    <skip />
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Да почне снимање или емитување со <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Не покажувај повторно"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Избриши сѐ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Управувајте"</string>
@@ -786,8 +784,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"Менувач на тастатура"</string>
     <string name="save" msgid="3392754183673848006">"Зачувај"</string>
-    <!-- no translation found for reset (8715144064608810383) -->
-    <skip />
+    <string name="reset" msgid="8715144064608810383">"Ресетирај"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Приспособи ја ширината на копчето"</string>
     <string name="clipboard" msgid="8517342737534284617">"Табла со исечоци"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"Приспособено копче за навигација"</string>
@@ -883,8 +880,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"Десно"</string>
     <string name="tuner_menu" msgid="363690665924769420">"Мени"</string>
     <string name="tuner_app" msgid="6949280415826686972">"Апликација <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for notification_channel_alerts (3385787053375150046) -->
-    <skip />
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"Известувања"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Батерија"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Слики од екранот"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"Општи пораки"</string>
@@ -894,8 +890,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"Се извршува <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Апликацијата беше отворена без да се инсталира."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Апликацијата беше отворена без да се инсталира. Допрете за да дознаете повеќе."</string>
-    <!-- no translation found for app_info (5153758994129963243) -->
-    <skip />
+    <string name="app_info" msgid="5153758994129963243">"Инфо. за апликација"</string>
     <string name="go_to_web" msgid="636673528981366511">"Одете на прелистувач"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Мобилен интернет"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> - <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -929,13 +924,6 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Поставки"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Сфатив"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Извади SysUI-слика"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> користи <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Апликациите користат <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" и "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"камера"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"локација"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"микрофон"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Сензорите се исклучени"</string>
     <string name="device_services" msgid="1549944177856658705">"Услуги за уредот"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Без наслов"</string>
@@ -958,4 +946,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Навигацијата на системот е ажурирана. За да извршите промени, одете во „Поставки“."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Одете во „Поставки“ за да ја ажурирате навигацијата на системот"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Подготвеност"</string>
+    <string name="magnification_overlay_title" msgid="6584179429612427958">"Прозорец за преклопување на зголемувањето"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"Прозорец за зголемување"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"Контроли на прозорец за зголемување"</string>
 </resources>

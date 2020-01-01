@@ -70,8 +70,7 @@
     <string name="learn_more" msgid="4690632085667273811">"了解详情"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"缩放以填满屏幕"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"拉伸以填满屏幕"</string>
-    <!-- no translation found for global_action_screenshot (2760267567509131654) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="2760267567509131654">"屏幕截图"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"正在保存屏幕截图..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"正在保存屏幕截图..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"已保存屏幕截图"</string>
@@ -119,8 +118,7 @@
     <string name="phone_label" msgid="5715229948920451352">"打开电话"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"打开语音助理"</string>
     <string name="camera_label" msgid="8253821920931143699">"打开相机"</string>
-    <!-- no translation found for cancel (1089011503403416730) -->
-    <skip />
+    <string name="cancel" msgid="1089011503403416730">"取消"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"确认"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"重试"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"点按即可取消身份验证"</string>
@@ -387,7 +385,9 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"在<xliff:g id="TIME">%s</xliff:g> 开启"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"直到<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"深色主题"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"深色主题背景\n省电模式"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"省电模式"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"在日落时开启"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"在日出时关闭"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC 已停用"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC 已启用"</string>
@@ -412,10 +412,6 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"再次点按即可打开"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑动即可打开"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑动即可重试"</string>
-    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
-    <skip />
-    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
-    <skip />
     <string name="do_disclosure_generic" msgid="2388094207542706440">"此设备由您所属单位管理"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"此设备是由<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>托管"</string>
     <string name="phone_hint" msgid="6682125338461375925">"滑动图标即可拨打电话"</string>
@@ -467,9 +463,11 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"省电模式已开启"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"降低性能并限制后台流量"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"关闭省电模式"</string>
-    <string name="media_projection_dialog_text" msgid="5509958417853154019">"在录制或投射内容时，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>可以获取您屏幕上显示或设备中播放的所有敏感信息，例如音频、密码、付款信息、照片、消息等。"</string>
-    <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"在录制或投射内容时，提供录制或投射功能的服务可以获取您屏幕上显示或设备中播放的所有敏感信息，例如音频、密码、付款信息、照片、消息等。"</string>
-    <string name="media_projection_dialog_title" msgid="6379655487632663290">"在投射/录制时显示敏感信息"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"在录制或投射内容时，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>将可获取您屏幕上显示或设备中播放的所有信息，其中包括密码、付款明细、照片、消息以及您播放的音频等信息。"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"在录制或投射内容时，提供此功能的服务将可获取您屏幕上显示或设备中播放的所有信息，其中包括密码、付款明细、照片、消息以及您播放的音频等信息。"</string>
+    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
+    <skip />
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"要开始使用<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>录制或投射内容吗？"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"不再显示"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"全部清除"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
@@ -786,8 +784,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"键盘切换器"</string>
     <string name="save" msgid="3392754183673848006">"保存"</string>
-    <!-- no translation found for reset (8715144064608810383) -->
-    <skip />
+    <string name="reset" msgid="8715144064608810383">"重置"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"调整按钮宽度"</string>
     <string name="clipboard" msgid="8517342737534284617">"剪贴板"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"自定义导航按钮"</string>
@@ -883,8 +880,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"向右"</string>
     <string name="tuner_menu" msgid="363690665924769420">"菜单"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g>应用"</string>
-    <!-- no translation found for notification_channel_alerts (3385787053375150046) -->
-    <skip />
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"提醒"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"电池"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"屏幕截图"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"常规消息"</string>
@@ -894,8 +890,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"正在运行<xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"已打开免安装应用。"</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"已打开免安装应用。点按即可了解详情。"</string>
-    <!-- no translation found for app_info (5153758994129963243) -->
-    <skip />
+    <string name="app_info" msgid="5153758994129963243">"应用信息"</string>
     <string name="go_to_web" msgid="636673528981366511">"转到浏览器"</string>
     <string name="mobile_data" msgid="4564407557775397216">"移动数据"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> - <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -929,13 +924,6 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"设置"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"知道了"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"转储 SysUI 堆"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g>正在使用您的<xliff:g id="TYPES_LIST">%2$s</xliff:g>。"</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"有多个应用正在使用您的<xliff:g id="TYPES_LIST">%s</xliff:g>。"</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"、 "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" 和 "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"相机"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"位置信息"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"麦克风"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"已关闭传感器"</string>
     <string name="device_services" msgid="1549944177856658705">"设备服务"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"无标题"</string>
@@ -958,4 +946,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系统导航已更新。要进行更改，请转到“设置”。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"转到“设置”即可更新系统导航"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待机"</string>
+    <string name="magnification_overlay_title" msgid="6584179429612427958">"放大叠加窗口"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"放大窗口"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"放大窗口控件"</string>
 </resources>

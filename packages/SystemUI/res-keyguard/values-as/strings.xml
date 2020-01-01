@@ -85,14 +85,6 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"আপুনি আপোনাৰ পিন <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ লিখিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>ছেকেণ্ডৰ পিছত আকৌ চেষ্টা কৰক।"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"আপুনি আপোনাৰ পাছৱৰ্ড <xliff:g id="NUMBER_0">%1$d</xliff:g>বাৰ ভুলকৈ লিখিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ছেকেণ্ডৰ পাছত আকৌ চেষ্টা কৰক।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"আপুনি আপোনাৰ আনলক আৰ্হি <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ আঁকিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>ছেকেণ্ডৰ পিছত আকৌ চেষ্টা কৰক।"</string>
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6114158710353725041) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
-    <skip />
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ছিমৰ ভুল পিন ক\'ড, আপোনাৰ ডিভাইচটো আনলক কৰিবলৈ আপুনি এতিয়া আপোনাৰ বাহকৰ সৈতে যোগাযোগ কৰিবই লাগিব।"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="one">ছিমৰ ভুল পিন ক’ড, আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g> বাৰ প্ৰয়াস কৰিব পাৰিব।</item>

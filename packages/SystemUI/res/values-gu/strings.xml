@@ -39,7 +39,7 @@
     <string name="battery_saver_start_action" msgid="4553256017945469937">"બૅટરી સેવર ચાલુ કરો"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"સેટિંગ્સ"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"વાઇ-ફાઇ"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"સ્ક્રીનને આપમેળે ફેરવો"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ઑટો રોટેટ સ્ક્રીન"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"મ્યૂટ કરો"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"સ્વતઃ"</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"નોટિફિકેશનો"</string>
@@ -70,8 +70,7 @@
     <string name="learn_more" msgid="4690632085667273811">"વધુ જાણો"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"સ્ક્રીન ભરવા માટે ઝૂમ કરો"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"સ્ક્રીન ભરવા માટે ખેંચો"</string>
-    <!-- no translation found for global_action_screenshot (2760267567509131654) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="2760267567509131654">"સ્ક્રીનશૉટ"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"સ્ક્રીનશોટ સાચવી રહ્યું છે…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"સ્ક્રીનશોટ સાચવી રહ્યું છે…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"સ્ક્રીનશૉટ સાચવ્યો"</string>
@@ -119,8 +118,7 @@
     <string name="phone_label" msgid="5715229948920451352">"ફોન ખોલો"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"વૉઇસ સહાય ખોલો"</string>
     <string name="camera_label" msgid="8253821920931143699">"કૅમેરો ખોલો"</string>
-    <!-- no translation found for cancel (1089011503403416730) -->
-    <skip />
+    <string name="cancel" msgid="1089011503403416730">"રદ કરો"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"કન્ફર્મ કરો"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ફરી પ્રયાસ કરો"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"પ્રમાણીકરણ રદ કરવા માટે ટૅપ કરો"</string>
@@ -324,7 +322,7 @@
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ચાલુ કરી રહ્યાં છીએ…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"તેજ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ઑટો રોટેટ"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"સ્ક્રીનને આપમેળે ફેરવો"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ઑટો રોટેટ સ્ક્રીન"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> મોડ"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"પરિભ્રમણ લૉક થયું"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"પોર્ટ્રેટ"</string>
@@ -387,7 +385,9 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> વાગ્યે"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> સુધી"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ઘેરી થીમ"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"ઘેરી થીમ\nબૅટરી સેવર"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"બૅટરી સેવર"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"સૂર્યાસ્ત વખતે"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"સૂર્યોદય સુધી"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC અક્ષમ કરેલ છે"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC સક્ષમ કરેલ છે"</string>
@@ -412,10 +412,6 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ખોલવા માટે ફરીથી ટૅપ કરો"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ખોલવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ફરી પ્રયાસ કરવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
-    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
-    <skip />
-    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
-    <skip />
     <string name="do_disclosure_generic" msgid="2388094207542706440">"આ ઉપકરણ તમારી સંસ્થા દ્વારા સંચાલિત છે"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"આ ઉપકરણ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> દ્વારા સંચાલિત થાય છે"</string>
     <string name="phone_hint" msgid="6682125338461375925">"ફોન માટે આયકનમાંથી સ્વાઇપ કરો"</string>
@@ -467,9 +463,11 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"બૅટરી સેવર ચાલુ છે"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"પ્રદર્શન અને બૅકગ્રાઉન્ડ ડેટા ઘટાડે છે"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"બૅટરી સેવર બંધ કરો"</string>
-    <string name="media_projection_dialog_text" msgid="5509958417853154019">"રેકોર્ડ અથવા કાસ્ટ કરતી વખતે, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ઑડિયો, પાસવર્ડ, ચુકવણીની માહિતી, ફોટા અને સંદેશા સહિતની આવી કોઈપણ સંવેદનશીલ માહિતી જે તમારા સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય, તેને કૅપ્ચર કરી શકે છે."</string>
-    <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"રેકોર્ડ અથવા કાસ્ટ કરતી વખતે, આ સેવા આપતી સુવિધા ઑડિયો, પાસવર્ડ, ચુકવણીની માહિતી, ફોટા અને સંદેશા સહિતની આવી કોઈપણ સંવેદનશીલ માહિતી જે તમારા સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય, તેને કૅપ્ચર કરી શકે છે."</string>
-    <string name="media_projection_dialog_title" msgid="6379655487632663290">"કાસ્ટિંગ/રેકોર્ડિંગ દરમિયાન સંવેદનશીલ માહિતી દર્શાવવી"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"રેકૉર્ડ અથવા કાસ્ટ કરતી વખતે, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ને તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી બધી માહિતીનો ઍક્સેસ હશે. આમાં પાસવર્ડ, ચુકવણીની વિગતો, ફોટા, સંદેશા અને તમે ચલાવો છો તે ઑડિયો જેવી માહિતીનો સમાવેશ થાય છે."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"રેકૉર્ડ અથવા કાસ્ટ કરતી વખતે, આ સુવિધા આપતી સેવાને તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી બધી માહિતીનો ઍક્સેસ હશે. આમાં પાસવર્ડ, ચુકવણીની વિગતો, ફોટા, સંદેશા અને તમે ચલાવો છો તે ઑડિયો જેવી માહિતીનો સમાવેશ થાય છે."</string>
+    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
+    <skip />
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> વડે રેકૉર્ડ અથવા કાસ્ટ કરવાનું શરૂ કરીએ?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"ફરીથી બતાવશો નહીં"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"બધુ સાફ કરો"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"મેનેજ કરો"</string>
@@ -667,12 +665,10 @@
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"આ ઍપમાંથી નોટિફિકેશન બતાવવાનું ચાલુ રાખીએ?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"સાઇલન્ટ"</string>
     <string name="notification_alert_title" msgid="7629202599338071971">"અલર્ટ કરવાનું ચાલુ રાખો"</string>
-    <!-- no translation found for notification_bubble_title (8330481035191903164) -->
-    <skip />
+    <string name="notification_bubble_title" msgid="8330481035191903164">"બબલ"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"તમને સાઉન્ડ અથવા વાઇબ્રેશન વિના ફોકસ કરવામાં સહાય કરે છે."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"સાઉન્ડ અથવા વાઇબ્રેશન વિના તમારું ધ્યાન દોરે છે."</string>
-    <!-- no translation found for notification_channel_summary_bubble (7235935211580860537) -->
-    <skip />
+    <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ફ્લોટિંગ શૉર્ટકટથી આ કન્ટેન્ટ પર તમારું ધ્યાન દોરી રાખે છે."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"આ નોટિફિકેશનમાં કોઈ ફેરફાર થઈ શકશે નહીં."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"નોટિફિકેશનના આ ગ્રૂપની ગોઠવણી અહીં કરી શકાશે નહીં"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"પ્રૉક્સી નોટિફિકેશન"</string>
@@ -788,8 +784,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"કીબોર્ડ સ્વિચર"</string>
     <string name="save" msgid="3392754183673848006">"સાચવો"</string>
-    <!-- no translation found for reset (8715144064608810383) -->
-    <skip />
+    <string name="reset" msgid="8715144064608810383">"રીસેટ કરો"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"બટનની પહોળાઈ સમાયોજિત કરો"</string>
     <string name="clipboard" msgid="8517342737534284617">"ક્લિપબોર્ડ"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"કસ્ટમ નેવિગેશન બટન"</string>
@@ -885,8 +880,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"જમણે"</string>
     <string name="tuner_menu" msgid="363690665924769420">"મેનૂ"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> ઍપ્લિકેશન"</string>
-    <!-- no translation found for notification_channel_alerts (3385787053375150046) -->
-    <skip />
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"અલર્ટ"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"બૅટરી"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"સ્ક્રીનશૉટ"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"સામાન્ય સંદેશા"</string>
@@ -896,8 +890,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ચાલી રહી છે"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ઍપ ઇન્સ્ટૉલ કર્યા વિના ખુલી જાય છે."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ઍપ ઇન્સ્ટૉલ કર્યા વિના ખુલી જાય છે. વધુ જાણવા માટે ટૅપ કરો."</string>
-    <!-- no translation found for app_info (5153758994129963243) -->
-    <skip />
+    <string name="app_info" msgid="5153758994129963243">"ઍપની માહિતી"</string>
     <string name="go_to_web" msgid="636673528981366511">"બ્રાઉઝર પર જાઓ"</string>
     <string name="mobile_data" msgid="4564407557775397216">"મોબાઇલ ડેટા"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -931,13 +924,6 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"સેટિંગ"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"સમજાઈ ગયું"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> ઍપ તમારા <xliff:g id="TYPES_LIST">%2$s</xliff:g>નો ઉપયોગ કરી રહી છે."</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ઍપ્લિકેશન તમારા <xliff:g id="TYPES_LIST">%s</xliff:g>નો ઉપયોગ કરી રહી છે."</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" અને "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"કૅમેરા"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"સ્થાન"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"માઇક્રોફોન"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"સેન્સર બંધ છે"</string>
     <string name="device_services" msgid="1549944177856658705">"ડિવાઇસ સેવાઓ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"કોઈ શીર્ષક નથી"</string>
@@ -960,4 +946,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"સિસ્ટમ નૅવિગેશન અપડેટ કર્યું. ફેરફારો કરવા માટે, સેટિંગ પર જાઓ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"સિસ્ટમ નૅવિગેશનને અપડેટ કરવા માટે સેટિંગ પર જાઓ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"સ્ટૅન્ડબાય"</string>
+    <string name="magnification_overlay_title" msgid="6584179429612427958">"વિસ્તૃતીકરણ ઓવરલે વિંડો"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"વિસ્તૃતીકરણ વિંડો"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"વિસ્તૃતીકરણ વિંડોના નિયંત્રણો"</string>
 </resources>

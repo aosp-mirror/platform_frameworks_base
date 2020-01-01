@@ -385,7 +385,9 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‎‏‏‎‏‏‎‎‎‏‎‎‎‏‎‎‎‎‎‏‏‏‎‏‎‏‎‏‏‏‎‏‎‏‎‏‎‏‏‎On at ‎‏‎‎‏‏‎<xliff:g id="TIME">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‎‏‎‎‏‎‏‎‎‏‏‏‏‏‎‏‏‏‏‏‎‏‎‎‎‏‎‎‏‎‎‎‎‎‎‏‎‏‏‏‏‏‎‏‎‏‎‎‏‎‎‏‏‎‎‎Until ‎‏‎‎‏‏‎<xliff:g id="TIME">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‎‏‏‎‏‎‎‏‏‏‏‏‏‏‎‏‏‏‎‏‏‎‎‏‏‎‏‎‏‏‎‎‎‎‎‎‎‎‎‏‏‏‎‏‎‎‎‏‎‎‏‏‎‏‏‎‎Dark theme‎‏‎‎‏‎"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‎‏‎‎‎‏‎‎‎‏‏‎‎‏‏‏‎‎‏‎‎‏‎‏‎‏‏‏‎‏‎‎‎‎‏‏‎‏‏‏‏‎‏‏‎‎‎‎‎‎‎‏‏‏‏‎‏‎Dark theme‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎Battery saver‎‏‎‎‏‎"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‏‎‎‎‎‏‎‏‎‎‏‎‎‏‎‏‏‎‎‏‎‏‎‎‏‎‎‎‏‎‎‎‎‎‏‎‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‏‎Battery Saver‎‏‎‎‏‎"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‏‏‎‎‎‎‎‏‎‎‎‎‎‎‏‏‎‏‏‏‏‏‏‎‏‏‎‎‎‏‎‎‎‎‎‏‏‎‏‎‎‎‎‏‎‎‏‏‎‏‏‎‏‏‏‏‎‎On at sunset‎‏‎‎‏‎"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‎‏‎‎‎‎‏‎‏‎‎‏‎‏‏‏‎‏‎‎‎‏‎‎‎‏‎‎‏‎‎‏‎‏‎‎‏‏‎‎‏‎‎‎‎‎‏‏‎‏‏‏‎‎‎‎Until sunrise‎‏‎‎‏‎"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‏‎‏‎‎‎‎‏‏‎‏‏‎‎‎‎‎‎‎‏‏‎‏‎‏‎‏‎‎‎‏‎‎‏‎‏‏‏‏‎‏‏‎‏‎‎‎‏‏‏‎‏‎‏‎‏‎NFC‎‏‎‎‏‎"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‎‎‎‏‎‏‏‎‎‎‏‎‎‏‏‏‎‎‏‏‎‎‎‏‏‏‏‎‎‎‏‎‏‎‎‎‎‏‎‏‎‎‎‎‎‏‎‏‏‎‎‏‎‏‏‏‎NFC is disabled‎‏‎‎‏‎"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‏‏‏‏‏‎‎‏‎‎‏‏‎‎‏‎‎‏‏‏‎‎‏‏‏‎‎‏‏‏‏‏‎‎‏‎‏‎‏‏‏‏‎‏‏‏‏‎‎‏‎‏‏‎‏‏‎‎NFC is enabled‎‏‎‎‏‎"</string>
@@ -410,10 +412,6 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‎‎‎‏‎‎‎‏‎‏‎‏‎‎‎‎‏‎‎‏‎‎‏‏‎‎‎‏‏‎‎‎‎‎‎‎‏‏‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‎‎‏‎Tap again to open‎‏‎‎‏‎"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‏‏‏‎‏‏‏‎‏‎‎‏‏‏‏‎‏‏‎‏‏‏‎‎‏‏‏‏‎‏‎‎‎‎‎‏‏‏‎‏‏‏‎‎‎‏‎‎‏‎‎‎‎‎‏‎Swipe up to open‎‏‎‎‏‎"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‎‏‎‎‏‏‏‎‏‎‎‎‏‏‏‎‎‎‏‏‎‎‏‎‎‎‏‎‎‎‎‎‏‎‎‎‏‎‏‎‏‏‏‏‎‏‏‏‎‎‎‏‎‎‏‏‎Swipe up to try again‎‏‎‎‏‎"</string>
-    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
-    <skip />
-    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
-    <skip />
     <string name="do_disclosure_generic" msgid="2388094207542706440">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‎‎‏‎‎‏‎‎‎‎‏‏‎‏‏‏‎‎‎‎‎‏‏‏‎‏‏‏‎‎‏‎‏‏‎‎‎‎‎‎‎‏‎‎‎‎‎‏‎‎‎‎‏‎‎‎‎This device is managed by your organization‎‏‎‎‏‎"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‎‎‎‏‎‏‎‎‎‎‏‏‎‎‏‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‏‎‎‎‏‎‏‎‏‎‏‏‏‏‎‏‏‎‏‏‎This device is managed by ‎‏‎‎‏‏‎<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="phone_hint" msgid="6682125338461375925">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‎‏‏‏‎‏‏‏‎‏‎‏‏‎‏‏‎‎‏‎‏‏‏‏‎‎‎‎‏‏‏‏‎‏‎‎‎‎‎‏‎‎‎‏‏‎‏‏‎‏‏‎‏‎‏‎Swipe from icon for phone‎‏‎‎‏‎"</string>
@@ -465,9 +463,11 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‏‎‏‏‏‎‎‏‏‏‏‏‎‎‏‎‏‎‎‎‏‎‎‎‎‎‎‎‏‏‎‏‏‎‏‎‏‎‏‏‎‏‏‏‏‏‏‎‏‎‎‏‎‎Battery Saver is on‎‏‎‎‏‎"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‎‏‎‏‎‏‎‎‎‏‏‏‎‎‎‏‎‎‎‏‏‎‎‏‎‎‏‏‎‎‏‎‏‏‎‎‎‏‎‏‎‏‎‏‏‏‎‎‎‏‏‏‎‏‏‏‎Reduces performance and background data‎‏‎‎‏‎"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‏‏‎‎‏‎‎‏‎‏‏‎‎‎‏‎‎‏‎‏‏‎‎‎‎‎‏‏‎‏‏‏‏‎‎‏‏‏‎‎‎‎‏‎‏‏‎‏‎‏‏‎‎‎‏‏‏‎Turn off Battery Saver‎‏‎‎‏‎"</string>
-    <string name="media_projection_dialog_text" msgid="5509958417853154019">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‏‏‏‎‏‏‏‎‏‎‎‏‏‎‏‏‏‏‏‏‏‎‎‏‏‏‎‏‏‏‏‎‏‎‎‏‏‏‏‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‏‎While recording or casting, ‎‏‎‎‏‏‎<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>‎‏‎‎‏‏‏‎ can capture any sensitive information that is displayed on your screen or played from your device, including sensitive information such as audio, passwords, payment info, photos and messages.‎‏‎‎‏‎"</string>
-    <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‏‎‎‎‎‏‏‏‎‎‏‏‏‎‏‏‏‏‏‎‎‏‎‎‎‏‏‏‏‎‏‏‎‏‏‎‏‏‎‎‏‏‏‏‎‏‎‎‎‎‏‎‏‎‎‎‎While recording or casting, the service providing this function can capture any sensitive information that is displayed on your screen or played from your device, including sensitive information such as audio, passwords, payment info, photos and messages.‎‏‎‎‏‎"</string>
-    <string name="media_projection_dialog_title" msgid="6379655487632663290">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‎‎‎‏‎‎‏‎‎‎‏‎‏‏‎‏‏‎‏‏‏‎‏‎‏‏‏‏‎‎‏‏‎‏‏‎‏‏‏‎‏‏‎‎‎‏‎‏‏‏‏‏‎‏‎‎Exposing sensitive info during casting/recording‎‏‎‎‏‎"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‎‎‏‎‏‏‏‎‏‏‎‎‎‎‏‎‎‏‎‏‎‎‏‎‏‎‎‏‏‏‎‎‏‎‏‎‎‏‎‏‎‏‏‎‎‏‎‏‏‎‏‎‏‎‏‎‎‎‎‏‎‎‏‏‎<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>‎‏‎‎‏‏‏‎ will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.‎‏‎‎‏‎"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‏‎‏‎‎‏‎‏‏‏‎‎‎‎‎‎‎‏‏‎‏‎‎‏‏‏‎‏‎‎‎‎‎‎‏‎‎‏‏‎‎‏‏‏‏‎‎‏‎‏‏‎‏‎‎‏‏‎The service providing this function will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.‎‏‎‎‏‎"</string>
+    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
+    <skip />
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‎‎‎‎‎‏‎‏‎‎‎‎‎‏‏‎‎‏‎‎‏‎‏‏‏‎‎‏‏‏‏‏‎‏‏‎‏‏‏‎‎‏‎‏‎‏‏‎‏‎‎‎‎‏‏‎‎Start recording or casting with ‎‏‎‎‏‏‎<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>‎‏‎‎‏‏‏‎?‎‏‎‎‏‎"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‏‏‏‎‏‎‏‎‏‎‏‏‏‏‏‏‎‏‎‎‎‏‎‏‏‏‎‎‏‏‎‏‎‎‏‎‏‎‎‏‎‎‏‏‏‎Don\'t show again‎‏‎‎‏‎"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‎‏‏‎‏‎‏‎‏‎‏‏‏‎‏‎‎‎‏‎‎‎‎‎‏‎‏‎‏‏‏‏‎‏‏‎‎‏‎‎‏‏‎‎‏‎‎‎‏‏‏‏‏‎‎‏‎‎Clear all‎‏‎‎‏‎"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‏‏‏‎‏‎‏‏‏‎‎‏‏‏‏‏‎‏‎‏‏‎‎‏‎‎‎‏‎‎‎‎‏‏‎‎‏‏‎‏‏‏‏‏‎‏‏‏‏‏‎‎‎Manage‎‏‎‎‏‎"</string>
@@ -924,13 +924,6 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‏‎‏‎‎‏‏‎‏‎‏‏‎‏‎‏‏‎‏‏‎‏‎‏‏‏‎‎‎‎‎‎‏‎‏‏‎‎‎‎‏‎‎‏‏‎‏‏‎‏‎‎‏‎‏‏‎‎Settings‎‏‎‎‏‎"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‏‏‎‏‏‏‏‎‏‏‏‏‏‏‎‎‎‎‏‏‏‏‎‏‎‎‏‎‏‏‏‏‎‎‏‏‎‏‎‎‏‎‎‏‎‏‎‎‎‏‏‎‏‎‎Got it‎‏‎‎‏‎"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‎‎‎‏‏‎‎‏‎‏‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‎‏‎‏‏‏‏‎‏‎‎‎‏‎‏‎‏‎‎‎‎‎‏‎‏‎‎‎‎‏‏‎‎Dump SysUI Heap‎‏‎‎‏‎"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‏‎‎‏‏‎‏‏‎‏‎‏‎‏‏‎‎‎‏‏‏‎‎‎‎‎‎‎‏‏‏‎‎‏‎‏‏‎‎‏‏‎‎‎‎‎‏‏‏‏‎‏‏‎‎‎‏‎‎‏‎‎‏‏‎<xliff:g id="APP">%1$s</xliff:g>‎‏‎‎‏‏‏‎ is using your ‎‏‎‎‏‏‎<xliff:g id="TYPES_LIST">%2$s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎"</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‎‎‏‏‏‎‏‎‏‏‏‎‎‎‏‏‏‏‎‎‏‏‎‎‏‏‎‏‎‎‏‎‏‎‎‏‎‎Applications are using your ‎‏‎‎‏‏‎<xliff:g id="TYPES_LIST">%s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎"</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‏‏‏‏‎‎‏‏‎‎‎‏‎‎‏‏‏‎‏‏‏‏‎‎‏‏‏‎‏‎‎‎‎‎‎‎‏‏‏‎‎‏‎‎‎‏‎‎‎‎‏‎‎‏‎‏‏‎, ‎‏‎‎‏‎ "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" ‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‏‎‏‏‏‏‏‎‎‏‏‎‎‏‏‎‎‏‎‎‏‎‎‏‎‏‏‏‎‏‏‎‎‎‏‎‏‏‏‎‏‏‎‏‎‏‎‎‏‎‎‏‏‏‎ and ‎‏‎‎‏‎ "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‏‎‏‎‎‏‏‎‎‎‎‏‎‏‎‏‏‏‏‎‏‏‏‏‎‏‎‏‏‎‏‏‎‎‏‎‎‎‎‎‎‎‎‏‎‏‏‎‏‏‏‏‎‎‎camera‎‏‎‎‏‎"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‏‏‎‎‏‏‏‎‏‏‏‎‎‏‎‎‎‏‏‎‏‏‏‏‏‏‏‎‏‎‎‏‎‎‎‏‏‏‏‏‏‎‎‏‎‏‏‏‎‎‎‏‏‏‏‎location‎‏‎‎‏‎"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‎‎‎‏‎‎‏‏‏‎‎‏‎‏‏‏‎‏‎‏‎‏‎‏‎‏‎‏‎‎‏‎‏‎‎‎‎‎‎‎‏‎‎‏‎‎‏‏‎‎‎microphone‎‏‎‎‏‎"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‏‏‏‎‏‏‏‏‎‏‎‎‏‎‎‏‏‏‎‏‎‎‎‏‎‏‎‎‏‏‎‎‎‏‏‎‏‎‏‎‏‏‎‏‎‏‏‏‎‎‎‏‏‏‎‎‎Sensors off‎‏‎‎‏‎"</string>
     <string name="device_services" msgid="1549944177856658705">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‏‎‎‎‎‎‏‎‏‎‎‎‎‎‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‏‏‎‏‏‎‏‎‏‎‎‏‎‏‏‏‏‎‏‎‎‎‏‎‎‎‏‎Device Services‎‏‎‎‏‎"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‏‏‎‏‎‎‏‎‎‏‎‏‏‏‏‏‎‎‎‎‎‎‎‏‏‏‎‎‏‎‎‏‏‎‎‎‏‏‏‎‎‏‏‎‏‏‏‎‎‏‏‏‏‎‏‎‎No title‎‏‎‎‏‎"</string>
@@ -953,4 +946,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‏‏‏‎‎‎‎‏‎‏‏‏‏‏‎‎‎‏‏‎‎‏‏‏‏‎‏‏‏‎‏‏‎‎‎‎‎‏‎‎‎‎‏‏‎‏‎‎‎‎‎‎‎‎‎System navigation updated. To make changes, go to Settings.‎‏‎‎‏‎"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‎‏‏‏‏‏‎‎‎‏‎‏‏‏‎‎‏‎‏‎‎‎‏‏‏‏‏‎‎‎‏‎‏‏‎‎‎‎‎Go to Settings to update system navigation‎‏‎‎‏‎"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‎‎‎‎‎‎‏‏‏‎‏‏‎‏‏‏‎‏‏‎‎‎‎‏‏‎‎‏‎‏‎‎‏‎‏‎‎‎‏‎‏‎‎‏‏‎‏‏‏‎‎‏‎‏‎Standby‎‏‎‎‏‎"</string>
+    <string name="magnification_overlay_title" msgid="6584179429612427958">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‏‎‏‏‏‏‏‏‎‏‏‎‏‎‎‎‏‎‎‏‏‏‎‏‎‎‎‎‏‏‏‎‏‏‏‏‎‏‏‏‎‎‏‏‎‏‎‏‎‏‏‎‏‏‎‎Magnification Overlay Window‎‏‎‎‏‎"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‏‎‎‎‎‎‎‎‎‎‎‏‏‎‎‎‎‏‎‏‎‏‏‏‎‏‎‏‎‎‎‎‎‎‏‏‏‎‎‎‏‏‎‏‎‎‏‎‏‏‎‏‏‏‎‏‎Magnification Window‎‏‎‎‏‎"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‏‏‏‎‏‏‏‎‎‎‏‏‏‏‏‎‏‎‏‏‏‏‎‎‎‎‏‎‎‏‎‎‏‎‏‎‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‏‏‎Magnification Window Controls‎‏‎‎‏‎"</string>
 </resources>
