@@ -4059,6 +4059,10 @@ package android.media {
     method public android.media.AudioRecord.Builder setSessionId(int) throws java.lang.IllegalArgumentException;
   }
 
+  public final class AudioRecordingConfiguration implements android.os.Parcelable {
+    method public int getClientUid();
+  }
+
   public class HwAudioSource {
     method public boolean isPlaying();
     method public void start();

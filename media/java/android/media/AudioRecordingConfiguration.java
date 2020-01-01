@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.media.audiofx.AudioEffect;
@@ -224,15 +225,16 @@ public final class AudioRecordingConfiguration implements Parcelable {
     public String getClientPackageName() { return mClientPackageName; }
 
     /**
-     * @pending for SystemApi
      * Returns the user id of the application performing the recording.
      * <p>This information is only available if the caller has the
      * {@link android.Manifest.permission.MODIFY_AUDIO_ROUTING}
      * permission.
      * <br>The result is -1 without the permission.
      * @return the user id
+     *
+     * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public int getClientUid() { return mClientUid; }
 
     /**
