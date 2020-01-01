@@ -94,7 +94,7 @@ public class SystemPropertiesTest extends TestCase {
     }
 
     @SmallTest
-    private static void testHandle() throws Exception {
+    public void testHandle() throws Exception {
         String value;
         SystemProperties.Handle handle = SystemProperties.find("doesnotexist_2341431");
         assertNull(handle);

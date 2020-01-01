@@ -36,10 +36,10 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The {@link HdmiControlManager} class is used to send HDMI control messages
@@ -532,7 +532,7 @@ public final class HdmiControlManager {
      */
     @SystemApi
     public void powerOffDevice(@NonNull HdmiDeviceInfo deviceInfo) {
-        Preconditions.checkNotNull(deviceInfo);
+        Objects.requireNonNull(deviceInfo);
         try {
             mService.powerOffRemoteDevice(
                     deviceInfo.getLogicalAddress(), deviceInfo.getDevicePowerStatus());
@@ -549,7 +549,7 @@ public final class HdmiControlManager {
     @Deprecated
     @SystemApi
     public void powerOffRemoteDevice(@NonNull HdmiDeviceInfo deviceInfo) {
-        Preconditions.checkNotNull(deviceInfo);
+        Objects.requireNonNull(deviceInfo);
         try {
             mService.powerOffRemoteDevice(
                     deviceInfo.getLogicalAddress(), deviceInfo.getDevicePowerStatus());
@@ -569,7 +569,7 @@ public final class HdmiControlManager {
      * @hide
      */
     public void powerOnDevice(HdmiDeviceInfo deviceInfo) {
-        Preconditions.checkNotNull(deviceInfo);
+        Objects.requireNonNull(deviceInfo);
         try {
             mService.powerOnRemoteDevice(
                     deviceInfo.getLogicalAddress(), deviceInfo.getDevicePowerStatus());
@@ -586,7 +586,7 @@ public final class HdmiControlManager {
     @Deprecated
     @SystemApi
     public void powerOnRemoteDevice(HdmiDeviceInfo deviceInfo) {
-        Preconditions.checkNotNull(deviceInfo);
+        Objects.requireNonNull(deviceInfo);
         try {
             mService.powerOnRemoteDevice(
                     deviceInfo.getLogicalAddress(), deviceInfo.getDevicePowerStatus());
@@ -610,7 +610,7 @@ public final class HdmiControlManager {
      */
     @SystemApi
     public void setActiveSource(@NonNull HdmiDeviceInfo deviceInfo) {
-        Preconditions.checkNotNull(deviceInfo);
+        Objects.requireNonNull(deviceInfo);
         try {
             mService.askRemoteDeviceToBecomeActiveSource(deviceInfo.getPhysicalAddress());
         } catch (RemoteException e) {
@@ -626,7 +626,7 @@ public final class HdmiControlManager {
     @Deprecated
     @SystemApi
     public void requestRemoteDeviceToBecomeActiveSource(@NonNull HdmiDeviceInfo deviceInfo) {
-        Preconditions.checkNotNull(deviceInfo);
+        Objects.requireNonNull(deviceInfo);
         try {
             mService.askRemoteDeviceToBecomeActiveSource(deviceInfo.getPhysicalAddress());
         } catch (RemoteException e) {
@@ -689,7 +689,7 @@ public final class HdmiControlManager {
      */
     @SystemApi
     public boolean isDeviceConnected(@NonNull HdmiDeviceInfo targetDevice) {
-        Preconditions.checkNotNull(targetDevice);
+        Objects.requireNonNull(targetDevice);
         int physicalAddress = getLocalPhysicalAddress();
         if (physicalAddress == INVALID_PHYSICAL_ADDRESS) {
             return false;
@@ -710,7 +710,7 @@ public final class HdmiControlManager {
     @Deprecated
     @SystemApi
     public boolean isRemoteDeviceConnected(@NonNull HdmiDeviceInfo targetDevice) {
-        Preconditions.checkNotNull(targetDevice);
+        Objects.requireNonNull(targetDevice);
         int physicalAddress = getLocalPhysicalAddress();
         if (physicalAddress == INVALID_PHYSICAL_ADDRESS) {
             return false;

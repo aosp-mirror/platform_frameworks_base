@@ -39,7 +39,6 @@ import android.util.TypedValue;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -52,6 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Provides access to an application's raw asset files; see {@link Resources}
@@ -273,7 +273,7 @@ public final class AssetManager implements AutoCloseable {
      * @hide
      */
     public void setApkAssets(@NonNull ApkAssets[] apkAssets, boolean invalidateCaches) {
-        Preconditions.checkNotNull(apkAssets, "apkAssets");
+        Objects.requireNonNull(apkAssets, "apkAssets");
 
         ApkAssets[] newApkAssets = new ApkAssets[sSystemApkAssets.length + apkAssets.length];
 
@@ -352,7 +352,7 @@ public final class AssetManager implements AutoCloseable {
      * @hide
      */
     public int findCookieForPath(@NonNull String path) {
-        Preconditions.checkNotNull(path, "path");
+        Objects.requireNonNull(path, "path");
         synchronized (this) {
             ensureValidLocked();
             final int count = mApkAssets.length;
@@ -396,7 +396,7 @@ public final class AssetManager implements AutoCloseable {
     }
 
     private int addAssetPathInternal(String path, boolean overlay, boolean appAsLib) {
-        Preconditions.checkNotNull(path, "path");
+        Objects.requireNonNull(path, "path");
         synchronized (this) {
             ensureOpenLocked();
             final int count = mApkAssets.length;
@@ -471,7 +471,7 @@ public final class AssetManager implements AutoCloseable {
     @UnsupportedAppUsage
     boolean getResourceValue(@AnyRes int resId, int densityDpi, @NonNull TypedValue outValue,
             boolean resolveRefs) {
-        Preconditions.checkNotNull(outValue, "outValue");
+        Objects.requireNonNull(outValue, "outValue");
         synchronized (this) {
             ensureValidLocked();
             final int cookie = nativeGetResourceValue(
@@ -568,7 +568,7 @@ public final class AssetManager implements AutoCloseable {
      * @see TypedArray#STYLE_DENSITY
      */
     int getResourceArray(@ArrayRes int resId, @NonNull int[] outData) {
-        Preconditions.checkNotNull(outData, "outData");
+        Objects.requireNonNull(outData, "outData");
         synchronized (this) {
             ensureValidLocked();
             return nativeGetResourceArray(mObject, resId, outData);
@@ -652,7 +652,7 @@ public final class AssetManager implements AutoCloseable {
      */
     boolean getThemeValue(long theme, @AnyRes int resId, @NonNull TypedValue outValue,
             boolean resolveRefs) {
-        Preconditions.checkNotNull(outValue, "outValue");
+        Objects.requireNonNull(outValue, "outValue");
         synchronized (this) {
             ensureValidLocked();
             final int cookie = nativeThemeGetAttributeValue(mObject, theme, resId, outValue,
@@ -791,7 +791,7 @@ public final class AssetManager implements AutoCloseable {
      * @see #list
      */
     public @NonNull InputStream open(@NonNull String fileName, int accessMode) throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             ensureOpenLocked();
 
@@ -822,7 +822,7 @@ public final class AssetManager implements AutoCloseable {
      * @return An open AssetFileDescriptor.
      */
     public @NonNull AssetFileDescriptor openFd(@NonNull String fileName) throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             ensureOpenLocked();
 
@@ -853,7 +853,7 @@ public final class AssetManager implements AutoCloseable {
      * @see #open
      */
     public @Nullable String[] list(@NonNull String path) throws IOException {
-        Preconditions.checkNotNull(path, "path");
+        Objects.requireNonNull(path, "path");
         synchronized (this) {
             ensureValidLocked();
             return nativeList(mObject, path);
@@ -922,7 +922,7 @@ public final class AssetManager implements AutoCloseable {
     @UnsupportedAppUsage
     public @NonNull InputStream openNonAsset(int cookie, @NonNull String fileName, int accessMode)
             throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             ensureOpenLocked();
 
@@ -967,7 +967,7 @@ public final class AssetManager implements AutoCloseable {
      */
     public @NonNull AssetFileDescriptor openNonAssetFd(int cookie, @NonNull String fileName)
             throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             ensureOpenLocked();
 
@@ -1034,7 +1034,7 @@ public final class AssetManager implements AutoCloseable {
      * @hide
      */
     @NonNull XmlBlock openXmlBlockAsset(int cookie, @NonNull String fileName) throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             ensureOpenLocked();
 
@@ -1145,7 +1145,7 @@ public final class AssetManager implements AutoCloseable {
     void applyStyle(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
             @Nullable XmlBlock.Parser parser, @NonNull int[] inAttrs, long outValuesAddress,
             long outIndicesAddress) {
-        Preconditions.checkNotNull(inAttrs, "inAttrs");
+        Objects.requireNonNull(inAttrs, "inAttrs");
         synchronized (this) {
             // Need to synchronize on AssetManager because we will be accessing
             // the native implementation of AssetManager.
@@ -1168,9 +1168,9 @@ public final class AssetManager implements AutoCloseable {
     boolean resolveAttrs(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
             @Nullable int[] inValues, @NonNull int[] inAttrs, @NonNull int[] outValues,
             @NonNull int[] outIndices) {
-        Preconditions.checkNotNull(inAttrs, "inAttrs");
-        Preconditions.checkNotNull(outValues, "outValues");
-        Preconditions.checkNotNull(outIndices, "outIndices");
+        Objects.requireNonNull(inAttrs, "inAttrs");
+        Objects.requireNonNull(outValues, "outValues");
+        Objects.requireNonNull(outIndices, "outIndices");
         synchronized (this) {
             // Need to synchronize on AssetManager because we will be accessing
             // the native implementation of AssetManager.
@@ -1183,10 +1183,10 @@ public final class AssetManager implements AutoCloseable {
     @UnsupportedAppUsage
     boolean retrieveAttributes(@NonNull XmlBlock.Parser parser, @NonNull int[] inAttrs,
             @NonNull int[] outValues, @NonNull int[] outIndices) {
-        Preconditions.checkNotNull(parser, "parser");
-        Preconditions.checkNotNull(inAttrs, "inAttrs");
-        Preconditions.checkNotNull(outValues, "outValues");
-        Preconditions.checkNotNull(outIndices, "outIndices");
+        Objects.requireNonNull(parser, "parser");
+        Objects.requireNonNull(inAttrs, "inAttrs");
+        Objects.requireNonNull(outValues, "outValues");
+        Objects.requireNonNull(outIndices, "outIndices");
         synchronized (this) {
             // Need to synchronize on AssetManager because we will be accessing
             // the native implementation of AssetManager.
@@ -1290,14 +1290,14 @@ public final class AssetManager implements AutoCloseable {
         @Override
         public final int read(@NonNull byte[] b) throws IOException {
             ensureOpen();
-            Preconditions.checkNotNull(b, "b");
+            Objects.requireNonNull(b, "b");
             return nativeAssetRead(mAssetNativePtr, b, 0, b.length);
         }
 
         @Override
         public final int read(@NonNull byte[] b, int off, int len) throws IOException {
             ensureOpen();
-            Preconditions.checkNotNull(b, "b");
+            Objects.requireNonNull(b, "b");
             return nativeAssetRead(mAssetNativePtr, b, off, len);
         }
 

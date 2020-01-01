@@ -136,6 +136,7 @@ public class DataChangedJournalTest {
         assertThat(mJournal.toString()).isEqualTo(mFile.toString());
     }
 
+    @Test
     public void listJournals_invalidJournalFile_returnsEmptyList() throws Exception {
         when(invalidFile.listFiles()).thenReturn(null);
 

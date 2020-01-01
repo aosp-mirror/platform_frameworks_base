@@ -39,6 +39,7 @@ import android.media.MediaRouter;
 import android.media.MediaRouterClientState;
 import android.media.RemoteDisplayState;
 import android.media.RemoteDisplayState.RemoteDisplayInfo;
+import android.media.RouteSessionInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -521,6 +522,12 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     public void requestUpdateVolume2Manager(IMediaRouter2Manager manager,
             MediaRoute2Info route, int delta) {
         mService2.requestUpdateVolume2Manager(manager, route, delta);
+    }
+
+    // Binder call
+    @Override
+    public List<RouteSessionInfo> getActiveSessions(IMediaRouter2Manager manager) {
+        return mService2.getActiveSessions(manager);
     }
 
     void restoreBluetoothA2dp() {

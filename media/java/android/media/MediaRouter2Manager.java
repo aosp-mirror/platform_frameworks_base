@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Handler;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
@@ -176,6 +175,22 @@ public class MediaRouter2Manager {
         return routes;
     }
 
+    @NonNull
+    public List<RouteSessionInfo> getActiveSessions() {
+        Client client;
+        synchronized (sLock) {
+            client = mClient;
+        }
+        if (client != null) {
+            try {
+                return mMediaRouterService.getActiveSessions(client);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to get sessions. Service probably died.", ex);
+            }
+        }
+        return Collections.emptyList();
+    }
+
     /**
      * Gets the list of routes that are actively used by {@link MediaRouter2}.
      */
@@ -220,8 +235,7 @@ public class MediaRouter2Manager {
         }
         if (client != null) {
             try {
-                //TODO: make request id globally unique
-                int requestId = Process.myPid() * 10000 + mNextRequestId.getAndIncrement();
+                int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.requestCreateClientSession(
                         client, packageName, route, requestId);
             } catch (RemoteException ex) {

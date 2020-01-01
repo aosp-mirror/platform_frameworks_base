@@ -22,11 +22,10 @@ import android.app.PendingIntent;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
-
 import dalvik.system.CloseGuard;
 
 import java.io.Closeable;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -80,7 +79,7 @@ public class ContextHubClient implements Closeable {
      * @param clientProxy the proxy of the client at the service
      */
     /* package */ void setClientProxy(IContextHubClient clientProxy) {
-        Preconditions.checkNotNull(clientProxy, "IContextHubClient cannot be null");
+        Objects.requireNonNull(clientProxy, "IContextHubClient cannot be null");
         if (mClientProxy != null) {
             throw new IllegalStateException("Cannot change client proxy multiple times");
         }
@@ -140,7 +139,7 @@ public class ContextHubClient implements Closeable {
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @ContextHubTransaction.Result
     public int sendMessageToNanoApp(@NonNull NanoAppMessage message) {
-        Preconditions.checkNotNull(message, "NanoAppMessage cannot be null");
+        Objects.requireNonNull(message, "NanoAppMessage cannot be null");
 
         int maxPayloadBytes = mAttachedHub.getMaxPacketLengthBytes();
         byte[] payload = message.getMessageBody();

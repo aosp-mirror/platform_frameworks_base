@@ -180,9 +180,16 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testRollbackWhitelistedApp() throws Exception {
-        runPhase("testRollbackWhitelistedApp_Phase1");
-        getDevice().reboot();
-        runPhase("testRollbackWhitelistedApp_Phase2");
+        try {
+            runPhase("testRollbackWhitelistedApp_Phase1");
+            getDevice().reboot();
+            runPhase("testRollbackWhitelistedApp_Phase2");
+        } finally {
+            // testNativeWatchdogTriggersRollback will fail if multiple staged sessions are
+            // committed on a device which doesn't support checkpoint. Let's clean up the rollback
+            // so there is only one rollback to commit when testing native crashes.
+            runPhase("testRollbackWhitelistedApp_cleanUp");
+        }
     }
 
     private void crashProcess(String processName, int numberOfCrashes) throws Exception {

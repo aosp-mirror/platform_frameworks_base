@@ -62,8 +62,6 @@ import android.os.UserManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
-
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -72,6 +70,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -766,8 +765,8 @@ public class LauncherApps {
      */
     public boolean shouldHideFromSuggestions(@NonNull String packageName,
             @NonNull UserHandle user) {
-        Preconditions.checkNotNull(packageName, "packageName");
-        Preconditions.checkNotNull(user, "user");
+        Objects.requireNonNull(packageName, "packageName");
+        Objects.requireNonNull(user, "user");
         try {
             return mService.shouldHideFromSuggestions(packageName, user);
         } catch (RemoteException re) {
@@ -789,8 +788,8 @@ public class LauncherApps {
     public ApplicationInfo getApplicationInfo(@NonNull String packageName,
             @ApplicationInfoFlags int flags, @NonNull UserHandle user)
             throws PackageManager.NameNotFoundException {
-        Preconditions.checkNotNull(packageName, "packageName");
-        Preconditions.checkNotNull(user, "user");
+        Objects.requireNonNull(packageName, "packageName");
+        Objects.requireNonNull(user, "user");
         logErrorForInvalidProfileAccess(user);
         try {
             final ApplicationInfo ai = mService

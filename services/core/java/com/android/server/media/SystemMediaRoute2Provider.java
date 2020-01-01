@@ -35,6 +35,8 @@ import android.util.Log;
 
 import com.android.internal.R;
 
+import java.util.Collections;
+
 /**
  * Provides routes for local playbacks such as phone speaker, wired headset, or Bluetooth speakers.
  */
@@ -90,7 +92,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
     @Override
     public void requestCreateSession(String packageName, String routeId, String controlCategory,
-            int requestId) {
+            long requestId) {
         // Do nothing
     }
 
@@ -214,6 +216,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             builder.addRoute(mBluetoothA2dpRoute);
         }
         builder.addRoute(mDefaultRoute);
-        setAndNotifyProviderInfo(builder.build());
+        setAndNotifyProviderState(builder.build(), Collections.emptyList());
     }
 }

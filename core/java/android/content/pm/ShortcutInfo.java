@@ -51,6 +51,7 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -519,12 +520,12 @@ public final class ShortcutInfo implements Parcelable {
     public void enforceMandatoryFields(boolean forPinned) {
         Preconditions.checkStringNotEmpty(mId, "Shortcut ID must be provided");
         if (!forPinned) {
-            Preconditions.checkNotNull(mActivity, "Activity must be provided");
+            Objects.requireNonNull(mActivity, "Activity must be provided");
         }
         if (mTitle == null && mTitleResId == 0) {
             throw new IllegalArgumentException("Short label must be provided");
         }
-        Preconditions.checkNotNull(mIntents, "Shortcut Intent must be provided");
+        Objects.requireNonNull(mIntents, "Shortcut Intent must be provided");
         Preconditions.checkArgument(mIntents.length > 0, "Shortcut Intent must be provided");
     }
 
@@ -1008,7 +1009,7 @@ public final class ShortcutInfo implements Parcelable {
          */
         @NonNull
         public Builder setLocusId(@NonNull LocusId locusId) {
-            mLocusId = Preconditions.checkNotNull(locusId, "locusId cannot be null");
+            mLocusId = Objects.requireNonNull(locusId, "locusId cannot be null");
             return this;
         }
 
@@ -1039,7 +1040,7 @@ public final class ShortcutInfo implements Parcelable {
          */
         @NonNull
         public Builder setActivity(@NonNull ComponentName activity) {
-            mActivity = Preconditions.checkNotNull(activity, "activity cannot be null");
+            mActivity = Objects.requireNonNull(activity, "activity cannot be null");
             return this;
         }
 
@@ -1229,11 +1230,11 @@ public final class ShortcutInfo implements Parcelable {
          */
         @NonNull
         public Builder setIntents(@NonNull Intent[] intents) {
-            Preconditions.checkNotNull(intents, "intents cannot be null");
-            Preconditions.checkNotNull(intents.length, "intents cannot be empty");
+            Objects.requireNonNull(intents, "intents cannot be null");
+            Objects.requireNonNull(intents.length, "intents cannot be empty");
             for (Intent intent : intents) {
-                Preconditions.checkNotNull(intent, "intents cannot contain null");
-                Preconditions.checkNotNull(intent.getAction(), "intent's action must be set");
+                Objects.requireNonNull(intent, "intents cannot contain null");
+                Objects.requireNonNull(intent.getAction(), "intent's action must be set");
             }
             // Make sure always clone incoming intents.
             mIntents = cloneIntents(intents);
@@ -1267,10 +1268,10 @@ public final class ShortcutInfo implements Parcelable {
          */
         @NonNull
         public Builder setPersons(@NonNull Person[] persons) {
-            Preconditions.checkNotNull(persons, "persons cannot be null");
-            Preconditions.checkNotNull(persons.length, "persons cannot be empty");
+            Objects.requireNonNull(persons, "persons cannot be null");
+            Objects.requireNonNull(persons.length, "persons cannot be empty");
             for (Person person : persons) {
-                Preconditions.checkNotNull(person, "persons cannot contain null");
+                Objects.requireNonNull(person, "persons cannot contain null");
             }
             mPersons = clonePersons(persons);
             return this;
@@ -1979,7 +1980,7 @@ public final class ShortcutInfo implements Parcelable {
      * @hide
      */
     public void setIntents(Intent[] intents) throws IllegalArgumentException {
-        Preconditions.checkNotNull(intents);
+        Objects.requireNonNull(intents);
         Preconditions.checkArgument(intents.length > 0);
 
         mIntents = cloneIntents(intents);

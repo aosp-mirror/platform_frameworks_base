@@ -76,7 +76,6 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -89,6 +88,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -117,11 +117,11 @@ public class VoiceInteractionManagerService extends SystemService {
         mResolver = context.getContentResolver();
         mDbHelper = new DatabaseHelper(context);
         mServiceStub = new VoiceInteractionManagerServiceStub();
-        mAmInternal = Preconditions.checkNotNull(
+        mAmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
-        mAtmInternal = Preconditions.checkNotNull(
+        mAtmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityTaskManagerInternal.class));
-        mUserManagerInternal = Preconditions.checkNotNull(
+        mUserManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(UserManagerInternal.class));
 
         PermissionManagerServiceInternal permissionManagerInternal = LocalServices.getService(
@@ -149,7 +149,7 @@ public class VoiceInteractionManagerService extends SystemService {
     @Override
     public void onBootPhase(int phase) {
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
-            mShortcutServiceInternal = Preconditions.checkNotNull(
+            mShortcutServiceInternal = Objects.requireNonNull(
                     LocalServices.getService(ShortcutServiceInternal.class));
             mSoundTriggerInternal = LocalServices.getService(SoundTriggerInternal.class);
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {

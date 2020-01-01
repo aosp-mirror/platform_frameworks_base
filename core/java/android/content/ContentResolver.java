@@ -68,7 +68,6 @@ import android.util.Size;
 import android.util.SparseArray;
 
 import com.android.internal.util.MimeIconUtils;
-import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
 
@@ -711,7 +710,7 @@ public abstract class ContentResolver implements ContentInterface {
 
     /** {@hide} */
     public static @NonNull ContentResolver wrap(@NonNull ContentInterface wrapped) {
-        Preconditions.checkNotNull(wrapped);
+        Objects.requireNonNull(wrapped);
 
         return new ContentResolver(null, wrapped) {
             @Override
@@ -796,7 +795,7 @@ public abstract class ContentResolver implements ContentInterface {
      */
     @Override
     public final @Nullable String getType(@NonNull Uri url) {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         try {
             if (mWrapped != null) return mWrapped.getType(url);
@@ -856,8 +855,8 @@ public abstract class ContentResolver implements ContentInterface {
      */
     @Override
     public @Nullable String[] getStreamTypes(@NonNull Uri url, @NonNull String mimeTypeFilter) {
-        Preconditions.checkNotNull(url, "url");
-        Preconditions.checkNotNull(mimeTypeFilter, "mimeTypeFilter");
+        Objects.requireNonNull(url, "url");
+        Objects.requireNonNull(mimeTypeFilter, "mimeTypeFilter");
 
         try {
             if (mWrapped != null) return mWrapped.getStreamTypes(url, mimeTypeFilter);
@@ -998,7 +997,7 @@ public abstract class ContentResolver implements ContentInterface {
     public final @Nullable Cursor query(final @RequiresPermission.Read @NonNull Uri uri,
             @Nullable String[] projection, @Nullable Bundle queryArgs,
             @Nullable CancellationSignal cancellationSignal) {
-        Preconditions.checkNotNull(uri, "uri");
+        Objects.requireNonNull(uri, "uri");
 
         try {
             if (mWrapped != null) {
@@ -1112,7 +1111,7 @@ public abstract class ContentResolver implements ContentInterface {
      */
     @Override
     public final @Nullable Uri canonicalize(@NonNull Uri url) {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         try {
             if (mWrapped != null) return mWrapped.canonicalize(url);
@@ -1156,7 +1155,7 @@ public abstract class ContentResolver implements ContentInterface {
      */
     @Override
     public final @Nullable Uri uncanonicalize(@NonNull Uri url) {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         try {
             if (mWrapped != null) return mWrapped.uncanonicalize(url);
@@ -1202,7 +1201,7 @@ public abstract class ContentResolver implements ContentInterface {
     @Override
     public final boolean refresh(@NonNull Uri url, @Nullable Bundle extras,
             @Nullable CancellationSignal cancellationSignal) {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         try {
             if (mWrapped != null) return mWrapped.refresh(url, extras, cancellationSignal);
@@ -1236,7 +1235,7 @@ public abstract class ContentResolver implements ContentInterface {
     /** {@hide} */
     @Override
     public int checkUriPermission(@NonNull Uri uri, int uid, @Intent.AccessUriMode int modeFlags) {
-        Preconditions.checkNotNull(uri, "uri");
+        Objects.requireNonNull(uri, "uri");
 
         try {
             if (mWrapped != null) return mWrapped.checkUriPermission(uri, uid, modeFlags);
@@ -1272,7 +1271,7 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public final @Nullable InputStream openInputStream(@NonNull Uri uri)
             throws FileNotFoundException {
-        Preconditions.checkNotNull(uri, "uri");
+        Objects.requireNonNull(uri, "uri");
         String scheme = uri.getScheme();
         if (SCHEME_ANDROID_RESOURCE.equals(scheme)) {
             // Note: left here to avoid breaking compatibility.  May be removed
@@ -1579,8 +1578,8 @@ public abstract class ContentResolver implements ContentInterface {
     public final @Nullable AssetFileDescriptor openAssetFileDescriptor(@NonNull Uri uri,
             @NonNull String mode, @Nullable CancellationSignal cancellationSignal)
                     throws FileNotFoundException {
-        Preconditions.checkNotNull(uri, "uri");
-        Preconditions.checkNotNull(mode, "mode");
+        Objects.requireNonNull(uri, "uri");
+        Objects.requireNonNull(mode, "mode");
 
         try {
             if (mWrapped != null) return mWrapped.openAssetFile(uri, mode, cancellationSignal);
@@ -1764,8 +1763,8 @@ public abstract class ContentResolver implements ContentInterface {
     public final @Nullable AssetFileDescriptor openTypedAssetFileDescriptor(@NonNull Uri uri,
             @NonNull String mimeType, @Nullable Bundle opts,
             @Nullable CancellationSignal cancellationSignal) throws FileNotFoundException {
-        Preconditions.checkNotNull(uri, "uri");
-        Preconditions.checkNotNull(mimeType, "mimeType");
+        Objects.requireNonNull(uri, "uri");
+        Objects.requireNonNull(mimeType, "mimeType");
 
         try {
             if (mWrapped != null) return mWrapped.openTypedAssetFile(uri, mimeType, opts, cancellationSignal);
@@ -1933,7 +1932,7 @@ public abstract class ContentResolver implements ContentInterface {
     @Override
     public final @Nullable Uri insert(@RequiresPermission.Write @NonNull Uri url,
             @Nullable ContentValues values, @Nullable Bundle extras) {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         try {
             if (mWrapped != null) return mWrapped.insert(url, values, extras);
@@ -1980,8 +1979,8 @@ public abstract class ContentResolver implements ContentInterface {
     public @NonNull ContentProviderResult[] applyBatch(@NonNull String authority,
             @NonNull ArrayList<ContentProviderOperation> operations)
                     throws RemoteException, OperationApplicationException {
-        Preconditions.checkNotNull(authority, "authority");
-        Preconditions.checkNotNull(operations, "operations");
+        Objects.requireNonNull(authority, "authority");
+        Objects.requireNonNull(operations, "operations");
 
         try {
             if (mWrapped != null) return mWrapped.applyBatch(authority, operations);
@@ -2013,8 +2012,8 @@ public abstract class ContentResolver implements ContentInterface {
     @Override
     public final int bulkInsert(@RequiresPermission.Write @NonNull Uri url,
                 @NonNull ContentValues[] values) {
-        Preconditions.checkNotNull(url, "url");
-        Preconditions.checkNotNull(values, "values");
+        Objects.requireNonNull(url, "url");
+        Objects.requireNonNull(values, "values");
 
         try {
             if (mWrapped != null) return mWrapped.bulkInsert(url, values);
@@ -2068,7 +2067,7 @@ public abstract class ContentResolver implements ContentInterface {
      */
     @Override
     public final int delete(@RequiresPermission.Write @NonNull Uri url, @Nullable Bundle extras) {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         try {
             if (mWrapped != null) return mWrapped.delete(url, extras);
@@ -2130,7 +2129,7 @@ public abstract class ContentResolver implements ContentInterface {
     @Override
     public final int update(@RequiresPermission.Write @NonNull Uri uri,
             @Nullable ContentValues values, @Nullable Bundle extras) {
-        Preconditions.checkNotNull(uri, "uri");
+        Objects.requireNonNull(uri, "uri");
 
         try {
             if (mWrapped != null) return mWrapped.update(uri, values, extras);
@@ -2179,8 +2178,8 @@ public abstract class ContentResolver implements ContentInterface {
     @Override
     public final @Nullable Bundle call(@NonNull String authority, @NonNull String method,
             @Nullable String arg, @Nullable Bundle extras) {
-        Preconditions.checkNotNull(authority, "authority");
-        Preconditions.checkNotNull(method, "method");
+        Objects.requireNonNull(authority, "authority");
+        Objects.requireNonNull(method, "method");
 
         try {
             if (mWrapped != null) return mWrapped.call(authority, method, arg, extras);
@@ -2297,7 +2296,7 @@ public abstract class ContentResolver implements ContentInterface {
      * that services the content at uri or null if there isn't one.
      */
     public final @Nullable ContentProviderClient acquireContentProviderClient(@NonNull Uri uri) {
-        Preconditions.checkNotNull(uri, "uri");
+        Objects.requireNonNull(uri, "uri");
         IContentProvider provider = acquireProvider(uri);
         if (provider != null) {
             return new ContentProviderClient(this, provider, uri.getAuthority(), true);
@@ -2318,7 +2317,7 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public final @Nullable ContentProviderClient acquireContentProviderClient(
             @NonNull String name) {
-        Preconditions.checkNotNull(name, "name");
+        Objects.requireNonNull(name, "name");
         IContentProvider provider = acquireProvider(name);
         if (provider != null) {
             return new ContentProviderClient(this, provider, name, true);
@@ -2345,7 +2344,7 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public final @Nullable ContentProviderClient acquireUnstableContentProviderClient(
             @NonNull Uri uri) {
-        Preconditions.checkNotNull(uri, "uri");
+        Objects.requireNonNull(uri, "uri");
         IContentProvider provider = acquireUnstableProvider(uri);
         if (provider != null) {
             return new ContentProviderClient(this, provider, uri.getAuthority(), false);
@@ -2372,7 +2371,7 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public final @Nullable ContentProviderClient acquireUnstableContentProviderClient(
             @NonNull String name) {
-        Preconditions.checkNotNull(name, "name");
+        Objects.requireNonNull(name, "name");
         IContentProvider provider = acquireUnstableProvider(name);
         if (provider != null) {
             return new ContentProviderClient(this, provider, name, false);
@@ -2401,8 +2400,8 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public final void registerContentObserver(@NonNull Uri uri, boolean notifyForDescendants,
             @NonNull ContentObserver observer) {
-        Preconditions.checkNotNull(uri, "uri");
-        Preconditions.checkNotNull(observer, "observer");
+        Objects.requireNonNull(uri, "uri");
+        Objects.requireNonNull(observer, "observer");
         registerContentObserver(
                 ContentProvider.getUriWithoutUserId(uri),
                 notifyForDescendants,
@@ -2429,7 +2428,7 @@ public abstract class ContentResolver implements ContentInterface {
      * @see #registerContentObserver
      */
     public final void unregisterContentObserver(@NonNull ContentObserver observer) {
-        Preconditions.checkNotNull(observer, "observer");
+        Objects.requireNonNull(observer, "observer");
         try {
             IContentObserver contentObserver = observer.releaseContentObserver();
             if (contentObserver != null) {
@@ -2523,7 +2522,7 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public void notifyChange(@NonNull Uri uri, @Nullable ContentObserver observer,
             @NotifyFlags int flags) {
-        Preconditions.checkNotNull(uri, "uri");
+        Objects.requireNonNull(uri, "uri");
         notifyChange(
                 ContentProvider.getUriWithoutUserId(uri),
                 observer,
@@ -2557,7 +2556,7 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public void notifyChange(@NonNull Iterable<Uri> uris, @Nullable ContentObserver observer,
             @NotifyFlags int flags) {
-        Preconditions.checkNotNull(uris, "uris");
+        Objects.requireNonNull(uris, "uris");
 
         // Cluster based on user ID
         final SparseArray<ArrayList<Uri>> clusteredByUser = new SparseArray<>();
@@ -2628,7 +2627,7 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public void takePersistableUriPermission(@NonNull Uri uri,
             @Intent.AccessUriMode int modeFlags) {
-        Preconditions.checkNotNull(uri, "uri");
+        Objects.requireNonNull(uri, "uri");
         try {
             UriGrantsManager.getService().takePersistableUriPermission(
                     ContentProvider.getUriWithoutUserId(uri), modeFlags, /* toPackage= */ null,
@@ -2644,8 +2643,8 @@ public abstract class ContentResolver implements ContentInterface {
     @UnsupportedAppUsage
     public void takePersistableUriPermission(@NonNull String toPackage, @NonNull Uri uri,
             @Intent.AccessUriMode int modeFlags) {
-        Preconditions.checkNotNull(toPackage, "toPackage");
-        Preconditions.checkNotNull(uri, "uri");
+        Objects.requireNonNull(toPackage, "toPackage");
+        Objects.requireNonNull(uri, "uri");
         try {
             UriGrantsManager.getService().takePersistableUriPermission(
                     ContentProvider.getUriWithoutUserId(uri), modeFlags, toPackage,
@@ -2665,7 +2664,7 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public void releasePersistableUriPermission(@NonNull Uri uri,
             @Intent.AccessUriMode int modeFlags) {
-        Preconditions.checkNotNull(uri, "uri");
+        Objects.requireNonNull(uri, "uri");
         try {
             UriGrantsManager.getService().releasePersistableUriPermission(
                     ContentProvider.getUriWithoutUserId(uri), modeFlags, /* toPackage= */ null,
