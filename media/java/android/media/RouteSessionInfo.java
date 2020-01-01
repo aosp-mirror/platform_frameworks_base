@@ -106,9 +106,47 @@ public class RouteSessionInfo implements Parcelable {
 
     /**
      * Gets non-unique session id (int) from unique session id (string).
+     * If the corresponding session id could not be generated, it will return null.
+     * @hide
      */
-    public static int getSessionId(@NonNull String uniqueSessionId, @NonNull String providerId) {
-        return Integer.parseInt(uniqueSessionId.substring(providerId.length() + 1));
+    @Nullable
+    public static Integer getSessionId(@NonNull String uniqueSessionId) {
+        int lastIndexOfSeparator = uniqueSessionId.lastIndexOf("/");
+        if (lastIndexOfSeparator == -1 || lastIndexOfSeparator + 1 >= uniqueSessionId.length()) {
+            return null;
+        }
+
+        String integerString = uniqueSessionId.substring(lastIndexOfSeparator + 1);
+        if (TextUtils.isEmpty(integerString)) {
+            return null;
+        }
+
+        try {
+            return Integer.parseInt(integerString);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Gets provider ID (string) from unique session id (string).
+     * If the corresponding provider ID could not be generated, it will return null.
+     * @hide
+     *
+     * TODO: This logic seems error-prone. Consider to use long uniqueId.
+     */
+    @Nullable
+    public static String getProviderId(@NonNull String uniqueSessionId) {
+        int lastIndexOfSeparator = uniqueSessionId.lastIndexOf("/");
+        if (lastIndexOfSeparator == -1) {
+            return null;
+        }
+
+        String result = uniqueSessionId.substring(0, lastIndexOfSeparator);
+        if (TextUtils.isEmpty(result)) {
+            return null;
+        }
+        return result;
     }
 
     /**

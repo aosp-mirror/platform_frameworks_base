@@ -484,6 +484,12 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
+    public void releaseSession(IMediaRouter2Client client, String sessionId) {
+        mService2.releaseSession(client, sessionId);
+    }
+
+    // Binder call
+    @Override
     public void sendControlRequest(IMediaRouter2Client client, MediaRoute2Info route,
             Intent request) {
         mService2.sendControlRequest(client, route, request);

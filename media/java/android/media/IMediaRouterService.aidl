@@ -56,6 +56,7 @@ interface IMediaRouterService {
     void selectRoute(IMediaRouter2Client client, String sessionId, in MediaRoute2Info route);
     void deselectRoute(IMediaRouter2Client client, String sessionId, in MediaRoute2Info route);
     void transferToRoute(IMediaRouter2Client client, String sessionId, in MediaRoute2Info route);
+    void releaseSession(IMediaRouter2Client client, String sessionId);
 
     void registerManager(IMediaRouter2Manager manager, String packageName);
     void unregisterManager(IMediaRouter2Manager manager);

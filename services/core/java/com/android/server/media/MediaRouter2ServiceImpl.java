@@ -233,6 +233,19 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    public void releaseSession(IMediaRouter2Client client, String uniqueSessionId) {
+        Objects.requireNonNull(client, "client must not be null");
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                releaseSessionLocked(client, uniqueSessionId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     public void sendControlRequest(@NonNull IMediaRouter2Client client,
             @NonNull MediaRoute2Info route, @NonNull Intent request) {
         Objects.requireNonNull(client, "client must not be null");
@@ -474,6 +487,18 @@ class MediaRouter2ServiceImpl {
                     obtainMessage(UserHandler::transferToRouteOnHandler,
                             clientRecord.mUserRecord.mHandler,
                             clientRecord, uniqueSessionId, route));
+        }
+    }
+
+    private void releaseSessionLocked(@NonNull IMediaRouter2Client client, String uniqueSessionId) {
+        final IBinder binder = client.asBinder();
+        final Client2Record clientRecord = mAllClientRecords.get(binder);
+
+        if (clientRecord != null) {
+            clientRecord.mUserRecord.mHandler.sendMessage(
+                    obtainMessage(UserHandler::releaseSessionOnHandler,
+                            clientRecord.mUserRecord.mHandler,
+                            clientRecord, uniqueSessionId));
         }
     }
 
@@ -835,25 +860,32 @@ class MediaRouter2ServiceImpl {
 
         @Override
         public void onProviderStateChanged(@NonNull MediaRoute2Provider provider) {
-            sendMessage(PooledLambda.obtainMessage(UserHandler::updateProvider, this, provider));
+            sendMessage(PooledLambda.obtainMessage(UserHandler::onProviderStateChangedOnHandler,
+                    this, provider));
         }
 
         @Override
         public void onSessionCreated(@NonNull MediaRoute2Provider provider,
                 @Nullable RouteSessionInfo sessionInfo, long requestId) {
-            sendMessage(PooledLambda.obtainMessage(UserHandler::handleCreateSessionResultOnHandler,
+            sendMessage(PooledLambda.obtainMessage(UserHandler::onSessionCreatedOnHandler,
                     this, provider, sessionInfo, requestId));
         }
 
         @Override
         public void onSessionInfoChanged(@NonNull MediaRoute2Provider provider,
                 @NonNull RouteSessionInfo sessionInfo) {
-            sendMessage(PooledLambda.obtainMessage(UserHandler::updateSession,
+            sendMessage(PooledLambda.obtainMessage(UserHandler::onSessionInfoChangedOnHandler,
+                    this, provider, sessionInfo));
+        }
+
+        @Override
+        public void onSessionReleased(MediaRoute2Provider provider, RouteSessionInfo sessionInfo) {
+            sendMessage(PooledLambda.obtainMessage(UserHandler::onSessionReleasedOnHandler,
                     this, provider, sessionInfo));
         }
 
         //TODO: notify session info updates
-        private void updateProvider(MediaRoute2Provider provider) {
+        private void onProviderStateChangedOnHandler(MediaRoute2Provider provider) {
             int providerIndex = getProviderInfoIndex(provider.getUniqueId());
             MediaRoute2ProviderInfo providerInfo = provider.getProviderInfo();
             MediaRoute2ProviderInfo prevInfo =
@@ -975,7 +1007,7 @@ class MediaRouter2ServiceImpl {
             if (provider == null) {
                 return;
             }
-            provider.selectRoute(RouteSessionInfo.getSessionId(uniqueSessionId, providerId), route);
+            provider.selectRoute(RouteSessionInfo.getSessionId(uniqueSessionId), route);
         }
 
         private void deselectRouteOnHandler(@NonNull Client2Record clientRecord,
@@ -991,8 +1023,7 @@ class MediaRouter2ServiceImpl {
             if (provider == null) {
                 return;
             }
-            provider.deselectRoute(
-                    RouteSessionInfo.getSessionId(uniqueSessionId, providerId), route);
+            provider.deselectRoute(RouteSessionInfo.getSessionId(uniqueSessionId), route);
         }
 
         private void transferToRouteOnHandler(@NonNull Client2Record clientRecord,
@@ -1008,8 +1039,7 @@ class MediaRouter2ServiceImpl {
             if (provider == null) {
                 return;
             }
-            provider.transferToRoute(
-                    RouteSessionInfo.getSessionId(uniqueSessionId, providerId), route);
+            provider.transferToRoute(RouteSessionInfo.getSessionId(uniqueSessionId), route);
         }
 
         private boolean checkArgumentsForSessionControl(@NonNull Client2Record clientRecord,
@@ -1040,20 +1070,57 @@ class MediaRouter2ServiceImpl {
                 return false;
             }
 
-            try {
-                RouteSessionInfo.getSessionId(uniqueSessionId, providerId);
-            } catch (Exception ex) {
+            final Integer sessionId = RouteSessionInfo.getSessionId(uniqueSessionId);
+            if (sessionId == null) {
                 Slog.w(TAG, "Failed to get int session id from unique session id. "
-                        + "uniqueSessionId=" + uniqueSessionId + " providerId=" + providerId);
+                        + "uniqueSessionId=" + uniqueSessionId);
                 return false;
             }
 
             return true;
         }
 
-        private void handleCreateSessionResultOnHandler(
-                @NonNull MediaRoute2Provider provider, @Nullable RouteSessionInfo sessionInfo,
-                long requestId) {
+        private void releaseSessionOnHandler(@NonNull Client2Record clientRecord,
+                String uniqueSessionId) {
+            if (TextUtils.isEmpty(uniqueSessionId)) {
+                Slog.w(TAG, "Ignoring releasing session with empty unique session ID.");
+                return;
+            }
+
+            final Client2Record matchingRecord = mSessionToClientMap.get(uniqueSessionId);
+            if (matchingRecord != clientRecord) {
+                Slog.w(TAG, "Ignoring releasing session from non-matching client."
+                        + " packageName=" + clientRecord.mPackageName
+                        + " uniqueSessionId=" + uniqueSessionId);
+                return;
+            }
+
+            final String providerId = RouteSessionInfo.getProviderId(uniqueSessionId);
+            if (providerId == null) {
+                Slog.w(TAG, "Ignoring releasing session with invalid unique session ID. "
+                        + "uniqueSessionId=" + uniqueSessionId);
+                return;
+            }
+
+            final Integer sessionId = RouteSessionInfo.getSessionId(uniqueSessionId);
+            if (sessionId == null) {
+                Slog.w(TAG, "Ignoring releasing session with invalid unique session ID. "
+                        + "uniqueSessionId=" + uniqueSessionId + " providerId=" + providerId);
+                return;
+            }
+
+            final MediaRoute2Provider provider = findProvider(providerId);
+            if (provider == null) {
+                Slog.w(TAG, "Ignoring releasing session since no provider found for given "
+                        + "providerId=" + providerId);
+                return;
+            }
+
+            provider.releaseSession(sessionId);
+        }
+
+        private void onSessionCreatedOnHandler(@NonNull MediaRoute2Provider provider,
+                @Nullable RouteSessionInfo sessionInfo, long requestId) {
             SessionCreationRequest matchingRequest = null;
 
             for (SessionCreationRequest request : mSessionCreationRequests) {
@@ -1103,7 +1170,7 @@ class MediaRouter2ServiceImpl {
             // TODO: Tell managers for the session creation
         }
 
-        private void updateSession(@NonNull MediaRoute2Provider provider,
+        private void onSessionInfoChangedOnHandler(@NonNull MediaRoute2Provider provider,
                 @NonNull RouteSessionInfo sessionInfo) {
             RouteSessionInfo sessionInfoWithProviderId = new RouteSessionInfo.Builder(sessionInfo)
                     .setProviderId(provider.getUniqueId())
@@ -1118,6 +1185,23 @@ class MediaRouter2ServiceImpl {
             }
             notifySessionInfoChanged(client2Record, sessionInfoWithProviderId);
             // TODO: Tell managers for the session update
+        }
+
+        private void onSessionReleasedOnHandler(@NonNull MediaRoute2Provider provider,
+                @NonNull RouteSessionInfo sessionInfo) {
+            RouteSessionInfo sessionInfoWithProviderId = new RouteSessionInfo.Builder(sessionInfo)
+                    .setProviderId(provider.getUniqueId())
+                    .build();
+
+            Client2Record client2Record = mSessionToClientMap.get(
+                    sessionInfoWithProviderId.getUniqueSessionId());
+            if (client2Record == null) {
+                Slog.w(TAG, "No matching client found for session=" + sessionInfoWithProviderId);
+                // TODO: Tell managers for the session release
+                return;
+            }
+            notifySessionReleased(client2Record, sessionInfoWithProviderId);
+            // TODO: Tell managers for the session release
         }
 
         private void notifySessionCreated(Client2Record clientRecord, RouteSessionInfo sessionInfo,
@@ -1145,6 +1229,16 @@ class MediaRouter2ServiceImpl {
                 clientRecord.mClient.notifySessionInfoChanged(sessionInfo);
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify client of the session info change."
+                        + " Client probably died.", ex);
+            }
+        }
+
+        private void notifySessionReleased(Client2Record clientRecord,
+                RouteSessionInfo sessionInfo) {
+            try {
+                clientRecord.mClient.notifySessionReleased(sessionInfo);
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify client of the session release."
                         + " Client probably died.", ex);
             }
         }
