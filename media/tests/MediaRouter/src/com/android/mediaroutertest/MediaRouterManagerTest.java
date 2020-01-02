@@ -64,6 +64,11 @@ public class MediaRouterManagerTest {
     public static final String ROUTE_ID3_SESSION_CREATION_FAILED =
             "route_id3_session_creation_failed";
     public static final String ROUTE_NAME3 = "Sample Route 3 - Session creation failed";
+    public static final String ROUTE_ID4_TO_SELECT_AND_DESELECT =
+            "route_id4_to_select_and_deselect";
+    public static final String ROUTE_NAME4 = "Sample Route 4 - Route to select and deselect";
+    public static final String ROUTE_ID5_TO_TRANSFER_TO = "route_id5_to_transfer_to";
+    public static final String ROUTE_NAME5 = "Sample Route 5 - Route to transfer to";
 
     public static final String ROUTE_ID_SPECIAL_CATEGORY = "route_special_category";
     public static final String ROUTE_NAME_SPECIAL_CATEGORY = "Special Category Route";

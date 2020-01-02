@@ -40,6 +40,11 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     public static final String ROUTE_ID3_SESSION_CREATION_FAILED =
             "route_id3_session_creation_failed";
     public static final String ROUTE_NAME3 = "Sample Route 3 - Session creation failed";
+    public static final String ROUTE_ID4_TO_SELECT_AND_DESELECT =
+            "route_id4_to_select_and_deselect";
+    public static final String ROUTE_NAME4 = "Sample Route 4 - Route to select and deselect";
+    public static final String ROUTE_ID5_TO_TRANSFER_TO = "route_id5_to_transfer_to";
+    public static final String ROUTE_NAME5 = "Sample Route 5 - Route to transfer to";
 
     public static final String ROUTE_ID_SPECIAL_CATEGORY = "route_special_category";
     public static final String ROUTE_NAME_SPECIAL_CATEGORY = "Special Category Route";
@@ -75,6 +80,14 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
                 ROUTE_ID3_SESSION_CREATION_FAILED, ROUTE_NAME3)
                 .addSupportedCategory(CATEGORY_SAMPLE)
                 .build();
+        MediaRoute2Info route4 = new MediaRoute2Info.Builder(
+                ROUTE_ID4_TO_SELECT_AND_DESELECT, ROUTE_NAME4)
+                .addSupportedCategory(CATEGORY_SAMPLE)
+                .build();
+        MediaRoute2Info route5 = new MediaRoute2Info.Builder(
+                ROUTE_ID5_TO_TRANSFER_TO, ROUTE_NAME5)
+                .addSupportedCategory(CATEGORY_SAMPLE)
+                .build();
         MediaRoute2Info routeSpecial =
                 new MediaRoute2Info.Builder(ROUTE_ID_SPECIAL_CATEGORY, ROUTE_NAME_SPECIAL_CATEGORY)
                         .addSupportedCategory(CATEGORY_SAMPLE)
@@ -95,6 +108,8 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         mRoutes.put(route1.getId(), route1);
         mRoutes.put(route2.getId(), route2);
         mRoutes.put(route3.getId(), route3);
+        mRoutes.put(route4.getId(), route4);
+        mRoutes.put(route5.getId(), route5);
         mRoutes.put(routeSpecial.getId(), routeSpecial);
         mRoutes.put(fixedVolumeRoute.getId(), fixedVolumeRoute);
         mRoutes.put(variableVolumeRoute.getId(), variableVolumeRoute);
@@ -173,6 +188,8 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         RouteSessionInfo sessionInfo = new RouteSessionInfo.Builder(
                 sessionId, packageName, controlCategory)
                 .addSelectedRoute(routeId)
+                .addSelectableRoute(ROUTE_ID4_TO_SELECT_AND_DESELECT)
+                .addTransferrableRoute(ROUTE_ID5_TO_TRANSFER_TO)
                 .build();
         notifySessionCreated(sessionInfo, requestId);
         publishRoutes();
@@ -207,9 +224,11 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
 
         RouteSessionInfo newSessionInfo = new RouteSessionInfo.Builder(sessionInfo)
                 .addSelectedRoute(routeId)
+                .removeSelectableRoute(routeId)
+                .addDeselectableRoute(routeId)
                 .build();
         updateSessionInfo(newSessionInfo);
-        publishRoutes();
+        notifySessionInfoChanged(newSessionInfo);
     }
 
     @Override
@@ -227,20 +246,24 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
 
         RouteSessionInfo newSessionInfo = new RouteSessionInfo.Builder(sessionInfo)
                 .removeSelectedRoute(routeId)
+                .addSelectableRoute(routeId)
+                .removeDeselectableRoute(routeId)
                 .build();
         updateSessionInfo(newSessionInfo);
-        publishRoutes();
+        notifySessionInfoChanged(newSessionInfo);
     }
 
     @Override
-    public void onTransferRoute(int sessionId, String routeId) {
+    public void onTransferToRoute(int sessionId, String routeId) {
         RouteSessionInfo sessionInfo = getSessionInfo(sessionId);
         RouteSessionInfo newSessionInfo = new RouteSessionInfo.Builder(sessionInfo)
                 .clearSelectedRoutes()
                 .addSelectedRoute(routeId)
+                .removeDeselectableRoute(routeId)
+                .removeTransferrableRoute(routeId)
                 .build();
         updateSessionInfo(newSessionInfo);
-        publishRoutes();
+        notifySessionInfoChanged(newSessionInfo);
     }
 
     void maybeDeselectRoute(String routeId) {
