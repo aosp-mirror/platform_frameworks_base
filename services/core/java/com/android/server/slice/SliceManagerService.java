@@ -106,7 +106,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     @VisibleForTesting
     SliceManagerService(Context context, Looper looper) {
         mContext = context;
-        mPackageManagerInternal = Preconditions.checkNotNull(
+        mPackageManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(PackageManagerInternal.class));
         mAppOps = context.getSystemService(AppOpsManager.class);
         mAssistUtils = new AssistUtils(context);
