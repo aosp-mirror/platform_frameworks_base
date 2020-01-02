@@ -943,6 +943,12 @@ public class ComponentParseUtils {
      */
     // @DataClass verifier is broken, hence comment out for now
     public static class ParsedFeature implements Parcelable {
+        /** Maximum length of featureId */
+        public static final int MAX_FEATURE_ID_LEN = 50;
+
+        /** Maximum amount of features per package */
+        private static final int MAX_NUM_FEATURES = 1000;
+
         /** Id of the feature */
         public final @NonNull String id;
 
@@ -964,6 +970,10 @@ public class ComponentParseUtils {
             ArraySet<String> inheritFromFeatureIds = new ArraySet<>();
 
             int numFeatures = features.size();
+            if (numFeatures > MAX_NUM_FEATURES) {
+                return false;
+            }
+
             for (int featureNum = 0; featureNum < numFeatures; featureNum++) {
                 boolean wasAdded = featureIds.add(features.get(featureNum).id);
                 if (!wasAdded) {
@@ -2762,6 +2772,11 @@ public class ComponentParseUtils {
                     0);
             if (featureId == null) {
                 outError[0] = "<featureId> does not specify android:featureId";
+                return null;
+            }
+            if (featureId.length() > ParsedFeature.MAX_FEATURE_ID_LEN) {
+                outError[0] = "<featureId> is too long. Max length is "
+                        + ParsedFeature.MAX_FEATURE_ID_LEN;
                 return null;
             }
 
