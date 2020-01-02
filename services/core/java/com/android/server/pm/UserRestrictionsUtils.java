@@ -585,6 +585,9 @@ public class UserRestrictionsUtils {
                             android.provider.Settings.Global.putStringForUser(cr,
                                     android.provider.Settings.Global.ADB_ENABLED, "0",
                                     userId);
+                            android.provider.Settings.Global.putStringForUser(cr,
+                                    android.provider.Settings.Global.ADB_WIFI_ENABLED, "0",
+                                    userId);
                         }
                     }
                     break;
@@ -721,6 +724,7 @@ public class UserRestrictionsUtils {
                 break;
 
             case android.provider.Settings.Global.ADB_ENABLED:
+            case android.provider.Settings.Global.ADB_WIFI_ENABLED:
                 if ("0".equals(value)) {
                     return false;
                 }

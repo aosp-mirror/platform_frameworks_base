@@ -480,6 +480,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         GLOBAL_SETTINGS_WHITELIST = new ArraySet<>();
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.ADB_ENABLED);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.ADB_WIFI_ENABLED);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME_ZONE);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.DATA_ROAMING);

@@ -989,6 +989,11 @@ public class SettingsProvider extends ContentProvider {
                             String value = setting != null ? setting.getValue() : null;
                             updateGlobalSetting(Settings.Global.ADB_ENABLED,
                                     value, null, true, userId, true);
+
+                            setting = getGlobalSetting(Settings.Global.ADB_WIFI_ENABLED);
+                            value = setting != null ? setting.getValue() : null;
+                            updateGlobalSetting(Settings.Global.ADB_WIFI_ENABLED,
+                                    value, null, true, userId, true);
                         }
                     } finally {
                         Binder.restoreCallingIdentity(identity);
