@@ -17,12 +17,15 @@ package com.android.settingslib.media;
 
 import android.app.Notification;
 import android.content.Context;
-import android.util.Log;
-
-import androidx.mediarouter.media.MediaRouteSelector;
-import androidx.mediarouter.media.MediaRouter;
+import android.media.MediaRoute2Info;
+import android.media.MediaRouter2Manager;
+import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * InfoMediaManager provide interface to get InfoMediaDevice list.
@@ -32,62 +35,75 @@ public class InfoMediaManager extends MediaManager {
     private static final String TAG = "InfoMediaManager";
 
     @VisibleForTesting
-    final MediaRouterCallback mMediaRouterCallback = new MediaRouterCallback();
+    final RouterManagerCallback mMediaRouterCallback = new RouterManagerCallback();
     @VisibleForTesting
-    MediaRouteSelector mSelector;
+    final Executor mExecutor = Executors.newSingleThreadExecutor();
     @VisibleForTesting
-    MediaRouter mMediaRouter;
+    MediaRouter2Manager mRouterManager;
 
     private String mPackageName;
+    private MediaDevice mCurrentConnectedDevice;
 
-    InfoMediaManager(Context context, String packageName, Notification notification) {
+    public InfoMediaManager(Context context, String packageName, Notification notification) {
         super(context, notification);
 
-        mMediaRouter = MediaRouter.getInstance(context);
-        mPackageName = packageName;
-        mSelector = new MediaRouteSelector.Builder()
-                .addControlCategory(getControlCategoryByPackageName(mPackageName))
-                .build();
+        mRouterManager = MediaRouter2Manager.getInstance(context);
+        if (packageName != null) {
+            mPackageName = packageName;
+        }
     }
 
     @Override
     public void startScan() {
         mMediaDevices.clear();
-        mMediaRouter.addCallback(mSelector, mMediaRouterCallback,
-                MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
+        mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
     }
 
     @VisibleForTesting
     String getControlCategoryByPackageName(String packageName) {
         //TODO(b/117129183): Use package name to get ControlCategory.
         //Since api not ready, return fixed ControlCategory for prototype.
-        return "com.google.android.gms.cast.CATEGORY_CAST/4F8B3483";
+        return "com.google.android.gms.cast.CATEGORY_CAST";
     }
 
     @Override
     public void stopScan() {
-        mMediaRouter.removeCallback(mMediaRouterCallback);
+        mRouterManager.unregisterCallback(mMediaRouterCallback);
     }
 
-    class MediaRouterCallback extends MediaRouter.Callback {
-        @Override
-        public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
-            MediaDevice mediaDevice = findMediaDevice(MediaDeviceUtils.getId(route));
-            if (mediaDevice == null) {
-                mediaDevice = new InfoMediaDevice(mContext, route);
-                Log.d(TAG, "onRouteAdded() route : " + route.getName());
-                mMediaDevices.add(mediaDevice);
-                dispatchDeviceAdded(mediaDevice);
+    /**
+     * Get current device that played media.
+     * @return MediaDevice
+     */
+    public MediaDevice getCurrentConnectedDevice() {
+        return mCurrentConnectedDevice;
+    }
+
+    class RouterManagerCallback extends MediaRouter2Manager.Callback {
+
+        private void refreshDevices() {
+            mMediaDevices.clear();
+            mCurrentConnectedDevice = null;
+            for (MediaRoute2Info route : mRouterManager.getAvailableRoutes(mPackageName)) {
+                final MediaDevice device = new InfoMediaDevice(mContext, mRouterManager, route,
+                        mPackageName);
+                if (TextUtils.equals(route.getClientPackageName(), mPackageName)) {
+                    mCurrentConnectedDevice = device;
+                }
+                mMediaDevices.add(device);
             }
+            dispatchDeviceListAdded();
         }
 
         @Override
-        public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
-            final MediaDevice mediaDevice = findMediaDevice(MediaDeviceUtils.getId(route));
-            if (mediaDevice != null) {
-                Log.d(TAG, "onRouteRemoved() route : " + route.getName());
-                mMediaDevices.remove(mediaDevice);
-                dispatchDeviceRemoved(mediaDevice);
+        public void onRoutesAdded(List<MediaRoute2Info> routes) {
+            refreshDevices();
+        }
+
+        @Override
+        public void onControlCategoriesChanged(String packageName, List<String> controlCategories) {
+            if (TextUtils.equals(mPackageName, packageName)) {
+                refreshDevices();
             }
         }
     }

@@ -16,8 +16,7 @@
 package com.android.settingslib.media;
 
 import android.bluetooth.BluetoothDevice;
-
-import androidx.mediarouter.media.MediaRouter;
+import android.media.MediaRoute2Info;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 
@@ -49,12 +48,12 @@ public class MediaDeviceUtils {
     }
 
     /**
-     * Use RouteInfo id to represent unique id
+     * Use MediaRoute2Info id to represent unique id
      *
-     * @param route the RouteInfo
-     * @return RouteInfo id
+     * @param route the MediaRoute2Info
+     * @return MediaRoute2Info id
      */
-    public static String getId(MediaRouter.RouteInfo route) {
+    public static String getId(MediaRoute2Info route) {
         return route.getId();
     }
 }

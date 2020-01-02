@@ -23,9 +23,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-
-import androidx.mediarouter.media.MediaRouteSelector;
-import androidx.mediarouter.media.MediaRouter;
+import android.media.MediaRoute2Info;
+import android.media.MediaRouter2Manager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +34,9 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RunWith(RobolectricTestRunner.class)
 public class InfoMediaManagerTest {
 
@@ -42,9 +44,7 @@ public class InfoMediaManagerTest {
     private static final String TEST_ID = "test_id";
 
     @Mock
-    private MediaRouter mMediaRouter;
-    @Mock
-    private MediaRouteSelector mSelector;
+    private MediaRouter2Manager mRouterManager;
 
     private InfoMediaManager mInfoMediaManager;
     private Context mContext;
@@ -55,82 +55,70 @@ public class InfoMediaManagerTest {
         mContext = RuntimeEnvironment.application;
 
         mInfoMediaManager = new InfoMediaManager(mContext, TEST_PACKAGE_NAME, null);
-        mInfoMediaManager.mMediaRouter = mMediaRouter;
-        mInfoMediaManager.mSelector = mSelector;
+        mInfoMediaManager.mRouterManager = mRouterManager;
     }
 
     @Test
     public void stopScan_shouldRemoveCallback() {
         mInfoMediaManager.stopScan();
 
-        verify(mMediaRouter).removeCallback(mInfoMediaManager.mMediaRouterCallback);
+        verify(mRouterManager).unregisterCallback(mInfoMediaManager.mMediaRouterCallback);
     }
 
     @Test
     public void startScan_shouldAddCallback() {
         mInfoMediaManager.startScan();
 
-        verify(mMediaRouter).addCallback(mSelector, mInfoMediaManager.mMediaRouterCallback,
-                MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
+        verify(mRouterManager).registerCallback(mInfoMediaManager.mExecutor,
+                mInfoMediaManager.mMediaRouterCallback);
     }
 
     @Test
-    public void onRouteAdded_mediaDeviceNotExistInList_addMediaDevice() {
-        final MediaRouter.RouteInfo info = mock(MediaRouter.RouteInfo.class);
+    public void onRouteAdded_shouldAddMediaDevice() {
+        final MediaRoute2Info info = mock(MediaRoute2Info.class);
         when(info.getId()).thenReturn(TEST_ID);
+        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+
+        final List<MediaRoute2Info> routes = new ArrayList<>();
+        routes.add(info);
+        when(mRouterManager.getAvailableRoutes(TEST_PACKAGE_NAME)).thenReturn(routes);
 
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
 
-        mInfoMediaManager.mMediaRouterCallback.onRouteAdded(mMediaRouter, info);
+        mInfoMediaManager.mMediaRouterCallback.onRoutesAdded(routes);
 
         final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
         assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
+        assertThat(mInfoMediaManager.getCurrentConnectedDevice()).isEqualTo(infoDevice);
+        assertThat(mInfoMediaManager.mMediaDevices).hasSize(routes.size());
     }
 
     @Test
-    public void onRouteAdded_mediaDeviceExistInList_doNothing() {
-        final MediaRouter.RouteInfo info = mock(MediaRouter.RouteInfo.class);
+    public void onControlCategoriesChanged_samePackageName_shouldAddMediaDevice() {
+        final MediaRoute2Info info = mock(MediaRoute2Info.class);
         when(info.getId()).thenReturn(TEST_ID);
-        final InfoMediaDevice infoDevice = new InfoMediaDevice(mContext, info);
-        mInfoMediaManager.mMediaDevices.add(infoDevice);
+        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+
+        final List<MediaRoute2Info> routes = new ArrayList<>();
+        routes.add(info);
+        when(mRouterManager.getAvailableRoutes(TEST_PACKAGE_NAME)).thenReturn(routes);
 
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
-        final int size = mInfoMediaManager.mMediaDevices.size();
-        assertThat(mediaDevice).isNotNull();
-
-        mInfoMediaManager.mMediaRouterCallback.onRouteAdded(mMediaRouter, info);
-
-        assertThat(mInfoMediaManager.mMediaDevices).hasSize(size);
-    }
-
-    @Test
-    public void onRouteRemoved_mediaDeviceExistInList_removeMediaDevice() {
-        final MediaRouter.RouteInfo info = mock(MediaRouter.RouteInfo.class);
-        when(info.getId()).thenReturn(TEST_ID);
-        final InfoMediaDevice infoDevice = new InfoMediaDevice(mContext, info);
-        mInfoMediaManager.mMediaDevices.add(infoDevice);
-
-        final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
-        assertThat(mediaDevice).isNotNull();
-        assertThat(mInfoMediaManager.mMediaDevices).hasSize(1);
-
-        mInfoMediaManager.mMediaRouterCallback.onRouteRemoved(mMediaRouter, info);
-
-        assertThat(mInfoMediaManager.mMediaDevices).isEmpty();
-    }
-
-    @Test
-    public void onRouteRemoved_mediaDeviceNotExistInList_doNothing() {
-        final MediaRouter.RouteInfo info = mock(MediaRouter.RouteInfo.class);
-        when(info.getId()).thenReturn(TEST_ID);
-
-        final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
-        final int size = mInfoMediaManager.mMediaDevices.size();
         assertThat(mediaDevice).isNull();
 
-        mInfoMediaManager.mMediaRouterCallback.onRouteRemoved(mMediaRouter, info);
+        mInfoMediaManager.mMediaRouterCallback.onControlCategoriesChanged(TEST_PACKAGE_NAME, null);
 
-        assertThat(mInfoMediaManager.mMediaDevices).hasSize(size);
+        final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
+        assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
+        assertThat(mInfoMediaManager.getCurrentConnectedDevice()).isEqualTo(infoDevice);
+        assertThat(mInfoMediaManager.mMediaDevices).hasSize(routes.size());
+    }
+
+    @Test
+    public void onControlCategoriesChanged_differentPackageName_doNothing() {
+        mInfoMediaManager.mMediaRouterCallback.onControlCategoriesChanged("com.fake.play", null);
+
+        assertThat(mInfoMediaManager.mMediaDevices).hasSize(0);
     }
 }
