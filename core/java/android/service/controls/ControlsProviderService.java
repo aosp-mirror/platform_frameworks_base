@@ -172,7 +172,7 @@ public abstract class ControlsProviderService extends Service {
 
             public void onAction(String id, ControlAction action) {
                 ActionMessage msg = new ActionMessage(id, action);
-                mHandler.obtainMessage(RequestHandler.MSG_SUBSCRIBE, msg).sendToTarget();
+                mHandler.obtainMessage(RequestHandler.MSG_ON_ACTION, msg).sendToTarget();
             }
         };
     }
