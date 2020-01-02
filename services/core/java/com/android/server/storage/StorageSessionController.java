@@ -43,6 +43,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
+import java.util.Objects;
 
 /**
  * Controls storage sessions for users initiated by the {@link StorageManagerService}.
@@ -63,7 +64,7 @@ public final class StorageSessionController {
     private volatile boolean mIsResetting;
 
     public StorageSessionController(Context context, boolean isFuseEnabled) {
-        mContext = Preconditions.checkNotNull(context);
+        mContext = Objects.requireNonNull(context);
         mIsFuseEnabled = isFuseEnabled;
     }
 
