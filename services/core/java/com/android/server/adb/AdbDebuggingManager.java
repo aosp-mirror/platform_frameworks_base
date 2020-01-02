@@ -29,6 +29,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.debug.AdbProtoEnums;
+import android.debug.AdbTransportType;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.net.Uri;
@@ -717,13 +718,21 @@ public class AdbDebuggingManager {
     }
 
     /**
-     * When {@code enabled} is {@code true}, this allows ADB debugging and starts the ADB hanler
-     * thread. When {@code enabled} is {@code false}, this disallows ADB debugging and shuts
-     * down the handler thread.
+     * When {@code enabled} is {@code true}, this allows ADB debugging and starts the ADB handler
+     * thread. When {@code enabled} is {@code false}, this disallows ADB debugging for the given
+     * @{code transportType}. See {@link IAdbTransport} for all available transport types.
+     * If all transport types are disabled, the ADB handler thread will shut down.
      */
-    public void setAdbEnabled(boolean enabled) {
-        mHandler.sendEmptyMessage(enabled ? AdbDebuggingHandler.MESSAGE_ADB_ENABLED
-                                          : AdbDebuggingHandler.MESSAGE_ADB_DISABLED);
+    public void setAdbEnabled(boolean enabled, byte transportType) {
+        if (transportType == AdbTransportType.USB) {
+            mHandler.sendEmptyMessage(enabled ? AdbDebuggingHandler.MESSAGE_ADB_ENABLED
+                                              : AdbDebuggingHandler.MESSAGE_ADB_DISABLED);
+        } else if (transportType == AdbTransportType.WIFI) {
+            // TODO(joshuaduong): Not implemented
+        } else {
+            throw new IllegalArgumentException(
+                    "setAdbEnabled called with unimplemented transport type=" + transportType);
+        }
     }
 
     /**
