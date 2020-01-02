@@ -330,8 +330,8 @@ protected:
      */
     virtual void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const MetricDimensionKey& eventKey,
-            const ConditionKey& conditionKey, bool condition,
-            const LogEvent& event) = 0;
+            const ConditionKey& conditionKey, bool condition, const LogEvent& event,
+            const map<int, HashableDimensionKey>& statePrimaryKeys) = 0;
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.
     virtual void onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event);
@@ -475,6 +475,10 @@ protected:
     FRIEND_TEST(StatsLogProcessorTest,
             TestActivationOnBootMultipleActivationsDifferentActivationTypes);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart);
+
+    FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState);
+    FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithDimensions);
+    FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithIncorrectDimensions);
 };
 
 }  // namespace statsd

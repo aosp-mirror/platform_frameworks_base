@@ -369,6 +369,168 @@ TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation) {
     EXPECT_EQ(1, bucketInfo.values_size());
 }
 
+/**
+ * Test initialization of a simple value metric that is sliced by a state.
+ *
+ * ValueCpuUserTimePerScreenState
+ */
+TEST(ValueMetricE2eTest, TestInitWithSlicedState) {
+    // Create config.
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
+
+    auto pulledAtomMatcher =
+            CreateSimpleAtomMatcher("TestMatcher", android::util::SUBSYSTEM_SLEEP_STATE);
+    *config.add_atom_matcher() = pulledAtomMatcher;
+
+    auto screenState = CreateScreenState();
+    *config.add_state() = screenState;
+
+    // Create value metric that slices by screen state without a map.
+    int64_t metricId = 123456;
+    auto valueMetric = config.add_value_metric();
+    valueMetric->set_id(metricId);
+    valueMetric->set_bucket(TimeUnit::FIVE_MINUTES);
+    valueMetric->set_what(pulledAtomMatcher.id());
+    *valueMetric->mutable_value_field() =
+            CreateDimensions(android::util::CPU_TIME_PER_UID, {2 /* user_time_micros */});
+    valueMetric->add_slice_by_state(screenState.id());
+    valueMetric->set_max_pull_delay_sec(INT_MAX);
+
+    // Initialize StatsLogProcessor.
+    const uint64_t bucketStartTimeNs = 10000000000;  // 0:10
+    const uint64_t bucketSizeNs =
+            TimeUnitToBucketSizeInMillis(config.value_metric(0).bucket()) * 1000000LL;
+    int uid = 12345;
+    int64_t cfgId = 98765;
+    ConfigKey cfgKey(uid, cfgId);
+
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
+
+    // Check that StateTrackers were initialized correctly.
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(SCREEN_STATE_ATOM_ID));
+
+    // Check that ValueMetricProducer was initialized correctly.
+    EXPECT_EQ(1U, processor->mMetricsManagers.size());
+    sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
+    EXPECT_TRUE(metricsManager->isConfigValid());
+    EXPECT_EQ(1, metricsManager->mAllMetricProducers.size());
+    sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
+    EXPECT_EQ(1, metricProducer->mSlicedStateAtoms.size());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, metricProducer->mSlicedStateAtoms.at(0));
+    EXPECT_EQ(0, metricProducer->mStateGroupMap.size());
+}
+
+/**
+ * Test initialization of a value metric that is sliced by state and has
+ * dimensions_in_what.
+ *
+ * ValueCpuUserTimePerUidPerUidProcessState
+ */
+TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithDimensions) {
+    // Create config.
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
+
+    auto cpuTimePerUidMatcher =
+            CreateSimpleAtomMatcher("CpuTimePerUidMatcher", android::util::CPU_TIME_PER_UID);
+    *config.add_atom_matcher() = cpuTimePerUidMatcher;
+
+    auto uidProcessState = CreateUidProcessState();
+    *config.add_state() = uidProcessState;
+
+    // Create value metric that slices by screen state with a complete map.
+    int64_t metricId = 123456;
+    auto valueMetric = config.add_value_metric();
+    valueMetric->set_id(metricId);
+    valueMetric->set_bucket(TimeUnit::FIVE_MINUTES);
+    valueMetric->set_what(cpuTimePerUidMatcher.id());
+    *valueMetric->mutable_value_field() =
+            CreateDimensions(android::util::CPU_TIME_PER_UID, {2 /* user_time_micros */});
+    *valueMetric->mutable_dimensions_in_what() =
+            CreateDimensions(android::util::CPU_TIME_PER_UID, {1 /* uid */});
+    valueMetric->add_slice_by_state(uidProcessState.id());
+    MetricStateLink* stateLink = valueMetric->add_state_link();
+    stateLink->set_state_atom_id(UID_PROCESS_STATE_ATOM_ID);
+    auto fieldsInWhat = stateLink->mutable_fields_in_what();
+    *fieldsInWhat = CreateDimensions(android::util::CPU_TIME_PER_UID, {1 /* uid */});
+    auto fieldsInState = stateLink->mutable_fields_in_state();
+    *fieldsInState = CreateDimensions(UID_PROCESS_STATE_ATOM_ID, {1 /* uid */});
+    valueMetric->set_max_pull_delay_sec(INT_MAX);
+
+    // Initialize StatsLogProcessor.
+    const uint64_t bucketStartTimeNs = 10000000000;  // 0:10
+    int uid = 12345;
+    int64_t cfgId = 98765;
+    ConfigKey cfgKey(uid, cfgId);
+
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
+
+    // Check that StateTrackers were initialized correctly.
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(UID_PROCESS_STATE_ATOM_ID));
+
+    // Check that ValueMetricProducer was initialized correctly.
+    EXPECT_EQ(1U, processor->mMetricsManagers.size());
+    sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
+    EXPECT_TRUE(metricsManager->isConfigValid());
+    EXPECT_EQ(1, metricsManager->mAllMetricProducers.size());
+    sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
+    EXPECT_EQ(1, metricProducer->mSlicedStateAtoms.size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, metricProducer->mSlicedStateAtoms.at(0));
+    EXPECT_EQ(0, metricProducer->mStateGroupMap.size());
+}
+
+/**
+ * Test initialization of a value metric that is sliced by state and has
+ * dimensions_in_what.
+ *
+ * ValueCpuUserTimePerUidPerUidProcessState
+ */
+TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithIncorrectDimensions) {
+    // Create config.
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
+
+    auto cpuTimePerUidMatcher =
+            CreateSimpleAtomMatcher("CpuTimePerUidMatcher", android::util::CPU_TIME_PER_UID);
+    *config.add_atom_matcher() = cpuTimePerUidMatcher;
+
+    auto uidProcessState = CreateUidProcessState();
+    *config.add_state() = uidProcessState;
+
+    // Create value metric that slices by screen state with a complete map.
+    int64_t metricId = 123456;
+    auto valueMetric = config.add_value_metric();
+    valueMetric->set_id(metricId);
+    valueMetric->set_bucket(TimeUnit::FIVE_MINUTES);
+    valueMetric->set_what(cpuTimePerUidMatcher.id());
+    *valueMetric->mutable_value_field() =
+            CreateDimensions(android::util::CPU_TIME_PER_UID, {2 /* user_time_micros */});
+    valueMetric->add_slice_by_state(uidProcessState.id());
+    MetricStateLink* stateLink = valueMetric->add_state_link();
+    stateLink->set_state_atom_id(UID_PROCESS_STATE_ATOM_ID);
+    auto fieldsInWhat = stateLink->mutable_fields_in_what();
+    *fieldsInWhat = CreateDimensions(android::util::CPU_TIME_PER_UID, {1 /* uid */});
+    auto fieldsInState = stateLink->mutable_fields_in_state();
+    *fieldsInState = CreateDimensions(UID_PROCESS_STATE_ATOM_ID, {1 /* uid */});
+    valueMetric->set_max_pull_delay_sec(INT_MAX);
+
+    // Initialize StatsLogProcessor.
+    const uint64_t bucketStartTimeNs = 10000000000;  // 0:10
+    int uid = 12345;
+    int64_t cfgId = 98765;
+    ConfigKey cfgKey(uid, cfgId);
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
+
+    // No StateTrackers are initialized.
+    EXPECT_EQ(0, StateManager::getInstance().getStateTrackersCount());
+
+    // Config initialization fails.
+    EXPECT_EQ(0, processor->mMetricsManagers.size());
+}
+
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";
 #endif

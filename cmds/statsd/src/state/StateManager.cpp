@@ -28,13 +28,17 @@ StateManager& StateManager::getInstance() {
     return sStateManager;
 }
 
+void StateManager::clear() {
+    mStateTrackers.clear();
+}
+
 void StateManager::onLogEvent(const LogEvent& event) {
     if (mStateTrackers.find(event.GetTagId()) != mStateTrackers.end()) {
         mStateTrackers[event.GetTagId()]->onLogEvent(event);
     }
 }
 
-bool StateManager::registerListener(int32_t atomId, wp<StateListener> listener) {
+bool StateManager::registerListener(const int32_t atomId, wp<StateListener> listener) {
     // Check if state tracker already exists.
     if (mStateTrackers.find(atomId) == mStateTrackers.end()) {
         // Create a new state tracker iff atom is a state atom.
@@ -50,7 +54,7 @@ bool StateManager::registerListener(int32_t atomId, wp<StateListener> listener) 
     return true;
 }
 
-void StateManager::unregisterListener(int32_t atomId, wp<StateListener> listener) {
+void StateManager::unregisterListener(const int32_t atomId, wp<StateListener> listener) {
     std::unique_lock<std::mutex> lock(mMutex);
 
     // Hold the sp<> until the lock is released so that ~StateTracker() is
@@ -74,7 +78,7 @@ void StateManager::unregisterListener(int32_t atomId, wp<StateListener> listener
     lock.unlock();
 }
 
-bool StateManager::getStateValue(int32_t atomId, const HashableDimensionKey& key,
+bool StateManager::getStateValue(const int32_t atomId, const HashableDimensionKey& key,
                                  FieldValue* output) const {
     auto it = mStateTrackers.find(atomId);
     if (it != mStateTrackers.end()) {

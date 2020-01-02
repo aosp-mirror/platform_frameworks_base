@@ -284,6 +284,10 @@ private:
     FRIEND_TEST(DurationMetricE2eTest, TestWithCondition);
     FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedCondition);
     FRIEND_TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition);
+
+    FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState);
+    FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithDimensions);
+    FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithIncorrectDimensions);
 };
 
 }  // namespace statsd

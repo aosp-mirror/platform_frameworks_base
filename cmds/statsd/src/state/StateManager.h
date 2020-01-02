@@ -40,30 +40,33 @@ public:
     // Returns a pointer to the single, shared StateManager object.
     static StateManager& getInstance();
 
+    // Unregisters all listeners and removes all trackers from StateManager.
+    void clear();
+
     // Notifies the correct StateTracker of an event.
     void onLogEvent(const LogEvent& event);
 
     // Returns true if atomId is being tracked and is associated with a state
     // atom. StateManager notifies the correct StateTracker to register listener.
     // If the correct StateTracker does not exist, a new StateTracker is created.
-    bool registerListener(int32_t atomId, wp<StateListener> listener);
+    bool registerListener(const int32_t atomId, wp<StateListener> listener);
 
     // Notifies the correct StateTracker to unregister a listener
     // and removes the tracker if it no longer has any listeners.
-    void unregisterListener(int32_t atomId, wp<StateListener> listener);
+    void unregisterListener(const int32_t atomId, wp<StateListener> listener);
 
     // Returns true if the StateTracker exists and queries for the
     // original state value mapped to the given query key. The state value is
     // stored and output in a FieldValue class.
     // Returns false if the StateTracker doesn't exist.
-    bool getStateValue(int32_t atomId, const HashableDimensionKey& queryKey,
+    bool getStateValue(const int32_t atomId, const HashableDimensionKey& queryKey,
                        FieldValue* output) const;
 
     inline int getStateTrackersCount() const {
         return mStateTrackers.size();
     }
 
-    inline int getListenersCount(int32_t atomId) const {
+    inline int getListenersCount(const int32_t atomId) const {
         auto it = mStateTrackers.find(atomId);
         if (it != mStateTrackers.end()) {
             return it->second->getListenersCount();

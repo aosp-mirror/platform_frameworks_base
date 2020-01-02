@@ -541,8 +541,8 @@ void DurationMetricProducer::handleStartEvent(const MetricDimensionKey& eventKey
 
 void DurationMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const MetricDimensionKey& eventKey,
-        const ConditionKey& conditionKeys, bool condition,
-        const LogEvent& event) {
+        const ConditionKey& conditionKeys, bool condition, const LogEvent& event,
+        const map<int, HashableDimensionKey>& statePrimaryKeys) {
     ALOGW("Not used in duration tracker.");
 }
 

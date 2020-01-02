@@ -83,11 +83,14 @@ public:
         flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
     };
 
+    void onStateChanged(int64_t eventTimeNs, int32_t atomId, const HashableDimensionKey& primaryKey,
+                        int oldState, int newState) override;
+
 protected:
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const MetricDimensionKey& eventKey,
-            const ConditionKey& conditionKey, bool condition,
-            const LogEvent& event) override;
+            const ConditionKey& conditionKey, bool condition, const LogEvent& event,
+            const std::map<int, HashableDimensionKey>& statePrimaryKeys) override;
 
 private:
     void onDumpReportLocked(const int64_t dumpTimeNs,
@@ -144,7 +147,10 @@ private:
     std::vector<Matcher> mFieldMatchers;
 
     // Value fields for matching.
-    std::set<MetricDimensionKey> mMatchedMetricDimensionKeys;
+    std::set<HashableDimensionKey> mMatchedMetricDimensionKeys;
+
+    // Holds the atom id, primary key pair from a state change.
+    pair<int32_t, HashableDimensionKey> mStateChangePrimaryKey;
 
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;
@@ -156,10 +162,6 @@ private:
     typedef struct {
         // Index in multi value aggregation.
         int valueIndex;
-        // Holds current base value of the dimension. Take diff and update if necessary.
-        Value base;
-        // Whether there is a base to diff to.
-        bool hasBase;
         // Current value, depending on the aggregation type.
         Value value;
         // Number of samples collected.
@@ -171,7 +173,20 @@ private:
         bool seenNewData = false;
     } Interval;
 
+    typedef struct {
+        // Holds current base value of the dimension. Take diff and update if necessary.
+        Value base;
+        // Whether there is a base to diff to.
+        bool hasBase;
+        // Last seen state value(s).
+        HashableDimensionKey currentState;
+        // Whether this dimensions in what key has a current state key.
+        bool hasCurrentState;
+    } BaseInfo;
+
     std::unordered_map<MetricDimensionKey, std::vector<Interval>> mCurrentSlicedBucket;
+
+    std::unordered_map<HashableDimensionKey, std::vector<BaseInfo>> mCurrentBaseInfo;
 
     std::unordered_map<MetricDimensionKey, int64_t> mCurrentFullBucket;
 
@@ -285,6 +300,9 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullTooLate);
     FRIEND_TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput);
     FRIEND_TEST(ValueMetricProducerTest, TestSkipZeroDiffOutputMultiValue);
+    FRIEND_TEST(ValueMetricProducerTest, TestSlicedState);
+    FRIEND_TEST(ValueMetricProducerTest, TestSlicedStateWithMap);
+    FRIEND_TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions);
     FRIEND_TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey);
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBase);
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures);

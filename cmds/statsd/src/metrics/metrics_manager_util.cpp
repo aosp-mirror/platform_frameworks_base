@@ -18,11 +18,12 @@
 #include "Log.h"
 
 #include "metrics_manager_util.h"
-#include "MetricProducer.h"
 
 #include <inttypes.h>
 
 #include "atoms_info.h"
+#include "FieldValue.h"
+#include "MetricProducer.h"
 #include "condition/CombinationConditionTracker.h"
 #include "condition/SimpleConditionTracker.h"
 #include "condition/StateConditionTracker.h"
@@ -171,6 +172,14 @@ bool handleMetricWithStates(
         }
     }
     return true;
+}
+
+bool handleMetricWithStateLink(const FieldMatcher& stateMatcher,
+                               const vector<Matcher>& dimensionsInWhat) {
+    vector<Matcher> stateMatchers;
+    translateFieldMatcher(stateMatcher, &stateMatchers);
+
+    return subsetDimensions(stateMatchers, dimensionsInWhat);
 }
 
 // Validates a metricActivation and populates state.
@@ -669,18 +678,41 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
+        std::vector<int> slicedStateAtoms;
+        unordered_map<int, unordered_map<int, int64_t>> stateGroupMap;
+        if (metric.slice_by_state_size() > 0) {
+            if (!handleMetricWithStates(config, metric.slice_by_state(), stateAtomIdMap,
+                                        allStateGroupMaps, slicedStateAtoms, stateGroupMap)) {
+                return false;
+            }
+        } else {
+            if (metric.state_link_size() > 0) {
+                ALOGW("ValueMetric has a MetricStateLink but doesn't have a sliced state");
+                return false;
+            }
+        }
+
+        // Check that all metric state links are a subset of dimensions_in_what fields.
+        std::vector<Matcher> dimensionsInWhat;
+        translateFieldMatcher(metric.dimensions_in_what(), &dimensionsInWhat);
+        for (const auto& stateLink : metric.state_link()) {
+            if (!handleMetricWithStateLink(stateLink.fields_in_what(), dimensionsInWhat)) {
+                return false;
+            }
+        }
+
         unordered_map<int, shared_ptr<Activation>> eventActivationMap;
         unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
-        bool success = handleMetricActivation(config, metric.id(), metricIndex,
-                metricToActivationMap, logTrackerMap, activationAtomTrackerToMetricMap,
-                deactivationAtomTrackerToMetricMap, metricsWithActivation, eventActivationMap,
-                eventDeactivationMap);
+        bool success = handleMetricActivation(
+                config, metric.id(), metricIndex, metricToActivationMap, logTrackerMap,
+                activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
+                metricsWithActivation, eventActivationMap, eventDeactivationMap);
         if (!success) return false;
 
         sp<MetricProducer> valueProducer = new ValueMetricProducer(
                 key, metric, conditionIndex, wizard, trackerIndex, matcherWizard, pullTagId,
                 timeBaseTimeNs, currentTimeNs, pullerManager, eventActivationMap,
-                eventDeactivationMap);
+                eventDeactivationMap, slicedStateAtoms, stateGroupMap);
         allMetricProducers.push_back(valueProducer);
     }
 
