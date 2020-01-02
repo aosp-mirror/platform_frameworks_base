@@ -590,4 +590,17 @@ public class Annotation {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ImsAudioCodec {
     }
+
+    /**
+     * UICC SIM Application Types
+     */
+    @IntDef(prefix = { "APPTYPE_" }, value = {
+            TelephonyManager.APPTYPE_SIM,
+            TelephonyManager.APPTYPE_USIM,
+            TelephonyManager.APPTYPE_RUIM,
+            TelephonyManager.APPTYPE_CSIM,
+            TelephonyManager.APPTYPE_ISIM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UiccAppType{}
 }
