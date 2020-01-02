@@ -24,14 +24,14 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.integrity.model.RuleMetadata;
+import com.android.server.integrity.parser.RuleBinaryParser;
 import com.android.server.integrity.parser.RuleMetadataParser;
 import com.android.server.integrity.parser.RuleParseException;
 import com.android.server.integrity.parser.RuleParser;
-import com.android.server.integrity.parser.RuleXmlParser;
+import com.android.server.integrity.serializer.RuleBinarySerializer;
 import com.android.server.integrity.serializer.RuleMetadataSerializer;
 import com.android.server.integrity.serializer.RuleSerializeException;
 import com.android.server.integrity.serializer.RuleSerializer;
-import com.android.server.integrity.serializer.RuleXmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -57,6 +57,7 @@ public class IntegrityFileManager {
     private final RuleParser mRuleParser;
     private final RuleSerializer mRuleSerializer;
 
+    private final File mDataDir;
     // mRulesDir contains data of the actual rules currently stored.
     private final File mRulesDir;
     // mStagingDir is used to store the temporary rules / metadata during updating, since we want to
@@ -74,18 +75,22 @@ public class IntegrityFileManager {
     }
 
     private IntegrityFileManager() {
-        this(new RuleXmlParser(), new RuleXmlSerializer(), Environment.getDataSystemDirectory());
+        this(
+                new RuleBinaryParser(),
+                new RuleBinarySerializer(),
+                Environment.getDataSystemDirectory());
     }
 
     @VisibleForTesting
     IntegrityFileManager(RuleParser ruleParser, RuleSerializer ruleSerializer, File dataDir) {
         mRuleParser = ruleParser;
         mRuleSerializer = ruleSerializer;
+        mDataDir = dataDir;
 
         mRulesDir = new File(dataDir, "integrity_rules");
         mStagingDir = new File(dataDir, "integrity_staging");
 
-        if (!mStagingDir.mkdirs() && mRulesDir.mkdirs()) {
+        if (!mStagingDir.mkdirs() || !mRulesDir.mkdirs()) {
             Slog.e(TAG, "Error creating staging and rules directory");
             // TODO: maybe throw an exception?
         }
@@ -153,7 +158,7 @@ public class IntegrityFileManager {
 
     private void switchStagingRulesDir() throws IOException {
         synchronized (RULES_LOCK) {
-            File tmpDir = new File(Environment.getDataSystemDirectory(), "temp");
+            File tmpDir = new File(mDataDir, "temp");
 
             if (!(mRulesDir.renameTo(tmpDir)
                     && mStagingDir.renameTo(mRulesDir)
