@@ -26,6 +26,7 @@ import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Feature action that handles device discovery sequences.
@@ -106,7 +107,7 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
      */
     DeviceDiscoveryAction(HdmiCecLocalDevice source, DeviceDiscoveryCallback callback, int delay) {
         super(source);
-        mCallback = Preconditions.checkNotNull(callback);
+        mCallback = Objects.requireNonNull(callback);
         mDelayPeriod = delay;
     }
 
