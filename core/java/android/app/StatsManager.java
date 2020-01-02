@@ -18,11 +18,13 @@ package android.app;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.PACKAGE_USAGE_STATS;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.IPullAtomCallback;
 import android.os.IPullAtomResultReceiver;
@@ -108,13 +110,11 @@ public final class StatsManager {
     /**
      * Value indicating that this pull was successful and that the result should be used.
      *
-     * @hide
      **/
     public static final int PULL_SUCCESS = 0;
 
     /**
      * Value indicating that this pull was unsuccessful and that the result should not be used.
-     * @hide
      **/
     public static final int PULL_SKIP = 1;
 
@@ -512,6 +512,17 @@ public final class StatsManager {
 
 
     /**
+     * Temp registration for while the migration is in progress.
+     *
+     * @hide
+     */
+    public void registerPullAtomCallback(int atomTag, @Nullable PullAtomMetadata metadata,
+            @NonNull StatsPullAtomCallback callback,
+            @NonNull @CallbackExecutor Executor executor) {
+        registerPullAtomCallback(atomTag, metadata, executor, callback);
+    }
+
+    /**
      * Registers a callback for an atom when that atom is to be pulled. The stats service will
      * invoke pullData in the callback when the stats service determines that this atom needs to be
      * pulled.
@@ -520,18 +531,19 @@ public final class StatsManager {
      * @param metadata          Optional metadata specifying the timeout, cool down time, and
      *                          additive fields for mapping isolated to host uids.
      * @param callback          The callback to be invoked when the stats service pulls the atom.
-     * @param executor          The executor in which to run the callback
+     * @param executor          The executor in which to run the callback.
      *
-     * @hide
      */
     public void registerPullAtomCallback(int atomTag, @Nullable PullAtomMetadata metadata,
-            @NonNull StatsPullAtomCallback callback, @NonNull Executor executor) {
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull StatsPullAtomCallback callback) {
         long coolDownNs = metadata == null ? DEFAULT_COOL_DOWN_NS : metadata.mCoolDownNs;
         long timeoutNs = metadata == null ? DEFAULT_TIMEOUT_NS : metadata.mTimeoutNs;
         int[] additiveFields = metadata == null ? new int[0] : metadata.mAdditiveFields;
         if (additiveFields == null) {
             additiveFields = new int[0];
         }
+
         synchronized (sLock) {
             try {
                 IStatsManagerService service = getIStatsManagerServiceLocked();
@@ -551,7 +563,6 @@ public final class StatsManager {
      *
      * @param atomTag           The tag of the atom of which to unregister
      *
-     * @hide
      */
     public void unregisterPullAtomCallback(int atomTag) {
         synchronized (sLock) {
@@ -577,21 +588,26 @@ public final class StatsManager {
 
         @Override
         public void onPullAtom(int atomTag, IPullAtomResultReceiver resultReceiver) {
-            mExecutor.execute(() -> {
-                List<StatsEvent> data = new ArrayList<>();
-                int successInt = mCallback.onPullAtom(atomTag, data);
-                boolean success = successInt == PULL_SUCCESS;
-                StatsEventParcel[] parcels = new StatsEventParcel[data.size()];
-                for (int i = 0; i < data.size(); i++) {
-                    parcels[i] = new StatsEventParcel();
-                    parcels[i].buffer = data.get(i).getBytes();
-                }
-                try {
-                    resultReceiver.pullFinished(atomTag, success, parcels);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "StatsPullResultReceiver failed for tag " + mAtomId);
-                }
-            });
+            long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> {
+                    List<StatsEvent> data = new ArrayList<>();
+                    int successInt = mCallback.onPullAtom(atomTag, data);
+                    boolean success = successInt == PULL_SUCCESS;
+                    StatsEventParcel[] parcels = new StatsEventParcel[data.size()];
+                    for (int i = 0; i < data.size(); i++) {
+                        parcels[i] = new StatsEventParcel();
+                        parcels[i].buffer = data.get(i).getBytes();
+                    }
+                    try {
+                        resultReceiver.pullFinished(atomTag, success, parcels);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "StatsPullResultReceiver failed for tag " + mAtomId);
+                    }
+                });
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 
@@ -599,7 +615,6 @@ public final class StatsManager {
      * Metadata required for registering a StatsPullAtomCallback.
      * All fields are optional, and defaults will be used for fields that are unspecified.
      *
-     * @hide
      */
     public static class PullAtomMetadata {
         private final long mCoolDownNs;
@@ -614,22 +629,27 @@ public final class StatsManager {
         }
 
         /**
-         * Returns a new PullAtomMetadata.Builder object for constructing PullAtomMetadata for
-         * StatsManager#registerPullAtomCallback
+         * Temp for while migrations are in progress.
+         *
+         * @hide
          */
         public static PullAtomMetadata.Builder newBuilder() {
             return new PullAtomMetadata.Builder();
         }
 
         /**
-         * Builder for PullAtomMetadata.
+         *  Builder for PullAtomMetadata.
          */
         public static class Builder {
             private long mCoolDownNs;
             private long mTimeoutNs;
             private int[] mAdditiveFields;
 
-            private Builder() {
+            /**
+             * Returns a new PullAtomMetadata.Builder object for constructing PullAtomMetadata for
+             * StatsManager#registerPullAtomCallback
+             */
+            public Builder() {
                 mCoolDownNs = DEFAULT_COOL_DOWN_NS;
                 mTimeoutNs = DEFAULT_TIMEOUT_NS;
                 mAdditiveFields = null;
@@ -662,7 +682,7 @@ public final class StatsManager {
              * will be combined when the non-additive fields are the same.
              */
             @NonNull
-            public Builder setAdditiveFields(int[] additiveFields) {
+            public Builder setAdditiveFields(@NonNull int[] additiveFields) {
                 mAdditiveFields = additiveFields;
                 return this;
             }
@@ -705,14 +725,13 @@ public final class StatsManager {
     /**
      * Callback interface for pulling atoms requested by the stats service.
      *
-     * @hide
      */
     public interface StatsPullAtomCallback {
         /**
          * Pull data for the specified atom tag, filling in the provided list of StatsEvent data.
          * @return {@link #PULL_SUCCESS} if the pull was successful, or {@link #PULL_SKIP} if not.
          */
-        int onPullAtom(int atomTag, List<StatsEvent> data);
+        int onPullAtom(int atomTag, @NonNull List<StatsEvent> data);
     }
 
     private class StatsdDeathRecipient implements IBinder.DeathRecipient {
