@@ -27,7 +27,6 @@ import com.google.common.io.Files;
 
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -41,11 +40,6 @@ public class FileUtilsTest {
     private static File sTemporaryDir;
     private File mTemporaryFile;
 
-    @BeforeClass
-    public static void setUpClass() {
-        sTemporaryDir = Files.createTempDir();
-    }
-
     @AfterClass
     public static void tearDownClass() {
         if (sTemporaryDir != null) {
@@ -55,17 +49,21 @@ public class FileUtilsTest {
 
     @Before
     public void setUp() throws Exception {
+        if (sTemporaryDir != null) {
+            sTemporaryDir.delete();
+        }
+        sTemporaryDir = Files.createTempDir();
         mTemporaryFile = new File(sTemporaryDir, "fileutilstest.txt");
     }
 
     /** Test that if file does not exist, {@link FileUtils#createNewFile()} creates the file. */
     @Test
     public void testEnsureFileExists_fileDoesNotAlreadyExist_getsCreated() {
-        assertThat(!mTemporaryFile.exists());
+        assertThat(mTemporaryFile.exists()).isFalse();
 
         FileUtils.createNewFile(mTemporaryFile);
 
-        assertThat(mTemporaryFile.exists());
+        assertThat(mTemporaryFile.exists()).isTrue();
     }
 
     /** Test that if file does exist, {@link FileUtils#createNewFile()} does not error out. */
@@ -75,6 +73,6 @@ public class FileUtilsTest {
 
         FileUtils.createNewFile(mTemporaryFile);
 
-        assertThat(mTemporaryFile.exists());
+        assertThat(mTemporaryFile.exists()).isTrue();
     }
 }
