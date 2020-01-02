@@ -29,6 +29,7 @@ import android.media.soundtrigger_middleware.SoundModelType;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,7 +43,7 @@ import java.util.regex.Pattern;
  */
 public class ValidationUtil {
     static void validateUuid(@Nullable String uuid) {
-        Preconditions.checkNotNull(uuid);
+        Objects.requireNonNull(uuid);
         Matcher matcher = UuidUtil.PATTERN.matcher(uuid);
         if (!matcher.matches()) {
             throw new IllegalArgumentException(
@@ -55,37 +56,37 @@ public class ValidationUtil {
     }
 
     static void validateModel(@Nullable SoundModel model, int expectedType) {
-        Preconditions.checkNotNull(model);
+        Objects.requireNonNull(model);
         if (model.type != expectedType) {
             throw new IllegalArgumentException("Invalid type");
         }
         validateUuid(model.uuid);
         validateUuid(model.vendorUuid);
-        Preconditions.checkNotNull(model.data);
+        Objects.requireNonNull(model.data);
     }
 
     static void validatePhraseModel(@Nullable PhraseSoundModel model) {
-        Preconditions.checkNotNull(model);
+        Objects.requireNonNull(model);
         validateModel(model.common, SoundModelType.KEYPHRASE);
-        Preconditions.checkNotNull(model.phrases);
+        Objects.requireNonNull(model.phrases);
         for (Phrase phrase : model.phrases) {
-            Preconditions.checkNotNull(phrase);
+            Objects.requireNonNull(phrase);
             if ((phrase.recognitionModes & ~(RecognitionMode.VOICE_TRIGGER
                     | RecognitionMode.USER_IDENTIFICATION | RecognitionMode.USER_AUTHENTICATION
                     | RecognitionMode.GENERIC_TRIGGER)) != 0) {
                 throw new IllegalArgumentException("Invalid recognitionModes");
             }
-            Preconditions.checkNotNull(phrase.users);
-            Preconditions.checkNotNull(phrase.locale);
-            Preconditions.checkNotNull(phrase.text);
+            Objects.requireNonNull(phrase.users);
+            Objects.requireNonNull(phrase.locale);
+            Objects.requireNonNull(phrase.text);
         }
     }
 
     static void validateRecognitionConfig(@Nullable RecognitionConfig config) {
-        Preconditions.checkNotNull(config);
-        Preconditions.checkNotNull(config.phraseRecognitionExtras);
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(config.phraseRecognitionExtras);
         for (PhraseRecognitionExtra extra : config.phraseRecognitionExtras) {
-            Preconditions.checkNotNull(extra);
+            Objects.requireNonNull(extra);
             if ((extra.recognitionModes & ~(RecognitionMode.VOICE_TRIGGER
                     | RecognitionMode.USER_IDENTIFICATION | RecognitionMode.USER_AUTHENTICATION
                     | RecognitionMode.GENERIC_TRIGGER)) != 0) {
@@ -94,15 +95,15 @@ public class ValidationUtil {
             if (extra.confidenceLevel < 0 || extra.confidenceLevel > 100) {
                 throw new IllegalArgumentException("Invalid confidenceLevel");
             }
-            Preconditions.checkNotNull(extra.levels);
+            Objects.requireNonNull(extra.levels);
             for (ConfidenceLevel level : extra.levels) {
-                Preconditions.checkNotNull(level);
+                Objects.requireNonNull(level);
                 if (level.levelPercent < 0 || level.levelPercent > 100) {
                     throw new IllegalArgumentException("Invalid confidenceLevel");
                 }
             }
         }
-        Preconditions.checkNotNull(config.data);
+        Objects.requireNonNull(config.data);
     }
 
     static void validateModelParameter(int modelParam) {
