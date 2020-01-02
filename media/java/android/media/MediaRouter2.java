@@ -547,8 +547,6 @@ public class MediaRouter2 {
      * {@link SessionCallback#onSessionCreationFailed}.
      * <p>
      * Pass {@code null} to sessionInfo for the failure case.
-     *
-     * TODO: What should router do when the session is created by manager?
      */
     void createControllerOnHandler(@Nullable RouteSessionInfo sessionInfo, int requestId) {
         SessionCreationRequest matchingRequest = null;
@@ -559,40 +557,44 @@ public class MediaRouter2 {
             }
         }
 
-        if (matchingRequest == null) {
-            Log.w(TAG, "Ignoring session creation result for unknown request."
-                    + " requestId=" + requestId + ", sessionInfo=" + sessionInfo);
-            return;
+        if (matchingRequest != null) {
+            mSessionCreationRequests.remove(matchingRequest);
+
+            MediaRoute2Info requestedRoute = matchingRequest.mRoute;
+            String requestedControlCategory = matchingRequest.mControlCategory;
+
+            if (sessionInfo == null) {
+                // TODO: We may need to distinguish between failure and rejection.
+                //       One way can be introducing 'reason'.
+                notifySessionCreationFailed(requestedRoute, requestedControlCategory);
+                return;
+            } else if (!TextUtils.equals(requestedControlCategory,
+                    sessionInfo.getControlCategory())) {
+                Log.w(TAG, "The session has different control category from what we requested. "
+                        + "(requested=" + requestedControlCategory
+                        + ", actual=" + sessionInfo.getControlCategory()
+                        + ")");
+                notifySessionCreationFailed(requestedRoute, requestedControlCategory);
+                return;
+            } else if (!sessionInfo.getSelectedRoutes().contains(requestedRoute.getId())) {
+                Log.w(TAG, "The session does not contain the requested route. "
+                        + "(requestedRouteId=" + requestedRoute.getId()
+                        + ", actualRoutes=" + sessionInfo.getSelectedRoutes()
+                        + ")");
+                notifySessionCreationFailed(requestedRoute, requestedControlCategory);
+                return;
+            } else if (!TextUtils.equals(requestedRoute.getProviderId(),
+                    sessionInfo.getProviderId())) {
+                Log.w(TAG, "The session's provider ID does not match the requested route's. "
+                        + "(requested route's providerId=" + requestedRoute.getProviderId()
+                        + ", actual providerId=" + sessionInfo.getProviderId()
+                        + ")");
+                notifySessionCreationFailed(requestedRoute, requestedControlCategory);
+                return;
+            }
         }
 
-        mSessionCreationRequests.remove(matchingRequest);
-
-        MediaRoute2Info requestedRoute = matchingRequest.mRoute;
-        String requestedControlCategory = matchingRequest.mControlCategory;
-
-        if (sessionInfo == null) {
-            // TODO: We may need to distinguish between failure and rejection.
-            //       One way can be introducing 'reason'.
-            notifySessionCreationFailed(requestedRoute, requestedControlCategory);
-        } else if (!TextUtils.equals(requestedControlCategory, sessionInfo.getControlCategory())) {
-            Log.w(TAG, "The session has different control category from what we requested. "
-                    + "(requested=" + requestedControlCategory
-                    + ", actual=" + sessionInfo.getControlCategory()
-                    + ")");
-            notifySessionCreationFailed(requestedRoute, requestedControlCategory);
-        } else if (!sessionInfo.getSelectedRoutes().contains(requestedRoute.getId())) {
-            Log.w(TAG, "The session does not contain the requested route. "
-                    + "(requestedRouteId=" + requestedRoute.getId()
-                    + ", actualRoutes=" + sessionInfo.getSelectedRoutes()
-                    + ")");
-            notifySessionCreationFailed(requestedRoute, requestedControlCategory);
-        } else if (!TextUtils.equals(requestedRoute.getProviderId(), sessionInfo.getProviderId())) {
-            Log.w(TAG, "The session's provider ID does not match the requested route's. "
-                    + "(requested route's providerId=" + requestedRoute.getProviderId()
-                    + ", actual providerId=" + sessionInfo.getProviderId()
-                    + ")");
-            notifySessionCreationFailed(requestedRoute, requestedControlCategory);
-        } else {
+        if (sessionInfo != null) {
             RouteSessionController controller = new RouteSessionController(sessionInfo);
             mSessionControllers.put(controller.getUniqueSessionId(), controller);
             notifySessionCreated(controller);
