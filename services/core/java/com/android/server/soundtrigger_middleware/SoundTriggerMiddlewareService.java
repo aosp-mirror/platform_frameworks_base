@@ -42,6 +42,7 @@ import com.android.server.SystemService;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -179,8 +180,8 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
         // Permission check.
         checkPermissions();
         // Input validation.
-        Preconditions.checkNotNull(callback);
-        Preconditions.checkNotNull(callback.asBinder());
+        Objects.requireNonNull(callback);
+        Objects.requireNonNull(callback.asBinder());
 
         synchronized (this) {
             // State validation.
