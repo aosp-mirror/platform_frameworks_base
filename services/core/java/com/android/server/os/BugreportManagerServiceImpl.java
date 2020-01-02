@@ -38,6 +38,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.SystemConfig;
 
 import java.io.FileDescriptor;
+import java.util.Objects;
 
 /**
  * Implementation of the service that provides a privileged API to capture and consume bugreports.
@@ -67,9 +68,9 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             FileDescriptor bugreportFd, FileDescriptor screenshotFd,
             int bugreportMode, IDumpstateListener listener) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, "startBugreport");
-        Preconditions.checkNotNull(callingPackage);
-        Preconditions.checkNotNull(bugreportFd);
-        Preconditions.checkNotNull(listener);
+        Objects.requireNonNull(callingPackage);
+        Objects.requireNonNull(bugreportFd);
+        Objects.requireNonNull(listener);
         validateBugreportMode(bugreportMode);
         final long identity = Binder.clearCallingIdentity();
         try {
