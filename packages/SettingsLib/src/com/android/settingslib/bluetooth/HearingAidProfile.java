@@ -203,13 +203,6 @@ public class HearingAidProfile implements LocalBluetoothProfile {
         }
     }
 
-    public int getVolume() {
-        if (mService == null) {
-            return 0;
-        }
-        return mService.getVolume();
-    }
-
     public void setVolume(int volume) {
         if (mService == null) {
             return;
@@ -222,20 +215,6 @@ public class HearingAidProfile implements LocalBluetoothProfile {
             return BluetoothHearingAid.HI_SYNC_ID_INVALID;
         }
         return mService.getHiSyncId(device);
-    }
-
-    public int getDeviceSide(BluetoothDevice device) {
-        if (mService == null) {
-            return BluetoothHearingAid.SIDE_LEFT;
-        }
-        return mService.getDeviceSide(device);
-    }
-
-    public int getDeviceMode(BluetoothDevice device) {
-        if (mService == null) {
-            return BluetoothHearingAid.MODE_MONAURAL;
-        }
-        return mService.getDeviceMode(device);
     }
 
     public String toString() {
