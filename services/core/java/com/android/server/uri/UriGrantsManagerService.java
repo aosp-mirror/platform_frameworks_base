@@ -103,6 +103,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /** Manages uri grants. */
 public class UriGrantsManagerService extends IUriGrantsManager.Stub {
@@ -215,7 +216,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     public ParceledListSlice<android.content.UriPermission> getUriPermissions(
             String packageName, boolean incoming, boolean persistedOnly) {
         enforceNotIsolatedCaller("getUriPermissions");
-        Preconditions.checkNotNull(packageName, "packageName");
+        Objects.requireNonNull(packageName, "packageName");
 
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
