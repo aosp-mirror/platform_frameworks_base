@@ -59,7 +59,7 @@ public class FileIntegrityService extends SystemService {
         }
 
         @Override
-        public boolean isAppSourceCertificateTrusted(byte[] certificateBytes) {
+        public boolean isAppSourceCertificateTrusted(@Nullable byte[] certificateBytes) {
             enforceAnyCallingPermissions(
                     android.Manifest.permission.REQUEST_INSTALL_PACKAGES,
                     android.Manifest.permission.INSTALL_PACKAGES);
@@ -67,7 +67,10 @@ public class FileIntegrityService extends SystemService {
                 if (!isApkVeritySupported()) {
                     return false;
                 }
-
+                if (certificateBytes == null) {
+                    Slog.w(TAG, "Received a null certificate");
+                    return false;
+                }
                 return mTrustedCertificates.contains(toCertificate(certificateBytes));
             } catch (CertificateException e) {
                 Slog.e(TAG, "Failed to convert the certificate: " + e);
@@ -122,7 +125,12 @@ public class FileIntegrityService extends SystemService {
             }
 
             for (File cert : files) {
-                collectCertificate(Files.readAllBytes(cert.toPath()));
+                byte[] certificateBytes = Files.readAllBytes(cert.toPath());
+                if (certificateBytes == null) {
+                    Slog.w(TAG, "The certificate file is empty, ignoring " + cert);
+                    continue;
+                }
+                collectCertificate(certificateBytes);
             }
         } catch (IOException e) {
             Slog.wtf(TAG, "Failed to load fs-verity certificate from " + path, e);
@@ -146,10 +154,10 @@ public class FileIntegrityService extends SystemService {
      * Tries to convert {@code bytes} into an X.509 certificate and store in memory.
      * Errors need to be surpressed in order fo the next certificates to still be collected.
      */
-    private void collectCertificate(@Nullable byte[] bytes) {
+    private void collectCertificate(@NonNull byte[] bytes) {
         try {
             mTrustedCertificates.add(toCertificate(bytes));
-        } catch (CertificateException | AssertionError e) {
+        } catch (CertificateException e) {
             Slog.e(TAG, "Invalid certificate, ignored: " + e);
         }
     }
@@ -159,7 +167,7 @@ public class FileIntegrityService extends SystemService {
      * the rest. The rational is to make it harder to smuggle.
      */
     @NonNull
-    private static X509Certificate toCertificate(@Nullable byte[] bytes)
+    private static X509Certificate toCertificate(@NonNull byte[] bytes)
             throws CertificateException {
         Certificate certificate = sCertFactory.generateCertificate(new ByteArrayInputStream(bytes));
         if (!(certificate instanceof X509Certificate)) {
