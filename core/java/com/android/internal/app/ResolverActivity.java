@@ -472,34 +472,52 @@ public class ResolverActivity extends Activity implements
         finish();
     }
 
+    /**
+     * Numerous layouts are supported, each with optional ViewGroups.
+     * Make sure the inset gets added to the correct View, using
+     * a footer for Lists so it can properly scroll under the navbar.
+     */
+    protected boolean shouldAddFooterView() {
+        if (useLayoutWithDefault()) return true;
+
+        View buttonBar = findViewById(R.id.button_bar);
+        if (buttonBar == null || buttonBar.getVisibility() == View.GONE) return true;
+
+        return false;
+    }
+
+    protected void applyFooterView(int height) {
+        if (mFooterSpacer == null) {
+            mFooterSpacer = new Space(getApplicationContext());
+        } else {
+            ((ResolverMultiProfilePagerAdapter) mMultiProfilePagerAdapter)
+                .getCurrentAdapterView().removeFooterView(mFooterSpacer);
+        }
+        mFooterSpacer.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,
+                                                                   mSystemWindowInsets.bottom));
+        ((ResolverMultiProfilePagerAdapter) mMultiProfilePagerAdapter)
+            .getCurrentAdapterView().addFooterView(mFooterSpacer);
+    }
+
     protected WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
         mSystemWindowInsets = insets.getSystemWindowInsets();
 
         mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,
                 mSystemWindowInsets.right, 0);
 
+        resetButtonBar();
+
         // Need extra padding so the list can fully scroll up
-        if (useLayoutWithDefault()) {
-            if (mFooterSpacer == null) {
-                mFooterSpacer = new Space(getApplicationContext());
-            } else {
-                ((ResolverMultiProfilePagerAdapter) mMultiProfilePagerAdapter)
-                        .getCurrentAdapterView().removeFooterView(mFooterSpacer);
-            }
-            mFooterSpacer.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,
-                                                                       mSystemWindowInsets.bottom));
-            ((ResolverMultiProfilePagerAdapter) mMultiProfilePagerAdapter)
-                    .getCurrentAdapterView().addFooterView(mFooterSpacer);
-        } else {
-            View emptyView = findViewById(R.id.empty);
-            if (emptyView != null) {
-                emptyView.setPadding(0, 0, 0, mSystemWindowInsets.bottom
-                                     + getResources().getDimensionPixelSize(
-                                             R.dimen.chooser_edge_margin_normal) * 2);
-            }
+        if (shouldAddFooterView()) {
+            applyFooterView(mSystemWindowInsets.bottom);
         }
 
-        resetButtonBar();
+        View emptyView = findViewById(R.id.empty);
+        if (emptyView != null) {
+            emptyView.setPadding(0, 0, 0, mSystemWindowInsets.bottom
+                                 + getResources().getDimensionPixelSize(
+                                         R.dimen.chooser_edge_margin_normal) * 2);
+        }
 
         return insets.consumeSystemWindowInsets();
     }
