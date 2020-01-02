@@ -70,6 +70,7 @@ import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STARTED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
+import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityStackSupervisor.dumpHistoryList;
 import static com.android.server.wm.ActivityStackSupervisor.printThisActivity;
@@ -1834,6 +1835,15 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 && (topTask == null || topTask.supportsSplitScreenWindowingMode());
     }
 
+    /**
+     * Returns {@code true} if this is the top-most split-screen-primary or
+     * split-screen-secondary stack, {@code false} otherwise.
+     */
+    boolean isTopSplitScreenStack() {
+        return inSplitScreenWindowingMode()
+                && this == getDisplay().getTopStackInWindowingMode(getWindowingMode());
+    }
+
     /** @return True if the resizing of the primary-split-screen stack affects this stack size. */
     boolean affectedBySplitScreenResize() {
         if (!supportsSplitScreenWindowingMode()) {
@@ -3003,6 +3013,11 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
 
     final void moveTaskToFrontLocked(Task tr, boolean noAnimation, ActivityOptions options,
             AppTimeTracker timeTracker, String reason) {
+        moveTaskToFrontLocked(tr, noAnimation, options, timeTracker, !DEFER_RESUME, reason);
+    }
+
+    final void moveTaskToFrontLocked(Task tr, boolean noAnimation, ActivityOptions options,
+            AppTimeTracker timeTracker, boolean deferResume, String reason) {
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "moveTaskToFront: " + tr);
 
         final ActivityStack topStack = getDisplay().getTopStack();
@@ -3074,7 +3089,9 @@ class ActivityStack extends WindowContainer<WindowContainer> implements BoundsAn
                 topActivity.supportsEnterPipOnTaskSwitch = true;
             }
 
-            mRootWindowContainer.resumeFocusedStacksTopActivities();
+            if (!deferResume) {
+                mRootWindowContainer.resumeFocusedStacksTopActivities();
+            }
             EventLogTags.writeWmTaskToFront(tr.mUserId, tr.mTaskId);
             mAtmService.getTaskChangeNotificationController().notifyTaskMovedToFront(tr.getTaskInfo());
         } finally {

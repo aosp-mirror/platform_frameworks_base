@@ -2805,7 +2805,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             int realCallingUid) {
         int taskId = INVALID_TASK_ID;
         int displayId = INVALID_DISPLAY;
-        //Rect bounds = null;
 
         // We give preference to the launch preference in activity options.
         if (options != null) {
@@ -2827,7 +2826,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         final int activityType = resolveActivityType(r, options, candidateTask);
-        ActivityStack stack;
+        ActivityStack stack = null;
 
         // Next preference for stack goes to the display Id set the candidate display.
         if (launchParams != null && launchParams.mPreferredDisplayId != INVALID_DISPLAY) {
@@ -2860,7 +2859,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         // Give preference to the stack and display of the input task and activity if they match the
         // mode we want to launch into.
-        stack = null;
         DisplayContent display = null;
         if (candidateTask != null) {
             stack = candidateTask.getStack();
