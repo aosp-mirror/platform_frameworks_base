@@ -38,23 +38,19 @@ class RuleIndexingDetailsIdentifier {
     private static final String DEFAULT_RULE_KEY = "N/A";
 
     /**
-     * Splits a given rule list into three indexing categories and returns a sorted list of rules
-     * per each index.
-     *
-     * The sorting guarantees an order based on the key but the rules that have the same key
-     * can be in arbitrary order. For example, given the rules of [package_name_a_rule_1,
-     * package_name_a_rule_2, package_name_b_rule_3, package_name_b_rule_4], the  method will
-     * guarantee that package_name_b rules (i.e., 3 and 4) will never come before package_name_a
-     * rules (i.e., 1 and 2). However, we do not care about the ordering between rule 1 and 2.
-     * We also do not care about the ordering between rule 3 and 4.
+     * Splits a given rule list into three indexing categories. Each rule category is returned as a
+     * TreeMap that is sorted by their indexing keys -- where keys correspond to package name for
+     * PACKAGE_NAME_INDEXED rules, app certificate for APP_CERTIFICATE_INDEXED rules and N/A for
+     * NOT_INDEXED rules.
      */
-    public static Map<Integer, List<Rule>> splitRulesIntoIndexBuckets(List<Rule> rules) {
+    public static Map<Integer, TreeMap<String, List<Rule>>> splitRulesIntoIndexBuckets(
+            List<Rule> rules) {
         if (rules == null) {
             throw new IllegalArgumentException(
                     "Index buckets cannot be created for null rule list.");
         }
 
-        Map<Integer, Map<String, List<Rule>>> typeOrganizedRuleMap = new HashMap();
+        Map<Integer, TreeMap<String, List<Rule>>> typeOrganizedRuleMap = new HashMap();
         typeOrganizedRuleMap.put(NOT_INDEXED, new TreeMap());
         typeOrganizedRuleMap.put(PACKAGE_NAME_INDEXED, new TreeMap());
         typeOrganizedRuleMap.put(APP_CERTIFICATE_INDEXED, new TreeMap());
@@ -87,19 +83,7 @@ class RuleIndexingDetailsIdentifier {
                     .add(rule);
         }
 
-        // Per indexing type, create the sorted rule set based on their key.
-        Map<Integer, List<Rule>> orderedListPerIndexingType = new HashMap<>();
-
-        for (Integer indexingKey : typeOrganizedRuleMap.keySet()) {
-            List<Rule> sortedRules = new ArrayList();
-            for (Map.Entry<String, List<Rule>> entry :
-                    typeOrganizedRuleMap.get(indexingKey).entrySet()) {
-                sortedRules.addAll(entry.getValue());
-            }
-            orderedListPerIndexingType.put(indexingKey, sortedRules);
-        }
-
-        return orderedListPerIndexingType;
+        return typeOrganizedRuleMap;
     }
 
     private static RuleIndexingDetails getIndexingDetails(Formula formula) {

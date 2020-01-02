@@ -38,8 +38,10 @@ import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /** Unit tests for {@link RuleIndexingDetailsIdentifier}. */
 @RunWith(JUnit4.class)
@@ -138,14 +140,16 @@ public class RuleIndexingDetailsIdentifierTest {
         List<Rule> ruleList = new ArrayList();
         ruleList.add(RULE_WITH_PACKAGE_NAME);
 
-        Map<Integer, List<Rule>> result = splitRulesIntoIndexBuckets(ruleList);
+        Map<Integer, TreeMap<String, List<Rule>>> result = splitRulesIntoIndexBuckets(ruleList);
 
         // Verify the resulting map content.
         assertThat(result.keySet())
                 .containsExactly(NOT_INDEXED, PACKAGE_NAME_INDEXED, APP_CERTIFICATE_INDEXED);
         assertThat(result.get(NOT_INDEXED)).isEmpty();
         assertThat(result.get(APP_CERTIFICATE_INDEXED)).isEmpty();
-        assertThat(result.get(PACKAGE_NAME_INDEXED)).containsExactly(RULE_WITH_PACKAGE_NAME);
+        assertThat(result.get(PACKAGE_NAME_INDEXED).keySet()).containsExactly(SAMPLE_PACKAGE_NAME);
+        assertThat(result.get(PACKAGE_NAME_INDEXED).get(SAMPLE_PACKAGE_NAME))
+                .containsExactly(RULE_WITH_PACKAGE_NAME);
     }
 
     @Test
@@ -153,13 +157,16 @@ public class RuleIndexingDetailsIdentifierTest {
         List<Rule> ruleList = new ArrayList();
         ruleList.add(RULE_WITH_APP_CERTIFICATE);
 
-        Map<Integer, List<Rule>> result = splitRulesIntoIndexBuckets(ruleList);
+        Map<Integer, TreeMap<String, List<Rule>>> result = splitRulesIntoIndexBuckets(ruleList);
 
         assertThat(result.keySet())
                 .containsExactly(NOT_INDEXED, PACKAGE_NAME_INDEXED, APP_CERTIFICATE_INDEXED);
         assertThat(result.get(NOT_INDEXED)).isEmpty();
         assertThat(result.get(PACKAGE_NAME_INDEXED)).isEmpty();
-        assertThat(result.get(APP_CERTIFICATE_INDEXED)).containsExactly(RULE_WITH_APP_CERTIFICATE);
+        assertThat(result.get(APP_CERTIFICATE_INDEXED).keySet())
+                .containsExactly(SAMPLE_APP_CERTIFICATE);
+        assertThat(result.get(APP_CERTIFICATE_INDEXED).get(SAMPLE_APP_CERTIFICATE))
+                .containsExactly(RULE_WITH_APP_CERTIFICATE);
     }
 
     @Test
@@ -167,13 +174,14 @@ public class RuleIndexingDetailsIdentifierTest {
         List<Rule> ruleList = new ArrayList();
         ruleList.add(RULE_WITH_INSTALLER_RESTRICTIONS);
 
-        Map<Integer, List<Rule>> result = splitRulesIntoIndexBuckets(ruleList);
+        Map<Integer, TreeMap<String, List<Rule>>> result = splitRulesIntoIndexBuckets(ruleList);
 
         assertThat(result.keySet())
                 .containsExactly(NOT_INDEXED, PACKAGE_NAME_INDEXED, APP_CERTIFICATE_INDEXED);
         assertThat(result.get(PACKAGE_NAME_INDEXED)).isEmpty();
         assertThat(result.get(APP_CERTIFICATE_INDEXED)).isEmpty();
-        assertThat(result.get(NOT_INDEXED)).containsExactly(RULE_WITH_INSTALLER_RESTRICTIONS);
+        assertThat(result.get(NOT_INDEXED).get("N/A"))
+                .containsExactly(RULE_WITH_INSTALLER_RESTRICTIONS);
     }
 
     @Test
@@ -181,13 +189,14 @@ public class RuleIndexingDetailsIdentifierTest {
         List<Rule> ruleList = new ArrayList();
         ruleList.add(RULE_WITH_NONSTRING_RESTRICTIONS);
 
-        Map<Integer, List<Rule>> result = splitRulesIntoIndexBuckets(ruleList);
+        Map<Integer, TreeMap<String, List<Rule>>> result = splitRulesIntoIndexBuckets(ruleList);
 
         assertThat(result.keySet())
                 .containsExactly(NOT_INDEXED, PACKAGE_NAME_INDEXED, APP_CERTIFICATE_INDEXED);
         assertThat(result.get(PACKAGE_NAME_INDEXED)).isEmpty();
         assertThat(result.get(APP_CERTIFICATE_INDEXED)).isEmpty();
-        assertThat(result.get(NOT_INDEXED)).containsExactly(RULE_WITH_NONSTRING_RESTRICTIONS);
+        assertThat(result.get(NOT_INDEXED).get("N/A"))
+                .containsExactly(RULE_WITH_NONSTRING_RESTRICTIONS);
     }
 
     @Test
@@ -206,13 +215,13 @@ public class RuleIndexingDetailsIdentifierTest {
         List<Rule> ruleList = new ArrayList();
         ruleList.add(negatedRule);
 
-        Map<Integer, List<Rule>> result = splitRulesIntoIndexBuckets(ruleList);
+        Map<Integer, TreeMap<String, List<Rule>>> result = splitRulesIntoIndexBuckets(ruleList);
 
         assertThat(result.keySet())
                 .containsExactly(NOT_INDEXED, PACKAGE_NAME_INDEXED, APP_CERTIFICATE_INDEXED);
         assertThat(result.get(PACKAGE_NAME_INDEXED)).isEmpty();
         assertThat(result.get(APP_CERTIFICATE_INDEXED)).isEmpty();
-        assertThat(result.get(NOT_INDEXED)).containsExactly(negatedRule);
+        assertThat(result.get(NOT_INDEXED).get("N/A")).containsExactly(negatedRule);
     }
 
     @Test
@@ -234,22 +243,36 @@ public class RuleIndexingDetailsIdentifierTest {
         ruleList.add(RULE_WITH_INSTALLER_RESTRICTIONS);
         ruleList.add(RULE_WITH_NONSTRING_RESTRICTIONS);
 
-        Map<Integer, List<Rule>> result = splitRulesIntoIndexBuckets(ruleList);
+        Map<Integer, TreeMap<String, List<Rule>>> result = splitRulesIntoIndexBuckets(ruleList);
 
         assertThat(result.keySet())
                 .containsExactly(NOT_INDEXED, PACKAGE_NAME_INDEXED, APP_CERTIFICATE_INDEXED);
 
         // We check asserts this way to ensure ordering based on package name.
-        assertThat(result.get(PACKAGE_NAME_INDEXED).get(0)).isEqualTo(packageNameRuleA);
-        assertThat(result.get(PACKAGE_NAME_INDEXED).get(1)).isEqualTo(packageNameRuleB);
-        assertThat(result.get(PACKAGE_NAME_INDEXED).get(2)).isEqualTo(packageNameRuleC);
+        assertThat(result.get(PACKAGE_NAME_INDEXED).keySet()).containsExactly("aaa", "bbb", "ccc");
+        Iterator<String> keySetIterator = result.get(PACKAGE_NAME_INDEXED).keySet().iterator();
+        assertThat(keySetIterator.next()).isEqualTo("aaa");
+        assertThat(keySetIterator.next()).isEqualTo("bbb");
+        assertThat(keySetIterator.next()).isEqualTo("ccc");
+        assertThat(result.get(PACKAGE_NAME_INDEXED).get("aaa")).containsExactly(packageNameRuleA);
+        assertThat(result.get(PACKAGE_NAME_INDEXED).get("bbb")).containsExactly(packageNameRuleB);
+        assertThat(result.get(PACKAGE_NAME_INDEXED).get("ccc")).containsExactly(packageNameRuleC);
 
         // We check asserts this way to ensure ordering based on app certificate.
-        assertThat(result.get(APP_CERTIFICATE_INDEXED).get(0)).isEqualTo(certificateRule1);
-        assertThat(result.get(APP_CERTIFICATE_INDEXED).get(1)).isEqualTo(certificateRule2);
-        assertThat(result.get(APP_CERTIFICATE_INDEXED).get(2)).isEqualTo(certificateRule3);
+        assertThat(result.get(APP_CERTIFICATE_INDEXED).keySet()).containsExactly("cert1", "cert2",
+                "cert3");
+        keySetIterator = result.get(APP_CERTIFICATE_INDEXED).keySet().iterator();
+        assertThat(keySetIterator.next()).isEqualTo("cert1");
+        assertThat(keySetIterator.next()).isEqualTo("cert2");
+        assertThat(keySetIterator.next()).isEqualTo("cert3");
+        assertThat(result.get(APP_CERTIFICATE_INDEXED).get("cert1")).containsExactly(
+                certificateRule1);
+        assertThat(result.get(APP_CERTIFICATE_INDEXED).get("cert2")).containsExactly(
+                certificateRule2);
+        assertThat(result.get(APP_CERTIFICATE_INDEXED).get("cert3")).containsExactly(
+                certificateRule3);
 
-        assertThat(result.get(NOT_INDEXED))
+        assertThat(result.get(NOT_INDEXED).get("N/A"))
                 .containsExactly(
                         RULE_WITH_INSTALLER_RESTRICTIONS,
                         RULE_WITH_NONSTRING_RESTRICTIONS);

@@ -35,6 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 /** A helper class to serialize rules from the {@link Rule} model to Xml representation. */
 public class RuleXmlSerializer implements RuleSerializer {
@@ -84,7 +85,7 @@ public class RuleXmlSerializer implements RuleSerializer {
             throws RuleSerializeException {
         try {
             // Determine the indexing groups and the order of the rules within each indexed group.
-            Map<Integer, List<Rule>> indexedRules =
+            Map<Integer, TreeMap<String, List<Rule>>> indexedRules =
                     RuleIndexingDetailsIdentifier.splitRulesIntoIndexBuckets(rules);
 
             // Write the XML formatted rules in order.
@@ -101,10 +102,13 @@ public class RuleXmlSerializer implements RuleSerializer {
         }
     }
 
-    private void serializeRuleList(List<Rule> rules, XmlSerializer xmlSerializer)
+    private void serializeRuleList(TreeMap<String, List<Rule>> rulesMap,
+            XmlSerializer xmlSerializer)
             throws IOException {
-        for (Rule rule : rules) {
-            serializeRule(rule, xmlSerializer);
+        for (Map.Entry<String, List<Rule>> entry : rulesMap.entrySet()) {
+            for (Rule rule : entry.getValue()) {
+                serializeRule(rule, xmlSerializer);
+            }
         }
     }
 
