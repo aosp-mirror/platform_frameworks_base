@@ -21,6 +21,8 @@ import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HARD_K
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HARD_KEYBOARD_OVERRIDDEN;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HIDDEN;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_IGNORE_HARD_KEYBOARD;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED;
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_TOUCH_EXPLORATION_ENABLED;
@@ -116,6 +118,7 @@ public class AccessibilityUserStateTest {
         mUserState.setAutoclickEnabledLocked(true);
         mUserState.setUserNonInteractiveUiTimeoutLocked(30);
         mUserState.setUserInteractiveUiTimeoutLocked(30);
+        mUserState.setMagnificationModeLocked(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
 
         mUserState.onSwitchToAnotherUserLocked();
 
@@ -134,6 +137,8 @@ public class AccessibilityUserStateTest {
         assertFalse(mUserState.isAutoclickEnabledLocked());
         assertEquals(0, mUserState.getUserNonInteractiveUiTimeoutLocked());
         assertEquals(0, mUserState.getUserInteractiveUiTimeoutLocked());
+        assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
+                mUserState.getMagnificationModeLocked());
     }
 
     @Test
@@ -296,6 +301,17 @@ public class AccessibilityUserStateTest {
         final ComponentName invalidTarget =
                 new ComponentName("com.android.server.accessibility", "InvalidTarget");
         assertFalse(mUserState.isShortcutTargetInstalledLocked(invalidTarget.flattenToString()));
+    }
+
+    @Test
+    public void setWindowMagnificationMode_returnExpectedMagnificationMode() {
+        assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
+                mUserState.getMagnificationModeLocked());
+
+        mUserState.setMagnificationModeLocked(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                mUserState.getMagnificationModeLocked());
     }
 
     private int getSecureIntForUser(String key, int userId) {
