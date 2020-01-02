@@ -283,6 +283,7 @@ public class IorapForwardingService extends SystemService {
     }
 
     private final AppLaunchObserver mAppLaunchObserver = new AppLaunchObserver();
+    private final EventSequenceValidator mEventSequenceValidator = new EventSequenceValidator();
     private boolean mRegisteredListeners = false;
 
     private void registerInProcessListenersLocked() {
@@ -303,6 +304,7 @@ public class IorapForwardingService extends SystemService {
         ActivityMetricsLaunchObserverRegistry launchObserverRegistry =
                 provideLaunchObserverRegistry();
         launchObserverRegistry.registerLaunchObserver(mAppLaunchObserver);
+        launchObserverRegistry.registerLaunchObserver(mEventSequenceValidator);
 
         mRegisteredListeners = true;
     }
