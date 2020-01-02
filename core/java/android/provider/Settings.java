@@ -389,6 +389,21 @@ public final class Settings {
             "android.settings.MANAGE_UNKNOWN_APP_SOURCES";
 
     /**
+     * Activity Action: Show settings to allow configuration of cross-profile access for apps
+     *
+     * Input: Optionally, the Intent's data URI can specify the application package name to
+     * directly invoke the management GUI specific to the package name. For example
+     * "package:com.my.app".
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_CROSS_PROFILE_ACCESS =
+            "android.settings.MANAGE_CROSS_PROFILE_ACCESS";
+
+    /**
      * Activity Action: Show the "Open by Default" page in a particular application's details page.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
