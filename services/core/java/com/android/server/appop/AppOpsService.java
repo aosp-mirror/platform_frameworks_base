@@ -4471,7 +4471,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (dumpOp >= 0 || dumpPackage != null || dumpMode >= 0) {
                     boolean hasOp = dumpOp < 0 || (uidState.opModes != null
                             && uidState.opModes.indexOfKey(dumpOp) >= 0);
-                    boolean hasPackage = dumpPackage == null;
+                    boolean hasPackage = dumpPackage == null || dumpUid == mUidStates.keyAt(i);
                     boolean hasMode = dumpMode < 0;
                     if (!hasMode && opModes != null) {
                         for (int opi = 0; !hasMode && opi < opModes.size(); opi++) {
