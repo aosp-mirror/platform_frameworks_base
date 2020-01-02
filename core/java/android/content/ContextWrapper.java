@@ -943,6 +943,12 @@ public class ContextWrapper extends Context {
         return mBase.getUserId();
     }
 
+    /** @hide */
+    @Override
+    public UserHandle getUser() {
+        return mBase.getUser();
+    }
+
     @Override
     public Context createConfigurationContext(Configuration overrideConfiguration) {
         return mBase.createConfigurationContext(overrideConfiguration);
