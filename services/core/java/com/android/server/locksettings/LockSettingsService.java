@@ -212,7 +212,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final LockSettingsStrongAuth mStrongAuth;
     private final SynchronizedStrongAuthTracker mStrongAuthTracker;
 
-    private final LockPatternUtils mLockPatternUtils;
     private final NotificationManager mNotificationManager;
     private final UserManager mUserManager;
     private final IStorageManager mStorageManager;
@@ -228,6 +227,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     // the device or changes password. Removed when user is stopped.
     @GuardedBy("this")
     final SparseArray<PasswordMetrics> mUserPasswordMetrics = new SparseArray<>();
+    @VisibleForTesting
+    protected boolean mHasSecureLockScreen;
 
     protected IGateKeeperService mGateKeeperService;
     protected IAuthSecret mAuthSecretService;
@@ -351,7 +352,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             return;
         }
         // Do not tie managed profile when work challenge is enabled
-        if (mLockPatternUtils.isSeparateProfileChallengeEnabled(managedUserId)) {
+        if (getSeparateProfileChallengeEnabledInternal(managedUserId)) {
             return;
         }
         // Do not tie managed profile to parent when it's done already
@@ -432,10 +433,6 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         public IActivityManager getActivityManager() {
             return ActivityManager.getService();
-        }
-
-        public LockPatternUtils getLockPatternUtils() {
-            return new LockPatternUtils(mContext);
         }
 
         public NotificationManager getNotificationManager() {
@@ -535,7 +532,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStrongAuth = injector.getStrongAuth();
         mActivityManager = injector.getActivityManager();
 
-        mLockPatternUtils = injector.getLockPatternUtils();
         mFirstCallToVold = true;
 
         IntentFilter filter = new IntentFilter();
@@ -780,6 +776,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             EventLog.writeEvent(0x534e4554, "28251513", getCallingUid(), "");  // SafetyNet
         }
         checkWritePermission(UserHandle.USER_SYSTEM);
+
+        mHasSecureLockScreen = mContext.getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN);
         migrateOldData();
         getGateKeeperService();
         mSpManager.initWeaverService();
@@ -1019,6 +1018,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
+    public boolean hasSecureLockScreen() {
+        return mHasSecureLockScreen;
+    }
+
+    @Override
     public boolean getSeparateProfileChallengeEnabled(int userId) {
         checkReadPermission(SEPARATE_PROFILE_CHALLENGE_KEY, userId);
         return getSeparateProfileChallengeEnabledInternal(userId);
@@ -1034,7 +1038,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     public void setSeparateProfileChallengeEnabled(int userId, boolean enabled,
             LockscreenCredential managedUserPassword) {
         checkWritePermission(userId);
-        if (!mLockPatternUtils.hasSecureLockScreen()) {
+        if (!mHasSecureLockScreen) {
             throw new UnsupportedOperationException(
                     "This operation requires secure lock screen feature.");
         }
@@ -1147,12 +1151,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private String getStringUnchecked(String key, String defaultValue, int userId) {
         if (Settings.Secure.LOCK_PATTERN_ENABLED.equals(key)) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                return mLockPatternUtils.isLockPatternEnabled(userId) ? "1" : "0";
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+            return getCredentialTypeInternal(userId) == CREDENTIAL_TYPE_PATTERN ? "1" : "0";
         }
         if (userId == USER_FRP) {
             return null;
@@ -1402,7 +1401,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private boolean tiedManagedProfileReadyToUnlock(UserInfo userInfo) {
         return userInfo.isManagedProfile()
-                && !mLockPatternUtils.isSeparateProfileChallengeEnabled(userInfo.id)
+                && !getSeparateProfileChallengeEnabledInternal(userInfo.id)
                 && mStorage.hasChildProfileLock(userInfo.id)
                 && mUserManager.isUserRunning(userInfo.id);
     }
@@ -1420,7 +1419,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 continue;
             }
             final int managedUserId = profile.id;
-            if (mLockPatternUtils.isSeparateProfileChallengeEnabled(managedUserId)) {
+            if (getSeparateProfileChallengeEnabledInternal(managedUserId)) {
                 continue;
             }
             try {
@@ -1460,7 +1459,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             final UserInfo profile = profiles.get(i);
             if (profile.isManagedProfile()) {
                 final int managedUserId = profile.id;
-                if (mLockPatternUtils.isSeparateProfileChallengeEnabled(managedUserId)) {
+                if (getSeparateProfileChallengeEnabledInternal(managedUserId)) {
                     continue;
                 }
                 if (isSecure) {
@@ -1487,12 +1486,12 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private boolean isManagedProfileWithUnifiedLock(int userId) {
         return mUserManager.getUserInfo(userId).isManagedProfile()
-                && !mLockPatternUtils.isSeparateProfileChallengeEnabled(userId);
+                && !getSeparateProfileChallengeEnabledInternal(userId);
     }
 
     private boolean isManagedProfileWithSeparatedLock(int userId) {
         return mUserManager.getUserInfo(userId).isManagedProfile()
-                && mLockPatternUtils.isSeparateProfileChallengeEnabled(userId);
+                && getSeparateProfileChallengeEnabledInternal(userId);
     }
 
     /**
@@ -1565,7 +1564,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     public boolean setLockCredential(LockscreenCredential credential,
             LockscreenCredential savedCredential, int userId) {
 
-        if (!mLockPatternUtils.hasSecureLockScreen()) {
+        if (!mHasSecureLockScreen) {
             throw new UnsupportedOperationException(
                     "This operation requires secure lock screen feature");
         }
@@ -1872,7 +1871,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         for (UserInfo pi : profiles) {
             // Unlock managed profile with unified lock
             if (pi.isManagedProfile()
-                    && !mLockPatternUtils.isSeparateProfileChallengeEnabled(pi.id)
+                    && !getSeparateProfileChallengeEnabledInternal(pi.id)
                     && mStorage.hasChildProfileLock(pi.id)) {
                 try {
                     if (managedUserId == -1) {
@@ -2867,7 +2866,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         VerifyCredentialResponse response = authResult.gkResponse;
         AuthenticationToken auth = authResult.authToken;
 
-
         if (auth == null) {
             if (response == null
                     || response.getResponseCode() == VerifyCredentialResponse.RESPONSE_ERROR) {
@@ -3075,9 +3073,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
 
         pw.println("Current lock settings service state:");
-
-        pw.println(String.format("SP Enabled = %b",
-                mLockPatternUtils.isSyntheticPasswordEnabled()));
         pw.println();
 
         pw.println("User State:");
@@ -3263,7 +3258,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         @Override
         public boolean setLockCredentialWithToken(LockscreenCredential credential, long tokenHandle,
                 byte[] token, int userId) {
-            if (!mLockPatternUtils.hasSecureLockScreen()) {
+            if (!mHasSecureLockScreen) {
                 throw new UnsupportedOperationException(
                         "This operation requires secure lock screen feature.");
             }
