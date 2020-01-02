@@ -16,7 +16,7 @@
           package="com.android.test.viewembed">
 
     <application>
-        <activity android:name="WindowlessWmTest" android:label="View Embedding Test">
+        <activity android:name="SurfaceControlViewHostTest" android:label="View Embedding Test">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

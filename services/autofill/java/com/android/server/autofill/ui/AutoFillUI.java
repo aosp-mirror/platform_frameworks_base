@@ -40,8 +40,8 @@ import android.text.TextUtils;
 import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.WindowManager;
-import android.view.WindowlessViewRoot;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -217,14 +217,12 @@ public final class AutoFillUI {
         }
 
         final AutofillValue datasetValue = dataset.getFieldValues().get(index);
-        final SurfaceControl sc = new SurfaceControl.Builder()
-                // TODO(b/137800469): sanitize name
-                .setName("af suggestion")
-                .build();
-
         //TODO(b/137800469): Pass in inputToken from IME.
-        final WindowlessViewRoot wvr = new WindowlessViewRoot(context, context.getDisplay(), sc,
-                null);
+        final SurfaceControlViewHost wvr = new SurfaceControlViewHost(context, context.getDisplay(),
+                (IBinder) null);
+        // TODO(b/134365580): Use the package instead of the SurfaceControl itself
+        // for accessibility support.
+        final SurfaceControl sc = wvr.getSurfacePackage().getSurfaceControl();
 
         TextView textView = new TextView(context);
         textView.setText(datasetValue.getTextValue());
