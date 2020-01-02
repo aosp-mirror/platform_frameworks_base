@@ -19,8 +19,6 @@ package com.android.server.wm;
 import static android.provider.AndroidDeviceConfig.KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE;
 import static android.provider.AndroidDeviceConfig.KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.provider.AndroidDeviceConfig;
 import android.provider.DeviceConfig;
 
@@ -28,6 +26,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.utils.DeviceConfigInterface;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -74,8 +73,8 @@ final class WindowManagerConstants {
     WindowManagerConstants(WindowManagerGlobalLock globalLock,
             Runnable updateSystemGestureExclusionCallback,
             DeviceConfigInterface deviceConfig) {
-        mGlobalLock = checkNotNull(globalLock);
-        mUpdateSystemGestureExclusionCallback = checkNotNull(updateSystemGestureExclusionCallback);
+        mGlobalLock = Objects.requireNonNull(globalLock);
+        mUpdateSystemGestureExclusionCallback = Objects.requireNonNull(updateSystemGestureExclusionCallback);
         mDeviceConfig = deviceConfig;
         mListenerAndroid = this::onAndroidPropertiesChanged;
         mListenerWindowManager = this::onWindowPropertiesChanged;

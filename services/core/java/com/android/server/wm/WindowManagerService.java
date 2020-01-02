@@ -297,6 +297,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -2869,7 +2870,7 @@ public class WindowManagerService extends IWindowManager.Stub
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
-        Preconditions.checkNotNull(token, "token is null");
+        Objects.requireNonNull(token, "token is null");
         final int callingUid = Binder.getCallingUid();
         final long origIdentity = Binder.clearCallingIdentity();
         try {
