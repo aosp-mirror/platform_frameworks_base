@@ -287,7 +287,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     static final int PRECISE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_PRECISE_CALL_STATE
-                | PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE;
+                | PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE
+                | PhoneStateListener.LISTEN_CALL_DISCONNECT_CAUSES
+                | PhoneStateListener.LISTEN_CALL_ATTRIBUTES_CHANGED
+                | PhoneStateListener.LISTEN_IMS_CALL_DISCONNECT_CAUSES;
 
     static final int READ_ACTIVE_EMERGENCY_SESSION_PERMISSION_MASK =
             PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_CALL
@@ -2397,8 +2400,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
 
         if ((events & PRECISE_PHONE_STATE_PERMISSION_MASK) != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PRECISE_PHONE_STATE, null);
+            // check if calling app has either permission READ_PRECISE_PHONE_STATE
+            // or with carrier privileges
+            try {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.READ_PRECISE_PHONE_STATE, null);
+            } catch (SecurityException se) {
+                TelephonyPermissions.enforceCallingOrSelfCarrierPrivilege(mContext, subId, message);
+            }
         }
 
         if ((events & READ_ACTIVE_EMERGENCY_SESSION_PERMISSION_MASK) != 0) {
@@ -2416,16 +2425,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
         }
 
-        if ((events & PhoneStateListener.LISTEN_CALL_DISCONNECT_CAUSES) != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PRECISE_PHONE_STATE, null);
-        }
-
-        if ((events & PhoneStateListener.LISTEN_CALL_ATTRIBUTES_CHANGED) != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PRECISE_PHONE_STATE, null);
-        }
-
         if ((events & PhoneStateListener.LISTEN_RADIO_POWER_STATE_CHANGED) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
@@ -2434,11 +2433,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if ((events & PhoneStateListener.LISTEN_VOICE_ACTIVATION_STATE) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
-        }
-
-        if ((events & PhoneStateListener.LISTEN_IMS_CALL_DISCONNECT_CAUSES) != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PRECISE_PHONE_STATE, null);
         }
 
         return true;
