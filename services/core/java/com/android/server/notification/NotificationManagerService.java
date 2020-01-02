@@ -2261,8 +2261,8 @@ public class NotificationManagerService extends SystemService {
 
     private void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
             boolean fromApp, boolean fromListener) {
-        Preconditions.checkNotNull(group);
-        Preconditions.checkNotNull(pkg);
+        Objects.requireNonNull(group);
+        Objects.requireNonNull(pkg);
 
         final NotificationChannelGroup preUpdate =
                 mPreferencesHelper.getNotificationChannelGroup(group.getId(), pkg, uid);
@@ -3005,7 +3005,7 @@ public class NotificationManagerService extends SystemService {
             boolean needsPolicyFileChange = false;
             for (int i = 0; i < channelsSize; i++) {
                 final NotificationChannel channel = channels.get(i);
-                Preconditions.checkNotNull(channel, "channel in list is null");
+                Objects.requireNonNull(channel, "channel in list is null");
                 needsPolicyFileChange = mPreferencesHelper.createNotificationChannel(pkg, uid,
                         channel, true /* fromTargetApp */,
                         mConditionProviders.isPackageOrComponentAllowed(
@@ -3126,7 +3126,7 @@ public class NotificationManagerService extends SystemService {
         public void updateNotificationChannelForPackage(String pkg, int uid,
                 NotificationChannel channel) {
             enforceSystemOrSystemUI("Caller not system or systemui");
-            Preconditions.checkNotNull(channel);
+            Objects.requireNonNull(channel);
             updateNotificationChannelInt(pkg, uid, channel, false);
         }
 
@@ -3877,21 +3877,21 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public AutomaticZenRule getAutomaticZenRule(String id) throws RemoteException {
-            Preconditions.checkNotNull(id, "Id is null");
+            Objects.requireNonNull(id, "Id is null");
             enforcePolicyAccess(Binder.getCallingUid(), "getAutomaticZenRule");
             return mZenModeHelper.getAutomaticZenRule(id);
         }
 
         @Override
         public String addAutomaticZenRule(AutomaticZenRule automaticZenRule) {
-            Preconditions.checkNotNull(automaticZenRule, "automaticZenRule is null");
-            Preconditions.checkNotNull(automaticZenRule.getName(), "Name is null");
+            Objects.requireNonNull(automaticZenRule, "automaticZenRule is null");
+            Objects.requireNonNull(automaticZenRule.getName(), "Name is null");
             if (automaticZenRule.getOwner() == null
                     && automaticZenRule.getConfigurationActivity() == null) {
                 throw new NullPointerException(
                         "Rule must have a conditionproviderservice and/or configuration activity");
             }
-            Preconditions.checkNotNull(automaticZenRule.getConditionId(), "ConditionId is null");
+            Objects.requireNonNull(automaticZenRule.getConditionId(), "ConditionId is null");
             if (automaticZenRule.getZenPolicy() != null
                     && automaticZenRule.getInterruptionFilter() != INTERRUPTION_FILTER_PRIORITY) {
                 throw new IllegalArgumentException("ZenPolicy is only applicable to "
@@ -3906,14 +3906,14 @@ public class NotificationManagerService extends SystemService {
         @Override
         public boolean updateAutomaticZenRule(String id, AutomaticZenRule automaticZenRule)
                 throws RemoteException {
-            Preconditions.checkNotNull(automaticZenRule, "automaticZenRule is null");
-            Preconditions.checkNotNull(automaticZenRule.getName(), "Name is null");
+            Objects.requireNonNull(automaticZenRule, "automaticZenRule is null");
+            Objects.requireNonNull(automaticZenRule.getName(), "Name is null");
             if (automaticZenRule.getOwner() == null
                     && automaticZenRule.getConfigurationActivity() == null) {
                 throw new NullPointerException(
                         "Rule must have a conditionproviderservice and/or configuration activity");
             }
-            Preconditions.checkNotNull(automaticZenRule.getConditionId(), "ConditionId is null");
+            Objects.requireNonNull(automaticZenRule.getConditionId(), "ConditionId is null");
             enforcePolicyAccess(Binder.getCallingUid(), "updateAutomaticZenRule");
 
             return mZenModeHelper.updateAutomaticZenRule(id, automaticZenRule,
@@ -3922,7 +3922,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean removeAutomaticZenRule(String id) throws RemoteException {
-            Preconditions.checkNotNull(id, "Id is null");
+            Objects.requireNonNull(id, "Id is null");
             // Verify that they can modify zen rules.
             enforcePolicyAccess(Binder.getCallingUid(), "removeAutomaticZenRule");
 
@@ -3931,7 +3931,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean removeAutomaticZenRules(String packageName) throws RemoteException {
-            Preconditions.checkNotNull(packageName, "Package name is null");
+            Objects.requireNonNull(packageName, "Package name is null");
             enforceSystemOrSystemUI("removeAutomaticZenRules");
 
             return mZenModeHelper.removeAutomaticZenRules(packageName, "removeAutomaticZenRules");
@@ -3939,7 +3939,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public int getRuleInstanceCount(ComponentName owner) throws RemoteException {
-            Preconditions.checkNotNull(owner, "Owner is null");
+            Objects.requireNonNull(owner, "Owner is null");
             enforceSystemOrSystemUI("getRuleInstanceCount");
 
             return mZenModeHelper.getCurrentInstanceCount(owner);
@@ -3947,8 +3947,8 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void setAutomaticZenRuleState(String id, Condition condition) {
-            Preconditions.checkNotNull(id, "id is null");
-            Preconditions.checkNotNull(condition, "Condition is null");
+            Objects.requireNonNull(id, "id is null");
+            Objects.requireNonNull(condition, "Condition is null");
 
             enforcePolicyAccess(Binder.getCallingUid(), "setAutomaticZenRuleState");
 
@@ -4292,7 +4292,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean isNotificationListenerAccessGranted(ComponentName listener) {
-            Preconditions.checkNotNull(listener);
+            Objects.requireNonNull(listener);
             checkCallerIsSystemOrSameApp(listener.getPackageName());
             return mListeners.isPackageOrComponentAllowed(listener.flattenToString(),
                     getCallingUserHandle().getIdentifier());
@@ -4301,7 +4301,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public boolean isNotificationListenerAccessGrantedForUser(ComponentName listener,
                 int userId) {
-            Preconditions.checkNotNull(listener);
+            Objects.requireNonNull(listener);
             checkCallerIsSystem();
             return mListeners.isPackageOrComponentAllowed(listener.flattenToString(),
                     userId);
@@ -4309,7 +4309,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean isNotificationAssistantAccessGranted(ComponentName assistant) {
-            Preconditions.checkNotNull(assistant);
+            Objects.requireNonNull(assistant);
             checkCallerIsSystemOrSameApp(assistant.getPackageName());
             return mAssistants.isPackageOrComponentAllowed(assistant.flattenToString(),
                     getCallingUserHandle().getIdentifier());
@@ -4332,7 +4332,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setNotificationListenerAccessGrantedForUser(ComponentName listener, int userId,
                 boolean granted) {
-            Preconditions.checkNotNull(listener);
+            Objects.requireNonNull(listener);
             checkCallerIsSystemOrShell();
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -4450,7 +4450,7 @@ public class NotificationManagerService extends SystemService {
         public void updateNotificationChannelGroupFromPrivilegedListener(
                 INotificationListener token, String pkg, UserHandle user,
                 NotificationChannelGroup group) throws RemoteException {
-            Preconditions.checkNotNull(user);
+            Objects.requireNonNull(user);
             verifyPrivilegedListener(token, user, false);
             createNotificationChannelGroup(
                     pkg, getUidForPackageAndUser(pkg, user), group, false, true);
@@ -4460,9 +4460,9 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void updateNotificationChannelFromPrivilegedListener(INotificationListener token,
                 String pkg, UserHandle user, NotificationChannel channel) throws RemoteException {
-            Preconditions.checkNotNull(channel);
-            Preconditions.checkNotNull(pkg);
-            Preconditions.checkNotNull(user);
+            Objects.requireNonNull(channel);
+            Objects.requireNonNull(pkg);
+            Objects.requireNonNull(user);
 
             verifyPrivilegedListener(token, user, false);
             updateNotificationChannelInt(pkg, getUidForPackageAndUser(pkg, user), channel, true);
@@ -4471,8 +4471,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public ParceledListSlice<NotificationChannel> getNotificationChannelsFromPrivilegedListener(
                 INotificationListener token, String pkg, UserHandle user) throws RemoteException {
-            Preconditions.checkNotNull(pkg);
-            Preconditions.checkNotNull(user);
+            Objects.requireNonNull(pkg);
+            Objects.requireNonNull(user);
             verifyPrivilegedListener(token, user, true);
 
             return mPreferencesHelper.getNotificationChannels(pkg, getUidForPackageAndUser(pkg, user),
@@ -4483,8 +4483,8 @@ public class NotificationManagerService extends SystemService {
         public ParceledListSlice<NotificationChannelGroup>
                 getNotificationChannelGroupsFromPrivilegedListener(
                 INotificationListener token, String pkg, UserHandle user) throws RemoteException {
-            Preconditions.checkNotNull(pkg);
-            Preconditions.checkNotNull(user);
+            Objects.requireNonNull(pkg);
+            Objects.requireNonNull(user);
             verifyPrivilegedListener(token, user, true);
 
             List<NotificationChannelGroup> groups = new ArrayList<>();
@@ -4520,7 +4520,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean isPackagePaused(String pkg) {
-            Preconditions.checkNotNull(pkg);
+            Objects.requireNonNull(pkg);
             checkCallerIsSameApp(pkg);
 
             return isPackagePausedOrSuspended(pkg, Binder.getCallingUid());
