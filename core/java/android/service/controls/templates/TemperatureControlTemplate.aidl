@@ -16,4 +16,4 @@
 
 package android.service.controls.templates;
 
-parcelable ThermostatTemplate;
+parcelable TemperatureControlTemplate;
