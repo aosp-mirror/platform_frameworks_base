@@ -403,6 +403,8 @@ public interface AndroidPackage extends Parcelable {
 
     boolean isEnabled();
 
+    boolean isCrossProfile();
+
     boolean isEncryptionAware();
 
     boolean isExternal();
