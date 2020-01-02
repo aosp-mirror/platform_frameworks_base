@@ -966,7 +966,7 @@ static const JNINativeMethod gFilterMethods[] = {
     { "nativeStopFilter", "()I", (void *)android_media_tv_Tuner_stop_filter },
     { "nativeFlushFilter", "()I", (void *)android_media_tv_Tuner_flush_filter },
     { "nativeRead", "([BII)I", (void *)android_media_tv_Tuner_read_filter_fmq },
-    { "nativeCloseFilter", "()I", (void *)android_media_tv_Tuner_close_filter },
+    { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_filter },
 };
 
 static const JNINativeMethod gDescramblerMethods[] = {
@@ -975,7 +975,7 @@ static const JNINativeMethod gDescramblerMethods[] = {
     { "nativeRemovePid", "(IILandroid/media/tv/tuner/Tuner$Filter;)I",
             (void *)android_media_tv_Tuner_remove_pid },
     { "nativeSetKeyToken", "([B)I", (void *)android_media_tv_Tuner_set_key_token },
-    { "nativeClose", "()V", (void *)android_media_tv_Tuner_close_descrambler },
+    { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_descrambler },
 };
 
 static const JNINativeMethod gDvrMethods[] = {
