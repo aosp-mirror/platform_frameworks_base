@@ -85,14 +85,6 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"আপনি আপনার পিন টাইপ করতে <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল করেছেন৷ \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুলভাবে আপনার পাসওয়ার্ড লিখেছেন।\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুলভাবে আপনার আনলকের প্যাটার্ন এঁকেছেন।\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন।"</string>
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6114158710353725041) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
-    <skip />
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ভুল সিম পিন কোড দিয়েছেন, আপনার ডিভাইসটি আনলক করতে এখন আপনাকে অবশ্যই আপনার পরিষেবা প্রদানকারীর সাথে যোগাযোগ করতে হবে।"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="one">সিমের পিন কোডটি ভুল, আপনি আর <xliff:g id="NUMBER_1">%d</xliff:g> বার চেষ্টা করতে পারেন।</item>

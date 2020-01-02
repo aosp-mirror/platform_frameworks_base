@@ -70,8 +70,7 @@
     <string name="learn_more" msgid="4690632085667273811">"瞭解詳情"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"放大為全螢幕"</string>
-    <!-- no translation found for global_action_screenshot (2760267567509131654) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="2760267567509131654">"螢幕截圖"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"正在儲存螢幕擷取畫面..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"正在儲存螢幕擷取畫面..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"螢幕擷取畫面已儲存"</string>
@@ -119,8 +118,7 @@
     <string name="phone_label" msgid="5715229948920451352">"開啟電話"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"開啟語音助手"</string>
     <string name="camera_label" msgid="8253821920931143699">"開啟相機"</string>
-    <!-- no translation found for cancel (1089011503403416730) -->
-    <skip />
+    <string name="cancel" msgid="1089011503403416730">"取消"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"確認"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"請再試一次"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"輕按即可取消驗證"</string>
@@ -381,13 +379,15 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"上限為 <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> 警告"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"工作設定檔"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"夜燈模式"</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"夜間模式"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"在日落時開啟"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"在日出時關閉"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> 開啟"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"直到<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"深色主題背景"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"深色主題背景\n省電模式"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"省電模式"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"在日落時開啟"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"在日出時關閉"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC 已停用"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC 已啟用"</string>
@@ -412,10 +412,6 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"再次輕按即可開啟"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑動即可開啟"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"請向上滑動以再試一次"</string>
-    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
-    <skip />
-    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
-    <skip />
     <string name="do_disclosure_generic" msgid="2388094207542706440">"此裝置由您的機構管理"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"此裝置由<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>管理"</string>
     <string name="phone_hint" msgid="6682125338461375925">"從圖示滑動即可使用手機功能"</string>
@@ -467,9 +463,11 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"省電模式已開啟"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"降低效能並限制背景數據傳輸"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"關閉省電模式"</string>
-    <string name="media_projection_dialog_text" msgid="5509958417853154019">"錄製或投放期間，「<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>」可以擷取螢幕顯示或裝置播放的任何敏感資料，包括音效、密碼、付款資料、相片和訊息等敏感資料。"</string>
-    <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"錄製或投放期間，此功能的服務供應商可以擷取螢幕顯示或裝置播放的任何敏感資料，包括音效、密碼、付款資料、相片和訊息等敏感資料。"</string>
-    <string name="media_projection_dialog_title" msgid="6379655487632663290">"在投放/錄製期間披露敏感資訊"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"在錄影或投放時，「<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>」可以存取螢幕顯示或裝置播放的任何資料，當中包括密碼、付款詳情、相片、訊息和播放的語音等。"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"在錄影或投放時，此功能的服務供應商可以存取螢幕顯示或裝置播放的任何資料，當中包括密碼、付款詳情、相片、訊息和播放的語音等。"</string>
+    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
+    <skip />
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"要使用「<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>」開始錄影或投放嗎？"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"不用再顯示"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"全部清除"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
@@ -786,8 +784,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"鍵盤切換工具"</string>
     <string name="save" msgid="3392754183673848006">"儲存"</string>
-    <!-- no translation found for reset (8715144064608810383) -->
-    <skip />
+    <string name="reset" msgid="8715144064608810383">"重設"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"調整按鈕寬度"</string>
     <string name="clipboard" msgid="8517342737534284617">"剪貼簿"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"自訂導覽按鈕"</string>
@@ -883,8 +880,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"向右"</string>
     <string name="tuner_menu" msgid="363690665924769420">"選單"</string>
     <string name="tuner_app" msgid="6949280415826686972">"「<xliff:g id="APP">%1$s</xliff:g>」應用程式"</string>
-    <!-- no translation found for notification_channel_alerts (3385787053375150046) -->
-    <skip />
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"通知"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"電池"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"螢幕擷取畫面"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"一般訊息"</string>
@@ -894,8 +890,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> 運作中"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"已開啟免安裝應用程式。"</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"已開啟免安裝應用程式。輕按即可瞭解詳情。"</string>
-    <!-- no translation found for app_info (5153758994129963243) -->
-    <skip />
+    <string name="app_info" msgid="5153758994129963243">"應用程式資料"</string>
     <string name="go_to_web" msgid="636673528981366511">"前往瀏覽器"</string>
     <string name="mobile_data" msgid="4564407557775397216">"流動數據"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> - <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -929,13 +924,6 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"設定"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"知道了"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"轉儲 SysUI 堆"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"「<xliff:g id="APP">%1$s</xliff:g>」正在使用<xliff:g id="TYPES_LIST">%2$s</xliff:g>。"</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"有多個應用程式正在使用<xliff:g id="TYPES_LIST">%s</xliff:g>。"</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"、 "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" 和 "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"相機"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"位置"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"麥克風"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"感應器已關閉"</string>
     <string name="device_services" msgid="1549944177856658705">"裝置服務"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"無標題"</string>
@@ -958,4 +946,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系統導覽已更新。如需變更，請前往「設定」。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"前往「設定」更新系統導覽"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待機"</string>
+    <string name="magnification_overlay_title" msgid="6584179429612427958">"放大重疊視窗"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"放大視窗"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"放大視窗控制項"</string>
 </resources>

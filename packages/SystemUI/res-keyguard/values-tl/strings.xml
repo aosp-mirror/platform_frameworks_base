@@ -85,14 +85,6 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Na-type mo nang mali ang iyong PIN nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%2$d</xliff:g> (na) segundo."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Na-type mo nang hindi tama ang iyong password nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%2$d</xliff:g> (na) segundo."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%2$d</xliff:g> (na) segundo."</string>
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6114158710353725041) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
-    <skip />
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Mali ang PIN code ng SIM, dapat ka nang makipag-ugnayan sa iyong carrier upang i-unlock ang iyong device."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="one">Mali ang PIN code ng SIM, mayroon kang <xliff:g id="NUMBER_1">%d</xliff:g> natitirang pagsubok.</item>
