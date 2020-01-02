@@ -23,8 +23,8 @@ import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.service.controls.templates.ControlTemplate;
 import android.service.controls.IControlsProviderCallback;
+import android.service.controls.templates.ControlTemplate;
 
 import com.android.internal.util.Preconditions;
 
@@ -82,11 +82,17 @@ public abstract class ControlAction implements Parcelable {
 
     public static final @ActionType int TYPE_COMMAND = 5;
 
+
+    public static final boolean isValidResponse(@ResponseResult int response) {
+        return (response >= 0 && response < NUM_RESPONSE_TYPES);
+    }
+    private static final int NUM_RESPONSE_TYPES = 6;
     /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
+            RESPONSE_UNKNOWN,
             RESPONSE_OK,
             RESPONSE_FAIL,
             RESPONSE_CHALLENGE_ACK,
@@ -95,31 +101,33 @@ public abstract class ControlAction implements Parcelable {
     })
     public @interface ResponseResult {};
 
+    public static final @ResponseResult int RESPONSE_UNKNOWN = 0;
+
     /**
      * Response code for {@link IControlsProviderCallback#onControlActionResponse} indicating that
      * the action has been performed. The action may still fail later and the state may not change.
      */
-    public static final @ResponseResult int RESPONSE_OK = 0;
+    public static final @ResponseResult int RESPONSE_OK = 1;
     /**
      * Response code for {@link IControlsProviderCallback#onControlActionResponse} indicating that
      * the action has failed.
      */
-    public static final @ResponseResult int RESPONSE_FAIL = 1;
+    public static final @ResponseResult int RESPONSE_FAIL = 2;
     /**
      * Response code for {@link IControlsProviderCallback#onControlActionResponse} indicating that
      * in order for the action to be performed, acknowledgment from the user is required.
      */
-    public static final @ResponseResult int RESPONSE_CHALLENGE_ACK = 2;
+    public static final @ResponseResult int RESPONSE_CHALLENGE_ACK = 3;
     /**
      * Response code for {@link IControlsProviderCallback#onControlActionResponse} indicating that
      * in order for the action to be performed, a PIN is required.
      */
-    public static final @ResponseResult int RESPONSE_CHALLENGE_PIN = 3;
+    public static final @ResponseResult int RESPONSE_CHALLENGE_PIN = 4;
     /**
      * Response code for {@link IControlsProviderCallback#onControlActionResponse} indicating that
      * in order for the action to be performed, an alphanumeric passphrase is required.
      */
-    public static final @ResponseResult int RESPONSE_CHALLENGE_PASSPHRASE = 4;
+    public static final @ResponseResult int RESPONSE_CHALLENGE_PASSPHRASE = 5;
 
     /**
      * The {@link ActionType} associated with this class.

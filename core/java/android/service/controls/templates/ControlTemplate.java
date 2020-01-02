@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.controls.Control;
-import android.service.controls.ControlState;
 import android.service.controls.actions.ControlAction;
 
 import com.android.internal.util.Preconditions;
@@ -34,12 +33,11 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * An abstract input template for a {@link Control}.
  *
- * Specifies what layout is presented to the user when a {@link ControlState} is assigned to a
- * particular {@link Control}.
+ * Specifies what layout is presented to the user for a given {@link Control}.
  * <p>
  * Some instances of {@link Control} can originate actions (via user interaction) to modify its
- * associated state. The actions available to a given {@link Control} in a particular
- * {@link ControlState} are determined by its {@link ControlTemplate}.
+ * associated state. The actions available to a given {@link Control} are determined by its
+ * {@link ControlTemplate}.
  * @see ControlAction
  * @hide
  */
