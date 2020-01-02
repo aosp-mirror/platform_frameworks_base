@@ -429,17 +429,17 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     ShortcutService(Context context, Looper looper, boolean onlyForPackageManagerApis) {
-        mContext = Preconditions.checkNotNull(context);
+        mContext = Objects.requireNonNull(context);
         LocalServices.addService(ShortcutServiceInternal.class, new LocalService());
         mHandler = new Handler(looper);
         mIPackageManager = AppGlobals.getPackageManager();
-        mPackageManagerInternal = Preconditions.checkNotNull(
+        mPackageManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(PackageManagerInternal.class));
-        mUserManagerInternal = Preconditions.checkNotNull(
+        mUserManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(UserManagerInternal.class));
-        mUsageStatsManagerInternal = Preconditions.checkNotNull(
+        mUsageStatsManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(UsageStatsManagerInternal.class));
-        mActivityManagerInternal = Preconditions.checkNotNull(
+        mActivityManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
 
         mShortcutRequestPinProcessor = new ShortcutRequestPinProcessor(this, mLock);
@@ -1680,7 +1680,7 @@ public class ShortcutService extends IShortcutService.Stub {
                     "Re-publishing ShortcutInfo returned by server is not supported."
                     + " Some information such as icon may lost from shortcut.");
         }
-        Preconditions.checkNotNull(shortcut, "Null shortcut detected");
+        Objects.requireNonNull(shortcut, "Null shortcut detected");
         if (shortcut.getActivity() != null) {
             Preconditions.checkState(
                     shortcut.getPackage().equals(shortcut.getActivity().getPackageName()),
@@ -1947,7 +1947,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @Override
     public boolean requestPinShortcut(String packageName, ShortcutInfo shortcut,
             IntentSender resultIntent, int userId) {
-        Preconditions.checkNotNull(shortcut);
+        Objects.requireNonNull(shortcut);
         Preconditions.checkArgument(shortcut.isEnabled(), "Shortcut must be enabled");
         return requestPinItem(packageName, userId, shortcut, null, null, resultIntent);
     }
@@ -1955,7 +1955,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @Override
     public Intent createShortcutResultIntent(String packageName, ShortcutInfo shortcut, int userId)
             throws RemoteException {
-        Preconditions.checkNotNull(shortcut);
+        Objects.requireNonNull(shortcut);
         Preconditions.checkArgument(shortcut.isEnabled(), "Shortcut must be enabled");
         verifyCaller(packageName, userId);
         verifyShortcutInfoPackage(packageName, shortcut);
@@ -2019,7 +2019,7 @@ public class ShortcutService extends IShortcutService.Stub {
     public void disableShortcuts(String packageName, List shortcutIds,
             CharSequence disabledMessage, int disabledMessageResId, @UserIdInt int userId) {
         verifyCaller(packageName, userId);
-        Preconditions.checkNotNull(shortcutIds, "shortcutIds must be provided");
+        Objects.requireNonNull(shortcutIds, "shortcutIds must be provided");
 
         synchronized (mLock) {
             throwIfUserLockedL(userId);
@@ -2054,7 +2054,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @Override
     public void enableShortcuts(String packageName, List shortcutIds, @UserIdInt int userId) {
         verifyCaller(packageName, userId);
-        Preconditions.checkNotNull(shortcutIds, "shortcutIds must be provided");
+        Objects.requireNonNull(shortcutIds, "shortcutIds must be provided");
 
         synchronized (mLock) {
             throwIfUserLockedL(userId);
@@ -2081,7 +2081,7 @@ public class ShortcutService extends IShortcutService.Stub {
     public void removeDynamicShortcuts(String packageName, List shortcutIds,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
-        Preconditions.checkNotNull(shortcutIds, "shortcutIds must be provided");
+        Objects.requireNonNull(shortcutIds, "shortcutIds must be provided");
 
         synchronized (mLock) {
             throwIfUserLockedL(userId);
@@ -2256,7 +2256,7 @@ public class ShortcutService extends IShortcutService.Stub {
     public void reportShortcutUsed(String packageName, String shortcutId, int userId) {
         verifyCaller(packageName, userId);
 
-        Preconditions.checkNotNull(shortcutId);
+        Objects.requireNonNull(shortcutId);
 
         if (DEBUG) {
             Slog.d(TAG, String.format("reportShortcutUsed: Shortcut %s package %s used on user %d",
@@ -2713,7 +2713,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 @NonNull List<String> shortcutIds, int userId) {
             // Calling permission must be checked by LauncherAppsImpl.
             Preconditions.checkStringNotEmpty(packageName, "packageName");
-            Preconditions.checkNotNull(shortcutIds, "shortcutIds");
+            Objects.requireNonNull(shortcutIds, "shortcutIds");
 
             synchronized (mLock) {
                 throwIfUserLockedL(userId);
@@ -2766,16 +2766,16 @@ public class ShortcutService extends IShortcutService.Stub {
         @Override
         public void addListener(@NonNull ShortcutChangeListener listener) {
             synchronized (mLock) {
-                mListeners.add(Preconditions.checkNotNull(listener));
+                mListeners.add(Objects.requireNonNull(listener));
             }
         }
 
         @Override
         public int getShortcutIconResId(int launcherUserId, @NonNull String callingPackage,
                 @NonNull String packageName, @NonNull String shortcutId, int userId) {
-            Preconditions.checkNotNull(callingPackage, "callingPackage");
-            Preconditions.checkNotNull(packageName, "packageName");
-            Preconditions.checkNotNull(shortcutId, "shortcutId");
+            Objects.requireNonNull(callingPackage, "callingPackage");
+            Objects.requireNonNull(packageName, "packageName");
+            Objects.requireNonNull(shortcutId, "shortcutId");
 
             synchronized (mLock) {
                 throwIfUserLockedL(userId);
@@ -2800,9 +2800,9 @@ public class ShortcutService extends IShortcutService.Stub {
         public ParcelFileDescriptor getShortcutIconFd(int launcherUserId,
                 @NonNull String callingPackage, @NonNull String packageName,
                 @NonNull String shortcutId, int userId) {
-            Preconditions.checkNotNull(callingPackage, "callingPackage");
-            Preconditions.checkNotNull(packageName, "packageName");
-            Preconditions.checkNotNull(shortcutId, "shortcutId");
+            Objects.requireNonNull(callingPackage, "callingPackage");
+            Objects.requireNonNull(packageName, "packageName");
+            Objects.requireNonNull(shortcutId, "shortcutId");
 
             synchronized (mLock) {
                 throwIfUserLockedL(userId);
@@ -2854,7 +2854,7 @@ public class ShortcutService extends IShortcutService.Stub {
         public boolean requestPinAppWidget(@NonNull String callingPackage,
                 @NonNull AppWidgetProviderInfo appWidget, @Nullable Bundle extras,
                 @Nullable IntentSender resultIntent, int userId) {
-            Preconditions.checkNotNull(appWidget);
+            Objects.requireNonNull(appWidget);
             return requestPinItem(callingPackage, userId, null, appWidget, extras, resultIntent);
         }
 
@@ -2865,7 +2865,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         @Override
         public boolean isForegroundDefaultLauncher(@NonNull String callingPackage, int callingUid) {
-            Preconditions.checkNotNull(callingPackage);
+            Objects.requireNonNull(callingPackage);
 
             final int userId = UserHandle.getUserId(callingUid);
             final ComponentName defaultLauncher = getDefaultLauncher(userId);
@@ -3411,7 +3411,7 @@ public class ShortcutService extends IShortcutService.Stub {
     List<ResolveInfo> queryActivities(@NonNull Intent baseIntent,
             @NonNull String packageName, @Nullable ComponentName activity, int userId) {
 
-        baseIntent.setPackage(Preconditions.checkNotNull(packageName));
+        baseIntent.setPackage(Objects.requireNonNull(packageName));
         if (activity != null) {
             baseIntent.setComponent(activity);
         }
@@ -3529,7 +3529,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @Nullable
     ComponentName injectGetPinConfirmationActivity(@NonNull String launcherPackageName,
             int launcherUserId, int requestType) {
-        Preconditions.checkNotNull(launcherPackageName);
+        Objects.requireNonNull(launcherPackageName);
         String action = requestType == LauncherApps.PinItemRequest.REQUEST_TYPE_SHORTCUT ?
                 LauncherApps.ACTION_CONFIRM_PIN_SHORTCUT :
                 LauncherApps.ACTION_CONFIRM_PIN_APPWIDGET;

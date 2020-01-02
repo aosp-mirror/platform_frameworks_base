@@ -434,7 +434,7 @@ public class UserManagerService extends IUserManager.Stub {
         private final IntentSender mTarget;
 
         public DisableQuietModeUserUnlockedCallback(IntentSender target) {
-            Preconditions.checkNotNull(target);
+            Objects.requireNonNull(target);
             mTarget = target;
         }
 
@@ -884,7 +884,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public boolean requestQuietModeEnabled(@NonNull String callingPackage, boolean enableQuietMode,
             @UserIdInt int userId, @Nullable IntentSender target) {
-        Preconditions.checkNotNull(callingPackage);
+        Objects.requireNonNull(callingPackage);
 
         if (enableQuietMode && target != null) {
             throw new IllegalArgumentException(

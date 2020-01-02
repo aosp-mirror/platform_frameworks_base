@@ -51,6 +51,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -357,7 +358,7 @@ public class UserRestrictionsUtils {
     }
 
     public static void merge(@NonNull Bundle dest, @Nullable Bundle in) {
-        Preconditions.checkNotNull(dest);
+        Objects.requireNonNull(dest);
         Preconditions.checkArgument(dest != in);
         if (in == null) {
             return;
@@ -661,7 +662,7 @@ public class UserRestrictionsUtils {
 
     public static boolean isSettingRestrictedForUser(Context context, @NonNull String setting,
             int userId, String value, int callingUid) {
-        Preconditions.checkNotNull(setting);
+        Objects.requireNonNull(setting);
         final UserManager mUserManager = context.getSystemService(UserManager.class);
         String restriction;
         boolean checkAllUser = false;
