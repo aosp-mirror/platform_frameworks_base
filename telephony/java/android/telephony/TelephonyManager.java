@@ -46,6 +46,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkStats;
@@ -450,12 +451,8 @@ public class TelephonyManager {
             case UNKNOWN:
                 modemCount = MODEM_COUNT_SINGLE_MODEM;
                 // check for voice and data support, 0 if not supported
-                if (!isVoiceCapable() && !isSmsCapable() && mContext != null) {
-                    ConnectivityManager cm = (ConnectivityManager) mContext
-                            .getSystemService(Context.CONNECTIVITY_SERVICE);
-                    if (cm != null && !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
-                        modemCount = MODEM_COUNT_NO_MODEM;
-                    }
+                if (!isVoiceCapable() && !isSmsCapable() && !isDataCapable()) {
+                    modemCount = MODEM_COUNT_NO_MODEM;
                 }
                 break;
             case DSDS:
@@ -10637,12 +10634,21 @@ public class TelephonyManager {
     }
 
     /**
+     * Checks whether cellular data connection is enabled in the device.
+     *
+     * Whether cellular data connection is enabled, meaning upon request whether will try to setup
+     * metered data connection considering all factors below:
+     * 1) User turned on data setting {@link #isDataEnabled}.
+     * 2) Carrier allows data to be on.
+     * 3) Network policy.
+     * And possibly others.
+     *
+     * @return {@code true} if the overall data connection is capable; {@code false} if not.
      * @hide
-     * It's similar to isDataEnabled, but unlike isDataEnabled, this API also evaluates
-     * carrierDataEnabled, policyDataEnabled etc to give a final decision of whether mobile data is
-     * capable of using.
      */
-    public boolean isDataCapable() {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isDataConnectionEnabled() {
         boolean retVal = false;
         try {
             int subId = getSubId(SubscriptionManager.getDefaultDataSubscriptionId());
@@ -10650,10 +10656,21 @@ public class TelephonyManager {
             if (telephony != null)
                 retVal = telephony.isDataEnabled(subId);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#isDataEnabled", e);
+            Log.e(TAG, "Error isDataConnectionEnabled", e);
         } catch (NullPointerException e) {
         }
         return retVal;
+    }
+
+    /**
+     * Checks if FEATURE_TELEPHONY_DATA is enabled.
+     *
+     * @hide
+     */
+    public boolean isDataCapable() {
+        if (mContext == null) return true;
+        return mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_TELEPHONY_DATA);
     }
 
     /**
