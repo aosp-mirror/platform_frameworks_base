@@ -1138,11 +1138,11 @@ public class NetworkPolicyManagerServiceTest {
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(360), 0L, 0L, 0L, 0));
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
-            expectMobileDefaults();
+            TelephonyManager tmSub = expectMobileDefaults();
 
             mService.updateNetworks();
 
-            verify(mTelephonyManager, atLeastOnce()).setPolicyDataEnabled(true, TEST_SUB_ID);
+            verify(tmSub, atLeastOnce()).setPolicyDataEnabled(true);
             verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE,
                     DataUnit.MEGABYTES.toBytes(1800 - 360));
             verify(mNotifManager, never()).notifyAsUser(any(), anyInt(), any(), any());
@@ -1155,11 +1155,11 @@ public class NetworkPolicyManagerServiceTest {
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1799), 0L, 0L, 0L, 0));
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
-            expectMobileDefaults();
+            TelephonyManager tmSub = expectMobileDefaults();
 
             mService.updateNetworks();
 
-            verify(mTelephonyManager, atLeastOnce()).setPolicyDataEnabled(true, TEST_SUB_ID);
+            verify(tmSub, atLeastOnce()).setPolicyDataEnabled(true);
             verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE,
                     DataUnit.MEGABYTES.toBytes(1800 - 1799));
             verify(mNotifManager, atLeastOnce()).notifyAsUser(any(), eq(TYPE_WARNING),
@@ -1173,12 +1173,12 @@ public class NetworkPolicyManagerServiceTest {
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1799), 0L, 0L, 0L, 0));
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
-            expectMobileDefaults();
+            TelephonyManager tmSub = expectMobileDefaults();
             expectDefaultCarrierConfig();
 
             mService.updateNetworks();
 
-            verify(mTelephonyManager, atLeastOnce()).setPolicyDataEnabled(true, TEST_SUB_ID);
+            verify(tmSub, atLeastOnce()).setPolicyDataEnabled(true);
             verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE,
                     DataUnit.MEGABYTES.toBytes(1800 - 1799));
             // Since this isn't from the identified carrier, there should be no notifications
@@ -1192,11 +1192,11 @@ public class NetworkPolicyManagerServiceTest {
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1810), 0L, 0L, 0L, 0));
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
-            expectMobileDefaults();
+            TelephonyManager tmSub = expectMobileDefaults();
 
             mService.updateNetworks();
 
-            verify(mTelephonyManager, atLeastOnce()).setPolicyDataEnabled(false, TEST_SUB_ID);
+            verify(tmSub, atLeastOnce()).setPolicyDataEnabled(false);
             verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE, 1);
             verify(mNotifManager, atLeastOnce()).notifyAsUser(any(), eq(TYPE_LIMIT),
                     isA(Notification.class), eq(UserHandle.ALL));
@@ -1205,12 +1205,12 @@ public class NetworkPolicyManagerServiceTest {
         // Snooze limit
         {
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
-            expectMobileDefaults();
+            TelephonyManager tmSub = expectMobileDefaults();
 
             mService.snoozeLimit(NetworkTemplate.buildTemplateMobileAll(TEST_IMSI));
             mService.updateNetworks();
 
-            verify(mTelephonyManager, atLeastOnce()).setPolicyDataEnabled(true, TEST_SUB_ID);
+            verify(tmSub, atLeastOnce()).setPolicyDataEnabled(true);
             verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE,
                     Long.MAX_VALUE);
             verify(mNotifManager, atLeastOnce()).notifyAsUser(any(), eq(TYPE_LIMIT_SNOOZED),
@@ -1928,10 +1928,11 @@ public class NetworkPolicyManagerServiceTest {
                 .thenReturn(CarrierConfigManager.getDefaultConfig());
     }
 
-    private void expectMobileDefaults() throws Exception {
-        setupTelephonySubscriptionManagers(TEST_SUB_ID, TEST_IMSI);
-        doNothing().when(mTelephonyManager).setPolicyDataEnabled(anyBoolean(), anyInt());
+    private TelephonyManager expectMobileDefaults() throws Exception {
+        TelephonyManager tmSub = setupTelephonySubscriptionManagers(TEST_SUB_ID, TEST_IMSI);
+        doNothing().when(tmSub).setPolicyDataEnabled(anyBoolean());
         expectNetworkState(false /* roaming */);
+        return tmSub;
     }
 
     private void verifyAdvisePersistThreshold() throws Exception {
@@ -2090,8 +2091,10 @@ public class NetworkPolicyManagerServiceTest {
 
     /**
      * Creates a mock {@link TelephonyManager} and {@link SubscriptionManager}.
+     *
      */
-    private void setupTelephonySubscriptionManagers(int subscriptionId, String subscriberId) {
+    private TelephonyManager setupTelephonySubscriptionManagers(int subscriptionId,
+            String subscriberId) {
         when(mSubscriptionManager.getActiveSubscriptionInfoList()).thenReturn(
                 createSubscriptionInfoList(subscriptionId));
 
@@ -2101,6 +2104,7 @@ public class NetworkPolicyManagerServiceTest {
         when(subTelephonyManager.getSubscriberId()).thenReturn(subscriberId);
         when(mTelephonyManager.createForSubscriptionId(subscriptionId))
                 .thenReturn(subTelephonyManager);
+        return subTelephonyManager;
     }
 
     /**
