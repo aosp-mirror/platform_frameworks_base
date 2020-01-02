@@ -981,7 +981,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
         final DisplayContent displayContent =
-                mAtm.mRootActivityContainer.getDisplayContent(mDisplayId);
+                mAtm.mRootWindowContainer.getDisplayContent(mDisplayId);
         if (displayContent != null) {
             displayContent.unregisterConfigurationChangeListener(this);
         }

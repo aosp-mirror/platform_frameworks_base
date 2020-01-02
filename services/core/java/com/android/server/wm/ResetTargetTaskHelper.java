@@ -261,7 +261,7 @@ class ResetTargetTaskHelper {
         DisplayContent display = mParent.getDisplay();
         final boolean singleTaskInstanceDisplay = display.isSingleTaskInstance();
         if (singleTaskInstanceDisplay) {
-            display = mParent.mRootActivityContainer.getDefaultDisplay();
+            display = mParent.mRootWindowContainer.getDefaultDisplay();
         }
 
         final int windowingMode = mParent.getWindowingMode();

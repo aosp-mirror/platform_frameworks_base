@@ -271,11 +271,11 @@ public class SystemServicesTestRule implements TestRule {
         spyOn(mWmService);
         spyOn(mWmService.mRoot);
         // Invoked during {@link ActivityStack} creation.
-        doNothing().when((RootActivityContainer) mWmService.mRoot).updateUIDsPresentOnDisplay();
+        doNothing().when(mWmService.mRoot).updateUIDsPresentOnDisplay();
         // Always keep things awake.
-        doReturn(true).when((RootActivityContainer) mWmService.mRoot).hasAwakeDisplay();
+        doReturn(true).when(mWmService.mRoot).hasAwakeDisplay();
         // Called when moving activity to pinned stack.
-        doNothing().when((RootActivityContainer) mWmService.mRoot).ensureActivitiesVisible(any(),
+        doNothing().when(mWmService.mRoot).ensureActivitiesVisible(any(),
                 anyInt(), anyBoolean(), anyBoolean());
 
         // Setup factory classes to prevent calls to native code.
@@ -293,7 +293,7 @@ public class SystemServicesTestRule implements TestRule {
         mWmService.getDefaultDisplayContentLocked().reconfigureDisplayLocked();
 
         // Mock default display, and home stack.
-        final DisplayContent display = mAtmService.mRootActivityContainer.getDefaultDisplay();
+        final DisplayContent display = mAtmService.mRootWindowContainer.getDefaultDisplay();
         // Set default display to be in fullscreen mode. Devices with PC feature may start their
         // default display in freeform mode but some of tests in WmTests have implicit assumption on
         // that the default display is in fullscreen mode.
@@ -307,7 +307,7 @@ public class SystemServicesTestRule implements TestRule {
     private void tearDown() {
         // Unregister display listener from root to avoid issues with subsequent tests.
         mContext.getSystemService(DisplayManager.class)
-                .unregisterDisplayListener(mAtmService.mRootActivityContainer);
+                .unregisterDisplayListener(mAtmService.mRootWindowContainer);
         // The constructor of WindowManagerService registers WindowManagerConstants and
         // HighRefreshRateBlacklist with DeviceConfig. We need to undo that here to avoid
         // leaking mWmService.

@@ -60,7 +60,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mFullscreenStack = mRootActivityContainer.getDefaultDisplay().createStack(
+        mFullscreenStack = mRootWindowContainer.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
     }
 
@@ -113,7 +113,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     public void testHandleNonResizableTaskOnSecondaryDisplay() {
         // Create an unresizable task on secondary display.
         final DisplayContent newDisplay = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
-        final ActivityStack stack = new StackBuilder(mRootActivityContainer)
+        final ActivityStack stack = new StackBuilder(mRootWindowContainer)
                 .setDisplay(newDisplay).build();
         final ActivityRecord unresizableActivity = stack.getTopNonFinishingActivity();
         final Task task = unresizableActivity.getTask();

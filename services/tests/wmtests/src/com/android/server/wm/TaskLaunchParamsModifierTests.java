@@ -1047,10 +1047,10 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     @Test
     public void testAdjustBoundsToFitNewDisplay_LargerThanDisplay_RTL() {
         final Configuration overrideConfig =
-                mRootActivityContainer.getRequestedOverrideConfiguration();
+                mRootWindowContainer.getRequestedOverrideConfiguration();
         // Egyptian Arabic is a RTL language.
         overrideConfig.setLayoutDirection(new Locale("ar", "EG"));
-        mRootActivityContainer.onRequestedOverrideConfigurationChanged(overrideConfig);
+        mRootWindowContainer.onRequestedOverrideConfigurationChanged(overrideConfig);
 
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);

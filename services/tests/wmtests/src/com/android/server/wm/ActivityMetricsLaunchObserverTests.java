@@ -341,7 +341,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     public void testConsecutiveLaunchOnDifferentDisplay() {
         onActivityLaunched(mTopActivity);
 
-        final ActivityStack stack = new StackBuilder(mRootActivityContainer)
+        final ActivityStack stack = new StackBuilder(mRootWindowContainer)
                 .setDisplay(addNewDisplayContentAt(DisplayContent.POSITION_BOTTOM))
                 .setCreateActivity(false)
                 .build();

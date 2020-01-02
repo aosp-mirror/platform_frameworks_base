@@ -396,7 +396,7 @@ class ActivityMetricsLogger {
 
         mWindowState = WINDOW_STATE_INVALID;
         ActivityStack stack =
-                mSupervisor.mRootActivityContainer.getTopDisplayFocusedStack();
+                mSupervisor.mRootWindowContainer.getTopDisplayFocusedStack();
         if (stack == null) {
             return;
         }
@@ -408,7 +408,7 @@ class ActivityMetricsLogger {
 
         @WindowingMode int windowingMode = stack.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_PINNED) {
-            stack = mSupervisor.mRootActivityContainer.findStackBehind(stack);
+            stack = mSupervisor.mRootWindowContainer.findStackBehind(stack);
             windowingMode = stack.getWindowingMode();
         }
         switch (windowingMode) {

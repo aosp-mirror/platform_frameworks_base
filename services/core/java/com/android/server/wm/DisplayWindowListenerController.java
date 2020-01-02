@@ -39,9 +39,9 @@ class DisplayWindowListenerController {
         synchronized (mService.mGlobalLock) {
             mDisplayListeners.register(listener);
             try {
-                for (int i = 0; i < mService.mAtmService.mRootActivityContainer.getChildCount();
+                for (int i = 0; i < mService.mAtmService.mRootWindowContainer.getChildCount();
                         ++i) {
-                    DisplayContent d = mService.mAtmService.mRootActivityContainer.getChildAt(i);
+                    DisplayContent d = mService.mAtmService.mRootWindowContainer.getChildAt(i);
                     listener.onDisplayAdded(d.mDisplayId);
                 }
             } catch (RemoteException e) { }

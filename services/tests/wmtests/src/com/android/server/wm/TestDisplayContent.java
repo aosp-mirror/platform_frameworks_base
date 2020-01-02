@@ -39,7 +39,7 @@ class TestDisplayContent extends DisplayContent {
     private final ActivityStackSupervisor mSupervisor;
 
     private TestDisplayContent(ActivityStackSupervisor supervisor, Display display) {
-        super(display, supervisor.mService.mRootActivityContainer);
+        super(display, supervisor.mService.mRootWindowContainer);
         // Normally this comes from display-properties as exposed by WM. Without that, just
         // hard-code to FULLSCREEN for tests.
         setWindowingMode(WINDOWING_MODE_FULLSCREEN);

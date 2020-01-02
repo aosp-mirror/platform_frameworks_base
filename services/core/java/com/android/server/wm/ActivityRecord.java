@@ -515,7 +515,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     boolean inHistory;  // are we in the history stack?
     final ActivityStackSupervisor mStackSupervisor;
-    final RootActivityContainer mRootActivityContainer;
+    final RootWindowContainer mRootWindowContainer;
 
     static final int STARTING_WINDOW_NOT_SHOWN = 0;
     static final int STARTING_WINDOW_SHOWN = 1;
@@ -1564,7 +1564,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         appToken.attach(this);
 
-        mRootActivityContainer = _service.mRootActivityContainer;
+        mRootWindowContainer = _service.mRootWindowContainer;
         launchedFromPid = _launchedFromPid;
         launchedFromUid = _launchedFromUid;
         launchedFromPackage = _launchedFromPackage;
@@ -2100,7 +2100,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // {@link #returningOptions} of the activity under this one can be applied in
         // {@link #handleAlreadyVisible()}.
         if (changed || !occludesParent) {
-            mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+            mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         }
         return changed;
     }
@@ -2140,7 +2140,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean isFocusable() {
-        return mRootActivityContainer.isFocusable(this, isAlwaysFocusable());
+        return mRootWindowContainer.isFocusable(this, isAlwaysFocusable());
     }
 
     boolean isResizeable() {
@@ -2336,7 +2336,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        if (mRootActivityContainer.getTopResumedActivity() == this
+        if (mRootWindowContainer.getTopResumedActivity() == this
                 && getDisplayContent().mFocusedApp == this) {
             if (DEBUG_FOCUS) {
                 Slog.d(TAG_FOCUS, "moveActivityStackToFront: already on top, activity=" + this);
@@ -2350,7 +2350,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         stack.moveToFront(reason, task);
         // Report top activity change to tracking services and WM
-        if (mRootActivityContainer.getTopResumedActivity() == this) {
+        if (mRootWindowContainer.getTopResumedActivity() == this) {
             mAtmService.setResumedActivityUncheckLocked(this, reason);
         }
         return true;
@@ -2466,7 +2466,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean shouldAdjustGlobalFocus = mayAdjustTop
                 // It must be checked before {@link #makeFinishingLocked} is called, because a stack
                 // is not visible if it only contains finishing activities.
-                && mRootActivityContainer.isTopDisplayFocusedStack(stack);
+                && mRootWindowContainer.isTopDisplayFocusedStack(stack);
 
         mAtmService.deferWindowLayout();
         try {
@@ -2694,11 +2694,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If the display does not have running activity, the configuration may need to be
         // updated for restoring original orientation of the display.
         if (next == null) {
-            mRootActivityContainer.ensureVisibilityAndConfig(next, getDisplayId(),
+            mRootWindowContainer.ensureVisibilityAndConfig(next, getDisplayId(),
                     false /* markFrozenIfConfigChanged */, true /* deferResume */);
         }
         if (activityRemoved) {
-            mRootActivityContainer.resumeFocusedStacksTopActivities();
+            mRootWindowContainer.resumeFocusedStacksTopActivities();
         }
 
         if (DEBUG_CONTAINERS) {
@@ -2722,7 +2722,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mStackSupervisor.mFinishingActivities.add(this);
         }
         resumeKeyDispatchingLocked();
-        return mRootActivityContainer.resumeFocusedStacksTopActivities();
+        return mRootWindowContainer.resumeFocusedStacksTopActivities();
     }
 
     /**
@@ -2892,7 +2892,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             removeFromHistory(reason);
         }
 
-        mRootActivityContainer.resumeFocusedStacksTopActivities();
+        mRootWindowContainer.resumeFocusedStacksTopActivities();
     }
 
     /**
@@ -3409,13 +3409,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void setShowWhenLocked(boolean showWhenLocked) {
         mShowWhenLocked = showWhenLocked;
-        mAtmService.mRootActivityContainer.ensureActivitiesVisible(null /* starting */,
+        mAtmService.mRootWindowContainer.ensureActivitiesVisible(null /* starting */,
                 0 /* configChanges */, false /* preserveWindows */);
     }
 
     void setInheritShowWhenLocked(boolean inheritShowWhenLocked) {
         mInheritShownWhenLocked = inheritShowWhenLocked;
-        mAtmService.mRootActivityContainer.ensureActivitiesVisible(null /* starting */,
+        mAtmService.mRootWindowContainer.ensureActivitiesVisible(null /* starting */,
                 0 /* configChanges */, false /* preserveWindows */);
     }
 
@@ -4835,7 +4835,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
 
-        mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+        mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
     }
 
     /**
@@ -4966,9 +4966,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else {
                 if (deferRelaunchUntilPaused) {
                     destroyImmediately(true /* removeFromApp */, "stop-config");
-                    mRootActivityContainer.resumeFocusedStacksTopActivities();
+                    mRootWindowContainer.resumeFocusedStacksTopActivities();
                 } else {
-                    mRootActivityContainer.updatePreviousProcess(this);
+                    mRootWindowContainer.updatePreviousProcess(this);
                 }
             }
         }
@@ -5428,7 +5428,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // First find the real culprit...  if this activity has stopped, then the key dispatching
         // timeout should not be caused by this.
         if (stopped) {
-            final ActivityStack stack = mRootActivityContainer.getTopDisplayFocusedStack();
+            final ActivityStack stack = mRootWindowContainer.getTopDisplayFocusedStack();
             // Try to use the one which is closest to top.
             ActivityRecord r = stack.getResumedActivity();
             if (r == null) {
@@ -6104,7 +6104,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         getDisplayContent().mAppTransition.notifyAppTransitionFinishedLocked(token);
         scheduleAnimation();
 
-        if (mAtmService.mRootActivityContainer.allResumedActivitiesIdle()
+        if (mAtmService.mRootWindowContainer.allResumedActivitiesIdle()
                 || mAtmService.mStackSupervisor.isStoppingNoHistoryActivity()) {
             // If all activities are already idle or there is an activity that must be
             // stopped immediately after visible, then we now need to make sure we perform
@@ -7423,7 +7423,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean isTopRunningActivity() {
-        return mRootActivityContainer.topRunningActivity() == this;
+        return mRootWindowContainer.topRunningActivity() == this;
     }
 
     /**

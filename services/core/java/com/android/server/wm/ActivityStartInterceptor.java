@@ -69,7 +69,7 @@ class ActivityStartInterceptor {
 
     private final ActivityTaskManagerService mService;
     private final ActivityStackSupervisor mSupervisor;
-    private final RootActivityContainer mRootActivityContainer;
+    private final RootWindowContainer mRootWindowContainer;
     private final Context mServiceContext;
 
     // UserManager cannot be final as it's not ready when this class is instantiated during boot
@@ -102,15 +102,15 @@ class ActivityStartInterceptor {
 
     ActivityStartInterceptor(
             ActivityTaskManagerService service, ActivityStackSupervisor supervisor) {
-        this(service, supervisor, service.mRootActivityContainer, service.mContext);
+        this(service, supervisor, service.mRootWindowContainer, service.mContext);
     }
 
     @VisibleForTesting
     ActivityStartInterceptor(ActivityTaskManagerService service, ActivityStackSupervisor supervisor,
-            RootActivityContainer root, Context context) {
+            RootWindowContainer root, Context context) {
         mService = service;
         mSupervisor = supervisor;
-        mRootActivityContainer = root;
+        mRootWindowContainer = root;
         mServiceContext = context;
     }
 
