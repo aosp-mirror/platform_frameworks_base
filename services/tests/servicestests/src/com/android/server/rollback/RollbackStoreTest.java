@@ -53,8 +53,7 @@ public class RollbackStoreTest {
                     if (a == null || b == null) {
                         return a == b;
                     }
-                    return a.getLongVersionCode() == b.getLongVersionCode()
-                            && Objects.equals(a.getPackageName(), b.getPackageName());
+                    return a.equals(b);
                 }
 
                 @Override
@@ -298,15 +297,8 @@ public class RollbackStoreTest {
     private void assertPackageRollbacksAreEquivalent(PackageRollbackInfo b, PackageRollbackInfo a) {
         assertThat(b.getPackageName()).isEqualTo(a.getPackageName());
 
-        assertThat(b.getVersionRolledBackFrom().getLongVersionCode())
-                .isEqualTo(a.getVersionRolledBackFrom().getLongVersionCode());
-        assertThat(b.getVersionRolledBackFrom().getPackageName())
-                .isEqualTo(a.getVersionRolledBackFrom().getPackageName());
-
-        assertThat(b.getVersionRolledBackTo().getLongVersionCode())
-                .isEqualTo(a.getVersionRolledBackTo().getLongVersionCode());
-        assertThat(b.getVersionRolledBackTo().getPackageName())
-                .isEqualTo(a.getVersionRolledBackTo().getPackageName());
+        assertThat(b.getVersionRolledBackFrom()).isEqualTo(a.getVersionRolledBackFrom());
+        assertThat(b.getVersionRolledBackTo()).isEqualTo(a.getVersionRolledBackTo());
 
         assertThat(b.getPendingBackups().toArray()).isEqualTo(a.getPendingBackups().toArray());
 
