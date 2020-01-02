@@ -196,6 +196,15 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
 
     private void handleIntegrityVerification(Intent intent) {
         int verificationId = intent.getIntExtra(EXTRA_VERIFICATION_ID, -1);
+
+        // Fail early if we don't have any rules at all.
+        if (!mIntegrityFileManager.initialized()) {
+            Slog.i(TAG, "Rules not initialized. Skipping integrity check.");
+            mPackageManagerInternal.setIntegrityVerificationResult(
+                    verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
+            return;
+        }
+
         try {
             Slog.i(TAG, "Received integrity verification intent " + intent.toString());
             Slog.i(TAG, "Extras " + intent.getExtras());

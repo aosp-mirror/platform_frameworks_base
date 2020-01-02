@@ -74,10 +74,7 @@ public class IntegrityFileManager {
     }
 
     private IntegrityFileManager() {
-        this(
-                new RuleXmlParser(),
-                new RuleXmlSerializer(),
-                Environment.getDataSystemDirectory());
+        this(new RuleXmlParser(), new RuleXmlSerializer(), Environment.getDataSystemDirectory());
     }
 
     @VisibleForTesting
@@ -101,6 +98,16 @@ public class IntegrityFileManager {
                 Slog.e(TAG, "Error reading metadata file.", e);
             }
         }
+    }
+
+    /**
+     * Returns if the rules have been initialized.
+     *
+     * <p>Used to fail early if there are no rules (so we don't need to parse the apk at all).
+     */
+    public boolean initialized() {
+        return new File(mRulesDir, RULES_FILE).exists()
+                && new File(mRulesDir, METADATA_FILE).exists();
     }
 
     /** Write rules to persistent storage. */
