@@ -63,6 +63,8 @@ import com.android.internal.view.IInlineSuggestionsRequestCallback;
  * which is what clients use to communicate with the input method.
  */
 public interface InputMethod {
+    /** @hide **/
+    public static final String TAG = "InputMethod";
     /**
      * This is the interface name that a service implementing an input
      * method should say that it supports -- that is, this is the action it
@@ -111,6 +113,10 @@ public interface InputMethod {
     /**
      * Called to notify the IME that Autofill Frameworks requested an inline suggestions request.
      *
+     * @param componentName {@link ComponentName} of current app/activity.
+     * @param autofillId {@link AutofillId} of currently focused field.
+     * @param cb {@link IInlineSuggestionsRequestCallback} used to pass back the request object.
+     *
      * @hide
      */
     default void onCreateInlineSuggestionsRequest(ComponentName componentName,
@@ -118,7 +124,7 @@ public interface InputMethod {
         try {
             cb.onInlineSuggestionsUnsupported();
         } catch (RemoteException e) {
-            Log.w("InputMethod", "RemoteException calling onInlineSuggestionsUnsupported: " + e);
+            Log.w(TAG, "Failed to call onInlineSuggestionsUnsupported.", e);
         }
     }
 

@@ -517,7 +517,9 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public void onCreateInlineSuggestionsRequest(ComponentName componentName,
                 AutofillId autofillId, IInlineSuggestionsRequestCallback cb) {
-            Log.d(TAG, "InputMethodService received onCreateInlineSuggestionsRequest()");
+            if (DEBUG) {
+                Log.d(TAG, "InputMethodService received onCreateInlineSuggestionsRequest()");
+            }
             handleOnCreateInlineSuggestionsRequest(componentName, autofillId, cb);
         }
 
@@ -755,7 +757,12 @@ public class InputMethodService extends AbstractInputMethodService {
     private void handleOnCreateInlineSuggestionsRequest(@NonNull ComponentName componentName,
             @NonNull AutofillId autofillId, @NonNull IInlineSuggestionsRequestCallback callback) {
         if (!mInputStarted) {
-            Log.w(TAG, "onStartInput() not called yet");
+            try {
+                Log.w(TAG, "onStartInput() not called yet");
+                callback.onInlineSuggestionsUnsupported();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to call onInlineSuggestionsUnsupported.", e);
+            }
             return;
         }
 
@@ -768,8 +775,12 @@ public class InputMethodService extends AbstractInputMethodService {
     private void handleOnInlineSuggestionsResponse(@NonNull ComponentName componentName,
             @NonNull AutofillId autofillId, @NonNull InlineSuggestionsResponse response) {
         if (!mInlineSuggestionsRequestInfo.validate(componentName)) {
-            Log.d(TAG, "Response component=" + componentName + " differs from request component="
-                    + mInlineSuggestionsRequestInfo.mComponentName + ", ignoring response");
+            if (DEBUG) {
+                Log.d(TAG,
+                        "Response component=" + componentName + " differs from request component="
+                                + mInlineSuggestionsRequestInfo.mComponentName
+                                + ", ignoring response");
+            }
             return;
         }
         onInlineSuggestionsResponse(response);
@@ -841,7 +852,7 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         public boolean validate(ComponentName componentName) {
             final boolean result = componentName.equals(mComponentName);
-            if (!result) {
+            if (DEBUG && !result) {
                 Log.d(TAG, "Cached request info ComponentName=" + mComponentName
                         + " differs from received ComponentName=" + componentName);
             }
