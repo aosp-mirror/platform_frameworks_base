@@ -17,6 +17,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := frameworks-base-overlays
 LOCAL_REQUIRED_MODULES := \
+	AccentColorPornhubOverlay \
 	AccentColorMIUIOverlay \
 	AccentColorTealOverlay \
 	AccentColorRedOverlay \
