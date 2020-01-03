@@ -4193,6 +4193,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(0, mService.countLogSmartSuggestionsVisible);
     }
 
+    @Test
     public void testReportSeen_delegated() {
         Notification.Builder nb =
                 new Notification.Builder(mContext, mTestNotificationChannel.getId())
