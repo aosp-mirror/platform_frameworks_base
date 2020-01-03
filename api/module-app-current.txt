@@ -7,3 +7,11 @@ package android.app {
 
 }
 
+package android.provider {
+
+  public static final class Settings.Global extends android.provider.Settings.NameValueTable {
+    field public static final String COMMON_CRITERIA_MODE = "common_criteria_mode";
+  }
+
+}
+

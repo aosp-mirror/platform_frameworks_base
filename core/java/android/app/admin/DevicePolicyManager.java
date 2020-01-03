@@ -11493,4 +11493,48 @@ public class DevicePolicyManager {
         }
         return Collections.emptyList();
     }
+
+    /**
+     * Called by device owner or profile owner of an organization-owned managed profile to toggle
+     * Common Criteria mode for the device. When the device is in Common Criteria mode,
+     * certain device functionalities are tuned to meet the higher
+     * security level required by Common Criteria certification. For example:
+     * <ul>
+     * <li> Bluetooth long term key material is additionally integrity-protected with AES-GCM. </li>
+     * <li> WiFi configuration store is additionally integrity-protected with AES-GCM. </li>
+     * </ul>
+     * Common Criteria mode is disabled by default.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @param enabled whether Common Criteria mode should be enabled or not.
+     */
+    public void setCommonCriteriaModeEnabled(@NonNull ComponentName admin, boolean enabled) {
+        throwIfParentInstance("setCommonCriteriaModeEnabled");
+        if (mService != null) {
+            try {
+                mService.setCommonCriteriaModeEnabled(admin, enabled);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by device owner or profile owner of an organization-owned managed profile to return
+     * whether Common Criteria mode is currently enabled for the device.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @return {@code true} if Common Criteria mode is enabled, {@code false} otherwise.
+     */
+    public boolean isCommonCriteriaModeEnabled(@NonNull ComponentName admin) {
+        throwIfParentInstance("isCommonCriteriaModeEnabled");
+        if (mService != null) {
+            try {
+                return mService.isCommonCriteriaModeEnabled(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
 }

@@ -5721,6 +5721,31 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 dpm.getAllCrossProfilePackages());
     }
 
+    public void testSetCommonCriteriaMode_asDeviceOwner() throws Exception {
+        setDeviceOwner();
+
+        dpm.setCommonCriteriaModeEnabled(admin1, true);
+        verify(getServices().settings).settingsGlobalPutInt(
+                Settings.Global.COMMON_CRITERIA_MODE, 1);
+
+        when(getServices().settings.settingsGlobalGetInt(Settings.Global.COMMON_CRITERIA_MODE, 0))
+                .thenReturn(1);
+        assertTrue(dpm.isCommonCriteriaModeEnabled(admin1));
+    }
+
+    public void testSetCommonCriteriaMode_asPoOfOrgOwnedDevice() throws Exception {
+        setupProfileOwner();
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
+
+        dpm.setCommonCriteriaModeEnabled(admin1, true);
+        verify(getServices().settings).settingsGlobalPutInt(
+                Settings.Global.COMMON_CRITERIA_MODE, 1);
+
+        when(getServices().settings.settingsGlobalGetInt(Settings.Global.COMMON_CRITERIA_MODE, 0))
+                .thenReturn(1);
+        assertTrue(dpm.isCommonCriteriaModeEnabled(admin1));
+    }
+
     private void setCrossProfileAppsList(String... packages) {
         when(mContext.getResources()
                 .getStringArray(eq(R.array.cross_profile_apps)))
