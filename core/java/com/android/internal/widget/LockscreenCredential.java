@@ -308,7 +308,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
 
     @Override
     public int hashCode() {
-        // Effective Java — Item 9
+        // Effective Java — Always override hashCode when you override equals
         return (17 + mType) * 31 + mCredential.hashCode();
     }
 
