@@ -284,6 +284,7 @@ java_defaults {
     name: "framework-aidl-export-defaults",
     aidl: {
         export_include_dirs: [
+            "apex/media/java",
             "core/java",
             "drm/java",
             "graphics/java",
@@ -291,7 +292,6 @@ java_defaults {
             "location/java",
             "lowpan/java",
             "media/java",
-            "media/apex/java",
             "media/mca/effect/java",
             "media/mca/filterfw/java",
             "media/mca/filterpacks/java",
