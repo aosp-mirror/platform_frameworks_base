@@ -16,6 +16,7 @@
 
 package com.android.server.rollback;
 
+import android.content.pm.PackageManager;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.os.storage.StorageManager;
@@ -119,11 +120,22 @@ public class AppDataRollbackHelper {
         }
 
         try {
-            mInstaller.restoreAppDataSnapshot(packageRollbackInfo.getPackageName(), appId, seInfo,
-                    userId, rollbackId, storageFlags);
+            switch (packageRollbackInfo.getRollbackDataPolicy()) {
+                case PackageManager.RollbackDataPolicy.WIPE:
+                    mInstaller.clearAppData(null, packageRollbackInfo.getPackageName(),
+                            userId, storageFlags, 0);
+                    break;
+                case PackageManager.RollbackDataPolicy.RESTORE:
+                    mInstaller.restoreAppDataSnapshot(packageRollbackInfo.getPackageName(), appId,
+                            seInfo, userId, rollbackId, storageFlags);
+                    break;
+                default:
+                    break;
+            }
         } catch (InstallerException ie) {
-            Slog.e(TAG, "Unable to restore app data snapshot: "
-                        + packageRollbackInfo.getPackageName(), ie);
+            Slog.e(TAG, "Unable to restore/wipe app data: "
+                    + packageRollbackInfo.getPackageName() + " policy="
+                    + packageRollbackInfo.getRollbackDataPolicy(), ie);
         }
 
         return changedRollback;
@@ -207,13 +219,24 @@ public class AppDataRollbackHelper {
 
             if (hasPendingRestore) {
                 try {
-                    mInstaller.restoreAppDataSnapshot(info.getPackageName(), ri.appId,
-                            ri.seInfo, userId, rollback.info.getRollbackId(),
-                            Installer.FLAG_STORAGE_CE);
+                    switch (info.getRollbackDataPolicy()) {
+                        case PackageManager.RollbackDataPolicy.WIPE:
+                            mInstaller.clearAppData(null, info.getPackageName(), userId,
+                                    Installer.FLAG_STORAGE_CE, 0);
+                            break;
+                        case PackageManager.RollbackDataPolicy.RESTORE:
+                            mInstaller.restoreAppDataSnapshot(info.getPackageName(), ri.appId,
+                                    ri.seInfo, userId, rollback.info.getRollbackId(),
+                                    Installer.FLAG_STORAGE_CE);
+                            break;
+                        default:
+                            break;
+                    }
                     info.removeRestoreInfo(ri);
                 } catch (InstallerException ie) {
-                    Slog.e(TAG, "Unable to restore app data snapshot for: "
-                            + info.getPackageName(), ie);
+                    Slog.e(TAG, "Unable to restore/wipe app data for: "
+                            + info.getPackageName() + " policy="
+                            + info.getRollbackDataPolicy(), ie);
                 }
             }
         }
