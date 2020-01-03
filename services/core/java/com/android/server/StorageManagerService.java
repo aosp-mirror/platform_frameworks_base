@@ -61,6 +61,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
@@ -3898,8 +3899,22 @@ class StorageManagerService extends IStorageManager.Stub
 
             // Otherwise we're willing to give out sandboxed or non-sandboxed if
             // they hold the runtime permission
-            final boolean hasLegacy = mIAppOpsService.checkOperation(OP_LEGACY_STORAGE,
+            boolean hasLegacy = mIAppOpsService.checkOperation(OP_LEGACY_STORAGE,
                     uid, packageName) == MODE_ALLOWED;
+
+            // Hack(b/147137425): we have to honor hasRequestedLegacyExternalStorage for a short
+            // while to enable 2 cases.
+            // 1) Apps that want to be in scoped storage in R, but want to opt out in Q devices,
+            // because they want to use raw file paths, would fail until fuse is enabled by default.
+            // 2) Test apps that target current sdk will fail. They would fail even after fuse is
+            // enabled, but we are fixing it with b/142395442. We are not planning to enable
+            // fuse by default until b/142395442 is fixed.
+            if (!hasLegacy && !mIsFuseEnabled) {
+                ApplicationInfo ai = mIPackageManager.getApplicationInfo(packageName,
+                        0, UserHandle.getUserId(uid));
+                hasLegacy = ai.hasRequestedLegacyExternalStorage();
+            }
+
             if (hasLegacy && hasWrite) {
                 return Zygote.MOUNT_EXTERNAL_WRITE;
             } else if (hasLegacy && hasRead) {
