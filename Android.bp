@@ -284,7 +284,7 @@ java_defaults {
     name: "framework-aidl-export-defaults",
     aidl: {
         export_include_dirs: [
-            "apex/media/java",
+            "apex/media/framework/java",
             "core/java",
             "drm/java",
             "graphics/java",
