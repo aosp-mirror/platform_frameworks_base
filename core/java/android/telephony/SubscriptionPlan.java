@@ -228,24 +228,6 @@ public final class SubscriptionPlan implements Parcelable {
     }
 
     /**
-     * Return the networkTypes array converted to a {@link TelephonyManager.NetworkTypeBitMask}
-     * @hide
-     */
-    public long getNetworkTypesBitMask() {
-        // calculate bitmask the first time and save for future calls
-        if (networkTypesBitMask == 0) {
-            if (networkTypes == null) {
-                networkTypesBitMask = ~0;
-            } else {
-                for (int networkType : networkTypes) {
-                    networkTypesBitMask |= TelephonyManager.getBitMaskForNetworkType(networkType);
-                }
-            }
-        }
-        return networkTypesBitMask;
-    }
-
-    /**
      * Return an iterator that will return all valid data usage cycles based on
      * any recurrence rules. The iterator starts from the currently active cycle
      * and walks backwards through time.
