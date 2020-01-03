@@ -671,6 +671,12 @@ public class CarrierConfigManager {
             "carrier_promote_wfc_on_call_fail_bool";
 
     /**
+     * Flag specifying whether provisioning is required for RCS.
+     */
+    public static final String KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL =
+            "carrier_rcs_provisioning_required_bool";
+
+    /**
      * Flag specifying whether provisioning is required for VoLTE, Video Telephony, and WiFi
      * Calling.
      */
@@ -3431,6 +3437,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT, 2);
         sDefaults.putInt(KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT, 2);
         sDefaults.putBoolean(KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL, false);

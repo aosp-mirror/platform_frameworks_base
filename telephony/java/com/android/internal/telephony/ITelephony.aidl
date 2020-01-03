@@ -1954,6 +1954,17 @@ interface ITelephony {
      */
     boolean getImsProvisioningStatusForCapability(int subId, int capability, int tech);
 
+    /**
+     * Get the provisioning status for the IMS Rcs capability specified.
+     */
+    boolean getRcsProvisioningStatusForCapability(int subId, int capability);
+
+    /**
+     * Set the provisioning status for the IMS Rcs capability using the specified subscription.
+     */
+    void setRcsProvisioningStatusForCapability(int subId, int capability,
+            boolean isProvisioned);
+
     /** Is the capability and tech flagged as provisioned in the cache */
     boolean isMmTelCapabilityProvisionedInCache(int subId, int capability, int tech);
 
