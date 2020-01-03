@@ -1723,7 +1723,7 @@ class UserController implements Handler.Callback {
     }
 
     void registerUserSwitchObserver(IUserSwitchObserver observer, String name) {
-        Preconditions.checkNotNull(name, "Observer name cannot be null");
+        Objects.requireNonNull(name, "Observer name cannot be null");
         checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "registerUserSwitchObserver");
         mUserSwitchObservers.register(observer, name);
     }
