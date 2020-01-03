@@ -67,6 +67,7 @@ import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Objects;
 
 /**
  * An attention service implementation that runs in System Server process.
@@ -120,7 +121,7 @@ public class AttentionManagerService extends SystemService {
     AttentionManagerService(Context context, PowerManager powerManager, Object lock,
             AttentionHandler handler) {
         super(context);
-        mContext = Preconditions.checkNotNull(context);
+        mContext = Objects.requireNonNull(context);
         mPowerManager = powerManager;
         mLock = lock;
         mAttentionHandler = handler;
@@ -200,7 +201,7 @@ public class AttentionManagerService extends SystemService {
      */
     @VisibleForTesting
     boolean checkAttention(long timeout, AttentionCallbackInternal callbackInternal) {
-        Preconditions.checkNotNull(callbackInternal);
+        Objects.requireNonNull(callbackInternal);
 
         if (!isAttentionServiceSupported()) {
             Slog.w(LOG_TAG, "Trying to call checkAttention() on an unsupported device.");
@@ -543,9 +544,9 @@ public class AttentionManagerService extends SystemService {
         UserState(int userId, Context context, Object lock, Handler handler,
                 ComponentName componentName) {
             mUserId = userId;
-            mContext = Preconditions.checkNotNull(context);
-            mLock = Preconditions.checkNotNull(lock);
-            mComponentName = Preconditions.checkNotNull(componentName);
+            mContext = Objects.requireNonNull(context);
+            mLock = Objects.requireNonNull(lock);
+            mComponentName = Objects.requireNonNull(componentName);
             mAttentionHandler = handler;
         }
 
