@@ -5693,6 +5693,7 @@ package android.net.wifi {
   @Deprecated public class WifiConfiguration implements android.os.Parcelable {
     method @Deprecated public int getAuthType();
     method @Deprecated @NonNull public android.net.IpConfiguration.IpAssignment getIpAssignment();
+    method @Deprecated @NonNull public android.net.IpConfiguration getIpConfiguration();
     method @Deprecated @NonNull public android.net.wifi.WifiConfiguration.NetworkSelectionStatus getNetworkSelectionStatus();
     method @Deprecated @NonNull public String getPrintableSsid();
     method @Deprecated @NonNull public android.net.IpConfiguration.ProxySettings getProxySettings();
