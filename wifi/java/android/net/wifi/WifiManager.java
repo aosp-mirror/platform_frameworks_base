@@ -666,7 +666,8 @@ public class WifiManager {
     public @interface SapStartFailure {}
 
     /**
-     *  All other reasons for AP start failure besides {@link #SAP_START_FAILURE_NO_CHANNEL}.
+     *  All other reasons for AP start failure besides {@link #SAP_START_FAILURE_NO_CHANNEL} and
+     *  {@link #SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION}.
      *
      *  @hide
      */
@@ -690,6 +691,37 @@ public class WifiManager {
      */
     @SystemApi
     public static final int SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION = 2;
+
+
+    /** @hide */
+    @IntDef(flag = false, prefix = { "SAP_CLIENT_BLOCKED_REASON_" }, value = {
+        SAP_CLIENT_BLOCK_REASON_CODE_BLOCKED_BY_USER,
+        SAP_CLIENT_BLOCK_REASON_CODE_NO_MORE_STAS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SapClientBlockedReason {}
+
+    /**
+     *  If Soft Ap client is blocked, this reason code means that client doesn't exist in the
+     *  specified configuration {@link SoftApConfiguration.Builder#setClientList(List, List)}
+     *  and the {@link SoftApConfiguration.Builder#enableClientControlByUser(true)}
+     *  is configured as well.
+     *  @hide
+     */
+    @SystemApi
+    public static final int SAP_CLIENT_BLOCK_REASON_CODE_BLOCKED_BY_USER = 0;
+
+    /**
+     *  If Soft Ap client is blocked, this reason code means that no more clients can be
+     *  associated to this AP since it reached maximum capacity. The maximum capacity is
+     *  the minimum of {@link SoftApConfiguration.Builder#setMaxNumberOfClients(int)} and
+     *  {@link SoftApCapability#getMaxSupportedClients} which get from
+     *  {@link WifiManager.SoftApCallback#onCapabilityChanged(SoftApCapability)}.
+     *
+     *  @hide
+     */
+    @SystemApi
+    public static final int SAP_CLIENT_BLOCK_REASON_CODE_NO_MORE_STAS = 1;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -3229,8 +3261,17 @@ public class WifiManager {
     /**
      * Sets the Wi-Fi AP Configuration.
      *
+     * If the API is called while the soft AP is enabled, the configuration will apply to
+     * the current soft AP if the new configuration only includes
+     * {@link SoftApConfiguration.Builder#setMaxNumberOfClients(int)}
+     * or {@link SoftApConfiguration.Builder#setShutdownTimeoutMillis(int)}
+     * or {@link SoftApConfiguration.Builder#enableClientControlByUser(boolean)}
+     * or {@link SoftApConfiguration.Builder#setClientList(List, List)}.
+     *
+     * Otherwise, the configuration changes will be applied when the Soft AP is next started
+     * (the framework will not stop/start the AP).
+     *
      * @param softApConfig  A valid SoftApConfiguration specifying the configuration of the SAP.
-
      * @return {@code true} if the operation succeeded, {@code false} otherwise
      *
      * @hide
@@ -3460,7 +3501,8 @@ public class WifiManager {
          *                      {@link #WIFI_AP_STATE_ENABLING}, {@link #WIFI_AP_STATE_FAILED}
          * @param failureReason reason when in failed state. One of
          *                      {@link #SAP_START_FAILURE_GENERAL},
-         *                      {@link #SAP_START_FAILURE_NO_CHANNEL}
+         *                      {@link #SAP_START_FAILURE_NO_CHANNEL},
+         *                      {@link #SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION}
          */
         default void onStateChanged(@WifiApState int state, @SapStartFailure int failureReason) {}
 
@@ -3488,6 +3530,22 @@ public class WifiManager {
         default void onCapabilityChanged(@NonNull SoftApCapability softApCapability) {
             // Do nothing: can be updated to add SoftApCapability details (e.g. meximum supported
             // client number) to the UI.
+        }
+
+        /**
+         * Called when client trying to connect but device blocked the client with specific reason.
+         *
+         * Can be used to ask user to update client to allowed list or blocked list
+         * when reason is {@link SAP_CLIENT_BLOCK_REASON_CODE_BLOCKED_BY_USER}, or
+         * indicate the block due to maximum supported client number limitation when reason is
+         * {@link SAP_CLIENT_BLOCK_REASON_CODE_NO_MORE_STAS}.
+         *
+         * @param client the currently blocked client.
+         * @param blockedReason one of blocked reason from {@link SapClientBlockedReason}
+         */
+        default void onBlockedClientConnecting(@NonNull WifiClient client,
+                @SapClientBlockedReason int blockedReason) {
+            // Do nothing: can be used to ask user to update client to allowed list or blocked list.
         }
     }
 
@@ -3553,6 +3611,19 @@ public class WifiManager {
             Binder.clearCallingIdentity();
             mExecutor.execute(() -> {
                 mCallback.onCapabilityChanged(capability);
+            });
+        }
+
+        @Override
+        public void onBlockedClientConnecting(@NonNull WifiClient client, int blockedReason) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "SoftApCallbackProxy: onBlockedClientConnecting: client=" + client
+                        + " with reason = " + blockedReason);
+            }
+
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
+                mCallback.onBlockedClientConnecting(client, blockedReason);
             });
         }
     }
