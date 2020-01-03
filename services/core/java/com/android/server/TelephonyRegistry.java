@@ -785,9 +785,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
                                 r.callback.onServiceStateChanged(rawSs);
                             } else if (checkCoarseLocationAccess(r, Build.VERSION_CODES.Q)) {
-                                r.callback.onServiceStateChanged(rawSs.sanitizeLocationInfo(false));
+                                r.callback.onServiceStateChanged(
+                                        rawSs.createLocationInfoSanitizedCopy(false));
                             } else {
-                                r.callback.onServiceStateChanged(rawSs.sanitizeLocationInfo(true));
+                                r.callback.onServiceStateChanged(
+                                        rawSs.createLocationInfoSanitizedCopy(true));
                             }
                         } catch (RemoteException ex) {
                             remove(r.binder);
@@ -1142,9 +1144,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
                                 stateToSend = new ServiceState(state);
                             } else if (checkCoarseLocationAccess(r, Build.VERSION_CODES.Q)) {
-                                stateToSend = state.sanitizeLocationInfo(false);
+                                stateToSend = state.createLocationInfoSanitizedCopy(false);
                             } else {
-                                stateToSend = state.sanitizeLocationInfo(true);
+                                stateToSend = state.createLocationInfoSanitizedCopy(true);
                             }
                             if (DBG) {
                                 log("notifyServiceStateForSubscriber: callback.onSSC r=" + r

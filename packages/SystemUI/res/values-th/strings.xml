@@ -70,8 +70,7 @@
     <string name="learn_more" msgid="4690632085667273811">"ดูข้อมูลเพิ่มเติม"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"ขยายจนเต็มหน้าจอ"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ยืดจนเต็มหน้าจอ"</string>
-    <!-- no translation found for global_action_screenshot (2760267567509131654) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="2760267567509131654">"ภาพหน้าจอ"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"กำลังบันทึกภาพหน้าจอ..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"กำลังบันทึกภาพหน้าจอ..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"บันทึกภาพหน้าจอแล้ว"</string>
@@ -119,8 +118,7 @@
     <string name="phone_label" msgid="5715229948920451352">"เปิดโทรศัพท์"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"เปิดตัวช่วยเสียง"</string>
     <string name="camera_label" msgid="8253821920931143699">"เปิดกล้อง"</string>
-    <!-- no translation found for cancel (1089011503403416730) -->
-    <skip />
+    <string name="cancel" msgid="1089011503403416730">"ยกเลิก"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ยืนยัน"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ลองอีกครั้ง"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"แตะเพื่อยกเลิกการตรวจสอบสิทธิ์"</string>
@@ -386,8 +384,10 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"จนพระอาทิตย์ขึ้น"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"เปิดเวลา <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"จนถึง <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ธีมสีเข้ม"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"ธีมสีเข้ม\nโหมดประหยัดแบตเตอรี่"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ธีมมืด"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"โหมดประหยัดแบตเตอรี่"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"เปิดตอนพระอาทิตย์ตก"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"จนพระอาทิตย์ขึ้น"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ถูกปิดใช้งาน"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"เปิดใช้งาน NFC แล้ว"</string>
@@ -412,10 +412,6 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"แตะอีกครั้งเพื่อเปิด"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"เลื่อนขึ้นเพื่อเปิด"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"เลื่อนขึ้นเพื่อลองอีกครั้ง"</string>
-    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
-    <skip />
-    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
-    <skip />
     <string name="do_disclosure_generic" msgid="2388094207542706440">"อุปกรณ์นี้จัดการโดยองค์กรของคุณ"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"อุปกรณ์เครื่องนี้จัดการโดย <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"เลื่อนไอคอนโทรศัพท์"</string>
@@ -467,9 +463,11 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"เปิดโหมดประหยัดแบตเตอรี่อยู่"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"ลดการใช้แบตเตอรี่และอินเทอร์เน็ตที่ใช้งานอยู่เบื้องหลัง"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"ปิดโหมดประหยัดแบตเตอรี่"</string>
-    <string name="media_projection_dialog_text" msgid="5509958417853154019">"ขณะที่กำลังบันทึกหรือแคสต์ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> มีสิทธิ์บันทึกข้อมูลที่ละเอียดอ่อนซึ่งแสดงบนหน้าจอหรือเล่นจากอุปกรณ์ของคุณ เช่น เสียง รหัสผ่าน ข้อมูลการชำระเงิน รูปภาพ และข้อความ"</string>
-    <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"ขณะที่กำลังบันทึกหรือแคสต์ บริการที่มีฟังก์ชันนี้มีสิทธิ์บันทึกข้อมูลที่ละเอียดอ่อนซึ่งแสดงบนหน้าจอหรือเล่นจากอุปกรณ์ของคุณ เช่น เสียง รหัสผ่าน ข้อมูลการชำระเงิน รูปภาพ และข้อความ"</string>
-    <string name="media_projection_dialog_title" msgid="6379655487632663290">"มีการเปิดเผยข้อมูลที่ละเอียดอ่อนระหว่างการแคสต์/บันทึก"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> จะมีสิทธิ์เข้าถึงข้อมูลทั้งหมดที่ปรากฏบนหน้าจอหรือเปิดจากอุปกรณ์ของคุณขณะบันทึกหรือแคสต์ ซึ่งรวมถึงข้อมูลอย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน รูปภาพ ข้อความ และเสียงที่คุณเล่น"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"บริการที่มีฟังก์ชันนี้จะมีสิทธิ์เข้าถึงข้อมูลทั้งหมดที่ปรากฏบนหน้าจอหรือเปิดจากอุปกรณ์ของคุณขณะบันทึกหรือแคสต์ ซึ่งรวมถึงข้อมูลอย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน รูปภาพ ข้อความ และเสียงที่คุณเล่น"</string>
+    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
+    <skip />
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"เริ่มบันทึกหรือแคสต์ด้วย <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> เลยไหม"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"ไม่ต้องแสดงข้อความนี้อีก"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ล้างทั้งหมด"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"จัดการ"</string>
@@ -786,8 +784,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"ปุ่มสลับแป้นพิมพ์"</string>
     <string name="save" msgid="3392754183673848006">"บันทึก"</string>
-    <!-- no translation found for reset (8715144064608810383) -->
-    <skip />
+    <string name="reset" msgid="8715144064608810383">"รีเซ็ต"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"ปรับความกว้างของปุ่ม"</string>
     <string name="clipboard" msgid="8517342737534284617">"คลิปบอร์ด"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"ปุ่มนำทางที่กำหนดเอง"</string>
@@ -795,7 +792,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"Keycode ทางขวา"</string>
     <string name="left_icon" msgid="5036278531966897006">"ไอคอนทางซ้าย"</string>
     <string name="right_icon" msgid="1103955040645237425">"ไอคอนทางขวา"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"กดค้างแล้วลากเพื่อเพิ่มไทล์"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"กดค้างแล้วลากเพื่อเพิ่มชิ้นส่วน"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"กดไทล์ค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ลากมาที่นี่เพื่อนำออก"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"คุณต้องมีการ์ดอย่างน้อย <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> รายการ"</string>
@@ -883,8 +880,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"ขวา"</string>
     <string name="tuner_menu" msgid="363690665924769420">"เมนู"</string>
     <string name="tuner_app" msgid="6949280415826686972">"แอป <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for notification_channel_alerts (3385787053375150046) -->
-    <skip />
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"การแจ้งเตือน"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"แบตเตอรี"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"ภาพหน้าจอ"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"ข้อความทั่วไป"</string>
@@ -894,8 +890,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ทำงานอยู่"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"เปิดแอปได้โดยไม่ต้องติดตั้ง"</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"เปิดแอปได้โดยไม่ต้องติดตั้ง แตะเพื่อดูข้อมูลเพิ่มเติม"</string>
-    <!-- no translation found for app_info (5153758994129963243) -->
-    <skip />
+    <string name="app_info" msgid="5153758994129963243">"ข้อมูลแอป"</string>
     <string name="go_to_web" msgid="636673528981366511">"ไปที่เบราว์เซอร์"</string>
     <string name="mobile_data" msgid="4564407557775397216">"เน็ตมือถือ"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -929,13 +924,6 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"การตั้งค่า"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"รับทราบ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> ใช้<xliff:g id="TYPES_LIST">%2$s</xliff:g>ของคุณอยู่"</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"หลายแอปพลิเคชันใช้<xliff:g id="TYPES_LIST">%s</xliff:g>ของคุณอยู่"</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" และ "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"กล้องถ่ายรูป"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"ตำแหน่ง"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"ไมโครโฟน"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"ปิดเซ็นเซอร์"</string>
     <string name="device_services" msgid="1549944177856658705">"บริการของอุปกรณ์"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ไม่มีชื่อ"</string>
@@ -958,4 +946,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"อัปเดตการไปยังส่วนต่างๆ ของระบบแล้ว หากต้องการเปลี่ยนแปลง ให้ไปที่การตั้งค่า"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ไปที่การตั้งค่าเพื่ออัปเดตการไปยังส่วนต่างๆ ของระบบ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"สแตนด์บาย"</string>
+    <string name="magnification_overlay_title" msgid="6584179429612427958">"หน้าต่างการขยายที่วางซ้อน"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"หน้าต่างการขยาย"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"การควบคุมหน้าต่างการขยาย"</string>
 </resources>

@@ -290,11 +290,13 @@ message ValueMetric {
 
   optional FieldMatcher dimensions_in_what = 5;
 
-  optional FieldMatcher dimensions_in_condition = 9 [deprecated = true];
+  repeated int64 slice_by_state = 18;
 
   optional TimeUnit bucket = 6;
 
   repeated MetricConditionLink links = 7;
+
+  repeated MetricStateLink state_link = 19;
 
   enum AggregationType {
     SUM = 1;
@@ -325,6 +327,8 @@ message ValueMetric {
   optional int32 max_pull_delay_sec = 16 [default = 10];
 
   optional bool split_bucket_for_app_upgrade = 17 [default = true];
+
+  optional FieldMatcher dimensions_in_condition = 9 [deprecated = true];
 }
 
 message Alert {

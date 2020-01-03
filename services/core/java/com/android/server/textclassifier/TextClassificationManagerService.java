@@ -62,6 +62,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 
 /**
@@ -137,7 +138,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     private TextClassificationConstants mSettings;
 
     private TextClassificationManagerService(Context context) {
-        mContext = Preconditions.checkNotNull(context);
+        mContext = Objects.requireNonNull(context);
         mLock = new Object();
         mSettingsListener = new TextClassifierSettingsListener(mContext);
     }
@@ -156,8 +157,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             @Nullable TextClassificationSessionId sessionId,
             TextSelection.Request request, ITextClassifierCallback callback)
             throws RemoteException {
-        Preconditions.checkNotNull(request);
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(callback);
         final int userId = request.getUserId();
         validateInput(mContext, request.getCallingPackageName(), userId);
 
@@ -186,8 +187,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             @Nullable TextClassificationSessionId sessionId,
             TextClassification.Request request, ITextClassifierCallback callback)
             throws RemoteException {
-        Preconditions.checkNotNull(request);
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(callback);
         final int userId = request.getUserId();
         validateInput(mContext, request.getCallingPackageName(), userId);
 
@@ -215,8 +216,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             @Nullable TextClassificationSessionId sessionId,
             TextLinks.Request request, ITextClassifierCallback callback)
             throws RemoteException {
-        Preconditions.checkNotNull(request);
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(callback);
         final int userId = request.getUserId();
         validateInput(mContext, request.getCallingPackageName(), userId);
 
@@ -244,7 +245,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     public void onSelectionEvent(
             @Nullable TextClassificationSessionId sessionId, SelectionEvent event)
             throws RemoteException {
-        Preconditions.checkNotNull(event);
+        Objects.requireNonNull(event);
         final int userId = event.getUserId();
         validateInput(mContext, event.getPackageName(), userId);
 
@@ -268,7 +269,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     public void onTextClassifierEvent(
             @Nullable TextClassificationSessionId sessionId,
             TextClassifierEvent event) throws RemoteException {
-        Preconditions.checkNotNull(event);
+        Objects.requireNonNull(event);
         final String packageName = event.getEventContext() == null
                 ? null
                 : event.getEventContext().getPackageName();
@@ -299,8 +300,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             @Nullable TextClassificationSessionId sessionId,
             TextLanguage.Request request,
             ITextClassifierCallback callback) throws RemoteException {
-        Preconditions.checkNotNull(request);
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(callback);
         final int userId = request.getUserId();
         validateInput(mContext, request.getCallingPackageName(), userId);
 
@@ -329,8 +330,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             @Nullable TextClassificationSessionId sessionId,
             ConversationActions.Request request,
             ITextClassifierCallback callback) throws RemoteException {
-        Preconditions.checkNotNull(request);
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(callback);
         final int userId = request.getUserId();
         validateInput(mContext, request.getCallingPackageName(), userId);
 
@@ -360,8 +361,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     public void onCreateTextClassificationSession(
             TextClassificationContext classificationContext, TextClassificationSessionId sessionId)
             throws RemoteException {
-        Preconditions.checkNotNull(sessionId);
-        Preconditions.checkNotNull(classificationContext);
+        Objects.requireNonNull(sessionId);
+        Objects.requireNonNull(classificationContext);
         final int userId = classificationContext.getUserId();
         validateInput(mContext, classificationContext.getPackageName(), userId);
 
@@ -391,7 +392,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     @Override
     public void onDestroyTextClassificationSession(TextClassificationSessionId sessionId)
             throws RemoteException {
-        Preconditions.checkNotNull(sessionId);
+        Objects.requireNonNull(sessionId);
 
         synchronized (mLock) {
             final int userId = mSessionUserIds.containsKey(sessionId)
@@ -514,7 +515,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 UserState owningUser, int uid) {
             mName = name;
             mRequest =
-                    logOnFailure(Preconditions.checkNotNull(request), "handling pending request");
+                    logOnFailure(Objects.requireNonNull(request), "handling pending request");
             mOnServiceFailure =
                     logOnFailure(onServiceFailure, "notifying callback of service failure");
             mBinder = binder;
@@ -604,8 +605,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
 
         private UserState(int userId, Context context, Object lock) {
             mUserId = userId;
-            mContext = Preconditions.checkNotNull(context);
-            mLock = Preconditions.checkNotNull(lock);
+            mContext = Objects.requireNonNull(context);
+            mLock = Objects.requireNonNull(lock);
         }
 
         @GuardedBy("mLock")

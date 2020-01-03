@@ -87,7 +87,7 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
         // Unregistration still work even if the display was removed.
         mWpc.registerDisplayConfigurationListenerLocked(testDisplayContent1);
         assertEquals(testDisplayContent1.mDisplayId, mWpc.getDisplayId());
-        mRootActivityContainer.removeChild(testDisplayContent1);
+        mRootWindowContainer.removeChild(testDisplayContent1);
         mWpc.unregisterDisplayConfigurationListenerLocked();
         assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
     }

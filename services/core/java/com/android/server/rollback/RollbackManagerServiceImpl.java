@@ -841,7 +841,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         ApplicationInfo appInfo = pkgInfo.applicationInfo;
         return rollback.enableForPackage(packageName, newPackage.versionCode,
                 pkgInfo.getLongVersionCode(), isApex, appInfo.sourceDir,
-                appInfo.splitSourceDirs);
+                appInfo.splitSourceDirs, session.rollbackDataPolicy);
     }
 
     @Override

@@ -277,8 +277,8 @@ bool CountMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
 
 void CountMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const MetricDimensionKey& eventKey,
-        const ConditionKey& conditionKey, bool condition,
-        const LogEvent& event) {
+        const ConditionKey& conditionKey, bool condition, const LogEvent& event,
+        const map<int, HashableDimensionKey>& statePrimaryKeys) {
     int64_t eventTimeNs = event.GetElapsedTimestampNs();
     flushIfNeededLocked(eventTimeNs);
 

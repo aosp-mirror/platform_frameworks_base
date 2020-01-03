@@ -133,8 +133,8 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
     HashableDimensionKey dimensionInWhat;
     filterValues(mDimensionsInWhat, event.getValues(), &dimensionInWhat);
     MetricDimensionKey metricKey(dimensionInWhat, stateValuesKey);
-    onMatchedLogEventInternalLocked(
-            matcherIndex, metricKey, conditionKey, condition, event);
+    onMatchedLogEventInternalLocked(matcherIndex, metricKey, conditionKey, condition, event,
+                                    statePrimaryKeys);
 }
 
 bool MetricProducer::evaluateActiveStateLocked(int64_t elapsedTimestampNs) {
@@ -269,6 +269,7 @@ void MetricProducer::getMappedStateValue(const int32_t atomId, const HashableDim
                                          FieldValue* value) {
     if (!StateManager::getInstance().getStateValue(atomId, queryKey, value)) {
         value->mValue = Value(StateTracker::kStateUnknown);
+        value->mField.setTag(atomId);
         ALOGW("StateTracker not found for state atom %d", atomId);
         return;
     }

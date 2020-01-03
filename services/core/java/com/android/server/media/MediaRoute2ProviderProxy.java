@@ -109,9 +109,9 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     @Override
-    public void transferRoute(int sessionId, MediaRoute2Info route) {
+    public void transferToRoute(int sessionId, MediaRoute2Info route) {
         if (mConnectionReady) {
-            mActiveConnection.transferRoute(sessionId, route.getId());
+            mActiveConnection.transferToRoute(sessionId, route.getId());
         }
     }
 
@@ -289,6 +289,18 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         mCallback.onSessionCreated(this, sessionInfo, requestId);
     }
 
+    private void onSessionInfoChanged(Connection connection, RouteSessionInfo sessionInfo) {
+        if (mActiveConnection != connection) {
+            return;
+        }
+        if (sessionInfo == null) {
+            Slog.w(TAG, "onSessionInfoChanged: Ignoring null sessionInfo sent from "
+                    + mComponentName);
+            return;
+        }
+        mCallback.onSessionInfoChanged(this, sessionInfo);
+    }
+
     private void disconnect() {
         if (mActiveConnection != null) {
             mConnectionReady = false;
@@ -363,9 +375,9 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             }
         }
 
-        public void transferRoute(int sessionId, String routeId) {
+        public void transferToRoute(int sessionId, String routeId) {
             try {
-                mProvider.transferRoute(sessionId, routeId);
+                mProvider.transferToRoute(sessionId, routeId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to deliver request to transfer a session to a route.", ex);
             }
@@ -410,6 +422,10 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             mHandler.post(() -> onSessionCreated(Connection.this, sessionInfo,
                     requestId));
         }
+
+        void postSessionInfoChanged(RouteSessionInfo sessionInfo) {
+            mHandler.post(() -> onSessionInfoChanged(Connection.this, sessionInfo));
+        }
     }
 
     private static final class ProviderClient extends IMediaRoute2ProviderClient.Stub  {
@@ -437,6 +453,14 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             Connection connection = mConnectionRef.get();
             if (connection != null) {
                 connection.postSessionCreated(sessionInfo, requestId);
+            }
+        }
+
+        @Override
+        public void notifySessionInfoChanged(RouteSessionInfo sessionInfo) {
+            Connection connection = mConnectionRef.get();
+            if (connection != null) {
+                connection.postSessionInfoChanged(sessionInfo);
             }
         }
     }

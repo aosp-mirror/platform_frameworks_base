@@ -42,11 +42,21 @@ filegroup {
     srcs: ["java/android/net/wifi/WifiAnnotations.java"],
 }
 
+// list of tests that are allowed to access @hide APIs from framework-wifi
+test_access_hidden_api_whitelist = [
+    "//frameworks/base/wifi/tests",
+    "//frameworks/opt/net/wifi/tests/wifitests:__subpackages__",
+
+    "//frameworks/opt/net/wifi/libs/WifiTrackerLib/tests",
+]
+
 java_library {
     name: "framework-wifi",
-    sdk_version: "core_platform", // TODO(b/140299412) should be core_current
+    // TODO(b/140299412) should be core_current once we build against framework-system-stubs
+    sdk_version: "core_platform",
     libs: [
-        "framework-minus-apex", // TODO(b/140299412) should be framework-system-stubs
+        // TODO(b/140299412) should be framework-system-stubs once we fix all @hide dependencies
+        "framework-minus-apex",
     ],
     srcs: [
         ":framework-wifi-updatable-sources",
@@ -54,7 +64,11 @@ java_library {
     installable: true,
     optimize: {
         enabled: false
-    }
+    },
+    visibility: [
+        "//frameworks/base", // TODO(b/140299412) remove once all dependencies are fixed
+        "//frameworks/opt/net/wifi/service:__subpackages__",
+    ] + test_access_hidden_api_whitelist,
 }
 
 droidstubs {
@@ -84,3 +98,16 @@ java_library {
     installable: false,
 }
 
+// defaults for tests that need to build against framework-wifi's @hide APIs
+java_defaults {
+    name: "framework-wifi-test-defaults",
+    sdk_version: "core_platform", // tests can use @CorePlatformApi's
+    libs: [
+        "framework-wifi",
+        "framework-minus-apex",
+
+        // if sdk_version="" this gets automatically included, but here we need to add manually.
+        "framework-res",
+    ],
+    visibility: test_access_hidden_api_whitelist,
+}

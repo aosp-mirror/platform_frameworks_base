@@ -27,8 +27,7 @@ namespace stats_log_api_gen {
 using namespace std;
 
 int write_atoms_info_cpp(FILE* out, const Atoms& atoms, const string& namespaceStr,
-        const string& importHeader, const string& statslogHeader
-);
+        const string& importHeader, const string& statslogHeader);
 
 int write_atoms_info_header(FILE* out, const Atoms& atoms, const string& namespaceStr);
 

@@ -511,7 +511,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
 
             Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
             Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
-            Preconditions.checkNotNull(callback, "callback cannot be null");
+            Objects.requireNonNull(callback, "callback cannot be null");
 
             getOrCreateController(userId).onAddRoleHolder(roleName, packageName, flags,
                     callback);
@@ -531,7 +531,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
 
             Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
             Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
-            Preconditions.checkNotNull(callback, "callback cannot be null");
+            Objects.requireNonNull(callback, "callback cannot be null");
 
             getOrCreateController(userId).onRemoveRoleHolder(roleName, packageName, flags,
                     callback);
@@ -550,7 +550,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                     "clearRoleHoldersAsUser");
 
             Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
-            Preconditions.checkNotNull(callback, "callback cannot be null");
+            Objects.requireNonNull(callback, "callback cannot be null");
 
             getOrCreateController(userId).onClearRoleHolders(roleName, flags, callback);
         }
@@ -566,7 +566,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             getContext().enforceCallingOrSelfPermission(Manifest.permission.OBSERVE_ROLE_HOLDERS,
                     "addOnRoleHoldersChangedListenerAsUser");
 
-            Preconditions.checkNotNull(listener, "listener cannot be null");
+            Objects.requireNonNull(listener, "listener cannot be null");
 
             RemoteCallbackList<IOnRoleHoldersChangedListener> listeners = getOrCreateListeners(
                     userId);
@@ -584,7 +584,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             getContext().enforceCallingOrSelfPermission(Manifest.permission.OBSERVE_ROLE_HOLDERS,
                     "removeOnRoleHoldersChangedListenerAsUser");
 
-            Preconditions.checkNotNull(listener, "listener cannot be null");
+            Objects.requireNonNull(listener, "listener cannot be null");
 
             RemoteCallbackList<IOnRoleHoldersChangedListener> listeners = getListeners(userId);
             if (listener == null) {
@@ -599,7 +599,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                     RoleManager.PERMISSION_MANAGE_ROLES_FROM_CONTROLLER,
                     "setRoleNamesFromController");
 
-            Preconditions.checkNotNull(roleNames, "roleNames cannot be null");
+            Objects.requireNonNull(roleNames, "roleNames cannot be null");
 
             int userId = UserHandle.getCallingUserId();
             getOrCreateUserState(userId).setRoleNames(roleNames);

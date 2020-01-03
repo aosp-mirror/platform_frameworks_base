@@ -22,18 +22,19 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.WindowlessViewRoot;
+import android.view.SurfaceControlViewHost;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
 
-public class WindowlessWmTest extends Activity implements SurfaceHolder.Callback{
+public class SurfaceControlViewHostTest extends Activity implements SurfaceHolder.Callback{
     SurfaceView mView;
-    WindowlessViewRoot mVr;
+    SurfaceControlViewHost mVr;
 
     protected void onCreate(Bundle savedInstanceState) {
         FrameLayout content = new FrameLayout(this);
@@ -49,8 +50,12 @@ public class WindowlessWmTest extends Activity implements SurfaceHolder.Callback
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        mVr = new WindowlessViewRoot(this, this.getDisplay(), mView.getSurfaceControl(),
+        mVr = new SurfaceControlViewHost(this, this.getDisplay(),
                 mView.getInputToken());
+
+        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        t.reparent(mVr.getSurfacePackage().getSurfaceControl(), mView.getSurfaceControl()).apply();
+
         Button v = new Button(this);
         v.setBackgroundColor(Color.BLUE);
         v.setOnClickListener(new View.OnClickListener() {

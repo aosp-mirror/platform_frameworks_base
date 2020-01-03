@@ -21,8 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothDevice;
-
-import androidx.mediarouter.media.MediaRouter;
+import android.media.MediaRoute2Info;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 
@@ -44,7 +43,7 @@ public class MediaDeviceUtilsTest {
     @Mock
     private BluetoothDevice mBluetoothDevice;
     @Mock
-    private MediaRouter.RouteInfo mRouteInfo;
+    private MediaRoute2Info mRouteInfo;
 
     @Before
     public void setUp() {

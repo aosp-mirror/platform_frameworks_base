@@ -70,8 +70,7 @@
     <string name="learn_more" msgid="4690632085667273811">"மேலும் அறிக"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"திரையை நிரப்ப அளவை மாற்று"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"திரையை நிரப்ப இழு"</string>
-    <!-- no translation found for global_action_screenshot (2760267567509131654) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="2760267567509131654">"ஸ்கிரீன்ஷாட்"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ஸ்கிரீன்ஷாட் சேமிக்கப்பட்டது"</string>
@@ -119,8 +118,7 @@
     <string name="phone_label" msgid="5715229948920451352">"ஃபோனைத் திற"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"குரல் உதவியைத் திற"</string>
     <string name="camera_label" msgid="8253821920931143699">"கேமராவைத் திற"</string>
-    <!-- no translation found for cancel (1089011503403416730) -->
-    <skip />
+    <string name="cancel" msgid="1089011503403416730">"ரத்துசெய்"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"உறுதிப்படுத்துக"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"மீண்டும் முயல்க"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"பயோமெட்ரிக் அடையாளத்தை ரத்துசெய்ய தட்டவும்"</string>
@@ -387,7 +385,9 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>க்கு ஆன் செய்"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> வரை"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"டார்க் தீம்"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"டார்க் தீம்\nபேட்டரி சேமிப்பான்"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"பேட்டரி சேமிப்பான்"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"மாலையில் ஆன் செய்"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"காலை வரை"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC முடக்கப்பட்டது"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC இயக்கப்பட்டது"</string>
@@ -412,10 +412,6 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"திறக்க, மீண்டும் தட்டவும்"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"திறப்பதற்கு மேல் நோக்கி ஸ்வைப் செய்யவும்"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"மீண்டும் முயல மேல்நோக்கி ஸ்வைப் செய்யவும்"</string>
-    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
-    <skip />
-    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
-    <skip />
     <string name="do_disclosure_generic" msgid="2388094207542706440">"இந்தச் சாதனத்தை உங்கள் நிறுவனம் நிர்வகிக்கிறது"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"இந்தச் சாதனத்தை நிர்வகிப்பது: <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"ஃபோனிற்கு ஐகானிலிருந்து ஸ்வைப் செய்யவும்"</string>
@@ -467,9 +463,11 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"பேட்டரி சேமிப்பான் ஆன் செய்யப்பட்டுள்ளது"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"செயல்திறனையும் பின்புல டேட்டா உபயோகத்தையும் குறைக்கிறது"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"பேட்டரி சேமிப்பானை ஆஃப் செய்"</string>
-    <string name="media_projection_dialog_text" msgid="5509958417853154019">"ரெக்கார்டிங் செய்யும்போதோ அலைபரப்பும்போதோ, உங்கள் திரையில் காட்டப்படும் அல்லது உங்கள் சாதனத்திலிருந்து இயக்கப்படும் (ஆடியோ, கடவுச்சொற்கள், கட்டணத் தகவல், படங்கள், மெசேஜ்கள் உள்ளிட்ட) எந்த ஒரு அதிமுக்கியத் தகவலையும் <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ஆல் படமெடுக்க முடியும்."</string>
-    <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"ரெக்கார்டிங் செய்யும்போதோ அலைபரப்பும்போதோ உங்கள் திரையில் காட்டப்படும் அல்லது உங்கள் சாதனத்திலிருந்து இயக்கப்படும் (ஆடியோ, கடவுச்சொற்கள், கட்டணத் தகவல், படங்கள், மெசேஜ்கள் உள்ளிட்ட) எந்த ஒரு அதிமுக்கியத் தகவலையும் இந்தச் செயல்பாட்டை வழங்கும் சேவையால் படமெடுக்க முடியும்."</string>
-    <string name="media_projection_dialog_title" msgid="6379655487632663290">"அலைபரப்பும்போதோ ரெக்கார்டிங் செய்யும்போதோ தனிப்பட்ட விவரங்கள் அறியப்படும் வாய்ப்புள்ளது"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> உங்கள் திரையில் தெரியும் தகவல்கள், ரெக்கார்டு செய்யும்போதோ அனுப்பும்போதோ உங்கள் சாதனத்திலிருந்து பிளே ஆகும் அனைத்து தகவல்கள் ஆகியவற்றுக்கான அணுகலைக் கொண்டிருக்கும். கடவுச்சொற்கள், பேமெண்ட் தொடர்பான தகவல்கள், படங்கள், மெசேஜ்கள், நீங்கள் பிளே செய்யும் ஆடியோ போன்ற அனைத்துத் தகவல்களும் இதில் அடங்கும்."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"இந்தச் செயல்பாட்டை வழங்கும் சேவையானது உங்கள் திரையில் தெரியும் தகவல்கள், ரெக்கார்டு செய்யும்போதோ அனுப்பும்போதோ உங்கள் சாதனத்திலிருந்து பிளே ஆகும் அனைத்துத் தகவல்கள் ஆகியவற்றுக்கான அணுகலைக் கொண்டிருக்கும். கடவுச்சொற்கள், பேமெண்ட் தொடர்பான தகவல்கள், படங்கள், மெசேஜ்கள், நீங்கள் பிளே செய்யும் ஆடியோ போன்ற அனைத்துத் தகவல்களும் இதில் அடங்கும்."</string>
+    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
+    <skip />
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> மூலம் ரெக்கார்டிங் செய்யவோ அனுப்புவதற்கோ தொடங்கிவீட்டீர்களா?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"மீண்டும் காட்டாதே"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"எல்லாவற்றையும் அழி"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"அறிவிப்புகளை நிர்வகி"</string>
@@ -786,8 +784,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"விசைப்பலகை மாற்றி"</string>
     <string name="save" msgid="3392754183673848006">"சேமி"</string>
-    <!-- no translation found for reset (8715144064608810383) -->
-    <skip />
+    <string name="reset" msgid="8715144064608810383">"மீட்டமை"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"பட்டனின் அகலத்தை மாற்று"</string>
     <string name="clipboard" msgid="8517342737534284617">"கிளிப்போர்டு"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"தனிப்பயன் வழிசெலுத்தல் பட்டன்"</string>
@@ -883,8 +880,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"வலது"</string>
     <string name="tuner_menu" msgid="363690665924769420">"மெனு"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> ஆப்ஸ்"</string>
-    <!-- no translation found for notification_channel_alerts (3385787053375150046) -->
-    <skip />
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"விழிப்பூட்டல்கள்"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"பேட்டரி"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"ஸ்கிரீன் ஷாட்டுகள்"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"பொதுச் செய்திகள்"</string>
@@ -894,8 +890,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> இயங்குகிறது"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"நிறுவ வேண்டிய தேவையில்லாமல் ஆப்ஸ் திறக்கப்பட்டது."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"நிறுவ வேண்டிய தேவையில்லாமல் ஆப்ஸ் திறக்கப்பட்டது. மேலும் அறியத் தட்டவும்."</string>
-    <!-- no translation found for app_info (5153758994129963243) -->
-    <skip />
+    <string name="app_info" msgid="5153758994129963243">"ஆப்ஸ் தகவல்"</string>
     <string name="go_to_web" msgid="636673528981366511">"உலாவிக்குச் செல்"</string>
     <string name="mobile_data" msgid="4564407557775397216">"மொபைல் டேட்டா"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -929,13 +924,6 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"அமைப்புகள்"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"சரி"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"உங்கள் <xliff:g id="TYPES_LIST">%2$s</xliff:g>ஐ <xliff:g id="APP">%1$s</xliff:g> ஆப்ஸ் பயன்படுத்துகிறது."</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"உங்கள் <xliff:g id="TYPES_LIST">%s</xliff:g> ஆகியவற்றை ஆப்ஸ் பயன்படுத்துகின்றன."</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" மற்றும் "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"கேமரா"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"இருப்பிடம்"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"மைக்ரோஃபோன்"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"சென்சார்களை ஆஃப் செய்தல்"</string>
     <string name="device_services" msgid="1549944177856658705">"சாதன சேவைகள்"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"தலைப்பு இல்லை"</string>
@@ -958,4 +946,10 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"சிஸ்டம் நேவிகேஷன் மாற்றப்பட்டது. மாற்றங்களைச் செய்ய ‘அமைப்புகளுக்குச்’ செல்லவும்."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"சிஸ்டம் நேவிகேஷனை மாற்ற ’அமைப்புகளுக்குச்’ செல்லவும்"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"இயக்க நேரம்"</string>
+    <!-- no translation found for magnification_overlay_title (6584179429612427958) -->
+    <skip />
+    <!-- no translation found for magnification_window_title (4863914360847258333) -->
+    <skip />
+    <!-- no translation found for magnification_controls_title (8421106606708891519) -->
+    <skip />
 </resources>

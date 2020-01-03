@@ -2590,4 +2590,12 @@ public final class Debug
      * @hide
      */
     public static native long getIonMappedSizeKb();
+
+    /**
+     * Return whether virtually-mapped kernel stacks are enabled (CONFIG_VMAP_STACK).
+     * Note: caller needs config_gz read sepolicy permission
+     *
+     * @hide
+     */
+    public static native boolean isVmapStack();
 }

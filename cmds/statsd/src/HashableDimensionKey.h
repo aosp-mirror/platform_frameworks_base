@@ -71,6 +71,8 @@ public:
 
     std::string toString() const;
 
+    bool operator!=(const HashableDimensionKey& that) const;
+
     bool operator==(const HashableDimensionKey& that) const;
 
     bool operator<(const HashableDimensionKey& that) const;

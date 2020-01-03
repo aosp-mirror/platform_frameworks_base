@@ -21,6 +21,7 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static com.android.server.rollback.Rollback.rollbackStateFromString;
 
 import android.annotation.NonNull;
+import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
@@ -345,6 +346,8 @@ class RollbackStore {
         json.put("installedUsers", convertToJsonArray(snapshottedUsers));
         json.put("ceSnapshotInodes", ceSnapshotInodesToJson(info.getCeSnapshotInodes()));
 
+        json.put("rollbackDataPolicy", info.getRollbackDataPolicy());
+
         return json;
     }
 
@@ -367,8 +370,13 @@ class RollbackStore {
         final SparseLongArray ceSnapshotInodes = ceSnapshotInodesFromJson(
                 json.getJSONArray("ceSnapshotInodes"));
 
+        // Backward compatibility: no such field for old versions.
+        final int rollbackDataPolicy = json.optInt("rollbackDataPolicy",
+                PackageManager.RollbackDataPolicy.RESTORE);
+
         return new PackageRollbackInfo(versionRolledBackFrom, versionRolledBackTo,
-                pendingBackups, pendingRestores, isApex, snapshottedUsers, ceSnapshotInodes);
+                pendingBackups, pendingRestores, isApex, snapshottedUsers, ceSnapshotInodes,
+                rollbackDataPolicy);
     }
 
     private static JSONArray versionedPackagesToJson(List<VersionedPackage> packages)

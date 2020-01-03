@@ -24,7 +24,6 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 
@@ -91,7 +90,7 @@ public class ActivityStartInterceptorTest {
     @Mock
     private ActivityTaskManagerService mService;
     @Mock
-    private RootActivityContainer mRootActivityContainer;
+    private RootWindowContainer mRootWindowContainer;
     @Mock
     private ActivityStackSupervisor mSupervisor;
     @Mock
@@ -115,7 +114,7 @@ public class ActivityStartInterceptorTest {
         MockitoAnnotations.initMocks(this);
         mService.mAmInternal = mAmInternal;
         mInterceptor = new ActivityStartInterceptor(
-                mService, mSupervisor, mRootActivityContainer, mContext);
+                mService, mSupervisor, mRootWindowContainer, mContext);
         mInterceptor.setStates(TEST_USER_ID, TEST_REAL_CALLING_PID, TEST_REAL_CALLING_UID,
                 TEST_START_FLAGS, TEST_CALLING_PACKAGE);
 

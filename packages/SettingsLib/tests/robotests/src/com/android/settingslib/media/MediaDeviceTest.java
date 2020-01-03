@@ -22,8 +22,8 @@ import static org.mockito.Mockito.when;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-
-import androidx.mediarouter.media.MediaRouter;
+import android.media.MediaRoute2Info;
+import android.media.MediaRouter2Manager;
 
 import com.android.settingslib.bluetooth.A2dpProfile;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -56,6 +56,7 @@ public class MediaDeviceTest {
     private static final String ROUTER_ID_1 = "RouterId_1";
     private static final String ROUTER_ID_2 = "RouterId_2";
     private static final String ROUTER_ID_3 = "RouterId_3";
+    private static final String TEST_PACKAGE_NAME = "com.test.playmusic";
     private final BluetoothClass mHeadreeClass =
             new BluetoothClass(BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES);
     private final BluetoothClass mCarkitClass =
@@ -76,11 +77,11 @@ public class MediaDeviceTest {
     @Mock
     private LocalBluetoothManager mLocalBluetoothManager;
     @Mock
-    private MediaRouter.RouteInfo mRouteInfo1;
+    private MediaRoute2Info mRouteInfo1;
     @Mock
-    private MediaRouter.RouteInfo mRouteInfo2;
+    private MediaRoute2Info mRouteInfo2;
     @Mock
-    private MediaRouter.RouteInfo mRouteInfo3;
+    private MediaRoute2Info mRouteInfo3;
     @Mock
     private LocalBluetoothProfileManager mProfileManager;
     @Mock
@@ -99,6 +100,7 @@ public class MediaDeviceTest {
     private InfoMediaDevice mInfoMediaDevice3;
     private List<MediaDevice> mMediaDevices = new ArrayList<>();
     private PhoneMediaDevice mPhoneMediaDevice;
+    private MediaRouter2Manager mMediaRouter2Manager;
 
     @Before
     public void setUp() {
@@ -134,9 +136,13 @@ public class MediaDeviceTest {
         mBluetoothMediaDevice1 = new BluetoothMediaDevice(mContext, mCachedDevice1);
         mBluetoothMediaDevice2 = new BluetoothMediaDevice(mContext, mCachedDevice2);
         mBluetoothMediaDevice3 = new BluetoothMediaDevice(mContext, mCachedDevice3);
-        mInfoMediaDevice1 = new InfoMediaDevice(mContext, mRouteInfo1);
-        mInfoMediaDevice2 = new InfoMediaDevice(mContext, mRouteInfo2);
-        mInfoMediaDevice3 = new InfoMediaDevice(mContext, mRouteInfo3);
+        mMediaRouter2Manager = MediaRouter2Manager.getInstance(mContext);
+        mInfoMediaDevice1 = new InfoMediaDevice(mContext, mMediaRouter2Manager, mRouteInfo1,
+                TEST_PACKAGE_NAME);
+        mInfoMediaDevice2 = new InfoMediaDevice(mContext, mMediaRouter2Manager, mRouteInfo2,
+                TEST_PACKAGE_NAME);
+        mInfoMediaDevice3 = new InfoMediaDevice(mContext, mMediaRouter2Manager, mRouteInfo3,
+                TEST_PACKAGE_NAME);
         mPhoneMediaDevice = new PhoneMediaDevice(mContext, mLocalBluetoothManager);
     }
 
@@ -364,5 +370,4 @@ public class MediaDeviceTest {
         assertThat(mMediaDevices.get(5)).isEqualTo(mBluetoothMediaDevice1);
         assertThat(mMediaDevices.get(6)).isEqualTo(mBluetoothMediaDevice2);
     }
-
 }

@@ -621,10 +621,10 @@ public class PreferencesHelper implements RankingConfig {
     @Override
     public void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
             boolean fromTargetApp) {
-        Preconditions.checkNotNull(pkg);
-        Preconditions.checkNotNull(group);
-        Preconditions.checkNotNull(group.getId());
-        Preconditions.checkNotNull(!TextUtils.isEmpty(group.getName()));
+        Objects.requireNonNull(pkg);
+        Objects.requireNonNull(group);
+        Objects.requireNonNull(group.getId());
+        Objects.requireNonNull(!TextUtils.isEmpty(group.getName()));
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
@@ -658,9 +658,9 @@ public class PreferencesHelper implements RankingConfig {
     @Override
     public boolean createNotificationChannel(String pkg, int uid, NotificationChannel channel,
             boolean fromTargetApp, boolean hasDndAccess) {
-        Preconditions.checkNotNull(pkg);
-        Preconditions.checkNotNull(channel);
-        Preconditions.checkNotNull(channel.getId());
+        Objects.requireNonNull(pkg);
+        Objects.requireNonNull(channel);
+        Objects.requireNonNull(channel.getId());
         Preconditions.checkArgument(!TextUtils.isEmpty(channel.getName()));
         boolean needsPolicyFileChange = false;
         synchronized (mPackagePreferences) {
@@ -788,8 +788,8 @@ public class PreferencesHelper implements RankingConfig {
     @Override
     public void updateNotificationChannel(String pkg, int uid, NotificationChannel updatedChannel,
             boolean fromUser) {
-        Preconditions.checkNotNull(updatedChannel);
-        Preconditions.checkNotNull(updatedChannel.getId());
+        Objects.requireNonNull(updatedChannel);
+        Objects.requireNonNull(updatedChannel.getId());
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
@@ -850,7 +850,7 @@ public class PreferencesHelper implements RankingConfig {
     @Override
     public NotificationChannel getNotificationChannel(String pkg, int uid, String channelId,
             boolean includeDeleted) {
-        Preconditions.checkNotNull(pkg);
+        Objects.requireNonNull(pkg);
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
@@ -891,8 +891,8 @@ public class PreferencesHelper implements RankingConfig {
     @Override
     @VisibleForTesting
     public void permanentlyDeleteNotificationChannel(String pkg, int uid, String channelId) {
-        Preconditions.checkNotNull(pkg);
-        Preconditions.checkNotNull(channelId);
+        Objects.requireNonNull(pkg);
+        Objects.requireNonNull(channelId);
         synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
@@ -904,7 +904,7 @@ public class PreferencesHelper implements RankingConfig {
 
     @Override
     public void permanentlyDeleteNotificationChannels(String pkg, int uid) {
-        Preconditions.checkNotNull(pkg);
+        Objects.requireNonNull(pkg);
         synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
@@ -993,7 +993,7 @@ public class PreferencesHelper implements RankingConfig {
 
     public NotificationChannelGroup getNotificationChannelGroupWithChannels(String pkg,
             int uid, String groupId, boolean includeDeleted) {
-        Preconditions.checkNotNull(pkg);
+        Objects.requireNonNull(pkg);
         synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null || groupId == null || !r.groups.containsKey(groupId)) {
@@ -1016,7 +1016,7 @@ public class PreferencesHelper implements RankingConfig {
 
     public NotificationChannelGroup getNotificationChannelGroup(String groupId, String pkg,
             int uid) {
-        Preconditions.checkNotNull(pkg);
+        Objects.requireNonNull(pkg);
         synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
@@ -1029,7 +1029,7 @@ public class PreferencesHelper implements RankingConfig {
     @Override
     public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid, boolean includeDeleted, boolean includeNonGrouped, boolean includeEmpty) {
-        Preconditions.checkNotNull(pkg);
+        Objects.requireNonNull(pkg);
         Map<String, NotificationChannelGroup> groups = new ArrayMap<>();
         synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
@@ -1111,7 +1111,7 @@ public class PreferencesHelper implements RankingConfig {
     @Override
     public ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid,
             boolean includeDeleted) {
-        Preconditions.checkNotNull(pkg);
+        Objects.requireNonNull(pkg);
         List<NotificationChannel> channels = new ArrayList<>();
         synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
@@ -1168,7 +1168,7 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public int getDeletedChannelCount(String pkg, int uid) {
-        Preconditions.checkNotNull(pkg);
+        Objects.requireNonNull(pkg);
         int deletedCount = 0;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
@@ -1187,7 +1187,7 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public int getBlockedChannelCount(String pkg, int uid) {
-        Preconditions.checkNotNull(pkg);
+        Objects.requireNonNull(pkg);
         int blockedCount = 0;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);

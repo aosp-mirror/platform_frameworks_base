@@ -379,9 +379,11 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                  * This gets called on a RenderThread worker thread, so members accessed here must
                  * be protected by a lock.
                  */
+                final boolean useBLAST = ViewRootImpl.USE_BLAST_BUFFERQUEUE;
                 viewRoot.registerRtFrameCallback(frame -> {
                     try {
-                        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                        final SurfaceControl.Transaction t = useBLAST ?
+                            viewRoot.getBLASTSyncTransaction() : new SurfaceControl.Transaction();
                         synchronized (mSurfaceControlLock) {
                             if (!parent.isValid()) {
                                 if (DEBUG) {
@@ -404,7 +406,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                                         + " updateSurfaceAlpha RT: set alpha=" + alpha);
                             }
                             t.setAlpha(mSurfaceControl, alpha);
-                            t.deferTransactionUntilSurface(mSurfaceControl, parent, frame);
+                            if (!useBLAST) {
+                                t.deferTransactionUntilSurface(mSurfaceControl, parent, frame);
+                            }
                         }
                         // It's possible that mSurfaceControl is released in the UI thread before
                         // the transaction completes. If that happens, an exception is thrown, which
@@ -1101,33 +1105,39 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             Surface viewRootSurface, long nextViewRootFrameNumber) {
     }
 
-    private void applySurfaceTransforms(SurfaceControl surface, Rect position, long frameNumber) {
-        if (frameNumber > 0) {
+    private void applySurfaceTransforms(SurfaceControl surface, SurfaceControl.Transaction t,
+            Rect position, long frameNumber) {
+        if (frameNumber > 0 && ViewRootImpl.USE_BLAST_BUFFERQUEUE == false) {
             final ViewRootImpl viewRoot = getViewRootImpl();
 
-            mRtTransaction.deferTransactionUntilSurface(surface, viewRoot.mSurface,
+            t.deferTransactionUntilSurface(surface, viewRoot.mSurface,
                     frameNumber);
         }
 
-        mRtTransaction.setPosition(surface, position.left, position.top);
-        mRtTransaction.setMatrix(surface,
+        t.setPosition(surface, position.left, position.top);
+        t.setMatrix(surface,
                 position.width() / (float) mSurfaceWidth,
                 0.0f, 0.0f,
                 position.height() / (float) mSurfaceHeight);
         if (mViewVisibility) {
-            mRtTransaction.show(surface);
+            t.show(surface);
         }
     }
 
     private void setParentSpaceRectangle(Rect position, long frameNumber) {
+        final boolean useBLAST = ViewRootImpl.USE_BLAST_BUFFERQUEUE;
         final ViewRootImpl viewRoot = getViewRootImpl();
+        final SurfaceControl.Transaction t = useBLAST ? viewRoot.getBLASTSyncTransaction() :
+            mRtTransaction;
 
-        applySurfaceTransforms(mSurfaceControl, position, frameNumber);
+        applySurfaceTransforms(mSurfaceControl, t, position, frameNumber);
 
-        applyChildSurfaceTransaction_renderWorker(mRtTransaction, viewRoot.mSurface,
+        applyChildSurfaceTransaction_renderWorker(t, viewRoot.mSurface,
                 frameNumber);
 
-        mRtTransaction.apply();
+        if (!useBLAST) {
+            t.apply();
+        }
     }
 
     private Rect mRTLastReportedPosition = new Rect();
@@ -1176,6 +1186,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
         @Override
         public void positionLost(long frameNumber) {
+            boolean useBLAST = ViewRootImpl.USE_BLAST_BUFFERQUEUE;
             if (DEBUG) {
                 Log.d(TAG, String.format("%d windowPositionLost, frameNr = %d",
                         System.identityHashCode(this), frameNumber));
@@ -1187,13 +1198,18 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             }
 
             final ViewRootImpl viewRoot = getViewRootImpl();
-            if (frameNumber > 0 && viewRoot !=  null) {
+
+            final SurfaceControl.Transaction t = useBLAST ?
+                (viewRoot != null ? viewRoot.getBLASTSyncTransaction() : mRtTransaction) :
+                mRtTransaction;
+
+            if (frameNumber > 0 && viewRoot !=  null && !useBLAST) {
                 if (viewRoot.mSurface.isValid()) {
                     mRtTransaction.deferTransactionUntilSurface(mSurfaceControl, viewRoot.mSurface,
                             frameNumber);
                 }
             }
-            mRtTransaction.hide(mSurfaceControl);
+            t.hide(mSurfaceControl);
 
             synchronized (mSurfaceControlLock) {
                 if (mRtReleaseSurfaces) {
@@ -1206,7 +1222,11 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 mRtHandlingPositionUpdates = false;
             }
 
-            mRtTransaction.apply();
+            // If we aren't using BLAST, we apply the transaction locally, otherise we let the ViewRoot apply it for us.
+            // If the ViewRoot is null, we behave as if we aren't using BLAST so we need to apply the transaction.
+            if (!useBLAST || viewRoot == null) {
+                mRtTransaction.apply();
+            }
         }
     };
 
@@ -1495,5 +1515,20 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         SurfaceControl viewRoot = getViewRootImpl().getSurfaceControl();
         t.setRelativeLayer(mBackgroundControl, viewRoot, Integer.MIN_VALUE);
         t.setRelativeLayer(mSurfaceControl, viewRoot, mSubLayer);
+    }
+
+    /**
+     * @hide
+     * Note: Base class method is @UnsupportedAppUsage
+     */
+    @Override
+    public void invalidate(boolean invalidateCache) {
+        super.invalidate(invalidateCache);
+        if (ViewRootImpl.USE_BLAST_BUFFERQUEUE == false) {
+            return;
+        }
+        final ViewRootImpl viewRoot = getViewRootImpl();
+        if (viewRoot == null) return;
+        viewRoot.setUseBLASTSyncTransaction();
     }
 }

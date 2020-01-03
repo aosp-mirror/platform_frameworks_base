@@ -85,14 +85,6 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"PIN을 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"비밀번호를 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 잘못 그렸습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6114158710353725041) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
-    <skip />
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"잘못된 SIM PIN코드입니다. 이동통신사에 문의하여 기기를 잠금 해제해야 합니다."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="other">잘못된 SIM PIN 코드입니다. 입력을 <xliff:g id="NUMBER_1">%d</xliff:g>번 더 시도할 수 있습니다.</item>

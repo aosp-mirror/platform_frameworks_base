@@ -148,6 +148,26 @@ class ValueMetricProducerTestHelper {
         return valueProducer;
     }
 
+    static sp<ValueMetricProducer> createValueProducerWithState(
+            sp<MockStatsPullerManager>& pullerManager, ValueMetric& metric,
+            vector<int32_t> slicedStateAtoms,
+            unordered_map<int, unordered_map<int, int64_t>> stateGroupMap) {
+        UidMap uidMap;
+        SimpleAtomMatcher atomMatcher;
+        atomMatcher.set_atom_id(tagId);
+        sp<EventMatcherWizard> eventMatcherWizard =
+                new EventMatcherWizard({new SimpleLogMatchingTracker(
+                        atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+        sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+        EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
+        EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillRepeatedly(Return());
+        sp<ValueMetricProducer> valueProducer = new ValueMetricProducer(
+                kConfigKey, metric, -1 /* no condition */, wizard, logEventMatcherIndex,
+                eventMatcherWizard, tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager, {},
+                {}, slicedStateAtoms, stateGroupMap);
+        return valueProducer;
+    }
+
     static ValueMetric createMetric() {
         ValueMetric metric;
         metric.set_id(metricId);
@@ -163,8 +183,13 @@ class ValueMetricProducerTestHelper {
         metric.set_condition(StringToId("SCREEN_ON"));
         return metric;
     }
-};
 
+    static ValueMetric createMetricWithState(string state) {
+        ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
+        metric.add_slice_by_state(StringToId(state));
+        return metric;
+    }
+};
 
 /*
  * Tests that the first bucket works correctly
@@ -253,10 +278,12 @@ TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
     // has one slice
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    ValueMetricProducer::Interval curInterval =
+            valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
 
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(11, curInterval.base.long_value);
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(11, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(8, curInterval.value.long_value);
     EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
@@ -273,9 +300,10 @@ TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
     // has one slice
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
 
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(23, curInterval.base.long_value);
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(23, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(12, curInterval.value.long_value);
     EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
@@ -294,9 +322,10 @@ TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket4StartTimeNs);
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
 
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(36, curInterval.base.long_value);
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(36, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(13, curInterval.value.long_value);
     EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
@@ -394,9 +423,8 @@ TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering) {
             }));
 
     sp<ValueMetricProducer> valueProducer = new ValueMetricProducer(
-            kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-            logEventMatcherIndex, eventMatcherWizard, tagId,
-            bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+            kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard, logEventMatcherIndex,
+            eventMatcherWizard, tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -411,9 +439,10 @@ TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering) {
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
 
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(11, curInterval.base.long_value);
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(11, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(8, curInterval.value.long_value);
     EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
@@ -430,8 +459,8 @@ TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering) {
     // No new data seen, so data has been cleared.
     EXPECT_EQ(0UL, valueProducer->mCurrentSlicedBucket.size());
 
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(11, curInterval.base.long_value);
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(11, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(8, curInterval.value.long_value);
     EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
@@ -447,10 +476,11 @@ TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket4StartTimeNs);
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
 
     // the base was reset
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(36, curInterval.base.long_value);
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(36, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
     EXPECT_EQ(1UL, valueProducer->mPastBuckets.begin()->second.size());
@@ -482,9 +512,10 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset) {
     // has one slice
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
 
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(11, curInterval.base.long_value);
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(11, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
 
@@ -498,8 +529,9 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset) {
     // has one slice
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(10, curInterval.base.long_value);
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(10, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(10, curInterval.value.long_value);
     EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
@@ -515,8 +547,9 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket4StartTimeNs);
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(36, curInterval.base.long_value);
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(36, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(26, curInterval.value.long_value);
     EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
@@ -549,9 +582,10 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset) {
     // has one slice
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
 
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(11, curInterval.base.long_value);
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(11, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
 
@@ -565,8 +599,9 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset) {
     // has one slice
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(10, curInterval.base.long_value);
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(10, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
 
@@ -579,8 +614,9 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket4StartTimeNs);
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(36, curInterval.base.long_value);
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(36, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(26, curInterval.value.long_value);
     EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
@@ -633,9 +669,10 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     // has one slice
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
     // startUpdated:false sum:0 start:100
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(100, curInterval.base.long_value);
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(100, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
 
@@ -652,8 +689,9 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     // has one slice
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(110, curInterval.base.long_value);
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(110, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(10, curInterval.value.long_value);
 
@@ -663,9 +701,10 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     // has one slice
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasValue);
     EXPECT_EQ(20, curInterval.value.long_value);
-    EXPECT_EQ(false, curInterval.hasBase);
+    EXPECT_EQ(false, curBaseInfo.hasBase);
 
     valueProducer->onConditionChanged(true, bucket3StartTimeNs + 1);
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10, 20}, {bucketSizeNs - 8, 1});
@@ -879,6 +918,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer.mCurrentBaseInfo.begin()->second[0];
     EXPECT_EQ(10, curInterval.value.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
 
@@ -1066,10 +1106,11 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
 
     // startUpdated:true sum:0 start:11
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(11, curInterval.base.long_value);
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(11, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
 
@@ -1084,9 +1125,10 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     // has one slice
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
     // tartUpdated:false sum:12
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(23, curInterval.base.long_value);
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(23, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {12}, {bucketSizeNs});
 
@@ -1103,9 +1145,10 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket6StartTimeNs);
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
     // startUpdated:false sum:12
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(36, curInterval.base.long_value);
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(36, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {12}, {bucketSizeNs});
 }
@@ -1148,16 +1191,18 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition) {
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(100, curInterval.base.long_value);
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(100, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
 
     // pull on bucket boundary come late, condition change happens before it
     valueProducer->onConditionChanged(false, bucket2StartTimeNs + 1);
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8});
-    EXPECT_EQ(false, curInterval.hasBase);
+    EXPECT_EQ(false, curBaseInfo.hasBase);
 
     // Now the alarm is delivered.
     // since the condition turned to off before this pull finish, it has no effect
@@ -1167,7 +1212,8 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition) {
 
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8});
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(false, curInterval.hasBase);
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(false, curBaseInfo.hasBase);
     EXPECT_EQ(false, curInterval.hasValue);
 }
 
@@ -1220,9 +1266,10 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
     // startUpdated:false sum:0 start:100
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(100, curInterval.base.long_value);
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(100, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
 
@@ -1231,15 +1278,17 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8});
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(false, curInterval.hasBase);
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(false, curBaseInfo.hasBase);
     EXPECT_EQ(false, curInterval.hasValue);
 
     // condition changed to true again, before the pull alarm is delivered
     valueProducer->onConditionChanged(true, bucket2StartTimeNs + 25);
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8});
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(130, curInterval.base.long_value);
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(130, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
 
     // Now the alarm is delivered, but it is considered late, the data will be used
@@ -1249,8 +1298,9 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs + 50);
 
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(140, curInterval.base.long_value);
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(140, curBaseInfo.base.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
     EXPECT_EQ(10, curInterval.value.long_value);
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8});
@@ -1477,8 +1527,9 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval curInterval =
             valueProducer.mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(10, curInterval.base.long_value);
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer.mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(10, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
 
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event2);
@@ -1497,8 +1548,9 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event3);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
     curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(15, curInterval.base.long_value);
+    curBaseInfo = valueProducer.mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(15, curBaseInfo.base.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
 
     shared_ptr<LogEvent> event4 = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 15);
@@ -1508,8 +1560,9 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event4);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
     curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(15, curInterval.base.long_value);
+    curBaseInfo = valueProducer.mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(15, curBaseInfo.base.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
 
     valueProducer.flushIfNeededLocked(bucket3StartTimeNs);
@@ -1550,27 +1603,29 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutputMultiValue) {
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event1);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval0 =
-        valueProducer.mCurrentSlicedBucket.begin()->second[0];
-    ValueMetricProducer::Interval curInterval1 =
-        valueProducer.mCurrentSlicedBucket.begin()->second[1];
-    EXPECT_EQ(true, curInterval0.hasBase);
-    EXPECT_EQ(10, curInterval0.base.long_value);
-    EXPECT_EQ(false, curInterval0.hasValue);
-    EXPECT_EQ(true, curInterval1.hasBase);
-    EXPECT_EQ(20, curInterval1.base.long_value);
-    EXPECT_EQ(false, curInterval1.hasValue);
+    ValueMetricProducer::Interval curInterval =
+            valueProducer.mCurrentSlicedBucket.begin()->second[0];
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer.mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(10, curBaseInfo.base.long_value);
+    EXPECT_EQ(false, curInterval.hasValue);
+    curBaseInfo = valueProducer.mCurrentBaseInfo.begin()->second[1];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(20, curBaseInfo.base.long_value);
+    EXPECT_EQ(false, curInterval.hasValue);
 
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event2);
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval0 = valueProducer.mCurrentSlicedBucket.begin()->second[0];
-    curInterval1 = valueProducer.mCurrentSlicedBucket.begin()->second[1];
-    EXPECT_EQ(true, curInterval0.hasValue);
-    EXPECT_EQ(5, curInterval0.value.long_value);
-    EXPECT_EQ(true, curInterval1.hasValue);
-    EXPECT_EQ(2, curInterval1.value.long_value);
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer.mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curInterval.hasValue);
+    EXPECT_EQ(5, curInterval.value.long_value);
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[1];
+    curBaseInfo = valueProducer.mCurrentBaseInfo.begin()->second[1];
+    EXPECT_EQ(true, curInterval.hasValue);
+    EXPECT_EQ(2, curInterval.value.long_value);
 
     // no change in first value field
     shared_ptr<LogEvent> event3 = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 10);
@@ -1580,14 +1635,17 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutputMultiValue) {
     event3->init();
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event3);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval0 = valueProducer.mCurrentSlicedBucket.begin()->second[0];
-    curInterval1 = valueProducer.mCurrentSlicedBucket.begin()->second[1];
-    EXPECT_EQ(true, curInterval0.hasBase);
-    EXPECT_EQ(15, curInterval0.base.long_value);
-    EXPECT_EQ(true, curInterval0.hasValue);
-    EXPECT_EQ(true, curInterval1.hasBase);
-    EXPECT_EQ(25, curInterval1.base.long_value);
-    EXPECT_EQ(true, curInterval1.hasValue);
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer.mCurrentBaseInfo.begin()->second[0];
+
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(15, curBaseInfo.base.long_value);
+    EXPECT_EQ(true, curInterval.hasValue);
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[1];
+    curBaseInfo = valueProducer.mCurrentBaseInfo.begin()->second[1];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(25, curBaseInfo.base.long_value);
+    EXPECT_EQ(true, curInterval.hasValue);
 
     shared_ptr<LogEvent> event4 = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 15);
     event4->write(1);
@@ -1596,14 +1654,16 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutputMultiValue) {
     event4->init();
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event4);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval0 = valueProducer.mCurrentSlicedBucket.begin()->second[0];
-    curInterval1 = valueProducer.mCurrentSlicedBucket.begin()->second[1];
-    EXPECT_EQ(true, curInterval0.hasBase);
-    EXPECT_EQ(15, curInterval0.base.long_value);
-    EXPECT_EQ(true, curInterval0.hasValue);
-    EXPECT_EQ(true, curInterval1.hasBase);
-    EXPECT_EQ(29, curInterval1.base.long_value);
-    EXPECT_EQ(true, curInterval1.hasValue);
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer.mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(15, curBaseInfo.base.long_value);
+    EXPECT_EQ(true, curInterval.hasValue);
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[1];
+    curBaseInfo = valueProducer.mCurrentBaseInfo.begin()->second[1];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(29, curBaseInfo.base.long_value);
+    EXPECT_EQ(true, curInterval.hasValue);
 
     valueProducer.flushIfNeededLocked(bucket3StartTimeNs);
 
@@ -1650,9 +1710,11 @@ TEST(ValueMetricProducerTest, TestUseZeroDefaultBase) {
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     auto iter = valueProducer->mCurrentSlicedBucket.begin();
     auto& interval1 = iter->second[0];
+    auto iterBase = valueProducer->mCurrentBaseInfo.begin();
+    auto& baseInfo1 = iterBase->second[0];
     EXPECT_EQ(1, iter->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, interval1.hasBase);
-    EXPECT_EQ(3, interval1.base.long_value);
+    EXPECT_EQ(true, baseInfo1.hasBase);
+    EXPECT_EQ(3, baseInfo1.base.long_value);
     EXPECT_EQ(false, interval1.hasValue);
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
     EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
@@ -1672,8 +1734,8 @@ TEST(ValueMetricProducerTest, TestUseZeroDefaultBase) {
 
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
     EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
-    EXPECT_EQ(true, interval1.hasBase);
-    EXPECT_EQ(11, interval1.base.long_value);
+    EXPECT_EQ(true, baseInfo1.hasBase);
+    EXPECT_EQ(11, baseInfo1.base.long_value);
     EXPECT_EQ(false, interval1.hasValue);
     EXPECT_EQ(8, interval1.value.long_value);
 
@@ -1683,11 +1745,19 @@ TEST(ValueMetricProducerTest, TestUseZeroDefaultBase) {
             break;
         }
     }
+    auto itBase = valueProducer->mCurrentBaseInfo.begin();
+    for (; itBase != valueProducer->mCurrentBaseInfo.end(); it++) {
+        if (itBase != iterBase) {
+            break;
+        }
+    }
     EXPECT_TRUE(it != iter);
+    EXPECT_TRUE(itBase != iterBase);
     auto& interval2 = it->second[0];
+    auto& baseInfo2 = itBase->second[0];
     EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, interval2.hasBase);
-    EXPECT_EQ(4, interval2.base.long_value);
+    EXPECT_EQ(true, baseInfo2.hasBase);
+    EXPECT_EQ(4, baseInfo2.base.long_value);
     EXPECT_EQ(false, interval2.hasValue);
     EXPECT_EQ(4, interval2.value.long_value);
 
@@ -1725,11 +1795,13 @@ TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures) {
             ValueMetricProducerTestHelper::createValueProducerNoConditions(pullerManager, metric);
 
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-    auto iter = valueProducer->mCurrentSlicedBucket.begin();
-    auto& interval1 = iter->second[0];
-    EXPECT_EQ(1, iter->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, interval1.hasBase);
-    EXPECT_EQ(3, interval1.base.long_value);
+    auto it = valueProducer->mCurrentSlicedBucket.begin();
+    auto& interval1 = it->second[0];
+    auto& baseInfo1 =
+            valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat())->second[0];
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, baseInfo1.hasBase);
+    EXPECT_EQ(3, baseInfo1.base.long_value);
     EXPECT_EQ(false, interval1.hasValue);
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
     EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
@@ -1749,22 +1821,31 @@ TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures) {
 
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
     EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
-    EXPECT_EQ(true, interval1.hasBase);
-    EXPECT_EQ(11, interval1.base.long_value);
+    EXPECT_EQ(true, baseInfo1.hasBase);
+    EXPECT_EQ(11, baseInfo1.base.long_value);
     EXPECT_EQ(false, interval1.hasValue);
     EXPECT_EQ(8, interval1.value.long_value);
 
-    auto it = valueProducer->mCurrentSlicedBucket.begin();
-    for (; it != valueProducer->mCurrentSlicedBucket.end(); it++) {
-        if (it != iter) {
+    auto it2 = valueProducer->mCurrentSlicedBucket.begin();
+    for (; it2 != valueProducer->mCurrentSlicedBucket.end(); it2++) {
+        if (it2 != it) {
             break;
         }
     }
-    EXPECT_TRUE(it != iter);
-    auto& interval2 = it->second[0];
-    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, interval2.hasBase);
-    EXPECT_EQ(4, interval2.base.long_value);
+    // auto itBase = valueProducer->mCurrentBaseInfo.begin();
+    // for (; itBase != valueProducer->mCurrentBaseInfo.end(); it++) {
+    //     if (itBase != iterBase) {
+    //         break;
+    //     }
+    // }
+    EXPECT_TRUE(it2 != it);
+    // EXPECT_TRUE(itBase != iterBase);
+    auto& interval2 = it2->second[0];
+    auto& baseInfo2 =
+            valueProducer->mCurrentBaseInfo.find(it2->first.getDimensionKeyInWhat())->second[0];
+    EXPECT_EQ(2, it2->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, baseInfo2.hasBase);
+    EXPECT_EQ(4, baseInfo2.base.long_value);
     EXPECT_EQ(false, interval2.hasValue);
     EXPECT_EQ(4, interval2.value.long_value);
     EXPECT_EQ(2UL, valueProducer->mPastBuckets.size());
@@ -1779,8 +1860,8 @@ TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket4StartTimeNs);
 
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-    EXPECT_EQ(true, interval2.hasBase);
-    EXPECT_EQ(5, interval2.base.long_value);
+    EXPECT_EQ(true, baseInfo2.hasBase);
+    EXPECT_EQ(5, baseInfo2.base.long_value);
     EXPECT_EQ(false, interval2.hasValue);
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
     EXPECT_EQ(2UL, valueProducer->mPastBuckets.size());
@@ -1799,17 +1880,24 @@ TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket5StartTimeNs);
 
     EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
-    auto it1 = std::next(valueProducer->mCurrentSlicedBucket.begin())->second[0];
-    EXPECT_EQ(true, it1.hasBase);
-    EXPECT_EQ(13, it1.base.long_value);
-    EXPECT_EQ(false, it1.hasValue);
-    EXPECT_EQ(8, it1.value.long_value);
-    auto it2 = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, it2.hasBase);
-    EXPECT_EQ(5, it2.base.long_value);
-    EXPECT_EQ(false, it2.hasValue);
-    EXPECT_EQ(5, it2.value.long_value);
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    it2 = std::next(valueProducer->mCurrentSlicedBucket.begin());
+    interval1 = it->second[0];
+    interval2 = it2->second[0];
+    baseInfo1 = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat())->second[0];
+    baseInfo2 = valueProducer->mCurrentBaseInfo.find(it2->first.getDimensionKeyInWhat())->second[0];
+
+    EXPECT_EQ(true, baseInfo1.hasBase);
+    EXPECT_EQ(5, baseInfo1.base.long_value);
+    EXPECT_EQ(false, interval1.hasValue);
+    EXPECT_EQ(5, interval1.value.long_value);
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
+
+    EXPECT_EQ(true, baseInfo2.hasBase);
+    EXPECT_EQ(13, baseInfo2.base.long_value);
+    EXPECT_EQ(false, interval2.hasValue);
+    EXPECT_EQ(8, interval2.value.long_value);
+
     EXPECT_EQ(2UL, valueProducer->mPastBuckets.size());
 }
 
@@ -1839,9 +1927,11 @@ TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey) {
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     auto iter = valueProducer->mCurrentSlicedBucket.begin();
     auto& interval1 = iter->second[0];
+    auto iterBase = valueProducer->mCurrentBaseInfo.begin();
+    auto& baseInfo1 = iterBase->second[0];
     EXPECT_EQ(1, iter->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, interval1.hasBase);
-    EXPECT_EQ(3, interval1.base.long_value);
+    EXPECT_EQ(true, baseInfo1.hasBase);
+    EXPECT_EQ(3, baseInfo1.base.long_value);
     EXPECT_EQ(false, interval1.hasValue);
     EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
     vector<shared_ptr<LogEvent>> allData;
@@ -1860,8 +1950,8 @@ TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey) {
 
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
     EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
-    EXPECT_EQ(true, interval1.hasBase);
-    EXPECT_EQ(11, interval1.base.long_value);
+    EXPECT_EQ(true, baseInfo1.hasBase);
+    EXPECT_EQ(11, baseInfo1.base.long_value);
     EXPECT_EQ(false, interval1.hasValue);
     EXPECT_EQ(8, interval1.value.long_value);
     EXPECT_FALSE(interval1.seenNewData);
@@ -1873,11 +1963,19 @@ TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey) {
             break;
         }
     }
+    auto itBase = valueProducer->mCurrentBaseInfo.begin();
+    for (; itBase != valueProducer->mCurrentBaseInfo.end(); it++) {
+        if (itBase != iterBase) {
+            break;
+        }
+    }
     EXPECT_TRUE(it != iter);
+    EXPECT_TRUE(itBase != iterBase);
     auto& interval2 = it->second[0];
+    auto& baseInfo2 = itBase->second[0];
     EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, interval2.hasBase);
-    EXPECT_EQ(4, interval2.base.long_value);
+    EXPECT_EQ(true, baseInfo2.hasBase);
+    EXPECT_EQ(4, baseInfo2.base.long_value);
     EXPECT_EQ(false, interval2.hasValue);
     EXPECT_FALSE(interval2.seenNewData);
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {8}, {bucketSizeNs});
@@ -1890,12 +1988,13 @@ TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey) {
     event1->init();
     allData.push_back(event1);
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket4StartTimeNs);
-	// Only one interval left. One was trimmed.
+    // Only one interval left. One was trimmed.
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     interval2 = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    baseInfo2 = valueProducer->mCurrentBaseInfo.begin()->second[0];
     EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, interval2.hasBase);
-    EXPECT_EQ(5, interval2.base.long_value);
+    EXPECT_EQ(true, baseInfo2.hasBase);
+    EXPECT_EQ(5, baseInfo2.base.long_value);
     EXPECT_EQ(false, interval2.hasValue);
     EXPECT_FALSE(interval2.seenNewData);
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {8}, {bucketSizeNs});
@@ -1909,8 +2008,9 @@ TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket5StartTimeNs);
 
     interval2 = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, interval2.hasBase);
-    EXPECT_EQ(14, interval2.base.long_value);
+    baseInfo2 = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, baseInfo2.hasBase);
+    EXPECT_EQ(14, baseInfo2.base.long_value);
     EXPECT_EQ(false, interval2.hasValue);
     EXPECT_FALSE(interval2.seenNewData);
     ASSERT_EQ(2UL, valueProducer->mPastBuckets.size());
@@ -1946,14 +2046,15 @@ TEST(ValueMetricProducerTest, TestResetBaseOnPullFailAfterConditionChange_EndOfB
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval& curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(100, curInterval.base.long_value);
+    ValueMetricProducer::BaseInfo& curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(100, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
 
     vector<shared_ptr<LogEvent>> allData;
     valueProducer->onDataPulled(allData, /** succeed */ false, bucket2StartTimeNs);
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-    EXPECT_EQ(false, curInterval.hasBase);
+    EXPECT_EQ(false, curBaseInfo.hasBase);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(false, valueProducer->mHasGlobalBase);
 }
@@ -1983,8 +2084,9 @@ TEST(ValueMetricProducerTest, TestResetBaseOnPullFailAfterConditionChange) {
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval& curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(100, curInterval.base.long_value);
+    ValueMetricProducer::BaseInfo& curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(100, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
 
@@ -1993,7 +2095,7 @@ TEST(ValueMetricProducerTest, TestResetBaseOnPullFailAfterConditionChange) {
     // has one slice
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     EXPECT_EQ(false, curInterval.hasValue);
-    EXPECT_EQ(false, curInterval.hasBase);
+    EXPECT_EQ(false, curBaseInfo.hasBase);
     EXPECT_EQ(false, valueProducer->mHasGlobalBase);
 }
 
@@ -2035,7 +2137,8 @@ TEST(ValueMetricProducerTest, TestResetBaseOnPullFailBeforeConditionChange) {
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval& curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(false, curInterval.hasBase);
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(false, curBaseInfo.hasBase);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(false, valueProducer->mHasGlobalBase);
 }
@@ -2118,8 +2221,9 @@ TEST(ValueMetricProducerTest, TestBaseSetOnConditionChange) {
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval& curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(100, curInterval.base.long_value);
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(100, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
 }
@@ -2181,8 +2285,9 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenOneConditionFailed
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval& curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(140, curInterval.base.long_value);
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(140, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
 
@@ -2222,7 +2327,8 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenGuardRailHit) {
             // First onConditionChanged
             .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
                 for (int i = 0; i < 2000; i++) {
-                    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 1);
+                    shared_ptr<LogEvent> event =
+                            make_shared<LogEvent>(tagId, bucketStartTimeNs + 1);
                     event->write(i);
                     event->write(i);
                     event->init();
@@ -2338,8 +2444,9 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenInitialPullFailed)
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval& curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(140, curInterval.base.long_value);
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(140, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
 
@@ -2429,7 +2536,8 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenLastPullFailed) {
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval& curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(false, curInterval.hasBase);
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(false, curBaseInfo.hasBase);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(false, valueProducer->mHasGlobalBase);
 
@@ -2523,7 +2631,8 @@ TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onConditionChanged) {
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval& curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
 
@@ -2531,7 +2640,8 @@ TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onConditionChanged) {
     valueProducer->onConditionChanged(false, bucketStartTimeNs + 10);
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(false, curInterval.hasBase);
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(false, curBaseInfo.hasBase);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(false, valueProducer->mHasGlobalBase);
 }
@@ -2579,7 +2689,8 @@ TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onBucketBoundary) {
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval& curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
     EXPECT_EQ(true, curInterval.hasValue);
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
 
@@ -2589,9 +2700,10 @@ TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onBucketBoundary) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
     // Data is empty, base should be reset.
-    EXPECT_EQ(false, curInterval.hasBase);
-    EXPECT_EQ(5, curInterval.base.long_value);
+    EXPECT_EQ(false, curBaseInfo.hasBase);
+    EXPECT_EQ(5, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
 
@@ -2638,12 +2750,14 @@ TEST(ValueMetricProducerTest, TestPartialResetOnBucketBoundaries) {
     // Key 1 should be reset since in not present in the most pull.
     EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
     auto iterator = valueProducer->mCurrentSlicedBucket.begin();
-    EXPECT_EQ(true, iterator->second[0].hasBase);
-    EXPECT_EQ(2, iterator->second[0].base.long_value);
+    auto baseInfoIter = valueProducer->mCurrentBaseInfo.begin();
+    EXPECT_EQ(true, baseInfoIter->second[0].hasBase);
+    EXPECT_EQ(2, baseInfoIter->second[0].base.long_value);
     EXPECT_EQ(false, iterator->second[0].hasValue);
     iterator++;
-    EXPECT_EQ(false, iterator->second[0].hasBase);
-    EXPECT_EQ(1, iterator->second[0].base.long_value);
+    baseInfoIter++;
+    EXPECT_EQ(false, baseInfoIter->second[0].hasBase);
+    EXPECT_EQ(1, baseInfoIter->second[0].base.long_value);
     EXPECT_EQ(false, iterator->second[0].hasValue);
 
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
@@ -2715,8 +2829,9 @@ TEST(ValueMetricProducerTest, TestBucketBoundariesOnConditionChange) {
     valueProducer->onConditionChanged(true, bucket2StartTimeNs + 10);
     ASSERT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     auto curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(true, curInterval.hasBase);
-    EXPECT_EQ(5, curInterval.base.long_value);
+    auto curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(5, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
 
     valueProducer->onConditionChanged(false, bucket3StartTimeNs + 10);
@@ -2827,6 +2942,7 @@ TEST(ValueMetricProducerTest, TestDataIsNotUpdatedWhenNoConditionChanged) {
 
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     auto curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    auto curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasValue);
     EXPECT_EQ(2, curInterval.value.long_value);
 
@@ -2918,8 +3034,7 @@ TEST(ValueMetricProducerTest, TestPullNeededFastDump) {
 
     ProtoOutputStream output;
     std::set<string> strSet;
-    valueProducer.onDumpReport(bucketStartTimeNs + 10,
-                               true /* include recent buckets */, true,
+    valueProducer.onDumpReport(bucketStartTimeNs + 10, true /* include recent buckets */, true,
                                FAST, &strSet, &output);
 
     StatsLogReport report = outputStreamToProto(&output);
@@ -2970,9 +3085,8 @@ TEST(ValueMetricProducerTest, TestFastDumpWithoutCurrentBucket) {
 
     ProtoOutputStream output;
     std::set<string> strSet;
-    valueProducer.onDumpReport(bucket4StartTimeNs,
-                               false /* include recent buckets */, true,
-                               FAST, &strSet, &output);
+    valueProducer.onDumpReport(bucket4StartTimeNs, false /* include recent buckets */, true, FAST,
+                               &strSet, &output);
 
     StatsLogReport report = outputStreamToProto(&output);
     // Previous bucket is part of the report.
@@ -3023,8 +3137,7 @@ TEST(ValueMetricProducerTest, TestPullNeededNoTimeConstraints) {
 
     ProtoOutputStream output;
     std::set<string> strSet;
-    valueProducer.onDumpReport(bucketStartTimeNs + 10,
-                               true /* include recent buckets */, true,
+    valueProducer.onDumpReport(bucketStartTimeNs + 10, true /* include recent buckets */, true,
                                NO_TIME_CONSTRAINTS, &strSet, &output);
 
     StatsLogReport report = outputStreamToProto(&output);
@@ -3058,15 +3171,15 @@ TEST(ValueMetricProducerTest, TestPulledData_noDiff_withMultipleConditionChanges
             // condition becomes true
             .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
-                data->push_back(ValueMetricProducerTestHelper::createEvent(
-                        bucketStartTimeNs + 30, 10));
+                data->push_back(
+                        ValueMetricProducerTestHelper::createEvent(bucketStartTimeNs + 30, 10));
                 return true;
             }))
             // condition becomes false
             .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
-                data->push_back(ValueMetricProducerTestHelper::createEvent(
-                        bucketStartTimeNs + 50, 20));
+                data->push_back(
+                        ValueMetricProducerTestHelper::createEvent(bucketStartTimeNs + 50, 20));
                 return true;
             }));
     sp<ValueMetricProducer> valueProducer =
@@ -3079,10 +3192,10 @@ TEST(ValueMetricProducerTest, TestPulledData_noDiff_withMultipleConditionChanges
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(false, curInterval.hasBase);
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(false, curBaseInfo.hasBase);
     EXPECT_EQ(true, curInterval.hasValue);
     EXPECT_EQ(20, curInterval.value.long_value);
-
 
     // Now the alarm is delivered. Condition is off though.
     vector<shared_ptr<LogEvent>> allData;
@@ -3091,7 +3204,8 @@ TEST(ValueMetricProducerTest, TestPulledData_noDiff_withMultipleConditionChanges
 
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {50 - 8});
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(false, curInterval.hasBase);
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(false, curBaseInfo.hasBase);
     EXPECT_EQ(false, curInterval.hasValue);
 }
 
@@ -3104,8 +3218,8 @@ TEST(ValueMetricProducerTest, TestPulledData_noDiff_bucketBoundaryTrue) {
             // condition becomes true
             .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
-                data->push_back(ValueMetricProducerTestHelper::createEvent(
-                        bucketStartTimeNs + 30, 10));
+                data->push_back(
+                        ValueMetricProducerTestHelper::createEvent(bucketStartTimeNs + 30, 10));
                 return true;
             }));
     sp<ValueMetricProducer> valueProducer =
@@ -3122,7 +3236,8 @@ TEST(ValueMetricProducerTest, TestPulledData_noDiff_bucketBoundaryTrue) {
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {30}, {bucketSizeNs - 8});
     ValueMetricProducer::Interval curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
-    EXPECT_EQ(false, curInterval.hasBase);
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(false, curBaseInfo.hasBase);
     EXPECT_EQ(false, curInterval.hasValue);
 }
 
@@ -3153,8 +3268,8 @@ TEST(ValueMetricProducerTest, TestPulledData_noDiff_withFailure) {
             // condition becomes true
             .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
-                data->push_back(ValueMetricProducerTestHelper::createEvent(
-                        bucketStartTimeNs + 30, 10));
+                data->push_back(
+                        ValueMetricProducerTestHelper::createEvent(bucketStartTimeNs + 30, 10));
                 return true;
             }))
             .WillOnce(Return(false));
@@ -3766,6 +3881,725 @@ TEST(ValueMetricProducerTest_BucketDrop, TestMaxBucketDropEvents) {
     dropEvent = report.value_metrics().skipped(0).drop_event(9);
     EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
     EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 200), dropEvent.drop_time_millis());
+}
+
+/*
+ * Test metric with a simple sliced state
+ * - Increasing values
+ * - Using diff
+ * - Second field is value field
+ */
+TEST(ValueMetricProducerTest, TestSlicedState) {
+    // Set up ValueMetricProducer.
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithState("SCREEN_STATE");
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // ValueMetricProducer initialized.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs);
+                event->write("field1");
+                event->write(3);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Screen state change to ON.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 5);
+                event->write("field1");
+                event->write(5);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Screen state change to OFF.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
+                event->write("field1");
+                event->write(9);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Screen state change to ON.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 15);
+                event->write("field1");
+                event->write(21);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Dump report requested.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 50);
+                event->write("field1");
+                event->write(30);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithState(
+                    pullerManager, metric, {android::util::SCREEN_STATE_CHANGED}, {});
+
+    // Set up StateManager and check that StateTrackers are initialized.
+    StateManager::getInstance().clear();
+    StateManager::getInstance().registerListener(SCREEN_STATE_ATOM_ID, valueProducer);
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(SCREEN_STATE_ATOM_ID));
+
+    // Bucket status after metric initialized.
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    auto it = valueProducer->mCurrentSlicedBucket.begin();
+    auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(3, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Bucket status after screen state change kStateUnknown->ON.
+    auto screenEvent = CreateScreenStateChangedEvent(
+            android::view::DisplayStateEnum::DISPLAY_STATE_ON, bucketStartTimeNs + 5);
+    StateManager::getInstance().onLogEvent(*screenEvent);
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(5, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Bucket status after screen state change ON->OFF.
+    screenEvent = CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
+                                                bucketStartTimeNs + 10);
+    StateManager::getInstance().onLogEvent(*screenEvent);
+    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(9, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, ON}
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(4, it->second[0].value.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    it++;
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Bucket status after screen state change OFF->ON.
+    screenEvent = CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+                                                bucketStartTimeNs + 15);
+    StateManager::getInstance().onLogEvent(*screenEvent);
+    EXPECT_EQ(3UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(21, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, OFF}
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(12, it->second[0].value.long_value);
+    // Value for dimension, state key {{}, ON}
+    it++;
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(4, it->second[0].value.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    it++;
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Start dump report and check output.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucketStartTimeNs + 50, true /* include recent buckets */, true,
+                                NO_TIME_CONSTRAINTS, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(3, report.value_metrics().data_size());
+
+    auto data = report.value_metrics().data(0);
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(2, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
+
+    data = report.value_metrics().data(1);
+    EXPECT_EQ(1, report.value_metrics().data(1).bucket_info_size());
+    EXPECT_EQ(13, report.value_metrics().data(1).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON, data.slice_by_state(0).value());
+
+    data = report.value_metrics().data(2);
+    EXPECT_EQ(1, report.value_metrics().data(2).bucket_info_size());
+    EXPECT_EQ(12, report.value_metrics().data(2).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF, data.slice_by_state(0).value());
+}
+
+/*
+ * Test metric with sliced state with map
+ * - Increasing values
+ * - Using diff
+ * - Second field is value field
+ */
+TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
+    // Set up ValueMetricProducer.
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithState("SCREEN_STATE_ONOFF");
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // ValueMetricProducer initialized.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs);
+                event->write("field1");
+                event->write(3);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Screen state change to ON.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 5);
+                event->write("field1");
+                event->write(5);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Screen state change to VR.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
+                event->write("field1");
+                event->write(9);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Screen state change to OFF.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 15);
+                event->write("field1");
+                event->write(21);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Dump report requested.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 50);
+                event->write("field1");
+                event->write(30);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
+
+    const StateMap& stateMap = CreateScreenStateOnOffMap();
+    const StateMap_StateGroup screenOnGroup = stateMap.group(0);
+    const StateMap_StateGroup screenOffGroup = stateMap.group(1);
+
+    unordered_map<int, unordered_map<int, int64_t>> stateGroupMap;
+    for (auto group : stateMap.group()) {
+        for (auto value : group.value()) {
+            stateGroupMap[SCREEN_STATE_ATOM_ID][value] = group.group_id();
+        }
+    }
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithState(
+                    pullerManager, metric, {android::util::SCREEN_STATE_CHANGED}, stateGroupMap);
+
+    // Set up StateManager and check that StateTrackers are initialized.
+    StateManager::getInstance().clear();
+    StateManager::getInstance().registerListener(SCREEN_STATE_ATOM_ID, valueProducer);
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(SCREEN_STATE_ATOM_ID));
+
+    // Bucket status after metric initialized.
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    auto it = valueProducer->mCurrentSlicedBucket.begin();
+    auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(3, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, {}}
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Bucket status after screen state change kStateUnknown->ON.
+    auto screenEvent = CreateScreenStateChangedEvent(
+            android::view::DisplayStateEnum::DISPLAY_STATE_ON, bucketStartTimeNs + 5);
+    StateManager::getInstance().onLogEvent(*screenEvent);
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(5, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Bucket status after screen state change ON->VR (also ON).
+    screenEvent = CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_VR,
+                                                bucketStartTimeNs + 10);
+    StateManager::getInstance().onLogEvent(*screenEvent);
+    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(9, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, ON GROUP}
+    EXPECT_EQ(screenOnGroup.group_id(),
+              it->first.getStateValuesKey().getValues()[0].mValue.long_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(4, it->second[0].value.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    it++;
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Bucket status after screen state change VR->OFF.
+    screenEvent = CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
+                                                bucketStartTimeNs + 15);
+    StateManager::getInstance().onLogEvent(*screenEvent);
+    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(21, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, ON GROUP}
+    EXPECT_EQ(screenOnGroup.group_id(),
+              it->first.getStateValuesKey().getValues()[0].mValue.long_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(16, it->second[0].value.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    it++;
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Start dump report and check output.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucketStartTimeNs + 50, true /* include recent buckets */, true,
+                                NO_TIME_CONSTRAINTS, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(3, report.value_metrics().data_size());
+
+    auto data = report.value_metrics().data(0);
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(2, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
+
+    data = report.value_metrics().data(1);
+    EXPECT_EQ(1, report.value_metrics().data(1).bucket_info_size());
+    EXPECT_EQ(16, report.value_metrics().data(1).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_group_id());
+    EXPECT_EQ(screenOnGroup.group_id(), data.slice_by_state(0).group_id());
+
+    data = report.value_metrics().data(2);
+    EXPECT_EQ(1, report.value_metrics().data(2).bucket_info_size());
+    EXPECT_EQ(9, report.value_metrics().data(2).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_group_id());
+    EXPECT_EQ(screenOffGroup.group_id(), data.slice_by_state(0).group_id());
+}
+
+/*
+ * Test metric that slices by state with a primary field and has dimensions
+ * - Increasing values
+ * - Using diff
+ * - Second field is value field
+ */
+TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
+    // Set up ValueMetricProducer.
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithState("UID_PROCESS_STATE");
+    metric.mutable_dimensions_in_what()->set_field(tagId);
+    metric.mutable_dimensions_in_what()->add_child()->set_field(1);
+
+    MetricStateLink* stateLink = metric.add_state_link();
+    stateLink->set_state_atom_id(UID_PROCESS_STATE_ATOM_ID);
+    auto fieldsInWhat = stateLink->mutable_fields_in_what();
+    *fieldsInWhat = CreateDimensions(tagId, {1 /* uid */});
+    auto fieldsInState = stateLink->mutable_fields_in_state();
+    *fieldsInState = CreateDimensions(UID_PROCESS_STATE_ATOM_ID, {1 /* uid */});
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // ValueMetricProducer initialized.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs);
+                event->write(2 /* uid */);
+                event->write(7);
+                event->init();
+                data->push_back(event);
+
+                event = make_shared<LogEvent>(tagId, bucketStartTimeNs);
+                event->write(1 /* uid */);
+                event->write(3);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Uid 1 process state change from kStateUnknown -> Foreground
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 20);
+                event->write(1 /* uid */);
+                event->write(6);
+                event->init();
+                data->push_back(event);
+
+                // This event should be skipped.
+                event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 20);
+                event->write(2 /* uid */);
+                event->write(8);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Uid 2 process state change from kStateUnknown -> Background
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 40);
+                event->write(2 /* uid */);
+                event->write(9);
+                event->init();
+                data->push_back(event);
+
+                // This event should be skipped.
+                event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 40);
+                event->write(1 /* uid */);
+                event->write(12);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Uid 1 process state change from Foreground -> Background
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 20);
+                event->write(1 /* uid */);
+                event->write(13);
+                event->init();
+                data->push_back(event);
+
+                // This event should be skipped.
+                event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 20);
+                event->write(2 /* uid */);
+                event->write(11);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Uid 1 process state change from Background -> Foreground
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 40);
+                event->write(1 /* uid */);
+                event->write(17);
+                event->init();
+                data->push_back(event);
+
+                // This event should be skipped.
+                event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 40);
+                event->write(2 /* uid */);
+                event->write(15);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
+            // Dump report pull.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 50);
+                event->write(2 /* uid */);
+                event->write(20);
+                event->init();
+                data->push_back(event);
+
+                event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 50);
+                event->write(1 /* uid */);
+                event->write(21);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithState(
+                    pullerManager, metric, {UID_PROCESS_STATE_ATOM_ID}, {});
+
+    // Set up StateManager and check that StateTrackers are initialized.
+    StateManager::getInstance().clear();
+    StateManager::getInstance().registerListener(UID_PROCESS_STATE_ATOM_ID, valueProducer);
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(UID_PROCESS_STATE_ATOM_ID));
+
+    // Bucket status after metric initialized.
+    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {uid 1}.
+    auto it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(3, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{uid 1}, kStateUnknown}
+    // TODO(tsaichristine): test equality of state values key
+    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(false, it->second[0].hasValue);
+    // Base for dimension key {uid 2}
+    it++;
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(7, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{uid 2}, kStateUnknown}
+    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Bucket status after uid 1 process state change kStateUnknown -> Foreground.
+    auto uidProcessEvent = CreateUidProcessStateChangedEvent(
+            1 /* uid */, android::app::PROCESS_STATE_IMPORTANT_FOREGROUND, bucketStartTimeNs + 20);
+    StateManager::getInstance().onLogEvent(*uidProcessEvent);
+    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {uid 1}.
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(6, itBase->second[0].base.long_value);
+    // Value for key {uid 1, kStateUnknown}.
+    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(3, it->second[0].value.long_value);
+
+    // Base for dimension key {uid 2}
+    it++;
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(7, itBase->second[0].base.long_value);
+    // Value for key {uid 2, kStateUnknown}
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Bucket status after uid 2 process state change kStateUnknown -> Background.
+    uidProcessEvent = CreateUidProcessStateChangedEvent(
+            2 /* uid */, android::app::PROCESS_STATE_IMPORTANT_BACKGROUND, bucketStartTimeNs + 40);
+    StateManager::getInstance().onLogEvent(*uidProcessEvent);
+    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {uid 1}.
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(6, itBase->second[0].base.long_value);
+    // Value for key {uid 1, kStateUnknown}.
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(3, it->second[0].value.long_value);
+
+    // Base for dimension key {uid 2}
+    it++;
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(9, itBase->second[0].base.long_value);
+    // Value for key {uid 2, kStateUnknown}
+    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Pull at end of first bucket.
+    vector<shared_ptr<LogEvent>> allData;
+    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs);
+    event->write(1 /* uid */);
+    event->write(10);
+    event->init();
+    allData.push_back(event);
+
+    event = make_shared<LogEvent>(tagId, bucket2StartTimeNs);
+    event->write(2 /* uid */);
+    event->write(15);
+    event->init();
+    allData.push_back(event);
+
+    valueProducer->onDataPulled(allData, /** succeeds */ true, bucket2StartTimeNs + 1);
+
+    // Buckets flushed after end of first bucket.
+    // None of the buckets should have a value.
+    EXPECT_EQ(4UL, valueProducer->mCurrentSlicedBucket.size());
+    EXPECT_EQ(4UL, valueProducer->mPastBuckets.size());
+    EXPECT_EQ(2UL, valueProducer->mCurrentBaseInfo.size());
+    // Base for dimension key {uid 2}.
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(15, itBase->second[0].base.long_value);
+    // Value for key {uid 2, BACKGROUND}.
+    EXPECT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(1006, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Base for dimension key {uid 1}
+    it++;
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(10, itBase->second[0].base.long_value);
+    // Value for key {uid 1, kStateUnknown}
+    EXPECT_EQ(0, it->first.getStateValuesKey().getValues().size());
+    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Value for key {uid 1, FOREGROUND}
+    it++;
+    EXPECT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(1005, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Value for key {uid 2, kStateUnknown}
+    it++;
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Bucket status after uid 1 process state change from Foreground -> Background.
+    uidProcessEvent = CreateUidProcessStateChangedEvent(
+            1 /* uid */, android::app::PROCESS_STATE_IMPORTANT_BACKGROUND, bucket2StartTimeNs + 20);
+    StateManager::getInstance().onLogEvent(*uidProcessEvent);
+
+    EXPECT_EQ(4UL, valueProducer->mCurrentSlicedBucket.size());
+    EXPECT_EQ(4UL, valueProducer->mPastBuckets.size());
+    EXPECT_EQ(2UL, valueProducer->mCurrentBaseInfo.size());
+    // Base for dimension key {uid 2}.
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(15, itBase->second[0].base.long_value);
+    // Value for key {uid 2, BACKGROUND}.
+    EXPECT_EQ(false, it->second[0].hasValue);
+    // Base for dimension key {uid 1}
+    it++;
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(13, itBase->second[0].base.long_value);
+    // Value for key {uid 1, kStateUnknown}
+    EXPECT_EQ(false, it->second[0].hasValue);
+    // Value for key {uid 1, FOREGROUND}
+    it++;
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(1005, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(3, it->second[0].value.long_value);
+    // Value for key {uid 2, kStateUnknown}
+    it++;
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Bucket status after uid 1 process state change Background->Foreground.
+    uidProcessEvent = CreateUidProcessStateChangedEvent(
+            1 /* uid */, android::app::PROCESS_STATE_IMPORTANT_FOREGROUND, bucket2StartTimeNs + 40);
+    StateManager::getInstance().onLogEvent(*uidProcessEvent);
+
+    EXPECT_EQ(5UL, valueProducer->mCurrentSlicedBucket.size());
+    EXPECT_EQ(2UL, valueProducer->mCurrentBaseInfo.size());
+    // Base for dimension key {uid 2}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(15, itBase->second[0].base.long_value);
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    it++;
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Base for dimension key {uid 1}
+    it++;
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(17, itBase->second[0].base.long_value);
+    // Value for key {uid 1, BACKGROUND}
+    EXPECT_EQ(1006, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(4, it->second[0].value.long_value);
+    // Value for key {uid 1, FOREGROUND}
+    it++;
+    EXPECT_EQ(1005, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(3, it->second[0].value.long_value);
+
+    // Start dump report and check output.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucket2StartTimeNs + 50, true /* include recent buckets */, true,
+                                NO_TIME_CONSTRAINTS, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(5, report.value_metrics().data_size());
+
+    auto data = report.value_metrics().data(0);
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(4, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              data.slice_by_state(0).value());
+
+    data = report.value_metrics().data(1);
+    EXPECT_EQ(1, report.value_metrics().data(1).bucket_info_size());
+    EXPECT_EQ(2, report.value_metrics().data(1).bucket_info(0).values(0).value_long());
+
+    data = report.value_metrics().data(2);
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              data.slice_by_state(0).value());
+    EXPECT_EQ(2, report.value_metrics().data(2).bucket_info_size());
+    EXPECT_EQ(4, report.value_metrics().data(2).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(7, report.value_metrics().data(2).bucket_info(1).values(0).value_long());
+
+    data = report.value_metrics().data(3);
+    EXPECT_EQ(1, report.value_metrics().data(3).bucket_info_size());
+    EXPECT_EQ(3, report.value_metrics().data(3).bucket_info(0).values(0).value_long());
+
+    data = report.value_metrics().data(4);
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              data.slice_by_state(0).value());
+    EXPECT_EQ(2, report.value_metrics().data(4).bucket_info_size());
+    EXPECT_EQ(6, report.value_metrics().data(4).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(5, report.value_metrics().data(4).bucket_info(1).values(0).value_long());
 }
 
 }  // namespace statsd

@@ -192,6 +192,15 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         }
     }
 
+    @Test
+    public void testRollbackDataPolicy() throws Exception {
+        runPhase("testRollbackDataPolicy_Phase1");
+        getDevice().reboot();
+        runPhase("testRollbackDataPolicy_Phase2");
+        getDevice().reboot();
+        runPhase("testRollbackDataPolicy_Phase3");
+    }
+
     private void crashProcess(String processName, int numberOfCrashes) throws Exception {
         String pid = "";
         String lastPid = "invalid";

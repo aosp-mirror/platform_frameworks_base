@@ -70,8 +70,7 @@
     <string name="learn_more" msgid="4690632085667273811">"অধিক জানক"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"স্ক্ৰীণ পূর্ণ কৰিবলৈ জুম কৰক"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"স্ক্ৰীণ পূর্ণ কৰিবলৈ প্ৰসাৰিত কৰক"</string>
-    <!-- no translation found for global_action_screenshot (2760267567509131654) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="2760267567509131654">"স্ক্ৰীনশ্বট"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"স্ক্ৰীণশ্বট ছেভ কৰি থকা হৈছে…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্ৰীণশ্বট ছেভ কৰি থকা হৈছে…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"স্ক্ৰীণশ্বট ছেভ কৰা হ’ল"</string>
@@ -119,8 +118,7 @@
     <string name="phone_label" msgid="5715229948920451352">"ফ\'ন খোলক"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"কণ্ঠধ্বনিৰে সহায় খোলক"</string>
     <string name="camera_label" msgid="8253821920931143699">"কেমেৰা খোলক"</string>
-    <!-- no translation found for cancel (1089011503403416730) -->
-    <skip />
+    <string name="cancel" msgid="1089011503403416730">"বাতিল কৰক"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"নিশ্চিত কৰক"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"আকৌ চেষ্টা কৰক"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ বাতিল কৰিবলৈ টিপক"</string>
@@ -387,7 +385,9 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>ত অন কৰক"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> পৰ্যন্ত"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"গাঢ় ৰঙৰ থীম"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"গাঢ় ৰঙৰ থীম\nবেটাৰী সঞ্চয়কাৰী"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"বেটাৰী সঞ্চয়কাৰী"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"সূৰ্যাস্তত অন হয়"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"সূৰ্যোদয়লৈকে"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC নিষ্ক্ৰিয় হৈ আছে"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC সক্ষম হৈ আছে"</string>
@@ -412,10 +412,6 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"খুলিবলৈ পুনৰাই টিপক"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"খুলিবলৈ ওপৰলৈ ছোৱাইপ কৰক"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"পুনৰ চেষ্টা কৰিবলৈ ওপৰলৈ ছোৱাইপ কৰক"</string>
-    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
-    <skip />
-    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
-    <skip />
     <string name="do_disclosure_generic" msgid="2388094207542706440">"আপোনাৰ প্ৰতিষ্ঠানে এই ডিভাইচটো পৰিচালনা কৰে"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>ৰ দ্বাৰা পৰিচালিত।"</string>
     <string name="phone_hint" msgid="6682125338461375925">"ফ\'নৰ বাবে আইকনৰপৰা ছোৱাইপ কৰক"</string>
@@ -467,9 +463,11 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"বেটাৰি সঞ্চয়কাৰী অন হৈ আছে"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"কাৰ্যদক্ষতা আৰু নেপথ্য ডেটা হ্ৰাস কৰে"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"বেটাৰি সঞ্চয়কাৰী অফ কৰক"</string>
-    <string name="media_projection_dialog_text" msgid="5509958417853154019">"ৰেকৰ্ড বা কাষ্ট কৰি থাকোঁতে <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>এ অডিঅ’, পাছৱৰ্ডসমূহ, পৰিশোধৰ তথ্য, ফট’সমূহ আৰু বাৰ্তাসমূহকে ধৰি আপোনাৰ স্ক্রীণত দেখুওৱা বা আপোনাৰ ডিভাইচৰ পৰা প্লে’ কৰা যিকোনো সংবেনদশীল তথ্য কেপচ্চাৰ কৰিব পাৰে।"</string>
-    <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"ৰেকৰ্ড বা কাষ্ট কৰি থাকোঁতে এই কাৰ্যকাৰিতাটো প্ৰদান কৰি থকা সেৱাটোৱে অডিঅ’, পাছৱৰ্ডসমূহ, পৰিশোধৰ তথ্য, ফট’সমূহ আৰু বাৰ্তাসমূহকে ধৰি আপোনাৰ স্ক্রীণত দেখুওৱা বা আপোনাৰ ডিভাইচৰ পৰা প্লে’ কৰা যিকোনো সংবেনদশীল তথ্য কেপচ্চাৰ কৰিব পাৰে।"</string>
-    <string name="media_projection_dialog_title" msgid="6379655487632663290">"কাষ্টিং/ৰেকৰ্ডিঙৰ সময়ত স্পৰ্শকাতৰ তথ্য দেখুওৱা হৈছে"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>এ আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকর্ডিং অথবা কাষ্টিংৰ সময়ত আপোনাৰ ডিভাইচত প্লে\' কৰা সকলো তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱর্ড, পৰিশোধৰ সবিশেষ, ফট\', বার্তাসমূহ আৰু আপুনি প্লে\' কৰা অডিঅ\'ৰ দৰে তথ্য অন্তর্ভুক্ত হয়।"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"এই সুবিধাটো প্ৰদান কৰা সেৱাটোৱে আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকর্ডিং অথবা কাষ্টিংৰ সময়ত আপোনাৰ ডিভাইচত প্লে\' কৰা সকলো তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱর্ড, পৰিশোধৰ সবিশেষ, ফট\', বার্তাসমূহ আৰু আপুনি প্লে\' কৰা অডিঅ\'ৰ দৰে তথ্য অন্তর্ভুক্ত হয়।"</string>
+    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
+    <skip />
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ৰ জৰিয়তে ৰেকর্ডিং অথবা কাষ্টিং আৰম্ভ কৰিবনে ?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"পুনৰাই নেদেখুৱাব"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"সকলো মচক"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"পৰিচালনা"</string>
@@ -667,12 +665,10 @@
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"এই এপটোৰ জাননী দেখুওৱাই থাকিব লাগিবনে?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"নীৰৱ"</string>
     <string name="notification_alert_title" msgid="7629202599338071971">"সতৰ্ক কৰক"</string>
-    <!-- no translation found for notification_bubble_title (8330481035191903164) -->
-    <skip />
+    <string name="notification_bubble_title" msgid="8330481035191903164">"বাবল"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"কোনো ধ্বনি অথবা কম্পন অবিহনে আপোনাক মনোযোগ দিয়াত সহায় কৰে।"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ধ্বনি অথবা কম্পনৰ জৰিয়তে আপোনাৰ মনোযোগ আকৰ্ষণ কৰে।"</string>
-    <!-- no translation found for notification_channel_summary_bubble (7235935211580860537) -->
-    <skip />
+    <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"উপঙি থকা এটা শ্বৰ্টকাটৰ জৰিয়তে এই সমলখিনিৰ প্ৰতি আপোনাক মনোযোগী কৰি ৰাখে।"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"এই জাননীসমূহ সংশোধন কৰিব নোৱাৰি।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"এই ধৰণৰ জাননীবোৰ ইয়াত কনফিগাৰ কৰিব পৰা নাযায়"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"প্ৰক্সি হিচাপে পঠিওৱা জাননী"</string>
@@ -788,8 +784,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"কীব\'ৰ্ড সলনি কৰাৰ সুবিধা"</string>
     <string name="save" msgid="3392754183673848006">"ছেভ কৰক"</string>
-    <!-- no translation found for reset (8715144064608810383) -->
-    <skip />
+    <string name="reset" msgid="8715144064608810383">"ৰিছেট কৰক"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"বুটামৰ প্ৰস্থ খাপ খুৱাওক"</string>
     <string name="clipboard" msgid="8517342737534284617">"ক্লিপব\'ৰ্ড"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"উপযোগিতা অনুসৰি তৈয়াৰ কৰা নেভিগেশ্বনৰ বুটাম"</string>
@@ -885,8 +880,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"সোঁ"</string>
     <string name="tuner_menu" msgid="363690665924769420">"মেনু"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> এপ্"</string>
-    <!-- no translation found for notification_channel_alerts (3385787053375150046) -->
-    <skip />
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"সতৰ্কবার্তাসমূহ"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"বেটাৰি"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"স্ক্ৰীণশ্বটসমূহ"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"সাধাৰণ বার্তাসমূহ"</string>
@@ -896,8 +890,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> চলি আছে"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ইনষ্ট\'ল নকৰাকৈয়েই এপটো খোলা হৈছে।"</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ইনষ্ট\'ল নকৰাকৈয়েই এপটো খোলা হৈছে। অধিক জানিবলৈ টিপক।"</string>
-    <!-- no translation found for app_info (5153758994129963243) -->
-    <skip />
+    <string name="app_info" msgid="5153758994129963243">"এপৰ তথ্য"</string>
     <string name="go_to_web" msgid="636673528981366511">"ব্ৰাউজাৰলৈ যাওক"</string>
     <string name="mobile_data" msgid="4564407557775397216">"ম’বাইল ডেটা"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -931,13 +924,6 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ছেটিংবোৰ"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"বুজি পালোঁ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI হীপ ডাম্প কৰক"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g>এ আপোনাৰ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ব্যৱহাৰ কৰি আছে।"</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"এপ্লিকেশ্বনসমূহে আপোনাৰ <xliff:g id="TYPES_LIST">%s</xliff:g> ব্যৱহাৰ কৰি আছে।"</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" আৰু "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"কেমেৰা"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"অৱস্থান"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"মাইক্ৰ\'ফ\'ন"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"ছেন্সৰ অফ হৈ আছে"</string>
     <string name="device_services" msgid="1549944177856658705">"ডিভাইচ সেৱা"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"কোনো শিৰোনাম নাই"</string>
@@ -960,4 +946,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ছিষ্টেম নেভিগেশ্বন আপডে’ট কৰা হ’ল। সলনি কৰিবলৈ ছেটিংসমূহ-লৈ যাওক।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ছিষ্টেম নেভিগেশ্বন আপডে’ট কৰিবলৈ ছেটিংসমূহ-লৈ যাওক"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ষ্টেণ্ডবাই"</string>
+    <string name="magnification_overlay_title" msgid="6584179429612427958">"বিবৰ্ধন অ’ভাৰলে’ৰ ৱিণ্ড’"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"বিবৰ্ধন ৱিণ্ড’"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"বিবৰ্ধন ৱিণ্ড’ৰ নিয়ন্ত্ৰণসমূহ"</string>
 </resources>

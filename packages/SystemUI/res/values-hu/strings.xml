@@ -70,8 +70,7 @@
     <string name="learn_more" msgid="4690632085667273811">"Részletek"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"Nagyítás a kitöltéshez"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Nyújtás kitöltéshez"</string>
-    <!-- no translation found for global_action_screenshot (2760267567509131654) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="2760267567509131654">"Képernyőkép"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Képernyőkép mentése..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Képernyőkép mentése..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"A képernyőkép mentése sikerült"</string>
@@ -119,8 +118,7 @@
     <string name="phone_label" msgid="5715229948920451352">"telefon megnyitása"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"hangsegéd megnyitása"</string>
     <string name="camera_label" msgid="8253821920931143699">"kamera megnyitása"</string>
-    <!-- no translation found for cancel (1089011503403416730) -->
-    <skip />
+    <string name="cancel" msgid="1089011503403416730">"Mégse"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Megerősítés"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Újrapróbálkozás"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Koppintson a hitelesítés visszavonásához"</string>
@@ -387,7 +385,9 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Bekapcsolás: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Eddig: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Sötét téma"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"Sötét téma\nAkkumulátorkímélő mód"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Akkumulátorkímélő"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Be: napnyugta"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Napfelkeltéig"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Az NFC ki van kapcsolva"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Az NFC be van kapcsolva"</string>
@@ -412,10 +412,6 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Koppintson ismét a megnyitáshoz"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Csúsztasson felfelé a megnyitáshoz"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Az újrapróbálkozáshoz csúsztassa felfelé az ujját"</string>
-    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
-    <skip />
-    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
-    <skip />
     <string name="do_disclosure_generic" msgid="2388094207542706440">"Az eszközt az Ön szervezete kezeli"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"Az eszközt a(z) <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> felügyeli."</string>
     <string name="phone_hint" msgid="6682125338461375925">"A telefonhoz csúsztasson az ikonról"</string>
@@ -467,9 +463,11 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Akkumulátorkímélő mód bekapcsolva"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Csökkenti a teljesítményt és a háttéradatok használatát"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Akkumulátorkímélő mód kikapcsolása"</string>
-    <string name="media_projection_dialog_text" msgid="5509958417853154019">"Felvétel rögzítésekor és átküldés során a(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> rögzítheti a képernyőn megjelenő és az eszközön lejátszott bizalmas információkat, például hangfelvételeket, jelszavakat, fizetési adatokat, fotókat és üzeneteket."</string>
-    <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"Felvétel rögzítésekor és átküldés során a funkciót biztosító szolgáltató rögzítheti a képernyőn megjelenő és az eszközön lejátszott bizalmas információkat, például hangfelvételeket, jelszavakat, fizetési adatokat, fotókat és üzeneteket."</string>
-    <string name="media_projection_dialog_title" msgid="6379655487632663290">"Bizalmas adatok feltárása átküldés vagy rögzítés során"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"A(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> hozzáfér majd minden olyan információhoz, amely látható az Ön képernyőjén, vagy amelyet az Ön eszközéről játszanak le rögzítés vagy átküldés során. Ez olyan információkat is tartalmaz, mint a jelszavak, a fizetési részletek, fotók, üzenetek és lejátszott audiotartalmak."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"A funkciót biztosító szolgáltatás hozzáfér majd minden olyan információhoz, amely látható az Ön képernyőjén, illetve amelyet az Ön eszközéről játszanak le rögzítés vagy átküldés közben. Ez olyan információkat is tartalmaz, mint a jelszavak, a fizetési részletek, fotók, üzenetek és lejátszott audiotartalmak."</string>
+    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
+    <skip />
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Elkezdi a rögzítést vagy átküldést a következővel: <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Ne jelenjen meg többé"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Az összes törlése"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Kezelés"</string>
@@ -786,8 +784,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"Billentyűzetváltó"</string>
     <string name="save" msgid="3392754183673848006">"Mentés"</string>
-    <!-- no translation found for reset (8715144064608810383) -->
-    <skip />
+    <string name="reset" msgid="8715144064608810383">"Visszaállítás"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Gombszélesség beállítása"</string>
     <string name="clipboard" msgid="8517342737534284617">"Vágólap"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"Személyre szabott navigációs gomb"</string>
@@ -883,8 +880,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"Jobb"</string>
     <string name="tuner_menu" msgid="363690665924769420">"Menü"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> alkalmazás"</string>
-    <!-- no translation found for notification_channel_alerts (3385787053375150046) -->
-    <skip />
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"Értesítések"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Akkumulátor"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Képernyőképek"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"Általános üzenetek"</string>
@@ -894,8 +890,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"A(z) <xliff:g id="APP">%1$s</xliff:g> alkalmazás jelenleg fut"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Az alkalmazás telepítés nélkül lett megnyitva."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Az alkalmazás telepítés nélkül lett megnyitva. Ha további információra van szüksége, koppintson ide."</string>
-    <!-- no translation found for app_info (5153758994129963243) -->
-    <skip />
+    <string name="app_info" msgid="5153758994129963243">"Alkalmazásadatok"</string>
     <string name="go_to_web" msgid="636673528981366511">"Ugrás a böngészőbe"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Mobiladatok"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -929,13 +924,6 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Beállítások"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Értem"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI-memória-kiírás"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"A(z) <xliff:g id="APP">%1$s</xliff:g> használja a következőket: <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Több alkalmazás használja a következőket: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" és "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"helyadatok"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Érzékelők kikapcsolva"</string>
     <string name="device_services" msgid="1549944177856658705">"Eszközszolgáltatások"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Nincs cím"</string>
@@ -958,4 +946,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"A rendszer-navigáció módja megváltozott. Módosításához nyissa meg a Beállításokat."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"A rendszer-navigációs lehetőségeket a Beállításokban módosíthatja"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Készenléti mód"</string>
+    <string name="magnification_overlay_title" msgid="6584179429612427958">"Nagyítási fedvény ablaka"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"Nagyítás ablaka"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"Nagyítási vezérlők ablaka"</string>
 </resources>

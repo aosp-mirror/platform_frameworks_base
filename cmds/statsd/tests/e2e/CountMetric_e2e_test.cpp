@@ -27,9 +27,6 @@ namespace statsd {
 
 #ifdef __ANDROID__
 
-const int SCREEN_STATE_ATOM_ID = android::util::SCREEN_STATE_CHANGED;
-const int UID_PROCESS_STATE_ATOM_ID = android::util::UID_PROCESS_STATE_CHANGED;
-
 /**
  * Test a count metric that has one slice_by_state with no primary fields.
  *

@@ -320,7 +320,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     ActivityStack createTaskStackOnDisplay(int windowingMode, int activityType, DisplayContent dc) {
         synchronized (mWm.mGlobalLock) {
             return new ActivityTestsBase.StackBuilder(
-                    dc.mWmService.mAtmService.mRootActivityContainer)
+                    dc.mWmService.mAtmService.mRootWindowContainer)
                     .setDisplay(dc)
                     .setWindowingMode(windowingMode)
                     .setActivityType(activityType)
@@ -379,6 +379,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     /** Sets the default minimum task size to 1 so that tests can use small task sizes */
     void removeGlobalMinSizeRestriction() {
-        mWm.mAtmService.mRootActivityContainer.mDefaultMinSizeOfResizeableTaskDp = 1;
+        mWm.mAtmService.mRootWindowContainer.mDefaultMinSizeOfResizeableTaskDp = 1;
     }
 }

@@ -137,7 +137,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // STEP 1: Determine the display to launch the activity/task.
         final int displayId = getPreferredLaunchDisplay(task, options, source, currentParams);
         outParams.mPreferredDisplayId = displayId;
-        DisplayContent display = mSupervisor.mRootActivityContainer.getDisplayContent(displayId);
+        DisplayContent display = mSupervisor.mRootWindowContainer.getDisplayContent(displayId);
         if (DEBUG) {
             appendLog("display-id=" + outParams.mPreferredDisplayId + " display-windowing-mode="
                     + display.getWindowingMode());
@@ -333,13 +333,13 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         if (displayId != INVALID_DISPLAY
-                && mSupervisor.mRootActivityContainer.getDisplayContent(displayId) == null) {
+                && mSupervisor.mRootWindowContainer.getDisplayContent(displayId) == null) {
             displayId = currentParams.mPreferredDisplayId;
         }
         displayId = (displayId == INVALID_DISPLAY) ? currentParams.mPreferredDisplayId : displayId;
 
         return (displayId != INVALID_DISPLAY
-                && mSupervisor.mRootActivityContainer.getDisplayContent(displayId) != null)
+                && mSupervisor.mRootWindowContainer.getDisplayContent(displayId) != null)
                 ? displayId : DEFAULT_DISPLAY;
     }
 
@@ -656,7 +656,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             // There is no way for us to fit the bounds in the display without changing width
             // or height. Just move the start to align with the display.
             final int layoutDirection =
-                    mSupervisor.mRootActivityContainer.getConfiguration().getLayoutDirection();
+                    mSupervisor.mRootWindowContainer.getConfiguration().getLayoutDirection();
             final int left = layoutDirection == View.LAYOUT_DIRECTION_RTL
                     ? displayStableBounds.right - inOutBounds.right + inOutBounds.left
                     : displayStableBounds.left;

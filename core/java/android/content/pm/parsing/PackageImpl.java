@@ -240,6 +240,7 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     private int descriptionRes;
     private String deviceProtectedDataDir;
     private boolean enabled;
+    private boolean crossProfile;
     private int flags;
     private int fullBackupContent;
     private boolean hiddenUntilInstalled;
@@ -1636,6 +1637,12 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     }
 
     @Override
+    public PackageImpl setCrossProfile(boolean crossProfile) {
+        this.crossProfile = crossProfile;
+        return this;
+    }
+
+    @Override
     public PackageImpl setUiOptions(int uiOptions) {
         this.uiOptions = uiOptions;
         return this;
@@ -2835,6 +2842,11 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     }
 
     @Override
+    public boolean isCrossProfile() {
+        return crossProfile;
+    }
+
+    @Override
     public String getManageSpaceActivityName() {
         return manageSpaceActivityName;
     }
@@ -3042,6 +3054,7 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         dest.writeInt(this.descriptionRes);
         dest.writeString(this.deviceProtectedDataDir);
         dest.writeBoolean(this.enabled);
+        dest.writeBoolean(this.crossProfile);
         dest.writeInt(this.flags);
         dest.writeInt(this.fullBackupContent);
         dest.writeBoolean(this.hiddenUntilInstalled);
@@ -3194,6 +3207,7 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         this.descriptionRes = in.readInt();
         this.deviceProtectedDataDir = in.readString();
         this.enabled = in.readBoolean();
+        this.crossProfile = in.readBoolean();
         this.flags = in.readInt();
         this.fullBackupContent = in.readInt();
         this.hiddenUntilInstalled = in.readBoolean();

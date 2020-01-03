@@ -17,13 +17,12 @@
 package android.service.controls;
 
 import android.service.controls.Control;
-import android.service.controls.ControlState;
 
 /** @hide */
 oneway interface IControlsProviderCallback {
-    void onLoad(in List<Control> controls);
+    void onLoad(in IBinder token, in List<Control> controls);
 
-    void onRefreshState(in List<ControlState> controlStates);
+    void onRefreshState(in IBinder token, in List<Control> statefulControls);
 
-    void onControlActionResponse(in String controlId, int response);
+    void onControlActionResponse(in IBinder token, in String controlId, int response);
 }

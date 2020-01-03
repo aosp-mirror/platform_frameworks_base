@@ -70,8 +70,7 @@
     <string name="learn_more" msgid="4690632085667273811">"מידע נוסף"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"הגדל תצוגה כדי למלא את המסך"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"מתח כדי למלא את המסך"</string>
-    <!-- no translation found for global_action_screenshot (2760267567509131654) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="2760267567509131654">"צילום מסך"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"שומר צילום מסך..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"שומר צילום מסך..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"צילום המסך נשמר"</string>
@@ -119,8 +118,7 @@
     <string name="phone_label" msgid="5715229948920451352">"פתח את הטלפון"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"פתח את המסייע הקולי"</string>
     <string name="camera_label" msgid="8253821920931143699">"פתח את המצלמה"</string>
-    <!-- no translation found for cancel (1089011503403416730) -->
-    <skip />
+    <string name="cancel" msgid="1089011503403416730">"ביטול"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"אישור"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ניסיון נוסף"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"יש להקיש כדי לבטל את האימות"</string>
@@ -391,7 +389,9 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"מופעל בשעה <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"עד <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"עיצוב כהה"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"עיצוב כהה\nחיסכון בסוללה"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"חיסכון בסוללה"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"מופעל בשקיעה"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"עד הזריחה"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"‏NFC מושבת"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‏NFC מופעל"</string>
@@ -416,10 +416,6 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"הקש שוב כדי לפתוח"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"צריך להחליק כדי לפתוח"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"יש להחליק למעלה כדי לנסות שוב"</string>
-    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
-    <skip />
-    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
-    <skip />
     <string name="do_disclosure_generic" msgid="2388094207542706440">"מכשיר זה מנוהל על ידי הארגון שלך"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"המכשיר הזה מנוהל על ידי <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"החלק מהסמל כדי להפעיל את הטלפון"</string>
@@ -473,9 +469,11 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"תכונת החיסכון בסוללה פועלת"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"מפחית את הביצועים ונתונים ברקע"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"כיבוי תכונת החיסכון בסוללה"</string>
-    <string name="media_projection_dialog_text" msgid="5509958417853154019">"בזמן הקלטה או העברה, האפליקציה <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> יכולה לקלוט מידע רגיש שמוצג במסך או מופעל מהמכשיר שלך, כולל מידע רגיש כמו אודיו, סיסמאות, פרטי תשלום, תמונות והודעות."</string>
-    <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"בזמן הקלטה או העברה, השירות שמספק את הפונקציה הזו יכול לקלוט מידע רגיש שמוצג במסך או מופעל מהמכשיר שלך, כולל מידע רגיש כמו אודיו, סיסמאות, פרטי תשלום, תמונות והודעות."</string>
-    <string name="media_projection_dialog_title" msgid="6379655487632663290">"חשיפת מידע רגיש בזמן העברה/הקלטה"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"‏לאפליקציה <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> תהיה גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך בזמן הקלטה או העברה (cast). זה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"‏לשירות שמספק את הפונקציה הזו תהיה גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך בזמן הקלטה או העברה (cast). זה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
+    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
+    <skip />
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"‏להתחיל להקליט או להעביר (cast) באמצעות <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"אל תציג שוב"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ניקוי הכל"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ניהול"</string>
@@ -796,8 +794,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"מחליף מקלדת"</string>
     <string name="save" msgid="3392754183673848006">"שמירה"</string>
-    <!-- no translation found for reset (8715144064608810383) -->
-    <skip />
+    <string name="reset" msgid="8715144064608810383">"איפוס"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"שינוי של רוחב לחצן"</string>
     <string name="clipboard" msgid="8517342737534284617">"לוח"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"לחצן לניווט מותאם אישית"</string>
@@ -893,8 +890,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"ימינה"</string>
     <string name="tuner_menu" msgid="363690665924769420">"תפריט"</string>
     <string name="tuner_app" msgid="6949280415826686972">"האפליקציה <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for notification_channel_alerts (3385787053375150046) -->
-    <skip />
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"התראות"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"סוללה"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"צילומי מסך"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"הודעות כלליות"</string>
@@ -904,8 +900,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> פועלת"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"האפליקציה נפתחת בלי התקנה."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"האפליקציה נפתחת בלי התקנה. אפשר להקיש כדי לקבל מידע נוסף."</string>
-    <!-- no translation found for app_info (5153758994129963243) -->
-    <skip />
+    <string name="app_info" msgid="5153758994129963243">"פרטי האפליקציה"</string>
     <string name="go_to_web" msgid="636673528981366511">"מעבר אל הדפדפן"</string>
     <string name="mobile_data" msgid="4564407557775397216">"נתונים סלולריים"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> ‏— <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -939,13 +934,6 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"הגדרות"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"הבנתי"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"‏ערימת Dump SysUI"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> משתמשת ב<xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"אפליקציות משתמשות ב<xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" וגם "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"מצלמה"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"מיקום"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"מיקרופון"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"החיישנים כבויים"</string>
     <string name="device_services" msgid="1549944177856658705">"שירותים למכשיר"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ללא שם"</string>
@@ -968,4 +956,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"הניווט במערכת עודכן. אפשר לערוך שינויים דרך ההגדרות."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"יש לעבור להגדרות כדי לעדכן את הניווט במערכת"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"המתנה"</string>
+    <string name="magnification_overlay_title" msgid="6584179429612427958">"חלון ליצירת שכבת-על להגדלה"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"חלון הגדלה"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"בקרות של חלון ההגדלה"</string>
 </resources>

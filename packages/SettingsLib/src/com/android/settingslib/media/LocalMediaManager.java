@@ -18,6 +18,7 @@ package com.android.settingslib.media;
 import android.app.Notification;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.IntDef;
@@ -59,6 +60,8 @@ public class LocalMediaManager implements BluetoothCallback {
     private Context mContext;
     private BluetoothMediaManager mBluetoothMediaManager;
     private LocalBluetoothManager mLocalBluetoothManager;
+    private InfoMediaManager mInfoMediaManager;
+    private String mPackageName;
 
     @VisibleForTesting
     List<MediaDevice> mMediaDevices = new ArrayList<>();
@@ -87,6 +90,7 @@ public class LocalMediaManager implements BluetoothCallback {
 
     public LocalMediaManager(Context context, String packageName, Notification notification) {
         mContext = context;
+        mPackageName = packageName;
         mLocalBluetoothManager =
                 LocalBluetoothManager.getInstance(context, /* onInitCallback= */ null);
         if (mLocalBluetoothManager == null) {
@@ -96,6 +100,7 @@ public class LocalMediaManager implements BluetoothCallback {
 
         mBluetoothMediaManager =
                 new BluetoothMediaManager(context, mLocalBluetoothManager, notification);
+        mInfoMediaManager = new InfoMediaManager(context, packageName, notification);
     }
 
     @VisibleForTesting
@@ -104,6 +109,7 @@ public class LocalMediaManager implements BluetoothCallback {
         mContext = context;
         mLocalBluetoothManager = localBluetoothManager;
         mBluetoothMediaManager = bluetoothMediaManager;
+        mInfoMediaManager = infoMediaManager;
     }
 
     /**
@@ -126,8 +132,7 @@ public class LocalMediaManager implements BluetoothCallback {
             return;
         }
 
-        //TODO(b/121083246): Update it once remote media API is ready.
-        if (mCurrentConnectedDevice != null && !(connectDevice instanceof InfoMediaDevice)) {
+        if (mCurrentConnectedDevice != null) {
             mCurrentConnectedDevice.disconnect();
         }
 
@@ -157,6 +162,10 @@ public class LocalMediaManager implements BluetoothCallback {
         mMediaDevices.clear();
         mBluetoothMediaManager.registerCallback(mMediaDeviceCallback);
         mBluetoothMediaManager.startScan();
+        if (!TextUtils.isEmpty(mPackageName)) {
+            mInfoMediaManager.registerCallback(mMediaDeviceCallback);
+            mInfoMediaManager.startScan();
+        }
     }
 
     private void addPhoneDeviceIfNecessary() {
@@ -191,6 +200,10 @@ public class LocalMediaManager implements BluetoothCallback {
     public void stopScan() {
         mBluetoothMediaManager.unregisterCallback(mMediaDeviceCallback);
         mBluetoothMediaManager.stopScan();
+        if (!TextUtils.isEmpty(mPackageName)) {
+            mInfoMediaManager.unregisterCallback(mMediaDeviceCallback);
+            mInfoMediaManager.stopScan();
+        }
     }
 
     /**
@@ -253,7 +266,9 @@ public class LocalMediaManager implements BluetoothCallback {
                 }
             }
             addPhoneDeviceIfNecessary();
-            mCurrentConnectedDevice = updateCurrentConnectedDevice();
+            final MediaDevice infoMediaDevice = mInfoMediaManager.getCurrentConnectedDevice();
+            mCurrentConnectedDevice = infoMediaDevice != null
+                    ? infoMediaDevice : updateCurrentConnectedDevice();
             updatePhoneMediaDeviceSummary();
             dispatchDeviceListUpdate();
         }

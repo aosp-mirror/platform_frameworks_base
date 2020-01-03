@@ -82,9 +82,6 @@ public final class InputWindowHandle {
     // Input event dispatching is paused.
     public boolean paused;
 
-    // Window layer.
-    public int layer;
-
     // Id of process and user that owns the window.
     public int ownerPid;
     public int ownerUid;
@@ -126,7 +123,6 @@ public final class InputWindowHandle {
     @Override
     public String toString() {
         return new StringBuilder(name != null ? name : "")
-                .append(", layer=").append(layer)
                 .append(", frame=[").append(frameLeft).append(",").append(frameTop).append(",")
                         .append(frameRight).append(",").append(frameBottom).append("]")
                 .append(", touchableRegion=").append(touchableRegion)

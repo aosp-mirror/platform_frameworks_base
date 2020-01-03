@@ -465,6 +465,25 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
+    public void selectRoute(IMediaRouter2Client client, String sessionId, MediaRoute2Info route) {
+        mService2.selectRoute(client, sessionId, route);
+    }
+
+    // Binder call
+    @Override
+    public void deselectRoute(IMediaRouter2Client client, String sessionId, MediaRoute2Info route) {
+        mService2.deselectRoute(client, sessionId, route);
+    }
+
+    // Binder call
+    @Override
+    public void transferToRoute(IMediaRouter2Client client, String sessionId,
+            MediaRoute2Info route) {
+        mService2.transferToRoute(client, sessionId, route);
+    }
+
+    // Binder call
+    @Override
     public void sendControlRequest(IMediaRouter2Client client, MediaRoute2Info route,
             Intent request) {
         mService2.sendControlRequest(client, route, request);

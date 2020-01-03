@@ -70,8 +70,7 @@
     <string name="learn_more" msgid="4690632085667273811">"Ulteriori informazioni"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom per riempire schermo"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Estendi per riemp. schermo"</string>
-    <!-- no translation found for global_action_screenshot (2760267567509131654) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Salvataggio screenshot..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Salvataggio screenshot..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Screenshot salvato"</string>
@@ -119,8 +118,7 @@
     <string name="phone_label" msgid="5715229948920451352">"apri telefono"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"apri Voice Assist"</string>
     <string name="camera_label" msgid="8253821920931143699">"apri fotocamera"</string>
-    <!-- no translation found for cancel (1089011503403416730) -->
-    <skip />
+    <string name="cancel" msgid="1089011503403416730">"Annulla"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Conferma"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Riprova"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Tocca per annullare l\'autenticazione"</string>
@@ -199,7 +197,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Dati mobili attivati"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Dati mobili disattivati"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"Non impostato per l\'utilizzo dei dati"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"Off"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"OFF"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Tethering Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Modalità aereo."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN attiva."</string>
@@ -387,7 +385,9 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Dalle <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Fino alle <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Tema scuro"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"Tema scuro\nRisparmio energetico"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Risparmio energetico"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Attivato al tramonto"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Fino all\'alba"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC non attiva"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC attiva"</string>
@@ -412,10 +412,6 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Tocca ancora per aprire"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Scorri verso l\'alto per aprire"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Scorri verso l\'alto per riprovare"</string>
-    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
-    <skip />
-    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
-    <skip />
     <string name="do_disclosure_generic" msgid="2388094207542706440">"Questo dispositivo è gestito dalla tua organizzazione"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"Questo dispositivo è gestito da <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Scorri per accedere al telefono"</string>
@@ -467,9 +463,11 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Risparmio energetico attivo"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Riduce le prestazioni e i dati in background"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Disattiva Risparmio energetico"</string>
-    <string name="media_projection_dialog_text" msgid="5509958417853154019">"Mentre registri o trasmetti, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> può acquisire tutti i dati sensibili che vengono mostrati sul tuo schermo o riprodotti dal tuo dispositivo, incluse informazioni sensibili quali contenuti audio, password, informazioni di pagamento, foto e messaggi."</string>
-    <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"Mentre registri o trasmetti, il servizio che offre questa funzionalità può acquisire tutti i dati sensibili che vengono mostrati sul tuo schermo o riprodotti dal tuo dispositivo, incluse informazioni sensibili quali contenuti audio, password, informazioni di pagamento, foto e messaggi."</string>
-    <string name="media_projection_dialog_title" msgid="6379655487632663290">"Esposizione di informazioni sensibili durante la trasmissione/registrazione"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> avrà accesso a tutte le informazioni visibili sul tuo schermo o riprodotte dal tuo dispositivo durante la registrazione o la trasmissione. Sono incluse informazioni quali password, dettagli sui pagamenti, foto, messaggi e audio riprodotto."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Il servizio che offre questa funzione avrà accesso a tutte le informazioni visibili sul tuo schermo o riprodotte dal tuo dispositivo durante la registrazione o la trasmissione. Sono incluse informazioni quali password, dettagli sui pagamenti, foto, messaggi e audio riprodotto."</string>
+    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
+    <skip />
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Vuoi avviare la registrazione o la trasmissione con <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Non mostrare più"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Cancella tutto"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gestisci"</string>
@@ -643,7 +641,7 @@
     <string name="do_not_silence_block" msgid="4361847809775811849">"Non silenziare e non bloccare"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controlli di gestione delle notifiche"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"On"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Off"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"OFF"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"I controlli di gestione delle notifiche ti consentono di impostare un livello di importanza compreso tra 0 e 5 per le notifiche di un\'app. \n\n"<b>"Livello 5"</b>" \n- Mostra in cima all\'elenco di notifiche \n- Consenti l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 4"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 3"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n\n"<b>"Livello 2"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n\n"<b>"Livello 1"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n- Nascondi da schermata di blocco e barra di stato \n- Mostra in fondo all\'elenco di notifiche \n\n"<b>"Livello 0"</b>" \n- Blocca tutte le notifiche dell\'app"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Notifiche"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Non vedrai più queste notifiche"</string>
@@ -766,7 +764,7 @@
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Risparmio dati attivo"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Risparmio dati disattivato"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"On"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Off"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"OFF"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Barra di navigazione"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Layout"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Tipo di pulsante extra sinistra"</string>
@@ -786,8 +784,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"Selettore tastiera"</string>
     <string name="save" msgid="3392754183673848006">"Salva"</string>
-    <!-- no translation found for reset (8715144064608810383) -->
-    <skip />
+    <string name="reset" msgid="8715144064608810383">"Reimposta"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Modifica la larghezza del pulsante"</string>
     <string name="clipboard" msgid="8517342737534284617">"Appunti"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"Pulsante di navigazione personalizzato"</string>
@@ -883,8 +880,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"Destra"</string>
     <string name="tuner_menu" msgid="363690665924769420">"Menu"</string>
     <string name="tuner_app" msgid="6949280415826686972">"App <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for notification_channel_alerts (3385787053375150046) -->
-    <skip />
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"Avvisi"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Batteria"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Screenshot"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"Messaggi generali"</string>
@@ -894,8 +890,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"App <xliff:g id="APP">%1$s</xliff:g> in esecuzione"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"App aperta senza essere stata installata."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"App aperta senza essere stata installata. Tocca per avere ulteriori informazioni."</string>
-    <!-- no translation found for app_info (5153758994129963243) -->
-    <skip />
+    <string name="app_info" msgid="5153758994129963243">"Informazioni app"</string>
     <string name="go_to_web" msgid="636673528981366511">"Vai al browser"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Dati mobili"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> - <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -929,13 +924,6 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Impostazioni"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Esegui dump heap SysUI"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"L\'app <xliff:g id="APP">%1$s</xliff:g> sta usando <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Le app stanno usando <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" e "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"Fotocamera"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"luogo"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"un microfono"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensori disattivati"</string>
     <string name="device_services" msgid="1549944177856658705">"Servizi del dispositivo"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Senza titolo"</string>
@@ -958,4 +946,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigazione del sistema aggiornata. Per apportare modifiche, usa le Impostazioni."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Usa le Impostazioni per aggiornare la navigazione del sistema"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
+    <string name="magnification_overlay_title" msgid="6584179429612427958">"Finestra overlay ingrandimento"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"Finestra ingrandimento"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"Finestra controlli di ingrandimento"</string>
 </resources>

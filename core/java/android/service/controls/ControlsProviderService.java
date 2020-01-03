@@ -20,13 +20,21 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.service.controls.actions.ControlAction;
+import android.service.controls.templates.ControlTemplate;
+import android.text.TextUtils;
+import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,8 +46,14 @@ public abstract class ControlsProviderService extends Service {
 
     @SdkConstant(SdkConstantType.SERVICE_ACTION)
     public static final String CONTROLS_ACTION = "android.service.controls.ControlsProviderService";
+    public static final String CALLBACK_BUNDLE = "CALLBACK_BUNDLE";
+    public static final String CALLBACK_BINDER = "CALLBACK_BINDER";
+    public static final String CALLBACK_TOKEN = "CALLBACK_TOKEN";
+
+    public final String TAG = getClass().getSimpleName();
 
     private IControlsProviderCallback mCallback;
+    private IBinder mToken;
     private RequestHandler mHandler;
 
     /**
@@ -67,16 +81,80 @@ public abstract class ControlsProviderService extends Service {
      */
     public abstract void onAction(@NonNull String controlId, @NonNull ControlAction action);
 
-    protected IControlsProviderCallback getControlsProviderCallback() {
-        return mCallback;
+    /**
+     * Sends a list of the controls available from this service.
+     *
+     * The items in the list must not have state information (as created by
+     * {@link Control.StatelessBuilder}).
+     * @param controls
+     */
+    public void onLoad(@NonNull List<Control> controls) {
+        Preconditions.checkNotNull(controls);
+        List<Control> list = new ArrayList<>();
+        for (Control control: controls) {
+            if (control == null) {
+                Log.e(TAG, "onLoad: null control.");
+            }
+            if (isStateless(control)) {
+                list.add(control);
+            } else {
+                Log.w(TAG, "onLoad: control is not stateless.");
+                list.add(new Control.StatelessBuilder(control).build());
+            }
+        }
+        try {
+            mCallback.onLoad(mToken, list);
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Sends a list of the controls requested by {@link ControlsProviderService#subscribe} with
+     * their state.
+     * @param statefulControls
+     */
+    public void onRefreshState(@NonNull List<Control> statefulControls) {
+        Preconditions.checkNotNull(statefulControls);
+        try {
+            mCallback.onRefreshState(mToken, statefulControls);
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Sends the response of a command in the specified {@link Control}.
+     * @param controlId
+     * @param response
+     */
+    public void onControlActionResponse(
+            @NonNull String controlId, @ControlAction.ResponseResult int response) {
+        Preconditions.checkNotNull(controlId);
+        if (!ControlAction.isValidResponse(response)) {
+            Log.e(TAG, "Not valid response result: " + response);
+            response = ControlAction.RESPONSE_UNKNOWN;
+        }
+        try {
+            mCallback.onControlActionResponse(mToken, controlId, response);
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    private boolean isStateless(Control control) {
+        return (control.getStatus() == Control.STATUS_UNKNOWN
+                    && control.getControlTemplate().getTemplateType() == ControlTemplate.TYPE_NONE
+                    && TextUtils.isEmpty(control.getStatusText()));
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         mHandler = new RequestHandler(Looper.getMainLooper());
 
-        Bundle bundle = intent.getBundleExtra("CALLBACK_BUNDLE");
-        IBinder callbackBinder = bundle.getBinder("CALLBACK_BINDER");
+        Bundle bundle = intent.getBundleExtra(CALLBACK_BUNDLE);
+        IBinder callbackBinder = bundle.getBinder(CALLBACK_BINDER);
+        mToken = bundle.getBinder(CALLBACK_TOKEN);
         mCallback = IControlsProviderCallback.Stub.asInterface(callbackBinder);
 
         return new IControlsProvider.Stub() {
@@ -94,7 +172,7 @@ public abstract class ControlsProviderService extends Service {
 
             public void onAction(String id, ControlAction action) {
                 ActionMessage msg = new ActionMessage(id, action);
-                mHandler.obtainMessage(RequestHandler.MSG_SUBSCRIBE, msg).sendToTarget();
+                mHandler.obtainMessage(RequestHandler.MSG_ON_ACTION, msg).sendToTarget();
             }
         };
     }

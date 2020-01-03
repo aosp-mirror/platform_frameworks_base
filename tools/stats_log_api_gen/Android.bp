@@ -25,6 +25,8 @@ cc_binary_host {
         "java_writer.cpp",
         "java_writer_q.cpp",
         "main.cpp",
+        "native_writer.cpp",
+        "native_writer_q.cpp",
         "utils.cpp",
     ],
     cflags: [
@@ -121,17 +123,5 @@ cc_library {
         "libcutils",
     ],
     static_libs: ["libstatssocket"],
-    target: {
-        android: {
-            shared_libs: [
-                "libutils",
-            ],
-        },
-        host: {
-            static_libs: [
-                "libutils",
-            ],
-        },
-    },
 }
 

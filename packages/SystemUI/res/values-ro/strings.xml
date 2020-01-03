@@ -70,8 +70,7 @@
     <string name="learn_more" msgid="4690632085667273811">"Mai multe"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom pt. a umple ecranul"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Înt. pt. a umple ecranul"</string>
-    <!-- no translation found for global_action_screenshot (2760267567509131654) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="2760267567509131654">"Captură de ecran"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Se salv. captura de ecran..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Se salvează captura de ecran..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Captură de ecran salvată"</string>
@@ -119,8 +118,7 @@
     <string name="phone_label" msgid="5715229948920451352">"deschideți telefonul"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"deschideți asistentul vocal"</string>
     <string name="camera_label" msgid="8253821920931143699">"deschideți camera foto"</string>
-    <!-- no translation found for cancel (1089011503403416730) -->
-    <skip />
+    <string name="cancel" msgid="1089011503403416730">"Anulați"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Confirmați"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Încercați din nou"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Atingeți pentru a anula autentificarea"</string>
@@ -389,7 +387,9 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Activată la <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Până la <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Temă întunecată"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"Temă întunecată\nEconomisirea bateriei"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Economisire baterie"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Activată la apus"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Până la răsărit"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Serviciul NFC este dezactivat"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Serviciul NFC este activat"</string>
@@ -414,10 +414,6 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Atingeți din nou pentru a deschide"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Glisați în sus pentru a deschide"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Glisați pentru a încerca din nou"</string>
-    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
-    <skip />
-    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
-    <skip />
     <string name="do_disclosure_generic" msgid="2388094207542706440">"Acest dispozitiv este gestionat de organizația dvs."</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"Acest dispozitiv este gestionat de <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Glisați dinspre telefon"</string>
@@ -470,9 +466,11 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Economisire baterie activată"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Reduce performanța și datele de fundal"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Dezactivați economisirea bateriei"</string>
-    <string name="media_projection_dialog_text" msgid="5509958417853154019">"În timp ce înregistrați sau proiectați, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> poate captura toate informațiile sensibile care sunt afișate pe ecran sau redate pe dispozitiv, inclusiv informații sensibile precum conținutul audio, parolele, informațiile de plată, fotografiile și mesajele."</string>
-    <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"În timp ce înregistrați sau proiectați, serviciul care oferă această funcție poate captura toate informațiile sensibile care sunt afișate pe ecran sau redate pe dispozitiv, inclusiv informații sensibile precum conținutul audio, parolele, informațiile de plată, fotografiile și mesajele."</string>
-    <string name="media_projection_dialog_title" msgid="6379655487632663290">"Se expun informații sensibile în timpul proiectării/înregistrării"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> va avea acces la toate informațiile vizibile pe ecran sau redate pe dispozitiv în timp ce înregistrați sau proiectați. Între aceste informații se numără parole, detalii de plată, fotografii, mesaje și conținutul audio pe care îl redați."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Serviciul care oferă această funcție va avea acces la toate informațiile vizibile pe ecran sau redate pe dispozitiv în timp ce înregistrați sau proiectați. Între aceste informații se numără parole, detalii de plată, fotografii, mesaje și conținutul audio pe care îl redați."</string>
+    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
+    <skip />
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Începeți să înregistrați sau să proiectați cu <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Nu se mai afișează"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Ștergeți toate notificările"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gestionați"</string>
@@ -791,8 +789,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"Comutator tastatură"</string>
     <string name="save" msgid="3392754183673848006">"Salvați"</string>
-    <!-- no translation found for reset (8715144064608810383) -->
-    <skip />
+    <string name="reset" msgid="8715144064608810383">"Resetați"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Ajustați lățimea butonului"</string>
     <string name="clipboard" msgid="8517342737534284617">"Clipboard"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"Buton personalizat pentru navigare"</string>
@@ -888,8 +885,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"Dreapta"</string>
     <string name="tuner_menu" msgid="363690665924769420">"Meniu"</string>
     <string name="tuner_app" msgid="6949280415826686972">"Aplicația <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for notification_channel_alerts (3385787053375150046) -->
-    <skip />
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"Alerte"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Baterie"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Capturi de ecran"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"Mesaje generale"</string>
@@ -899,8 +895,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> rulează"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Aplicația a fost deschisă fără a fi instalată."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Aplicația a fost deschisă fără a fi instalată. Atingeți pentru a afla mai multe."</string>
-    <!-- no translation found for app_info (5153758994129963243) -->
-    <skip />
+    <string name="app_info" msgid="5153758994129963243">"Informații aplicație"</string>
     <string name="go_to_web" msgid="636673528981366511">"Accesați browserul"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Date mobile"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -934,13 +929,6 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Setări"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Extrageți memoria SysUI"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> folosește <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplicațiile folosesc <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" și "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"cameră foto"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"locație"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"microfon"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Senzori dezactivați"</string>
     <string name="device_services" msgid="1549944177856658705">"Servicii pentru dispozitiv"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Fără titlu"</string>
@@ -963,4 +951,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigarea în sistem a fost actualizată. Pentru a face modificări, accesați Setările."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Accesați Setările pentru a actualiza navigarea în sistem"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
+    <string name="magnification_overlay_title" msgid="6584179429612427958">"Fereastra de suprapunere pentru mărire"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"Fereastra de mărire"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"Comenzi pentru fereastra de mărire"</string>
 </resources>

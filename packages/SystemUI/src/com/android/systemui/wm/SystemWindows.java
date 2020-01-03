@@ -42,7 +42,7 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.WindowlessViewRoot;
+import android.view.SurfaceControlViewHost;
 import android.view.WindowlessWindowManager;
 
 import com.android.internal.os.IResultReceiver;
@@ -61,7 +61,7 @@ public class SystemWindows {
     private static final String TAG = "SystemWindows";
 
     private final SparseArray<PerDisplay> mPerDisplay = new SparseArray<>();
-    final HashMap<View, WindowlessViewRoot> mViewRoots = new HashMap<>();
+    final HashMap<View, SurfaceControlViewHost> mViewRoots = new HashMap<>();
     Context mContext;
     IWindowSession mSession;
     DisplayWindowController mDisplayController;
@@ -121,7 +121,7 @@ public class SystemWindows {
      * @param view
      */
     public void removeView(View view) {
-        WindowlessViewRoot root = mViewRoots.remove(view);
+        SurfaceControlViewHost root = mViewRoots.remove(view);
         root.die();
     }
 
@@ -129,7 +129,7 @@ public class SystemWindows {
      * Updates the layout params of a view.
      */
     public void updateViewLayout(@NonNull View view, ViewGroup.LayoutParams params) {
-        WindowlessViewRoot root = mViewRoots.get(view);
+        SurfaceControlViewHost root = mViewRoots.get(view);
         if (root == null || !(params instanceof WindowManager.LayoutParams)) {
             return;
         }
@@ -177,7 +177,7 @@ public class SystemWindows {
                 return;
             }
             final Display display = mDisplayController.getDisplay(mDisplayId);
-            WindowlessViewRoot viewRoot = new WindowlessViewRoot(mContext, display, wwm);
+            SurfaceControlViewHost viewRoot = new SurfaceControlViewHost(mContext, display, wwm);
             attrs.flags |= FLAG_HARDWARE_ACCELERATED;
             viewRoot.addView(view, attrs);
             mViewRoots.put(view, viewRoot);

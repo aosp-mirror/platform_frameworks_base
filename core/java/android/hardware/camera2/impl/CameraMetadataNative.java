@@ -240,6 +240,11 @@ public class CameraMetadataNative implements Parcelable {
          *
          * <p>This value is looked up the first time, and cached subsequently.</p>
          *
+         * <p>This function may be called without cacheTag() if this is not a vendor key.
+         * If this is a vendor key, cacheTag() must be called first before getTag() can
+         * be called. Otherwise, mVendorId could be default (Long.MAX_VALUE) and vendor
+         * tag lookup could fail.</p>
+         *
          * @return The tag numeric value corresponding to the string
          */
         @UnsupportedAppUsage
@@ -249,6 +254,27 @@ public class CameraMetadataNative implements Parcelable {
                 mHasTag = true;
             }
             return mTag;
+        }
+
+        /**
+         * Whether this key's tag is cached.
+         *
+         * @hide
+         */
+        @UnsupportedAppUsage
+        public final boolean hasTag() {
+            return mHasTag;
+        }
+
+        /**
+         * Cache this key's tag.
+         *
+         * @hide
+         */
+        @UnsupportedAppUsage
+        public final void cacheTag(int tag) {
+            mHasTag = true;
+            mTag = tag;
         }
 
         /**
@@ -523,7 +549,13 @@ public class CameraMetadataNative implements Parcelable {
     }
 
     private <T> T getBase(Key<T> key) {
-        int tag = nativeGetTagFromKeyLocal(key.getName());
+        int tag;
+        if (key.hasTag()) {
+            tag = key.getTag();
+        } else {
+            tag = nativeGetTagFromKeyLocal(key.getName());
+            key.cacheTag(tag);
+        }
         byte[] values = readValues(tag);
         if (values == null) {
             // If the key returns null, use the fallback key if exists.
@@ -1451,7 +1483,13 @@ public class CameraMetadataNative implements Parcelable {
     }
 
     private <T> void setBase(Key<T> key, T value) {
-        int tag = nativeGetTagFromKeyLocal(key.getName());
+        int tag;
+        if (key.hasTag()) {
+            tag = key.getTag();
+        } else {
+            tag = nativeGetTagFromKeyLocal(key.getName());
+            key.cacheTag(tag);
+        }
         if (value == null) {
             // Erase the entry
             writeValues(tag, /*src*/null);

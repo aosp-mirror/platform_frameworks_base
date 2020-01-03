@@ -37,6 +37,7 @@ import android.text.TextUtils;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -63,6 +64,11 @@ public class MediaRouterManagerTest {
     public static final String ROUTE_ID3_SESSION_CREATION_FAILED =
             "route_id3_session_creation_failed";
     public static final String ROUTE_NAME3 = "Sample Route 3 - Session creation failed";
+    public static final String ROUTE_ID4_TO_SELECT_AND_DESELECT =
+            "route_id4_to_select_and_deselect";
+    public static final String ROUTE_NAME4 = "Sample Route 4 - Route to select and deselect";
+    public static final String ROUTE_ID5_TO_TRANSFER_TO = "route_id5_to_transfer_to";
+    public static final String ROUTE_NAME5 = "Sample Route 5 - Route to transfer to";
 
     public static final String ROUTE_ID_SPECIAL_CATEGORY = "route_special_category";
     public static final String ROUTE_NAME_SPECIAL_CATEGORY = "Special Category Route";
@@ -202,8 +208,10 @@ public class MediaRouterManagerTest {
      * Tests if MR2.Callback.onRouteSelected is called when a route is selected from MR2Manager.
      *
      * TODO: Change this test so that this test check whether the route is added in a session.
-     *       Until then, temporailiy removing @Test annotation.
+     *       Until then, temporailiy marking @Ignore
      */
+    @Test
+    @Ignore
     public void testRouterOnRouteSelected() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(CATEGORIES_ALL);
 
@@ -235,7 +243,8 @@ public class MediaRouterManagerTest {
      * Tests if MR2Manager.Callback.onRouteSelected is called
      * when a route is selected by MR2Manager.
      */
-    //TODO: test session created callback instead of onRouteSelected
+    @Test
+    @Ignore("TODO: test session created callback instead of onRouteSelected")
     public void testManagerOnRouteSelected() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(CATEGORIES_ALL);
@@ -263,7 +272,8 @@ public class MediaRouterManagerTest {
         }
     }
 
-    //TODO: enable this when "releasing session" is implemented
+    @Test
+    @Ignore("TODO: enable this when 'releasing session' is implemented")
     public void testGetActiveRoutes() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
 
@@ -300,7 +310,8 @@ public class MediaRouterManagerTest {
     /**
      * Tests selecting and unselecting routes of a single provider.
      */
-    //TODO: @Test when session is released
+    @Test
+    @Ignore("TODO: enable when session is released")
     public void testSingleProviderSelect() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(CATEGORIES_ALL);
         addRouterCallback(new RouteCallback());

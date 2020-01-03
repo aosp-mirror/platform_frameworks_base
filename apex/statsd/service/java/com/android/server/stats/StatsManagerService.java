@@ -95,6 +95,12 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 return;
             }
             sStatsd = IStatsd.Stub.asInterface(ServiceManager.getService("stats"));
+            if (sStatsd == null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Failed to get stats service.");
+                }
+                return;
+            }
             // Assume statsd is ready since this is called form statscompanion, link to statsd.
             try {
                 sStatsd.asBinder().linkToDeath((IBinder.DeathRecipient) () -> {

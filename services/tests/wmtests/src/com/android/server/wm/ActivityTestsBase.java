@@ -55,7 +55,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
     final Context mContext = getInstrumentation().getTargetContext();
 
     ActivityTaskManagerService mService;
-    RootActivityContainer mRootActivityContainer;
+    RootWindowContainer mRootWindowContainer;
     ActivityStackSupervisor mSupervisor;
 
     // Default package name
@@ -73,7 +73,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
     public void setUpBase() {
         mService = mSystemServicesTestRule.getActivityTaskManagerService();
         mSupervisor = mService.mStackSupervisor;
-        mRootActivityContainer = mService.mRootActivityContainer;
+        mRootWindowContainer = mService.mRootWindowContainer;
     }
 
     /** Creates and adds a {@link TestDisplayContent} to supervisor at the given position. */
@@ -83,7 +83,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
 
     /** Sets the default minimum task size to 1 so that tests can use small task sizes */
     public void removeGlobalMinSizeRestriction() {
-        mService.mRootActivityContainer.mDefaultMinSizeOfResizeableTaskDp = 1;
+        mService.mRootWindowContainer.mDefaultMinSizeOfResizeableTaskDp = 1;
     }
 
     /**
@@ -273,7 +273,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
                     activity.processName, activity.info.applicationInfo.uid);
 
             // Resume top activities to make sure all other signals in the system are connected.
-            mService.mRootActivityContainer.resumeFocusedStacksTopActivities();
+            mService.mRootWindowContainer.resumeFocusedStacksTopActivities();
             return activity;
         }
     }
@@ -345,7 +345,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
 
         Task build() {
             if (mStack == null && mCreateStack) {
-                mStack = mSupervisor.mRootActivityContainer.getDefaultDisplay().createStack(
+                mStack = mSupervisor.mRootWindowContainer.getDefaultDisplay().createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
                 spyOn(mStack);
             }
@@ -379,7 +379,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
     }
 
     static class StackBuilder {
-        private final RootActivityContainer mRootActivityContainer;
+        private final RootWindowContainer mRootWindowContainer;
         private DisplayContent mDisplay;
         private int mStackId = -1;
         private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
@@ -387,9 +387,9 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         private boolean mOnTop = true;
         private boolean mCreateActivity = true;
 
-        StackBuilder(RootActivityContainer root) {
-            mRootActivityContainer = root;
-            mDisplay = mRootActivityContainer.getDefaultDisplay();
+        StackBuilder(RootWindowContainer root) {
+            mRootWindowContainer = root;
+            mDisplay = mRootWindowContainer.getDefaultDisplay();
         }
 
         StackBuilder setWindowingMode(int windowingMode) {
@@ -425,7 +425,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         ActivityStack build() {
             final int stackId = mStackId >= 0 ? mStackId : mDisplay.getNextStackId();
             final ActivityStack stack;
-            final ActivityStackSupervisor supervisor = mRootActivityContainer.mStackSupervisor;
+            final ActivityStackSupervisor supervisor = mRootWindowContainer.mStackSupervisor;
 
             stack = mDisplay.createStackUnchecked(mWindowingMode, mActivityType, stackId, mOnTop);
 

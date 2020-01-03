@@ -30,6 +30,9 @@ namespace statsd {
 using android::util::ProtoReader;
 using google::protobuf::RepeatedPtrField;
 
+const int SCREEN_STATE_ATOM_ID = android::util::SCREEN_STATE_CHANGED;
+const int UID_PROCESS_STATE_ATOM_ID = android::util::UID_PROCESS_STATE_CHANGED;
+
 // Converts a ProtoOutputStream to a StatsLogReport proto.
 StatsLogReport outputStreamToProto(ProtoOutputStream* proto);
 

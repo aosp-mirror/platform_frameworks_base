@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.service.controls.Control;
-import android.service.controls.ControlState;
 import android.service.controls.actions.FloatAction;
 
 /**
@@ -61,7 +60,7 @@ public final class RangeTemplate extends ControlTemplate {
      * @param templateId the identifier for this template object
      * @param minValue minimum value for the input
      * @param maxValue maximum value for the input
-     * @param currentValue the current value of the {@link ControlState} containing this object.
+     * @param currentValue the current value of the {@link Control} containing this object.
      * @param stepValue minimum value of increments/decrements when interacting with this control.
      * @param formatString a formatting string as per {@link String#format} used to display the
      *                    {@code currentValue}. If {@code null} is passed, the "%.1f" is used.

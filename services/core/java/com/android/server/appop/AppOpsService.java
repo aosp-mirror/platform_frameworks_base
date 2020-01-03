@@ -477,8 +477,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     /** A in progress startOp->finishOp event */
     private static final class InProgressStartOpEvent implements IBinder.DeathRecipient {
-        /** Time of startOp event */
+        /** Wall clock time of startOp event (not monotonic) */
         final long startTime;
+
+        /** Elapsed time since boot of startOp event */
+        final long startElapsedTime;
 
         /** Id of the client that started the event */
         final @NonNull IBinder clientId;
@@ -492,9 +495,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         /** How many times the op was started but not finished yet */
         int numUnfinishedStarts;
 
-        private InProgressStartOpEvent(long startTime, @NonNull IBinder clientId,
-                @NonNull Runnable onDeath, int uidState) throws RemoteException {
+        private InProgressStartOpEvent(long startTime, long startElapsedTime,
+                @NonNull IBinder clientId, @NonNull Runnable onDeath, int uidState)
+                throws RemoteException {
             this.startTime = startTime;
+            this.startElapsedTime = startElapsedTime;
             this.clientId = clientId;
             this.onDeath = onDeath;
             this.uidState = uidState;
@@ -636,7 +641,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             InProgressStartOpEvent event = mInProgressEvents.get(clientId);
             if (event == null) {
-                event = new InProgressStartOpEvent(System.currentTimeMillis(), clientId, () -> {
+                event = new InProgressStartOpEvent(System.currentTimeMillis(),
+                        SystemClock.elapsedRealtime(), clientId, () -> {
                     // In the case the client dies without calling finish first
                     synchronized (AppOpsService.this) {
                         if (mInProgressEvents == null) {
@@ -698,7 +704,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                 // startOp events don't support proxy, hence use flags==SELF
                 NoteOpEvent finishedEvent = new NoteOpEvent(event.startTime,
-                        System.currentTimeMillis() - event.startTime, null);
+                        SystemClock.elapsedRealtime() - event.startElapsedTime, null);
                 mAccessEvents.put(makeKey(event.uidState, OP_FLAG_SELF), finishedEvent);
 
                 mHistoricalRegistry.increaseOpAccessDuration(parent.op, parent.uid,
@@ -759,7 +765,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             // Add in progress events as access events
             if (mInProgressEvents != null) {
-                long now = System.currentTimeMillis();
+                long now = SystemClock.elapsedRealtime();
                 int numInProgressEvents = mInProgressEvents.size();
 
                 if (accessEvents == null) {
@@ -771,7 +777,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                     // startOp events don't support proxy
                     accessEvents.append(makeKey(event.uidState, OP_FLAG_SELF),
-                            new NoteOpEvent(event.startTime, now - event.startTime, null));
+                            new NoteOpEvent(event.startTime, now - event.startElapsedTime, null));
                 }
             }
 
@@ -4188,18 +4194,18 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         final FeatureOp featureOp = op.mFeatures.get(featureId);
         if (featureOp.isRunning()) {
-            long earliestStartTime = Long.MAX_VALUE;
+            long earliestElapsedTime = Long.MAX_VALUE;
             long maxNumStarts = 0;
             int numInProgressEvents = featureOp.mInProgressEvents.size();
             for (int i = 0; i < numInProgressEvents; i++) {
                 InProgressStartOpEvent event = featureOp.mInProgressEvents.valueAt(i);
 
-                earliestStartTime = Math.min(earliestStartTime, event.startTime);
+                earliestElapsedTime = Math.min(earliestElapsedTime, event.startElapsedTime);
                 maxNumStarts = Math.max(maxNumStarts, event.numUnfinishedStarts);
             }
 
             pw.print(prefix + "Running start at: ");
-            TimeUtils.formatDuration(nowElapsed - earliestStartTime, pw);
+            TimeUtils.formatDuration(nowElapsed - earliestElapsedTime, pw);
             pw.println();
 
             if (maxNumStarts > 1) {
@@ -4471,7 +4477,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (dumpOp >= 0 || dumpPackage != null || dumpMode >= 0) {
                     boolean hasOp = dumpOp < 0 || (uidState.opModes != null
                             && uidState.opModes.indexOfKey(dumpOp) >= 0);
-                    boolean hasPackage = dumpPackage == null;
+                    boolean hasPackage = dumpPackage == null || dumpUid == mUidStates.keyAt(i);
                     boolean hasMode = dumpMode < 0;
                     if (!hasMode && opModes != null) {
                         for (int opi = 0; !hasMode && opi < opModes.size(); opi++) {

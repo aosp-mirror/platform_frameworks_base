@@ -98,10 +98,10 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.WindowInsets;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
+import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -1546,6 +1546,21 @@ public class ChooserActivity extends ResolverActivity implements
         return -1;
     }
 
+    @Override
+    protected boolean shouldAddFooterView() {
+        // To accommodate for window insets
+        return true;
+    }
+
+    @Override
+    protected void applyFooterView(int height) {
+        int count = mChooserMultiProfilePagerAdapter.getItemCount();
+
+        for (int i = 0; i < count; i++) {
+            mChooserMultiProfilePagerAdapter.getAdapterForIndex(i).setFooterHeight(height);
+        }
+    }
+
     void queryTargetServices(ChooserListAdapter adapter) {
         mQueriedTargetServicesTimeMs = System.currentTimeMillis();
 
@@ -2413,12 +2428,17 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     /**
-     * Intentionally override the {@link ResolverActivity} implementation as we only need that
-     * implementation for the intent resolver case.
+     * Add a footer to the list, to support scrolling behavior below the navbar.
      */
-    @Override
-    protected WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-        return insets.consumeSystemWindowInsets();
+    final class FooterViewHolder extends RecyclerView.ViewHolder {
+        FooterViewHolder(View itemView) {
+            super(itemView);
+        }
+
+        public void setHeight(int height) {
+            itemView.setLayoutParams(
+                    new RecyclerView.LayoutParams(LayoutParams.MATCH_PARENT, height));
+        }
     }
 
     /**
@@ -2451,11 +2471,14 @@ public class ChooserActivity extends ResolverActivity implements
 
         private boolean mLayoutRequested = false;
 
+        private FooterViewHolder mFooterViewHolder;
+
         private static final int VIEW_TYPE_DIRECT_SHARE = 0;
         private static final int VIEW_TYPE_NORMAL = 1;
         private static final int VIEW_TYPE_PROFILE = 2;
         private static final int VIEW_TYPE_AZ_LABEL = 3;
         private static final int VIEW_TYPE_CALLER_AND_RANK = 4;
+        private static final int VIEW_TYPE_FOOTER = 5;
 
         private static final int MAX_TARGETS_PER_ROW_PORTRAIT = 4;
         private static final int MAX_TARGETS_PER_ROW_LANDSCAPE = 8;
@@ -2466,6 +2489,9 @@ public class ChooserActivity extends ResolverActivity implements
             super();
             mChooserListAdapter = wrappedAdapter;
             mLayoutInflater = LayoutInflater.from(ChooserActivity.this);
+
+            mFooterViewHolder = new FooterViewHolder(
+                    new Space(ChooserActivity.this.getApplicationContext()));
 
             mShowAzLabelIfPoss = getNumSheetExpansions() < NUM_EXPANSIONS_TO_HIDE_AZ_LABEL;
 
@@ -2482,6 +2508,10 @@ public class ChooserActivity extends ResolverActivity implements
                     notifyDataSetChanged();
                 }
             });
+        }
+
+        public void setFooterHeight(int height) {
+            mFooterViewHolder.setHeight(height);
         }
 
         /**
@@ -2534,6 +2564,10 @@ public class ChooserActivity extends ResolverActivity implements
             return mChooserListAdapter.getOtherProfile() == null ? 0 : 1;
         }
 
+        public int getFooterRowCount() {
+            return 1;
+        }
+
         public int getCallerAndRankedTargetRowCount() {
             return (int) Math.ceil(
                     ((float) mChooserListAdapter.getCallerTargetCount()
@@ -2563,6 +2597,7 @@ public class ChooserActivity extends ResolverActivity implements
                             + getCallerAndRankedTargetRowCount()
                             + getAzLabelRowCount()
                             + mChooserListAdapter.getAlphaTargetCount()
+                            + getFooterRowCount()
             );
         }
 
@@ -2578,6 +2613,8 @@ public class ChooserActivity extends ResolverActivity implements
                 case VIEW_TYPE_DIRECT_SHARE:
                 case VIEW_TYPE_CALLER_AND_RANK:
                     return createItemGroupViewHolder(viewType, parent);
+                case VIEW_TYPE_FOOTER:
+                    return mFooterViewHolder;
                 default:
                     // Since we catch all possible viewTypes above, no chance this is being called.
                     return null;
@@ -2614,6 +2651,8 @@ public class ChooserActivity extends ResolverActivity implements
 
             countSum += (count = getAzLabelRowCount());
             if (count > 0 && position < countSum) return VIEW_TYPE_AZ_LABEL;
+
+            if (position == getItemCount() - 1) return VIEW_TYPE_FOOTER;
 
             return VIEW_TYPE_NORMAL;
         }

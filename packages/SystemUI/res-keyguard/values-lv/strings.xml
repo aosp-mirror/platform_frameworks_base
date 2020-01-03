@@ -86,14 +86,6 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) esat ievadījis nepareizu PIN kodu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundes(-ēm)."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) esat ievadījis nepareizu paroli.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundes(-ēm)."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) esat nepareizi uzzīmējis atbloķēšanas kombināciju.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundes(-ēm)."</string>
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (9046628517316763961) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (3588779327358321092) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6114158710353725041) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (8345451368768804892) -->
-    <skip />
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Nepareizs SIM kartes PIN kods. Lai atbloķētu ierīci, sazinieties ar mobilo sakaru operatoru."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="zero">Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>

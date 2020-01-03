@@ -28,4 +28,5 @@ oneway interface IMediaRoute2ProviderClient {
     void updateState(in MediaRoute2ProviderInfo providerInfo,
             in List<RouteSessionInfo> sessionInfos);
     void notifySessionCreated(in @nullable RouteSessionInfo sessionInfo, long requestId);
+    void notifySessionInfoChanged(in RouteSessionInfo sessionInfo);
 }

@@ -207,7 +207,7 @@ class RecentTasks {
             mService.mH.post(PooledLambda.obtainRunnable((nonArg) -> {
                 synchronized (mService.mGlobalLock) {
                     // Unfreeze the task list once we touch down in a task
-                    final RootActivityContainer rac = mService.mRootActivityContainer;
+                    final RootWindowContainer rac = mService.mRootWindowContainer;
                     final DisplayContent dc = rac.getDisplayContent(displayId).mDisplayContent;
                     if (dc.pointWithinAppWindow(x, y)) {
                         final ActivityStack stack = mService.getTopDisplayFocusedStack();

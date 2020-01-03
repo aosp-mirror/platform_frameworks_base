@@ -2070,6 +2070,9 @@ public class ApkParseUtils {
                             sa.getBoolean(R.styleable.AndroidManifestApplication_enabled,
                                     true));
 
+            parsingPackage.setCrossProfile(
+                    sa.getBoolean(R.styleable.AndroidManifestApplication_crossProfile, false));
+
             parsingPackage.setIsGame(sa.getBoolean(
                     R.styleable.AndroidManifestApplication_isGame, false));
 

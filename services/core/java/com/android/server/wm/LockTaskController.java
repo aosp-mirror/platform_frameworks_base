@@ -459,7 +459,7 @@ public class LockTaskController {
             return;
         }
         task.performClearTaskLocked();
-        mSupervisor.mRootActivityContainer.resumeFocusedStacksTopActivities();
+        mSupervisor.mRootWindowContainer.resumeFocusedStacksTopActivities();
     }
 
     /**
@@ -591,7 +591,7 @@ public class LockTaskController {
         if (andResume) {
             mSupervisor.findTaskToMoveToFront(task, 0, null, reason,
                     lockTaskModeState != LOCK_TASK_MODE_NONE);
-            mSupervisor.mRootActivityContainer.resumeFocusedStacksTopActivities();
+            mSupervisor.mRootWindowContainer.resumeFocusedStacksTopActivities();
             final ActivityStack stack = task.getStack();
             if (stack != null) {
                 stack.getDisplay().mDisplayContent.executeAppTransition();
@@ -653,9 +653,9 @@ public class LockTaskController {
             taskChanged = true;
         }
 
-        mSupervisor.mRootActivityContainer.forAllTasks(Task::setLockTaskAuth);
+        mSupervisor.mRootWindowContainer.forAllTasks(Task::setLockTaskAuth);
 
-        final ActivityRecord r = mSupervisor.mRootActivityContainer.topRunningActivity();
+        final ActivityRecord r = mSupervisor.mRootWindowContainer.topRunningActivity();
         final Task task = (r != null) ? r.getTask() : null;
         if (mLockTaskModeTasks.isEmpty() && task!= null
                 && task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE) {
@@ -667,7 +667,7 @@ public class LockTaskController {
         }
 
         if (taskChanged) {
-            mSupervisor.mRootActivityContainer.resumeFocusedStacksTopActivities();
+            mSupervisor.mRootWindowContainer.resumeFocusedStacksTopActivities();
         }
     }
 

@@ -70,8 +70,7 @@
     <string name="learn_more" msgid="4690632085667273811">"Μάθετε περισσότερα"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"Ζουμ σε πλήρη οθόνη"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Προβoλή σε πλήρη οθ."</string>
-    <!-- no translation found for global_action_screenshot (2760267567509131654) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="2760267567509131654">"Στιγμιότυπο οθόνης"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Αποθήκ. στιγμιότυπου οθόνης..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Αποθήκευση στιγμιότυπου οθόνης..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Το στιγμιότυπο οθόνης αποθηκεύτηκε"</string>
@@ -119,8 +118,7 @@
     <string name="phone_label" msgid="5715229948920451352">"άνοιγμα τηλεφώνου"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"άνοιγμα φωνητικής υποβοήθησης"</string>
     <string name="camera_label" msgid="8253821920931143699">"άνοιγμα φωτογραφικής μηχανής"</string>
-    <!-- no translation found for cancel (1089011503403416730) -->
-    <skip />
+    <string name="cancel" msgid="1089011503403416730">"Ακύρωση"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Επιβεβαίωση"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Δοκιμάστε ξανά"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Πατήστε για ακύρωση του ελέγχου ταυτότητας"</string>
@@ -387,7 +385,9 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Ενεργοποίηση στις <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Έως τις <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Σκούρο θέμα"</string>
-    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="4506078248306696253">"Σκούρο θέμα\nΕξοικονόμηση μπαταρίας"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Εξοικονόμ. μπαταρίας"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Κατά τη δύση"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Μέχρι την ανατολή"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Το NFC είναι απενεργοποιημένο"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Το NFC είναι ενεργοποιημένο"</string>
@@ -412,10 +412,6 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Πατήστε ξανά για να ανοίξετε"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Σύρετε προς τα επάνω για άνοιγμα"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Σύρετε προς τα πάνω για να δοκιμάσετε ξανά"</string>
-    <!-- no translation found for dock_alignment_slow_charging (5148122851798085807) -->
-    <skip />
-    <!-- no translation found for dock_alignment_not_charging (1002617659995575624) -->
-    <skip />
     <string name="do_disclosure_generic" msgid="2388094207542706440">"Αυτή η συσκευή είναι διαχειριζόμενη από τον οργανισμό σας"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"Τη συσκευή διαχειρίζεται ο οργανισμός <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Σύρετε προς τα έξω για τηλέφωνο"</string>
@@ -467,9 +463,11 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Η Εξοικονόμηση μπαταρίας είναι ενεργή"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Μειώνει την απόδοση και τα δεδομένα παρασκηνίου"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Απενεργοποίηση Εξοικονόμησης μπαταρίας"</string>
-    <string name="media_projection_dialog_text" msgid="5509958417853154019">"Κατά την εγγραφή ή τη μετάδοση, η εφαρμογή <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> μπορεί να καταγράφει τυχόν ευαίσθητες πληροφορίες που εμφανίζονται στην οθόνη σας ή των οποίων γίνεται αναπαραγωγή από τη συσκευή σας, συμπεριλαμβανομένων ευαίσθητων πληροφοριών όπως ήχος, κωδικοί πρόσβασης, στοιχεία πληρωμής, φωτογραφίες και μηνύματα."</string>
-    <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"Κατά την εγγραφή ή τη μετάδοση, η υπηρεσία που παρέχει αυτήν τη λειτουργία μπορεί να καταγράφει τυχόν ευαίσθητες πληροφορίες που εμφανίζονται στην οθόνη σας ή των οποίων γίνεται αναπαραγωγή από τη συσκευή σας, συμπεριλαμβανομένων ευαίσθητων πληροφοριών όπως ήχος, κωδικοί πρόσβασης, στοιχεία πληρωμής, φωτογραφίες και μηνύματα."</string>
-    <string name="media_projection_dialog_title" msgid="6379655487632663290">"Έκθεση ευαίσθητων πληροφοριών κατά τη μετάδοση/εγγραφή"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"Η εφαρμογή <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> θα έχει πρόσβαση σε όλες τις πληροφορίες που εμφανίζονται στην οθόνη σας ή που αναπαράγονται από τη συσκευή σας κατά την εγγραφή ή τη μετάδοση. Αυτό περιλαμβάνει πληροφορίες όπως κωδικούς πρόσβασης, στοιχεία πληρωμής, φωτογραφίες, μηνύματα και ήχο που αναπαράγετε."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Η υπηρεσία που παρέχει αυτήν τη λειτουργία θα έχει πρόσβαση σε όλες τις πληροφορίες που εμφανίζονται στην οθόνη σας ή που αναπαράγονται από τη συσκευή σας κατά την εγγραφή ή τη μετάδοση. Αυτό περιλαμβάνει πληροφορίες όπως κωδικούς πρόσβασης, στοιχεία πληρωμής, φωτογραφίες, μηνύματα και ήχο που αναπαράγετε."</string>
+    <!-- no translation found for media_projection_dialog_service_title (2888507074107884040) -->
+    <skip />
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Έναρξη εγγραφής ή μετάδοσης με <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>;"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Να μην εμφανιστεί ξανά"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Διαγραφή όλων"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Διαχείριση"</string>
@@ -642,7 +640,7 @@
     <string name="do_not_silence" msgid="4982217934250511227">"Χωρίς σίγαση"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"Χωρίς σίγαση ή αποκλεισμό"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Στοιχεία ελέγχου ειδοποίησης ισχύος"</string>
-    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Ενεργή"</string>
+    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Ενεργό"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Ανενεργή"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Με τα στοιχεία ελέγχου ειδοποίησης ισχύος, μπορείτε να ορίσετε ένα επίπεδο βαρύτητας από 0 έως 5 για τις ειδοποιήσεις μιας εφαρμογής. \n\n"<b>"Επίπεδο 5"</b>" \n- Εμφάνιση στην κορυφή της λίστας ειδοποιήσεων \n- Να επιτρέπεται η διακοπή πλήρους οθόνης \n- Να γίνεται πάντα σύντομη προβολή \n\n"<b>"Επίπεδο 4"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να γίνεται πάντα σύντομη προβολή \n\n"<b>"Επίπεδο 3"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n\n"<b>"Επίπεδο 2"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n- Να μην χρησιμοποιείται ποτέ ήχος και δόνηση \n\n"<b>"Επίπεδο 1"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n- Να μην χρησιμοποιείται ποτέ ήχος και δόνηση \n- Απόκρυψη από την οθόνη κλειδώματος και τη γραμμή κατάστασης \n- Εμφάνιση στο κάτω μέρος της λίστας ειδοποιήσεων \n\n"<b>"Επίπεδο 0"</b>" \n- Αποκλεισμός όλων των ειδοποιήσεων από την εφαρμογή"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Ειδοποιήσεις"</string>
@@ -765,7 +763,7 @@
     <string name="data_saver" msgid="3484013368530820763">"Εξοικονόμηση δεδομένων"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Η Εξοικονόμηση δεδομένων είναι ενεργοποιημένη"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Η Εξοικονόμηση δεδομένων είναι απενεργοποιημένη"</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"Ενεργή"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"Ενεργό"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Απενεργοποίηση"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Γραμμή πλοήγησης"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Διάταξη"</string>
@@ -786,8 +784,7 @@
   </string-array>
     <string name="menu_ime" msgid="5677467548258017952">"Εναλλαγή πληκτρολογίων"</string>
     <string name="save" msgid="3392754183673848006">"Αποθήκευση"</string>
-    <!-- no translation found for reset (8715144064608810383) -->
-    <skip />
+    <string name="reset" msgid="8715144064608810383">"Επαναφορά"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Προσαρμογή πλάτους κουμπιού"</string>
     <string name="clipboard" msgid="8517342737534284617">"Πρόχειρο"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"Προσαρμοσμένο κουμπί πλοήγησης"</string>
@@ -883,8 +880,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"Δεξιά"</string>
     <string name="tuner_menu" msgid="363690665924769420">"Μενού"</string>
     <string name="tuner_app" msgid="6949280415826686972">"Εφαρμογή <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for notification_channel_alerts (3385787053375150046) -->
-    <skip />
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"Ειδοποιήσεις"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Μπαταρία"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Στιγμιότυπα οθόνης"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"Γενικά μηνύματα"</string>
@@ -894,8 +890,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> εκτελείται"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Η εφαρμογή άνοιξε χωρίς να έχει εγκατασταθεί."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Η εφαρμογή άνοιξε χωρίς να έχει εγκατασταθεί. Πατήστε για να μάθετε περισσότερα."</string>
-    <!-- no translation found for app_info (5153758994129963243) -->
-    <skip />
+    <string name="app_info" msgid="5153758994129963243">"Πληροφορ. εφαρμογής"</string>
     <string name="go_to_web" msgid="636673528981366511">"Μετάβ. σε πρόγ. περ."</string>
     <string name="mobile_data" msgid="4564407557775397216">"Δεδομένα κινητής τηλεφωνίας"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> - <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -929,13 +924,6 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Ρυθμίσεις"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Το κατάλαβα"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Στιγμ. μνήμης SysUI"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> χρησιμοποιεί τις λειτουργίες <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Οι εφαρμογές χρησιμοποιούν τις λειτουργίες <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
-    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
-    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" και "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"κάμερα"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"τοποθεσία"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"μικρόφωνο"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Αισθητήρες ανενεργοί"</string>
     <string name="device_services" msgid="1549944177856658705">"Υπηρεσίες συσκευής"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Χωρίς τίτλο"</string>
@@ -958,4 +946,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Η πλοήγηση συστήματος ενημερώθηκε. Για να κάνετε αλλαγές, μεταβείτε στις Ρυθμίσεις."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Μεταβείτε στις Ρυθμίσεις για να ενημερώσετε την πλοήγηση συστήματος"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Κατάσταση αναμονής"</string>
+    <string name="magnification_overlay_title" msgid="6584179429612427958">"Παράθυρο επικάλυψης μεγέθυνσης"</string>
+    <string name="magnification_window_title" msgid="4863914360847258333">"Παράθυρο μεγέθυνσης"</string>
+    <string name="magnification_controls_title" msgid="8421106606708891519">"Στοιχεία ελέγχου παραθύρου μεγέθυνσης"</string>
 </resources>

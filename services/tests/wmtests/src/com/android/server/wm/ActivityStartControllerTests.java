@@ -77,7 +77,7 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
                 .setCreateTask(true)
                 .build();
         final int startFlags = random.nextInt();
-        final ActivityStack stack = mService.mRootActivityContainer.getDefaultDisplay().createStack(
+        final ActivityStack stack = mService.mRootWindowContainer.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final WindowProcessController wpc = new WindowProcessController(mService,
                 mService.mContext.getApplicationInfo(), "name", 12345,

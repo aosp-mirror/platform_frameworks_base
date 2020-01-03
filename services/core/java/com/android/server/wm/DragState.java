@@ -276,7 +276,6 @@ class DragState {
                     display.getDisplayId());
             mDragWindowHandle.name = "drag";
             mDragWindowHandle.token = mServerChannel.getToken();
-            mDragWindowHandle.layer = getDragLayerLocked();
             mDragWindowHandle.layoutParamsFlags = 0;
             mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
             mDragWindowHandle.dispatchingTimeoutNanos =
@@ -343,12 +342,6 @@ class DragState {
             mInputInterceptor = new InputInterceptor(display);
             showInputSurface();
         }
-    }
-
-    int getDragLayerLocked() {
-        return mService.mPolicy.getWindowLayerFromTypeLw(WindowManager.LayoutParams.TYPE_DRAG)
-                * WindowManagerService.TYPE_LAYER_MULTIPLIER
-                + WindowManagerService.TYPE_LAYER_OFFSET;
     }
 
     /* call out to each visible window/session informing it about the drag

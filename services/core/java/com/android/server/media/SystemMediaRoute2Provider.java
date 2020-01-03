@@ -112,7 +112,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void transferRoute(int sessionId, MediaRoute2Info route) {
+    public void transferToRoute(int sessionId, MediaRoute2Info route) {
         //TODO: implement method
     }
 

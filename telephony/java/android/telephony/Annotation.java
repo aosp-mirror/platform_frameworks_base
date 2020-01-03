@@ -98,7 +98,13 @@ public class Annotation {
             TelephonyManager.NETWORK_TYPE_GSM,
             TelephonyManager.NETWORK_TYPE_TD_SCDMA,
             TelephonyManager.NETWORK_TYPE_IWLAN,
-            TelephonyManager.NETWORK_TYPE_LTE_CA,
+
+            //TODO: In order for @SystemApi methods to use this class, there cannot be any
+            // public hidden members.  This network type is marked as hidden because it is not a
+            // true network type and we are looking to remove it completely from the available list
+            // of network types.
+            //TelephonyManager.NETWORK_TYPE_LTE_CA,
+
             TelephonyManager.NETWORK_TYPE_NR,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -590,4 +596,17 @@ public class Annotation {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ImsAudioCodec {
     }
+
+    /**
+     * UICC SIM Application Types
+     */
+    @IntDef(prefix = { "APPTYPE_" }, value = {
+            TelephonyManager.APPTYPE_SIM,
+            TelephonyManager.APPTYPE_USIM,
+            TelephonyManager.APPTYPE_RUIM,
+            TelephonyManager.APPTYPE_CSIM,
+            TelephonyManager.APPTYPE_ISIM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UiccAppType{}
 }
