@@ -49,6 +49,7 @@ import com.android.server.power.batterysaver.BatterySavingStats.DozeState;
 import com.android.server.power.batterysaver.BatterySavingStats.InteractiveState;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Responsible for battery saver mode transition logic.
@@ -237,7 +238,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     private PowerManager getPowerManager() {
         if (mPowerManager == null) {
             mPowerManager =
-                    Preconditions.checkNotNull(mContext.getSystemService(PowerManager.class));
+                    Objects.requireNonNull(mContext.getSystemService(PowerManager.class));
         }
         return mPowerManager;
     }
