@@ -3902,8 +3902,51 @@ public class AppOpsManager {
         void visitHistoricalOps(@NonNull HistoricalOps ops);
         void visitHistoricalUidOps(@NonNull HistoricalUidOps ops);
         void visitHistoricalPackageOps(@NonNull HistoricalPackageOps ops);
+        void visitHistoricalFeatureOps(@NonNull HistoricalFeatureOps ops);
         void visitHistoricalOp(@NonNull HistoricalOp ops);
     }
+
+    /**
+     * Specifies what parameters to filter historical appop requests for
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "FILTER_BY_" }, value = {
+            FILTER_BY_UID,
+            FILTER_BY_PACKAGE_NAME,
+            FILTER_BY_FEATURE_ID,
+            FILTER_BY_OP_NAMES
+    })
+    public @interface HistoricalOpsRequestFilter {}
+
+    /**
+     * Filter historical appop request by uid.
+     *
+     * @hide
+     */
+    public static final int FILTER_BY_UID = 1<<0;
+
+    /**
+     * Filter historical appop request by package name.
+     *
+     * @hide
+     */
+    public static final int FILTER_BY_PACKAGE_NAME = 1<<1;
+
+    /**
+     * Filter historical appop request by feature id.
+     *
+     * @hide
+     */
+    public static final int FILTER_BY_FEATURE_ID = 1<<2;
+
+    /**
+     * Filter historical appop request by op names.
+     *
+     * @hide
+     */
+    public static final int FILTER_BY_OP_NAMES = 1<<3;
 
     /**
      * Request for getting historical app op usage. The request acts
@@ -3917,17 +3960,22 @@ public class AppOpsManager {
     public static final class HistoricalOpsRequest {
         private final int mUid;
         private final @Nullable String mPackageName;
+        private final @Nullable String mFeatureId;
         private final @Nullable List<String> mOpNames;
+        private final @HistoricalOpsRequestFilter int mFilter;
         private final long mBeginTimeMillis;
         private final long mEndTimeMillis;
         private final @OpFlags int mFlags;
 
         private HistoricalOpsRequest(int uid, @Nullable String packageName,
-                @Nullable List<String> opNames, long beginTimeMillis, long endTimeMillis,
-                @OpFlags int flags) {
+                @Nullable String featureId, @Nullable List<String> opNames,
+                @HistoricalOpsRequestFilter int filter, long beginTimeMillis,
+                long endTimeMillis, @OpFlags int flags) {
             mUid = uid;
             mPackageName = packageName;
+            mFeatureId = featureId;
             mOpNames = opNames;
+            mFilter = filter;
             mBeginTimeMillis = beginTimeMillis;
             mEndTimeMillis = endTimeMillis;
             mFlags = flags;
@@ -3943,7 +3991,9 @@ public class AppOpsManager {
         public static final class Builder {
             private int mUid = Process.INVALID_UID;
             private @Nullable String mPackageName;
+            private @Nullable String mFeatureId;
             private @Nullable List<String> mOpNames;
+            private @HistoricalOpsRequestFilter int mFilter;
             private final long mBeginTimeMillis;
             private final long mEndTimeMillis;
             private @OpFlags int mFlags = OP_FLAGS_ALL;
@@ -3976,6 +4026,13 @@ public class AppOpsManager {
                 Preconditions.checkArgument(uid == Process.INVALID_UID || uid >= 0,
                         "uid must be " + Process.INVALID_UID + " or non negative");
                 mUid = uid;
+
+                if (uid == Process.INVALID_UID) {
+                    mFilter &= ~FILTER_BY_UID;
+                } else {
+                    mFilter |= FILTER_BY_UID;
+                }
+
                 return this;
             }
 
@@ -3987,6 +4044,26 @@ public class AppOpsManager {
              */
             public @NonNull Builder setPackageName(@Nullable String packageName) {
                 mPackageName = packageName;
+
+                if (packageName == null) {
+                    mFilter &= ~FILTER_BY_PACKAGE_NAME;
+                } else {
+                    mFilter |= FILTER_BY_PACKAGE_NAME;
+                }
+
+                return this;
+            }
+
+            /**
+             * Sets the feature id to query for.
+             *
+             * @param featureId The id of the feature.
+             * @return This builder.
+             */
+            public @NonNull Builder setFeatureId(@Nullable String featureId) {
+                mFeatureId = featureId;
+                mFilter |= FILTER_BY_FEATURE_ID;
+
                 return this;
             }
 
@@ -4005,6 +4082,13 @@ public class AppOpsManager {
                     }
                 }
                 mOpNames = opNames;
+
+                if (mOpNames == null) {
+                    mFilter &= ~FILTER_BY_OP_NAMES;
+                } else {
+                    mFilter |= FILTER_BY_OP_NAMES;
+                }
+
                 return this;
             }
 
@@ -4029,8 +4113,8 @@ public class AppOpsManager {
              * @return a new {@link HistoricalOpsRequest}.
              */
             public @NonNull HistoricalOpsRequest build() {
-                return new HistoricalOpsRequest(mUid, mPackageName, mOpNames,
-                        mBeginTimeMillis, mEndTimeMillis, mFlags);
+                return new HistoricalOpsRequest(mUid, mPackageName, mFeatureId, mOpNames,
+                        mFilter, mBeginTimeMillis, mEndTimeMillis, mFlags);
             }
         }
     }
@@ -4187,15 +4271,18 @@ public class AppOpsManager {
         /**
          * AppPermissionUsage the ops to leave only the data we filter for.
          *
-         * @param uid Uid to filter for or {@link android.os.Process#INCIDENTD_UID} for all.
-         * @param packageName Package to filter for or null for all.
-         * @param opNames Ops to filter for or null for all.
+         * @param uid Uid to filter for.
+         * @param packageName Package to filter for.
+         * @param featureId Package to filter for.
+         * @param opNames Ops to filter for.
+         * @param filter Which parameters to filter on.
          * @param beginTimeMillis The begin time to filter for or {@link Long#MIN_VALUE} for all.
          * @param endTimeMillis The end time to filter for or {@link Long#MAX_VALUE} for all.
          *
          * @hide
          */
-        public void filter(int uid, @Nullable String packageName, @Nullable String[] opNames,
+        public void filter(int uid, @Nullable String packageName, @Nullable String featureId,
+                @Nullable String[] opNames, @HistoricalOpsRequestFilter int filter,
                 long beginTimeMillis, long endTimeMillis) {
             final long durationMillis = getDurationMillis();
             mBeginTimeMillis = Math.max(mBeginTimeMillis, beginTimeMillis);
@@ -4205,10 +4292,10 @@ public class AppOpsManager {
             final int uidCount = getUidCount();
             for (int i = uidCount - 1; i >= 0; i--) {
                 final HistoricalUidOps uidOp = mHistoricalUidOps.valueAt(i);
-                if (uid != Process.INVALID_UID && uid != uidOp.getUid()) {
+                if ((filter & FILTER_BY_UID) != 0 && uid != uidOp.getUid()) {
                     mHistoricalUidOps.removeAt(i);
                 } else {
-                    uidOp.filter(packageName, opNames, scaleFactor);
+                    uidOp.filter(packageName, featureId, opNames, filter, scaleFactor);
                 }
             }
         }
@@ -4236,25 +4323,28 @@ public class AppOpsManager {
         /** @hide */
         @TestApi
         public void increaseAccessCount(int opCode, int uid, @NonNull String packageName,
-                @UidState int uidState,  @OpFlags int flags, long increment) {
+                @Nullable String featureId, @UidState int uidState,  @OpFlags int flags,
+                long increment) {
             getOrCreateHistoricalUidOps(uid).increaseAccessCount(opCode,
-                    packageName, uidState, flags, increment);
+                    packageName, featureId, uidState, flags, increment);
         }
 
         /** @hide */
         @TestApi
         public void increaseRejectCount(int opCode, int uid, @NonNull String packageName,
-                @UidState int uidState, @OpFlags int flags, long increment) {
+                @Nullable String featureId, @UidState int uidState, @OpFlags int flags,
+                long increment) {
             getOrCreateHistoricalUidOps(uid).increaseRejectCount(opCode,
-                    packageName, uidState, flags, increment);
+                    packageName, featureId, uidState, flags, increment);
         }
 
         /** @hide */
         @TestApi
         public void increaseAccessDuration(int opCode, int uid, @NonNull String packageName,
-                @UidState int uidState, @OpFlags int flags, long increment) {
+                @Nullable String featureId, @UidState int uidState, @OpFlags int flags,
+                long increment) {
             getOrCreateHistoricalUidOps(uid).increaseAccessDuration(opCode,
-                    packageName, uidState, flags, increment);
+                    packageName, featureId, uidState, flags, increment);
         }
 
         /** @hide */
@@ -4534,15 +4624,17 @@ public class AppOpsManager {
             }
         }
 
-        private void filter(@Nullable String packageName, @Nullable String[] opNames,
+        private void filter(@Nullable String packageName, @Nullable String featureId,
+                @Nullable String[] opNames, @HistoricalOpsRequestFilter int filter,
                 double fractionToRemove) {
             final int packageCount = getPackageCount();
             for (int i = packageCount - 1; i >= 0; i--) {
                 final HistoricalPackageOps packageOps = getPackageOpsAt(i);
-                if (packageName != null && !packageName.equals(packageOps.getPackageName())) {
+                if ((filter & FILTER_BY_PACKAGE_NAME) != 0 && !packageName.equals(
+                        packageOps.getPackageName())) {
                     mHistoricalPackageOps.removeAt(i);
                 } else {
-                    packageOps.filter(opNames, fractionToRemove);
+                    packageOps.filter(featureId, opNames, filter, fractionToRemove);
                 }
             }
         }
@@ -4559,21 +4651,24 @@ public class AppOpsManager {
         }
 
         private void increaseAccessCount(int opCode, @NonNull String packageName,
-                @UidState int uidState, @OpFlags int flags, long increment) {
+                @Nullable String featureId, @UidState int uidState, @OpFlags int flags,
+                long increment) {
             getOrCreateHistoricalPackageOps(packageName).increaseAccessCount(
-                    opCode, uidState, flags, increment);
+                    opCode, featureId, uidState, flags, increment);
         }
 
         private void increaseRejectCount(int opCode, @NonNull String packageName,
-                @UidState int uidState,  @OpFlags int flags, long increment) {
+                @Nullable String featureId, @UidState int uidState,  @OpFlags int flags,
+                long increment) {
             getOrCreateHistoricalPackageOps(packageName).increaseRejectCount(
-                    opCode, uidState, flags, increment);
+                    opCode, featureId, uidState, flags, increment);
         }
 
         private void increaseAccessDuration(int opCode, @NonNull String packageName,
-                @UidState int uidState, @OpFlags int flags, long increment) {
+                @Nullable String featureId, @UidState int uidState, @OpFlags int flags,
+                long increment) {
             getOrCreateHistoricalPackageOps(packageName).increaseAccessDuration(
-                    opCode, uidState, flags, increment);
+                    opCode, featureId, uidState, flags, increment);
         }
 
         /**
@@ -4718,7 +4813,7 @@ public class AppOpsManager {
     @SystemApi
     public static final class HistoricalPackageOps implements Parcelable {
         private final @NonNull String mPackageName;
-        private @Nullable ArrayMap<String, HistoricalOp> mHistoricalOps;
+        private @Nullable ArrayMap<String, HistoricalFeatureOps> mHistoricalFeatureOps;
 
         /** @hide */
         public HistoricalPackageOps(@NonNull String packageName) {
@@ -4727,6 +4822,339 @@ public class AppOpsManager {
 
         private HistoricalPackageOps(@NonNull HistoricalPackageOps other) {
             mPackageName = other.mPackageName;
+            final int opCount = other.getFeatureCount();
+            for (int i = 0; i < opCount; i++) {
+                final HistoricalFeatureOps origOps = other.getFeatureOpsAt(i);
+                final HistoricalFeatureOps cloneOps = new HistoricalFeatureOps(origOps);
+                if (mHistoricalFeatureOps == null) {
+                    mHistoricalFeatureOps = new ArrayMap<>(opCount);
+                }
+                mHistoricalFeatureOps.put(cloneOps.getFeatureId(), cloneOps);
+            }
+        }
+
+        private HistoricalPackageOps(@NonNull Parcel parcel) {
+            mPackageName = parcel.readString();
+            mHistoricalFeatureOps = parcel.createTypedArrayMap(HistoricalFeatureOps.CREATOR);
+        }
+
+        private @Nullable HistoricalPackageOps splice(double fractionToRemove) {
+            HistoricalPackageOps splice = null;
+            final int featureCount = getFeatureCount();
+            for (int i = 0; i < featureCount; i++) {
+                final HistoricalFeatureOps origOps = getFeatureOpsAt(i);
+                final HistoricalFeatureOps spliceOps = origOps.splice(fractionToRemove);
+                if (spliceOps != null) {
+                    if (splice == null) {
+                        splice = new HistoricalPackageOps(mPackageName);
+                    }
+                    if (splice.mHistoricalFeatureOps == null) {
+                        splice.mHistoricalFeatureOps = new ArrayMap<>();
+                    }
+                    splice.mHistoricalFeatureOps.put(spliceOps.getFeatureId(), spliceOps);
+                }
+            }
+            return splice;
+        }
+
+        private void merge(@NonNull HistoricalPackageOps other) {
+            final int featureCount = other.getFeatureCount();
+            for (int i = 0; i < featureCount; i++) {
+                final HistoricalFeatureOps otherFeatureOps = other.getFeatureOpsAt(i);
+                final HistoricalFeatureOps thisFeatureOps = getFeatureOps(
+                        otherFeatureOps.getFeatureId());
+                if (thisFeatureOps != null) {
+                    thisFeatureOps.merge(otherFeatureOps);
+                } else {
+                    if (mHistoricalFeatureOps == null) {
+                        mHistoricalFeatureOps = new ArrayMap<>();
+                    }
+                    mHistoricalFeatureOps.put(otherFeatureOps.getFeatureId(), otherFeatureOps);
+                }
+            }
+        }
+
+        private void filter(@Nullable String featureId, @Nullable String[] opNames,
+                @HistoricalOpsRequestFilter int filter, double fractionToRemove) {
+            final int featureCount = getFeatureCount();
+            for (int i = featureCount - 1; i >= 0; i--) {
+                final HistoricalFeatureOps featureOps = getFeatureOpsAt(i);
+                if ((filter & FILTER_BY_FEATURE_ID) != 0 && !Objects.equals(featureId,
+                        featureOps.getFeatureId())) {
+                    mHistoricalFeatureOps.removeAt(i);
+                } else {
+                    featureOps.filter(opNames, filter, fractionToRemove);
+                }
+            }
+        }
+
+        private void accept(@NonNull HistoricalOpsVisitor visitor) {
+            visitor.visitHistoricalPackageOps(this);
+            final int featureCount = getFeatureCount();
+            for (int i = 0; i < featureCount; i++) {
+                getFeatureOpsAt(i).accept(visitor);
+            }
+        }
+
+        private boolean isEmpty() {
+            final int featureCount = getFeatureCount();
+            for (int i = featureCount - 1; i >= 0; i--) {
+                final HistoricalFeatureOps featureOps = mHistoricalFeatureOps.valueAt(i);
+                if (!featureOps.isEmpty()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private void increaseAccessCount(int opCode, @Nullable String featureId,
+                @UidState int uidState, @OpFlags int flags, long increment) {
+            getOrCreateHistoricalFeatureOps(featureId).increaseAccessCount(
+                    opCode, uidState, flags, increment);
+        }
+
+        private void increaseRejectCount(int opCode, @Nullable String featureId,
+                @UidState int uidState, @OpFlags int flags, long increment) {
+            getOrCreateHistoricalFeatureOps(featureId).increaseRejectCount(
+                    opCode, uidState, flags, increment);
+        }
+
+        private void increaseAccessDuration(int opCode, @Nullable String featureId,
+                @UidState int uidState, @OpFlags int flags, long increment) {
+            getOrCreateHistoricalFeatureOps(featureId).increaseAccessDuration(
+                    opCode, uidState, flags, increment);
+        }
+
+        /**
+         * Gets the package name which the data represents.
+         *
+         * @return The package name which the data represents.
+         */
+        public @NonNull String getPackageName() {
+            return mPackageName;
+        }
+
+        private @NonNull HistoricalFeatureOps getOrCreateHistoricalFeatureOps(
+                @Nullable String featureId) {
+            if (mHistoricalFeatureOps == null) {
+                mHistoricalFeatureOps = new ArrayMap<>();
+            }
+            HistoricalFeatureOps historicalFeatureOp = mHistoricalFeatureOps.get(featureId);
+            if (historicalFeatureOp == null) {
+                historicalFeatureOp = new HistoricalFeatureOps(featureId);
+                mHistoricalFeatureOps.put(featureId, historicalFeatureOp);
+            }
+            return historicalFeatureOp;
+        }
+
+        /**
+         * Gets number historical app ops.
+         *
+         * @return The number historical app ops.
+         * @see #getOpAt(int)
+         */
+        public @IntRange(from = 0) int getOpCount() {
+            int numOps = 0;
+            int numFeatures = getFeatureCount();
+
+            for (int code = 0; code < _NUM_OP; code++) {
+                String opName = opToPublicName(code);
+
+                for (int featureNum = 0; featureNum < numFeatures; featureNum++) {
+                    if (getFeatureOpsAt(featureNum).getOp(opName) != null) {
+                        numOps++;
+                        break;
+                    }
+                }
+            }
+
+            return numOps;
+        }
+
+        /**
+         * Gets the historical op at a given index.
+         *
+         * <p>This combines the counts from all features.
+         *
+         * @param index The index to lookup.
+         * @return The op at the given index.
+         * @see #getOpCount()
+         */
+        public @NonNull HistoricalOp getOpAt(@IntRange(from = 0) int index) {
+            int numOpsFound = 0;
+            int numFeatures = getFeatureCount();
+
+            for (int code = 0; code < _NUM_OP; code++) {
+                String opName = opToPublicName(code);
+
+                for (int featureNum = 0; featureNum < numFeatures; featureNum++) {
+                    if (getFeatureOpsAt(featureNum).getOp(opName) != null) {
+                        if (numOpsFound == index) {
+                            return getOp(opName);
+                        } else {
+                            numOpsFound++;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            throw new IndexOutOfBoundsException();
+        }
+
+        /**
+         * Gets the historical entry for a given op name.
+         *
+         * <p>This combines the counts from all features.
+         *
+         * @param opName The op name.
+         * @return The historical entry for that op name.
+         */
+        public @Nullable HistoricalOp getOp(@NonNull String opName) {
+            if (mHistoricalFeatureOps == null) {
+                return null;
+            }
+
+            HistoricalOp combinedOp = null;
+            int numFeatures = getFeatureCount();
+            for (int i = 0; i < numFeatures; i++) {
+                HistoricalOp featureOp = getFeatureOpsAt(i).getOp(opName);
+                if (featureOp != null) {
+                    if (combinedOp == null) {
+                        combinedOp = new HistoricalOp(featureOp);
+                    } else {
+                        combinedOp.merge(featureOp);
+                    }
+                }
+            }
+
+            return combinedOp;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel parcel, int flags) {
+            parcel.writeString(mPackageName);
+            parcel.writeTypedArrayMap(mHistoricalFeatureOps, flags);
+        }
+
+        public static final @android.annotation.NonNull Creator<HistoricalPackageOps> CREATOR =
+                new Creator<HistoricalPackageOps>() {
+            @Override
+            public @NonNull HistoricalPackageOps createFromParcel(@NonNull Parcel parcel) {
+                return new HistoricalPackageOps(parcel);
+            }
+
+            @Override
+            public @NonNull HistoricalPackageOps[] newArray(int size) {
+                return new HistoricalPackageOps[size];
+            }
+        };
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || getClass() != obj.getClass()) {
+                return false;
+            }
+            final HistoricalPackageOps other = (HistoricalPackageOps) obj;
+            if (!mPackageName.equals(other.mPackageName)) {
+                return false;
+            }
+            if (mHistoricalFeatureOps == null) {
+                if (other.mHistoricalFeatureOps != null) {
+                    return false;
+                }
+            } else if (!mHistoricalFeatureOps.equals(other.mHistoricalFeatureOps)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = mPackageName != null ? mPackageName.hashCode() : 0;
+            result = 31 * result + (mHistoricalFeatureOps != null ? mHistoricalFeatureOps.hashCode()
+                    : 0);
+            return result;
+        }
+
+        /**
+         * Gets number of feature with historical ops.
+         *
+         * @return The number of feature with historical ops.
+         *
+         * @see #getFeatureOpsAt(int)
+         */
+        public @IntRange(from = 0) int getFeatureCount() {
+            if (mHistoricalFeatureOps == null) {
+                return 0;
+            }
+            return mHistoricalFeatureOps.size();
+        }
+
+        /**
+         * Gets the historical feature ops at a given index.
+         *
+         * @param index The index.
+         *
+         * @return The historical feature ops at the given index.
+         *
+         * @see #getFeatureCount()
+         */
+        public @NonNull HistoricalFeatureOps getFeatureOpsAt(@IntRange(from = 0) int index) {
+            if (mHistoricalFeatureOps == null) {
+                throw new IndexOutOfBoundsException();
+            }
+            return mHistoricalFeatureOps.valueAt(index);
+        }
+
+        /**
+         * Gets the historical feature ops for a given feature.
+         *
+         * @param featureId The feature id.
+         *
+         * @return The historical ops for the feature.
+         */
+        public @Nullable HistoricalFeatureOps getFeatureOps(@NonNull String featureId) {
+            if (mHistoricalFeatureOps == null) {
+                return null;
+            }
+            return mHistoricalFeatureOps.get(featureId);
+        }
+    }
+
+    /**
+     * This class represents historical app op information about a feature in a package.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    /* codegen verifier cannot deal with nested class parameters
+    @DataClass(genHiddenConstructor = true,
+            genEqualsHashCode = true, genHiddenCopyConstructor = true) */
+    @DataClass.Suppress("getHistoricalOps")
+    public static final class HistoricalFeatureOps implements Parcelable {
+        /** Id of the {@link Context#createFeatureContext feature} in the package */
+        private final @Nullable String mFeatureId;
+
+        /** Ops for this feature */
+        private @Nullable ArrayMap<String, HistoricalOp> mHistoricalOps;
+
+        /** @hide */
+        public HistoricalFeatureOps(@NonNull String featureId) {
+            mFeatureId = featureId;
+        }
+
+        private HistoricalFeatureOps(@NonNull HistoricalFeatureOps other) {
+            mFeatureId = other.mFeatureId;
             final int opCount = other.getOpCount();
             for (int i = 0; i < opCount; i++) {
                 final HistoricalOp origOp = other.getOpAt(i);
@@ -4738,20 +5166,15 @@ public class AppOpsManager {
             }
         }
 
-        private HistoricalPackageOps(@NonNull Parcel parcel) {
-            mPackageName = parcel.readString();
-            mHistoricalOps = parcel.createTypedArrayMap(HistoricalOp.CREATOR);
-        }
-
-        private @Nullable HistoricalPackageOps splice(double fractionToRemove) {
-            HistoricalPackageOps splice = null;
+        private @Nullable HistoricalFeatureOps splice(double fractionToRemove) {
+            HistoricalFeatureOps splice = null;
             final int opCount = getOpCount();
             for (int i = 0; i < opCount; i++) {
                 final HistoricalOp origOps = getOpAt(i);
                 final HistoricalOp spliceOps = origOps.splice(fractionToRemove);
                 if (spliceOps != null) {
                     if (splice == null) {
-                        splice = new HistoricalPackageOps(mPackageName);
+                        splice = new HistoricalFeatureOps(mFeatureId, null);
                     }
                     if (splice.mHistoricalOps == null) {
                         splice.mHistoricalOps = new ArrayMap<>();
@@ -4762,7 +5185,7 @@ public class AppOpsManager {
             return splice;
         }
 
-        private void merge(@NonNull HistoricalPackageOps other) {
+        private void merge(@NonNull HistoricalFeatureOps other) {
             final int opCount = other.getOpCount();
             for (int i = 0; i < opCount; i++) {
                 final HistoricalOp otherOp = other.getOpAt(i);
@@ -4778,11 +5201,13 @@ public class AppOpsManager {
             }
         }
 
-        private void filter(@Nullable String[] opNames, double scaleFactor) {
+        private void filter(@Nullable String[] opNames, @HistoricalOpsRequestFilter int filter,
+                double scaleFactor) {
             final int opCount = getOpCount();
             for (int i = opCount - 1; i >= 0; i--) {
                 final HistoricalOp op = mHistoricalOps.valueAt(i);
-                if (opNames != null && !ArrayUtils.contains(opNames, op.getOpName())) {
+                if ((filter & FILTER_BY_OP_NAMES) != 0 && !ArrayUtils.contains(opNames,
+                        op.getOpName())) {
                     mHistoricalOps.removeAt(i);
                 } else {
                     op.filter(scaleFactor);
@@ -4814,15 +5239,6 @@ public class AppOpsManager {
         private void increaseAccessDuration(int opCode, @UidState int uidState,
                 @OpFlags int flags, long increment) {
             getOrCreateHistoricalOp(opCode).increaseAccessDuration(uidState, flags, increment);
-        }
-
-        /**
-         * Gets the package name which the data represents.
-         *
-         * @return The package name which the data represents.
-         */
-        public @NonNull String getPackageName() {
-            return mPackageName;
         }
 
         /**
@@ -4865,19 +5281,8 @@ public class AppOpsManager {
             return mHistoricalOps.get(opName);
         }
 
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(@NonNull Parcel parcel, int flags) {
-            parcel.writeString(mPackageName);
-            parcel.writeTypedArrayMap(mHistoricalOps, flags);
-        }
-
         private void accept(@NonNull HistoricalOpsVisitor visitor) {
-            visitor.visitHistoricalPackageOps(this);
+            visitor.visitHistoricalFeatureOps(this);
             final int opCount = getOpCount();
             for (int i = 0; i < opCount; i++) {
                 getOpAt(i).accept(visitor);
@@ -4897,47 +5302,143 @@ public class AppOpsManager {
             return op;
         }
 
-        public static final @android.annotation.NonNull Creator<HistoricalPackageOps> CREATOR =
-                new Creator<HistoricalPackageOps>() {
+
+
+        // Code below generated by codegen v1.0.14.
+        //
+        // DO NOT MODIFY!
+        // CHECKSTYLE:OFF Generated code
+        //
+        // To regenerate run:
+        // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/app/AppOpsManager.java
+        //
+        // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
+        //   Settings > Editor > Code Style > Formatter Control
+        //@formatter:off
+
+
+        /**
+         * Creates a new HistoricalFeatureOps.
+         *
+         * @param featureId
+         *   Id of the {@link Context#createFeatureContext feature} in the package
+         * @param historicalOps
+         *   Ops for this feature
+         * @hide
+         */
+        @DataClass.Generated.Member
+        public HistoricalFeatureOps(
+                @Nullable String featureId,
+                @Nullable ArrayMap<String,HistoricalOp> historicalOps) {
+            this.mFeatureId = featureId;
+            this.mHistoricalOps = historicalOps;
+
+            // onConstructed(); // You can define this method to get a callback
+        }
+
+        /**
+         * Id of the {@link Context#createFeatureContext feature} in the package
+         */
+        @DataClass.Generated.Member
+        public @Nullable String getFeatureId() {
+            return mFeatureId;
+        }
+
+        @Override
+        @DataClass.Generated.Member
+        public boolean equals(@Nullable Object o) {
+            // You can override field equality logic by defining either of the methods like:
+            // boolean fieldNameEquals(HistoricalFeatureOps other) { ... }
+            // boolean fieldNameEquals(FieldType otherValue) { ... }
+
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            @SuppressWarnings("unchecked")
+            HistoricalFeatureOps that = (HistoricalFeatureOps) o;
+            //noinspection PointlessBooleanExpression
+            return true
+                    && Objects.equals(mFeatureId, that.mFeatureId)
+                    && Objects.equals(mHistoricalOps, that.mHistoricalOps);
+        }
+
+        @Override
+        @DataClass.Generated.Member
+        public int hashCode() {
+            // You can override field hashCode logic by defining methods like:
+            // int fieldNameHashCode() { ... }
+
+            int _hash = 1;
+            _hash = 31 * _hash + Objects.hashCode(mFeatureId);
+            _hash = 31 * _hash + Objects.hashCode(mHistoricalOps);
+            return _hash;
+        }
+
+        @Override
+        @DataClass.Generated.Member
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            // You can override field parcelling by defining methods like:
+            // void parcelFieldName(Parcel dest, int flags) { ... }
+
+            byte flg = 0;
+            if (mFeatureId != null) flg |= 0x1;
+            if (mHistoricalOps != null) flg |= 0x2;
+            dest.writeByte(flg);
+            if (mFeatureId != null) dest.writeString(mFeatureId);
+            if (mHistoricalOps != null) dest.writeMap(mHistoricalOps);
+        }
+
+        @Override
+        @DataClass.Generated.Member
+        public int describeContents() { return 0; }
+
+        /** @hide */
+        @SuppressWarnings({"unchecked", "RedundantCast"})
+        @DataClass.Generated.Member
+        /* package-private */ HistoricalFeatureOps(@NonNull Parcel in) {
+            // You can override field unparcelling by defining methods like:
+            // static FieldType unparcelFieldName(Parcel in) { ... }
+
+            byte flg = in.readByte();
+            String featureId = (flg & 0x1) == 0 ? null : in.readString();
+            ArrayMap<String,HistoricalOp> historicalOps = null;
+            if ((flg & 0x2) != 0) {
+                historicalOps = new ArrayMap();
+                in.readMap(historicalOps, HistoricalOp.class.getClassLoader());
+            }
+
+            this.mFeatureId = featureId;
+            this.mHistoricalOps = historicalOps;
+
+            // onConstructed(); // You can define this method to get a callback
+        }
+
+        @DataClass.Generated.Member
+        public static final @NonNull Parcelable.Creator<HistoricalFeatureOps> CREATOR
+                = new Parcelable.Creator<HistoricalFeatureOps>() {
             @Override
-            public @NonNull HistoricalPackageOps createFromParcel(@NonNull Parcel parcel) {
-                return new HistoricalPackageOps(parcel);
+            public HistoricalFeatureOps[] newArray(int size) {
+                return new HistoricalFeatureOps[size];
             }
 
             @Override
-            public @NonNull HistoricalPackageOps[] newArray(int size) {
-                return new HistoricalPackageOps[size];
+            public HistoricalFeatureOps createFromParcel(@NonNull Parcel in) {
+                return new HistoricalFeatureOps(in);
             }
         };
 
-        @Override
-        public boolean equals(@Nullable Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null || getClass() != obj.getClass()) {
-                return false;
-            }
-            final HistoricalPackageOps other = (HistoricalPackageOps) obj;
-            if (!mPackageName.equals(other.mPackageName)) {
-                return false;
-            }
-            if (mHistoricalOps == null) {
-                if (other.mHistoricalOps != null) {
-                    return false;
-                }
-            } else if (!mHistoricalOps.equals(other.mHistoricalOps)) {
-                return false;
-            }
-            return true;
-        }
+        /*
+        @DataClass.Generated(
+                time = 1578113234821L,
+                codegenVersion = "1.0.14",
+                sourceFile = "frameworks/base/core/java/android/app/AppOpsManager.java",
+                inputSignatures = "private final @android.annotation.Nullable java.lang.String mFeatureId\nprivate @android.annotation.Nullable android.util.ArrayMap<java.lang.String,android.app.HistoricalOp> mHistoricalOps\nprivate @android.annotation.Nullable android.app.HistoricalFeatureOps splice(double)\nprivate  void merge(android.app.HistoricalFeatureOps)\nprivate  void filter(java.lang.String[],int,double)\nprivate  boolean isEmpty()\nprivate  void increaseAccessCount(int,int,int,long)\nprivate  void increaseRejectCount(int,int,int,long)\nprivate  void increaseAccessDuration(int,int,int,long)\npublic @android.annotation.IntRange(from=0L) int getOpCount()\npublic @android.annotation.NonNull android.app.HistoricalOp getOpAt(int)\npublic @android.annotation.Nullable android.app.HistoricalOp getOp(java.lang.String)\nprivate  void accept(android.app.HistoricalOpsVisitor)\nprivate @android.annotation.NonNull android.app.HistoricalOp getOrCreateHistoricalOp(int)\nclass HistoricalFeatureOps extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true, genEqualsHashCode=true, genHiddenCopyConstructor=true)")
+        @Deprecated
+        private void __metadata() {}
+        */
 
-        @Override
-        public int hashCode() {
-            int result = mPackageName != null ? mPackageName.hashCode() : 0;
-            result = 31 * result + (mHistoricalOps != null ? mHistoricalOps.hashCode() : 0);
-            return result;
-        }
+        //@formatter:on
+        // End of generated code
+
     }
 
     /**
@@ -5273,13 +5774,13 @@ public class AppOpsManager {
             if (mOp != other.mOp) {
                 return false;
             }
-            if (!Objects.equals(mAccessCount, other.mAccessCount)) {
+            if (!equalsLongSparseLongArray(mAccessCount, other.mAccessCount)) {
                 return false;
             }
-            if (!Objects.equals(mRejectCount, other.mRejectCount)) {
+            if (!equalsLongSparseLongArray(mRejectCount, other.mRejectCount)) {
                 return false;
             }
-            return Objects.equals(mAccessDuration, other.mAccessDuration);
+            return equalsLongSparseLongArray(mAccessDuration, other.mAccessDuration);
         }
 
         @Override
@@ -5606,9 +6107,9 @@ public class AppOpsManager {
         Objects.requireNonNull(executor, "executor cannot be null");
         Objects.requireNonNull(callback, "callback cannot be null");
         try {
-            mService.getHistoricalOps(request.mUid, request.mPackageName, request.mOpNames,
-                    request.mBeginTimeMillis, request.mEndTimeMillis, request.mFlags,
-                    new RemoteCallback((result) -> {
+            mService.getHistoricalOps(request.mUid, request.mPackageName, request.mFeatureId,
+                    request.mOpNames, request.mFilter, request.mBeginTimeMillis,
+                    request.mEndTimeMillis, request.mFlags, new RemoteCallback((result) -> {
                 final HistoricalOps ops = result.getParcelable(KEY_HISTORICAL_OPS);
                 final long identity = Binder.clearCallingIdentity();
                 try {
@@ -5646,8 +6147,8 @@ public class AppOpsManager {
         Objects.requireNonNull(callback, "callback cannot be null");
         try {
             mService.getHistoricalOpsFromDiskRaw(request.mUid, request.mPackageName,
-                    request.mOpNames, request.mBeginTimeMillis, request.mEndTimeMillis,
-                    request.mFlags, new RemoteCallback((result) -> {
+                    request.mFeatureId, request.mOpNames, request.mFilter, request.mBeginTimeMillis,
+                    request.mEndTimeMillis, request.mFlags, new RemoteCallback((result) -> {
                 final HistoricalOps ops = result.getParcelable(KEY_HISTORICAL_OPS);
                 final long identity = Binder.clearCallingIdentity();
                 try {
@@ -7486,6 +7987,30 @@ public class AppOpsManager {
         }
 
         return lastEvent;
+    }
+
+    private static boolean equalsLongSparseLongArray(@Nullable LongSparseLongArray a,
+            @Nullable LongSparseLongArray b) {
+        if (a == b) {
+            return true;
+        }
+
+        if (a == null || b == null) {
+            return false;
+        }
+
+        if (a.size() != b.size()) {
+            return false;
+        }
+
+        int numEntries = a.size();
+        for (int i = 0; i < numEntries; i++) {
+            if (a.keyAt(i) != b.keyAt(i) || a.valueAt(i) != b.valueAt(i)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static void writeLongSparseLongArrayToParcel(
