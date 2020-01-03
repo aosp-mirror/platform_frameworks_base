@@ -54,6 +54,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager.ShareShortcutInfo;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -977,6 +978,7 @@ public class ChooserActivityTest {
                         serviceTargets,
                         TARGET_TYPE_CHOOSER_TARGET)
         );
+
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
         // TODO: restructure the tests b/129870719
@@ -1075,7 +1077,29 @@ public class ChooserActivityTest {
 
     // This test is too long and too slow and should not be taken as an example for future tests.
     @Test
-    public void testDirectTargetLoggingWithAppTargetNotRanked() throws InterruptedException {
+    public void testDirectTargetLoggingWithAppTargetNotRankedPortrait()
+            throws InterruptedException {
+        testDirectTargetLoggingWithAppTargetNotRanked(Configuration.ORIENTATION_PORTRAIT, 4);
+    }
+
+    @Test
+    public void testDirectTargetLoggingWithAppTargetNotRankedLandscape()
+            throws InterruptedException {
+        testDirectTargetLoggingWithAppTargetNotRanked(Configuration.ORIENTATION_LANDSCAPE, 8);
+    }
+
+    private void testDirectTargetLoggingWithAppTargetNotRanked(
+            int orientation, int appTargetsExpected
+    ) throws InterruptedException {
+        Configuration configuration =
+                new Configuration(InstrumentationRegistry.getInstrumentation().getContext()
+                        .getResources().getConfiguration());
+        configuration.orientation = orientation;
+
+        sOverrides.resources = Mockito.spy(
+                InstrumentationRegistry.getInstrumentation().getContext().getResources());
+        when(sOverrides.resources.getConfiguration()).thenReturn(configuration);
+
         Intent sendIntent = createSendTextIntent();
         // We need app targets for direct targets to get displayed
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(15);
@@ -1111,8 +1135,10 @@ public class ChooserActivityTest {
         // TODO: restructure the tests b/129870719
         Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
 
-        assertThat("Chooser should have 20 targets (4 apps, 1 direct, 15 A-Z)",
-                activity.getAdapter().getCount(), is(20));
+        assertThat(
+                String.format("Chooser should have %d targets (%d apps, 1 direct, 15 A-Z)",
+                        appTargetsExpected + 16, appTargetsExpected),
+                activity.getAdapter().getCount(), is(appTargetsExpected + 16));
         assertThat("Chooser should have exactly one selectable direct target",
                 activity.getAdapter().getSelectableServiceTargetCount(), is(1));
         assertThat("The resolver info must match the resolver info used to create the target",

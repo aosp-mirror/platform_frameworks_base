@@ -353,7 +353,11 @@ public class ResolverActivity extends Activity implements
                     finish();
                 }
             });
-            if (isVoiceInteraction()) {
+
+            boolean hasTouchScreen = getPackageManager()
+                    .hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN);
+
+            if (isVoiceInteraction() || !hasTouchScreen) {
                 rdl.setCollapsed(false);
             }
 
@@ -1301,10 +1305,11 @@ public class ResolverActivity extends Activity implements
 
         // In case this method is called again (due to activity recreation), avoid adding a new
         // header if one is already present.
-        if (useHeader && listView != null && listView.getHeaderViewsCount() == 0) {
+        if (useHeader && listView.getHeaderViewsCount() == 0) {
             listView.setHeaderDividersEnabled(true);
             listView.addHeaderView(LayoutInflater.from(this).inflate(
-                    R.layout.resolver_different_item_header, listView, false));
+                    R.layout.resolver_different_item_header, listView, false),
+                    null, false);
         }
     }
 
@@ -1367,6 +1372,8 @@ public class ResolverActivity extends Activity implements
         if (useLayoutWithDefault() && filteredPosition != ListView.INVALID_POSITION) {
             setAlwaysButtonEnabled(true, filteredPosition, false);
             mOnceButton.setEnabled(true);
+            // Focus the button if we already have the default option
+            mOnceButton.requestFocus();
             return;
         }
 
@@ -1499,6 +1506,7 @@ public class ResolverActivity extends Activity implements
                 mOnceButton.setEnabled(hasValidSelection);
                 if (hasValidSelection) {
                     currentAdapterView.smoothScrollToPosition(checkedPos);
+                    mOnceButton.requestFocus();
                 }
                 mLastSelected = checkedPos;
             } else {
