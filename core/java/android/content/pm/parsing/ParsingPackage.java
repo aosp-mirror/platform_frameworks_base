@@ -24,6 +24,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
+import android.content.pm.parsing.ComponentParseUtils.ParsedFeature;
 import android.content.pm.parsing.ComponentParseUtils.ParsedInstrumentation;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
@@ -63,6 +64,8 @@ public interface ParsingPackage extends AndroidPackage {
     ParsingPackage addOriginalPackage(String originalPackage);
 
     ParsingPackage addOverlayable(String overlayableName, String actorName);
+
+    ParsingPackage addFeature(ParsedFeature permission);
 
     ParsingPackage addPermission(ParsedPermission permission);
 

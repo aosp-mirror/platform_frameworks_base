@@ -1533,7 +1533,8 @@
          <code>com.google.app.<em>appname</em></code>
 
          <p>Inside of the manifest tag, may appear the following tags
-         in any order: {@link #AndroidManifestPermission permission},
+         in any order: {@link #AndroidManifestFeature feature},
+         {@link #AndroidManifestPermission permission},
          {@link #AndroidManifestPermissionGroup permission-group},
          {@link #AndroidManifestPermissionTree permission-tree},
          {@link #AndroidManifestUsesSdk uses-sdk},
@@ -1763,6 +1764,29 @@
              The default value is {@code false}. -->
         <attr name="crossProfile" format="boolean" />
     </declare-styleable>
+
+    <!-- The <code>feature</code> tag declares a feature. A feature is a part of an app. E.g.
+    photo sharing app might include a direct messaging component.
+
+    <p>This appears as a child tag of the root {@link #AndroidManifest manifest} tag.
+
+    <p>In case this feature inherits from another feature, this tag can contain one or multiple
+    {@link #AndroidManifestFeatureInheritFrom inherit-from} tags. -->
+    <declare-styleable name="AndroidManifestFeature" parent="AndroidManifest">
+        <!-- Required identifier for a feature. Can be passed to
+        {@link android.content.Context#createFeatureContext} to create a context for this feature
+        -->
+        <attr name="featureId" format="string" />
+        <!-- Required user visible label for a feature. -->
+        <attr name="label" format="string" />
+    </declare-styleable>
+
+    <!-- Declares previously declared features this feature inherits from. -->
+    <declare-styleable name="AndroidManifestFeatureInheritFrom" parent="AndroidManifestFeature">
+        <!-- Identifier of the feature this feature inherits from -->
+        <attr name="featureId" format="string" />
+    </declare-styleable>
+
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
          features in your package (or other packages).  See the
