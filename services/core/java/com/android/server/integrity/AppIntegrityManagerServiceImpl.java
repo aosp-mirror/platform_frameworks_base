@@ -385,6 +385,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                         String packageName = getPackageNameNormalized(packageAndCert[0]);
                         String cert = packageAndCert[1];
                         packageCertMap.put(packageName, cert);
+                    } else if (packageAndCert.length == 1
+                            && packageAndCert[0].equals(ADB_INSTALLER)) {
+                        packageCertMap.put(ADB_INSTALLER, INSTALLER_CERT_NOT_APPLICABLE);
                     }
                 }
             }
