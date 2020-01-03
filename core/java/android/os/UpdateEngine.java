@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.IUpdateEngine;
@@ -156,6 +157,26 @@ public class UpdateEngine {
          */
         public static final int DEVICE_CORRUPTED = 61;
     }
+
+    /** @hide */
+    @IntDef(value = {
+            ErrorCodeConstants.SUCCESS,
+            ErrorCodeConstants.ERROR,
+            ErrorCodeConstants.FILESYSTEM_COPIER_ERROR,
+            ErrorCodeConstants.POST_INSTALL_RUNNER_ERROR,
+            ErrorCodeConstants.PAYLOAD_MISMATCHED_TYPE_ERROR,
+            ErrorCodeConstants.INSTALL_DEVICE_OPEN_ERROR,
+            ErrorCodeConstants.KERNEL_DEVICE_OPEN_ERROR,
+            ErrorCodeConstants.DOWNLOAD_TRANSFER_ERROR,
+            ErrorCodeConstants.PAYLOAD_HASH_MISMATCH_ERROR,
+            ErrorCodeConstants.PAYLOAD_SIZE_MISMATCH_ERROR,
+            ErrorCodeConstants.DOWNLOAD_PAYLOAD_VERIFICATION_ERROR,
+            ErrorCodeConstants.PAYLOAD_TIMESTAMP_ERROR,
+            ErrorCodeConstants.UPDATED_BUT_NOT_ACTIVE,
+            ErrorCodeConstants.NOT_ENOUGH_SPACE,
+            ErrorCodeConstants.DEVICE_CORRUPTED,
+    })
+    public @interface ErrorCode {}
 
     /**
      * Status codes for update engine. Values must agree with the ones in
@@ -439,7 +460,7 @@ public class UpdateEngine {
      * Return value of {@link #allocateSpace.}
      */
     public static final class AllocateSpaceResult {
-        private int mErrorCode = ErrorCodeConstants.SUCCESS;
+        private @ErrorCode int mErrorCode = ErrorCodeConstants.SUCCESS;
         private long mFreeSpaceRequired = 0;
         private AllocateSpaceResult() {}
         /**
@@ -454,6 +475,7 @@ public class UpdateEngine {
          * <li>Other {@link ErrorCodeConstants} for other errors.</li>
          * </ul>
          */
+        @ErrorCode
         public int errorCode() {
             return mErrorCode;
         }
@@ -559,6 +581,7 @@ public class UpdateEngine {
      * @throws ServiceSpecificException if other transient errors has occurred.
      * A reboot may or may not help resolving the issue.
      */
+    @ErrorCode
     public int cleanupAppliedPayload() {
         try {
             return mUpdateEngine.cleanupSuccessfulUpdate();
