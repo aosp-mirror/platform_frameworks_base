@@ -24,8 +24,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.Bundle;
@@ -40,13 +38,9 @@ import android.text.TextUtils;
 import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.SurfaceControl;
-import android.view.SurfaceControlViewHost;
-import android.view.WindowManager;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
-import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutofillWindowPresenter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
@@ -189,8 +183,16 @@ public final class AutoFillUI {
             Slog.w(TAG, "getSuggestionSurfaceForShowing() called with null dataset");
         }
         mHandler.post(() -> {
-            final SurfaceControl suggestionSurface = inflateInlineSuggestion(dataset, response,
-                    autofillId, width, height);
+            final InlineSuggestionUi inlineSuggestionUi = new InlineSuggestionUi(mContext);
+            final SurfaceControl suggestionSurface = inlineSuggestionUi.inflate(dataset,
+                    autofillId, width, height, v -> {
+                        Slog.d(TAG, "Inline suggestion clicked");
+                        hideFillUiUiThread(mCallback, true);
+                        if (mCallback != null) {
+                            final int datasetIndex = response.getDatasets().indexOf(dataset);
+                            mCallback.fill(response.getRequestId(), datasetIndex, dataset);
+                        }
+                    });
 
             try {
                 cb.onContent(suggestionSurface);
@@ -198,51 +200,6 @@ public final class AutoFillUI {
                 Slog.w(TAG, "RemoteException replying onContent(" + suggestionSurface + "): " + e);
             }
         });
-    }
-
-    /**
-     * TODO(b/137800469): Fill in javadoc, generate custom templated view for inline suggestions.
-     * TODO: Move to ExtServices.
-     *
-     * @return a {@link SurfaceControl} with the inflated content embedded in it.
-     */
-    private SurfaceControl inflateInlineSuggestion(@NonNull Dataset dataset,
-            @NonNull FillResponse response, AutofillId autofillId, int width, int height) {
-        Slog.i(TAG, "inflate() called");
-        final Context context = mContext;
-        final int index = dataset.getFieldIds().indexOf(autofillId);
-        if (index < 0) {
-            Slog.w(TAG, "inflateInlineSuggestion(): AutofillId=" + autofillId
-                    + " not found in dataset");
-        }
-
-        final AutofillValue datasetValue = dataset.getFieldValues().get(index);
-        //TODO(b/137800469): Pass in inputToken from IME.
-        final SurfaceControlViewHost wvr = new SurfaceControlViewHost(context, context.getDisplay(),
-                (IBinder) null);
-        // TODO(b/134365580): Use the package instead of the SurfaceControl itself
-        // for accessibility support.
-        final SurfaceControl sc = wvr.getSurfacePackage().getSurfaceControl();
-
-        TextView textView = new TextView(context);
-        textView.setText(datasetValue.getTextValue());
-        textView.setBackgroundColor(Color.WHITE);
-        textView.setTextColor(Color.BLACK);
-        textView.setOnClickListener(v -> {
-            Slog.d(TAG, "Inline suggestion clicked");
-            hideFillUiUiThread(mCallback, true);
-            if (mCallback != null) {
-                final int datasetIndex = response.getDatasets().indexOf(dataset);
-                mCallback.fill(response.getRequestId(), datasetIndex, dataset);
-            }
-        });
-
-        WindowManager.LayoutParams lp =
-                new WindowManager.LayoutParams(width, height,
-                        WindowManager.LayoutParams.TYPE_APPLICATION, 0, PixelFormat.OPAQUE);
-        wvr.addView(textView, lp);
-
-        return sc;
     }
 
     /**
