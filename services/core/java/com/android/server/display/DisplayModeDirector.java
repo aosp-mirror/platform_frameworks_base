@@ -237,15 +237,15 @@ public class DisplayModeDirector {
                 lowestConsideredPriority++;
             }
 
-            int defaultModeId = defaultMode.getModeId();
+            int baseModeId = defaultMode.getModeId();
             if (availableModes.length > 0) {
-                defaultModeId = availableModes[0];
+                baseModeId = availableModes[0];
             }
             // filterModes function is going to filter the modes based on the voting system. If
             // the application requests a given mode with preferredModeId function, it will be
-            // stored as defaultModeId.
+            // stored as baseModeId.
             return new DesiredDisplayModeSpecs(
-                    defaultModeId, new RefreshRateRange(minRefreshRate, maxRefreshRate));
+                    baseModeId, new RefreshRateRange(minRefreshRate, maxRefreshRate));
         }
     }
 
@@ -526,7 +526,7 @@ public class DisplayModeDirector {
     }
 
     /**
-     * Information about the desired display mode to be set by the system. Includes the default
+     * Information about the desired display mode to be set by the system. Includes the base
      * mode ID and refresh rate range.
      *
      * We have this class in addition to SurfaceControl.DesiredDisplayConfigSpecs to make clear the
@@ -535,10 +535,10 @@ public class DisplayModeDirector {
      */
     public static final class DesiredDisplayModeSpecs {
         /**
-         * Default mode ID. This is what system defaults to for all other settings, or
+         * Base mode ID. This is what system defaults to for all other settings, or
          * if the refresh rate range is not available.
          */
-        public int defaultModeId;
+        public int baseModeId;
         /**
          * The refresh rate range.
          */
@@ -548,9 +548,8 @@ public class DisplayModeDirector {
             refreshRateRange = new RefreshRateRange();
         }
 
-        public DesiredDisplayModeSpecs(
-                int defaultModeId, @NonNull RefreshRateRange refreshRateRange) {
-            this.defaultModeId = defaultModeId;
+        public DesiredDisplayModeSpecs(int baseModeId, @NonNull RefreshRateRange refreshRateRange) {
+            this.baseModeId = baseModeId;
             this.refreshRateRange = refreshRateRange;
         }
 
@@ -559,7 +558,7 @@ public class DisplayModeDirector {
          */
         @Override
         public String toString() {
-            return String.format("defaultModeId=%d min=%.0f max=%.0f", defaultModeId,
+            return String.format("baseModeId=%d min=%.0f max=%.0f", baseModeId,
                     refreshRateRange.min, refreshRateRange.max);
         }
         /**
@@ -577,7 +576,7 @@ public class DisplayModeDirector {
 
             DesiredDisplayModeSpecs desiredDisplayModeSpecs = (DesiredDisplayModeSpecs) other;
 
-            if (defaultModeId != desiredDisplayModeSpecs.defaultModeId) {
+            if (baseModeId != desiredDisplayModeSpecs.baseModeId) {
                 return false;
             }
             if (!refreshRateRange.equals(desiredDisplayModeSpecs.refreshRateRange)) {
@@ -588,14 +587,14 @@ public class DisplayModeDirector {
 
         @Override
         public int hashCode() {
-            return Objects.hash(defaultModeId, refreshRateRange);
+            return Objects.hash(baseModeId, refreshRateRange);
         }
 
         /**
          * Copy values from the other object.
          */
         public void copyFrom(DesiredDisplayModeSpecs other) {
-            defaultModeId = other.defaultModeId;
+            baseModeId = other.baseModeId;
             refreshRateRange.min = other.refreshRateRange.min;
             refreshRateRange.max = other.refreshRateRange.max;
         }

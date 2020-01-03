@@ -317,7 +317,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         @Override
         public void setDesiredDisplayModeSpecsLocked(
                 DisplayModeDirector.DesiredDisplayModeSpecs displayModeSpecs) {
-            final int id = displayModeSpecs.defaultModeId;
+            final int id = displayModeSpecs.baseModeId;
             int index = -1;
             if (id == 0) {
                 // Use the default.
