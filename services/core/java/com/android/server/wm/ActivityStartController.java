@@ -135,7 +135,7 @@ public class ActivityStartController {
         mHandler = new StartHandler(mService.mH.getLooper());
         mFactory = factory;
         mFactory.setController(this);
-        mPendingRemoteAnimationRegistry = new PendingRemoteAnimationRegistry(service,
+        mPendingRemoteAnimationRegistry = new PendingRemoteAnimationRegistry(service.mGlobalLock,
                 service.mH);
     }
 
