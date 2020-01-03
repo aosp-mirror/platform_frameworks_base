@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -64,7 +65,6 @@ import com.android.server.integrity.engine.RuleEvaluationEngine;
 import com.android.server.integrity.model.IntegrityCheckResult;
 import com.android.server.testutils.TestUtils;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -75,9 +75,6 @@ import org.mockito.junit.MockitoRule;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -86,7 +83,8 @@ import java.util.Map;
 /** Unit test for {@link com.android.server.integrity.AppIntegrityManagerServiceImpl} */
 @RunWith(AndroidJUnit4.class)
 public class AppIntegrityManagerServiceImplTest {
-    private static final String TEST_DIR = "AppIntegrityManagerServiceImplTest";
+    private static final String TEST_APP_PATH =
+            "/data/local/tmp/AppIntegrityManagerServiceTestApp.apk";
 
     private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
     private static final String VERSION = "version";
@@ -97,12 +95,18 @@ public class AppIntegrityManagerServiceImplTest {
     private static final String INSTALLER = TEST_FRAMEWORK_PACKAGE;
     // These are obtained by running the test and checking logcat.
     private static final String APP_CERT =
-            "949ADC6CB92FF09E3784D6E9504F26F9BEAC06E60D881D55A6A81160F9CD6FD1";
+            "301AA3CB081134501C45F1422ABC66C24224FD5DED5FDC8F17E697176FD866AA";
     private static final String INSTALLER_CERT =
             "301AA3CB081134501C45F1422ABC66C24224FD5DED5FDC8F17E697176FD866AA";
     // We use SHA256 for package names longer than 32 characters.
     private static final String INSTALLER_SHA256 =
             "786933C28839603EB48C50B2A688DC6BE52C833627CB2731FF8466A2AE9F94CD";
+
+    private static final String PLAY_STORE_PKG = "com.android.vending";
+    private static final String ADB_INSTALLER = "adb";
+    private static final String PLAY_STORE_CERT =
+            "play_store_cert";
+    private static final String ADB_CERT = "";
 
     @org.junit.Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
 
@@ -122,11 +126,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Before
     public void setup() throws Exception {
-        mTestApk = File.createTempFile("TestApk", /* suffix= */ null);
-        mTestApk.deleteOnExit();
-        try (InputStream inputStream = mRealContext.getAssets().open(TEST_DIR + "/test.apk")) {
-            Files.copy(inputStream, mTestApk.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        }
+        mTestApk = new File(TEST_APP_PATH);
 
         mService =
                 new AppIntegrityManagerServiceImpl(
@@ -141,11 +141,7 @@ public class AppIntegrityManagerServiceImplTest {
         when(mMockContext.getPackageManager()).thenReturn(mSpyPackageManager);
         when(mMockContext.getResources()).thenReturn(mMockResources);
         when(mMockResources.getStringArray(anyInt())).thenReturn(new String[] {});
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        mTestApk.delete();
+        when(mIntegrityFileManager.initialized()).thenReturn(true);
     }
 
     // This is not a test of the class, but more of a safeguard that we don't block any install in
@@ -310,10 +306,10 @@ public class AppIntegrityManagerServiceImplTest {
         assertEquals(INSTALLER_CERT, appInstallMetadata.getInstallerCertificate());
         assertEquals(VERSION_CODE, appInstallMetadata.getVersionCode());
         assertFalse(appInstallMetadata.isPreInstalled());
-        // These are hardcoded in the test apk
+        // These are hardcoded in the test apk android manifest
         assertEquals(2, allowedInstallers.size());
-        assertEquals("cert_1", allowedInstallers.get("store_1"));
-        assertEquals("cert_2", allowedInstallers.get("store_2"));
+        assertEquals(PLAY_STORE_CERT, allowedInstallers.get(PLAY_STORE_PKG));
+        assertEquals(ADB_CERT, allowedInstallers.get(ADB_INSTALLER));
     }
 
     @Test
@@ -354,6 +350,25 @@ public class AppIntegrityManagerServiceImplTest {
         verify(mPackageManagerInternal)
                 .setIntegrityVerificationResult(
                         1, PackageManagerInternal.INTEGRITY_VERIFICATION_REJECT);
+    }
+
+    @Test
+    public void handleBroadcast_notInitialized() throws Exception {
+        when(mIntegrityFileManager.initialized()).thenReturn(false);
+        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mMockContext)
+                .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
+        Intent intent = makeVerificationIntent();
+        when(mRuleEvaluationEngine.evaluate(any(), any())).thenReturn(IntegrityCheckResult.allow());
+
+        broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
+        runJobInHandler();
+
+        verify(mPackageManagerInternal)
+                .setIntegrityVerificationResult(
+                        1, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
+        verify(mSpyPackageManager, never()).getPackageArchiveInfo(any(), anyInt());
     }
 
     private void whitelistUsAsRuleProvider() {

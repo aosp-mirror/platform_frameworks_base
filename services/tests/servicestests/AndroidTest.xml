@@ -26,6 +26,11 @@
         <option name="test-file-name" value="SimpleServiceTestApp.apk" />
     </target_preparer>
 
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
+        <option name="cleanup" value="true" />
+        <option name="push" value="AppIntegrityManagerServiceTestApp.apk->/data/local/tmp/AppIntegrityManagerServiceTestApp.apk" />
+    </target_preparer>
+
     <option name="test-tag" value="FrameworksServicesTests" />
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.frameworks.servicestests" />
