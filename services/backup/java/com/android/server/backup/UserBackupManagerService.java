@@ -18,7 +18,6 @@ package com.android.server.backup;
 
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
@@ -159,6 +158,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
@@ -518,7 +518,7 @@ public class UserBackupManagerService {
             File dataDir,
             TransportManager transportManager) {
         mUserId = userId;
-        mContext = checkNotNull(context, "context cannot be null");
+        mContext = Objects.requireNonNull(context, "context cannot be null");
         mPackageManager = context.getPackageManager();
         mPackageManagerBinder = AppGlobals.getPackageManager();
         mActivityManager = ActivityManager.getService();
@@ -528,14 +528,14 @@ public class UserBackupManagerService {
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mStorageManager = IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
 
-        checkNotNull(parent, "parent cannot be null");
+        Objects.requireNonNull(parent, "parent cannot be null");
         mBackupManagerBinder = BackupManagerService.asInterface(parent.asBinder());
 
         mAgentTimeoutParameters = new
                 BackupAgentTimeoutParameters(Handler.getMain(), mContext.getContentResolver());
         mAgentTimeoutParameters.start();
 
-        checkNotNull(userBackupThread, "userBackupThread cannot be null");
+        Objects.requireNonNull(userBackupThread, "userBackupThread cannot be null");
         mBackupHandler = new BackupHandler(this, userBackupThread);
 
         // Set up our bookkeeping
@@ -551,7 +551,7 @@ public class UserBackupManagerService {
                 mSetupObserver,
                 mUserId);
 
-        mBaseStateDir = checkNotNull(baseStateDir, "baseStateDir cannot be null");
+        mBaseStateDir = Objects.requireNonNull(baseStateDir, "baseStateDir cannot be null");
         // TODO (b/120424138): Remove once the system user is migrated to use the per-user CE
         // directory. Per-user CE directories are managed by vold.
         if (userId == UserHandle.USER_SYSTEM) {
@@ -563,7 +563,7 @@ public class UserBackupManagerService {
 
         // TODO (b/120424138): The system user currently uses the cache which is managed by init.rc
         // Initialization and restorecon is managed by vold for per-user CE directories.
-        mDataDir = checkNotNull(dataDir, "dataDir cannot be null");
+        mDataDir = Objects.requireNonNull(dataDir, "dataDir cannot be null");
         mBackupPasswordManager = new BackupPasswordManager(mContext, mBaseStateDir, mRng);
 
         // Receivers for scheduled backups and transport initialization operations.
@@ -625,7 +625,7 @@ public class UserBackupManagerService {
             addPackageParticipantsLocked(null);
         }
 
-        mTransportManager = checkNotNull(transportManager, "transportManager cannot be null");
+        mTransportManager = Objects.requireNonNull(transportManager, "transportManager cannot be null");
         mTransportManager.setOnTransportRegisteredListener(this::onTransportRegistered);
         mRegisterTransportsRequestedTime = SystemClock.elapsedRealtime();
         mBackupHandler.postDelayed(
@@ -3047,9 +3047,9 @@ public class UserBackupManagerService {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP, "updateTransportAttributes");
 
-        Preconditions.checkNotNull(transportComponent, "transportComponent can't be null");
-        Preconditions.checkNotNull(name, "name can't be null");
-        Preconditions.checkNotNull(
+        Objects.requireNonNull(transportComponent, "transportComponent can't be null");
+        Objects.requireNonNull(name, "name can't be null");
+        Objects.requireNonNull(
                 currentDestinationString, "currentDestinationString can't be null");
         Preconditions.checkArgument(
                 (dataManagementIntent == null) == (dataManagementLabel == null),

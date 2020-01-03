@@ -54,7 +54,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
-import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -79,6 +78,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class PerformUnifiedRestoreTask implements BackupRestoreTask {
@@ -208,7 +208,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mFinished = false;
         mDidLaunch = false;
         mListener = listener;
-        mAgentTimeoutParameters = Preconditions.checkNotNull(
+        mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
 

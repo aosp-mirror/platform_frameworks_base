@@ -32,7 +32,6 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.backup.IBackupTransport;
-import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
@@ -58,6 +57,7 @@ import com.android.server.backup.transport.TransportClient;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Asynchronous backup/restore handler thread.
@@ -98,7 +98,7 @@ public class BackupHandler extends Handler {
         super(backupThread.getLooper());
         mBackupThread = backupThread;
         this.backupManagerService = backupManagerService;
-        mAgentTimeoutParameters = Preconditions.checkNotNull(
+        mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
     }
