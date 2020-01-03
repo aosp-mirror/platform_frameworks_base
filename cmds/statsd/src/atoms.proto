@@ -6691,6 +6691,9 @@ message GpuStatsAppInfo {
 
     // App is not doing pre-rotation correctly.
     optional bool false_prerotation = 7;
+
+    // App creates GLESv1 context.
+    optional bool gles_1_in_use = 8;
 }
 
 /*

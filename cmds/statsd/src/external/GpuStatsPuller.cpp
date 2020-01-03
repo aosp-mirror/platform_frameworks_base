@@ -103,6 +103,7 @@ static bool pullGpuStatsAppInfo(const sp<IGpuService>& gpuService,
         }
         if (!event->write(info.cpuVulkanInUse)) return false;
         if (!event->write(info.falsePrerotation)) return false;
+        if (!event->write(info.gles1InUse)) return false;
         event->init();
         data->emplace_back(event);
     }
