@@ -145,8 +145,7 @@ public abstract class SoftRestrictedPermissionPolicy {
                     }
                     @Override
                     public boolean mayAllowExtraAppOp() {
-                        return !shouldApplyRestriction && hasRequestedLegacyExternalStorage
-                                && targetSDK <= Build.VERSION_CODES.Q;
+                        return !shouldApplyRestriction && hasRequestedLegacyExternalStorage;
                     }
                     @Override
                     public boolean mayDenyExtraAppOpIfGranted() {
