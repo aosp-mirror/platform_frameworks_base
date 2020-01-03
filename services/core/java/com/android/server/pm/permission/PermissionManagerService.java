@@ -3025,10 +3025,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     @Override
     public void startOneTimePermissionSession(String packageName, @UserIdInt int userId,
             long timeoutMillis, int importanceToResetTimer, int importanceToKeepSessionAlive) {
-        mContext.enforceCallingPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
-                "Must be able to revoke runtime permissions to register permissions as one time.");
-        mContext.enforceCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS,
-                "Must be able to access usage stats to register permissions as one time.");
+        mContext.enforceCallingPermission(Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS,
+                "Must hold " + Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS
+                        + " to register permissions as one time.");
         packageName = Preconditions.checkNotNull(packageName);
 
         long token = Binder.clearCallingIdentity();
@@ -3042,10 +3041,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     public void stopOneTimePermissionSession(String packageName, @UserIdInt int userId) {
-        mContext.enforceCallingPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
-                "Must be able to revoke runtime permissions to remove permissions as one time.");
-        mContext.enforceCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS,
-                "Must be able to access usage stats to remove permissions as one time.");
+        mContext.enforceCallingPermission(Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS,
+                "Must hold " + Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS
+                        + " to remove permissions as one time.");
         Preconditions.checkNotNull(packageName);
 
         long token = Binder.clearCallingIdentity();
