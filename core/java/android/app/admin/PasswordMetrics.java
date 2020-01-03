@@ -682,6 +682,11 @@ public final class PasswordMetrics implements Parcelable {
      *
      * TODO: move to PasswordPolicy
      */
+    public static PasswordMetrics applyComplexity(
+            PasswordMetrics adminMetrics, boolean isPin, int complexity) {
+        return applyComplexity(adminMetrics, isPin, ComplexityBucket.forComplexity(complexity));
+    }
+
     private static PasswordMetrics applyComplexity(
             PasswordMetrics adminMetrics, boolean isPin, ComplexityBucket bucket) {
         final PasswordMetrics minMetrics = new PasswordMetrics(adminMetrics);
