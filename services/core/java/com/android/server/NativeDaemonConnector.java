@@ -46,6 +46,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.LinkedList;
+import java.util.Objects;
 
 /**
  * Generic connector class for interfacing with a native daemon which uses the
@@ -126,7 +127,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
      */
     public void setWarnIfHeld(Object warnIfHeld) {
         Preconditions.checkState(mWarnIfHeld == null);
-        mWarnIfHeld = Preconditions.checkNotNull(warnIfHeld);
+        mWarnIfHeld = Objects.requireNonNull(warnIfHeld);
     }
 
     @Override
