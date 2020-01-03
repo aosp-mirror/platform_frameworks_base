@@ -23,7 +23,6 @@ import static android.os.Process.getUidForPid;
 import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.stats.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
@@ -1848,7 +1847,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         PowerProfile powerProfile = new PowerProfile(mContext);
-        checkNotNull(powerProfile);
+        Objects.requireNonNull(powerProfile);
 
         StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
                 wallClockNanos);
