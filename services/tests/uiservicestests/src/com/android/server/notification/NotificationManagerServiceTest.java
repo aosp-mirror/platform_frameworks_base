@@ -3172,9 +3172,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final NotificationVisibility nv = NotificationVisibility.obtain(r.getKey(), 1, 2, true);
         mService.mNotificationDelegate.onNotificationVisibilityChanged(
                 new NotificationVisibility[] {nv}, new NotificationVisibility[]{});
+        verify(mAssistants).notifyAssistantVisibilityChangedLocked(eq(r.sbn), eq(true));
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasSeen());
         mService.mNotificationDelegate.onNotificationVisibilityChanged(
                 new NotificationVisibility[] {}, new NotificationVisibility[]{nv});
+        verify(mAssistants).notifyAssistantVisibilityChangedLocked(eq(r.sbn), eq(false));
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasSeen());
     }
 
@@ -4422,6 +4424,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ((INotificationManager)mService.mService).enqueueToast(testPackage,
                 new TestableToastCallback(), 2000, 0);
         assertEquals(1, mService.mToastQueue.size());
+    }
+
+    @Test
+    public void testOnPanelRevealedAndHidden() {
+        int items = 5;
+        mService.mNotificationDelegate.onPanelRevealed(false, items);
+        verify(mAssistants, times(1)).onPanelRevealed(eq(items));
+
+        mService.mNotificationDelegate.onPanelHidden();
+        verify(mAssistants, times(1)).onPanelHidden();
     }
 
     @Test

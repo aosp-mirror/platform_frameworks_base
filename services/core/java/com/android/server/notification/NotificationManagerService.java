@@ -1009,12 +1009,14 @@ public class NotificationManagerService extends SystemService {
             if (clearEffects) {
                 clearEffects();
             }
+            mAssistants.onPanelRevealed(items);
         }
 
         @Override
         public void onPanelHidden() {
             MetricsLogger.hidden(getContext(), MetricsEvent.NOTIFICATION_PANEL);
             EventLogTags.writeNotificationPanelHidden();
+            mAssistants.onPanelHidden();
         }
 
         @Override
@@ -1061,6 +1063,7 @@ public class NotificationManagerService extends SystemService {
                         reportSeen(r);
                     }
                     r.setVisibility(true, nv.rank, nv.count);
+                    mAssistants.notifyAssistantVisibilityChangedLocked(r.sbn, true);
                     boolean isHun = (nv.location
                             == NotificationVisibility.NotificationLocation.LOCATION_FIRST_HEADS_UP);
                     // hasBeenVisiblyExpanded must be called after updating the expansion state of
@@ -1079,6 +1082,7 @@ public class NotificationManagerService extends SystemService {
                     NotificationRecord r = mNotificationsByKey.get(nv.key);
                     if (r == null) continue;
                     r.setVisibility(false, nv.rank, nv.count);
+                    mAssistants.notifyAssistantVisibilityChangedLocked(r.sbn, false);
                     nv.recycle();
                 }
             }
@@ -8304,6 +8308,32 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        protected void onPanelRevealed(int items) {
+            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
+                mHandler.post(() -> {
+                    final INotificationListener assistant = (INotificationListener) info.service;
+                    try {
+                        assistant.onPanelRevealed(items);
+                    } catch (RemoteException ex) {
+                        Slog.e(TAG, "unable to notify assistant (panel revealed): " + info, ex);
+                    }
+                });
+            }
+        }
+
+        protected void onPanelHidden() {
+            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
+                mHandler.post(() -> {
+                    final INotificationListener assistant = (INotificationListener) info.service;
+                    try {
+                        assistant.onPanelHidden();
+                    } catch (RemoteException ex) {
+                        Slog.e(TAG, "unable to notify assistant (panel hidden): " + info, ex);
+                    }
+                });
+            }
+        }
+
         boolean hasUserSet(int userId) {
             synchronized (mLock) {
                 return mUserSetMap.getOrDefault(userId, false);
@@ -8366,6 +8396,24 @@ public class NotificationManagerService extends SystemService {
                             assistant.onNotificationEnqueuedWithChannel(sbnHolder, r.getChannel());
                         } catch (RemoteException ex) {
                             Slog.e(TAG, "unable to notify assistant (enqueued): " + assistant, ex);
+                        }
+                    });
+        }
+
+        @GuardedBy("mNotificationLock")
+        void notifyAssistantVisibilityChangedLocked(
+                final StatusBarNotification sbn,
+                final boolean isVisible) {
+            final String key = sbn.getKey();
+            Slog.d(TAG, "notifyAssistantVisibilityChangedLocked: " + key);
+            notifyAssistantLocked(
+                    sbn,
+                    false /* sameUserOnly */,
+                    (assistant, sbnHolder) -> {
+                        try {
+                            assistant.onNotificationVisibilityChanged(key, isVisible);
+                        } catch (RemoteException ex) {
+                            Slog.e(TAG, "unable to notify assistant (visible): " + assistant, ex);
                         }
                     });
         }
