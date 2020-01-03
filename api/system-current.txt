@@ -4141,6 +4141,14 @@ package android.media {
 
 }
 
+package android.media.audiofx {
+
+  public class AudioEffect {
+    ctor @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public AudioEffect(@NonNull java.util.UUID, @NonNull android.media.AudioDeviceAddress);
+  }
+
+}
+
 package android.media.audiopolicy {
 
   public class AudioMix {
