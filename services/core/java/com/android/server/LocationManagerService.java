@@ -23,7 +23,6 @@ import static android.location.LocationManager.NETWORK_PROVIDER;
 import static android.location.LocationManager.PASSIVE_PROVIDER;
 import static android.os.PowerManager.locationPowerSaveModeToString;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 
 import android.Manifest;
@@ -121,6 +120,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -821,7 +821,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         @GuardedBy("mLock")
         public void attachLocked(AbstractLocationProvider provider) {
-            checkNotNull(provider);
+            Objects.requireNonNull(provider);
             checkState(mProvider == null);
 
             if (D) {
@@ -1430,7 +1430,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public boolean addGnssBatchingCallback(IBatchedLocationCallback callback, String packageName,
             String featureId, String listenerIdentifier) {
-        Preconditions.checkNotNull(listenerIdentifier);
+        Objects.requireNonNull(listenerIdentifier);
 
         return mGnssManagerService == null ? false : mGnssManagerService.addGnssBatchingCallback(
                 callback, packageName, featureId, listenerIdentifier);
@@ -2119,7 +2119,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     public void requestLocationUpdates(LocationRequest request, ILocationListener listener,
             PendingIntent intent, String packageName, String featureId,
             String listenerIdentifier) {
-        Preconditions.checkNotNull(listenerIdentifier);
+        Objects.requireNonNull(listenerIdentifier);
 
         synchronized (mLock) {
             if (request == null) request = DEFAULT_LOCATION_REQUEST;
@@ -2470,7 +2470,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public void requestGeofence(LocationRequest request, Geofence geofence, PendingIntent intent,
             String packageName, String featureId, String listenerIdentifier) {
-        Preconditions.checkNotNull(listenerIdentifier);
+        Objects.requireNonNull(listenerIdentifier);
 
         if (request == null) request = DEFAULT_LOCATION_REQUEST;
         int allowedResolutionLevel = getCallerAllowedResolutionLevel();
@@ -2567,7 +2567,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public boolean addGnssMeasurementsListener(IGnssMeasurementsListener listener,
             String packageName, String featureId, String listenerIdentifier) {
-        Preconditions.checkNotNull(listenerIdentifier);
+        Objects.requireNonNull(listenerIdentifier);
 
         return mGnssManagerService == null ? false
                 : mGnssManagerService.addGnssMeasurementsListener(listener, packageName, featureId,
@@ -2600,7 +2600,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public boolean addGnssNavigationMessageListener(IGnssNavigationMessageListener listener,
             String packageName, String featureId, String listenerIdentifier) {
-        Preconditions.checkNotNull(listenerIdentifier);
+        Objects.requireNonNull(listenerIdentifier);
 
         return mGnssManagerService == null ? false
                 : mGnssManagerService.addGnssNavigationMessageListener(listener, packageName,
