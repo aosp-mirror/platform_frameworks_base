@@ -5,7 +5,7 @@
 #include "SkShader.h"
 #include "SkBlendMode.h"
 #include "core_jni_helpers.h"
-#include "src/shaders/SkRTShader.h"
+#include "include/effects/SkRuntimeEffect.h"
 
 #include <jni.h>
 
@@ -214,14 +214,14 @@ static jlong ComposeShader_create(JNIEnv* env, jobject o, jlong matrixPtr,
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 static jlong RuntimeShader_create(JNIEnv* env, jobject, jlong shaderFactory, jlong matrixPtr,
-        jbyteArray inputs, jlong colorSpaceHandle) {
-    SkRuntimeShaderFactory* factory = reinterpret_cast<SkRuntimeShaderFactory*>(shaderFactory);
+        jbyteArray inputs, jlong colorSpaceHandle, jboolean isOpaque) {
+    SkRuntimeEffect* effect = reinterpret_cast<SkRuntimeEffect*>(shaderFactory);
     AutoJavaByteArray arInputs(env, inputs);
 
     sk_sp<SkData> fData;
     fData = SkData::MakeWithCopy(arInputs.ptr(), arInputs.length());
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
-    sk_sp<SkShader> shader = factory->make(fData, matrix);
+    sk_sp<SkShader> shader = effect->makeShader(fData, nullptr, 0, matrix, isOpaque == JNI_TRUE);
     ThrowIAE_IfNull(env, shader);
 
     return reinterpret_cast<jlong>(shader.release());
@@ -229,24 +229,22 @@ static jlong RuntimeShader_create(JNIEnv* env, jobject, jlong shaderFactory, jlo
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static jlong RuntimeShader_createShaderFactory(JNIEnv* env, jobject, jstring sksl,
-        jboolean isOpaque) {
+static jlong RuntimeShader_createShaderFactory(JNIEnv* env, jobject, jstring sksl) {
     ScopedUtfChars strSksl(env, sksl);
-    SkRuntimeShaderFactory* shaderFactory = new SkRuntimeShaderFactory(SkString(strSksl.c_str()),
-            isOpaque == JNI_TRUE);
-    ThrowIAE_IfNull(env, shaderFactory);
+    sk_sp<SkRuntimeEffect> effect = std::get<0>(SkRuntimeEffect::Make(SkString(strSksl.c_str())));
+    ThrowIAE_IfNull(env, effect);
 
-    return reinterpret_cast<jlong>(shaderFactory);
+    return reinterpret_cast<jlong>(effect.release());
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static void RuntimeShader_delete(SkRuntimeShaderFactory* shaderFactory) {
-    delete shaderFactory;
+static void Effect_safeUnref(SkRuntimeEffect* effect) {
+    SkSafeUnref(effect);
 }
 
 static jlong RuntimeShader_getNativeFinalizer(JNIEnv*, jobject) {
-    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&RuntimeShader_delete));
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&Effect_safeUnref));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -282,8 +280,8 @@ static const JNINativeMethod gComposeShaderMethods[] = {
 
 static const JNINativeMethod gRuntimeShaderMethods[] = {
     { "nativeGetFinalizer",   "()J",    (void*)RuntimeShader_getNativeFinalizer },
-    { "nativeCreate",     "(JJ[BJ)J",  (void*)RuntimeShader_create     },
-    { "nativeCreateShaderFactory",     "(Ljava/lang/String;Z)J",
+    { "nativeCreate",     "(JJ[BJZ)J",  (void*)RuntimeShader_create     },
+    { "nativeCreateShaderFactory",     "(Ljava/lang/String;)J",
       (void*)RuntimeShader_createShaderFactory     },
 };
 
