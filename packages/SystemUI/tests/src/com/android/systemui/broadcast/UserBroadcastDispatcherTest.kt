@@ -26,6 +26,8 @@ import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.time.FakeSystemClock
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
@@ -69,8 +71,6 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
     @Mock
     private lateinit var mockContext: Context
     @Mock
-    private lateinit var mockHandler: Handler
-    @Mock
     private lateinit var mPendingResult: BroadcastReceiver.PendingResult
 
     @Captor
@@ -81,12 +81,14 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
     private lateinit var intentFilter: IntentFilter
     private lateinit var intentFilterOther: IntentFilter
     private lateinit var handler: Handler
+    private lateinit var fakeExecutor: FakeExecutor
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         handler = Handler(testableLooper.looper)
+        fakeExecutor = FakeExecutor(FakeSystemClock())
 
         userBroadcastDispatcher = UserBroadcastDispatcher(
                 mockContext, USER_ID, handler, testableLooper.looper)
@@ -108,7 +110,7 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
         intentFilter = IntentFilter(ACTION_1)
 
         userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiver, intentFilter, mockHandler, USER_HANDLE))
+                ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
         testableLooper.processAllMessages()
 
         assertTrue(userBroadcastDispatcher.isRegistered())
@@ -128,7 +130,7 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
         intentFilter = IntentFilter(ACTION_1)
 
         userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiver, intentFilter, mockHandler, USER_HANDLE))
+                ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
         testableLooper.processAllMessages()
         reset(mockContext)
 
@@ -151,9 +153,9 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
         }
 
         userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiver, intentFilter, mockHandler, USER_HANDLE))
+                ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
         userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiverOther, intentFilterOther, mockHandler, USER_HANDLE))
+                ReceiverData(broadcastReceiverOther, intentFilterOther, fakeExecutor, USER_HANDLE))
 
         testableLooper.processAllMessages()
         assertTrue(userBroadcastDispatcher.isRegistered())
@@ -179,14 +181,15 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
         intentFilterOther = IntentFilter(ACTION_2)
 
         userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiver, intentFilter, handler, USER_HANDLE))
+                ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
         userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiverOther, intentFilterOther, handler, USER_HANDLE))
+                ReceiverData(broadcastReceiverOther, intentFilterOther, fakeExecutor, USER_HANDLE))
 
         val intent = Intent(ACTION_2)
 
         userBroadcastDispatcher.onReceive(mockContext, intent)
         testableLooper.processAllMessages()
+        fakeExecutor.runAllReady()
 
         verify(broadcastReceiver, never()).onReceive(any(), any())
         verify(broadcastReceiverOther).onReceive(mockContext, intent)
@@ -198,14 +201,15 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
         intentFilterOther = IntentFilter(ACTION_2)
 
         userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiver, intentFilter, handler, USER_HANDLE))
+                ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
         userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiver, intentFilterOther, handler, USER_HANDLE))
+                ReceiverData(broadcastReceiver, intentFilterOther, fakeExecutor, USER_HANDLE))
 
         val intent = Intent(ACTION_2)
 
         userBroadcastDispatcher.onReceive(mockContext, intent)
         testableLooper.processAllMessages()
+        fakeExecutor.runAllReady()
 
         verify(broadcastReceiver).onReceive(mockContext, intent)
     }
@@ -218,14 +222,15 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
         intentFilterOther.addCategory(CATEGORY_2)
 
         userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiver, intentFilter, handler, USER_HANDLE))
+                ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
         userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiverOther, intentFilterOther, handler, USER_HANDLE))
+                ReceiverData(broadcastReceiverOther, intentFilterOther, fakeExecutor, USER_HANDLE))
 
         val intent = Intent(ACTION_1)
 
         userBroadcastDispatcher.onReceive(mockContext, intent)
         testableLooper.processAllMessages()
+        fakeExecutor.runAllReady()
 
         verify(broadcastReceiver).onReceive(mockContext, intent)
         verify(broadcastReceiverOther).onReceive(mockContext, intent)
@@ -235,12 +240,13 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
     fun testPendingResult() {
         intentFilter = IntentFilter(ACTION_1)
         userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiver, intentFilter, handler, USER_HANDLE))
+                ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
 
         val intent = Intent(ACTION_1)
         userBroadcastDispatcher.onReceive(mockContext, intent)
 
         testableLooper.processAllMessages()
+        fakeExecutor.runAllReady()
 
         verify(broadcastReceiver).onReceive(mockContext, intent)
         verify(broadcastReceiver).pendingResult = mPendingResult
@@ -250,15 +256,16 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
     fun testRemoveReceiverReferences() {
         intentFilter = IntentFilter(ACTION_1)
         userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiver, intentFilter, handler, USER_HANDLE))
+                ReceiverData(broadcastReceiver, intentFilter, fakeExecutor, USER_HANDLE))
 
         intentFilterOther = IntentFilter(ACTION_1)
         intentFilterOther.addAction(ACTION_2)
         userBroadcastDispatcher.registerReceiver(
-                ReceiverData(broadcastReceiverOther, intentFilterOther, handler, USER_HANDLE))
+                ReceiverData(broadcastReceiverOther, intentFilterOther, fakeExecutor, USER_HANDLE))
 
         userBroadcastDispatcher.unregisterReceiver(broadcastReceiver)
         testableLooper.processAllMessages()
+        fakeExecutor.runAllReady()
 
         assertFalse(userBroadcastDispatcher.isReceiverReferenceHeld(broadcastReceiver))
     }

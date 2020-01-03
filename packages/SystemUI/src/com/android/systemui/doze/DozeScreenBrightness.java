@@ -91,7 +91,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
         if (mDebuggable) {
             IntentFilter filter = new IntentFilter();
             filter.addAction(ACTION_AOD_BRIGHTNESS);
-            mBroadcastDispatcher.registerReceiver(this, filter, handler, UserHandle.ALL);
+            mBroadcastDispatcher.registerReceiverWithHandler(this, filter, handler, UserHandle.ALL);
         }
     }
 

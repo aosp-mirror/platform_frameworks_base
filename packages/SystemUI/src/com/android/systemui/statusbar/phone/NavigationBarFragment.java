@@ -366,8 +366,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
-        mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, Handler.getMain(),
-                UserHandle.ALL);
+        mBroadcastDispatcher.registerReceiverWithHandler(mBroadcastReceiver, filter,
+                Handler.getMain(), UserHandle.ALL);
         notifyNavigationBarScreenOn();
 
         mOverviewProxyService.addCallback(mOverviewProxyListener);

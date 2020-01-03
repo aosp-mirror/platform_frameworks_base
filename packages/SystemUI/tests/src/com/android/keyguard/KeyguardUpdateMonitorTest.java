@@ -150,10 +150,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testReceiversRegistered() {
-        verify(mBroadcastDispatcher, atLeastOnce()).registerReceiver(
+        verify(mBroadcastDispatcher, atLeastOnce()).registerReceiverWithHandler(
                 eq(mKeyguardUpdateMonitor.mBroadcastReceiver),
                 any(IntentFilter.class), any(Handler.class));
-        verify(mBroadcastDispatcher, atLeastOnce()).registerReceiver(
+        verify(mBroadcastDispatcher, atLeastOnce()).registerReceiverWithHandler(
                 eq(mKeyguardUpdateMonitor.mBroadcastAllReceiver),
                 any(IntentFilter.class), any(Handler.class), eq(UserHandle.ALL));
     }

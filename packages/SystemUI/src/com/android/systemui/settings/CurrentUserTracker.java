@@ -98,7 +98,8 @@ public abstract class CurrentUserTracker {
             if (!mReceiverRegistered) {
                 mCurrentUserId = ActivityManager.getCurrentUser();
                 IntentFilter filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-                mBroadcastDispatcher.registerReceiver(this, filter, null, UserHandle.ALL);
+                mBroadcastDispatcher.registerReceiver(this, filter, null,
+                        UserHandle.ALL);
                 mReceiverRegistered = true;
             }
         }

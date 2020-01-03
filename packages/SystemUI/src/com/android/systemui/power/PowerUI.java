@@ -233,7 +233,7 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             filter.addAction(Intent.ACTION_SCREEN_ON);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
-            mBroadcastDispatcher.registerReceiver(this, filter, mHandler);
+            mBroadcastDispatcher.registerReceiverWithHandler(this, filter, mHandler);
         }
 
         @Override

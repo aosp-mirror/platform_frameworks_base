@@ -322,7 +322,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
         try {
             mUserReceiverRegistered.set(true);
-            mBroadcastDispatcher.registerReceiver(this, filter, mHandler, mUser);
+            mBroadcastDispatcher.registerReceiverWithHandler(this, filter, mHandler, mUser);
         } catch (Exception ex) {
             mUserReceiverRegistered.set(false);
             Log.e(TAG, "Could not register unlock receiver", ex);

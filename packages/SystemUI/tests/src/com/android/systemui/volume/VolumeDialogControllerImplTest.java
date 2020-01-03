@@ -69,7 +69,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
 
     @Test
     public void testRegisteredWithDispatcher() {
-        verify(mBroadcastDispatcher).registerReceiver(any(BroadcastReceiver.class),
+        verify(mBroadcastDispatcher).registerReceiverWithHandler(any(BroadcastReceiver.class),
                 any(IntentFilter.class),
                 any(Handler.class)); // VolumeDialogControllerImpl does not call with user
     }
