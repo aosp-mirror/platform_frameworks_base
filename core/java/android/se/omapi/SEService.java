@@ -22,14 +22,11 @@
 
 package android.se.omapi;
 
-import android.app.ActivityThread;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -141,10 +138,6 @@ public final class SEService {
 
         if (context == null || listener == null || executor == null) {
             throw new NullPointerException("Arguments must not be null");
-        }
-
-        if (!hasOMAPIReaders()) {
-            throw new UnsupportedOperationException("Device does not support any OMAPI reader");
         }
 
         mContext = context;
@@ -275,25 +268,6 @@ public final class SEService {
             return mSecureElementService.getReader(name);
         } catch (RemoteException e) {
             throw new IllegalStateException(e.getMessage());
-        }
-    }
-
-    /**
-     * Helper to check if this device support any OMAPI readers
-     */
-    private static boolean hasOMAPIReaders() {
-        IPackageManager pm = ActivityThread.getPackageManager();
-        if (pm == null) {
-            Log.e(TAG, "Cannot get package manager, assuming OMAPI readers supported");
-            return true;
-        }
-        try {
-            return pm.hasSystemFeature(PackageManager.FEATURE_SE_OMAPI_UICC, 0)
-                || pm.hasSystemFeature(PackageManager.FEATURE_SE_OMAPI_ESE, 0)
-                || pm.hasSystemFeature(PackageManager.FEATURE_SE_OMAPI_SD, 0);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Package manager query failed, assuming OMAPI readers supported", e);
-            return true;
         }
     }
 }
