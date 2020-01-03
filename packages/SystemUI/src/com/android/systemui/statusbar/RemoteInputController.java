@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Keeps track of the currently active {@link RemoteInputView}s.
@@ -108,8 +109,8 @@ public class RemoteInputController {
      * @param token a token identifying the view that is managing the remote input
      */
     public void addRemoteInput(NotificationEntry entry, Object token) {
-        Preconditions.checkNotNull(entry);
-        Preconditions.checkNotNull(token);
+        Objects.requireNonNull(entry);
+        Objects.requireNonNull(token);
 
         boolean found = pruneWeakThenRemoveAndContains(
                 entry /* contains */, null /* remove */, token /* removeToken */);
@@ -129,7 +130,7 @@ public class RemoteInputController {
      *              entry. If null, the entry is removed regardless.
      */
     public void removeRemoteInput(NotificationEntry entry, Object token) {
-        Preconditions.checkNotNull(entry);
+        Objects.requireNonNull(entry);
 
         pruneWeakThenRemoveAndContains(null /* contains */, entry /* remove */, token);
 
@@ -143,8 +144,8 @@ public class RemoteInputController {
      * @param token the token of the view managing the remote input.
      */
     public void addSpinning(String key, Object token) {
-        Preconditions.checkNotNull(key);
-        Preconditions.checkNotNull(token);
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(token);
 
         mSpinning.put(key, token);
     }
@@ -158,7 +159,7 @@ public class RemoteInputController {
      *              entry. If null, the entry is removed regardless.
      */
     public void removeSpinning(String key, Object token) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
 
         if (token == null || mSpinning.get(key) == token) {
             mSpinning.remove(key);
@@ -237,7 +238,7 @@ public class RemoteInputController {
 
 
     public void addCallback(Callback callback) {
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(callback);
         mCallbacks.add(callback);
     }
 

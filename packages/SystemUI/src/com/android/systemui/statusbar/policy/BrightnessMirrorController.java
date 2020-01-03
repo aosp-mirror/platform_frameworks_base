@@ -23,11 +23,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.android.internal.util.Preconditions;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -117,7 +117,7 @@ public class BrightnessMirrorController
 
     @Override
     public void addCallback(BrightnessMirrorListener listener) {
-        Preconditions.checkNotNull(listener);
+        Objects.requireNonNull(listener);
         mBrightnessMirrorListeners.add(listener);
     }
 

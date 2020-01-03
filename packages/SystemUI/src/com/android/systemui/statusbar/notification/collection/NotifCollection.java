@@ -35,8 +35,6 @@ import static android.service.notification.NotificationListenerService.REASON_TI
 import static android.service.notification.NotificationListenerService.REASON_UNAUTOBUNDLED;
 import static android.service.notification.NotificationListenerService.REASON_USER_STOPPED;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -60,6 +58,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -170,7 +169,7 @@ public class NotifCollection {
             @CancellationReason int reason,
             @NonNull DismissedByUserStats stats) {
         Assert.isMainThread();
-        checkNotNull(stats);
+        Objects.requireNonNull(stats);
         checkForReentrantCall();
 
         removeNotification(entry.getKey(), null, reason, stats);

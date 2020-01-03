@@ -30,14 +30,13 @@ import android.os.MemoryFile;
 import android.os.SystemClock;
 import android.util.ArraySet;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -113,7 +112,7 @@ public class FakeSensorManager extends SensorManager {
 
     @Override
     protected void unregisterListenerImpl(SensorEventListener listener, Sensor sensor) {
-        Preconditions.checkNotNull(listener);
+        Objects.requireNonNull(listener);
         for (FakeGenericSensor s : mSensors) {
             if (sensor == null || s.mSensor == sensor) {
                 s.mListeners.remove(listener);
@@ -125,8 +124,8 @@ public class FakeSensorManager extends SensorManager {
     protected boolean registerListenerImpl(SensorEventListener listener, Sensor sensor,
             int delayUs,
             Handler handler, int maxReportLatencyUs, int reservedFlags) {
-        Preconditions.checkNotNull(sensor);
-        Preconditions.checkNotNull(listener);
+        Objects.requireNonNull(sensor);
+        Objects.requireNonNull(listener);
         for (FakeGenericSensor s : mSensors) {
             if (s.mSensor == sensor) {
                 s.mListeners.add(listener);
