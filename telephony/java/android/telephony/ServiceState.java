@@ -379,15 +379,15 @@ public class ServiceState implements Parcelable {
     /**
      * Create a new ServiceState from a intent notifier Bundle
      *
-     * This method is used by PhoneStateIntentReceiver, CellBroadcastReceiver, and maybe by
-     * external applications.
+     * This method is used to get ServiceState object from extras upon receiving
+     * {@link Intent#ACTION_SERVICE_STATE}.
      *
      * @param m Bundle from intent notifier
      * @return newly created ServiceState
      * @hide
      */
+    @SystemApi
     @NonNull
-    @UnsupportedAppUsage
     public static ServiceState newFromBundle(@NonNull Bundle m) {
         ServiceState ret;
         ret = new ServiceState();
@@ -1281,11 +1281,15 @@ public class ServiceState implements Parcelable {
     /**
      * Set intent notifier Bundle based on service state.
      *
+     * Put ServiceState object and its fields into bundle which is used by TelephonyRegistry
+     * to broadcast {@link Intent#ACTION_SERVICE_STATE}.
+     *
      * @param m intent notifier Bundle
      * @hide
+     *
      */
-    @UnsupportedAppUsage
-    public void fillInNotifierBundle(Bundle m) {
+    @SystemApi
+    public void fillInNotifierBundle(@NonNull Bundle m) {
         m.putParcelable(Intent.EXTRA_SERVICE_STATE, this);
         // serviceState already consists of below entries.
         // for backward compatibility, we continue fill in below entries.
