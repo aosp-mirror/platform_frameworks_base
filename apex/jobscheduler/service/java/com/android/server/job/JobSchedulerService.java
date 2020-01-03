@@ -81,7 +81,6 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.FgThread;
@@ -117,6 +116,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -1283,7 +1283,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         super(context);
 
         mLocalPM = LocalServices.getService(PackageManagerInternal.class);
-        mActivityManagerInternal = Preconditions.checkNotNull(
+        mActivityManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
 
         mHandler = new JobHandler(context.getMainLooper());
@@ -1389,7 +1389,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 controller.onSystemServicesReady();
             }
 
-            mAppStateTracker = Preconditions.checkNotNull(
+            mAppStateTracker = Objects.requireNonNull(
                     LocalServices.getService(AppStateTracker.class));
 
             // Register br for package removals and user removals.
