@@ -111,6 +111,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -1785,7 +1786,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runGetCurrentUser(PrintWriter pw) throws RemoteException {
-        UserInfo currentUser = Preconditions.checkNotNull(mInterface.getCurrentUser(),
+        UserInfo currentUser = Objects.requireNonNull(mInterface.getCurrentUser(),
                 "Current user not set");
         pw.println(currentUser.id);
         return 0;
