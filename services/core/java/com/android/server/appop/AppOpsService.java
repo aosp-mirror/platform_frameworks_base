@@ -1417,7 +1417,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 .setOpNames(opNames)
                 .setFlags(flags)
                 .build();
-        Preconditions.checkNotNull(callback, "callback cannot be null");
+        Objects.requireNonNull(callback, "callback cannot be null");
 
         mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), "getHistoricalOps");
@@ -1442,7 +1442,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 .setOpNames(opNames)
                 .setFlags(flags)
                 .build();
-        Preconditions.checkNotNull(callback, "callback cannot be null");
+        Objects.requireNonNull(callback, "callback cannot be null");
 
         mContext.enforcePermission(Manifest.permission.MANAGE_APPOPS,
                 Binder.getCallingPid(), Binder.getCallingUid(), "getHistoricalOps");
@@ -2218,7 +2218,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int checkPackage(int uid, String packageName) {
-        Preconditions.checkNotNull(packageName);
+        Objects.requireNonNull(packageName);
         try {
             verifyAndGetIsPrivileged(uid, packageName);
 
@@ -2425,7 +2425,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         Preconditions.checkArgument(!ArrayUtils.isEmpty(ops), "Ops cannot be null or empty");
         Preconditions.checkArrayElementsInRange(ops, 0, AppOpsManager._NUM_OP - 1,
                 "Invalid op code in: " + Arrays.toString(ops));
-        Preconditions.checkNotNull(callback, "Callback cannot be null");
+        Objects.requireNonNull(callback, "Callback cannot be null");
         synchronized (this) {
             SparseArray<NotedCallback> callbacks = mNotedWatchers.get(callback.asBinder());
             if (callbacks == null) {
@@ -2442,7 +2442,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void stopWatchingNoted(IAppOpsNotedCallback callback) {
-        Preconditions.checkNotNull(callback, "Callback cannot be null");
+        Objects.requireNonNull(callback, "Callback cannot be null");
         synchronized (this) {
             final SparseArray<NotedCallback> notedCallbacks =
                     mNotedWatchers.remove(callback.asBinder());
@@ -2459,7 +2459,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void noteAsyncOp(String callingPackageName, int uid, String packageName, int opCode,
             String featureId, String message) {
-        Preconditions.checkNotNull(message);
+        Objects.requireNonNull(message);
         verifyAndGetIsPrivileged(uid, packageName);
 
         verifyIncomingUid(uid);
@@ -2528,8 +2528,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void startWatchingAsyncNoted(String packageName, IAppOpsAsyncNotedCallback callback) {
-        Preconditions.checkNotNull(packageName);
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(callback);
 
         int uid = Binder.getCallingUid();
         Pair<String, Integer> key = getAsyncNotedOpsKey(packageName, uid);
@@ -2558,8 +2558,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void stopWatchingAsyncNoted(String packageName, IAppOpsAsyncNotedCallback callback) {
-        Preconditions.checkNotNull(packageName);
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(callback);
 
         int uid = Binder.getCallingUid();
         Pair<String, Integer> key = getAsyncNotedOpsKey(packageName, uid);
@@ -2579,7 +2579,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public List<AsyncNotedAppOp> extractAsyncOps(String packageName) {
-        Preconditions.checkNotNull(packageName);
+        Objects.requireNonNull(packageName);
 
         int uid = Binder.getCallingUid();
 
@@ -4708,8 +4708,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void setUserRestrictions(Bundle restrictions, IBinder token, int userHandle) {
         checkSystemUid("setUserRestrictions");
-        Preconditions.checkNotNull(restrictions);
-        Preconditions.checkNotNull(token);
+        Objects.requireNonNull(restrictions);
+        Objects.requireNonNull(token);
         for (int i = 0; i < AppOpsManager._NUM_OP; i++) {
             String restriction = AppOpsManager.opToRestriction(i);
             if (restriction != null) {
@@ -4736,7 +4736,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
         verifyIncomingOp(code);
-        Preconditions.checkNotNull(token);
+        Objects.requireNonNull(token);
         setUserRestrictionNoCheck(code, restricted, token, userHandle, exceptionPackages);
     }
 
