@@ -98,7 +98,13 @@ public class Annotation {
             TelephonyManager.NETWORK_TYPE_GSM,
             TelephonyManager.NETWORK_TYPE_TD_SCDMA,
             TelephonyManager.NETWORK_TYPE_IWLAN,
-            TelephonyManager.NETWORK_TYPE_LTE_CA,
+
+            //TODO: In order for @SystemApi methods to use this class, there cannot be any
+            // public hidden members.  This network type is marked as hidden because it is not a
+            // true network type and we are looking to remove it completely from the available list
+            // of network types.
+            //TelephonyManager.NETWORK_TYPE_LTE_CA,
+
             TelephonyManager.NETWORK_TYPE_NR,
     })
     @Retention(RetentionPolicy.SOURCE)
