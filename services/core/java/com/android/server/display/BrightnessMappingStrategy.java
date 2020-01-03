@@ -34,6 +34,7 @@ import com.android.server.display.utils.Plog;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A utility to map from an ambient brightness to a display's "backlight" brightness based on the
@@ -702,7 +703,7 @@ public abstract class BrightnessMappingStrategy {
                     "Nits and backlight arrays must not be empty!");
             Preconditions.checkArgument(nits.length == backlight.length,
                     "Nits and backlight arrays must be the same length!");
-            Preconditions.checkNotNull(config);
+            Objects.requireNonNull(config);
             Preconditions.checkArrayElementsInRange(nits, 0, Float.MAX_VALUE, "nits");
             Preconditions.checkArrayElementsInRange(backlight,
                     PowerManager.BRIGHTNESS_OFF, PowerManager.BRIGHTNESS_ON, "backlight");
