@@ -30,6 +30,7 @@ import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceI
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController.Callbacks;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 
 /**
  * The DisplayWhiteBalanceSettings holds the state of all the settings related to
@@ -144,8 +145,8 @@ public class DisplayWhiteBalanceSettings implements
     }
 
     private void validateArguments(Context context, Handler handler) {
-        Preconditions.checkNotNull(context, "context must not be null");
-        Preconditions.checkNotNull(handler, "handler must not be null");
+        Objects.requireNonNull(context, "context must not be null");
+        Objects.requireNonNull(handler, "handler must not be null");
     }
 
     private void setEnabled(boolean enabled) {

@@ -28,6 +28,7 @@ import com.android.server.display.utils.AmbientFilter;
 import com.android.server.display.utils.History;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 
 /**
  * The DisplayWhiteBalanceController drives display white-balance (automatically correcting the
@@ -475,13 +476,13 @@ public class DisplayWhiteBalanceController implements
             AmbientSensor.AmbientColorTemperatureSensor colorTemperatureSensor,
             AmbientFilter colorTemperatureFilter,
             DisplayWhiteBalanceThrottler throttler) {
-        Preconditions.checkNotNull(brightnessSensor, "brightnessSensor must not be null");
-        Preconditions.checkNotNull(brightnessFilter, "brightnessFilter must not be null");
-        Preconditions.checkNotNull(colorTemperatureSensor,
+        Objects.requireNonNull(brightnessSensor, "brightnessSensor must not be null");
+        Objects.requireNonNull(brightnessFilter, "brightnessFilter must not be null");
+        Objects.requireNonNull(colorTemperatureSensor,
                 "colorTemperatureSensor must not be null");
-        Preconditions.checkNotNull(colorTemperatureFilter,
+        Objects.requireNonNull(colorTemperatureFilter,
                 "colorTemperatureFilter must not be null");
-        Preconditions.checkNotNull(throttler, "throttler cannot be null");
+        Objects.requireNonNull(throttler, "throttler cannot be null");
     }
 
     private boolean enable() {
