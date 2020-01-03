@@ -16,13 +16,13 @@
 
 package com.android.systemui.statusbar.notification;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+
+import java.util.Objects;
 
 /**
  * Root controller for the list of notifications in the shade.
@@ -39,9 +39,9 @@ public class NotificationListController {
             NotificationEntryManager entryManager,
             NotificationListContainer listContainer,
             DeviceProvisionedController deviceProvisionedController) {
-        mEntryManager = checkNotNull(entryManager);
-        mListContainer = checkNotNull(listContainer);
-        mDeviceProvisionedController = checkNotNull(deviceProvisionedController);
+        mEntryManager = Objects.requireNonNull(entryManager);
+        mListContainer = Objects.requireNonNull(listContainer);
+        mDeviceProvisionedController = Objects.requireNonNull(deviceProvisionedController);
     }
 
     /**

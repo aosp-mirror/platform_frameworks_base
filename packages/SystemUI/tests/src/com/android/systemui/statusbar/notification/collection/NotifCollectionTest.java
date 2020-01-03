@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.collection;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.statusbar.notification.collection.NotifCollection.REASON_UNKNOWN;
 
 import static org.junit.Assert.assertEquals;
@@ -65,6 +64,7 @@ import org.mockito.Spy;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -99,7 +99,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         // Capture the listener object that the collection registers with the listener service so
         // we can simulate listener service events in tests below
         verify(mListenerService).addNotificationListener(mListenerCaptor.capture());
-        mServiceListener = checkNotNull(mListenerCaptor.getValue());
+        mServiceListener = Objects.requireNonNull(mListenerCaptor.getValue());
 
         mNoMan = new NoManSimulator(mServiceListener);
     }

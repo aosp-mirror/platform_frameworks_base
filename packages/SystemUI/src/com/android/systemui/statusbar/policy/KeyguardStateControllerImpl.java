@@ -27,7 +27,6 @@ import android.os.Trace;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -36,6 +35,7 @@ import com.android.systemui.Dumpable;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -98,7 +98,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
 
     @Override
     public void addCallback(@NonNull Callback callback) {
-        Preconditions.checkNotNull(callback, "Callback must not be null. b/128895449");
+        Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
         if (!mCallbacks.contains(callback)) {
             mCallbacks.add(callback);
         }
@@ -106,7 +106,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
 
     @Override
     public void removeCallback(@NonNull Callback callback) {
-        Preconditions.checkNotNull(callback, "Callback must not be null. b/128895449");
+        Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
         mCallbacks.remove(callback);
     }
 

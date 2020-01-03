@@ -29,7 +29,6 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICAT
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING;
 
 import android.annotation.NonNull;
@@ -162,9 +161,9 @@ public final class NotificationEntry extends ListEntry {
     public NotificationEntry(
             @NonNull StatusBarNotification sbn,
             @NonNull Ranking ranking) {
-        super(checkNotNull(checkNotNull(sbn).getKey()));
+        super(Objects.requireNonNull(Objects.requireNonNull(sbn).getKey()));
 
-        checkNotNull(ranking);
+        Objects.requireNonNull(ranking);
 
         mKey = sbn.getKey();
         setSbn(sbn);
@@ -194,8 +193,8 @@ public final class NotificationEntry extends ListEntry {
      * TODO: Make this package-private
      */
     public void setSbn(@NonNull StatusBarNotification sbn) {
-        checkNotNull(sbn);
-        checkNotNull(sbn.getKey());
+        Objects.requireNonNull(sbn);
+        Objects.requireNonNull(sbn.getKey());
 
         if (!sbn.getKey().equals(mKey)) {
             throw new IllegalArgumentException("New key " + sbn.getKey()
@@ -223,8 +222,8 @@ public final class NotificationEntry extends ListEntry {
      * TODO: Make this package-private
      */
     public void setRanking(@NonNull Ranking ranking) {
-        checkNotNull(ranking);
-        checkNotNull(ranking.getKey());
+        Objects.requireNonNull(ranking);
+        Objects.requireNonNull(ranking.getKey());
 
         if (!ranking.getKey().equals(mKey)) {
             throw new IllegalArgumentException("New key " + ranking.getKey()
