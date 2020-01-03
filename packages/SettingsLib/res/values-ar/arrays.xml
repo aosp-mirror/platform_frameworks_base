@@ -170,7 +170,7 @@
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"إيقاف"</item>
     <item msgid="6014837961827347618">"الكل"</item>
-    <item msgid="7387060437894578132">"الكل دون اللاسلكي"</item>
+    <item msgid="7387060437894578132">"الكل بدون اللاسلكي"</item>
     <item msgid="7300881231043255746">"‏kernel فقط"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
