@@ -2196,7 +2196,7 @@ public class AudioService extends IAudioService.Stub
     public void setVolumeIndexForAttributes(@NonNull AudioAttributes attr, int index, int flags,
                                             String callingPackage) {
         enforceModifyAudioRoutingPermission();
-        Preconditions.checkNotNull(attr, "attr must not be null");
+        Objects.requireNonNull(attr, "attr must not be null");
         // @todo not hold the caller context, post message
         int stream = AudioProductStrategy.getLegacyStreamTypeForStrategyWithAudioAttributes(attr);
         final int device = getDeviceForStream(stream);
@@ -2231,7 +2231,7 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#getVolumeIndexForAttributes(attr) */
     public int getVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         enforceModifyAudioRoutingPermission();
-        Preconditions.checkNotNull(attr, "attr must not be null");
+        Objects.requireNonNull(attr, "attr must not be null");
         int stream = AudioProductStrategy.getLegacyStreamTypeForStrategyWithAudioAttributes(attr);
         final int device = getDeviceForStream(stream);
 
@@ -2241,14 +2241,14 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#getMaxVolumeIndexForAttributes(attr) */
     public int getMaxVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         enforceModifyAudioRoutingPermission();
-        Preconditions.checkNotNull(attr, "attr must not be null");
+        Objects.requireNonNull(attr, "attr must not be null");
         return AudioSystem.getMaxVolumeIndexForAttributes(attr);
     }
 
     /** @see AudioManager#getMinVolumeIndexForAttributes(attr) */
     public int getMinVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         enforceModifyAudioRoutingPermission();
-        Preconditions.checkNotNull(attr, "attr must not be null");
+        Objects.requireNonNull(attr, "attr must not be null");
         return AudioSystem.getMinVolumeIndexForAttributes(attr);
     }
 
@@ -2510,7 +2510,7 @@ public class AudioService extends IAudioService.Stub
 
 
     private int getVolumeGroupIdForAttributes(@NonNull AudioAttributes attributes) {
-        Preconditions.checkNotNull(attributes, "attributes must not be null");
+        Objects.requireNonNull(attributes, "attributes must not be null");
         int volumeGroupId = getVolumeGroupIdForAttributesInt(attributes);
         if (volumeGroupId != AudioVolumeGroup.DEFAULT_VOLUME_GROUP) {
             return volumeGroupId;
@@ -2521,7 +2521,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     private int getVolumeGroupIdForAttributesInt(@NonNull AudioAttributes attributes) {
-        Preconditions.checkNotNull(attributes, "attributes must not be null");
+        Objects.requireNonNull(attributes, "attributes must not be null");
         for (final AudioProductStrategy productStrategy :
                 AudioProductStrategy.getAudioProductStrategies()) {
             int volumeGroupId = productStrategy.getVolumeGroupIdForAudioAttributes(attributes);
