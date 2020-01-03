@@ -145,7 +145,8 @@ public class RuleXmlSerializerTest {
         xmlSerializer.serialize(
                 Collections.singletonList(rule),
                 /* formatVersion= */ Optional.empty(),
-                outputStream);
+                outputStream,
+                new ByteArrayOutputStream());
 
         byte[] actualRules = outputStream.toString().getBytes(StandardCharsets.UTF_8);
         assertEquals(expectedRules, new String(actualRules, StandardCharsets.UTF_8));
